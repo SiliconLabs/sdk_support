@@ -1,0 +1,957 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32gg11b.csen" label="CSEN" name="CSEN" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="CSEN.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="CSEN.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="CSEN.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="CSEN.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="CSEN.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="mode" id="CSEN.hal_csen_mode.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Single Channel Mode" value="single"/>
+        <enumValue label="Scan Mode" value="scan"/>
+        <enumValue label="Bonded Mode" value="bonded"/>
+      </enumProperty>
+      <enumProperty label="Single input selection" id="CSEN.BSP_CSEN_SINGLE_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+      </enumProperty>
+      <integerProperty label="Scan input mask (0-31)" id="CSEN.BSP_CSEN_SCAN_MASK0.INT" minValue="0" maxValue="4294967295" defaultValue="0" hidden="false" readonly="true"/>
+      <enumProperty label="Input 0 to 7" id="CSEN.BSP_CSEN_SCAN_INPUT0TO7.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 8 to 15" id="CSEN.BSP_CSEN_SCAN_INPUT8TO15.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 16 to 23" id="CSEN.BSP_CSEN_SCAN_INPUT16TO23.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 24 to 31" id="CSEN.BSP_CSEN_SCAN_INPUT24TO31.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 0" id="CSEN.BSP_CSEN_SCAN_INPUT0.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 1" id="CSEN.BSP_CSEN_SCAN_INPUT1.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 2" id="CSEN.BSP_CSEN_SCAN_INPUT2.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 3" id="CSEN.BSP_CSEN_SCAN_INPUT3.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 4" id="CSEN.BSP_CSEN_SCAN_INPUT4.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 5" id="CSEN.BSP_CSEN_SCAN_INPUT5.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 6" id="CSEN.BSP_CSEN_SCAN_INPUT6.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 7" id="CSEN.BSP_CSEN_SCAN_INPUT7.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 8" id="CSEN.BSP_CSEN_SCAN_INPUT8.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 9" id="CSEN.BSP_CSEN_SCAN_INPUT9.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 10" id="CSEN.BSP_CSEN_SCAN_INPUT10.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 11" id="CSEN.BSP_CSEN_SCAN_INPUT11.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 12" id="CSEN.BSP_CSEN_SCAN_INPUT12.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 13" id="CSEN.BSP_CSEN_SCAN_INPUT13.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 14" id="CSEN.BSP_CSEN_SCAN_INPUT14.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 15" id="CSEN.BSP_CSEN_SCAN_INPUT15.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 16" id="CSEN.BSP_CSEN_SCAN_INPUT16.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 17" id="CSEN.BSP_CSEN_SCAN_INPUT17.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 18" id="CSEN.BSP_CSEN_SCAN_INPUT18.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 19" id="CSEN.BSP_CSEN_SCAN_INPUT19.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 20" id="CSEN.BSP_CSEN_SCAN_INPUT20.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 21" id="CSEN.BSP_CSEN_SCAN_INPUT21.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 22" id="CSEN.BSP_CSEN_SCAN_INPUT22.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 23" id="CSEN.BSP_CSEN_SCAN_INPUT23.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 24" id="CSEN.BSP_CSEN_SCAN_INPUT24.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 25" id="CSEN.BSP_CSEN_SCAN_INPUT25.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 26" id="CSEN.BSP_CSEN_SCAN_INPUT26.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 27" id="CSEN.BSP_CSEN_SCAN_INPUT27.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 28" id="CSEN.BSP_CSEN_SCAN_INPUT28.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 29" id="CSEN.BSP_CSEN_SCAN_INPUT29.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 30" id="CSEN.BSP_CSEN_SCAN_INPUT30.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 31" id="CSEN.BSP_CSEN_SCAN_INPUT31.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <integerProperty label="Scan input mask (32-63)" id="CSEN.BSP_CSEN_SCAN_MASK1.INT" minValue="0" maxValue="4294967295" defaultValue="0" hidden="false" readonly="true"/>
+      <enumProperty label="Input 32 to 39" id="CSEN.BSP_CSEN_SCAN_INPUT32TO39.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 40 to 47" id="CSEN.BSP_CSEN_SCAN_INPUT40TO47.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 48 to 55" id="CSEN.BSP_CSEN_SCAN_INPUT48TO55.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 56 to 63" id="CSEN.BSP_CSEN_SCAN_INPUT56TO63.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus A channel 0-7" value="APORT1CH0TO7"/>
+        <enumValue label="APORT bus A channel 8-15" value="APORT1CH8TO15"/>
+        <enumValue label="APORT bus A channel 16-23" value="APORT1CH16TO23"/>
+        <enumValue label="APORT bus A channel 24-31" value="APORT1CH24TO31"/>
+        <enumValue label="APORT bus C channel 0-7" value="APORT3CH0TO7"/>
+        <enumValue label="APORT bus C channel 8-15" value="APORT3CH8TO15"/>
+        <enumValue label="APORT bus C channel 16-23" value="APORT3CH16TO23"/>
+        <enumValue label="APORT bus C channel 24-31" value="APORT3CH24TO31"/>
+      </enumProperty>
+      <enumProperty label="Input 32" id="CSEN.BSP_CSEN_SCAN_INPUT32.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 33" id="CSEN.BSP_CSEN_SCAN_INPUT33.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 34" id="CSEN.BSP_CSEN_SCAN_INPUT34.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 35" id="CSEN.BSP_CSEN_SCAN_INPUT35.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 36" id="CSEN.BSP_CSEN_SCAN_INPUT36.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 37" id="CSEN.BSP_CSEN_SCAN_INPUT37.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 38" id="CSEN.BSP_CSEN_SCAN_INPUT38.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 39" id="CSEN.BSP_CSEN_SCAN_INPUT39.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 40" id="CSEN.BSP_CSEN_SCAN_INPUT40.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 41" id="CSEN.BSP_CSEN_SCAN_INPUT41.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 42" id="CSEN.BSP_CSEN_SCAN_INPUT42.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 43" id="CSEN.BSP_CSEN_SCAN_INPUT43.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 44" id="CSEN.BSP_CSEN_SCAN_INPUT44.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 45" id="CSEN.BSP_CSEN_SCAN_INPUT45.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 46" id="CSEN.BSP_CSEN_SCAN_INPUT46.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 47" id="CSEN.BSP_CSEN_SCAN_INPUT47.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 48" id="CSEN.BSP_CSEN_SCAN_INPUT48.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 49" id="CSEN.BSP_CSEN_SCAN_INPUT49.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 50" id="CSEN.BSP_CSEN_SCAN_INPUT50.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 51" id="CSEN.BSP_CSEN_SCAN_INPUT51.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 52" id="CSEN.BSP_CSEN_SCAN_INPUT52.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 53" id="CSEN.BSP_CSEN_SCAN_INPUT53.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 54" id="CSEN.BSP_CSEN_SCAN_INPUT54.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 55" id="CSEN.BSP_CSEN_SCAN_INPUT55.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 56" id="CSEN.BSP_CSEN_SCAN_INPUT56.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 57" id="CSEN.BSP_CSEN_SCAN_INPUT57.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 58" id="CSEN.BSP_CSEN_SCAN_INPUT58.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 59" id="CSEN.BSP_CSEN_SCAN_INPUT59.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 60" id="CSEN.BSP_CSEN_SCAN_INPUT60.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 61" id="CSEN.BSP_CSEN_SCAN_INPUT61.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 62" id="CSEN.BSP_CSEN_SCAN_INPUT62.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Input 63" id="CSEN.BSP_CSEN_SCAN_INPUT63.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <integerProperty label="Bonded input mask (0-31)" id="CSEN.BSP_CSEN_BONDED_MASK0.INT" minValue="0" maxValue="4294967295" defaultValue="0" hidden="false" readonly="true"/>
+      <boolProperty label="Enable channel 0" id="CSEN.bsp_csen_bonded_A_ch0.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 0" id="CSEN.BSP_CSEN_BONDED_INPUT0.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 1" id="CSEN.bsp_csen_bonded_A_ch1.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 1" id="CSEN.BSP_CSEN_BONDED_INPUT1.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 2" id="CSEN.bsp_csen_bonded_A_ch2.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 2" id="CSEN.BSP_CSEN_BONDED_INPUT2.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 3" id="CSEN.bsp_csen_bonded_A_ch3.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 3" id="CSEN.BSP_CSEN_BONDED_INPUT3.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 4" id="CSEN.bsp_csen_bonded_A_ch4.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 4" id="CSEN.BSP_CSEN_BONDED_INPUT4.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 5" id="CSEN.bsp_csen_bonded_A_ch5.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 5" id="CSEN.BSP_CSEN_BONDED_INPUT5.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 6" id="CSEN.bsp_csen_bonded_A_ch6.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 6" id="CSEN.BSP_CSEN_BONDED_INPUT6.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 7" id="CSEN.bsp_csen_bonded_A_ch7.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 7" id="CSEN.BSP_CSEN_BONDED_INPUT7.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 8" id="CSEN.bsp_csen_bonded_A_ch8.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 8" id="CSEN.BSP_CSEN_BONDED_INPUT8.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 9" id="CSEN.bsp_csen_bonded_A_ch9.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 9" id="CSEN.BSP_CSEN_BONDED_INPUT9.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 10" id="CSEN.bsp_csen_bonded_A_ch10.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 10" id="CSEN.BSP_CSEN_BONDED_INPUT10.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 11" id="CSEN.bsp_csen_bonded_A_ch11.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 11" id="CSEN.BSP_CSEN_BONDED_INPUT11.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 12" id="CSEN.bsp_csen_bonded_A_ch12.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 12" id="CSEN.BSP_CSEN_BONDED_INPUT12.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 13" id="CSEN.bsp_csen_bonded_A_ch13.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 13" id="CSEN.BSP_CSEN_BONDED_INPUT13.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 14" id="CSEN.bsp_csen_bonded_A_ch14.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 14" id="CSEN.BSP_CSEN_BONDED_INPUT14.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 15" id="CSEN.bsp_csen_bonded_A_ch15.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 15" id="CSEN.BSP_CSEN_BONDED_INPUT15.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 16" id="CSEN.bsp_csen_bonded_A_ch16.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 16" id="CSEN.BSP_CSEN_BONDED_INPUT16.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 17" id="CSEN.bsp_csen_bonded_A_ch17.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 17" id="CSEN.BSP_CSEN_BONDED_INPUT17.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 18" id="CSEN.bsp_csen_bonded_A_ch18.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 18" id="CSEN.BSP_CSEN_BONDED_INPUT18.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 19" id="CSEN.bsp_csen_bonded_A_ch19.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 19" id="CSEN.BSP_CSEN_BONDED_INPUT19.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 20" id="CSEN.bsp_csen_bonded_A_ch20.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 20" id="CSEN.BSP_CSEN_BONDED_INPUT20.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 21" id="CSEN.bsp_csen_bonded_A_ch21.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 21" id="CSEN.BSP_CSEN_BONDED_INPUT21.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 22" id="CSEN.bsp_csen_bonded_A_ch22.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 22" id="CSEN.BSP_CSEN_BONDED_INPUT22.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 23" id="CSEN.bsp_csen_bonded_A_ch23.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 23" id="CSEN.BSP_CSEN_BONDED_INPUT23.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 24" id="CSEN.bsp_csen_bonded_A_ch24.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 24" id="CSEN.BSP_CSEN_BONDED_INPUT24.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 25" id="CSEN.bsp_csen_bonded_A_ch25.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 25" id="CSEN.BSP_CSEN_BONDED_INPUT25.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 26" id="CSEN.bsp_csen_bonded_A_ch26.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 26" id="CSEN.BSP_CSEN_BONDED_INPUT26.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 27" id="CSEN.bsp_csen_bonded_A_ch27.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 27" id="CSEN.BSP_CSEN_BONDED_INPUT27.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 28" id="CSEN.bsp_csen_bonded_A_ch28.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 28" id="CSEN.BSP_CSEN_BONDED_INPUT28.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 29" id="CSEN.bsp_csen_bonded_A_ch29.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 29" id="CSEN.BSP_CSEN_BONDED_INPUT29.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 30" id="CSEN.bsp_csen_bonded_A_ch30.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 30" id="CSEN.BSP_CSEN_BONDED_INPUT30.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 31" id="CSEN.bsp_csen_bonded_A_ch31.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 31" id="CSEN.BSP_CSEN_BONDED_INPUT31.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <integerProperty label="Bonded input mask (32-63)" id="CSEN.BSP_CSEN_BONDED_MASK1.INT" minValue="0" maxValue="4294967295" defaultValue="0" hidden="false" readonly="true"/>
+      <boolProperty label="Enable channel 32" id="CSEN.bsp_csen_bonded_C_ch0.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 32" id="CSEN.BSP_CSEN_BONDED_INPUT32.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 33" id="CSEN.bsp_csen_bonded_C_ch1.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 33" id="CSEN.BSP_CSEN_BONDED_INPUT33.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 34" id="CSEN.bsp_csen_bonded_C_ch2.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 34" id="CSEN.BSP_CSEN_BONDED_INPUT34.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 35" id="CSEN.bsp_csen_bonded_C_ch3.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 35" id="CSEN.BSP_CSEN_BONDED_INPUT35.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 36" id="CSEN.bsp_csen_bonded_C_ch4.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 36" id="CSEN.BSP_CSEN_BONDED_INPUT36.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 37" id="CSEN.bsp_csen_bonded_C_ch5.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 37" id="CSEN.BSP_CSEN_BONDED_INPUT37.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 38" id="CSEN.bsp_csen_bonded_C_ch6.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 38" id="CSEN.BSP_CSEN_BONDED_INPUT38.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 39" id="CSEN.bsp_csen_bonded_C_ch7.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 39" id="CSEN.BSP_CSEN_BONDED_INPUT39.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 40" id="CSEN.bsp_csen_bonded_C_ch8.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 40" id="CSEN.BSP_CSEN_BONDED_INPUT40.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 41" id="CSEN.bsp_csen_bonded_C_ch9.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 41" id="CSEN.BSP_CSEN_BONDED_INPUT41.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 42" id="CSEN.bsp_csen_bonded_C_ch10.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 42" id="CSEN.BSP_CSEN_BONDED_INPUT42.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 43" id="CSEN.bsp_csen_bonded_C_ch11.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 43" id="CSEN.BSP_CSEN_BONDED_INPUT43.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 44" id="CSEN.bsp_csen_bonded_C_ch12.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 44" id="CSEN.BSP_CSEN_BONDED_INPUT44.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 45" id="CSEN.bsp_csen_bonded_C_ch13.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 45" id="CSEN.BSP_CSEN_BONDED_INPUT45.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 46" id="CSEN.bsp_csen_bonded_C_ch14.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 46" id="CSEN.BSP_CSEN_BONDED_INPUT46.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 47" id="CSEN.bsp_csen_bonded_C_ch15.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 47" id="CSEN.BSP_CSEN_BONDED_INPUT47.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 48" id="CSEN.bsp_csen_bonded_C_ch16.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 48" id="CSEN.BSP_CSEN_BONDED_INPUT48.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 49" id="CSEN.bsp_csen_bonded_C_ch17.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 49" id="CSEN.BSP_CSEN_BONDED_INPUT49.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 50" id="CSEN.bsp_csen_bonded_C_ch18.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 50" id="CSEN.BSP_CSEN_BONDED_INPUT50.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 51" id="CSEN.bsp_csen_bonded_C_ch19.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 51" id="CSEN.BSP_CSEN_BONDED_INPUT51.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 52" id="CSEN.bsp_csen_bonded_C_ch20.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 52" id="CSEN.BSP_CSEN_BONDED_INPUT52.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 53" id="CSEN.bsp_csen_bonded_C_ch21.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 53" id="CSEN.BSP_CSEN_BONDED_INPUT53.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 54" id="CSEN.bsp_csen_bonded_C_ch22.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 54" id="CSEN.BSP_CSEN_BONDED_INPUT54.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 55" id="CSEN.bsp_csen_bonded_C_ch23.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 55" id="CSEN.BSP_CSEN_BONDED_INPUT55.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 56" id="CSEN.bsp_csen_bonded_C_ch24.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 56" id="CSEN.BSP_CSEN_BONDED_INPUT56.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 57" id="CSEN.bsp_csen_bonded_C_ch25.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 57" id="CSEN.BSP_CSEN_BONDED_INPUT57.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 58" id="CSEN.bsp_csen_bonded_C_ch26.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 58" id="CSEN.BSP_CSEN_BONDED_INPUT58.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 59" id="CSEN.bsp_csen_bonded_C_ch27.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 59" id="CSEN.BSP_CSEN_BONDED_INPUT59.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 60" id="CSEN.bsp_csen_bonded_C_ch28.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 60" id="CSEN.BSP_CSEN_BONDED_INPUT60.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 61" id="CSEN.bsp_csen_bonded_C_ch29.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 61" id="CSEN.BSP_CSEN_BONDED_INPUT61.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 62" id="CSEN.bsp_csen_bonded_C_ch30.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 62" id="CSEN.BSP_CSEN_BONDED_INPUT62.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 63" id="CSEN.bsp_csen_bonded_C_ch31.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <enumProperty label="Input 63" id="CSEN.BSP_CSEN_BONDED_INPUT63.PIN" defaultValueIndex="0" hidden="false" readonly="true" transient="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (CEXT)" id="CSEN.bsp_csen_single_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (CEXT)" id="CSEN.bsp_csen_single_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (CEXT)" id="CSEN.bsp_csen_single_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (CEXT)" id="CSEN.bsp_csen_single_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <boolProperty label="Enable channel 0" id="CSEN.bsp_csen_scan_A_ch0.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 1" id="CSEN.bsp_csen_scan_A_ch1.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 2" id="CSEN.bsp_csen_scan_A_ch2.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 3" id="CSEN.bsp_csen_scan_A_ch3.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 4" id="CSEN.bsp_csen_scan_A_ch4.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 5" id="CSEN.bsp_csen_scan_A_ch5.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 6" id="CSEN.bsp_csen_scan_A_ch6.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 7" id="CSEN.bsp_csen_scan_A_ch7.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 8" id="CSEN.bsp_csen_scan_A_ch8.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 9" id="CSEN.bsp_csen_scan_A_ch9.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 10" id="CSEN.bsp_csen_scan_A_ch10.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 11" id="CSEN.bsp_csen_scan_A_ch11.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 12" id="CSEN.bsp_csen_scan_A_ch12.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 13" id="CSEN.bsp_csen_scan_A_ch13.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 14" id="CSEN.bsp_csen_scan_A_ch14.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 15" id="CSEN.bsp_csen_scan_A_ch15.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 16" id="CSEN.bsp_csen_scan_A_ch16.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 17" id="CSEN.bsp_csen_scan_A_ch17.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 18" id="CSEN.bsp_csen_scan_A_ch18.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 19" id="CSEN.bsp_csen_scan_A_ch19.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 20" id="CSEN.bsp_csen_scan_A_ch20.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 21" id="CSEN.bsp_csen_scan_A_ch21.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 22" id="CSEN.bsp_csen_scan_A_ch22.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 25" id="CSEN.bsp_csen_scan_A_ch25.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 26" id="CSEN.bsp_csen_scan_A_ch26.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 27" id="CSEN.bsp_csen_scan_A_ch27.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 28" id="CSEN.bsp_csen_scan_A_ch28.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 29" id="CSEN.bsp_csen_scan_A_ch29.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 30" id="CSEN.bsp_csen_scan_A_ch30.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 31" id="CSEN.bsp_csen_scan_A_ch31.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 0" id="CSEN.bsp_csen_scan_C_ch0.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 1" id="CSEN.bsp_csen_scan_C_ch1.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 4" id="CSEN.bsp_csen_scan_C_ch4.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 5" id="CSEN.bsp_csen_scan_C_ch5.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 6" id="CSEN.bsp_csen_scan_C_ch6.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 7" id="CSEN.bsp_csen_scan_C_ch7.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 8" id="CSEN.bsp_csen_scan_C_ch8.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 9" id="CSEN.bsp_csen_scan_C_ch9.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 10" id="CSEN.bsp_csen_scan_C_ch10.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 11" id="CSEN.bsp_csen_scan_C_ch11.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 12" id="CSEN.bsp_csen_scan_C_ch12.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 13" id="CSEN.bsp_csen_scan_C_ch13.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 14" id="CSEN.bsp_csen_scan_C_ch14.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 15" id="CSEN.bsp_csen_scan_C_ch15.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 16" id="CSEN.bsp_csen_scan_C_ch16.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 17" id="CSEN.bsp_csen_scan_C_ch17.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 18" id="CSEN.bsp_csen_scan_C_ch18.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 19" id="CSEN.bsp_csen_scan_C_ch19.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 20" id="CSEN.bsp_csen_scan_C_ch20.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 21" id="CSEN.bsp_csen_scan_C_ch21.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 22" id="CSEN.bsp_csen_scan_C_ch22.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 23" id="CSEN.bsp_csen_scan_C_ch23.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 24" id="CSEN.bsp_csen_scan_C_ch24.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 25" id="CSEN.bsp_csen_scan_C_ch25.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 26" id="CSEN.bsp_csen_scan_C_ch26.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 27" id="CSEN.bsp_csen_scan_C_ch27.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 28" id="CSEN.bsp_csen_scan_C_ch28.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 29" id="CSEN.bsp_csen_scan_C_ch29.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 30" id="CSEN.bsp_csen_scan_C_ch30.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+      <boolProperty label="Enable channel 31" id="CSEN.bsp_csen_scan_C_ch31.CHECKBOX" defaultValue="false" hidden="true" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="CSEN">
+        <subCategory label="">
+          <propertyRef refId="CSEN.usedbysdk.BOOL"/>
+          <propertyRef refId="CSEN.hiddenbysdk.BOOL"/>
+          <propertyRef refId="CSEN.showadvanced.BOOL"/>
+          <propertyRef refId="CSEN.forceenable.BOOL"/>
+          <propertyRef refId="CSEN.owner.STRING"/>
+          <propertyRef refId="CSEN.hal_csen_mode.ENUM"/>
+        </subCategory>
+        <subCategory label="Single Channel Input">
+          <propertyRef refId="CSEN.BSP_CSEN_SINGLE_INPUT.ENUM"/>
+          <propertyRef refId="CSEN.bsp_csen_single_AX.PIN"/>
+          <propertyRef refId="CSEN.bsp_csen_single_AY.PIN"/>
+          <propertyRef refId="CSEN.bsp_csen_single_CX.PIN"/>
+          <propertyRef refId="CSEN.bsp_csen_single_CY.PIN"/>
+        </subCategory>
+      </category>
+      <category label="Scan Mode">
+        <subCategory label="">
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_MASK0.INT"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT0TO7.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT8TO15.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT16TO23.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT24TO31.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_MASK1.INT"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT32TO39.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT40TO47.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT48TO55.ENUM"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT56TO63.ENUM"/>
+        </subCategory>
+        <subCategory label="APORT bus A channel 0-7">
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch0.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch1.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch2.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch3.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch4.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch5.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch6.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch7.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus A channel 8-15">
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch8.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch9.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch10.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch11.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch12.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch13.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch14.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch15.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus A channel 16-23">
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch16.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch17.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch18.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch19.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch20.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch21.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch22.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus A channel 24-31">
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch25.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch26.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch27.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch28.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch29.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch30.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_A_ch31.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus C channel 0-7">
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch0.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch1.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch4.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch5.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch6.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch7.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus C channel 8-15">
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch8.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch9.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch10.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch11.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch12.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch13.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch14.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch15.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus C channel 16-23">
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch16.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch17.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch18.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch19.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch20.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch21.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch22.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch23.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="APORT bus C channel 24-31">
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch24.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch25.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch26.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch27.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch28.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch29.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch30.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_scan_C_ch31.CHECKBOX"/>
+        </subCategory>
+      </category>
+      <category label="Scan Mode Pinout">
+        <subCategory label="">
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT0.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT1.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT2.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT3.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT4.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT5.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT6.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT7.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT8.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT9.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT10.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT11.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT12.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT13.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT14.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT15.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT16.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT17.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT18.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT19.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT20.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT21.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT22.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT23.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT24.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT25.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT26.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT27.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT28.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT29.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT30.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT31.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT32.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT33.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT34.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT35.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT36.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT37.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT38.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT39.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT40.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT41.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT42.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT43.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT44.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT45.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT46.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT47.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT48.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT49.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT50.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT51.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT52.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT53.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT54.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT55.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT56.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT57.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT58.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT59.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT60.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT61.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT62.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_SCAN_INPUT63.PIN"/>
+        </subCategory>
+      </category>
+      <category label="Bonded Mode">
+        <subCategory label="Input 0-31 (APORT1)">
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_MASK0.INT"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch0.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch1.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch2.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch3.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch4.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch5.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch6.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch7.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch8.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch9.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch10.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch11.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch12.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch13.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch14.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch15.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch16.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch17.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch18.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch19.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch20.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch21.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch22.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch23.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch24.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch25.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch26.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch27.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch28.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch29.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch30.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_A_ch31.CHECKBOX"/>
+        </subCategory>
+        <subCategory label="Input 32-63 (APORT3)">
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_MASK1.INT"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch0.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch1.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch2.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch3.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch4.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch5.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch6.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch7.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch8.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch9.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch10.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch11.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch12.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch13.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch14.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch15.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch16.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch17.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch18.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch19.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch20.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch21.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch22.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch23.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch24.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch25.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch26.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch27.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch28.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch29.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch30.CHECKBOX"/>
+          <propertyRef refId="CSEN.bsp_csen_bonded_C_ch31.CHECKBOX"/>
+        </subCategory>
+      </category>
+      <category label="Bonded Mode Pinout">
+        <subCategory label="">
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT0.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT1.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT2.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT3.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT4.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT5.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT6.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT7.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT8.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT9.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT10.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT11.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT12.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT13.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT14.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT15.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT16.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT17.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT18.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT19.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT20.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT21.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT22.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT23.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT24.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT25.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT26.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT27.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT28.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT29.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT30.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT31.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT32.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT33.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT34.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT35.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT36.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT37.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT38.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT39.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT40.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT41.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT42.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT43.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT44.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT45.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT46.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT47.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT48.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT49.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT50.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT51.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT52.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT53.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT54.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT55.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT56.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT57.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT58.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT59.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT60.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT61.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT62.PIN"/>
+          <propertyRef refId="CSEN.BSP_CSEN_BONDED_INPUT63.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

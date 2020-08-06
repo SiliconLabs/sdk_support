@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg22.vcom" label="VCOM" name="VCOM" description="UART over USB/Ethernet through Starter Kit Board Controller" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="VCOM.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="VCOM.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="VCOM.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="VCOM.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="VCOM.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="VCOM enable pin" description="Select pin which drives the VCOM enable switch on (W)STK." id="VCOM.BSP_VCOM_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="VCOM">
+        <subCategory label="">
+          <propertyRef refId="VCOM.usedbysdk.BOOL"/>
+          <propertyRef refId="VCOM.hiddenbysdk.BOOL"/>
+          <propertyRef refId="VCOM.showadvanced.BOOL"/>
+          <propertyRef refId="VCOM.forceenable.BOOL"/>
+          <propertyRef refId="VCOM.owner.STRING"/>
+          <propertyRef refId="VCOM.BSP_VCOM_ENABLE.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.EXTDEV.BASE">
+  <folder name="extdev" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="ext-device.c" uri="$(sdkInstallationPath)/platform/base/hal/micro/cortexm3/efm32/ext-device.c"/>
+  </folder>
+</project>

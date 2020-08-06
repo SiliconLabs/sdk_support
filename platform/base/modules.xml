@@ -1,0 +1,63 @@
+<?xml version="1.1" encoding="UTF-8"?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors name="SDK.HAL.ANTDIV.BASE" label="ANTDIV" propertyScope="module">
+    <description>Antenna Diversity</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/antenna.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.BUTTON.BASE" label="BUTTON" propertyScope="module">
+    <description>Button</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/button.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.EMDRV.UARTDRV" label="UARTDRV" propertyScope="module">
+    <description>UART Driver</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/uartdrv.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.EMDRV.SPIDRV" label="SPIDRV" propertyScope="module">
+    <description>SPI Driver</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/spidrv.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.EXTDEV.BASE" label="EXTDEV" propertyScope="module">
+    <description>External Device</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/ext-device.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.EZRADIOPRO.BASE" label="EZRADIOPRO" propertyScope="module">
+    <description>EZRADIOPRO</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/ezradiopro.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.LED.BASE" label="LED" propertyScope="module">
+    <description>LED</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/led.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.SERIAL.BASE" label="SERIAL" propertyScope="module">
+    <description>Serial</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/serial.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.SPINCP.ZIGBEE" label="SPINCP(ZIGBEE)" propertyScope="module">
+    <description>SPI NCP (Zigbee)</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/spincp-zigbee.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.SPINCP.THREAD" label="SPINCP(THREAD)" propertyScope="module">
+    <description>SPI NCP (Thread)</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/spincp-thread.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.UARTNCP.ZIGBEE" label="UARTNCP(ZIGBEE)" propertyScope="module">
+    <description>UART NCP (Zigbee)</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/uartncp-zigbee.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+  <descriptors name="SDK.HAL.UARTNCP.THREAD" label="UARTNCP(THREAD)" propertyScope="module">
+    <description>UART NCP (Thread)</description>
+    <properties key="module.clientModelURI" value="./hal/plugin/module/uartncp-thread.slsproj"/>
+    <properties key="module.category" value="HAL Config"/>
+  </descriptors>
+</model:MDescriptors>

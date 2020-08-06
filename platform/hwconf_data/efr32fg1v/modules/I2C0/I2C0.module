@@ -1,0 +1,71 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32fg1v.i2c0" label="I2C0" name="I2C0" description="Inter-Integrated Circuit" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="I2C.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="I2C.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="I2C.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="I2C.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="I2C.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="I2C.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="mode" id="I2C.hal_i2c_mode.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Master" value="master"/>
+        <enumValue label="Slave" value="slave"/>
+      </enumProperty>
+      <enumProperty label="Enable I2C after init" description="Enable I2C as part of initialization" id="I2C.HAL_I2C_INIT_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="Bus frequency" description="Select I2C bus frequency (maximum bus frequency in slave mode)" id="I2C.HAL_I2C_MAX_BUS_FREQ.INT" minValue="1" maxValue="2000000" defaultValue="0" hidden="true" readonly="false"/>
+      <enumProperty label="Clock Low/High ratio" description="I2C clock ratio" id="I2C.HAL_I2C_LOW_HIGH_RATIO.ENUM" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Standard" value="_I2C_CTRL_CLHR_STANDARD"/>
+        <enumValue label="Asymmetric" value="_I2C_CTRL_CLHR_ASYMMETRIC"/>
+        <enumValue label="Fast" value="_I2C_CTRL_CLHR_FAST"/>
+      </enumProperty>
+      <enumProperty label="I2C Master" description="If true, use I2C in master mode. Else, use I2C in slave mode." id="I2C.HAL_I2C_MASTER.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="Slave address" description="I2C slave address" id="I2C.HAL_I2C_SLAVE_ADDRESS.INT" minValue="0" maxValue="255" defaultValue="0" hidden="true" readonly="false"/>
+      <enumProperty label="I2C SCL" description="Select pin for the SCL signal" id="I2C.BSP_I2C_SCL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="I2C SDA" description="Select pin for the SDA signal" id="I2C.BSP_I2C_SDA.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="I2C0">
+        <subCategory label="">
+          <propertyRef refId="I2C.usedbysdk.BOOL"/>
+          <propertyRef refId="I2C.hiddenbysdk.BOOL"/>
+          <propertyRef refId="I2C.showadvanced.BOOL"/>
+          <propertyRef refId="I2C.forceenable.BOOL"/>
+          <propertyRef refId="I2C.owner.STRING"/>
+          <propertyRef refId="I2C.customname.STRING"/>
+          <propertyRef refId="I2C.hal_i2c_mode.ENUM"/>
+          <propertyRef refId="I2C.HAL_I2C_INIT_ENABLE.BOOL"/>
+          <propertyRef refId="I2C.HAL_I2C_MAX_BUS_FREQ.INT"/>
+          <propertyRef refId="I2C.HAL_I2C_LOW_HIGH_RATIO.ENUM"/>
+          <propertyRef refId="I2C.HAL_I2C_MASTER.BOOL"/>
+          <propertyRef refId="I2C.HAL_I2C_SLAVE_ADDRESS.INT"/>
+          <propertyRef refId="I2C.BSP_I2C_SCL.PIN"/>
+          <propertyRef refId="I2C.BSP_I2C_SDA.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

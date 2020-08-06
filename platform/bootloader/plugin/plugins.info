@@ -1,0 +1,968 @@
+pluginDirectory=./
+
+plugin(core) {
+  name=Bootloader Core
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Core library for bootloader
+
+  root=../core
+
+  providedApis=core
+
+  # Files that are released in source
+  ../driver/btl_driver_util.c
+  btl_core.c
+  btl_main.c
+  (efr32+iar,efm32+iar):IAR/main_btl_startup.c
+  (efr32+gcc,efm32+gcc):GCC/main_btl_startup.c
+
+  # GCC versions of libbootloader.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../build/lib/libbootloader_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../build/lib/libbootloader_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../build/lib/libbootloader_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../build/lib/libbootloader_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../build/lib/libbootloader_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../build/lib/libbootloader_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../build/lib/libbootloader_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../build/lib/libbootloader_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../build/lib/libbootloader_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../build/lib/libbootloader_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../build/lib/libbootloader_efm32tg11b_gcc.a
+  }
+  # IAR versions of libbootloader.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../build/lib/libbootloader_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../build/lib/libbootloader_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../build/lib/libbootloader_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../build/lib/libbootloader_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../build/lib/libbootloader_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../build/lib/libbootloader_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../build/lib/libbootloader_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../build/lib/libbootloader_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../build/lib/libbootloader_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../build/lib/libbootloader_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../build/lib/libbootloader_efm32tg11b_iar.a
+  }
+
+  setup(macros) {
+    BTL_APP_SPACE_SIZE=(FLASH_SIZE - BTL_APPLICATION_BASE)
+    -DBOOTLOADER_VERSION_MAIN_CUSTOMER=3
+  }
+
+  setup(additionalFiles) {
+    PATH(FRAMEWORK_RELATIVE):./
+  }
+
+  options=\
+  enforceSignedUpgrade,\
+  enforceEncryptedUpgrade,\
+  enforceSecureBoot,\
+  enforceRTSLSecureBoot,\
+  allowFallbackToLegacyKeyStorage,\
+  rejectDirectSignedImage,\
+  appwdis,\
+  blwdis,\
+  skipVerifyAppOnEM4RST,\
+  upgradeImageBaseAddress
+
+  enforceSignedUpgrade.name=Require signed firmware upgrade files
+  enforceSignedUpgrade.description=Require that firmware upgrade files are authenticated using asymmetric signature verification.
+  enforceSignedUpgrade.type=BOOLEAN
+  enforceSignedUpgrade.default=false
+  enforceSignedUpgrade.define=BOOTLOADER_ENFORCE_SIGNED_UPGRADE
+
+  enforceEncryptedUpgrade.name=Require encrypted firmware upgrade files
+  enforceEncryptedUpgrade.description=Require that firmware upgrade files are encrypted.
+  enforceEncryptedUpgrade.type=BOOLEAN
+  enforceEncryptedUpgrade.default=false
+  enforceEncryptedUpgrade.define=BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE
+
+  enforceSecureBoot.name=Enable secure boot
+  enforceSecureBoot.description=Enforce signature verification on the application image in internal flash before every boot.
+  enforceSecureBoot.type=BOOLEAN
+  enforceSecureBoot.default=false
+  enforceSecureBoot.define=BOOTLOADER_ENFORCE_SECURE_BOOT
+
+  enforceRTSLSecureBoot.name=Enable certificate support
+  enforceRTSLSecureBoot.enabledIf=core_enforceSecureBoot
+  enforceRTSLSecureBoot.description=Enforce signature verification on the application image using the certificate of the bootloader image. To utilize certificate secure boot authentication, Secure Element should be configured to authenticate the bootloader image by configuring (certificate based) secure boot option in Secure Element OTP. This option will also allow certificate based authentication of the GBL files
+  enforceRTSLSecureBoot.type=BOOLEAN
+  enforceRTSLSecureBoot.default=false
+  enforceRTSLSecureBoot.override(efr32~series[1], efm32~series[1])=false
+  enforceRTSLSecureBoot.define=BOOTLOADER_SUPPORT_CERTIFICATES
+
+  allowFallbackToLegacyKeyStorage.name=Allow use of public key from manufacturing token storage
+  allowFallbackToLegacyKeyStorage.description=Allow use of the public key from the manufacturing token storage for signature verification if the public key is not stored in Secure Element.
+  allowFallbackToLegacyKeyStorage.type=BOOLEAN
+  allowFallbackToLegacyKeyStorage.default=true
+  allowFallbackToLegacyKeyStorage.override(efr32~series[2]~device_configuration[2], efr32~series[1], efm32~series[1])=true
+  allowFallbackToLegacyKeyStorage.define=BOOTLOADER_FALLBACK_LEGACY_KEY
+
+  rejectDirectSignedImage.name=Reject direct signed images
+  rejectDirectSignedImage.enabledIf=core_enforceRTSLSecureBoot
+  rejectDirectSignedImage.description=On every boot, look for a certificate on application images and only accept the application images with a certificate.
+  rejectDirectSignedImage.type=BOOLEAN
+  rejectDirectSignedImage.default=false
+  rejectDirectSignedImage.override(efr32~series[1], efm32~series[1])=false
+  rejectDirectSignedImage.define=BOOTLOADER_REJECT_DIRECT_SIGNED_IMG
+
+  appwdis.name=Prevent write/erase of verified application
+  appwdis.description=Lock the application area in flash after the signature verification is passed. This option is only valid if secure boot is enabled. If end address of the signature does not touch a page boundary, the remaining flash memory in the page becomes unavailable.
+  appwdis.enabledIf=core_enforceSecureBoot
+  appwdis.type=BOOLEAN
+  appwdis.default=false
+  appwdis.override(efr32~series[1], efm32~series[1])=false
+  appwdis.define=APPLICATION_WRITE_DISABLE
+
+  blwdis.name=Prevent bootloader write/erase
+  blwdis.description=Write lock bootloader area before entering application. The bootloader area in flash will be locked until the next reboot. This does not affect bootloader upgrades, but prevents the application running in main flash from disturbing the bootloader. On Series-1 devices this is only applicable to devices that use the bootloader area of flash (EFR32xG12 and later).
+  blwdis.type=BOOLEAN
+  blwdis.default=false
+  blwdis.override(efr32~series[1]~device_configuration[1])=false
+  blwdis.define=BOOTLOADER_WRITE_DISABLE
+
+  skipVerifyAppOnEM4RST.name=Skip verification of application on EM4 reset
+  skipVerifyAppOnEM4RST.description=Skip verification of the application when the device wakes up from EM4 sleep.
+  skipVerifyAppOnEM4RST.type=BOOLEAN
+  skipVerifyAppOnEM4RST.default=false
+  skipVerifyAppOnEM4RST.override(efr32~series[2], efr32~series[1]~device_configuration[1])=false
+  skipVerifyAppOnEM4RST.define=APPLICATION_VERIFICATION_SKIP_EM4_RST
+
+  upgradeImageBaseAddress.name=Base address of bootloader upgrade image
+  upgradeImageBaseAddress.description=At the upgrade stage of the bootloader, the running main bootloader extracts the upgrade image from the GBL file, and stores it in internal flash at the address chosen. The address need to be a multiple of the page size.
+  upgradeImageBaseAddress.type=NUMBER
+  upgradeImageBaseAddress.default=32768
+  upgradeImageBaseAddress.override(efr32~series[1], efm32~series[1])=32768
+  upgradeImageBaseAddress.define=BTL_UPGRADE_LOCATION_BASE
+}
+
+plugin(upgrade-version) {
+  name=Application upgrade version check
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Check the version number and product ID of the application upgrade before applying. If the version number of the running application can not be determined, this implementation will assume that it is OK to apply the new image. If secure downgrade protection is required, an alternative implementation that stores the information about the running image in a dedicated location must be implemented, as this is not provided by this simple implementation.
+
+  requiredApis=imageParser
+
+  root=parser
+
+  # Common files
+  app_version/btl_parser_app_version_check.c
+}
+
+plugin(parser) {
+  name=Image Parser
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Image parser
+
+  providedApis=imageParser
+  requiredApis=crc, aes, ecdsa, sha, tokenManagement, core
+
+  root=parser
+
+  # Common files
+  btl_image_parser.c
+  ebl/btl_gbl_custom_tags.c
+
+  # GCC versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser_efm32tg11b_gcc.a
+  }
+  # IAR versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser_efm32tg11b_iar.a
+  }
+}
+
+plugin(parser-eblv2) {
+  name=Image Parser with legacy EBL support
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Image parser with support for the legacy EBL version 2 format
+
+  providedApis=imageParser
+  requiredApis=crc, aes, ecdsa, sha, tokenManagement, core
+
+  root=parser
+
+  # Common files
+  btl_image_parser.c
+  ebl/btl_gbl_custom_tags.c
+
+    # GCC versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-eblv2_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-eblv2_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-eblv2_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-eblv2_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-eblv2_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-eblv2_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-eblv2_efm32tg11b_gcc.a
+  }
+  # IAR versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-eblv2_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-eblv2_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-eblv2_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-eblv2_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-eblv2_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-eblv2_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-eblv2_efm32tg11b_iar.a
+  }
+
+  conditions=enforceLegacy
+
+  enforceLegacy.expression=(!core_enforceSignedUpgrade @and !core_enforceEncryptedUpgrade)
+  enforceLegacy.message=Can not enable legacy EBL file format, since the bootloader is configured to enforce signed or encrypted upgrade files
+}
+
+plugin(parser-noenc) {
+  name=Image Parser without encryption support
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Image parser without support for encrypted GBL files.
+
+  providedApis=imageParser
+  requiredApis=crc, aes, ecdsa, sha, tokenManagement, core
+
+  root=parser
+
+  # Common files
+  btl_image_parser.c
+  ebl/btl_gbl_custom_tags.c
+
+    # GCC versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-noenc_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-noenc_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-noenc_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-noenc_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-noenc_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libparser-noenc_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libparser-noenc_efm32tg11b_gcc.a
+  }
+  # IAR versions of libparser.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-noenc_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-noenc_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-noenc_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-noenc_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-noenc_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libparser-noenc_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libparser-noenc_efm32tg11b_iar.a
+  }
+
+  conditions=enforceEncryption
+
+  enforceEncryption.expression=(!core_enforceEncryptedUpgrade)
+  enforceEncryption.message=Can not use parser without encryption support, since the bootloader is configured to enforce encrypted upgrade files
+
+  setup(macros) {
+    BTL_PARSER_NO_SUPPORT_ENCRYPTION=1
+  }
+}
+
+plugin(gbl-compression-lz4) {
+  name=GBL Compression (LZ4)
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Support LZ4 compressed GBL upgrade files
+
+  root=../plugin/parser/compression
+
+  requiredApis=core
+
+  # Source files
+  btl_decompress_lz4.c
+
+  setup(macros) {
+    -DBTL_PARSER_SUPPORT_LZ4=1
+  }
+}
+
+plugin(gbl-compression-lzma) {
+  name=GBL Compression (LZMA)
+  category=Core
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Support LZMA compressed GBL upgrade files
+
+  root=../plugin/parser/compression
+
+  requiredApis=core
+
+  # Source files
+  btl_decompress_lzma.c
+  lzma/LzmaDec.c
+
+  setup(macros) {
+    -DBTL_PARSER_SUPPORT_LZMA=1
+    -D_LZMA_SIZE_OPT
+  }
+}
+
+plugin(crc) {
+  name=Cyclic Redundancy Check
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Software implementations of 16- and 32-bit CRC
+
+  root=security
+
+  providedApis=crc
+
+  # Common files
+  btl_crc16.c
+  btl_crc32.c
+}
+
+plugin(crypto) {
+  name=Crypto
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Crypto operations for bootloader: AES, ECDSA and SHA
+
+  root=security
+
+  providedApis=aes, sha, ecdsa
+
+  # Files that are released in source
+  btl_security_aes.c
+  btl_security_sha256.c
+  btl_security_ecdsa.c
+  ecc/ecc.c
+}
+
+plugin(debug) {
+  name=Debug
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Build debug instrumentation into the bootloader. Not recommended for production.
+
+  root=debug
+
+  # Common files
+  btl_debug_swo.c
+  btl_debug.c
+
+  options=print,assert
+
+  print.name=Debug prints
+  print.description=Print debug messages to SWO
+  print.type=BOOLEAN
+  print.default=false
+  print.override(efm32~series[1]~family[T])=false
+  print.define=BTL_PLUGIN_DEBUG_PRINT
+
+  assert.name=Debug asserts
+  assert.description=Enable assertions in the source code
+  assert.type=BOOLEAN
+  assert.default=false
+  assert.override(efm32~series[1]~family[T])=false
+  assert.define=BTL_PLUGIN_DEBUG_ASSERT
+}
+
+plugin(delay-driver) {
+  name=Delay
+  category=Drivers
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Micro- and millisecond delays
+
+  root=../driver
+
+  providedApis=delayDriver
+
+  # Common files
+  sourceFiles=btl_driver_delay.c
+}
+
+plugin(emlib) {
+  name=EMLIB
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=EMLIB Peripheral Library
+
+  root=$EMLIB/src
+
+  # Files that are released in source
+  em_assert.c
+  em_cmu.c
+  em_crypto.c
+  em_emu.c
+  em_gpio.c
+  em_core.c
+  em_msc.c
+  em_rmu.c
+  em_system.c
+  em_timer.c
+  em_usart.c
+  em_wdog.c
+  em_se.c
+  em_eusart.c
+
+  setup(additionalFiles) {
+    PATH(ABSOLUTE):$EMLIB/inc
+  }
+}
+
+plugin(mbedtls) {
+  name=mbed TLS
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=mbed TLS with hardware acceleration for Exx32
+
+  root=$MBEDTLS/sl_crypto/src
+
+  # Files that are released in source
+  crypto_aes.c
+  crypto_sha.c
+  crypto_management.c
+  se_aes.c
+  se_sha.c
+  se_management.c
+  shax.c
+  cryptoacc_aes.c
+  cryptoacc_sha.c
+  cryptoacc_management.c
+
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_aes.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_hash.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_ecdsa_alg.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_ecc_curves.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/ba414ep_config.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_math.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_memcpy.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_memcmp.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/cryptodma_internal.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/cryptolib_types.c
+  (efr32~series[2]~device_configuration[2]): cryptoacc/src/sx_blk_cipher.c
+
+  setup(additionalFiles) {
+    PATH(ABSOLUTE):$MBEDTLS/include
+    PATH(ABSOLUTE):$MBEDTLS/configs
+    PATH(ABSOLUTE):$MBEDTLS/sl_crypto/include
+    PATH(ABSOLUTE):$MBEDTLS/sl_crypto/src/cryptoacc/include
+    PATH(ABSOLUTE):$MBEDTLS/sl_crypto/src/cryptoacc/src
+    PATH(ABSOLUTE):$EMDRV/common/inc
+  }
+
+  setup(macros) {
+      -DMBEDTLS_CONFIG_FILE="config-sl-crypto-all-acceleration.h"
+      -DUSE_SE_IN_IRQ=1
+  }
+}
+
+plugin(spi-driver) {
+  name=SPI Master
+  category=Drivers
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Simple blocking SPI master
+
+  root=../driver
+
+  providedApis=spiDriver
+  requiredApis=delayDriver
+
+  # Common files
+  btl_driver_spi.c
+
+  setup(hwConfig) {
+    dependentHwConfModules=EXTFLASH,USART0,USART1,USART2,USART3,USART4,USART5
+  }
+}
+
+plugin(spislave-driver) {
+  name=SPI Slave
+  category=Drivers
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=DMA-driven SPI slave driver
+
+  root=../driver
+
+  providedApis=spiSlaveDriver
+  requiredApis=delayDriver
+
+  # Files that are released in source
+  btl_driver_spislave.c
+
+  setup(hwConfig) {
+    dependentHwConfModules=SPINCP,USART0,USART1,USART2,USART3,USART4,USART5
+  }
+
+  options=rxBufferSize, txBufferSize, rxChannel, txChannel
+
+  rxBufferSize.name=RX buffer size
+  rxBufferSize.description=BTL_SPISLAVE_RX_BUFFER_SIZE
+  rxBufferSize.type=NUMBER:0,2048
+  rxBufferSize.default=300
+  rxBufferSize.define=BTL_SPISLAVE_RX_BUFFER_SIZE
+
+  txBufferSize.name=TX buffer size
+  txBufferSize.description=BTL_SPISLAVE_TX_BUFFER_SIZE
+  txBufferSize.type=NUMBER:0,2048
+  txBufferSize.default=50
+  txBufferSize.define=BTL_SPISLAVE_TX_BUFFER_SIZE
+
+  rxChannel.name=LDMA channel for SPI RX
+  rxChannel.description=LDMA channel for SPI RX
+  rxChannel.type=NUMBER:0,1
+  rxChannel.default=0
+  rxChannel.define=BTL_SPISLAVE_LDMA_RX_CHANNEL
+
+  txChannel.name=LDMA channel for SPI TX
+  txChannel.description=LDMA channel for SPI TX
+  txChannel.type=NUMBER:0,1
+  txChannel.default=1
+  txChannel.define=BTL_SPISLAVE_LDMA_TX_CHANNEL
+}
+
+plugin(storage-common) {
+  name=Common Storage
+  category=Storage
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Common functionality for storage plugins
+
+  root=storage
+
+  providedApis=storageCommon
+
+  # Common files
+  btl_storage.c
+
+  # GCC versions of libstorage.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../../build/lib/libstorage_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../../build/lib/libstorage_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage_efm32tg11b_gcc.a
+  }
+  # IAR versions of libstorage.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../../build/lib/libstorage_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../../build/lib/libstorage_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage_efm32tg11b_iar.a
+  }
+
+  options=storageBaseAddress
+
+  storageBaseAddress.name=Start address for bootload info
+  storageBaseAddress.description=Absolute start address for the "bootload info" meta-information about which storage slot to attempt firmware update from, in which order. Take care to ensure that any storage slots don't overlap with the location of bootload info.
+  storageBaseAddress.type=NUMBER
+  storageBaseAddress.default=0
+  storageBaseAddress.define=BTL_STORAGE_BASE_ADDRESS
+}
+
+plugin(storage-common-single) {
+  name=Common Storage (single storage slot only)
+  category=Storage
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Common functionality for storage plugins. Size-optimized version only supporting a single storage slot.
+
+  root=storage
+
+  providedApis=storageCommon
+
+  # Common files
+  btl_storage.c
+
+  # GCC versions of libstorage.a
+  precompiled(efr32~series[1]~device_configuration[1]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg11_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+gcc,\
+              efm32~family[P]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg12_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg13_gcc.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg14_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage-single_efr32xg21_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage-single_efr32xg22_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage-single_efm32jg1b_gcc.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage-single_efm32jg12b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage-single_efm32gg11b_gcc.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+gcc) {
+    file=../../build/lib/libstorage-single_efm32gg12b_gcc.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+gcc) {
+    file=../../build/lib/libstorage-single_efm32tg11b_gcc.a
+  }
+  # IAR versions of libstorage.a
+  precompiled(efr32~series[1]~device_configuration[1]+iar,\
+              efm32~family[P]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg11_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[2]+iar,\
+              efm32~family[P]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg12_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[3]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg13_iar.a
+  }
+  precompiled(efr32~series[1]~device_configuration[4]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg14_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage-single_efr32xg21_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage-single_efr32xg22_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage-single_efm32jg1b_iar.a
+  }
+  precompiled(efm32~family[J]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage-single_efm32jg12b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage-single_efm32gg11b_iar.a
+  }
+  precompiled(efm32~family[GI]~series[1]~device_configuration[2]+iar) {
+    file=../../build/lib/libstorage-single_efm32gg12b_iar.a
+  }
+  precompiled(efm32~family[T]~series[1]~device_configuration[1]+iar) {
+    file=../../build/lib/libstorage-single_efm32tg11b_iar.a
+  }
+
+  options=storageBaseAddress
+
+  storageBaseAddress.name=Start address for bootload info
+  storageBaseAddress.description=Absolute start address for the "bootload info" meta-information about which storage slot to attempt firmware update from, in which order. Take care to ensure that any storage slots don't overlap with the location of bootload info.
+  storageBaseAddress.type=NUMBER
+  storageBaseAddress.default=0
+  storageBaseAddress.define=BTL_STORAGE_BASE_ADDRESS
+}
+
+plugin(token-management) {
+  name=Token Management
+  category=Utils
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=Token management for cryptographic keys
+
+  root=security
+
+  providedApis=tokenManagement
+  # Common files
+  btl_security_tokens.c
+}
+
+plugin(uart-driver) {
+  name=UART
+  category=Drivers
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  description=DMA-driven UART driver
+
+  root=../driver
+
+  providedApis=uartDriver
+  requiredApis=delayDriver
+
+  # Files that are released in source
+  btl_driver_uart.c
+  btl_driver_euart.c
+
+  options=rxBufferSize, txBufferSize
+
+  rxBufferSize.name=RX buffer size
+  rxBufferSize.description=BTL_DRIVER_UART_RX_BUFFER_SIZE
+  rxBufferSize.type=NUMBER:0,2048
+  rxBufferSize.default=512
+  rxBufferSize.define=BTL_DRIVER_UART_RX_BUFFER_SIZE
+
+  txBufferSize.name=TX buffer size
+  txBufferSize.description=BTL_DRIVER_UART_TX_BUFFER_SIZE
+  txBufferSize.type=NUMBER:0,2048
+  txBufferSize.default=128
+  txBufferSize.define=BTL_DRIVER_UART_TX_BUFFER_SIZE
+
+  setup(hwConfig) {
+    dependentHwConfModules=SERIAL,USART0,USART1,USART2,USART3,USART4,USART5,UART0,UART1,EUART0
+  }
+}

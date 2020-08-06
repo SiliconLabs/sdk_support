@@ -1,0 +1,121 @@
+<?xml version='1.0' encoding='ASCII'?>
+<device:DocumentRoot xmlns:device="http://www.silabs.com/ss/hwconfig/device.ecore">
+  <device description="" label="MGM210P022JIA" name="MGM210P022JIA" partId="mcu.arm.efr32.mg21.mgm210p022jia" deviceExtensionIdRef="efr32.mgm210p022jia.extension" revision="A" singleMode="true">
+    <powerModel/>
+    <portIo componentIdRef="efr32.mgm21.mgm210p022jia.portio" name="PORTIO" revision="A">
+      <crossBars/>
+      <interfaceToPinLists/>
+      <portBanks>
+        <portBank componentIdRef="efr32.mgm21.port" displayName="PortA" name="PortA" revision="A" index="0">
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA00" name="PA00" index="0"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA01" name="PA01" index="1"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA02" name="PA02" index="2"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA03" name="PA03" index="3"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA04" name="PA04" index="4"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA05" name="PA05" index="5"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PA06" name="PA06" index="6"/>
+        </portBank>
+        <portBank componentIdRef="efr32.mgm21.port" displayName="PortB" name="PortB" revision="A" index="1">
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PB00" name="PB00" index="0"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PB01" name="PB01" index="1"/>
+        </portBank>
+        <portBank componentIdRef="efr32.mgm21.port" displayName="PortC" name="PortC" revision="A" index="2">
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC00" name="PC00" index="0"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC01" name="PC01" index="1"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC02" name="PC02" index="2"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC03" name="PC03" index="3"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC04" name="PC04" index="4"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PC05" name="PC05" index="5"/>
+        </portBank>
+        <portBank componentIdRef="efr32.mgm21.port" displayName="PortD" name="PortD" revision="A" index="3">
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PD00" name="PD00" index="0"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PD01" name="PD01" index="1"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PD02" name="PD02" index="2"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PD03" name="PD03" index="3"/>
+          <pin componentIdRef="efr32.mgm21.pin" displayName="PD04" name="PD04" index="4"/>
+        </portBank>
+      </portBanks>
+    </portIo>
+    <pinOut description="31-pin RECTS, 12P9X15" indicatorLocation="topleft" package="RECTS" padDescription="NONE" subtitle="(top view)">
+      <pin defaultLabel="GND" location="400,500,1600,800" number="1"/>
+      <pin defaultLabel="PB01" location="400,1700,1600,800" number="2" pinIndex="1" portBankIndex="1"/>
+      <pin defaultLabel="PB00" location="400,2900,1600,800" number="3" pinIndex="0" portBankIndex="1"/>
+      <pin defaultLabel="PA00" location="400,4100,1600,800" number="4" pinIndex="0" portBankIndex="0"/>
+      <pin defaultLabel="PA01" location="400,5300,1600,800" number="5" pinIndex="1" portBankIndex="0"/>
+      <pin defaultLabel="PA02" location="400,6500,1600,800" number="6" pinIndex="2" portBankIndex="0"/>
+      <pin defaultLabel="PA03" location="400,7700,1600,800" number="7" pinIndex="3" portBankIndex="0"/>
+      <pin defaultLabel="PA04" location="400,8900,1600,800" number="8" pinIndex="4" portBankIndex="0"/>
+      <pin defaultLabel="PA05" location="400,10100,1600,800" number="9" pinIndex="5" portBankIndex="0"/>
+      <pin defaultLabel="PA06" location="400,11300,1600,800" number="10" pinIndex="6" portBankIndex="0"/>
+      <pin defaultLabel="DECOUPLE" location="400,12500,1600,800" number="11"/>
+      <pin defaultLabel="GND" location="400,13700,1600,800" number="12"/>
+      <pin defaultLabel="VDD" location="2450,13000,800,1600" number="13"/>
+      <pin defaultLabel="IOVDD" location="3650,13000,800,1600" number="14"/>
+      <pin defaultLabel="PD04" location="4850,13000,800,1600" number="15" pinIndex="4" portBankIndex="3"/>
+      <pin defaultLabel="PD03" location="6050,13000,800,1600" number="16" pinIndex="3" portBankIndex="3"/>
+      <pin defaultLabel="PD02" location="7250,13000,800,1600" number="17" pinIndex="2" portBankIndex="3"/>
+      <pin defaultLabel="PD01" location="8450,13000,800,1600" number="18" pinIndex="1" portBankIndex="3"/>
+      <pin defaultLabel="PD00" location="9650,13000,800,1600" number="19" pinIndex="0" portBankIndex="3"/>
+      <pin defaultLabel="GND" location="10900,13700,1600,800" number="20"/>
+      <pin defaultLabel="PC00" location="10900,12500,1600,800" number="21" pinIndex="0" portBankIndex="2"/>
+      <pin defaultLabel="PC01" location="10900,11300,1600,800" number="22" pinIndex="1" portBankIndex="2"/>
+      <pin defaultLabel="PC02" location="10900,10100,1600,800" number="23" pinIndex="2" portBankIndex="2"/>
+      <pin defaultLabel="PC03" location="10900,8900,1600,800" number="24" pinIndex="3" portBankIndex="2"/>
+      <pin defaultLabel="PC04" location="10900,7700,1600,800" number="25" pinIndex="4" portBankIndex="2"/>
+      <pin defaultLabel="PC05" location="10900,6500,1600,800" number="26" pinIndex="5" portBankIndex="2"/>
+      <pin defaultLabel="RESETn" location="10900,5300,1600,800" number="27"/>
+      <pin defaultLabel="GND" location="10900,4100,1600,800" number="28"/>
+      <pin defaultLabel="RF2G4_IO2" location="10900,2900,1600,800" number="29"/>
+      <pin defaultLabel="GND" location="10900,1700,1600,800" number="30"/>
+      <pin defaultLabel="GND" location="10900,500,1600,800" number="31"/>
+    </pinOut>
+    <peripherals>
+      <peripheral componentIdRef="efr32.mgm21.acmp0" displayName="ACMP0" name="ACMP0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.acmp1" displayName="ACMP1" name="ACMP1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.antdiv" displayName="Antenna Diversity" name="ANTDIV" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.btl_button" displayName="Bootloader Entry" name="BTL_BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.button" displayName="Button" name="BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.cmu" displayName="CMU" name="CMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.coex" displayName="Coexistence" name="COEX" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.emu" displayName="EMU" name="EMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.extflash" displayName="SPI Flash" name="EXTFLASH" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.ezradiopro" displayName="EZRadioPro" name="EZRADIOPRO" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.fem" displayName="External FEM" name="FEM" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.gpio" displayName="GPIO" name="GPIO" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.i2c0" displayName="I2C0" name="I2C0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.i2c1" displayName="I2C1" name="I2C1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.i2csensor" displayName="I2C Sensor" name="I2CSENSOR" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.iadc0" displayName="IADC0" name="IADC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.ioexp" displayName="I2C I/O Expander" name="IOEXP" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.led" displayName="LED" name="LED" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.letimer0" displayName="LETIMER0" name="LETIMER0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.mgm21.lfxo" displayName="LFXO" name="LFXO" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.mgm21.modem" displayName="MODEM" name="MODEM" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.pa" displayName="PA" name="PA" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.prs" displayName="PRS" name="PRS" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.pti" displayName="PTI" name="PTI" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.serial" displayName="Serial" name="SERIAL" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.spidisplay" displayName="SPI Display" name="SPIDISPLAY" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.spincp" displayName="SPI NCP" name="SPINCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.timer0" displayName="TIMER0" name="TIMER0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.timer1" displayName="TIMER1" name="TIMER1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.timer2" displayName="TIMER2" name="TIMER2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.timer3" displayName="TIMER3" name="TIMER3" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.uartncp" displayName="UART NCP" name="UARTNCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.usart0" displayName="USART0" name="USART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.usart1" displayName="USART1" name="USART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.usart2" displayName="USART2" name="USART2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.vcom" displayName="Virtual COM Port" name="VCOM" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.vuart" displayName="Virtual UART" name="VUART" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.mgm21.wdog" displayName="WDOG" name="WDOG" revision="A" category="  Peripherals" hidden="false"/>
+    </peripherals>
+    <script uri="../MGM21.py">
+      <path>.</path>
+      <path>../..</path>
+      <path>..</path>
+    </script>
+    <sourceMappings initialGroup="main_template">
+      <sourceMapping uri="../MGM21.srcmap"/>
+    </sourceMappings>
+  </device>
+</device:DocumentRoot>

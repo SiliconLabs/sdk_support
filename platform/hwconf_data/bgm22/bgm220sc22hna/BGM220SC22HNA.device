@@ -1,0 +1,140 @@
+<?xml version='1.0' encoding='ASCII'?>
+<device:DocumentRoot xmlns:device="http://www.silabs.com/ss/hwconfig/device.ecore">
+  <device description="" label="BGM220SC22HNA" name="BGM220SC22HNA" partId="mcu.arm.efr32.bg22.bgm220sc22hna" deviceExtensionIdRef="efr32.bgm220sc22hna.extension" revision="A" singleMode="true">
+    <powerModel/>
+    <portIo componentIdRef="efr32.bgm22.bgm220sc22hna.portio" name="PORTIO" revision="A">
+      <crossBars/>
+      <interfaceToPinLists/>
+      <portBanks>
+        <portBank componentIdRef="efr32.bgm22.port" displayName="PortA" name="PortA" revision="A" index="0">
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA00" name="PA00" index="0"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA01" name="PA01" index="1"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA02" name="PA02" index="2"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA03" name="PA03" index="3"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA04" name="PA04" index="4"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA05" name="PA05" index="5"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA06" name="PA06" index="6"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA07" name="PA07" index="7"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PA08" name="PA08" index="8"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm22.port" displayName="PortB" name="PortB" revision="A" index="1">
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PB00" name="PB00" index="0"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PB01" name="PB01" index="1"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PB02" name="PB02" index="2"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PB03" name="PB03" index="3"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PB04" name="PB04" index="4"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm22.port" displayName="PortC" name="PortC" revision="A" index="2">
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC00" name="PC00" index="0"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC01" name="PC01" index="1"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC02" name="PC02" index="2"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC03" name="PC03" index="3"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC04" name="PC04" index="4"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC05" name="PC05" index="5"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PC06" name="PC06" index="6"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm22.port" displayName="PortD" name="PortD" revision="A" index="3">
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PD00" name="PD00" index="0"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PD01" name="PD01" index="1"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PD02" name="PD02" index="2"/>
+          <pin componentIdRef="efr32.bgm22.pin" displayName="PD03" name="PD03" index="3"/>
+        </portBank>
+      </portBanks>
+    </portIo>
+    <pinOut description="44-pin RECTS, 6X6" indicatorLocation="topleft" package="RECTS" padDescription="NONE" subtitle="(top view)">
+      <pin defaultLabel="NC" location="150,600,400,300" number="1"/>
+      <pin defaultLabel="ANT_IN" location="150,1100,400,300" number="2"/>
+      <pin defaultLabel="RF_2G4" location="150,1600,400,300" number="3"/>
+      <pin defaultLabel="GND" location="150,2100,400,300" number="4"/>
+      <pin defaultLabel="GND" location="150,2600,400,300" number="5"/>
+      <pin defaultLabel="PB04" location="150,3100,400,300" number="6" pinIndex="4" portBankIndex="1"/>
+      <pin defaultLabel="PB03" location="150,3600,400,300" number="7" pinIndex="3" portBankIndex="1"/>
+      <pin defaultLabel="PB02" location="150,4100,400,300" number="8" pinIndex="2" portBankIndex="1"/>
+      <pin defaultLabel="PB01" location="150,4600,400,300" number="9" pinIndex="1" portBankIndex="1"/>
+      <pin defaultLabel="PB00" location="150,5100,400,300" number="10" pinIndex="0" portBankIndex="1"/>
+      <pin defaultLabel="PA00" location="600,5450,300,400" number="11" pinIndex="0" portBankIndex="0"/>
+      <pin defaultLabel="PA01" location="1100,5450,300,400" number="12" pinIndex="1" portBankIndex="0"/>
+      <pin defaultLabel="PA02" location="1600,5450,300,400" number="13" pinIndex="2" portBankIndex="0"/>
+      <pin defaultLabel="DECOUPLE" location="2100,5450,300,400" number="14"/>
+      <pin defaultLabel="PA03" location="2600,5450,300,400" number="15" pinIndex="3" portBankIndex="0"/>
+      <pin defaultLabel="PA04" location="3100,5450,300,400" number="16" pinIndex="4" portBankIndex="0"/>
+      <pin defaultLabel="PA05" location="3600,5450,300,400" number="17" pinIndex="5" portBankIndex="0"/>
+      <pin defaultLabel="PA06" location="4100,5450,300,400" number="18" pinIndex="6" portBankIndex="0"/>
+      <pin defaultLabel="PA07" location="4600,5450,300,400" number="19" pinIndex="7" portBankIndex="0"/>
+      <pin defaultLabel="PA08" location="5100,5450,300,400" number="20" pinIndex="8" portBankIndex="0"/>
+      <pin defaultLabel="VREG" location="5450,5100,400,300" number="21"/>
+      <pin defaultLabel="VREGVDD" location="5450,4600,400,300" number="22"/>
+      <pin defaultLabel="IOVDD" location="5450,4100,400,300" number="23"/>
+      <pin defaultLabel="PD03" location="5450,3600,400,300" number="24" pinIndex="3" portBankIndex="3"/>
+      <pin defaultLabel="PD02" location="5450,3100,400,300" number="25" pinIndex="2" portBankIndex="3"/>
+      <pin defaultLabel="PD01" location="5450,2600,400,300" number="26" pinIndex="1" portBankIndex="3"/>
+      <pin defaultLabel="PD00" location="5450,2100,400,300" number="27" pinIndex="0" portBankIndex="3"/>
+      <pin defaultLabel="PC00" location="5450,1600,400,300" number="28" pinIndex="0" portBankIndex="2"/>
+      <pin defaultLabel="PC01" location="5450,1100,400,300" number="29" pinIndex="1" portBankIndex="2"/>
+      <pin defaultLabel="PC02" location="5450,600,400,300" number="30" pinIndex="2" portBankIndex="2"/>
+      <pin defaultLabel="PC03" location="5100,150,300,400" number="31" pinIndex="3" portBankIndex="2"/>
+      <pin defaultLabel="PC04" location="4600,150,300,400" number="32" pinIndex="4" portBankIndex="2"/>
+      <pin defaultLabel="PC05" location="4100,150,300,400" number="33" pinIndex="5" portBankIndex="2"/>
+      <pin defaultLabel="PC06" location="3600,150,300,400" number="34" pinIndex="6" portBankIndex="2"/>
+      <pin defaultLabel="RESETn" location="3100,150,300,400" number="35"/>
+      <pin defaultLabel="GND" location="2600,150,300,400" number="36"/>
+      <pin defaultLabel="NC" location="2100,150,300,400" number="37"/>
+      <pin defaultLabel="NC" location="1600,150,300,400" number="38"/>
+      <pin defaultLabel="NC" location="1100,150,300,400" number="39"/>
+      <pin defaultLabel="ANT_OUT" location="600,150,300,400" number="40"/>
+      <pin defaultLabel="GND" location="3250,2250,500,500" number="41"/>
+      <pin defaultLabel="GND" location="3250,3250,500,500" number="42"/>
+      <pin defaultLabel="GND" location="2250,3250,500,500" number="43"/>
+      <pin defaultLabel="GND" location="2250,2250,500,500" number="44"/>
+    </pinOut>
+    <peripherals>
+      <peripheral componentIdRef="efr32.bgm22.antdiv" displayName="Antenna Diversity" name="ANTDIV" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.btl_button" displayName="Bootloader Entry" name="BTL_BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.button" displayName="Button" name="BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.cmu" displayName="CMU" name="CMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.coex" displayName="Coexistence" name="COEX" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.dcdc" displayName="DCDC" name="DCDC" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.emu" displayName="EMU" name="EMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.euart0" displayName="EUART0" name="EUART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.extflash" displayName="SPI Flash" name="EXTFLASH" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.ezradiopro" displayName="EZRadioPro" name="EZRADIOPRO" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.fem" displayName="External FEM" name="FEM" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.gpio" displayName="GPIO" name="GPIO" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.i2c0" displayName="I2C0" name="I2C0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.i2c1" displayName="I2C1" name="I2C1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.i2csensor" displayName="I2C Sensor" name="I2CSENSOR" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.iadc0" displayName="IADC0" name="IADC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.ioexp" displayName="I2C I/O Expander" name="IOEXP" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.led" displayName="LED" name="LED" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.letimer0" displayName="LETIMER0" name="LETIMER0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm22.lfxo" displayName="LFXO" name="LFXO" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm22.modem" displayName="MODEM" name="MODEM" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.pa" displayName="PA" name="PA" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.pdm" displayName="PDM" name="PDM" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.prs" displayName="PRS" name="PRS" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.pti" displayName="PTI" name="PTI" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.serial" displayName="Serial" name="SERIAL" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.spidisplay" displayName="SPI Display" name="SPIDISPLAY" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.spincp" displayName="SPI NCP" name="SPINCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.timer0" displayName="TIMER0" name="TIMER0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.timer1" displayName="TIMER1" name="TIMER1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.timer2" displayName="TIMER2" name="TIMER2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.timer3" displayName="TIMER3" name="TIMER3" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.timer4" displayName="TIMER4" name="TIMER4" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.uartncp" displayName="UART NCP" name="UARTNCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.usart0" displayName="USART0" name="USART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.usart1" displayName="USART1" name="USART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.vcom" displayName="Virtual COM Port" name="VCOM" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.vuart" displayName="Virtual UART" name="VUART" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm22.wdog" displayName="WDOG" name="WDOG" revision="A" category="  Peripherals" hidden="false"/>
+    </peripherals>
+    <script uri="../BGM22.py">
+      <path>.</path>
+      <path>../..</path>
+      <path>..</path>
+    </script>
+    <sourceMappings initialGroup="main_template">
+      <sourceMapping uri="../BGM22.srcmap"/>
+    </sourceMappings>
+  </device>
+</device:DocumentRoot>

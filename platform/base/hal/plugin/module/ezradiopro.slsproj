@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.EZRADIOPRO.BASE">
+  <module id="SDK.HAL.EMDRV.SPIDRV"/>
+  <module id="SDK.HAL.EXTDEV.BASE"/>
+</project>

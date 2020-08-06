@@ -1,0 +1,1217 @@
+<?xml version='1.0' encoding='ASCII'?>
+<portio:DocumentRoot xmlns:portio="http://www.silabs.com/ss/hwconfig/portio.ecore">
+  <portIo description="" id="efm32.efm32tg.efm32tg825f32.portio" label="PORTIO" name="PORTIO" version="A">
+    <properties>
+      <enumProperty label="CH4" id="portio.acmp0.enable.ch4" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.acmp0.location.acmp0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="2"/>
+      </enumProperty>
+      <enumProperty label="OUT" id="portio.acmp0.enable.out" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH5" id="portio.acmp1.enable.ch5" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH6" id="portio.acmp1.enable.ch6" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH7" id="portio.acmp1.enable.ch7" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.acmp1.location.acmp1" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="2"/>
+      </enumProperty>
+      <enumProperty label="OUT" id="portio.acmp1.enable.out" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH4" id="portio.adc0.enable.ch4" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH5" id="portio.adc0.enable.ch5" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH6" id="portio.adc0.enable.ch6" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH7" id="portio.adc0.enable.ch7" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.cmu.location.cmu" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="2"/>
+      </enumProperty>
+      <enumProperty label="CLK0" id="portio.cmu.enable.clk0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CLK1" id="portio.cmu.enable.clk1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="N1" id="portio.dac0.enable.n1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT0" id="portio.dac0.enable.out0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT1ALT_1" id="portio.dac0.enable.out1alt_1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT1ALT_2" id="portio.dac0.enable.out1alt_2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT1ALT_3" id="portio.dac0.enable.out1alt_3" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT2_0" id="portio.dac0.enable.out2_0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="P0" id="portio.dac0.enable.p0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="P1" id="portio.dac0.enable.p1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="P2" id="portio.dac0.enable.p2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="EM4WU0" id="portio.gpio.enable.em4wu0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="EM4WU3" id="portio.gpio.enable.em4wu3" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="EM4WU4" id="portio.gpio.enable.em4wu4" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="EM4WU5" id="portio.gpio.enable.em4wu5" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.gpio.location.dbg" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+      </enumProperty>
+      <enumProperty label="SWCLK" id="portio.gpio.enable.swclk" description="" defaultValueIndex="1">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SWDIO" id="portio.gpio.enable.swdio" description="" defaultValueIndex="1">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SWO" id="portio.gpio.enable.swo" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.i2c0.location.i2c0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="5"/>
+        <enumValue value="6"/>
+      </enumProperty>
+      <enumProperty label="SCL" id="portio.i2c0.enable.scl" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SDA" id="portio.i2c0.enable.sda" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="BCAP_N" id="portio.lcd.enable.bcap_n" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="BCAP_P" id="portio.lcd.enable.bcap_p" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="BEXT" id="portio.lcd.enable.bext" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="COM0" id="portio.lcd.enable.com0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="COM1" id="portio.lcd.enable.com1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="COM2" id="portio.lcd.enable.com2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="COM3" id="portio.lcd.enable.com3" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG0" id="portio.lcd.enable.seg0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG1" id="portio.lcd.enable.seg1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG2" id="portio.lcd.enable.seg2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG3" id="portio.lcd.enable.seg3" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG6" id="portio.lcd.enable.seg6" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG7" id="portio.lcd.enable.seg7" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG8" id="portio.lcd.enable.seg8" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG9" id="portio.lcd.enable.seg9" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG13" id="portio.lcd.enable.seg13" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG14" id="portio.lcd.enable.seg14" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG15" id="portio.lcd.enable.seg15" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG20" id="portio.lcd.enable.seg20" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG21" id="portio.lcd.enable.seg21" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG22" id="portio.lcd.enable.seg22" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="SEG23" id="portio.lcd.enable.seg23" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.lesense.location.lesense" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+      </enumProperty>
+      <enumProperty label="ALTEX0" id="portio.lesense.enable.altex0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="ALTEX1" id="portio.lesense.enable.altex1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="ALTEX5" id="portio.lesense.enable.altex5" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="ALTEX6" id="portio.lesense.enable.altex6" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="ALTEX7" id="portio.lesense.enable.altex7" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH4" id="portio.lesense.enable.ch4" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH13" id="portio.lesense.enable.ch13" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH14" id="portio.lesense.enable.ch14" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH15" id="portio.lesense.enable.ch15" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.letimer0.location.letimer0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="2"/>
+        <enumValue value="3"/>
+      </enumProperty>
+      <enumProperty label="OUT0" id="portio.letimer0.enable.out0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="OUT1" id="portio.letimer0.enable.out1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.leuart0.location.leuart0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="3"/>
+        <enumValue value="4"/>
+      </enumProperty>
+      <enumProperty label="RX" id="portio.leuart0.enable.rx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="TX" id="portio.leuart0.enable.tx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="N" id="portio.lfxo.enable.n" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="P" id="portio.lfxo.enable.p" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_DATA0" id="portio.msc.enable.cda_data0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_DATA1" id="portio.msc.enable.cda_data1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_DATA2" id="portio.msc.enable.cda_data2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_DATA3" id="portio.msc.enable.cda_data3" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_SEL1" id="portio.msc.enable.cda_sel1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CDA_SEL2" id="portio.msc.enable.cda_sel2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="TM0" id="portio.msc.enable.tm0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="TM1" id="portio.msc.enable.tm1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.pcnt0.location.pcnt0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="3"/>
+      </enumProperty>
+      <enumProperty label="S0IN" id="portio.pcnt0.enable.s0in" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="S1IN" id="portio.pcnt0.enable.s1in" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.prs.location.prs" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+      </enumProperty>
+      <enumProperty label="CH0" id="portio.prs.enable.ch0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH1" id="portio.prs.enable.ch1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CH2" id="portio.prs.enable.ch2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.timer0.location.timer0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="4"/>
+        <enumValue value="5"/>
+      </enumProperty>
+      <enumProperty label="CC0" id="portio.timer0.enable.cc0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CC1" id="portio.timer0.enable.cc1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CC2" id="portio.timer0.enable.cc2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.timer1.location.timer1" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="3"/>
+        <enumValue value="4"/>
+      </enumProperty>
+      <enumProperty label="CC0" id="portio.timer1.enable.cc0" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CC1" id="portio.timer1.enable.cc1" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CC2" id="portio.timer1.enable.cc2" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.usart0.location.usart0" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="1"/>
+        <enumValue value="3"/>
+        <enumValue value="4"/>
+        <enumValue value="5"/>
+      </enumProperty>
+      <enumProperty label="CLK" id="portio.usart0.enable.clk" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CS" id="portio.usart0.enable.cs" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="RX" id="portio.usart0.enable.rx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="TX" id="portio.usart0.enable.tx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="Location" id="portio.usart1.location.usart1" description="" defaultValueIndex="0">
+        <enumValue value="0"/>
+        <enumValue value="2"/>
+      </enumProperty>
+      <enumProperty label="CLK" id="portio.usart1.enable.clk" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="CS" id="portio.usart1.enable.cs" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="RX" id="portio.usart1.enable.rx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+      <enumProperty label="TX" id="portio.usart1.enable.tx" description="" defaultValueIndex="0">
+        <enumValue value="Disabled"/>
+        <enumValue value="Enabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="Port Config">
+        <subCategory label="ACMP0">
+          <propertyRef refId="portio.acmp0.enable.ch4"/>
+          <propertyRef refId="portio.acmp0.location.acmp0"/>
+          <propertyRef refId="portio.acmp0.enable.out"/>
+        </subCategory>
+        <subCategory label="ACMP1">
+          <propertyRef refId="portio.acmp1.enable.ch5"/>
+          <propertyRef refId="portio.acmp1.enable.ch6"/>
+          <propertyRef refId="portio.acmp1.enable.ch7"/>
+          <propertyRef refId="portio.acmp1.location.acmp1"/>
+          <propertyRef refId="portio.acmp1.enable.out"/>
+        </subCategory>
+        <subCategory label="ADC0">
+          <propertyRef refId="portio.adc0.enable.ch4"/>
+          <propertyRef refId="portio.adc0.enable.ch5"/>
+          <propertyRef refId="portio.adc0.enable.ch6"/>
+          <propertyRef refId="portio.adc0.enable.ch7"/>
+        </subCategory>
+        <subCategory label="CMU">
+          <propertyRef refId="portio.cmu.location.cmu"/>
+          <propertyRef refId="portio.cmu.enable.clk0"/>
+          <propertyRef refId="portio.cmu.enable.clk1"/>
+        </subCategory>
+        <subCategory label="DAC0">
+          <propertyRef refId="portio.dac0.enable.n1"/>
+          <propertyRef refId="portio.dac0.enable.out0"/>
+          <propertyRef refId="portio.dac0.enable.out1alt_1"/>
+          <propertyRef refId="portio.dac0.enable.out1alt_2"/>
+          <propertyRef refId="portio.dac0.enable.out1alt_3"/>
+          <propertyRef refId="portio.dac0.enable.out2_0"/>
+          <propertyRef refId="portio.dac0.enable.p0"/>
+          <propertyRef refId="portio.dac0.enable.p1"/>
+          <propertyRef refId="portio.dac0.enable.p2"/>
+        </subCategory>
+        <subCategory label="GPIO">
+          <propertyRef refId="portio.gpio.enable.em4wu0"/>
+          <propertyRef refId="portio.gpio.enable.em4wu3"/>
+          <propertyRef refId="portio.gpio.enable.em4wu4"/>
+          <propertyRef refId="portio.gpio.enable.em4wu5"/>
+          <propertyRef refId="portio.gpio.location.dbg"/>
+          <propertyRef refId="portio.gpio.enable.swclk"/>
+          <propertyRef refId="portio.gpio.enable.swdio"/>
+          <propertyRef refId="portio.gpio.enable.swo"/>
+        </subCategory>
+        <subCategory label="I2C0">
+          <propertyRef refId="portio.i2c0.location.i2c0"/>
+          <propertyRef refId="portio.i2c0.enable.scl"/>
+          <propertyRef refId="portio.i2c0.enable.sda"/>
+        </subCategory>
+        <subCategory label="LCD">
+          <propertyRef refId="portio.lcd.enable.bcap_n"/>
+          <propertyRef refId="portio.lcd.enable.bcap_p"/>
+          <propertyRef refId="portio.lcd.enable.bext"/>
+          <propertyRef refId="portio.lcd.enable.com0"/>
+          <propertyRef refId="portio.lcd.enable.com1"/>
+          <propertyRef refId="portio.lcd.enable.com2"/>
+          <propertyRef refId="portio.lcd.enable.com3"/>
+          <propertyRef refId="portio.lcd.enable.seg0"/>
+          <propertyRef refId="portio.lcd.enable.seg1"/>
+          <propertyRef refId="portio.lcd.enable.seg2"/>
+          <propertyRef refId="portio.lcd.enable.seg3"/>
+          <propertyRef refId="portio.lcd.enable.seg6"/>
+          <propertyRef refId="portio.lcd.enable.seg7"/>
+          <propertyRef refId="portio.lcd.enable.seg8"/>
+          <propertyRef refId="portio.lcd.enable.seg9"/>
+          <propertyRef refId="portio.lcd.enable.seg13"/>
+          <propertyRef refId="portio.lcd.enable.seg14"/>
+          <propertyRef refId="portio.lcd.enable.seg15"/>
+          <propertyRef refId="portio.lcd.enable.seg20"/>
+          <propertyRef refId="portio.lcd.enable.seg21"/>
+          <propertyRef refId="portio.lcd.enable.seg22"/>
+          <propertyRef refId="portio.lcd.enable.seg23"/>
+        </subCategory>
+        <subCategory label="LESENSE">
+          <propertyRef refId="portio.lesense.location.lesense"/>
+          <propertyRef refId="portio.lesense.enable.altex0"/>
+          <propertyRef refId="portio.lesense.enable.altex1"/>
+          <propertyRef refId="portio.lesense.enable.altex5"/>
+          <propertyRef refId="portio.lesense.enable.altex6"/>
+          <propertyRef refId="portio.lesense.enable.altex7"/>
+          <propertyRef refId="portio.lesense.enable.ch4"/>
+          <propertyRef refId="portio.lesense.enable.ch13"/>
+          <propertyRef refId="portio.lesense.enable.ch14"/>
+          <propertyRef refId="portio.lesense.enable.ch15"/>
+        </subCategory>
+        <subCategory label="LETIMER0">
+          <propertyRef refId="portio.letimer0.location.letimer0"/>
+          <propertyRef refId="portio.letimer0.enable.out0"/>
+          <propertyRef refId="portio.letimer0.enable.out1"/>
+        </subCategory>
+        <subCategory label="LEUART0">
+          <propertyRef refId="portio.leuart0.location.leuart0"/>
+          <propertyRef refId="portio.leuart0.enable.rx"/>
+          <propertyRef refId="portio.leuart0.enable.tx"/>
+        </subCategory>
+        <subCategory label="LFXO">
+          <propertyRef refId="portio.lfxo.enable.n"/>
+          <propertyRef refId="portio.lfxo.enable.p"/>
+        </subCategory>
+        <subCategory label="MSC">
+          <propertyRef refId="portio.msc.enable.cda_data0"/>
+          <propertyRef refId="portio.msc.enable.cda_data1"/>
+          <propertyRef refId="portio.msc.enable.cda_data2"/>
+          <propertyRef refId="portio.msc.enable.cda_data3"/>
+          <propertyRef refId="portio.msc.enable.cda_sel1"/>
+          <propertyRef refId="portio.msc.enable.cda_sel2"/>
+          <propertyRef refId="portio.msc.enable.tm0"/>
+          <propertyRef refId="portio.msc.enable.tm1"/>
+        </subCategory>
+        <subCategory label="PCNT0">
+          <propertyRef refId="portio.pcnt0.location.pcnt0"/>
+          <propertyRef refId="portio.pcnt0.enable.s0in"/>
+          <propertyRef refId="portio.pcnt0.enable.s1in"/>
+        </subCategory>
+        <subCategory label="PRS">
+          <propertyRef refId="portio.prs.location.prs"/>
+          <propertyRef refId="portio.prs.enable.ch0"/>
+          <propertyRef refId="portio.prs.enable.ch1"/>
+          <propertyRef refId="portio.prs.enable.ch2"/>
+        </subCategory>
+        <subCategory label="TIMER0">
+          <propertyRef refId="portio.timer0.location.timer0"/>
+          <propertyRef refId="portio.timer0.enable.cc0"/>
+          <propertyRef refId="portio.timer0.enable.cc1"/>
+          <propertyRef refId="portio.timer0.enable.cc2"/>
+        </subCategory>
+        <subCategory label="TIMER1">
+          <propertyRef refId="portio.timer1.location.timer1"/>
+          <propertyRef refId="portio.timer1.enable.cc0"/>
+          <propertyRef refId="portio.timer1.enable.cc1"/>
+          <propertyRef refId="portio.timer1.enable.cc2"/>
+        </subCategory>
+        <subCategory label="USART0">
+          <propertyRef refId="portio.usart0.location.usart0"/>
+          <propertyRef refId="portio.usart0.enable.clk"/>
+          <propertyRef refId="portio.usart0.enable.cs"/>
+          <propertyRef refId="portio.usart0.enable.rx"/>
+          <propertyRef refId="portio.usart0.enable.tx"/>
+        </subCategory>
+        <subCategory label="USART1">
+          <propertyRef refId="portio.usart1.location.usart1"/>
+          <propertyRef refId="portio.usart1.enable.clk"/>
+          <propertyRef refId="portio.usart1.enable.cs"/>
+          <propertyRef refId="portio.usart1.enable.rx"/>
+          <propertyRef refId="portio.usart1.enable.tx"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals>
+      <signal name="ACMP0|CH4|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP0|CH4|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ACMP0|OUT|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP0|OUT|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ACMP1|CH5|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP1|CH5|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ACMP1|CH6|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP1|CH6|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ACMP1|CH7|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP1|CH7|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ACMP1|OUT|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ACMP1|OUT|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ADC0|CH4|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ADC0|CH4|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ADC0|CH5|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ADC0|CH5|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ADC0|CH6|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ADC0|CH6|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="ADC0|CH7|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="ADC0|CH7|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="CMU|CLK0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="CMU|CLK0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="CMU|CLK1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="CMU|CLK1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|N1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|N1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|OUT0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|OUT0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|OUT1ALT_1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|OUT1ALT_1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|OUT1ALT_2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|OUT1ALT_2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|OUT1ALT_3|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|OUT1ALT_3|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|OUT2_0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|OUT2_0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|P0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|P0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|P1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|P1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="DAC0|P2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="DAC0|P2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|EM4WU0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|EM4WU0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|EM4WU3|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|EM4WU3|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|EM4WU4|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|EM4WU4|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|EM4WU5|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|EM4WU5|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|SWCLK|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|SWCLK|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|SWDIO|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|SWDIO|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="GPIO|SWO|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="GPIO|SWO|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="I2C0|SCL|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="I2C0|SCL|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="I2C0|SDA|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="I2C0|SDA|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|BCAP_N|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|BCAP_N|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|BCAP_P|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|BCAP_P|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|BEXT|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|BEXT|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|COM0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|COM0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|COM1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|COM1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|COM2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|COM2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|COM3|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|COM3|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG3|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG3|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG6|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG6|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG7|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG7|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG8|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG8|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG9|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG9|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG13|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG13|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG14|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG14|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG15|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG15|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG20|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG20|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG21|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG21|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG22|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG22|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LCD|SEG23|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LCD|SEG23|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|ALTEX0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|ALTEX0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|ALTEX1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|ALTEX1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|ALTEX5|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|ALTEX5|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|ALTEX6|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|ALTEX6|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|ALTEX7|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|ALTEX7|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|CH4|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|CH4|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|CH13|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|CH13|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|CH14|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|CH14|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LESENSE|CH15|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LESENSE|CH15|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LETIMER0|OUT0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LETIMER0|OUT0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LETIMER0|OUT1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LETIMER0|OUT1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LEUART0|RX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LEUART0|RX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LEUART0|TX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LEUART0|TX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LFXO|N|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LFXO|N|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="LFXO|P|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="LFXO|P|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_DATA0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_DATA0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_DATA1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_DATA1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_DATA2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_DATA2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_DATA3|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_DATA3|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_SEL1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_SEL1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|CDA_SEL2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|CDA_SEL2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|TM0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|TM0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="MSC|TM1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="MSC|TM1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="PCNT0|S0IN|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="PCNT0|S0IN|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="PCNT0|S1IN|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="PCNT0|S1IN|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="PRS|CH0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="PRS|CH0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="PRS|CH1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="PRS|CH1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="PRS|CH2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="PRS|CH2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER0|CC0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER0|CC0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER0|CC1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER0|CC1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER0|CC2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER0|CC2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER1|CC0|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER1|CC0|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER1|CC1|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER1|CC1|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="TIMER1|CC2|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="TIMER1|CC2|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART0|CLK|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART0|CLK|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART0|CS|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART0|CS|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART0|RX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART0|RX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART0|TX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART0|TX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART1|CLK|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART1|CLK|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART1|CS|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART1|CS|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART1|RX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART1|RX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+      <signal name="USART1|TX|EN" signalType="Data" valueType="boolean" initialValue="false"/>
+      <signal name="USART1|TX|MODE" signalType="Data" valueType="string" initialValue="DISABLED"/>
+    </signals>
+    <propertyToInterfaceInfos/>
+    <pinRoutes>
+      <module name="ACMP0">
+        <selector name="ACMP0">
+          <route name="CH4" enablePropertyId="portio.acmp0.enable.ch4">
+            <location number="0" portBankIndex="2" pinIndex="4"/>
+          </route>
+        </selector>
+        <selector name="ACMP0" locationPropertyId="portio.acmp0.location.acmp0">
+          <route name="OUT" enablePropertyId="portio.acmp0.enable.out">
+            <location number="0" portBankIndex="4" pinIndex="13"/>
+            <location number="2" portBankIndex="3" pinIndex="6"/>
+          </route>
+        </selector>
+      </module>
+      <module name="ACMP1">
+        <selector name="ACMP1">
+          <route name="CH5" enablePropertyId="portio.acmp1.enable.ch5">
+            <location number="0" portBankIndex="2" pinIndex="13"/>
+          </route>
+          <route name="CH6" enablePropertyId="portio.acmp1.enable.ch6">
+            <location number="0" portBankIndex="2" pinIndex="14"/>
+          </route>
+          <route name="CH7" enablePropertyId="portio.acmp1.enable.ch7">
+            <location number="0" portBankIndex="2" pinIndex="15"/>
+          </route>
+        </selector>
+        <selector name="ACMP1" locationPropertyId="portio.acmp1.location.acmp1">
+          <route name="OUT" enablePropertyId="portio.acmp1.enable.out">
+            <location number="0" portBankIndex="5" pinIndex="2"/>
+            <location number="2" portBankIndex="3" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+      <module name="ADC0">
+        <selector name="ADC0">
+          <route name="CH4" enablePropertyId="portio.adc0.enable.ch4">
+            <location number="0" portBankIndex="3" pinIndex="4"/>
+          </route>
+          <route name="CH5" enablePropertyId="portio.adc0.enable.ch5">
+            <location number="0" portBankIndex="3" pinIndex="5"/>
+          </route>
+          <route name="CH6" enablePropertyId="portio.adc0.enable.ch6">
+            <location number="0" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="CH7" enablePropertyId="portio.adc0.enable.ch7">
+            <location number="0" portBankIndex="3" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+      <module name="CMU">
+        <selector name="CMU" locationPropertyId="portio.cmu.location.cmu">
+          <route name="CLK0" enablePropertyId="portio.cmu.enable.clk0">
+            <location number="0" portBankIndex="0" pinIndex="2"/>
+            <location number="2" portBankIndex="3" pinIndex="7"/>
+          </route>
+          <route name="CLK1" enablePropertyId="portio.cmu.enable.clk1">
+            <location number="0" portBankIndex="0" pinIndex="1"/>
+            <location number="2" portBankIndex="4" pinIndex="12"/>
+          </route>
+        </selector>
+      </module>
+      <module name="DAC0">
+        <selector name="DAC0">
+          <route name="N1" enablePropertyId="portio.dac0.enable.n1">
+            <location number="0" portBankIndex="3" pinIndex="7"/>
+          </route>
+          <route name="OUT0" enablePropertyId="portio.dac0.enable.out0">
+            <location number="0" portBankIndex="1" pinIndex="11"/>
+          </route>
+          <route name="OUT1ALT_1" enablePropertyId="portio.dac0.enable.out1alt_1">
+            <location number="0" portBankIndex="2" pinIndex="13"/>
+          </route>
+          <route name="OUT1ALT_2" enablePropertyId="portio.dac0.enable.out1alt_2">
+            <location number="0" portBankIndex="2" pinIndex="14"/>
+          </route>
+          <route name="OUT1ALT_3" enablePropertyId="portio.dac0.enable.out1alt_3">
+            <location number="0" portBankIndex="2" pinIndex="15"/>
+          </route>
+          <route name="OUT2_0" enablePropertyId="portio.dac0.enable.out2_0">
+            <location number="0" portBankIndex="3" pinIndex="5"/>
+          </route>
+          <route name="P0" enablePropertyId="portio.dac0.enable.p0">
+            <location number="0" portBankIndex="2" pinIndex="4"/>
+          </route>
+          <route name="P1" enablePropertyId="portio.dac0.enable.p1">
+            <location number="0" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="P2" enablePropertyId="portio.dac0.enable.p2">
+            <location number="0" portBankIndex="3" pinIndex="4"/>
+          </route>
+        </selector>
+      </module>
+      <module name="GPIO">
+        <selector name="GPIO">
+          <route name="EM4WU0" enablePropertyId="portio.gpio.enable.em4wu0">
+            <location number="0" portBankIndex="0" pinIndex="0"/>
+          </route>
+          <route name="EM4WU3" enablePropertyId="portio.gpio.enable.em4wu3">
+            <location number="0" portBankIndex="5" pinIndex="1"/>
+          </route>
+          <route name="EM4WU4" enablePropertyId="portio.gpio.enable.em4wu4">
+            <location number="0" portBankIndex="5" pinIndex="2"/>
+          </route>
+          <route name="EM4WU5" enablePropertyId="portio.gpio.enable.em4wu5">
+            <location number="0" portBankIndex="4" pinIndex="13"/>
+          </route>
+        </selector>
+        <selector name="DBG" locationPropertyId="portio.gpio.location.dbg">
+          <route name="SWCLK" enablePropertyId="portio.gpio.enable.swclk">
+            <location number="0" portBankIndex="5" pinIndex="0"/>
+            <location number="1" portBankIndex="5" pinIndex="0"/>
+          </route>
+          <route name="SWDIO" enablePropertyId="portio.gpio.enable.swdio">
+            <location number="0" portBankIndex="5" pinIndex="1"/>
+            <location number="1" portBankIndex="5" pinIndex="1"/>
+          </route>
+          <route name="SWO" enablePropertyId="portio.gpio.enable.swo">
+            <location number="0" portBankIndex="5" pinIndex="2"/>
+            <location number="1" portBankIndex="2" pinIndex="15"/>
+          </route>
+        </selector>
+      </module>
+      <module name="I2C0">
+        <selector name="I2C0" locationPropertyId="portio.i2c0.location.i2c0">
+          <route name="SCL" enablePropertyId="portio.i2c0.enable.scl">
+            <location number="0" portBankIndex="0" pinIndex="1"/>
+            <location number="1" portBankIndex="3" pinIndex="7"/>
+            <location number="5" portBankIndex="5" pinIndex="1"/>
+            <location number="6" portBankIndex="4" pinIndex="13"/>
+          </route>
+          <route name="SDA" enablePropertyId="portio.i2c0.enable.sda">
+            <location number="0" portBankIndex="0" pinIndex="0"/>
+            <location number="1" portBankIndex="3" pinIndex="6"/>
+            <location number="5" portBankIndex="5" pinIndex="0"/>
+            <location number="6" portBankIndex="4" pinIndex="12"/>
+          </route>
+        </selector>
+      </module>
+      <module name="LCD">
+        <selector name="LCD">
+          <route name="BCAP_N" enablePropertyId="portio.lcd.enable.bcap_n">
+            <location number="0" portBankIndex="0" pinIndex="13"/>
+          </route>
+          <route name="BCAP_P" enablePropertyId="portio.lcd.enable.bcap_p">
+            <location number="0" portBankIndex="0" pinIndex="12"/>
+          </route>
+          <route name="BEXT" enablePropertyId="portio.lcd.enable.bext">
+            <location number="0" portBankIndex="0" pinIndex="14"/>
+          </route>
+          <route name="COM0" enablePropertyId="portio.lcd.enable.com0">
+            <location number="0" portBankIndex="4" pinIndex="4"/>
+          </route>
+          <route name="COM1" enablePropertyId="portio.lcd.enable.com1">
+            <location number="0" portBankIndex="4" pinIndex="5"/>
+          </route>
+          <route name="COM2" enablePropertyId="portio.lcd.enable.com2">
+            <location number="0" portBankIndex="4" pinIndex="6"/>
+          </route>
+          <route name="COM3" enablePropertyId="portio.lcd.enable.com3">
+            <location number="0" portBankIndex="4" pinIndex="7"/>
+          </route>
+          <route name="SEG0" enablePropertyId="portio.lcd.enable.seg0">
+            <location number="0" portBankIndex="5" pinIndex="2"/>
+          </route>
+          <route name="SEG1" enablePropertyId="portio.lcd.enable.seg1">
+            <location number="0" portBankIndex="5" pinIndex="3"/>
+          </route>
+          <route name="SEG2" enablePropertyId="portio.lcd.enable.seg2">
+            <location number="0" portBankIndex="5" pinIndex="4"/>
+          </route>
+          <route name="SEG3" enablePropertyId="portio.lcd.enable.seg3">
+            <location number="0" portBankIndex="5" pinIndex="5"/>
+          </route>
+          <route name="SEG6" enablePropertyId="portio.lcd.enable.seg6">
+            <location number="0" portBankIndex="4" pinIndex="10"/>
+          </route>
+          <route name="SEG7" enablePropertyId="portio.lcd.enable.seg7">
+            <location number="0" portBankIndex="4" pinIndex="11"/>
+          </route>
+          <route name="SEG8" enablePropertyId="portio.lcd.enable.seg8">
+            <location number="0" portBankIndex="4" pinIndex="12"/>
+          </route>
+          <route name="SEG9" enablePropertyId="portio.lcd.enable.seg9">
+            <location number="0" portBankIndex="4" pinIndex="13"/>
+          </route>
+          <route name="SEG13" enablePropertyId="portio.lcd.enable.seg13">
+            <location number="0" portBankIndex="0" pinIndex="0"/>
+          </route>
+          <route name="SEG14" enablePropertyId="portio.lcd.enable.seg14">
+            <location number="0" portBankIndex="0" pinIndex="1"/>
+          </route>
+          <route name="SEG15" enablePropertyId="portio.lcd.enable.seg15">
+            <location number="0" portBankIndex="0" pinIndex="2"/>
+          </route>
+          <route name="SEG20" enablePropertyId="portio.lcd.enable.seg20">
+            <location number="0" portBankIndex="1" pinIndex="3"/>
+          </route>
+          <route name="SEG21" enablePropertyId="portio.lcd.enable.seg21">
+            <location number="0" portBankIndex="1" pinIndex="4"/>
+          </route>
+          <route name="SEG22" enablePropertyId="portio.lcd.enable.seg22">
+            <location number="0" portBankIndex="1" pinIndex="5"/>
+          </route>
+          <route name="SEG23" enablePropertyId="portio.lcd.enable.seg23">
+            <location number="0" portBankIndex="1" pinIndex="6"/>
+          </route>
+        </selector>
+      </module>
+      <module name="LESENSE">
+        <selector name="LESENSE" locationPropertyId="portio.lesense.location.lesense">
+          <route name="ALTEX0" enablePropertyId="portio.lesense.enable.altex0">
+            <location number="0" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="ALTEX1" enablePropertyId="portio.lesense.enable.altex1">
+            <location number="0" portBankIndex="3" pinIndex="7"/>
+          </route>
+          <route name="ALTEX5" enablePropertyId="portio.lesense.enable.altex5">
+            <location number="0" portBankIndex="4" pinIndex="11"/>
+          </route>
+          <route name="ALTEX6" enablePropertyId="portio.lesense.enable.altex6">
+            <location number="0" portBankIndex="4" pinIndex="12"/>
+          </route>
+          <route name="ALTEX7" enablePropertyId="portio.lesense.enable.altex7">
+            <location number="0" portBankIndex="4" pinIndex="13"/>
+          </route>
+          <route name="CH4" enablePropertyId="portio.lesense.enable.ch4">
+            <location number="0" portBankIndex="2" pinIndex="4"/>
+          </route>
+          <route name="CH13" enablePropertyId="portio.lesense.enable.ch13">
+            <location number="0" portBankIndex="2" pinIndex="13"/>
+          </route>
+          <route name="CH14" enablePropertyId="portio.lesense.enable.ch14">
+            <location number="0" portBankIndex="2" pinIndex="14"/>
+          </route>
+          <route name="CH15" enablePropertyId="portio.lesense.enable.ch15">
+            <location number="0" portBankIndex="2" pinIndex="15"/>
+          </route>
+        </selector>
+      </module>
+      <module name="LETIMER0">
+        <selector name="LETIMER0" locationPropertyId="portio.letimer0.location.letimer0">
+          <route name="OUT0" enablePropertyId="portio.letimer0.enable.out0">
+            <location number="0" portBankIndex="3" pinIndex="6"/>
+            <location number="1" portBankIndex="1" pinIndex="11"/>
+            <location number="2" portBankIndex="5" pinIndex="0"/>
+            <location number="3" portBankIndex="2" pinIndex="4"/>
+          </route>
+          <route name="OUT1" enablePropertyId="portio.letimer0.enable.out1">
+            <location number="0" portBankIndex="3" pinIndex="7"/>
+            <location number="2" portBankIndex="5" pinIndex="1"/>
+          </route>
+        </selector>
+      </module>
+      <module name="LEUART0">
+        <selector name="LEUART0" locationPropertyId="portio.leuart0.location.leuart0">
+          <route name="RX" enablePropertyId="portio.leuart0.enable.rx">
+            <location number="0" portBankIndex="3" pinIndex="5"/>
+            <location number="1" portBankIndex="1" pinIndex="14"/>
+            <location number="3" portBankIndex="5" pinIndex="1"/>
+            <location number="4" portBankIndex="0" pinIndex="0"/>
+          </route>
+          <route name="TX" enablePropertyId="portio.leuart0.enable.tx">
+            <location number="0" portBankIndex="3" pinIndex="4"/>
+            <location number="1" portBankIndex="1" pinIndex="13"/>
+            <location number="3" portBankIndex="5" pinIndex="0"/>
+            <location number="4" portBankIndex="5" pinIndex="2"/>
+          </route>
+        </selector>
+      </module>
+      <module name="LFXO">
+        <selector name="LFXO">
+          <route name="N" enablePropertyId="portio.lfxo.enable.n">
+            <location number="0" portBankIndex="1" pinIndex="8"/>
+          </route>
+          <route name="P" enablePropertyId="portio.lfxo.enable.p">
+            <location number="0" portBankIndex="1" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+      <module name="MSC">
+        <selector name="MSC">
+          <route name="CDA_DATA0" enablePropertyId="portio.msc.enable.cda_data0">
+            <location number="0" portBankIndex="4" pinIndex="4"/>
+          </route>
+          <route name="CDA_DATA1" enablePropertyId="portio.msc.enable.cda_data1">
+            <location number="0" portBankIndex="4" pinIndex="5"/>
+          </route>
+          <route name="CDA_DATA2" enablePropertyId="portio.msc.enable.cda_data2">
+            <location number="0" portBankIndex="4" pinIndex="6"/>
+          </route>
+          <route name="CDA_DATA3" enablePropertyId="portio.msc.enable.cda_data3">
+            <location number="0" portBankIndex="4" pinIndex="7"/>
+          </route>
+          <route name="CDA_SEL1" enablePropertyId="portio.msc.enable.cda_sel1">
+            <location number="0" portBankIndex="1" pinIndex="3"/>
+          </route>
+          <route name="CDA_SEL2" enablePropertyId="portio.msc.enable.cda_sel2">
+            <location number="0" portBankIndex="1" pinIndex="4"/>
+          </route>
+          <route name="TM0" enablePropertyId="portio.msc.enable.tm0">
+            <location number="0" portBankIndex="5" pinIndex="0"/>
+          </route>
+          <route name="TM1" enablePropertyId="portio.msc.enable.tm1">
+            <location number="0" portBankIndex="5" pinIndex="1"/>
+          </route>
+        </selector>
+      </module>
+      <module name="PCNT0">
+        <selector name="PCNT0" locationPropertyId="portio.pcnt0.location.pcnt0">
+          <route name="S0IN" enablePropertyId="portio.pcnt0.enable.s0in">
+            <location number="0" portBankIndex="2" pinIndex="13"/>
+            <location number="3" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="S1IN" enablePropertyId="portio.pcnt0.enable.s1in">
+            <location number="0" portBankIndex="2" pinIndex="14"/>
+            <location number="3" portBankIndex="3" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+      <module name="PRS">
+        <selector name="PRS" locationPropertyId="portio.prs.location.prs">
+          <route name="CH0" enablePropertyId="portio.prs.enable.ch0">
+            <location number="0" portBankIndex="0" pinIndex="0"/>
+            <location number="1" portBankIndex="5" pinIndex="3"/>
+          </route>
+          <route name="CH1" enablePropertyId="portio.prs.enable.ch1">
+            <location number="0" portBankIndex="0" pinIndex="1"/>
+            <location number="1" portBankIndex="5" pinIndex="4"/>
+          </route>
+          <route name="CH2" enablePropertyId="portio.prs.enable.ch2">
+            <location number="1" portBankIndex="5" pinIndex="5"/>
+          </route>
+        </selector>
+      </module>
+      <module name="TIMER0">
+        <selector name="TIMER0" locationPropertyId="portio.timer0.location.timer0">
+          <route name="CC0" enablePropertyId="portio.timer0.enable.cc0">
+            <location number="0" portBankIndex="0" pinIndex="0"/>
+            <location number="1" portBankIndex="0" pinIndex="0"/>
+            <location number="4" portBankIndex="0" pinIndex="0"/>
+            <location number="5" portBankIndex="5" pinIndex="0"/>
+          </route>
+          <route name="CC1" enablePropertyId="portio.timer0.enable.cc1">
+            <location number="0" portBankIndex="0" pinIndex="1"/>
+            <location number="1" portBankIndex="0" pinIndex="1"/>
+            <location number="5" portBankIndex="5" pinIndex="1"/>
+          </route>
+          <route name="CC2" enablePropertyId="portio.timer0.enable.cc2">
+            <location number="0" portBankIndex="0" pinIndex="2"/>
+            <location number="1" portBankIndex="0" pinIndex="2"/>
+            <location number="5" portBankIndex="5" pinIndex="2"/>
+          </route>
+        </selector>
+      </module>
+      <module name="TIMER1">
+        <selector name="TIMER1" locationPropertyId="portio.timer1.location.timer1">
+          <route name="CC0" enablePropertyId="portio.timer1.enable.cc0">
+            <location number="0" portBankIndex="2" pinIndex="13"/>
+            <location number="1" portBankIndex="4" pinIndex="10"/>
+            <location number="3" portBankIndex="1" pinIndex="7"/>
+            <location number="4" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="CC1" enablePropertyId="portio.timer1.enable.cc1">
+            <location number="0" portBankIndex="2" pinIndex="14"/>
+            <location number="1" portBankIndex="4" pinIndex="11"/>
+            <location number="3" portBankIndex="1" pinIndex="8"/>
+            <location number="4" portBankIndex="3" pinIndex="7"/>
+          </route>
+          <route name="CC2" enablePropertyId="portio.timer1.enable.cc2">
+            <location number="0" portBankIndex="2" pinIndex="15"/>
+            <location number="1" portBankIndex="4" pinIndex="12"/>
+            <location number="3" portBankIndex="1" pinIndex="11"/>
+            <location number="4" portBankIndex="2" pinIndex="13"/>
+          </route>
+        </selector>
+      </module>
+      <module name="USART0">
+        <selector name="USART0" locationPropertyId="portio.usart0.location.usart0">
+          <route name="CLK" enablePropertyId="portio.usart0.enable.clk">
+            <location number="0" portBankIndex="4" pinIndex="12"/>
+            <location number="1" portBankIndex="4" pinIndex="5"/>
+            <location number="3" portBankIndex="2" pinIndex="15"/>
+            <location number="4" portBankIndex="1" pinIndex="13"/>
+            <location number="5" portBankIndex="1" pinIndex="13"/>
+          </route>
+          <route name="CS" enablePropertyId="portio.usart0.enable.cs">
+            <location number="0" portBankIndex="4" pinIndex="13"/>
+            <location number="1" portBankIndex="4" pinIndex="4"/>
+            <location number="3" portBankIndex="2" pinIndex="14"/>
+            <location number="4" portBankIndex="1" pinIndex="14"/>
+            <location number="5" portBankIndex="1" pinIndex="14"/>
+          </route>
+          <route name="RX" enablePropertyId="portio.usart0.enable.rx">
+            <location number="0" portBankIndex="4" pinIndex="11"/>
+            <location number="1" portBankIndex="4" pinIndex="6"/>
+            <location number="3" portBankIndex="4" pinIndex="12"/>
+            <location number="4" portBankIndex="1" pinIndex="8"/>
+          </route>
+          <route name="TX" enablePropertyId="portio.usart0.enable.tx">
+            <location number="0" portBankIndex="4" pinIndex="10"/>
+            <location number="1" portBankIndex="4" pinIndex="7"/>
+            <location number="3" portBankIndex="4" pinIndex="13"/>
+            <location number="4" portBankIndex="1" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+      <module name="USART1">
+        <selector name="USART1" locationPropertyId="portio.usart1.location.usart1">
+          <route name="CLK" enablePropertyId="portio.usart1.enable.clk">
+            <location number="0" portBankIndex="1" pinIndex="7"/>
+            <location number="2" portBankIndex="5" pinIndex="0"/>
+          </route>
+          <route name="CS" enablePropertyId="portio.usart1.enable.cs">
+            <location number="0" portBankIndex="1" pinIndex="8"/>
+            <location number="2" portBankIndex="5" pinIndex="1"/>
+          </route>
+          <route name="RX" enablePropertyId="portio.usart1.enable.rx">
+            <location number="2" portBankIndex="3" pinIndex="6"/>
+          </route>
+          <route name="TX" enablePropertyId="portio.usart1.enable.tx">
+            <location number="2" portBankIndex="3" pinIndex="7"/>
+          </route>
+        </selector>
+      </module>
+    </pinRoutes>
+  </portIo>
+</portio:DocumentRoot>

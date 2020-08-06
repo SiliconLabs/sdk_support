@@ -1,0 +1,328 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.bgm21.coex" label="COEX" name="COEX" description="Coexistence between multiple radios. Radio hold-off, request, grant." version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="COEX.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="COEX.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="COEX.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="COEX.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="COEX.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="REQUEST signal" description="Pin used for REQUEST signal" id="COEX.BSP_COEX_REQ.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="REQUEST assert signal level" description="Polarity of REQUEST signal" id="COEX.BSP_COEX_REQ_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <enumProperty label="Enable REQUEST shared mode" description="Configure the REQUEST signal for shared mode" id="COEX.HAL_COEX_REQ_SHARED.BOOL" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="Max REQUEST backoff mask [0-255]" description="Maximum backoff time in microseconds after REQUEST was deasserted" id="COEX.HAL_COEX_REQ_BACKOFF.INT" minValue="0" maxValue="255" defaultValue="15" hidden="false" readonly="true"/>
+      <integerProperty label="Assert time between REQUEST and RX/TX start (us) [BLE only]" description="Specify the number of microseconds between asserting REQUEST and starting RX/TX (BLE only)" id="COEX.HAL_COEX_REQ_WINDOW.INT" minValue="0" maxValue="5000" defaultValue="500" hidden="false" readonly="true"/>
+      <enumProperty label="Enable REQUEST receive retry" description="Enable the receive retry" id="COEX.HAL_COEX_RETRYRX_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="REQUEST receive retry timeout(ms)" description="Receive retry REQ timeout in milliseconds" id="COEX.HAL_COEX_RETRYRX_TIMEOUT.INT" minValue="0" maxValue="255" defaultValue="16" hidden="false" readonly="true"/>
+      <enumProperty label="REQUEST receive retry assert PRIORITY" description="Enable the receive retry high priority" id="COEX.HAL_COEX_RETRYRX_HIPRI.BOOL" defaultValueIndex="1" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="GRANT signal" description="Pin used for grant (GNT) signal" id="COEX.BSP_COEX_GNT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="GRANT assert signal level" description="Polarity of grant (GNT) signal" id="COEX.BSP_COEX_GNT_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <enumProperty label="Abort transmission mid-packet if GRANT is lost" description="If grant signal is deasserted, local device aborts transmission" id="COEX.HAL_COEX_TX_ABORT.BOOL" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Disable ACKing when GRANT deasserted, RHO asserted, or REQUEST not secured (shared REQUEST only)" description="Disable ACKing when GNT deasserted, RHO asserted, or REQ not secured (shared REQ only)" id="COEX.HAL_COEX_ACKHOLDOFF.BOOL" defaultValueIndex="1" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="PRIORITY signal" description="Pin used for PRIORITY signal" id="COEX.BSP_COEX_PRI.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRIORITY assert signal level" description="Polarity of PRIORITY signal" id="COEX.BSP_COEX_PRI_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <enumProperty label="Enable PRIORITY shared mode" id="COEX.HAL_COEX_PRI_SHARED.BOOL" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Assert PRIORITY when transmitting packet" description="Assert a high priority when the local device is transmitting a packet" id="COEX.HAL_COEX_TX_HIPRI.BOOL" defaultValueIndex="1" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Assert PRIORITY when receiving packet" description="Assert a high priority when the local device is receiving a packet" id="COEX.HAL_COEX_RX_HIPRI.BOOL" defaultValueIndex="1" hidden="false" readonly="true">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Include TX PRIORITY Escalation" description="Compile-time include TX PRIORITY escalation feature" id="COEX.HAL_COEX_PRIORITY_ESCALATION_ENABLE.BOOL" defaultValueIndex="1" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="CCA/GRANT TX PRIORITY Escalation Threshold" description="Sets the threshold for escalating TX PRIORITY to high priority due to MAC failures from CCA/GRANT denials (five consecutive CCA/GRANT denials is one MAC failure)" id="COEX.HAL_COEX_CCA_THRESHOLD.INT" minValue="0" maxValue="7" defaultValue="4" hidden="false" readonly="false"/>
+      <integerProperty label="MAC Fail TX PRIORITY Escalation threshold" description="Sets the threshold for escalating TX PRIORITY to high priority due to MAC failures from CCA/GRANT denials (five consecutive CCA/GRANT denials is one MAC failure) or no RX_ACK received (four consecutive RX_ACK failures is one MAC failure)" id="COEX.HAL_COEX_MAC_FAIL_THRESHOLD.INT" minValue="0" maxValue="3" defaultValue="0" hidden="false" readonly="false"/>
+      <enumProperty label="PWM REQUEST signal (shared REQUEST only)" description="Pin used for PWM REQUEST signal when shared REQUEST enabled" id="COEX.BSP_COEX_PWM_REQ.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PWM REQUEST signal level (shared REQUEST only)" description="Polarity of PWM REQUEST signal when shared REQUEST enabled" id="COEX.BSP_COEX_PWM_REQ_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <enumProperty label="Enable PWM REQUEST at startup" description="Enable PWM REQUEST at startup (also run-time controllable)" id="COEX.HAL_COEX_PWM_DEFAULT_ENABLED.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="PWM REQUEST Period (0.5ms)" description="PWM REQUEST Period (5ms to 109ms in 0.5ms steps)" id="COEX.HAL_COEX_PWM_REQ_PERIOD.INT" minValue="5" maxValue="109" defaultValue="78" hidden="false" readonly="false"/>
+      <integerProperty label="PWM REQUEST Duty-Cycle (%)" description="PWM REQUEST Duty-Cycle (1% to 95% in 1% steps)" id="COEX.HAL_COEX_PWM_REQ_DUTYCYCLE.INT" minValue="1" maxValue="95" defaultValue="20" hidden="false" readonly="false"/>
+      <enumProperty label="Assert PRIORITY when PWM REQUEST asserted" description="Assert a high priority when local device is asserting PWM" id="COEX.HAL_COEX_PWM_PRIORITY.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Low" value="0"/>
+        <enumValue label="High" value="1"/>
+      </enumProperty>
+      <enumProperty label="RHO signal" description="Pin used for RHO signal" id="COEX.BSP_COEX_RHO.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="RHO assert signal level" description="Polarity of the RHO signal level" id="COEX.BSP_COEX_RHO_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <enumProperty label="Enable Directional PRIORITY" description="Enable Directional PRIORITY" id="COEX.HAL_COEX_DP_ENABLED.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Directional PRIORITY Timer" description="Directional PRIORITY Timer module" id="COEX.HAL_COEX_DP_TIMER.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <integerProperty label="Directional PRIORITY pulse width" description="Microseconds to hold Directional PRIORITY priority pulse" id="COEX.HAL_COEX_DP_PULSE_WIDTH_US.INT" minValue="0" maxValue="255" defaultValue="20" hidden="false" readonly="false"/>
+      <enumProperty label="Directional PRIORITY PRS channel" description="Directional PRIORITY PRS channel" id="COEX.BSP_COEX_DP_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="COEX.prs_disabled_chn_COEX_DP_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="COEX.BSP_COEX_DP0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="COEX.BSP_COEX_DP1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="COEX.BSP_COEX_DP2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="COEX.BSP_COEX_DP3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="COEX.BSP_COEX_DP4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="COEX.BSP_COEX_DP5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="COEX.BSP_COEX_DP6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="COEX.BSP_COEX_DP7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="COEX.BSP_COEX_DP8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="COEX.BSP_COEX_DP9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="COEX.BSP_COEX_DP10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="COEX.BSP_COEX_DP11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Enable Runtime Control" description="True: Runtime Optimization; False: No Runtime Optimization" id="COEX.HAL_COEX_RUNTIME_PHY_SELECT.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Optional 'Wi-Fi Select' Control of Blocker Optimization" description="Pin used to select optimization" id="COEX.BSP_COEX_PHY_SELECT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Assert" description="Polarity of signal" id="COEX.BSP_COEX_PHY_SELECT_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+      <integerProperty label="Timeout (ms)" description="Wi-Fi Optimization will be selected for 1-254 ms after 'Wi-Fi Select' deasserted " id="COEX.HAL_COEX_DEFAULT_PHY_SELECT_TIMEOUT.INT" minValue="0" maxValue="255" defaultValue="0" hidden="false" readonly="true"/>
+      <enumProperty label="RX active PRS channel" description="PRS channel asserted when a packet is being received" id="COEX.BSP_COEX_RX_ACTIVE_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="COEX.prs_disabled_chn_BSP_COEX_RX_ACTIVE_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="COEX.BSP_COEX_RX_ACTIVE0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="COEX.BSP_COEX_RX_ACTIVE1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="COEX.BSP_COEX_RX_ACTIVE2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="COEX.BSP_COEX_RX_ACTIVE3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="COEX.BSP_COEX_RX_ACTIVE4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="COEX.BSP_COEX_RX_ACTIVE5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="COEX.BSP_COEX_RX_ACTIVE6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="COEX.BSP_COEX_RX_ACTIVE7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="COEX.BSP_COEX_RX_ACTIVE8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="COEX.BSP_COEX_RX_ACTIVE9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="COEX.BSP_COEX_RX_ACTIVE10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="COEX.BSP_COEX_RX_ACTIVE11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="RX active assert signal level" description="Polarity of RX active signal" id="COEX.BSP_COEX_RX_ACTIVE_ASSERT_LEVEL.ENUM" defaultValueIndex="0" hidden="false" readonly="true">
+        <enumValue label="High" value="1"/>
+        <enumValue label="Low" value="0"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="COEX">
+        <subCategory label="">
+          <propertyRef refId="COEX.usedbysdk.BOOL"/>
+          <propertyRef refId="COEX.hiddenbysdk.BOOL"/>
+          <propertyRef refId="COEX.showadvanced.BOOL"/>
+          <propertyRef refId="COEX.forceenable.BOOL"/>
+          <propertyRef refId="COEX.owner.STRING"/>
+        </subCategory>
+        <subCategory label="REQUEST">
+          <propertyRef refId="COEX.BSP_COEX_REQ.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_REQ_ASSERT_LEVEL.ENUM"/>
+          <propertyRef refId="COEX.HAL_COEX_REQ_SHARED.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_REQ_BACKOFF.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_REQ_WINDOW.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_RETRYRX_ENABLE.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_RETRYRX_TIMEOUT.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_RETRYRX_HIPRI.BOOL"/>
+        </subCategory>
+        <subCategory label="GRANT">
+          <propertyRef refId="COEX.BSP_COEX_GNT.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_GNT_ASSERT_LEVEL.ENUM"/>
+          <propertyRef refId="COEX.HAL_COEX_TX_ABORT.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_ACKHOLDOFF.BOOL"/>
+        </subCategory>
+        <subCategory label="PRIORITY">
+          <propertyRef refId="COEX.BSP_COEX_PRI.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_PRI_ASSERT_LEVEL.ENUM"/>
+          <propertyRef refId="COEX.HAL_COEX_PRI_SHARED.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_TX_HIPRI.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_RX_HIPRI.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_PRIORITY_ESCALATION_ENABLE.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_CCA_THRESHOLD.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_MAC_FAIL_THRESHOLD.INT"/>
+        </subCategory>
+        <subCategory label="PWM">
+          <propertyRef refId="COEX.BSP_COEX_PWM_REQ.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_PWM_REQ_ASSERT_LEVEL.ENUM"/>
+          <propertyRef refId="COEX.HAL_COEX_PWM_DEFAULT_ENABLED.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_PWM_REQ_PERIOD.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_PWM_REQ_DUTYCYCLE.INT"/>
+          <propertyRef refId="COEX.HAL_COEX_PWM_PRIORITY.ENUM"/>
+        </subCategory>
+        <subCategory label="Radio Hold Off">
+          <propertyRef refId="COEX.BSP_COEX_RHO.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RHO_ASSERT_LEVEL.ENUM"/>
+        </subCategory>
+        <subCategory label="Directional PRIORITY">
+          <propertyRef refId="COEX.HAL_COEX_DP_ENABLED.BOOL"/>
+          <propertyRef refId="COEX.HAL_COEX_DP_TIMER.MOD"/>
+          <propertyRef refId="COEX.HAL_COEX_DP_PULSE_WIDTH_US.INT"/>
+          <propertyRef refId="COEX.BSP_COEX_DP_CHANNEL.ENUM"/>
+          <propertyRef refId="COEX.prs_disabled_chn_COEX_DP_pin.STRING"/>
+          <propertyRef refId="COEX.BSP_COEX_DP0.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP1.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP2.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP3.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP4.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP5.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP6.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP7.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP8.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP9.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP10.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_DP11.PIN"/>
+        </subCategory>
+        <subCategory label="Radio Blocker Optimization">
+          <propertyRef refId="COEX.HAL_COEX_RUNTIME_PHY_SELECT.BOOL"/>
+          <propertyRef refId="COEX.BSP_COEX_PHY_SELECT.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_PHY_SELECT_ASSERT_LEVEL.ENUM"/>
+          <propertyRef refId="COEX.HAL_COEX_DEFAULT_PHY_SELECT_TIMEOUT.INT"/>
+        </subCategory>
+        <subCategory label="RX Active">
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE_CHANNEL.ENUM"/>
+          <propertyRef refId="COEX.prs_disabled_chn_BSP_COEX_RX_ACTIVE_pin.STRING"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE0.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE1.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE2.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE3.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE4.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE5.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE6.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE7.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE8.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE9.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE10.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE11.PIN"/>
+          <propertyRef refId="COEX.BSP_COEX_RX_ACTIVE_ASSERT_LEVEL.ENUM"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

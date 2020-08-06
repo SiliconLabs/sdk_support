@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.UARTNCP.THREAD">
+  <module id="SDK.HAL.EMDRV.UARTDRV"/>
+  <folder name="uartncp" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="uart-link.c" uri="$(sdkInstallationPath)/platform/base/hal/micro/cortexm3/efm32/uart-link.c"/>
+  </folder>
+</project>

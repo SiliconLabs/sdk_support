@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<cli>
+  <group id="plugin-psstore" name="Plugin Commands: PS Store">
+    <description>
+      Commands for the PS Store plugin, which manages data in flash memory.
+    </description>
+  </group>
+  <command cli="plugin ps-store init" functionName="emAfPluginPsStoreInit" group="plugin-psstore">
+    <description>
+      Initializes the storage module.
+    </description>
+  </command>
+  <command cli="plugin ps-store dump" functionName="emAfPluginPsStoreDump" group="plugin-psstore">
+    <description>
+      Prints the contents in the entire storage module.
+    </description>
+  </command>
+  <command cli="plugin ps-store print-tags" functionName="emAfPluginPsStorePrintTags" group="plugin-psstore">
+    <description>
+      Prints all tags (or keys) in the storage module.
+    </description>
+  </command>
+  <command cli="plugin ps-store write-tag" functionName="emAfPluginPsStoreWriteTag" group="plugin-psstore">
+    <description>
+      Writes tag to storage module.
+    </description>
+    <arg name="tag"   type="INT16U"       description="The tag or key."/>
+    <arg name="flags" type="INT8U"        description="The flags that apply to this record."/>
+    <arg name="len"   type="INT8U"        description="The length of the data to write."/>
+    <arg name="val"   type="OCTET_STRING" description="The data values to write."/>
+  </command>
+  <command cli="plugin ps-store delete-tag" functionName="emAfPluginPsStoreDeleteTag" group="plugin-psstore">
+    <description>
+      Writes tag to storage module.
+    </description>
+    <arg name="tag"   type="INT16U" description="The tag or key."/>
+    <arg name="flags" type="INT16U" description="The mask to apply to the tag or key. 0 deletes all keys."/>
+  </command>
+</cli>

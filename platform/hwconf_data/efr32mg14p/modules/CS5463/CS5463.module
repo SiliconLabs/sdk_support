@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg14p.cs5463" label="CS5463" name="CS5463" description="Power meter used on reference designs" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="CS5463.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="CS5463.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="CS5463.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="CS5463.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="CS5463.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="CS5463 CS pin" description="Pin used for CS signal of the CS5463" id="CS5463.BSP_CS5463_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from USART" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="CS5463 USART port" description="USART port to communicate with the CS5463" id="CS5463.BSP_CS5463_USART_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="CS5463">
+        <subCategory label="">
+          <propertyRef refId="CS5463.usedbysdk.BOOL"/>
+          <propertyRef refId="CS5463.hiddenbysdk.BOOL"/>
+          <propertyRef refId="CS5463.showadvanced.BOOL"/>
+          <propertyRef refId="CS5463.forceenable.BOOL"/>
+          <propertyRef refId="CS5463.owner.STRING"/>
+          <propertyRef refId="CS5463.BSP_CS5463_CS.PIN"/>
+          <propertyRef refId="CS5463.BSP_CS5463_USART_PORT.MOD"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

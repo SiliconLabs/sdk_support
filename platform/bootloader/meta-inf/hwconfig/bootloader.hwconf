@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ASCII"?>
+<device:XMLDevice xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:device="http://www.silabs.com/ss/hwconfig/document/device.ecore">
+  <mode name="DefaultMode">
+    <property object="CMU" propertyId="ABPeripheral.included" value="true" />
+    <property object="USART0" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+    <property object="USART1" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+    <property object="USART2" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+    <property object="USART3" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+    <property object="USART4" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+    <property object="USART5" propertyId="USART.HAL_USART_FREQUENCY.INT" value="6400000"/>
+  </mode>
+</device:XMLDevice>

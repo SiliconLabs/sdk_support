@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg21.button" label="BUTTON" name="BUTTON" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="BUTTON.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="BUTTON.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="BUTTON.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="BUTTON.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="BUTTON.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <integerProperty label="Number of buttons available on board" description="Number of buttons physically present in hardware [0-8]" id="BUTTON.BSP_BUTTON_COUNT.INT" minValue="0" maxValue="8" defaultValue="2" hidden="false" readonly="false"/>
+      <enumProperty label="Button 0" id="BUTTON.BSP_BUTTON0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 1" id="BUTTON.BSP_BUTTON1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 2" id="BUTTON.BSP_BUTTON2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 3" id="BUTTON.BSP_BUTTON3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 4" id="BUTTON.BSP_BUTTON4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 5" id="BUTTON.BSP_BUTTON5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 6" id="BUTTON.BSP_BUTTON6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Button 7" id="BUTTON.BSP_BUTTON7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <stringProperty label="BSP_BUTTON init" id="BUTTON.BSP_BUTTON_INIT.ARRAY" defaultValue="{ BSP_BUTTON0_PORT, BSP_BUTTON0_PIN }, { BSP_BUTTON1_PORT, BSP_BUTTON1_PIN }" hidden="true" readonly="false" transient="true"/>
+      <enumProperty label="DOUT register value of button pins" description="Set to high/low to enable pullup or pulldown respectively when in input mode with pull. Set to high to enable filter in input only mode." id="BUTTON.BSP_BUTTON_GPIO_DOUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Low" value="HAL_GPIO_DOUT_LOW"/>
+        <enumValue label="High" value="HAL_GPIO_DOUT_HIGH"/>
+      </enumProperty>
+      <enumProperty label="MODE register value of button pins" description="Set the GPIO mode for the pins used for buttons." id="BUTTON.BSP_BUTTON_GPIO_MODE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Input" value="HAL_GPIO_MODE_INPUT"/>
+        <enumValue label="Input with pullup/down" value="HAL_GPIO_MODE_INPUT_PULL"/>
+        <enumValue label="Input with pullup/down and filter" value="HAL_GPIO_MODE_INPUT_PULL_FILTER"/>
+      </enumProperty>
+      <integerProperty label="Number of buttons to enable" description="Cannot exceed number of buttons configured as available above." id="BUTTON.HAL_BUTTON_COUNT.INT" minValue="0" maxValue="255" defaultValue="0" hidden="true" readonly="false"/>
+      <stringProperty label="List of button indices to enable" description="Comma separated list of the buttons that should be enabled for this application. Example: Board has 4 buttons, but application only uses button 0 and 2. Configure the list of buttons to enable as &quot;0, 2&quot;." id="BUTTON.HAL_BUTTON_ENABLE.ARRAY" defaultValue="0, 1" hidden="true" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="BUTTON">
+        <subCategory label="">
+          <propertyRef refId="BUTTON.usedbysdk.BOOL"/>
+          <propertyRef refId="BUTTON.hiddenbysdk.BOOL"/>
+          <propertyRef refId="BUTTON.showadvanced.BOOL"/>
+          <propertyRef refId="BUTTON.forceenable.BOOL"/>
+          <propertyRef refId="BUTTON.owner.STRING"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON_COUNT.INT"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON0.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON1.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON2.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON3.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON4.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON5.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON6.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON7.PIN"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON_INIT.ARRAY"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON_GPIO_DOUT.ENUM"/>
+          <propertyRef refId="BUTTON.BSP_BUTTON_GPIO_MODE.ENUM"/>
+          <propertyRef refId="BUTTON.HAL_BUTTON_COUNT.INT"/>
+          <propertyRef refId="BUTTON.HAL_BUTTON_ENABLE.ARRAY"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

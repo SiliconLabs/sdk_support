@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg1v.serial" label="SERIAL" name="SERIAL" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="SERIAL.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="SERIAL.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="SERIAL.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="SERIAL.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="SERIAL.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Port for application serial communication" description="Select the port on which application prints are communicated (such as printf())" id="SERIAL.BSP_SERIAL_APP_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <enumProperty label="Port for assert serial communication" description="Select the port on which asserts are communicated" id="SERIAL.BSP_SERIAL_ASSERT_PORT.MOD" defaultValueIndex="0" hidden="true" readonly="false"/>
+      <enumProperty label="Enable wake from activity on RX GPIO of application port" description="Enable wake up on Serial Activity" id="SERIAL.HAL_SERIAL_RXWAKE_ENABLE.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable wake from idle" description="Enable wake from idle" id="SERIAL.HAL_SERIAL_IDLE_WAKE_ENABLE.BOOL" defaultValueIndex="1" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Use LEUART0 for serial" id="SERIAL.HAL_SERIAL_LEUART0_ENABLE.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Use USART0 for serial" id="SERIAL.HAL_SERIAL_USART0_ENABLE.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Use USART1 for serial" id="SERIAL.HAL_SERIAL_USART1_ENABLE.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="SERIAL">
+        <subCategory label="">
+          <propertyRef refId="SERIAL.usedbysdk.BOOL"/>
+          <propertyRef refId="SERIAL.hiddenbysdk.BOOL"/>
+          <propertyRef refId="SERIAL.showadvanced.BOOL"/>
+          <propertyRef refId="SERIAL.forceenable.BOOL"/>
+          <propertyRef refId="SERIAL.owner.STRING"/>
+          <propertyRef refId="SERIAL.BSP_SERIAL_APP_PORT.MOD"/>
+          <propertyRef refId="SERIAL.BSP_SERIAL_ASSERT_PORT.MOD"/>
+          <propertyRef refId="SERIAL.HAL_SERIAL_RXWAKE_ENABLE.BOOL"/>
+          <propertyRef refId="SERIAL.HAL_SERIAL_IDLE_WAKE_ENABLE.BOOL"/>
+          <propertyRef refId="SERIAL.HAL_SERIAL_LEUART0_ENABLE.BOOL"/>
+          <propertyRef refId="SERIAL.HAL_SERIAL_USART0_ENABLE.BOOL"/>
+          <propertyRef refId="SERIAL.HAL_SERIAL_USART1_ENABLE.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

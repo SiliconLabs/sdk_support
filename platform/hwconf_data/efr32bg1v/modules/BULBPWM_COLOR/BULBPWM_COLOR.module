@@ -1,0 +1,60 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg1v.bulbpwm_color" label="BULBPWM_COLOR" name="BULBPWM_COLOR" description="Configuration of pulse-width modulation for controlling a color lightbulb" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="BULBPWM_COLOR.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="BULBPWM_COLOR.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="BULBPWM_COLOR.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="BULBPWM_COLOR.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="BULBPWM_COLOR.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <integerProperty label="PWM frequency select" description="Base frequency of the PWM" id="BULBPWM_COLOR.HAL_BULBPWM_COLOR_FREQUENCY.INT" minValue="500" maxValue="2000" defaultValue="1000" hidden="false" readonly="false"/>
+      <enumProperty label="BULBPWM_COLOR Timer module" description="Timer to be used by the PWM" id="BULBPWM_COLOR.BSP_BULBPWM_COLOR_TIMER.MOD" hidden="false" readonly="true"/>
+      <enumProperty label="Enable red PWM channel (CC0)" description="Enable Compare/Capture channel for red LED" id="BULBPWM_COLOR.HAL_BULBPWM_RED_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable green PWM channel (CC1)" description="Enable Compare/Capture channel for green LED" id="BULBPWM_COLOR.HAL_BULBPWM_GREEN_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable blue PWM channel (CC2)" description="Enable Compare/Capture channel for blue LED" id="BULBPWM_COLOR.HAL_BULBPWM_BLUE_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable amber PWM channel (CC3)" description="Enable Compare/Capture channel for amber LED" id="BULBPWM_COLOR.HAL_BULBPWM_AMBER_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="BULBPWM_COLOR">
+        <subCategory label="">
+          <propertyRef refId="BULBPWM_COLOR.usedbysdk.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.hiddenbysdk.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.showadvanced.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.forceenable.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.owner.STRING"/>
+          <propertyRef refId="BULBPWM_COLOR.HAL_BULBPWM_COLOR_FREQUENCY.INT"/>
+          <propertyRef refId="BULBPWM_COLOR.BSP_BULBPWM_COLOR_TIMER.MOD"/>
+          <propertyRef refId="BULBPWM_COLOR.HAL_BULBPWM_RED_ENABLE.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.HAL_BULBPWM_GREEN_ENABLE.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.HAL_BULBPWM_BLUE_ENABLE.BOOL"/>
+          <propertyRef refId="BULBPWM_COLOR.HAL_BULBPWM_AMBER_ENABLE.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

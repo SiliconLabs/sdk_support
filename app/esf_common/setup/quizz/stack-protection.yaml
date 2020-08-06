@@ -1,0 +1,365 @@
+#
+# Stack protection yaml file: provides the quiz to turn
+# on stack protection in appbuilder.
+#
+---
+qStackProtection: {
+  architecture: efr32,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection2: {
+  architecture: em351,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection3: {
+  architecture: em355,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection4: {
+  architecture: em3555,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection5: {
+  architecture: em357,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection6: {
+  architecture: em3581,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection7: {
+  architecture: em3582,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection8: {
+  architecture: em3585,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection9: {
+  architecture: em3586,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection10: {
+  architecture: em3587,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection11: {
+  architecture: em3588,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection12: {
+  architecture: em3591,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection13: {
+  architecture: em3592,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection14: {
+  architecture: em3595,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection15: {
+  architecture: em3596,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection16: {
+  architecture: em3597,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection17: {
+  architecture: em3598,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection18: {
+  architecture: simulation,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}
+
+qStackProtection19: {
+  architecture: em356,
+  description: 'Do you wish to use stack protection with IAR? See Stack Protection for IAR plugin for more details.',
+  aStackProtectionNo: {
+    description: No.,
+    default: true,
+    replacement: [ stackProtection=, stackProtectionEwp=, stackProtectionSls= ],
+    plugins: [ -stack-protection-iar ]
+  },
+
+  aStackProtectionYes: {
+    description: Yes.,
+    macros: [-DSTACK_PROTECTION],
+    replacement: [ stackProtection=-stack_protection, stackProtectionEwp=<state>--stack_protection</state>, stackProtectionSls=--stack_protection ],
+    plugins: [ +stack-protection-iar ]
+  },
+
+}

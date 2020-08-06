@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.BUTTON.BASE">
+  <folder name="button" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="button.c" uri="$(sdkInstallationPath)/platform/base/hal/micro/cortexm3/efm32/button.c"/>
+  </folder>
+</project>

@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg14p.antdiv" label="ANTDIV" name="ANTDIV" description="Antenna Diversity" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="ANTDIV.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="ANTDIV.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="ANTDIV.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="ANTDIV.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="ANTDIV.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Antenna Diversity TX Mode" description="Choose mode for antenna diversity TX" id="ANTDIV.HAL_ANTDIV_TX_MODE.ENUM" defaultValueIndex="3" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="HAL_ANTENNA_MODE_DISABLED"/>
+        <enumValue label="Enable 1" value="HAL_ANTENNA_MODE_ENABLE1"/>
+        <enumValue label="Enable 2" value="HAL_ANTENNA_MODE_ENABLE2"/>
+        <enumValue label="Diversity" value="HAL_ANTENNA_MODE_DIVERSITY"/>
+      </enumProperty>
+      <enumProperty label="Antenna Diversity RX Mode" description="Choose mode for antenna diversity RX" id="ANTDIV.HAL_ANTDIV_RX_MODE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="HAL_ANTENNA_MODE_DISABLED"/>
+        <enumValue label="Enable 1" value="HAL_ANTENNA_MODE_ENABLE1"/>
+        <enumValue label="Enable 2" value="HAL_ANTENNA_MODE_ENABLE2"/>
+        <enumValue label="Diversity" value="HAL_ANTENNA_MODE_DIVERSITY"/>
+      </enumProperty>
+      <enumProperty label="Inherit antenna select from MODEM" description="Pins used to control external antenna switch and external antenna signal are defined in MODEM module" id="ANTDIV.BSP_ANTDIV.MOD" hidden="true" readonly="false"/>
+      <enumProperty label="Antenna select" description="Pin used to control external antenna switch" id="ANTDIV.BSP_ANTDIV_SEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from MODEM" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Complementary antenna select" description="Pin for inverted external antenna signal" id="ANTDIV.BSP_ANTDIV_NSEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from MODEM" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Enable selecting the RX antenna diversity PHY at runtime" description="Allow toggling between standard and RX antenna diversity radio configuration" id="ANTDIV.HAL_ANTDIV_RX_RUNTIME_PHY_SELECT.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="ANTDIV">
+        <subCategory label="">
+          <propertyRef refId="ANTDIV.usedbysdk.BOOL"/>
+          <propertyRef refId="ANTDIV.hiddenbysdk.BOOL"/>
+          <propertyRef refId="ANTDIV.showadvanced.BOOL"/>
+          <propertyRef refId="ANTDIV.forceenable.BOOL"/>
+          <propertyRef refId="ANTDIV.owner.STRING"/>
+          <propertyRef refId="ANTDIV.HAL_ANTDIV_TX_MODE.ENUM"/>
+          <propertyRef refId="ANTDIV.HAL_ANTDIV_RX_MODE.ENUM"/>
+          <propertyRef refId="ANTDIV.BSP_ANTDIV.MOD"/>
+          <propertyRef refId="ANTDIV.BSP_ANTDIV_SEL.PIN"/>
+          <propertyRef refId="ANTDIV.BSP_ANTDIV_NSEL.PIN"/>
+          <propertyRef refId="ANTDIV.HAL_ANTDIV_RX_RUNTIME_PHY_SELECT.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

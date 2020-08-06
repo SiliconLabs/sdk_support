@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<src:sourceMapping xmlns:src="http://www.silabs.com/ss/sourceMapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.silabs.com/ss/sourceMapping platform:/plugin/com.silabs.ss.framework.sourcegen.core/SourceMapping.xsd">
+  <mappingGroup name="main_template">
+    <loadScript name="cgEntry" uri="EFR32MG21_srcgen.py">
+      <path>..</path>
+      <path>.</path>
+    </loadScript>
+    <callScript script="cgEntry" function="generate"/>
+  </mappingGroup>
+</src:sourceMapping>

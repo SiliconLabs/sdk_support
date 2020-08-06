@@ -1,0 +1,49 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg12p.pa" label="PA" name="PA" description="Power Amplifier" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="PA.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="PA.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="PA.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="PA.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="PA.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom PA curve header file" description="Specify PA curve header file for power level look up table. Used to convert raw power level to dBm." id="PA.HAL_PA_CURVE_HEADER.STRING" defaultValue="&quot;pa_curves_efr32.h&quot;" hidden="false" readonly="false"/>
+      <integerProperty label="Output power (raw units)" description="Set output power in raw units" id="PA.HAL_PA_POWER.INT" minValue="0" maxValue="252" defaultValue="252" hidden="false" readonly="false"/>
+      <integerProperty label="Ramp time (us)" description="Select the PA ramp time in microseconds" id="PA.HAL_PA_RAMP.INT" minValue="1" maxValue="65535" defaultValue="10" hidden="false" readonly="false"/>
+      <integerProperty label="PA voltage (mV)" description="Set the PA supply voltage. Should be 1800 if powered from DCDC, and typically 3300 if powered from a coin-cell battery." id="PA.BSP_PA_VOLTAGE.INT" minValue="0" maxValue="3800" defaultValue="3300" hidden="false" readonly="false"/>
+      <enumProperty label="Use low power PA on 2.4 GHz" description="Use low power PA on 2.4 GHz" id="PA.HAL_PA_2P4_LOWPOWER.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="PA">
+        <subCategory label="">
+          <propertyRef refId="PA.usedbysdk.BOOL"/>
+          <propertyRef refId="PA.hiddenbysdk.BOOL"/>
+          <propertyRef refId="PA.showadvanced.BOOL"/>
+          <propertyRef refId="PA.forceenable.BOOL"/>
+          <propertyRef refId="PA.owner.STRING"/>
+          <propertyRef refId="PA.HAL_PA_CURVE_HEADER.STRING"/>
+          <propertyRef refId="PA.HAL_PA_POWER.INT"/>
+          <propertyRef refId="PA.HAL_PA_RAMP.INT"/>
+          <propertyRef refId="PA.BSP_PA_VOLTAGE.INT"/>
+          <propertyRef refId="PA.HAL_PA_2P4_LOWPOWER.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,94 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.bgm21.usart0" label="USART0" name="USART0" description="USART. Asynchronous and synchronous serial communication interface" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="USART.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="USART.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="USART.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="USART.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="USART.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="USART.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="mode" id="USART.hal_usart_mode.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Asynchronous (UART)" value="uart"/>
+        <enumValue label="Synchronous (SPI)" value="spi"/>
+      </enumProperty>
+      <integerProperty label="Baud rate" description="Specify the baud rate of the USART. Must be less than refFreq/oversampling as described in the reference manual" id="USART.HAL_USART_BAUD_RATE.INT" minValue="1" maxValue="4294967295" defaultValue="115200" hidden="false" readonly="false"/>
+      <integerProperty label="Frequency" description="Specify the baud rate of the USART." id="USART.HAL_USART_FREQUENCY.INT" minValue="1" maxValue="4294967295" defaultValue="1000000" hidden="true" readonly="false"/>
+      <enumProperty label="Flow control mode" description="Configure flow control for the USART" id="USART.HAL_USART_FLOW_CONTROL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="No flow control" value="HAL_USART_FLOW_CONTROL_NONE"/>
+        <enumValue label="Xon-Xoff" value="HAL_USART_FLOW_CONTROL_SW"/>
+        <enumValue label="GPIO-based CTS/RTS" value="HAL_USART_FLOW_CONTROL_HW"/>
+        <enumValue label="USART-based CTS/RTS" value="HAL_USART_FLOW_CONTROL_HWUART"/>
+      </enumProperty>
+      <integerProperty label="Flow control threshold" description="Flow control assert threshold (flow control is asserted once less than the specified amount of bytes are available in the RX buffer)" id="USART.HAL_USART_RXSTOP.INT" minValue="0" maxValue="65535" defaultValue="0" hidden="true" readonly="false"/>
+      <integerProperty label="Release flow control threshold" description="Flow control release threshold (flow control is released once more than the specified amount of bytes are available in the RX buffer). Must be a multiple of the assert flow control threshold" id="USART.HAL_USART_RXSTART.INT" minValue="0" maxValue="65535" defaultValue="0" hidden="true" readonly="false"/>
+      <integerProperty label="TX buffer size" description="Transmit buffer size." id="USART.HAL_USART_TX_QUEUE_SIZE.INT" minValue="0" maxValue="65535" defaultValue="0" hidden="true" readonly="false"/>
+      <integerProperty label="RX buffer size" description="Receive buffer size. Must be a multiple of the assert flow control threshold" id="USART.HAL_USART_RX_QUEUE_SIZE.INT" minValue="0" maxValue="65535" defaultValue="0" hidden="true" readonly="false"/>
+      <enumProperty label="USART MOSI pin" description="Select pin for the MOSI signal" id="USART.BSP_USART_MOSI.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART MISO pin" description="Select pin for the MISO signal" id="USART.BSP_USART_MISO.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART CLK pin" description="Select pin for the CLK signal" id="USART.BSP_USART_CLK.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART CS pin" description="Select pin for the CS signal" id="USART.BSP_USART_CS.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART TX pin" description="Select pin for the TX signal" id="USART.BSP_USART_TX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART RX pin" description="Select pin for the RX signal" id="USART.BSP_USART_RX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART CTS pin" description="Select pin for the CTS signal" id="USART.BSP_USART_CTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="USART RTS pin" description="Select pin for the RTS signal" id="USART.BSP_USART_RTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="USART0">
+        <subCategory label="">
+          <propertyRef refId="USART.usedbysdk.BOOL"/>
+          <propertyRef refId="USART.hiddenbysdk.BOOL"/>
+          <propertyRef refId="USART.showadvanced.BOOL"/>
+          <propertyRef refId="USART.forceenable.BOOL"/>
+          <propertyRef refId="USART.owner.STRING"/>
+          <propertyRef refId="USART.customname.STRING"/>
+          <propertyRef refId="USART.hal_usart_mode.ENUM"/>
+          <propertyRef refId="USART.HAL_USART_BAUD_RATE.INT"/>
+          <propertyRef refId="USART.HAL_USART_FREQUENCY.INT"/>
+          <propertyRef refId="USART.HAL_USART_FLOW_CONTROL.ENUM"/>
+          <propertyRef refId="USART.HAL_USART_RXSTOP.INT"/>
+          <propertyRef refId="USART.HAL_USART_RXSTART.INT"/>
+          <propertyRef refId="USART.HAL_USART_TX_QUEUE_SIZE.INT"/>
+          <propertyRef refId="USART.HAL_USART_RX_QUEUE_SIZE.INT"/>
+          <propertyRef refId="USART.BSP_USART_MOSI.PIN"/>
+          <propertyRef refId="USART.BSP_USART_MISO.PIN"/>
+          <propertyRef refId="USART.BSP_USART_CLK.PIN"/>
+          <propertyRef refId="USART.BSP_USART_CS.PIN"/>
+          <propertyRef refId="USART.BSP_USART_TX.PIN"/>
+          <propertyRef refId="USART.BSP_USART_RX.PIN"/>
+          <propertyRef refId="USART.BSP_USART_CTS.PIN"/>
+          <propertyRef refId="USART.BSP_USART_RTS.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

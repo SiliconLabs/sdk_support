@@ -1,0 +1,382 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32gg11b.vdac0" label="VDAC0" name="VDAC0" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="VDAC.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="VDAC.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="VDAC.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="VDAC.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="VDAC.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="VDAC.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="Positive input selection" id="VDAC.BSP_VDAC_OPA0_POS_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus BX" value="APORT2X"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus DX" value="APORT4X"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="DAC" value="DAC"/>
+        <enumValue label="POSPAD" value="POSPAD"/>
+        <enumValue label="OPANEXT" value="OPANEXT"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+      </enumProperty>
+      <enumProperty label="Negative input selection" id="VDAC.BSP_VDAC_OPA0_NEG_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="UG" value="UG"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+        <enumValue label="NEGPAD" value="NEGPAD"/>
+      </enumProperty>
+      <enumProperty label="Output selection" id="VDAC.BSP_VDAC_OPA0_OUTPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+      </enumProperty>
+      <enumProperty label="Positive input selection" id="VDAC.BSP_VDAC_OPA1_POS_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus BX" value="APORT2X"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus DX" value="APORT4X"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="DAC" value="DAC"/>
+        <enumValue label="POSPAD" value="POSPAD"/>
+        <enumValue label="OPANEXT" value="OPANEXT"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+      </enumProperty>
+      <enumProperty label="Negative input selection" id="VDAC.BSP_VDAC_OPA1_NEG_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="UG" value="UG"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+        <enumValue label="NEGPAD" value="NEGPAD"/>
+      </enumProperty>
+      <enumProperty label="Output selection" id="VDAC.BSP_VDAC_OPA1_OUTPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+      </enumProperty>
+      <enumProperty label="Positive input selection" id="VDAC.BSP_VDAC_OPA2_POS_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus BX" value="APORT2X"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus DX" value="APORT4X"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="DAC" value="DAC"/>
+        <enumValue label="POSPAD" value="POSPAD"/>
+        <enumValue label="OPANEXT" value="OPANEXT"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+      </enumProperty>
+      <enumProperty label="Negative input selection" id="VDAC.BSP_VDAC_OPA2_NEG_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="UG" value="UG"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+        <enumValue label="NEGPAD" value="NEGPAD"/>
+      </enumProperty>
+      <enumProperty label="Output selection" id="VDAC.BSP_VDAC_OPA2_OUTPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+      </enumProperty>
+      <enumProperty label="Positive input selection" id="VDAC.BSP_VDAC_OPA3_POS_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus BX" value="APORT2X"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus DX" value="APORT4X"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="DAC" value="DAC"/>
+        <enumValue label="POSPAD" value="POSPAD"/>
+        <enumValue label="OPANEXT" value="OPANEXT"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+      </enumProperty>
+      <enumProperty label="Negative input selection" id="VDAC.BSP_VDAC_OPA3_NEG_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+        <enumValue label="DISABLE" value="DISABLE"/>
+        <enumValue label="UG" value="UG"/>
+        <enumValue label="OPATAP" value="OPATAP"/>
+        <enumValue label="NEGPAD" value="NEGPAD"/>
+      </enumProperty>
+      <enumProperty label="Output selection" id="VDAC.BSP_VDAC_OPA3_OUTPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (OPA0POS)" id="VDAC.bsp_vdac_opa0_pos_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BX (OPA0POS)" id="VDAC.bsp_vdac_opa0_pos_BX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (OPA0POS)" id="VDAC.bsp_vdac_opa0_pos_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DX (OPA0POS)" id="VDAC.bsp_vdac_opa0_pos_DX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA0NEG)" id="VDAC.bsp_vdac_opa0_neg_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA0NEG)" id="VDAC.bsp_vdac_opa0_neg_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA0NEG)" id="VDAC.bsp_vdac_opa0_neg_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA0NEG)" id="VDAC.bsp_vdac_opa0_neg_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA0OUT)" id="VDAC.bsp_vdac_opa0_out_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA0OUT)" id="VDAC.bsp_vdac_opa0_out_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA0OUT)" id="VDAC.bsp_vdac_opa0_out_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA0OUT)" id="VDAC.bsp_vdac_opa0_out_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (OPA1POS)" id="VDAC.bsp_vdac_opa1_pos_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BX (OPA1POS)" id="VDAC.bsp_vdac_opa1_pos_BX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (OPA1POS)" id="VDAC.bsp_vdac_opa1_pos_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DX (OPA1POS)" id="VDAC.bsp_vdac_opa1_pos_DX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA1NEG)" id="VDAC.bsp_vdac_opa1_neg_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA1NEG)" id="VDAC.bsp_vdac_opa1_neg_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA1NEG)" id="VDAC.bsp_vdac_opa1_neg_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA1NEG)" id="VDAC.bsp_vdac_opa1_neg_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA1OUT)" id="VDAC.bsp_vdac_opa1_out_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA1OUT)" id="VDAC.bsp_vdac_opa1_out_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA1OUT)" id="VDAC.bsp_vdac_opa1_out_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA1OUT)" id="VDAC.bsp_vdac_opa1_out_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (OPA2POS)" id="VDAC.bsp_vdac_opa2_pos_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BX (OPA2POS)" id="VDAC.bsp_vdac_opa2_pos_BX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (OPA2POS)" id="VDAC.bsp_vdac_opa2_pos_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DX (OPA2POS)" id="VDAC.bsp_vdac_opa2_pos_DX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA2NEG)" id="VDAC.bsp_vdac_opa2_neg_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA2NEG)" id="VDAC.bsp_vdac_opa2_neg_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA2NEG)" id="VDAC.bsp_vdac_opa2_neg_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA2NEG)" id="VDAC.bsp_vdac_opa2_neg_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA2OUT)" id="VDAC.bsp_vdac_opa2_out_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA2OUT)" id="VDAC.bsp_vdac_opa2_out_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA2OUT)" id="VDAC.bsp_vdac_opa2_out_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA2OUT)" id="VDAC.bsp_vdac_opa2_out_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (OPA3POS)" id="VDAC.bsp_vdac_opa3_pos_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BX (OPA3POS)" id="VDAC.bsp_vdac_opa3_pos_BX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (OPA3POS)" id="VDAC.bsp_vdac_opa3_pos_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DX (OPA3POS)" id="VDAC.bsp_vdac_opa3_pos_DX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA3NEG)" id="VDAC.bsp_vdac_opa3_neg_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA3NEG)" id="VDAC.bsp_vdac_opa3_neg_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA3NEG)" id="VDAC.bsp_vdac_opa3_neg_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA3NEG)" id="VDAC.bsp_vdac_opa3_neg_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (OPA3OUT)" id="VDAC.bsp_vdac_opa3_out_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (OPA3OUT)" id="VDAC.bsp_vdac_opa3_out_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (OPA3OUT)" id="VDAC.bsp_vdac_opa3_out_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (OPA3OUT)" id="VDAC.bsp_vdac_opa3_out_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="VDAC0">
+        <subCategory label="">
+          <propertyRef refId="VDAC.usedbysdk.BOOL"/>
+          <propertyRef refId="VDAC.hiddenbysdk.BOOL"/>
+          <propertyRef refId="VDAC.showadvanced.BOOL"/>
+          <propertyRef refId="VDAC.forceenable.BOOL"/>
+          <propertyRef refId="VDAC.owner.STRING"/>
+          <propertyRef refId="VDAC.customname.STRING"/>
+        </subCategory>
+      </category>
+      <category label="OPA0">
+        <subCategory label="Positive Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA0_POS_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_pos_AX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_pos_BX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_pos_CX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_pos_DX.PIN"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA0_NEG_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_neg_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_neg_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_neg_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_neg_DY.PIN"/>
+        </subCategory>
+        <subCategory label="Output">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA0_OUTPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_out_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_out_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_out_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa0_out_DY.PIN"/>
+        </subCategory>
+      </category>
+      <category label="OPA1">
+        <subCategory label="Positive Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA1_POS_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_pos_AX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_pos_BX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_pos_CX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_pos_DX.PIN"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA1_NEG_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_neg_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_neg_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_neg_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_neg_DY.PIN"/>
+        </subCategory>
+        <subCategory label="Output">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA1_OUTPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_out_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_out_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_out_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa1_out_DY.PIN"/>
+        </subCategory>
+      </category>
+      <category label="OPA2">
+        <subCategory label="Positive Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA2_POS_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_pos_AX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_pos_BX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_pos_CX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_pos_DX.PIN"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA2_NEG_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_neg_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_neg_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_neg_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_neg_DY.PIN"/>
+        </subCategory>
+        <subCategory label="Output">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA2_OUTPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_out_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_out_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_out_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa2_out_DY.PIN"/>
+        </subCategory>
+      </category>
+      <category label="OPA3">
+        <subCategory label="Positive Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA3_POS_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_pos_AX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_pos_BX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_pos_CX.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_pos_DX.PIN"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA3_NEG_INPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_neg_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_neg_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_neg_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_neg_DY.PIN"/>
+        </subCategory>
+        <subCategory label="Output">
+          <propertyRef refId="VDAC.BSP_VDAC_OPA3_OUTPUT.ENUM"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_out_AY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_out_BY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_out_CY.PIN"/>
+          <propertyRef refId="VDAC.bsp_vdac_opa3_out_DY.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

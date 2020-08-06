@@ -1,0 +1,287 @@
+<?xml version='1.0' encoding='ASCII'?>
+<device:DocumentRoot xmlns:device="http://www.silabs.com/ss/hwconfig/device.ecore">
+  <device description="" label="EFM32GG11B310F2048GQ100" name="EFM32GG11B310F2048GQ100" partId="mcu.arm.efm32.gg11.efm32gg11b310f2048gq100" deviceExtensionIdRef="efm32.efm32gg11b310f2048gq100.extension" revision="A" singleMode="true">
+    <powerModel/>
+    <portIo componentIdRef="efm32.efm32gg11b.efm32gg11b310f2048gq100.portio" name="PORTIO" revision="A">
+      <crossBars/>
+      <interfaceToPinLists/>
+      <portBanks>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortA" name="PortA" revision="A" index="0">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA0" name="PA0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA1" name="PA1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA2" name="PA2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA3" name="PA3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA4" name="PA4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA5" name="PA5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA6" name="PA6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA7" name="PA7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA8" name="PA8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA9" name="PA9" index="9"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA10" name="PA10" index="10"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA11" name="PA11" index="11"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA12" name="PA12" index="12"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA13" name="PA13" index="13"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA14" name="PA14" index="14"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PA15" name="PA15" index="15"/>
+        </portBank>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortB" name="PortB" revision="A" index="1">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB0" name="PB0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB1" name="PB1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB2" name="PB2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB3" name="PB3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB4" name="PB4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB5" name="PB5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB6" name="PB6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB7" name="PB7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB8" name="PB8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB9" name="PB9" index="9"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB10" name="PB10" index="10"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB11" name="PB11" index="11"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB12" name="PB12" index="12"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB13" name="PB13" index="13"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PB14" name="PB14" index="14"/>
+        </portBank>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortC" name="PortC" revision="A" index="2">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC0" name="PC0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC1" name="PC1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC2" name="PC2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC3" name="PC3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC4" name="PC4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC5" name="PC5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC6" name="PC6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC7" name="PC7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC8" name="PC8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC9" name="PC9" index="9"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC10" name="PC10" index="10"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC11" name="PC11" index="11"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC12" name="PC12" index="12"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC13" name="PC13" index="13"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC14" name="PC14" index="14"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PC15" name="PC15" index="15"/>
+        </portBank>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortD" name="PortD" revision="A" index="3">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD0" name="PD0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD1" name="PD1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD2" name="PD2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD3" name="PD3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD4" name="PD4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD5" name="PD5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD6" name="PD6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD7" name="PD7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD8" name="PD8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD9" name="PD9" index="9"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD10" name="PD10" index="10"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD11" name="PD11" index="11"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PD12" name="PD12" index="12"/>
+        </portBank>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortE" name="PortE" revision="A" index="4">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE0" name="PE0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE1" name="PE1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE2" name="PE2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE3" name="PE3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE4" name="PE4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE5" name="PE5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE6" name="PE6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE7" name="PE7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE8" name="PE8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE9" name="PE9" index="9"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE10" name="PE10" index="10"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE11" name="PE11" index="11"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE12" name="PE12" index="12"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE13" name="PE13" index="13"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE14" name="PE14" index="14"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PE15" name="PE15" index="15"/>
+        </portBank>
+        <portBank componentIdRef="efm32.efm32gg11b.port" displayName="PortF" name="PortF" revision="A" index="5">
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF0" name="PF0" index="0"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF1" name="PF1" index="1"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF2" name="PF2" index="2"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF3" name="PF3" index="3"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF4" name="PF4" index="4"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF5" name="PF5" index="5"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF6" name="PF6" index="6"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF7" name="PF7" index="7"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF8" name="PF8" index="8"/>
+          <pin componentIdRef="efm32.efm32gg11b.pin" displayName="PF9" name="PF9" index="9"/>
+        </portBank>
+      </portBanks>
+    </portIo>
+    <pinOut description="100-pin QFP, 14x14" indicatorLocation="topleft" package="TQFP" padDescription="GND" subtitle="(top view)">
+      <pin defaultLabel="PA0" location="left:0" number="1" pinIndex="0" portBankIndex="0"/>
+      <pin defaultLabel="PA1" location="left:1" number="2" pinIndex="1" portBankIndex="0"/>
+      <pin defaultLabel="PA2" location="left:2" number="3" pinIndex="2" portBankIndex="0"/>
+      <pin defaultLabel="PA3" location="left:3" number="4" pinIndex="3" portBankIndex="0"/>
+      <pin defaultLabel="PA4" location="left:4" number="5" pinIndex="4" portBankIndex="0"/>
+      <pin defaultLabel="PA5" location="left:5" number="6" pinIndex="5" portBankIndex="0"/>
+      <pin defaultLabel="PA6" location="left:6" number="7" pinIndex="6" portBankIndex="0"/>
+      <pin defaultLabel="IOVDD0" location="left:7" number="8"/>
+      <pin defaultLabel="PB0" location="left:8" number="9" pinIndex="0" portBankIndex="1"/>
+      <pin defaultLabel="PB1" location="left:9" number="10" pinIndex="1" portBankIndex="1"/>
+      <pin defaultLabel="PB2" location="left:10" number="11" pinIndex="2" portBankIndex="1"/>
+      <pin defaultLabel="PB3" location="left:11" number="12" pinIndex="3" portBankIndex="1"/>
+      <pin defaultLabel="PB4" location="left:12" number="13" pinIndex="4" portBankIndex="1"/>
+      <pin defaultLabel="PB5" location="left:13" number="14" pinIndex="5" portBankIndex="1"/>
+      <pin defaultLabel="PB6" location="left:14" number="15" pinIndex="6" portBankIndex="1"/>
+      <pin defaultLabel="PAD_GROUNDRING" location="left:15" number="16"/>
+      <pin defaultLabel="IOVDD0" location="left:16" number="17"/>
+      <pin defaultLabel="PC0" location="left:17" number="18" pinIndex="0" portBankIndex="2"/>
+      <pin defaultLabel="PC1" location="left:18" number="19" pinIndex="1" portBankIndex="2"/>
+      <pin defaultLabel="PC2" location="left:19" number="20" pinIndex="2" portBankIndex="2"/>
+      <pin defaultLabel="PC3" location="left:20" number="21" pinIndex="3" portBankIndex="2"/>
+      <pin defaultLabel="PC4" location="left:21" number="22" pinIndex="4" portBankIndex="2"/>
+      <pin defaultLabel="PC5" location="left:22" number="23" pinIndex="5" portBankIndex="2"/>
+      <pin defaultLabel="PB7" location="left:23" number="24" pinIndex="7" portBankIndex="1"/>
+      <pin defaultLabel="PB8" location="left:24" number="25" pinIndex="8" portBankIndex="1"/>
+      <pin defaultLabel="PA7" location="bottom:0" number="26" pinIndex="7" portBankIndex="0"/>
+      <pin defaultLabel="PA8" location="bottom:1" number="27" pinIndex="8" portBankIndex="0"/>
+      <pin defaultLabel="PA9" location="bottom:2" number="28" pinIndex="9" portBankIndex="0"/>
+      <pin defaultLabel="PA10" location="bottom:3" number="29" pinIndex="10" portBankIndex="0"/>
+      <pin defaultLabel="PA11" location="bottom:4" number="30" pinIndex="11" portBankIndex="0"/>
+      <pin defaultLabel="IOVDD0" location="bottom:5" number="31"/>
+      <pin defaultLabel="PAD_GROUNDRING" location="bottom:6" number="32"/>
+      <pin defaultLabel="PA12" location="bottom:7" number="33" pinIndex="12" portBankIndex="0"/>
+      <pin defaultLabel="PA13" location="bottom:8" number="34" pinIndex="13" portBankIndex="0"/>
+      <pin defaultLabel="PA14" location="bottom:9" number="35" pinIndex="14" portBankIndex="0"/>
+      <pin defaultLabel="RESETn" location="bottom:10" number="36"/>
+      <pin defaultLabel="PB9" location="bottom:11" number="37" pinIndex="9" portBankIndex="1"/>
+      <pin defaultLabel="PB10" location="bottom:12" number="38" pinIndex="10" portBankIndex="1"/>
+      <pin defaultLabel="PB11" location="bottom:13" number="39" pinIndex="11" portBankIndex="1"/>
+      <pin defaultLabel="PB12" location="bottom:14" number="40" pinIndex="12" portBankIndex="1"/>
+      <pin defaultLabel="AVDD" location="bottom:15" number="41"/>
+      <pin defaultLabel="PB13" location="bottom:16" number="42" pinIndex="13" portBankIndex="1"/>
+      <pin defaultLabel="PB14" location="bottom:17" number="43" pinIndex="14" portBankIndex="1"/>
+      <pin defaultLabel="IOVDD0" location="bottom:18" number="44"/>
+      <pin defaultLabel="AVDD" location="bottom:19" number="45"/>
+      <pin defaultLabel="PD0" location="bottom:20" number="46" pinIndex="0" portBankIndex="3"/>
+      <pin defaultLabel="PD1" location="bottom:21" number="47" pinIndex="1" portBankIndex="3"/>
+      <pin defaultLabel="PD2" location="bottom:22" number="48" pinIndex="2" portBankIndex="3"/>
+      <pin defaultLabel="PD3" location="bottom:23" number="49" pinIndex="3" portBankIndex="3"/>
+      <pin defaultLabel="PD4" location="bottom:24" number="50" pinIndex="4" portBankIndex="3"/>
+      <pin defaultLabel="PD5" location="right:0" number="51" pinIndex="5" portBankIndex="3"/>
+      <pin defaultLabel="PD6" location="right:1" number="52" pinIndex="6" portBankIndex="3"/>
+      <pin defaultLabel="PD7" location="right:2" number="53" pinIndex="7" portBankIndex="3"/>
+      <pin defaultLabel="PD8" location="right:3" number="54" pinIndex="8" portBankIndex="3"/>
+      <pin defaultLabel="PC6" location="right:4" number="55" pinIndex="6" portBankIndex="2"/>
+      <pin defaultLabel="PC7" location="right:5" number="56" pinIndex="7" portBankIndex="2"/>
+      <pin defaultLabel="DVDD" location="right:6" number="57"/>
+      <pin defaultLabel="PAD_GROUNDRING" location="right:7" number="58"/>
+      <pin defaultLabel="DECOUPLE" location="right:8" number="59"/>
+      <pin defaultLabel="PE0" location="right:9" number="60" pinIndex="0" portBankIndex="4"/>
+      <pin defaultLabel="PE1" location="right:10" number="61" pinIndex="1" portBankIndex="4"/>
+      <pin defaultLabel="PE2" location="right:11" number="62" pinIndex="2" portBankIndex="4"/>
+      <pin defaultLabel="PE3" location="right:12" number="63" pinIndex="3" portBankIndex="4"/>
+      <pin defaultLabel="PE4" location="right:13" number="64" pinIndex="4" portBankIndex="4"/>
+      <pin defaultLabel="PE5" location="right:14" number="65" pinIndex="5" portBankIndex="4"/>
+      <pin defaultLabel="PE6" location="right:15" number="66" pinIndex="6" portBankIndex="4"/>
+      <pin defaultLabel="PE7" location="right:16" number="67" pinIndex="7" portBankIndex="4"/>
+      <pin defaultLabel="PC8" location="right:17" number="68" pinIndex="8" portBankIndex="2"/>
+      <pin defaultLabel="PC9" location="right:18" number="69" pinIndex="9" portBankIndex="2"/>
+      <pin defaultLabel="PC10" location="right:19" number="70" pinIndex="10" portBankIndex="2"/>
+      <pin defaultLabel="PC11" location="right:20" number="71" pinIndex="11" portBankIndex="2"/>
+      <pin defaultLabel="PC12" location="right:21" number="72" pinIndex="12" portBankIndex="2"/>
+      <pin defaultLabel="PC13" location="right:22" number="73" pinIndex="13" portBankIndex="2"/>
+      <pin defaultLabel="PC14" location="right:23" number="74" pinIndex="14" portBankIndex="2"/>
+      <pin defaultLabel="PC15" location="right:24" number="75" pinIndex="15" portBankIndex="2"/>
+      <pin defaultLabel="PF0" location="top:0" number="76" pinIndex="0" portBankIndex="5"/>
+      <pin defaultLabel="PF1" location="top:1" number="77" pinIndex="1" portBankIndex="5"/>
+      <pin defaultLabel="PF2" location="top:2" number="78" pinIndex="2" portBankIndex="5"/>
+      <pin defaultLabel="PF3" location="top:3" number="79" pinIndex="3" portBankIndex="5"/>
+      <pin defaultLabel="PF4" location="top:4" number="80" pinIndex="4" portBankIndex="5"/>
+      <pin defaultLabel="PF5" location="top:5" number="81" pinIndex="5" portBankIndex="5"/>
+      <pin defaultLabel="IOVDD0" location="top:6" number="82"/>
+      <pin defaultLabel="PAD_GROUNDRING" location="top:7" number="83"/>
+      <pin defaultLabel="PF6" location="top:8" number="84" pinIndex="6" portBankIndex="5"/>
+      <pin defaultLabel="PF7" location="top:9" number="85" pinIndex="7" portBankIndex="5"/>
+      <pin defaultLabel="PF8" location="top:10" number="86" pinIndex="8" portBankIndex="5"/>
+      <pin defaultLabel="PF9" location="top:11" number="87" pinIndex="9" portBankIndex="5"/>
+      <pin defaultLabel="PD9" location="top:12" number="88" pinIndex="9" portBankIndex="3"/>
+      <pin defaultLabel="PD10" location="top:13" number="89" pinIndex="10" portBankIndex="3"/>
+      <pin defaultLabel="PD11" location="top:14" number="90" pinIndex="11" portBankIndex="3"/>
+      <pin defaultLabel="PD12" location="top:15" number="91" pinIndex="12" portBankIndex="3"/>
+      <pin defaultLabel="PE8" location="top:16" number="92" pinIndex="8" portBankIndex="4"/>
+      <pin defaultLabel="PE9" location="top:17" number="93" pinIndex="9" portBankIndex="4"/>
+      <pin defaultLabel="PE10" location="top:18" number="94" pinIndex="10" portBankIndex="4"/>
+      <pin defaultLabel="PE11" location="top:19" number="95" pinIndex="11" portBankIndex="4"/>
+      <pin defaultLabel="PE12" location="top:20" number="96" pinIndex="12" portBankIndex="4"/>
+      <pin defaultLabel="PE13" location="top:21" number="97" pinIndex="13" portBankIndex="4"/>
+      <pin defaultLabel="PE14" location="top:22" number="98" pinIndex="14" portBankIndex="4"/>
+      <pin defaultLabel="PE15" location="top:23" number="99" pinIndex="15" portBankIndex="4"/>
+      <pin defaultLabel="PA15" location="top:24" number="100" pinIndex="15" portBankIndex="0"/>
+    </pinOut>
+    <peripherals>
+      <peripheral componentIdRef="efm32.efm32gg11b.acmp0" displayName="ACMP0" name="ACMP0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.acmp1" displayName="ACMP1" name="ACMP1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.acmp2" displayName="ACMP2" name="ACMP2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.acmp3" displayName="ACMP3" name="ACMP3" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.adc0" displayName="ADC0" name="ADC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.adc1" displayName="ADC1" name="ADC1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.btl_button" displayName="Bootloader Entry" name="BTL_BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.button" displayName="Button" name="BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.can0" displayName="CAN0" name="CAN0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.can1" displayName="CAN1" name="CAN1" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.cmu" displayName="CMU" name="CMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.csen" displayName="CSEN" name="CSEN" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.dcdc" displayName="DCDC" name="DCDC" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.ebi" displayName="EBI" name="EBI" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.emu" displayName="EMU" name="EMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.eth" displayName="ETH" name="ETH" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.extflash" displayName="SPI Flash" name="EXTFLASH" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.gpio" displayName="GPIO" name="GPIO" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.i2c0" displayName="I2C0" name="I2C0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.i2c1" displayName="I2C1" name="I2C1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.i2c2" displayName="I2C2" name="I2C2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.i2csensor" displayName="I2C Sensor" name="I2CSENSOR" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.idac0" displayName="IDAC0" name="IDAC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.ioexp" displayName="I2C I/O Expander" name="IOEXP" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.lcd" displayName="LCD" name="LCD" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.led" displayName="LED" name="LED" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.lesense" displayName="LESENSE" name="LESENSE" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.letimer0" displayName="LETIMER0" name="LETIMER0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.letimer1" displayName="LETIMER1" name="LETIMER1" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.leuart0" displayName="LEUART0" name="LEUART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.leuart1" displayName="LEUART1" name="LEUART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.lfxo" displayName="LFXO" name="LFXO" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.pcnt0" displayName="PCNT0" name="PCNT0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.pcnt1" displayName="PCNT1" name="PCNT1" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.pcnt2" displayName="PCNT2" name="PCNT2" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.prs" displayName="PRS" name="PRS" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.qspi0" displayName="QSPI0" name="QSPI0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.sdio" displayName="SDIO" name="SDIO" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.serial" displayName="Serial" name="SERIAL" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.spidisplay" displayName="SPI Display" name="SPIDISPLAY" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.spincp" displayName="SPI NCP" name="SPINCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer0" displayName="TIMER0" name="TIMER0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer1" displayName="TIMER1" name="TIMER1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer2" displayName="TIMER2" name="TIMER2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer3" displayName="TIMER3" name="TIMER3" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer4" displayName="TIMER4" name="TIMER4" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer5" displayName="TIMER5" name="TIMER5" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.timer6" displayName="TIMER6" name="TIMER6" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.uart0" displayName="UART0" name="UART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.uart1" displayName="UART1" name="UART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.uartncp" displayName="UART NCP" name="UARTNCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart0" displayName="USART0" name="USART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart1" displayName="USART1" name="USART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart2" displayName="USART2" name="USART2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart3" displayName="USART3" name="USART3" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart4" displayName="USART4" name="USART4" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usart5" displayName="USART5" name="USART5" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.usb" displayName="USB" name="USB" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.vcom" displayName="Virtual COM Port" name="VCOM" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.vdac0" displayName="VDAC0" name="VDAC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.wdog" displayName="WDOG" name="WDOG" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.wtimer0" displayName="WTIMER0" name="WTIMER0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.wtimer1" displayName="WTIMER1" name="WTIMER1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.wtimer2" displayName="WTIMER2" name="WTIMER2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efm32.efm32gg11b.wtimer3" displayName="WTIMER3" name="WTIMER3" revision="A" category="  Peripherals" hidden="false"/>
+    </peripherals>
+    <script uri="../EFM32GG11B.py">
+      <path>.</path>
+      <path>../..</path>
+      <path>..</path>
+    </script>
+    <sourceMappings initialGroup="main_template">
+      <sourceMapping uri="../EFM32GG11B.srcmap"/>
+    </sourceMappings>
+  </device>
+</device:DocumentRoot>

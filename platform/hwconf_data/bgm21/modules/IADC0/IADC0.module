@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.bgm21.iadc0" label="IADC0" name="IADC0" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="IADC.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="IADC.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="IADC.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="IADC.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="IADC.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="IADC.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="Positive input selection" id="IADC.BSP_IADC_POS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Negative input selection" id="IADC.BSP_IADC_NEG.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="IADC0">
+        <subCategory label="">
+          <propertyRef refId="IADC.usedbysdk.BOOL"/>
+          <propertyRef refId="IADC.hiddenbysdk.BOOL"/>
+          <propertyRef refId="IADC.showadvanced.BOOL"/>
+          <propertyRef refId="IADC.forceenable.BOOL"/>
+          <propertyRef refId="IADC.owner.STRING"/>
+          <propertyRef refId="IADC.customname.STRING"/>
+        </subCategory>
+        <subCategory label="Single Channel Positive Input">
+          <propertyRef refId="IADC.BSP_IADC_POS.PIN"/>
+        </subCategory>
+        <subCategory label="Single Channel Negative Input">
+          <propertyRef refId="IADC.BSP_IADC_NEG.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

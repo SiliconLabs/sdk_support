@@ -1,0 +1,107 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32zg.spidisplay" label="SPIDISPLAY" name="SPIDISPLAY" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="SPIDISPLAY.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="SPIDISPLAY.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="SPIDISPLAY.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="SPIDISPLAY.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="SPIDISPLAY.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Display type" description="Select the part number of the used display" id="SPIDISPLAY.BSP_SPIDISPLAY_DISPLAY.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Sharp LS013B7DH03" value="HAL_DISPLAY_SHARP_LS013B7DH03"/>
+        <enumValue label="Sharp LS013B7DH06" value="HAL_DISPLAY_SHARP_LS013B7DH06"/>
+      </enumProperty>
+      <enumProperty label="USART port" description="Select the USART to use with the display" id="SPIDISPLAY.BSP_SPIDISPLAY_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <enumProperty label="Chip Select pin" description="Select pin to connect to the CS signal of the display" id="SPIDISPLAY.BSP_SPIDISPLAY_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from USART" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Display enable pin" description="Select pin which drives the display enable switch on (W)STK" id="SPIDISPLAY.BSP_SPIDISPLAY_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="EXTMODE pin" description="External COM inversion mode pin. If present, this pin tells the display whether to expect COM inversion on GPIO pin or as SPI command. Most designs tie this pin high or low in hardware, rather than retaining software control." id="SPIDISPLAY.BSP_SPIDISPLAY_EXTMODE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Use EXTCOMIN pin for polarity inversion" description="Handle COM inversion by toggling a GPIO pin" id="SPIDISPLAY.HAL_SPIDISPLAY_EXTMODE_EXTCOMIN.BOOL" defaultValueIndex="1" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Use SPI command for polarity inversion" description="Handle COM inversion by sending a SPI command" id="SPIDISPLAY.HAL_SPIDISPLAY_EXTMODE_SPI.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Toggle EXTCOMIN from software callback" description="Use a software callback to toggle the COM inversion pin" id="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_USE_CALLBACK.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="EXTCOMIN callback registration function" description="Specify function the display driver should call in order to register the periodic software callback used to toggle the COM inversion signal" id="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_CALLBACK.STRING" defaultValue="" hidden="true" readonly="false"/>
+      <enumProperty label="Autonomously toggle EXTCOMIN using PRS" description="Toggle COM inversion signal autonomously using PRS" id="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_USE_PRS.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="EXTCOMIN pin" description="Select GPIO pin for COM inversion signal" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="EXTCOMIN PRS channel" description="Select PRS channel for COM inversion signal" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN_CHANNEL.ENUM" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="SPIDISPLAY.prs_disabled_chn_SPIDISPLAY_EXTCOMIN_pin.STRING" defaultValue="" hidden="true" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN0.PIN" defaultValueIndex="0" hidden="true" readonly="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN1.PIN" defaultValueIndex="0" hidden="true" readonly="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN2.PIN" defaultValueIndex="0" hidden="true" readonly="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN3.PIN" defaultValueIndex="0" hidden="true" readonly="true">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="SPIDISPLAY">
+        <subCategory label="">
+          <propertyRef refId="SPIDISPLAY.usedbysdk.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.hiddenbysdk.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.showadvanced.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.forceenable.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.owner.STRING"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_DISPLAY.ENUM"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_USART.MOD"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_CS.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_ENABLE.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTMODE.PIN"/>
+          <propertyRef refId="SPIDISPLAY.HAL_SPIDISPLAY_EXTMODE_EXTCOMIN.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.HAL_SPIDISPLAY_EXTMODE_SPI.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_USE_CALLBACK.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_CALLBACK.STRING"/>
+          <propertyRef refId="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_USE_PRS.BOOL"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN_CHANNEL.ENUM"/>
+          <propertyRef refId="SPIDISPLAY.prs_disabled_chn_SPIDISPLAY_EXTCOMIN_pin.STRING"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN0.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN1.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN2.PIN"/>
+          <propertyRef refId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN3.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

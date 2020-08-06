@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.bgm13.acmp1" label="ACMP1" name="ACMP1" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="ACMP.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="ACMP.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="ACMP.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="ACMP.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="ACMP.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="ACMP.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="Negative input selection" id="ACMP.BSP_ACMP_NEG_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AY" value="APORT1Y"/>
+        <enumValue label="APORT bus BY" value="APORT2Y"/>
+        <enumValue label="APORT bus CY" value="APORT3Y"/>
+        <enumValue label="APORT bus DY" value="APORT4Y"/>
+        <enumValue label="VLP" value="VLP"/>
+        <enumValue label="VBDIV" value="VBDIV"/>
+        <enumValue label="VADIV" value="VADIV"/>
+        <enumValue label="VDD" value="VDD"/>
+        <enumValue label="VSS" value="VSS"/>
+      </enumProperty>
+      <enumProperty label="Positive input selection" id="ACMP.BSP_ACMP_POS_INPUT.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="APORT bus AX" value="APORT1X"/>
+        <enumValue label="APORT bus BX" value="APORT2X"/>
+        <enumValue label="APORT bus CX" value="APORT3X"/>
+        <enumValue label="APORT bus DX" value="APORT4X"/>
+        <enumValue label="VLP" value="VLP"/>
+        <enumValue label="VBDIV" value="VBDIV"/>
+        <enumValue label="VADIV" value="VADIV"/>
+        <enumValue label="VDD" value="VDD"/>
+        <enumValue label="VSS" value="VSS"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AY (NEG)" id="ACMP.bsp_acmp_neg_AY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BY (NEG)" id="ACMP.bsp_acmp_neg_BY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CY (NEG)" id="ACMP.bsp_acmp_neg_CY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DY (NEG)" id="ACMP.bsp_acmp_neg_DY.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus AX (POS)" id="ACMP.bsp_acmp_pos_AX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus BX (POS)" id="ACMP.bsp_acmp_pos_BX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus CX (POS)" id="ACMP.bsp_acmp_pos_CX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Channel on APORT bus DX (POS)" id="ACMP.bsp_acmp_pos_DX.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="ACMP1">
+        <subCategory label="">
+          <propertyRef refId="ACMP.usedbysdk.BOOL"/>
+          <propertyRef refId="ACMP.hiddenbysdk.BOOL"/>
+          <propertyRef refId="ACMP.showadvanced.BOOL"/>
+          <propertyRef refId="ACMP.forceenable.BOOL"/>
+          <propertyRef refId="ACMP.owner.STRING"/>
+          <propertyRef refId="ACMP.customname.STRING"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="ACMP.BSP_ACMP_NEG_INPUT.ENUM"/>
+          <propertyRef refId="ACMP.bsp_acmp_neg_AY.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_neg_BY.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_neg_CY.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_neg_DY.PIN"/>
+        </subCategory>
+        <subCategory label="Positive Input">
+          <propertyRef refId="ACMP.BSP_ACMP_POS_INPUT.ENUM"/>
+          <propertyRef refId="ACMP.bsp_acmp_pos_AX.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_pos_BX.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_pos_CX.PIN"/>
+          <propertyRef refId="ACMP.bsp_acmp_pos_DX.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

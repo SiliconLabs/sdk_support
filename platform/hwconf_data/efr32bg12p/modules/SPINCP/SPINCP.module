@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg12p.spincp" label="SPINCP" name="SPINCP" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="SPINCP.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="SPINCP.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="SPINCP.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="SPINCP.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="SPINCP.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="USART port" description="Select USART port for NCP communication" id="SPINCP.BSP_SPINCP_USART_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <enumProperty label="Chip Select pin" description="Select pin for CS signal of NCP" id="SPINCP.BSP_SPINCP_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from USART" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="nHOST_INT pin" description="Select pin for nHOST_INT signal of NCP" id="SPINCP.BSP_SPINCP_NHOSTINT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="nWAKE pin" description="Select pin for nWAKE signal of NCP" id="SPINCP.BSP_SPINCP_NWAKE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="SPINCP">
+        <subCategory label="">
+          <propertyRef refId="SPINCP.usedbysdk.BOOL"/>
+          <propertyRef refId="SPINCP.hiddenbysdk.BOOL"/>
+          <propertyRef refId="SPINCP.showadvanced.BOOL"/>
+          <propertyRef refId="SPINCP.forceenable.BOOL"/>
+          <propertyRef refId="SPINCP.owner.STRING"/>
+          <propertyRef refId="SPINCP.BSP_SPINCP_USART_PORT.MOD"/>
+          <propertyRef refId="SPINCP.BSP_SPINCP_CS.PIN"/>
+          <propertyRef refId="SPINCP.BSP_SPINCP_NHOSTINT.PIN"/>
+          <propertyRef refId="SPINCP.BSP_SPINCP_NWAKE.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

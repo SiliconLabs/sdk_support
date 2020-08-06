@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg1b.btl_button" label="BTL_BUTTON" name="BTL_BUTTON" description="GPIO used by bootloader upon reset. It is not necessary to configure this in the application, only the bootloader." version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="BTL_BUTTON.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="BTL_BUTTON.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="BTL_BUTTON.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="BTL_BUTTON.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="BTL_BUTTON.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Bootloader entry pin" description="Device is forced to stay in bootloader when signal is high/low as configured in bootloader" id="BTL_BUTTON.BSP_BTL_BUTTON.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="BTL_BUTTON">
+        <subCategory label="">
+          <propertyRef refId="BTL_BUTTON.usedbysdk.BOOL"/>
+          <propertyRef refId="BTL_BUTTON.hiddenbysdk.BOOL"/>
+          <propertyRef refId="BTL_BUTTON.showadvanced.BOOL"/>
+          <propertyRef refId="BTL_BUTTON.forceenable.BOOL"/>
+          <propertyRef refId="BTL_BUTTON.owner.STRING"/>
+          <propertyRef refId="BTL_BUTTON.BSP_BTL_BUTTON.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

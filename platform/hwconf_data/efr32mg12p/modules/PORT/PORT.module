@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module description="" id="efr32.efr32mg12p.port" label="Port" name="Port" version="A">
+    <properties>
+
+    </properties>
+    <propertyCategories>
+      <category label="Port Bank">
+        <subCategory label="Settings">
+
+        </subCategory>
+      </category>
+    </propertyCategories>
+  </module>
+</module:DocumentRoot>

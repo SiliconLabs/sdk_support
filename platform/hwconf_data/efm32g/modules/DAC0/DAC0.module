@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32g.dac0" label="DAC0" name="DAC0" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="DAC.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="DAC.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="DAC.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="DAC.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="DAC.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="DAC.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="DAC0">
+        <subCategory label="">
+          <propertyRef refId="DAC.usedbysdk.BOOL"/>
+          <propertyRef refId="DAC.hiddenbysdk.BOOL"/>
+          <propertyRef refId="DAC.showadvanced.BOOL"/>
+          <propertyRef refId="DAC.forceenable.BOOL"/>
+          <propertyRef refId="DAC.owner.STRING"/>
+          <propertyRef refId="DAC.customname.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

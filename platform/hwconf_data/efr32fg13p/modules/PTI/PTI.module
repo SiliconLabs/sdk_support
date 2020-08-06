@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32fg13p.pti" label="PTI" name="PTI" description="Packet Trace Interface" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="PTI.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="PTI.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="PTI.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="PTI.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="PTI.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="mode" id="PTI.HAL_PTI_MODE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Asynchronous (UART)" value="HAL_PTI_MODE_UART"/>
+        <enumValue label="Synchronous (SPI)" value="HAL_PTI_MODE_SPI"/>
+        <enumValue label="Asynchronous (UART) one wire" value="HAL_PTI_MODE_UART_ONEWIRE"/>
+      </enumProperty>
+      <integerProperty label="PTI baud rate" id="PTI.HAL_PTI_BAUD_RATE.INT" minValue="0" maxValue="4294967295" defaultValue="1600000" hidden="false" readonly="false"/>
+      <enumProperty label="DCLK pin" description="Select pin for the DCLK signal" id="PTI.BSP_PTI_DCLK.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="DFRAME pin" description="Select pin for the DFRAME signal" id="PTI.BSP_PTI_DFRAME.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="DOUT pin" description="Select pin for the DOUT signal" id="PTI.BSP_PTI_DOUT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="PTI">
+        <subCategory label="">
+          <propertyRef refId="PTI.usedbysdk.BOOL"/>
+          <propertyRef refId="PTI.hiddenbysdk.BOOL"/>
+          <propertyRef refId="PTI.showadvanced.BOOL"/>
+          <propertyRef refId="PTI.forceenable.BOOL"/>
+          <propertyRef refId="PTI.owner.STRING"/>
+          <propertyRef refId="PTI.HAL_PTI_MODE.ENUM"/>
+          <propertyRef refId="PTI.HAL_PTI_BAUD_RATE.INT"/>
+          <propertyRef refId="PTI.BSP_PTI_DCLK.PIN"/>
+          <propertyRef refId="PTI.BSP_PTI_DFRAME.PIN"/>
+          <propertyRef refId="PTI.BSP_PTI_DOUT.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

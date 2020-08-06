@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32pg12b.wtimer0" label="WTIMER0" name="WTIMER0" description="Wide Timer" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="WTIMER.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="WTIMER.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="WTIMER.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="WTIMER.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="WTIMER.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="WTIMER.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="WTIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="WTIMER.BSP_WTIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="WTIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="WTIMER.BSP_WTIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="WTIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="WTIMER.BSP_WTIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="WTIMER0">
+        <subCategory label="">
+          <propertyRef refId="WTIMER.usedbysdk.BOOL"/>
+          <propertyRef refId="WTIMER.hiddenbysdk.BOOL"/>
+          <propertyRef refId="WTIMER.showadvanced.BOOL"/>
+          <propertyRef refId="WTIMER.forceenable.BOOL"/>
+          <propertyRef refId="WTIMER.owner.STRING"/>
+          <propertyRef refId="WTIMER.customname.STRING"/>
+          <propertyRef refId="WTIMER.BSP_WTIMER_CC0.PIN"/>
+          <propertyRef refId="WTIMER.BSP_WTIMER_CC1.PIN"/>
+          <propertyRef refId="WTIMER.BSP_WTIMER_CC2.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

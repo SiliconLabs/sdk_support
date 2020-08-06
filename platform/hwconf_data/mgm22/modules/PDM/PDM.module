@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.mgm22.pdm" label="PDM" name="PDM" description="Pulse-Density Modulation" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="PDM.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="PDM.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="PDM.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="PDM.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="PDM.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="CLK pin" description="Select pin for the CLK signal" id="PDM.BSP_PDM_CLK.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="DAT0 pin" description="Select pin for the DAT0 signal" id="PDM.BSP_PDM_DAT0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="DAT1 pin" description="Select pin for the DAT1 signal" id="PDM.BSP_PDM_DAT1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="PDM">
+        <subCategory label="">
+          <propertyRef refId="PDM.usedbysdk.BOOL"/>
+          <propertyRef refId="PDM.hiddenbysdk.BOOL"/>
+          <propertyRef refId="PDM.showadvanced.BOOL"/>
+          <propertyRef refId="PDM.forceenable.BOOL"/>
+          <propertyRef refId="PDM.owner.STRING"/>
+          <propertyRef refId="PDM.BSP_PDM_CLK.PIN"/>
+          <propertyRef refId="PDM.BSP_PDM_DAT0.PIN"/>
+          <propertyRef refId="PDM.BSP_PDM_DAT1.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,100 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32fg13p.cmu" label="CMU" name="CMU" description="Clock Management Unit. Configure clock sources for the device." version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="CMU.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="CMU.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="CMU.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="CMU.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="CMU.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="HF clock source" description="Clock source for the High Frequency clock tree" id="CMU.HAL_CLK_HFCLK_SOURCE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="HFRCO (High frequency RC oscillator)" value="HAL_CLK_HFCLK_SOURCE_HFRCO"/>
+        <enumValue label="HFXO (High frequency crystal oscillator)" value="HAL_CLK_HFCLK_SOURCE_HFXO"/>
+      </enumProperty>
+      <enumProperty label="LFA clock source" description="Clock source for the Low Frequency A clock tree" id="CMU.HAL_CLK_LFACLK_SOURCE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="HAL_CLK_LFCLK_SOURCE_DISABLED"/>
+        <enumValue label="LFRCO (Low frequency RC oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFRCO"/>
+        <enumValue label="LFXO (Low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFXO"/>
+        <enumValue label="ULFRCO (Ultra low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_ULFRCO"/>
+        <enumValue label="PLFRCO (Precision low frequency oscillator)" value="HAL_CLK_LFCLK_SOURCE_PLFRCO"/>
+      </enumProperty>
+      <enumProperty label="LFB clock source" description="Clock source for the Low Frequency B clock tree" id="CMU.HAL_CLK_LFBCLK_SOURCE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="HAL_CLK_LFCLK_SOURCE_DISABLED"/>
+        <enumValue label="LFRCO (Low frequency RC oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFRCO"/>
+        <enumValue label="LFXO (Low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFXO"/>
+        <enumValue label="ULFRCO (Ultra low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_ULFRCO"/>
+        <enumValue label="HFLE (Low energy high frequency clock)" value="HAL_CLK_LFCLK_SOURCE_HFLE"/>
+        <enumValue label="PLFRCO (Precision low frequency oscillator)" value="HAL_CLK_LFCLK_SOURCE_PLFRCO"/>
+      </enumProperty>
+      <enumProperty label="LFE clock source" description="Clock source for the Low Frequency E clock tree" id="CMU.HAL_CLK_LFECLK_SOURCE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="HAL_CLK_LFCLK_SOURCE_DISABLED"/>
+        <enumValue label="LFRCO (Low frequency RC oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFRCO"/>
+        <enumValue label="LFXO (Low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_LFXO"/>
+        <enumValue label="ULFRCO (Ultra low frequency crystal oscillator)" value="HAL_CLK_LFCLK_SOURCE_ULFRCO"/>
+        <enumValue label="PLFRCO (Precision low frequency oscillator)" value="HAL_CLK_LFCLK_SOURCE_PLFRCO"/>
+      </enumProperty>
+      <enumProperty label="HFXO present on board" description="The PCB has a high frequency crystal oscillator wired to the HFXI/HFXO pins." id="CMU.BSP_CLK_HFXO_PRESENT.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <integerProperty label="HFXO frequency (0-40MHz)" description="Frequency of the HFXO (Hz)" id="CMU.BSP_CLK_HFXO_FREQ.INT" minValue="0" maxValue="40000000" defaultValue="38400000" hidden="false" readonly="false"/>
+      <stringProperty label="HFXO initialization settings struct" description="Settings to initialize the HFXO. The value given here will typically be assigned to a CMU_HFXOInit_TypeDef structure from EMLIB. One way of setting non-default settings for this property, is to set it to the value of a macro that is defined elsewhere. For instance, this property can be set to MY_CUSTOM_HFXO_INIT, and that macro can be #define-ed in the hal-config.h file before the CMU section (taking care to define it outside of the $[...]$ sections that get overwritten when generating)." id="CMU.BSP_CLK_HFXO_INIT.STRING" defaultValue="CMU_HFXOINIT_DEFAULT" hidden="false" readonly="false"/>
+      <enumProperty label="Start HFXO automatically on EM0/1 entry" description="Automatically start HFXO on wakeup from sleep." id="CMU.HAL_CLK_HFXO_AUTOSTART.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Do not start automatically" value="HAL_CLK_HFXO_AUTOSTART_NONE"/>
+        <enumValue label="Start automatically" value="HAL_CLK_HFXO_AUTOSTART_START"/>
+        <enumValue label="Start automatically and select as HFCLK" value="HAL_CLK_HFXO_AUTOSTART_SELECT"/>
+      </enumProperty>
+      <integerProperty label="HFXO CTUNE value" description="Oscillator tuning value for the high frequency crystal oscillator, only used if no manufacturing token or factory calibrated value. If set to -1, the default value in the init structure is not overridden." id="CMU.BSP_CLK_HFXO_CTUNE.INT" minValue="-1" maxValue="511" defaultValue="-1" hidden="false" readonly="false"/>
+      <enumProperty label="LFXO present on board" description="The PCB has a low frequency crystal oscillator wired to the LFXI and LFXO pins." id="CMU.BSP_CLK_LFXO_PRESENT.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="LFXO initialization settings struct" description="Settings to initialize the LFXO. The value given here will typically be assigned to a CMU_LFXOInit_TypeDef structure from EMLIB. One way of setting non-default settings for this property, is to set it to the value of a macro that is defined elsewhere. For instance, this property can be set to MY_CUSTOM_LFXO_INIT, and that macro can be #define-ed in the hal-config.h file before the CMU section (taking care to define it outside of the $[...]$ sections that get overwritten when generating)." id="CMU.BSP_CLK_LFXO_INIT.STRING" defaultValue="CMU_LFXOINIT_DEFAULT" hidden="false" readonly="false"/>
+      <integerProperty label="LFXO frequency" description="Frequency of the low frequency crystal oscillator" id="CMU.BSP_CLK_LFXO_FREQ.INT" minValue="0" maxValue="32768" defaultValue="32768" hidden="false" readonly="false"/>
+      <integerProperty label="LFXO CTUNE value" description="Oscillator tuning value for LFXO" id="CMU.BSP_CLK_LFXO_CTUNE.INT" minValue="0" maxValue="511" defaultValue="0" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="CMU">
+        <subCategory label="">
+          <propertyRef refId="CMU.usedbysdk.BOOL"/>
+          <propertyRef refId="CMU.hiddenbysdk.BOOL"/>
+          <propertyRef refId="CMU.showadvanced.BOOL"/>
+          <propertyRef refId="CMU.forceenable.BOOL"/>
+          <propertyRef refId="CMU.owner.STRING"/>
+        </subCategory>
+        <subCategory label="Clock Sources">
+          <propertyRef refId="CMU.HAL_CLK_HFCLK_SOURCE.ENUM"/>
+          <propertyRef refId="CMU.HAL_CLK_LFACLK_SOURCE.ENUM"/>
+          <propertyRef refId="CMU.HAL_CLK_LFBCLK_SOURCE.ENUM"/>
+          <propertyRef refId="CMU.HAL_CLK_LFECLK_SOURCE.ENUM"/>
+        </subCategory>
+        <subCategory label="HFXO">
+          <propertyRef refId="CMU.BSP_CLK_HFXO_PRESENT.BOOL"/>
+          <propertyRef refId="CMU.BSP_CLK_HFXO_FREQ.INT"/>
+          <propertyRef refId="CMU.BSP_CLK_HFXO_INIT.STRING"/>
+          <propertyRef refId="CMU.HAL_CLK_HFXO_AUTOSTART.ENUM"/>
+          <propertyRef refId="CMU.BSP_CLK_HFXO_CTUNE.INT"/>
+        </subCategory>
+        <subCategory label="LFXO">
+          <propertyRef refId="CMU.BSP_CLK_LFXO_PRESENT.BOOL"/>
+          <propertyRef refId="CMU.BSP_CLK_LFXO_INIT.STRING"/>
+          <propertyRef refId="CMU.BSP_CLK_LFXO_FREQ.INT"/>
+          <propertyRef refId="CMU.BSP_CLK_LFXO_CTUNE.INT"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

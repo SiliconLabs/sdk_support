@@ -1,0 +1,771 @@
+<?xml version='1.0' encoding='ASCII'?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors id="EFM32WG230F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg230f128"/>
+    <property key="hardwareConfigData" value="efm32wg230f128/EFM32WG230F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg230f128.extension">
+    <property key="hardwareConfigData" value="efm32wg230f128/EFM32WG230F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg230f128.portio">
+    <property key="hardwareConfigData" value="efm32wg230f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG230F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg230f256"/>
+    <property key="hardwareConfigData" value="efm32wg230f256/EFM32WG230F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg230f256.extension">
+    <property key="hardwareConfigData" value="efm32wg230f256/EFM32WG230F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg230f256.portio">
+    <property key="hardwareConfigData" value="efm32wg230f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG230F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg230f64"/>
+    <property key="hardwareConfigData" value="efm32wg230f64/EFM32WG230F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg230f64.extension">
+    <property key="hardwareConfigData" value="efm32wg230f64/EFM32WG230F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg230f64.portio">
+    <property key="hardwareConfigData" value="efm32wg230f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG232F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg232f128"/>
+    <property key="hardwareConfigData" value="efm32wg232f128/EFM32WG232F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg232f128.extension">
+    <property key="hardwareConfigData" value="efm32wg232f128/EFM32WG232F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg232f128.portio">
+    <property key="hardwareConfigData" value="efm32wg232f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG232F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg232f256"/>
+    <property key="hardwareConfigData" value="efm32wg232f256/EFM32WG232F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg232f256.extension">
+    <property key="hardwareConfigData" value="efm32wg232f256/EFM32WG232F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg232f256.portio">
+    <property key="hardwareConfigData" value="efm32wg232f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG232F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg232f64"/>
+    <property key="hardwareConfigData" value="efm32wg232f64/EFM32WG232F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg232f64.extension">
+    <property key="hardwareConfigData" value="efm32wg232f64/EFM32WG232F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg232f64.portio">
+    <property key="hardwareConfigData" value="efm32wg232f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG280F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg280f128"/>
+    <property key="hardwareConfigData" value="efm32wg280f128/EFM32WG280F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg280f128.extension">
+    <property key="hardwareConfigData" value="efm32wg280f128/EFM32WG280F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg280f128.portio">
+    <property key="hardwareConfigData" value="efm32wg280f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG280F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg280f256"/>
+    <property key="hardwareConfigData" value="efm32wg280f256/EFM32WG280F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg280f256.extension">
+    <property key="hardwareConfigData" value="efm32wg280f256/EFM32WG280F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg280f256.portio">
+    <property key="hardwareConfigData" value="efm32wg280f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG280F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg280f64"/>
+    <property key="hardwareConfigData" value="efm32wg280f64/EFM32WG280F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg280f64.extension">
+    <property key="hardwareConfigData" value="efm32wg280f64/EFM32WG280F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg280f64.portio">
+    <property key="hardwareConfigData" value="efm32wg280f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG290F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg290f128"/>
+    <property key="hardwareConfigData" value="efm32wg290f128/EFM32WG290F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg290f128.extension">
+    <property key="hardwareConfigData" value="efm32wg290f128/EFM32WG290F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg290f128.portio">
+    <property key="hardwareConfigData" value="efm32wg290f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG290F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg290f256"/>
+    <property key="hardwareConfigData" value="efm32wg290f256/EFM32WG290F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg290f256.extension">
+    <property key="hardwareConfigData" value="efm32wg290f256/EFM32WG290F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg290f256.portio">
+    <property key="hardwareConfigData" value="efm32wg290f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG290F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg290f64"/>
+    <property key="hardwareConfigData" value="efm32wg290f64/EFM32WG290F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg290f64.extension">
+    <property key="hardwareConfigData" value="efm32wg290f64/EFM32WG290F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg290f64.portio">
+    <property key="hardwareConfigData" value="efm32wg290f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG295F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg295f128"/>
+    <property key="hardwareConfigData" value="efm32wg295f128/EFM32WG295F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg295f128.extension">
+    <property key="hardwareConfigData" value="efm32wg295f128/EFM32WG295F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg295f128.portio">
+    <property key="hardwareConfigData" value="efm32wg295f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG295F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg295f256"/>
+    <property key="hardwareConfigData" value="efm32wg295f256/EFM32WG295F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg295f256.extension">
+    <property key="hardwareConfigData" value="efm32wg295f256/EFM32WG295F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg295f256.portio">
+    <property key="hardwareConfigData" value="efm32wg295f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG295F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg295f64"/>
+    <property key="hardwareConfigData" value="efm32wg295f64/EFM32WG295F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg295f64.extension">
+    <property key="hardwareConfigData" value="efm32wg295f64/EFM32WG295F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg295f64.portio">
+    <property key="hardwareConfigData" value="efm32wg295f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG330F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg330f128"/>
+    <property key="hardwareConfigData" value="efm32wg330f128/EFM32WG330F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg330f128.extension">
+    <property key="hardwareConfigData" value="efm32wg330f128/EFM32WG330F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg330f128.portio">
+    <property key="hardwareConfigData" value="efm32wg330f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG330F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg330f256"/>
+    <property key="hardwareConfigData" value="efm32wg330f256/EFM32WG330F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg330f256.extension">
+    <property key="hardwareConfigData" value="efm32wg330f256/EFM32WG330F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg330f256.portio">
+    <property key="hardwareConfigData" value="efm32wg330f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG330F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg330f64"/>
+    <property key="hardwareConfigData" value="efm32wg330f64/EFM32WG330F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg330f64.extension">
+    <property key="hardwareConfigData" value="efm32wg330f64/EFM32WG330F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg330f64.portio">
+    <property key="hardwareConfigData" value="efm32wg330f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG332F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg332f128"/>
+    <property key="hardwareConfigData" value="efm32wg332f128/EFM32WG332F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg332f128.extension">
+    <property key="hardwareConfigData" value="efm32wg332f128/EFM32WG332F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg332f128.portio">
+    <property key="hardwareConfigData" value="efm32wg332f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG332F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg332f256"/>
+    <property key="hardwareConfigData" value="efm32wg332f256/EFM32WG332F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg332f256.extension">
+    <property key="hardwareConfigData" value="efm32wg332f256/EFM32WG332F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg332f256.portio">
+    <property key="hardwareConfigData" value="efm32wg332f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG332F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg332f64"/>
+    <property key="hardwareConfigData" value="efm32wg332f64/EFM32WG332F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg332f64.extension">
+    <property key="hardwareConfigData" value="efm32wg332f64/EFM32WG332F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg332f64.portio">
+    <property key="hardwareConfigData" value="efm32wg332f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG360F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg360f128"/>
+    <property key="hardwareConfigData" value="efm32wg360f128/EFM32WG360F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg360f128.extension">
+    <property key="hardwareConfigData" value="efm32wg360f128/EFM32WG360F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg360f128.portio">
+    <property key="hardwareConfigData" value="efm32wg360f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG360F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg360f256"/>
+    <property key="hardwareConfigData" value="efm32wg360f256/EFM32WG360F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg360f256.extension">
+    <property key="hardwareConfigData" value="efm32wg360f256/EFM32WG360F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg360f256.portio">
+    <property key="hardwareConfigData" value="efm32wg360f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG360F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg360f64"/>
+    <property key="hardwareConfigData" value="efm32wg360f64/EFM32WG360F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg360f64.extension">
+    <property key="hardwareConfigData" value="efm32wg360f64/EFM32WG360F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg360f64.portio">
+    <property key="hardwareConfigData" value="efm32wg360f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG380F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg380f128"/>
+    <property key="hardwareConfigData" value="efm32wg380f128/EFM32WG380F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg380f128.extension">
+    <property key="hardwareConfigData" value="efm32wg380f128/EFM32WG380F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg380f128.portio">
+    <property key="hardwareConfigData" value="efm32wg380f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG380F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg380f256"/>
+    <property key="hardwareConfigData" value="efm32wg380f256/EFM32WG380F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg380f256.extension">
+    <property key="hardwareConfigData" value="efm32wg380f256/EFM32WG380F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg380f256.portio">
+    <property key="hardwareConfigData" value="efm32wg380f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG380F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg380f64"/>
+    <property key="hardwareConfigData" value="efm32wg380f64/EFM32WG380F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg380f64.extension">
+    <property key="hardwareConfigData" value="efm32wg380f64/EFM32WG380F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg380f64.portio">
+    <property key="hardwareConfigData" value="efm32wg380f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG390F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg390f128"/>
+    <property key="hardwareConfigData" value="efm32wg390f128/EFM32WG390F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg390f128.extension">
+    <property key="hardwareConfigData" value="efm32wg390f128/EFM32WG390F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg390f128.portio">
+    <property key="hardwareConfigData" value="efm32wg390f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG390F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg390f256"/>
+    <property key="hardwareConfigData" value="efm32wg390f256/EFM32WG390F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg390f256.extension">
+    <property key="hardwareConfigData" value="efm32wg390f256/EFM32WG390F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg390f256.portio">
+    <property key="hardwareConfigData" value="efm32wg390f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG390F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg390f64"/>
+    <property key="hardwareConfigData" value="efm32wg390f64/EFM32WG390F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg390f64.extension">
+    <property key="hardwareConfigData" value="efm32wg390f64/EFM32WG390F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg390f64.portio">
+    <property key="hardwareConfigData" value="efm32wg390f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG395F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg395f128"/>
+    <property key="hardwareConfigData" value="efm32wg395f128/EFM32WG395F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg395f128.extension">
+    <property key="hardwareConfigData" value="efm32wg395f128/EFM32WG395F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg395f128.portio">
+    <property key="hardwareConfigData" value="efm32wg395f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG395F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg395f256"/>
+    <property key="hardwareConfigData" value="efm32wg395f256/EFM32WG395F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg395f256.extension">
+    <property key="hardwareConfigData" value="efm32wg395f256/EFM32WG395F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg395f256.portio">
+    <property key="hardwareConfigData" value="efm32wg395f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG395F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg395f64"/>
+    <property key="hardwareConfigData" value="efm32wg395f64/EFM32WG395F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg395f64.extension">
+    <property key="hardwareConfigData" value="efm32wg395f64/EFM32WG395F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg395f64.portio">
+    <property key="hardwareConfigData" value="efm32wg395f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG840F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg840f128"/>
+    <property key="hardwareConfigData" value="efm32wg840f128/EFM32WG840F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg840f128.extension">
+    <property key="hardwareConfigData" value="efm32wg840f128/EFM32WG840F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg840f128.portio">
+    <property key="hardwareConfigData" value="efm32wg840f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG840F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg840f256"/>
+    <property key="hardwareConfigData" value="efm32wg840f256/EFM32WG840F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg840f256.extension">
+    <property key="hardwareConfigData" value="efm32wg840f256/EFM32WG840F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg840f256.portio">
+    <property key="hardwareConfigData" value="efm32wg840f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG840F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg840f64"/>
+    <property key="hardwareConfigData" value="efm32wg840f64/EFM32WG840F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg840f64.extension">
+    <property key="hardwareConfigData" value="efm32wg840f64/EFM32WG840F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg840f64.portio">
+    <property key="hardwareConfigData" value="efm32wg840f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG842F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg842f128"/>
+    <property key="hardwareConfigData" value="efm32wg842f128/EFM32WG842F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg842f128.extension">
+    <property key="hardwareConfigData" value="efm32wg842f128/EFM32WG842F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg842f128.portio">
+    <property key="hardwareConfigData" value="efm32wg842f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG842F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg842f256"/>
+    <property key="hardwareConfigData" value="efm32wg842f256/EFM32WG842F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg842f256.extension">
+    <property key="hardwareConfigData" value="efm32wg842f256/EFM32WG842F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg842f256.portio">
+    <property key="hardwareConfigData" value="efm32wg842f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG842F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg842f64"/>
+    <property key="hardwareConfigData" value="efm32wg842f64/EFM32WG842F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg842f64.extension">
+    <property key="hardwareConfigData" value="efm32wg842f64/EFM32WG842F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg842f64.portio">
+    <property key="hardwareConfigData" value="efm32wg842f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG880F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg880f128"/>
+    <property key="hardwareConfigData" value="efm32wg880f128/EFM32WG880F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg880f128.extension">
+    <property key="hardwareConfigData" value="efm32wg880f128/EFM32WG880F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg880f128.portio">
+    <property key="hardwareConfigData" value="efm32wg880f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG880F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg880f256"/>
+    <property key="hardwareConfigData" value="efm32wg880f256/EFM32WG880F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg880f256.extension">
+    <property key="hardwareConfigData" value="efm32wg880f256/EFM32WG880F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg880f256.portio">
+    <property key="hardwareConfigData" value="efm32wg880f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG880F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg880f64"/>
+    <property key="hardwareConfigData" value="efm32wg880f64/EFM32WG880F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg880f64.extension">
+    <property key="hardwareConfigData" value="efm32wg880f64/EFM32WG880F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg880f64.portio">
+    <property key="hardwareConfigData" value="efm32wg880f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG890F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg890f128"/>
+    <property key="hardwareConfigData" value="efm32wg890f128/EFM32WG890F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg890f128.extension">
+    <property key="hardwareConfigData" value="efm32wg890f128/EFM32WG890F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg890f128.portio">
+    <property key="hardwareConfigData" value="efm32wg890f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG890F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg890f256"/>
+    <property key="hardwareConfigData" value="efm32wg890f256/EFM32WG890F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg890f256.extension">
+    <property key="hardwareConfigData" value="efm32wg890f256/EFM32WG890F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg890f256.portio">
+    <property key="hardwareConfigData" value="efm32wg890f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG890F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg890f64"/>
+    <property key="hardwareConfigData" value="efm32wg890f64/EFM32WG890F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg890f64.extension">
+    <property key="hardwareConfigData" value="efm32wg890f64/EFM32WG890F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg890f64.portio">
+    <property key="hardwareConfigData" value="efm32wg890f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG895F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg895f128"/>
+    <property key="hardwareConfigData" value="efm32wg895f128/EFM32WG895F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg895f128.extension">
+    <property key="hardwareConfigData" value="efm32wg895f128/EFM32WG895F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg895f128.portio">
+    <property key="hardwareConfigData" value="efm32wg895f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG895F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg895f256"/>
+    <property key="hardwareConfigData" value="efm32wg895f256/EFM32WG895F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg895f256.extension">
+    <property key="hardwareConfigData" value="efm32wg895f256/EFM32WG895F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg895f256.portio">
+    <property key="hardwareConfigData" value="efm32wg895f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG895F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg895f64"/>
+    <property key="hardwareConfigData" value="efm32wg895f64/EFM32WG895F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg895f64.extension">
+    <property key="hardwareConfigData" value="efm32wg895f64/EFM32WG895F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg895f64.portio">
+    <property key="hardwareConfigData" value="efm32wg895f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG940F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg940f128"/>
+    <property key="hardwareConfigData" value="efm32wg940f128/EFM32WG940F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg940f128.extension">
+    <property key="hardwareConfigData" value="efm32wg940f128/EFM32WG940F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg940f128.portio">
+    <property key="hardwareConfigData" value="efm32wg940f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG940F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg940f256"/>
+    <property key="hardwareConfigData" value="efm32wg940f256/EFM32WG940F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg940f256.extension">
+    <property key="hardwareConfigData" value="efm32wg940f256/EFM32WG940F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg940f256.portio">
+    <property key="hardwareConfigData" value="efm32wg940f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG940F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg940f64"/>
+    <property key="hardwareConfigData" value="efm32wg940f64/EFM32WG940F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg940f64.extension">
+    <property key="hardwareConfigData" value="efm32wg940f64/EFM32WG940F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg940f64.portio">
+    <property key="hardwareConfigData" value="efm32wg940f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG942F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg942f128"/>
+    <property key="hardwareConfigData" value="efm32wg942f128/EFM32WG942F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg942f128.extension">
+    <property key="hardwareConfigData" value="efm32wg942f128/EFM32WG942F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg942f128.portio">
+    <property key="hardwareConfigData" value="efm32wg942f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG942F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg942f256"/>
+    <property key="hardwareConfigData" value="efm32wg942f256/EFM32WG942F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg942f256.extension">
+    <property key="hardwareConfigData" value="efm32wg942f256/EFM32WG942F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg942f256.portio">
+    <property key="hardwareConfigData" value="efm32wg942f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG942F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg942f64"/>
+    <property key="hardwareConfigData" value="efm32wg942f64/EFM32WG942F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg942f64.extension">
+    <property key="hardwareConfigData" value="efm32wg942f64/EFM32WG942F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg942f64.portio">
+    <property key="hardwareConfigData" value="efm32wg942f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG980F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg980f128"/>
+    <property key="hardwareConfigData" value="efm32wg980f128/EFM32WG980F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg980f128.extension">
+    <property key="hardwareConfigData" value="efm32wg980f128/EFM32WG980F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg980f128.portio">
+    <property key="hardwareConfigData" value="efm32wg980f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG980F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg980f256"/>
+    <property key="hardwareConfigData" value="efm32wg980f256/EFM32WG980F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg980f256.extension">
+    <property key="hardwareConfigData" value="efm32wg980f256/EFM32WG980F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg980f256.portio">
+    <property key="hardwareConfigData" value="efm32wg980f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG980F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg980f64"/>
+    <property key="hardwareConfigData" value="efm32wg980f64/EFM32WG980F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg980f64.extension">
+    <property key="hardwareConfigData" value="efm32wg980f64/EFM32WG980F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg980f64.portio">
+    <property key="hardwareConfigData" value="efm32wg980f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG990F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg990f128"/>
+    <property key="hardwareConfigData" value="efm32wg990f128/EFM32WG990F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg990f128.extension">
+    <property key="hardwareConfigData" value="efm32wg990f128/EFM32WG990F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg990f128.portio">
+    <property key="hardwareConfigData" value="efm32wg990f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG990F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg990f256"/>
+    <property key="hardwareConfigData" value="efm32wg990f256/EFM32WG990F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg990f256.extension">
+    <property key="hardwareConfigData" value="efm32wg990f256/EFM32WG990F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg990f256.portio">
+    <property key="hardwareConfigData" value="efm32wg990f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG990F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg990f64"/>
+    <property key="hardwareConfigData" value="efm32wg990f64/EFM32WG990F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg990f64.extension">
+    <property key="hardwareConfigData" value="efm32wg990f64/EFM32WG990F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg990f64.portio">
+    <property key="hardwareConfigData" value="efm32wg990f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG995F128">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg995f128"/>
+    <property key="hardwareConfigData" value="efm32wg995f128/EFM32WG995F128.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg995f128.extension">
+    <property key="hardwareConfigData" value="efm32wg995f128/EFM32WG995F128.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg995f128.portio">
+    <property key="hardwareConfigData" value="efm32wg995f128/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG995F256">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg995f256"/>
+    <property key="hardwareConfigData" value="efm32wg995f256/EFM32WG995F256.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg995f256.extension">
+    <property key="hardwareConfigData" value="efm32wg995f256/EFM32WG995F256.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg995f256.portio">
+    <property key="hardwareConfigData" value="efm32wg995f256/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFM32WG995F64">
+    <property key="partCompatibility" value="mcu.arm.efm32.wg.efm32wg995f64"/>
+    <property key="hardwareConfigData" value="efm32wg995f64/EFM32WG995F64.device"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg995f64.extension">
+    <property key="hardwareConfigData" value="efm32wg995f64/EFM32WG995F64.deviceextension"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.efm32wg995f64.portio">
+    <property key="hardwareConfigData" value="efm32wg995f64/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.port">
+    <property key="hardwareConfigData" value="modules/PORT/PORT.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.portio">
+    <property key="hardwareConfigData" value="modules/PORTIO/PORTIO.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.pin">
+    <property key="hardwareConfigData" value="modules/PIN/PIN.pin"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.acmp0">
+    <property key="hardwareConfigData" value="modules/ACMP0/ACMP0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.acmp1">
+    <property key="hardwareConfigData" value="modules/ACMP1/ACMP1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.adc0">
+    <property key="hardwareConfigData" value="modules/ADC0/ADC0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.btl_button">
+    <property key="hardwareConfigData" value="modules/BTL_BUTTON/BTL_BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.button">
+    <property key="hardwareConfigData" value="modules/BUTTON/BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.cmu">
+    <property key="hardwareConfigData" value="modules/CMU/CMU.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.dac0">
+    <property key="hardwareConfigData" value="modules/DAC0/DAC0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.ebi">
+    <property key="hardwareConfigData" value="modules/EBI/EBI.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.emu">
+    <property key="hardwareConfigData" value="modules/EMU/EMU.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.extflash">
+    <property key="hardwareConfigData" value="modules/EXTFLASH/EXTFLASH.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.gpio">
+    <property key="hardwareConfigData" value="modules/GPIO/GPIO.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.i2c0">
+    <property key="hardwareConfigData" value="modules/I2C0/I2C0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.i2c1">
+    <property key="hardwareConfigData" value="modules/I2C1/I2C1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.i2csensor">
+    <property key="hardwareConfigData" value="modules/I2CSENSOR/I2CSENSOR.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.ioexp">
+    <property key="hardwareConfigData" value="modules/IOEXP/IOEXP.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.lcd">
+    <property key="hardwareConfigData" value="modules/LCD/LCD.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.led">
+    <property key="hardwareConfigData" value="modules/LED/LED.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.lesense">
+    <property key="hardwareConfigData" value="modules/LESENSE/LESENSE.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.letimer0">
+    <property key="hardwareConfigData" value="modules/LETIMER0/LETIMER0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.leuart0">
+    <property key="hardwareConfigData" value="modules/LEUART0/LEUART0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.leuart1">
+    <property key="hardwareConfigData" value="modules/LEUART1/LEUART1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.lfxo">
+    <property key="hardwareConfigData" value="modules/LFXO/LFXO.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.msc">
+    <property key="hardwareConfigData" value="modules/MSC/MSC.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.pcnt0">
+    <property key="hardwareConfigData" value="modules/PCNT0/PCNT0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.pcnt1">
+    <property key="hardwareConfigData" value="modules/PCNT1/PCNT1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.pcnt2">
+    <property key="hardwareConfigData" value="modules/PCNT2/PCNT2.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.prs">
+    <property key="hardwareConfigData" value="modules/PRS/PRS.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.serial">
+    <property key="hardwareConfigData" value="modules/SERIAL/SERIAL.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.spidisplay">
+    <property key="hardwareConfigData" value="modules/SPIDISPLAY/SPIDISPLAY.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.spincp">
+    <property key="hardwareConfigData" value="modules/SPINCP/SPINCP.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.timer0">
+    <property key="hardwareConfigData" value="modules/TIMER0/TIMER0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.timer1">
+    <property key="hardwareConfigData" value="modules/TIMER1/TIMER1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.timer2">
+    <property key="hardwareConfigData" value="modules/TIMER2/TIMER2.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.timer3">
+    <property key="hardwareConfigData" value="modules/TIMER3/TIMER3.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.uart0">
+    <property key="hardwareConfigData" value="modules/UART0/UART0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.uart1">
+    <property key="hardwareConfigData" value="modules/UART1/UART1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.uartncp">
+    <property key="hardwareConfigData" value="modules/UARTNCP/UARTNCP.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.usart0">
+    <property key="hardwareConfigData" value="modules/USART0/USART0.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.usart1">
+    <property key="hardwareConfigData" value="modules/USART1/USART1.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.usart2">
+    <property key="hardwareConfigData" value="modules/USART2/USART2.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.usb">
+    <property key="hardwareConfigData" value="modules/USB/USB.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.vcom">
+    <property key="hardwareConfigData" value="modules/VCOM/VCOM.module"/>
+  </descriptors>
+  <descriptors id="efm32.efm32wg.wdog">
+    <property key="hardwareConfigData" value="modules/WDOG/WDOG.module"/>
+  </descriptors>
+</model:MDescriptors>

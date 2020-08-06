@@ -1,0 +1,2941 @@
+<?xml version='1.0' encoding='ASCII'?>
+<deviceextension:DocumentRoot xmlns:deviceextension="http://www.silabs.com/ss/hwconfig/deviceextension.ecore">
+  <deviceExtension id="efr32.efr32fg22c121f512gm32.extension">
+    <componentExtension componentName="ANTDIV">
+      <overriddenProperties>
+        <enumProperty label="Inherit antenna select from MODEM" description="Pins used to control external antenna switch and external antenna signal are defined in MODEM module" id="ANTDIV.BSP_ANTDIV.MOD" defaultValueIndex="1" hidden="true" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="MODEM" value="MODEM"/>
+        </enumProperty>
+        <enumProperty label="Antenna select" description="Pin used to control external antenna switch" id="ANTDIV.BSP_ANTDIV_SEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from MODEM" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Complementary antenna select" description="Pin for inverted external antenna signal" id="ANTDIV.BSP_ANTDIV_NSEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from MODEM" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="BTL_BUTTON">
+      <overriddenProperties>
+        <enumProperty label="Bootloader entry pin" description="Device is forced to stay in bootloader when signal is high/low as configured in bootloader" id="BTL_BUTTON.BSP_BTL_BUTTON.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="BUTTON">
+      <overriddenProperties>
+        <enumProperty label="Button 0" id="BUTTON.BSP_BUTTON0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 1" id="BUTTON.BSP_BUTTON1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 2" id="BUTTON.BSP_BUTTON2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 3" id="BUTTON.BSP_BUTTON3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 4" id="BUTTON.BSP_BUTTON4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 5" id="BUTTON.BSP_BUTTON5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 6" id="BUTTON.BSP_BUTTON6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Button 7" id="BUTTON.BSP_BUTTON7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="COEX">
+      <overriddenProperties>
+        <enumProperty label="REQUEST signal" description="Pin used for REQUEST signal" id="COEX.BSP_COEX_REQ.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="GRANT signal" description="Pin used for grant (GNT) signal" id="COEX.BSP_COEX_GNT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRIORITY signal" description="Pin used for PRIORITY signal" id="COEX.BSP_COEX_PRI.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PWM REQUEST signal (shared REQUEST only)" description="Pin used for PWM REQUEST signal when shared REQUEST enabled" id="COEX.BSP_COEX_PWM_REQ.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="RHO signal" description="Pin used for RHO signal" id="COEX.BSP_COEX_RHO.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Directional PRIORITY Timer" description="Directional PRIORITY Timer module" id="COEX.HAL_COEX_DP_TIMER.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="TIMER0" value="TIMER0"/>
+          <enumValue label="TIMER1" value="TIMER1"/>
+          <enumValue label="TIMER2" value="TIMER2"/>
+          <enumValue label="TIMER3" value="TIMER3"/>
+          <enumValue label="TIMER4" value="TIMER4"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 0 output pin" id="COEX.BSP_COEX_DP0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="COEX.BSP_COEX_DP1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="COEX.BSP_COEX_DP2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="COEX.BSP_COEX_DP3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="COEX.BSP_COEX_DP4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="COEX.BSP_COEX_DP5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="COEX.BSP_COEX_DP6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="COEX.BSP_COEX_DP7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="COEX.BSP_COEX_DP8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="COEX.BSP_COEX_DP9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="COEX.BSP_COEX_DP10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="COEX.BSP_COEX_DP11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Optional 'Wi-Fi Select' Control of Blocker Optimization" description="Pin used to select optimization" id="COEX.BSP_COEX_PHY_SELECT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 0 output pin" id="COEX.BSP_COEX_RX_ACTIVE0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="COEX.BSP_COEX_RX_ACTIVE1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="COEX.BSP_COEX_RX_ACTIVE2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="COEX.BSP_COEX_RX_ACTIVE3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="COEX.BSP_COEX_RX_ACTIVE4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="COEX.BSP_COEX_RX_ACTIVE5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="COEX.BSP_COEX_RX_ACTIVE6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="COEX.BSP_COEX_RX_ACTIVE7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="COEX.BSP_COEX_RX_ACTIVE8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="COEX.BSP_COEX_RX_ACTIVE9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="COEX.BSP_COEX_RX_ACTIVE10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="COEX.BSP_COEX_RX_ACTIVE11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="EUART0">
+      <overriddenProperties>
+        <enumProperty label="TX pin" description="Select pin for the TX signal" id="EUART.BSP_EUART_TX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="RX pin" description="Select pin for the RX signal" id="EUART.BSP_EUART_RX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="CTS pin" description="Select pin for the CTS signal" id="EUART.BSP_EUART_CTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="RTS pin" description="Select pin for the RTS signal" id="EUART.BSP_EUART_RTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="EXTFLASH">
+      <overriddenProperties>
+        <enumProperty label="USART connected to SPI Flash" description="USART port to communicate with external flash" id="EXTFLASH.BSP_EXTFLASH_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+        </enumProperty>
+        <enumProperty label="Chip Select pin" description="Pin for external flash CS signal" id="EXTFLASH.BSP_EXTFLASH_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from USART" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Hold pin" description="Pin for external flash hold signal" id="EXTFLASH.BSP_EXTFLASH_HOLD.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Write Protect pin" description="Pin for external flash write protect signal" id="EXTFLASH.BSP_EXTFLASH_WP.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="EZRADIOPRO">
+      <overriddenProperties>
+        <enumProperty label="USART port" description="USART port to communicate with PRO2+ tranceiver" id="EZRADIOPRO.BSP_EZRADIOPRO_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+        </enumProperty>
+        <enumProperty label="nSEL/CS pin" description="Pin for PRO2+ tranceiver CS signal" id="EZRADIOPRO.BSP_EZRADIOPRO_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from USART" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="EZRadio Pro Interrupt pin" description="Pin for PRO2+ tranceiver interrupt signal" id="EZRADIOPRO.BSP_EZRADIOPRO_INT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="EZRadio Pro Shutdown pin" description="Pin for PRO2+ tranceiver shutdown signal" id="EZRADIOPRO.BSP_EZRADIOPRO_SDN.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="FEM">
+      <overriddenProperties>
+        <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_RX0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_RX1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_RX2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_RX3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_RX4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_RX5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_RX6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_RX7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_RX8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_RX9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_RX10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_RX11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_SLEEP0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_SLEEP1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_SLEEP2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_SLEEP3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_SLEEP4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_SLEEP5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_SLEEP6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_SLEEP7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_SLEEP8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_SLEEP9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_SLEEP10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_SLEEP11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_TX0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_TX1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_TX2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_TX3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_TX4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_TX5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_TX6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_TX7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_TX8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_TX9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_TX10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_TX11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Bypass pin" description="Select pin for the bypass (FEM pin CPS) signal (optional)" id="FEM.BSP_FEM_BYPASS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TX power pin" description="Select pin for the tx power mode (FEM pin CHL) signal (optional)" id="FEM.BSP_FEM_TXPOWER.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="GPIO">
+      <overriddenProperties>
+        <enumProperty label="Serial Wire Output pin" description="Select pin for SWO" id="GPIO.BSP_TRACE_SWO.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA03" value="PA03"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="I2C0">
+      <overriddenProperties>
+        <enumProperty label="I2C SCL" description="Select pin for the SCL signal" id="I2C.BSP_I2C_SCL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="I2C SDA" description="Select pin for the SDA signal" id="I2C.BSP_I2C_SDA.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="I2C1">
+      <overriddenProperties>
+        <enumProperty label="I2C SCL" description="Select pin for the SCL signal" id="I2C.BSP_I2C_SCL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="I2C SDA" description="Select pin for the SDA signal" id="I2C.BSP_I2C_SDA.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="I2CSENSOR">
+      <overriddenProperties>
+        <enumProperty label="Sensor enable pin" description="Pin for I2C sensor enable signal (typically used on Starter Kit)" id="I2CSENSOR.BSP_I2CSENSOR_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="I2C peripheral" description="Select I2C peripheral" id="I2CSENSOR.BSP_I2CSENSOR_PERIPHERAL.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="I2C0" value="I2C0"/>
+          <enumValue label="I2C1" value="I2C1"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="IADC0">
+      <overriddenProperties>
+        <enumProperty label="Positive input selection" id="IADC.BSP_IADC_POS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Negative input selection" id="IADC.BSP_IADC_NEG.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="IOEXP">
+      <overriddenProperties>
+        <enumProperty label="IOEXP wake pin" description="Select pin to connect to the wake signal of the IO expander" id="IOEXP.BSP_IOEXP_WAKE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="IO expander I2C" description="Select I2C peripheral to connect to the IO Expander" id="IOEXP.BSP_IOEXP_PERIPHERAL.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="I2C0" value="I2C0"/>
+          <enumValue label="I2C1" value="I2C1"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="LED">
+      <overriddenProperties>
+        <enumProperty label="LED 0" id="LED.BSP_LED0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 1" id="LED.BSP_LED1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 2" id="LED.BSP_LED2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 3" id="LED.BSP_LED3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 4" id="LED.BSP_LED4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 5" id="LED.BSP_LED5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 6" id="LED.BSP_LED6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="LED 7" id="LED.BSP_LED7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="MODEM">
+      <overriddenProperties>
+        <enumProperty label="Antenna select" description="Pin used to control external antenna switch" id="MODEM.BSP_MODEM_SEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Complementary antenna select" description="Pin for inverted external antenna signal" id="MODEM.BSP_MODEM_NSEL.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="PDM">
+      <overriddenProperties>
+        <enumProperty label="CLK pin" description="Select pin for the CLK signal" id="PDM.BSP_PDM_CLK.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="DAT0 pin" description="Select pin for the DAT0 signal" id="PDM.BSP_PDM_DAT0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="DAT1 pin" description="Select pin for the DAT1 signal" id="PDM.BSP_PDM_DAT1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="PRS">
+      <overriddenProperties>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH3.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH4.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH5.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH6.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH7.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH8.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH9.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH10.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Output pin" id="PRS.BSP_PRS_CH11.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="PTI">
+      <overriddenProperties>
+        <enumProperty label="DCLK pin" description="Select pin for the DCLK signal" id="PTI.BSP_PTI_DCLK.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="DFRAME pin" description="Select pin for the DFRAME signal" id="PTI.BSP_PTI_DFRAME.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="DOUT pin" description="Select pin for the DOUT signal" id="PTI.BSP_PTI_DOUT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="SERIAL">
+      <overriddenProperties>
+        <enumProperty label="Port for application serial communication" description="Select the port on which application prints are communicated (such as printf())" id="SERIAL.BSP_SERIAL_APP_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="EUART0" value="EUART0"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+          <enumValue label="VUART" value="VUART"/>
+        </enumProperty>
+        <enumProperty label="Port for assert serial communication" description="Select the port on which asserts are communicated" id="SERIAL.BSP_SERIAL_ASSERT_PORT.MOD" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+          <enumValue label="VUART" value="VUART"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="SPIDISPLAY">
+      <overriddenProperties>
+        <enumProperty label="USART port" description="Select the USART to use with the display" id="SPIDISPLAY.BSP_SPIDISPLAY_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+        </enumProperty>
+        <enumProperty label="Chip Select pin" description="Select pin to connect to the CS signal of the display" id="SPIDISPLAY.BSP_SPIDISPLAY_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from USART" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="Display enable pin" description="Select pin which drives the display enable switch on (W)STK" id="SPIDISPLAY.BSP_SPIDISPLAY_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="EXTMODE pin" description="External COM inversion mode pin. If present, this pin tells the display whether to expect COM inversion on GPIO pin or as SPI command. Most designs tie this pin high or low in hardware, rather than retaining software control." id="SPIDISPLAY.BSP_SPIDISPLAY_EXTMODE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="EXTCOMIN pin" description="Select GPIO pin for COM inversion signal" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 0 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 1 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 2 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 3 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 4 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 5 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 6 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 7 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 8 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 9 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 10 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="PRS channel 11 output pin" id="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="SPINCP">
+      <overriddenProperties>
+        <enumProperty label="USART port" description="Select USART port for NCP communication" id="SPINCP.BSP_SPINCP_USART_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+        </enumProperty>
+        <enumProperty label="Chip Select pin" description="Select pin for CS signal of NCP" id="SPINCP.BSP_SPINCP_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Inherited from USART" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="nHOST_INT pin" description="Select pin for nHOST_INT signal of NCP" id="SPINCP.BSP_SPINCP_NHOSTINT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="nWAKE pin" description="Select pin for nWAKE signal of NCP" id="SPINCP.BSP_SPINCP_NWAKE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="TIMER0">
+      <overriddenProperties>
+        <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="TIMER1">
+      <overriddenProperties>
+        <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="TIMER2">
+      <overriddenProperties>
+        <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="TIMER3">
+      <overriddenProperties>
+        <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="TIMER4">
+      <overriddenProperties>
+        <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="UARTNCP">
+      <overriddenProperties>
+        <enumProperty label="UART port" description="Select UART port for NCP communication" id="UARTNCP.BSP_UARTNCP_USART_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="None" value="None"/>
+          <enumValue label="USART0" value="USART0"/>
+          <enumValue label="USART1" value="USART1"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="USART0">
+      <overriddenProperties>
+        <enumProperty label="USART MOSI pin" description="Select pin for the MOSI signal" id="USART.BSP_USART_MOSI.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART MISO pin" description="Select pin for the MISO signal" id="USART.BSP_USART_MISO.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART CLK pin" description="Select pin for the CLK signal" id="USART.BSP_USART_CLK.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART CS pin" description="Select pin for the CS signal" id="USART.BSP_USART_CS.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART TX pin" description="Select pin for the TX signal" id="USART.BSP_USART_TX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART RX pin" description="Select pin for the RX signal" id="USART.BSP_USART_RX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART CTS pin" description="Select pin for the CTS signal" id="USART.BSP_USART_CTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+        <enumProperty label="USART RTS pin" description="Select pin for the RTS signal" id="USART.BSP_USART_RTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="USART1">
+      <overriddenProperties>
+        <enumProperty label="USART MOSI pin" description="Select pin for the MOSI signal" id="USART.BSP_USART_MOSI.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART MISO pin" description="Select pin for the MISO signal" id="USART.BSP_USART_MISO.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART CLK pin" description="Select pin for the CLK signal" id="USART.BSP_USART_CLK.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART CS pin" description="Select pin for the CS signal" id="USART.BSP_USART_CS.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART TX pin" description="Select pin for the TX signal" id="USART.BSP_USART_TX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART RX pin" description="Select pin for the RX signal" id="USART.BSP_USART_RX.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART CTS pin" description="Select pin for the CTS signal" id="USART.BSP_USART_CTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+        <enumProperty label="USART RTS pin" description="Select pin for the RTS signal" id="USART.BSP_USART_RTS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+    <componentExtension componentName="VCOM">
+      <overriddenProperties>
+        <enumProperty label="VCOM enable pin" description="Select pin which drives the VCOM enable switch on (W)STK." id="VCOM.BSP_VCOM_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+          <enumValue label="Disabled" value="Disabled"/>
+          <enumValue label="PA00" value="PA00"/>
+          <enumValue label="PA01" value="PA01"/>
+          <enumValue label="PA02" value="PA02"/>
+          <enumValue label="PA03" value="PA03"/>
+          <enumValue label="PA04" value="PA04"/>
+          <enumValue label="PA05" value="PA05"/>
+          <enumValue label="PA06" value="PA06"/>
+          <enumValue label="PB00" value="PB00"/>
+          <enumValue label="PB01" value="PB01"/>
+          <enumValue label="PB02" value="PB02"/>
+          <enumValue label="PC00" value="PC00"/>
+          <enumValue label="PC01" value="PC01"/>
+          <enumValue label="PC02" value="PC02"/>
+          <enumValue label="PC03" value="PC03"/>
+          <enumValue label="PC04" value="PC04"/>
+          <enumValue label="PC05" value="PC05"/>
+          <enumValue label="PD00" value="PD00"/>
+          <enumValue label="PD01" value="PD01"/>
+        </enumProperty>
+      </overriddenProperties>
+    </componentExtension>
+  </deviceExtension>
+</deviceextension:DocumentRoot>

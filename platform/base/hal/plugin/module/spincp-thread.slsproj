@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.SPINCP.THREAD">
+  <module id="SDK.HAL.EMDRV.SPIDRV"/>
+  <folder name="spincp" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="spi-protocol2.c" uri="$(sdkInstallationPath)/platform/base/hal/micro/cortexm3/efm32/spi-protocol2.c"/>
+  </folder>
+</project>

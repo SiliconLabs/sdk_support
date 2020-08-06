@@ -1,0 +1,59 @@
+#ISD afv6
+# ISD version: 4.21.0.201709251649-886
+
+# Application configuration
+appId: bootloader
+frameworkRoot: platform/bootloader
+architecture: EFR32MG1P232F256GM48+BRD4151A+iar
+deviceName: bootloader
+generationDirectory: PATH(ISC_RELATIVE):.
+
+# Devices
+
+# Plugin configuration
+appPlugin: bgapi-uart-dfu=false
+appPlugin: core=true
+appPlugin: crc=true
+appPlugin: crypto=true
+appPlugin: debug=false
+appPlugin: delay-driver=true
+appPlugin: emlib=true
+appPlugin: ezsp-spi=false
+appPlugin: gbl-compression-lz4=false
+appPlugin: gpio-activation=true
+appPlugin: ezsp-gpio-activation=false
+appPlugin: internal_flash=false
+appPlugin: mbedtls=true
+appPlugin: parser=true
+appPlugin: parser-eblv2=false
+appPlugin: spi-driver=false
+appPlugin: spiflash=false
+appPlugin: spislave-driver=false
+appPlugin: storage-common=false
+appPlugin: token-management=true
+appPlugin: uart-driver=true
+appPlugin: xmodem-parser=true
+appPlugin: xmodem-uart=true
+
+# Setup configurations
+{setupId:additionalFiles
+}
+{setupId:bootloaderStorage
+}
+{setupId:callbackConfiguration
+}
+{setupId:hwConfig
+featureLevel=1
+active=true
+}
+{setupId:information
+\{key:description
+
+\}
+}
+{setupId:macros
+}
+{setupId:template
+}
+
+# Plugin options

@@ -1,0 +1,179 @@
+<?xml version='1.0' encoding='ASCII'?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors id="BGM220PC22HNA">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg22.bgm220pc22hna"/>
+    <property key="hardwareConfigData" value="bgm220pc22hna/BGM220PC22HNA.device"/>
+  </descriptors>
+  <descriptors id="efr32.bgm220pc22hna.extension">
+    <property key="hardwareConfigData" value="bgm220pc22hna/BGM220PC22HNA.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.bgm220pc22hna.portio">
+    <property key="hardwareConfigData" value="bgm220pc22hna/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="BGM220PC22WGA">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg22.bgm220pc22wga"/>
+    <property key="hardwareConfigData" value="bgm220pc22wga/BGM220PC22WGA.device"/>
+  </descriptors>
+  <descriptors id="efr32.bgm220pc22wga.extension">
+    <property key="hardwareConfigData" value="bgm220pc22wga/BGM220PC22WGA.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.bgm220pc22wga.portio">
+    <property key="hardwareConfigData" value="bgm220pc22wga/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="BGM220SC12WGA">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg22.bgm220sc12wga"/>
+    <property key="hardwareConfigData" value="bgm220sc12wga/BGM220SC12WGA.device"/>
+  </descriptors>
+  <descriptors id="efr32.bgm220sc12wga.extension">
+    <property key="hardwareConfigData" value="bgm220sc12wga/BGM220SC12WGA.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.bgm220sc12wga.portio">
+    <property key="hardwareConfigData" value="bgm220sc12wga/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="BGM220SC22HNA">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg22.bgm220sc22hna"/>
+    <property key="hardwareConfigData" value="bgm220sc22hna/BGM220SC22HNA.device"/>
+  </descriptors>
+  <descriptors id="efr32.bgm220sc22hna.extension">
+    <property key="hardwareConfigData" value="bgm220sc22hna/BGM220SC22HNA.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.bgm220sc22hna.portio">
+    <property key="hardwareConfigData" value="bgm220sc22hna/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="BGM220SC22WGA">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg22.bgm220sc22wga"/>
+    <property key="hardwareConfigData" value="bgm220sc22wga/BGM220SC22WGA.device"/>
+  </descriptors>
+  <descriptors id="efr32.bgm220sc22wga.extension">
+    <property key="hardwareConfigData" value="bgm220sc22wga/BGM220SC22WGA.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.bgm220sc22wga.portio">
+    <property key="hardwareConfigData" value="bgm220sc22wga/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.port">
+    <property key="hardwareConfigData" value="modules/PORT/PORT.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.portio">
+    <property key="hardwareConfigData" value="modules/PORTIO/PORTIO.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.pin">
+    <property key="hardwareConfigData" value="modules/PIN/PIN.pin"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.antdiv">
+    <property key="hardwareConfigData" value="modules/ANTDIV/ANTDIV.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.btl_button">
+    <property key="hardwareConfigData" value="modules/BTL_BUTTON/BTL_BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.button">
+    <property key="hardwareConfigData" value="modules/BUTTON/BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.cmu">
+    <property key="hardwareConfigData" value="modules/CMU/CMU.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.coex">
+    <property key="hardwareConfigData" value="modules/COEX/COEX.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.dcdc">
+    <property key="hardwareConfigData" value="modules/DCDC/DCDC.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.emu">
+    <property key="hardwareConfigData" value="modules/EMU/EMU.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.euart0">
+    <property key="hardwareConfigData" value="modules/EUART0/EUART0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.extflash">
+    <property key="hardwareConfigData" value="modules/EXTFLASH/EXTFLASH.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.ezradiopro">
+    <property key="hardwareConfigData" value="modules/EZRADIOPRO/EZRADIOPRO.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.fem">
+    <property key="hardwareConfigData" value="modules/FEM/FEM.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.gpio">
+    <property key="hardwareConfigData" value="modules/GPIO/GPIO.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.i2c0">
+    <property key="hardwareConfigData" value="modules/I2C0/I2C0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.i2c1">
+    <property key="hardwareConfigData" value="modules/I2C1/I2C1.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.i2csensor">
+    <property key="hardwareConfigData" value="modules/I2CSENSOR/I2CSENSOR.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.iadc0">
+    <property key="hardwareConfigData" value="modules/IADC0/IADC0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.ioexp">
+    <property key="hardwareConfigData" value="modules/IOEXP/IOEXP.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.led">
+    <property key="hardwareConfigData" value="modules/LED/LED.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.letimer0">
+    <property key="hardwareConfigData" value="modules/LETIMER0/LETIMER0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.lfxo">
+    <property key="hardwareConfigData" value="modules/LFXO/LFXO.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.modem">
+    <property key="hardwareConfigData" value="modules/MODEM/MODEM.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.pa">
+    <property key="hardwareConfigData" value="modules/PA/PA.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.pdm">
+    <property key="hardwareConfigData" value="modules/PDM/PDM.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.prs">
+    <property key="hardwareConfigData" value="modules/PRS/PRS.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.pti">
+    <property key="hardwareConfigData" value="modules/PTI/PTI.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.serial">
+    <property key="hardwareConfigData" value="modules/SERIAL/SERIAL.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.spidisplay">
+    <property key="hardwareConfigData" value="modules/SPIDISPLAY/SPIDISPLAY.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.spincp">
+    <property key="hardwareConfigData" value="modules/SPINCP/SPINCP.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.timer0">
+    <property key="hardwareConfigData" value="modules/TIMER0/TIMER0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.timer1">
+    <property key="hardwareConfigData" value="modules/TIMER1/TIMER1.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.timer2">
+    <property key="hardwareConfigData" value="modules/TIMER2/TIMER2.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.timer3">
+    <property key="hardwareConfigData" value="modules/TIMER3/TIMER3.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.timer4">
+    <property key="hardwareConfigData" value="modules/TIMER4/TIMER4.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.uartncp">
+    <property key="hardwareConfigData" value="modules/UARTNCP/UARTNCP.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.usart0">
+    <property key="hardwareConfigData" value="modules/USART0/USART0.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.usart1">
+    <property key="hardwareConfigData" value="modules/USART1/USART1.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.vcom">
+    <property key="hardwareConfigData" value="modules/VCOM/VCOM.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.vuart">
+    <property key="hardwareConfigData" value="modules/VUART/VUART.module"/>
+  </descriptors>
+  <descriptors id="efr32.bgm22.wdog">
+    <property key="hardwareConfigData" value="modules/WDOG/WDOG.module"/>
+  </descriptors>
+</model:MDescriptors>

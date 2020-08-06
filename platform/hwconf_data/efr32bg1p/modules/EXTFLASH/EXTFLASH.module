@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg1p.extflash" label="EXTFLASH" name="EXTFLASH" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="EXTFLASH.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="EXTFLASH.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="EXTFLASH.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="EXTFLASH.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="EXTFLASH.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="SPI Flash type" description="Connection type of SPI flash. Select Internal SPI flash to auto-configure SPI flash in SiP package (e.g. EFR32MG1P632F256GM32). Non-SiP devices can only select External SPI flash." id="EXTFLASH.BSP_EXTFLASH_INTERNAL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="External SPI flash" value="0"/>
+        <enumValue label="Internal SPI flash" value="1"/>
+      </enumProperty>
+      <enumProperty label="USART connected to SPI Flash" description="USART port to communicate with external flash" id="EXTFLASH.BSP_EXTFLASH_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <enumProperty label="Chip Select pin" description="Pin for external flash CS signal" id="EXTFLASH.BSP_EXTFLASH_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from USART" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Hold pin" description="Pin for external flash hold signal" id="EXTFLASH.BSP_EXTFLASH_HOLD.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Write Protect pin" description="Pin for external flash write protect signal" id="EXTFLASH.BSP_EXTFLASH_WP.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="EXTFLASH">
+        <subCategory label="">
+          <propertyRef refId="EXTFLASH.usedbysdk.BOOL"/>
+          <propertyRef refId="EXTFLASH.hiddenbysdk.BOOL"/>
+          <propertyRef refId="EXTFLASH.showadvanced.BOOL"/>
+          <propertyRef refId="EXTFLASH.forceenable.BOOL"/>
+          <propertyRef refId="EXTFLASH.owner.STRING"/>
+          <propertyRef refId="EXTFLASH.BSP_EXTFLASH_INTERNAL.ENUM"/>
+          <propertyRef refId="EXTFLASH.BSP_EXTFLASH_USART.MOD"/>
+          <propertyRef refId="EXTFLASH.BSP_EXTFLASH_CS.PIN"/>
+          <propertyRef refId="EXTFLASH.BSP_EXTFLASH_HOLD.PIN"/>
+          <propertyRef refId="EXTFLASH.BSP_EXTFLASH_WP.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

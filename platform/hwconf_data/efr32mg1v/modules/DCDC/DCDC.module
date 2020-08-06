@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg1v.dcdc" label="DCDC" name="DCDC" description="DC-to-DC Converter" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="DCDC.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="DCDC.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="DCDC.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="DCDC.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="DCDC.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="DCDC initialization options struct" description="Settings to initialize the DCDC. The value given here will typically be assigned to a EMU_DCDCInit_TypeDef structure from EMLIB. One way of setting non-default settings for this property, is to set it to the value of a macro that is defined elsewhere. For instance, this property can be set to MY_CUSTOM_DCDC_INIT, and that macro can be #define-ed in the hal-config.h file before the EMU section (taking care to define it outside of the $[...]$ sections that get overwritten when generating)." id="DCDC.BSP_DCDC_INIT.STRING" defaultValue="EMU_DCDCINIT_DEFAULT" hidden="false" readonly="false"/>
+      <enumProperty label="Bypass DCDC" description="The PCB is wired for DCDC, but the DCDC should be bypassed." id="DCDC.HAL_DCDC_BYPASS.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="DCDC">
+        <subCategory label="">
+          <propertyRef refId="DCDC.usedbysdk.BOOL"/>
+          <propertyRef refId="DCDC.hiddenbysdk.BOOL"/>
+          <propertyRef refId="DCDC.showadvanced.BOOL"/>
+          <propertyRef refId="DCDC.forceenable.BOOL"/>
+          <propertyRef refId="DCDC.owner.STRING"/>
+          <propertyRef refId="DCDC.BSP_DCDC_INIT.STRING"/>
+          <propertyRef refId="DCDC.HAL_DCDC_BYPASS.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

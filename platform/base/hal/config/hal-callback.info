@@ -1,0 +1,25 @@
+#include "hal/hal.h"
+
+/**
+ * @brief Called whenever the radio is powered on.
+ */
+void halRadioPowerUpHandler(void)
+{
+}
+
+/**
+ * @brief Called whenever the radio is powered off.
+ */
+void halRadioPowerDownHandler(void)
+{
+}
+
+/**
+ * @brief Called whenever the microcontroller enters/exits a idle/sleep mode
+ *
+ * @param enter        True if entering idle/sleep, False if exiting
+ * @param sleepMode    Idle/sleep mode
+ */
+void halSleepCallback(boolean enter, SleepModes sleepMode)
+{
+}

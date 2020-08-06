@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore" xmlns:device="http://www.silabs.com/ss/hwconfig/device.ecore" xmlns:deviceextension="http://www.silabs.com/ss/hwconfig/deviceextension.ecore" xmlns:crossbar="http://www.silabs.com/ss/hwconfig/crossbar.ecore" xmlns:portio="http://www.silabs.com/ss/hwconfig/portio.ecore" xmlns:pin="http://www.silabs.com/ss/hwconfig/pin.ecore" xmlns:xmi="http://www.omg.org/XMI" xmi:version="2.0">
+  <module id="efr32.efr32bg1p.portio" name="PORTIO" label="PORTIO" description="" version="EFR">
+    <properties/>
+    <propertyCategories/>
+    <signals/>
+  </module>
+</module:DocumentRoot>

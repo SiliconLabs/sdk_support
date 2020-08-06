@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32gg11b.ioexp" label="IOEXP" name="IOEXP" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="IOEXP.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="IOEXP.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="IOEXP.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="IOEXP.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="IOEXP.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="IOEXP wake pin" description="Select pin to connect to the wake signal of the IO expander" id="IOEXP.BSP_IOEXP_WAKE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Enable VCOM via IO expander" description="Enable the use of VCOM via IO Expander" id="IOEXP.HAL_IOEXP_VCOM_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="IO expander I2C" description="Select I2C peripheral to connect to the IO Expander" id="IOEXP.BSP_IOEXP_PERIPHERAL.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="IOEXP">
+        <subCategory label="">
+          <propertyRef refId="IOEXP.usedbysdk.BOOL"/>
+          <propertyRef refId="IOEXP.hiddenbysdk.BOOL"/>
+          <propertyRef refId="IOEXP.showadvanced.BOOL"/>
+          <propertyRef refId="IOEXP.forceenable.BOOL"/>
+          <propertyRef refId="IOEXP.owner.STRING"/>
+          <propertyRef refId="IOEXP.BSP_IOEXP_WAKE.PIN"/>
+          <propertyRef refId="IOEXP.HAL_IOEXP_VCOM_ENABLE.BOOL"/>
+          <propertyRef refId="IOEXP.BSP_IOEXP_PERIPHERAL.MOD"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

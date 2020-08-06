@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.mgm11.bulbpwm" label="BULBPWM" name="BULBPWM" description="Configuration of pulse-width modulation for controlling a lightbulb" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="BULBPWM.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="BULBPWM.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="BULBPWM.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="BULBPWM.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="BULBPWM.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <integerProperty label="PWM frequency select" description="Base frequency of the PWM" id="BULBPWM.HAL_BULBPWM_FREQUENCY.INT" minValue="500" maxValue="2000" defaultValue="1000" hidden="false" readonly="false"/>
+      <enumProperty label="BULBPWM Timer module" description="Timer to be used by the PWM" id="BULBPWM.BSP_BULBPWM_TIMER.MOD" hidden="false" readonly="true"/>
+      <enumProperty label="Enable white PWM channel (CC0)" description="Enable Compare/Capture channel for white LED" id="BULBPWM.HAL_BULBPWM_WHITE_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable lowtemp PWM channel (CC1)" description="Enable Compare/Capture channel for low temperature LED" id="BULBPWM.HAL_BULBPWM_LOWTEMP_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable status PWM channel (CC2)" description="Enable Compare/Capture channel for status LED" id="BULBPWM.HAL_BULBPWM_STATUS_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="BULBPWM">
+        <subCategory label="">
+          <propertyRef refId="BULBPWM.usedbysdk.BOOL"/>
+          <propertyRef refId="BULBPWM.hiddenbysdk.BOOL"/>
+          <propertyRef refId="BULBPWM.showadvanced.BOOL"/>
+          <propertyRef refId="BULBPWM.forceenable.BOOL"/>
+          <propertyRef refId="BULBPWM.owner.STRING"/>
+          <propertyRef refId="BULBPWM.HAL_BULBPWM_FREQUENCY.INT"/>
+          <propertyRef refId="BULBPWM.BSP_BULBPWM_TIMER.MOD"/>
+          <propertyRef refId="BULBPWM.HAL_BULBPWM_WHITE_ENABLE.BOOL"/>
+          <propertyRef refId="BULBPWM.HAL_BULBPWM_LOWTEMP_ENABLE.BOOL"/>
+          <propertyRef refId="BULBPWM.HAL_BULBPWM_STATUS_ENABLE.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,102 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg1p.batterymon" label="BATTERYMON" name="BATTERYMON" description="External battery monitor used on reference designs." version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="BATTERYMON.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="BATTERYMON.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="BATTERYMON.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="BATTERYMON.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="BATTERYMON.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Battery monitor TX active PRS channel" description="Signal to trigger reading the supply voltage when TX is active (current consumption is highest)" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="BATTERYMON.prs_disabled_chn_BATTERYMON_TX_ACTIVE_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="BATTERYMON">
+        <subCategory label="">
+          <propertyRef refId="BATTERYMON.usedbysdk.BOOL"/>
+          <propertyRef refId="BATTERYMON.hiddenbysdk.BOOL"/>
+          <propertyRef refId="BATTERYMON.showadvanced.BOOL"/>
+          <propertyRef refId="BATTERYMON.forceenable.BOOL"/>
+          <propertyRef refId="BATTERYMON.owner.STRING"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE_CHANNEL.ENUM"/>
+          <propertyRef refId="BATTERYMON.prs_disabled_chn_BATTERYMON_TX_ACTIVE_pin.STRING"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE0.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE1.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE2.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE3.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE4.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE5.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE6.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE7.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE8.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE9.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE10.PIN"/>
+          <propertyRef refId="BATTERYMON.BSP_BATTERYMON_TX_ACTIVE11.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

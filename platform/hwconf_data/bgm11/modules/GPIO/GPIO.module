@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.bgm11.gpio" label="GPIO" name="GPIO" description="GPIO configuration of debug signals" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="GPIO.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="GPIO.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="GPIO.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="GPIO.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="GPIO.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Serial Wire Output pin" description="Select pin for SWO" id="GPIO.BSP_TRACE_SWO.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="GPIO">
+        <subCategory label="">
+          <propertyRef refId="GPIO.usedbysdk.BOOL"/>
+          <propertyRef refId="GPIO.hiddenbysdk.BOOL"/>
+          <propertyRef refId="GPIO.showadvanced.BOOL"/>
+          <propertyRef refId="GPIO.forceenable.BOOL"/>
+          <propertyRef refId="GPIO.owner.STRING"/>
+          <propertyRef refId="GPIO.BSP_TRACE_SWO.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

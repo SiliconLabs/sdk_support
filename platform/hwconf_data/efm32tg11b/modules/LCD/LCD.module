@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32tg11b.lcd" label="LCD" name="LCD" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="LCD.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="LCD.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="LCD.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="LCD.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="LCD.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+    </properties>
+    <propertyCategories>
+      <category label="LCD">
+        <subCategory label="">
+          <propertyRef refId="LCD.usedbysdk.BOOL"/>
+          <propertyRef refId="LCD.hiddenbysdk.BOOL"/>
+          <propertyRef refId="LCD.showadvanced.BOOL"/>
+          <propertyRef refId="LCD.forceenable.BOOL"/>
+          <propertyRef refId="LCD.owner.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

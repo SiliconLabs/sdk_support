@@ -1,0 +1,5 @@
+import efm32gg12b.halconfig.halconfig_types as halconfig_types
+import efm32gg12b.halconfig.halconfig_dependency as halconfig_dependency
+import efm32gg12b.PythonSnippet.ExporterModel as ExporterModel
+import efm32gg12b.PythonSnippet.RuntimeModel as RuntimeModel
+import efm32gg12b.PythonSnippet.Metadata as Metadata

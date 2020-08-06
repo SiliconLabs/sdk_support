@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.EMDRV.UARTDRV">
+  <folder name="emdrv" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="uartdrv.c" uri="$(sdkInstallationPath)/platform/emdrv/uartdrv/src/uartdrv.c"/>
+  </folder>
+</project>

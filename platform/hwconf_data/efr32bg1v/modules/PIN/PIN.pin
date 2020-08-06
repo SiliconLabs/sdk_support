@@ -1,0 +1,46 @@
+<?xml version='1.0' encoding='ASCII'?>
+<pin:DocumentRoot xmlns:pin="http://www.silabs.com/ss/hwconfig/pin.ecore">
+  <pin description="" id="efr32.efr32bg1v.pin" label="Pin" name="Pin" version="A" ioModePropertyId="ports.settings.pinmode" skippedPropertyId="ports.settings.reserve" labelPropertyId="ports.settings.custompinname">
+    <properties>
+      <enumProperty label="Pin mode" id="ports.settings.pinmode" description="" defaultValueIndex="0" hidden="true">
+        <enumValue value="Disabled"/>
+        <enumValue value="Input"/>
+        <enumValue value="Input pull"/>
+        <enumValue value="Input pull filter"/>
+        <enumValue value="Push-pull"/>
+        <enumValue value="Push-pull alternate"/>
+        <enumValue value="Wired-or"/>
+        <enumValue value="Wired-or pulldown"/>
+        <enumValue value="Wired-and"/>
+        <enumValue value="Wired-and filter"/>
+        <enumValue value="Wired-and pullup"/>
+        <enumValue value="Wired-and pullup filter"/>
+        <enumValue value="Wired-and alternate"/>
+        <enumValue value="Wired-and alternate filter"/>
+        <enumValue value="Wired-and alternate pullup"/>
+        <enumValue value="Wired-and alternate pullup filter"/>
+      </enumProperty>
+
+      <stringProperty label="Custom pin name" id="ports.settings.custompinname" description=""/>
+      <stringProperty label="HAL pin name" id="ports.settings.halpinname" readonly="true" description="" transient="true"/>
+      <stringProperty label="Dummy hidden setting" id="ports.settings.dummy" readonly="true" description="" transient="true" hidden="true"/>
+      <enumProperty label="Pin conflict resolution" id="ports.settings.reserve" description="" defaultValueIndex="0">
+        <enumValue value="Allowed"/>
+        <enumValue value="Not allowed"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="Port Pin">
+        <subCategory label="Settings">
+          <propertyRef refId="ports.settings.pinmode"/>
+
+
+
+
+          <propertyRef refId="ports.settings.custompinname"/>
+          <propertyRef refId="ports.settings.reserve"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+  </pin>
+</pin:DocumentRoot>

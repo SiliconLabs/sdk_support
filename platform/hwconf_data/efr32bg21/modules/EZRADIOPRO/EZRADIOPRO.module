@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32bg21.ezradiopro" label="EZRADIOPRO" name="EZRADIOPRO" description="EZRadioPro external transceiver configuration" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="EZRADIOPRO.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="EZRADIOPRO.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="EZRADIOPRO.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="EZRADIOPRO.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="EZRADIOPRO.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="USART port" description="USART port to communicate with PRO2+ tranceiver" id="EZRADIOPRO.BSP_EZRADIOPRO_USART.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+      <enumProperty label="nSEL/CS pin" description="Pin for PRO2+ tranceiver CS signal" id="EZRADIOPRO.BSP_EZRADIOPRO_CS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Inherited from USART" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="EZRadio Pro Interrupt pin" description="Pin for PRO2+ tranceiver interrupt signal" id="EZRADIOPRO.BSP_EZRADIOPRO_INT.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="EZRadio Pro Shutdown pin" description="Pin for PRO2+ tranceiver shutdown signal" id="EZRADIOPRO.BSP_EZRADIOPRO_SDN.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Shutdown radio when MCU is sleeping" description="Shut down radio when MCU is sleeping" id="EZRADIOPRO.HAL_EZRADIOPRO_SHUTDOWN_SLEEP.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="EZRADIOPRO">
+        <subCategory label="">
+          <propertyRef refId="EZRADIOPRO.usedbysdk.BOOL"/>
+          <propertyRef refId="EZRADIOPRO.hiddenbysdk.BOOL"/>
+          <propertyRef refId="EZRADIOPRO.showadvanced.BOOL"/>
+          <propertyRef refId="EZRADIOPRO.forceenable.BOOL"/>
+          <propertyRef refId="EZRADIOPRO.owner.STRING"/>
+          <propertyRef refId="EZRADIOPRO.BSP_EZRADIOPRO_USART.MOD"/>
+          <propertyRef refId="EZRADIOPRO.BSP_EZRADIOPRO_CS.PIN"/>
+          <propertyRef refId="EZRADIOPRO.BSP_EZRADIOPRO_INT.PIN"/>
+          <propertyRef refId="EZRADIOPRO.BSP_EZRADIOPRO_SDN.PIN"/>
+          <propertyRef refId="EZRADIOPRO.HAL_EZRADIOPRO_SHUTDOWN_SLEEP.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

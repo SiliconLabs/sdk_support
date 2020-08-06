@@ -1,0 +1,24 @@
+id: "systemview"
+version: 1
+package: "platform"
+description: "SEGGER SystemView"
+category: "Platform|Util"
+quality: "internal"
+config_file:
+  - path: "util/third_party/segger/systemview/Config/SEGGER_SYSVIEW_Conf.h"
+source:
+  - path: "util/third_party/segger/systemview/SEGGER/SEGGER_SYSVIEW.c"
+include:
+  - path: "util/third_party/segger/systemview/SEGGER"
+    file_list:
+      - path: "Global.h"
+      - path: "SEGGER_SYSVIEW.h"
+      - path: "SEGGER_SYSVIEW_ConfDefaults.h"
+      - path: "SEGGER_SYSVIEW_Int.h"
+provides:
+  - name: "systemview"
+requires:
+  - name: "rtt"
+  - name: "systemview_micriumos"
+    condition:
+      - "micriumos"

@@ -1,0 +1,9 @@
+#include PLATFORM_HEADER
+#include CONFIGURATION_HEADER
+#include EMBER_AF_API_NVM3
+// The NVM3 Callback function.
+void halNvm3Callback(Ecode_t status)
+{
+  // NVM3 does error handling internally, but this callback is included
+  // in case the application requires any custom error handling.
+}

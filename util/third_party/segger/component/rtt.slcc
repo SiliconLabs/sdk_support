@@ -1,0 +1,17 @@
+id: "rtt"
+version: 1
+package: "platform"
+description: "SEGGER RTT"
+category: "Platform|Util"
+quality: "internal"
+config_file:
+  - path: "util/third_party/segger/systemview/Config/SEGGER_RTT_Conf.h"
+source:
+  - path: "util/third_party/segger/systemview/SEGGER/SEGGER_RTT.c"
+include:
+  - path: "util/third_party/segger/systemview/SEGGER"
+    file_list:
+      - path: "SEGGER.h"
+      - path: "SEGGER_RTT.h"
+provides:
+  - name: "rtt"

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efm32.efm32gg11b.eth" label="ETH" name="ETH" description="" version="efm">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="ETH.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="ETH.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="ETH.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="ETH.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="ETH.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+    </properties>
+    <propertyCategories>
+      <category label="ETH">
+        <subCategory label="">
+          <propertyRef refId="ETH.usedbysdk.BOOL"/>
+          <propertyRef refId="ETH.hiddenbysdk.BOOL"/>
+          <propertyRef refId="ETH.showadvanced.BOOL"/>
+          <propertyRef refId="ETH.forceenable.BOOL"/>
+          <propertyRef refId="ETH.owner.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

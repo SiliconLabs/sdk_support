@@ -1,0 +1,81 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="ezr32.ezr32wg.led" label="LED" name="LED" description="" version="ezr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="LED.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="LED.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="LED.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="LED.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="LED.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <integerProperty label="Number of LEDs available on board" description="Number of LEDs physically present in hardware [0-8]" id="LED.BSP_LED_COUNT.INT" minValue="0" maxValue="8" defaultValue="2" hidden="false" readonly="false"/>
+      <enumProperty label="LED 0" id="LED.BSP_LED0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 1" id="LED.BSP_LED1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 2" id="LED.BSP_LED2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 3" id="LED.BSP_LED3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 4" id="LED.BSP_LED4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 5" id="LED.BSP_LED5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 6" id="LED.BSP_LED6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="LED 7" id="LED.BSP_LED7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <stringProperty label="BSP_LED init" id="LED.BSP_LED_INIT.ARRAY" defaultValue="{ BSP_LED0_PORT, BSP_LED0_PIN }, { BSP_LED1_PORT, BSP_LED1_PIN }" hidden="true" readonly="false" transient="true"/>
+      <integerProperty label="Number of LEDs to initialize" description="Cannot exceed number of LEDs configured as available above." id="LED.HAL_LED_COUNT.INT" minValue="0" maxValue="8" defaultValue="0" hidden="true" readonly="false"/>
+      <stringProperty label="List of LED indices to initialize" description="Comma separated list of the LEDs that should be enabled for this application. Example: Board has 4 LEDs, but application only uses LEDs 0 and 2. Configure the list of LEDs to enable as &quot;0, 2&quot;, and the number of LEDs to initialize as 2." id="LED.HAL_LED_ENABLE.ARRAY" defaultValue="0, 1" hidden="true" readonly="false"/>
+      <enumProperty label="Polarity" description="LED polarity" id="LED.BSP_LED_POLARITY.ENUM" defaultValueIndex="1" hidden="false" readonly="false">
+        <enumValue label="Active low" value="0"/>
+        <enumValue label="Active high" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="LED">
+        <subCategory label="">
+          <propertyRef refId="LED.usedbysdk.BOOL"/>
+          <propertyRef refId="LED.hiddenbysdk.BOOL"/>
+          <propertyRef refId="LED.showadvanced.BOOL"/>
+          <propertyRef refId="LED.forceenable.BOOL"/>
+          <propertyRef refId="LED.owner.STRING"/>
+          <propertyRef refId="LED.BSP_LED_COUNT.INT"/>
+          <propertyRef refId="LED.BSP_LED0.PIN"/>
+          <propertyRef refId="LED.BSP_LED1.PIN"/>
+          <propertyRef refId="LED.BSP_LED2.PIN"/>
+          <propertyRef refId="LED.BSP_LED3.PIN"/>
+          <propertyRef refId="LED.BSP_LED4.PIN"/>
+          <propertyRef refId="LED.BSP_LED5.PIN"/>
+          <propertyRef refId="LED.BSP_LED6.PIN"/>
+          <propertyRef refId="LED.BSP_LED7.PIN"/>
+          <propertyRef refId="LED.BSP_LED_INIT.ARRAY"/>
+          <propertyRef refId="LED.HAL_LED_COUNT.INT"/>
+          <propertyRef refId="LED.HAL_LED_ENABLE.ARRAY"/>
+          <propertyRef refId="LED.BSP_LED_POLARITY.ENUM"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

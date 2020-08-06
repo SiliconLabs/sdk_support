@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32fg14p.i2csensor" label="I2CSENSOR" name="I2CSENSOR" description="I2C sensor configuration. Can be used with I2C sensors on starter kits." version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="I2CSENSOR.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="I2CSENSOR.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="I2CSENSOR.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="I2CSENSOR.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="I2CSENSOR.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="Sensor enable pin" description="Pin for I2C sensor enable signal (typically used on Starter Kit)" id="I2CSENSOR.BSP_I2CSENSOR_ENABLE.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="I2C peripheral" description="Select I2C peripheral" id="I2CSENSOR.BSP_I2CSENSOR_PERIPHERAL.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="I2CSENSOR">
+        <subCategory label="">
+          <propertyRef refId="I2CSENSOR.usedbysdk.BOOL"/>
+          <propertyRef refId="I2CSENSOR.hiddenbysdk.BOOL"/>
+          <propertyRef refId="I2CSENSOR.showadvanced.BOOL"/>
+          <propertyRef refId="I2CSENSOR.forceenable.BOOL"/>
+          <propertyRef refId="I2CSENSOR.owner.STRING"/>
+          <propertyRef refId="I2CSENSOR.BSP_I2CSENSOR_ENABLE.PIN"/>
+          <propertyRef refId="I2CSENSOR.BSP_I2CSENSOR_PERIPHERAL.MOD"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

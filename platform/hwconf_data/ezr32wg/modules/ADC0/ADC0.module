@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="ezr32.ezr32wg.adc0" label="ADC0" name="ADC0" description="" version="ezr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="ADC.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="ADC.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="ADC.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="ADC.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="ADC.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="ADC.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="ADC0">
+        <subCategory label="">
+          <propertyRef refId="ADC.usedbysdk.BOOL"/>
+          <propertyRef refId="ADC.hiddenbysdk.BOOL"/>
+          <propertyRef refId="ADC.showadvanced.BOOL"/>
+          <propertyRef refId="ADC.forceenable.BOOL"/>
+          <propertyRef refId="ADC.owner.STRING"/>
+          <propertyRef refId="ADC.customname.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

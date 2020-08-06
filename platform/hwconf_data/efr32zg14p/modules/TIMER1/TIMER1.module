@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32zg14p.timer1" label="TIMER1" name="TIMER1" description="Timer" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="TIMER.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="TIMER.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="TIMER.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="TIMER.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="TIMER.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="TIMER.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="TIMER Compare/Capture Channel 0 pin" description="Select pin for CC channel 0" id="TIMER.BSP_TIMER_CC0.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="TIMER Compare/Capture Channel 1 pin" description="Select pin for CC channel 1" id="TIMER.BSP_TIMER_CC1.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="TIMER Compare/Capture Channel 2 pin" description="Select pin for CC channel 2" id="TIMER.BSP_TIMER_CC2.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="TIMER Compare/Capture Channel 3 pin" description="Select pin for CC channel 3" id="TIMER.BSP_TIMER_CC3.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="TIMER1">
+        <subCategory label="">
+          <propertyRef refId="TIMER.usedbysdk.BOOL"/>
+          <propertyRef refId="TIMER.hiddenbysdk.BOOL"/>
+          <propertyRef refId="TIMER.showadvanced.BOOL"/>
+          <propertyRef refId="TIMER.forceenable.BOOL"/>
+          <propertyRef refId="TIMER.owner.STRING"/>
+          <propertyRef refId="TIMER.customname.STRING"/>
+          <propertyRef refId="TIMER.BSP_TIMER_CC0.PIN"/>
+          <propertyRef refId="TIMER.BSP_TIMER_CC1.PIN"/>
+          <propertyRef refId="TIMER.BSP_TIMER_CC2.PIN"/>
+          <propertyRef refId="TIMER.BSP_TIMER_CC3.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

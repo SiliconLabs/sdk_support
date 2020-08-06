@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.ANTDIV.BASE">
+  <folder name="antenna" partCompatibility="mcu.arm.efr32.*">
+    <file name="antenna.c" uri="$(sdkInstallationPath)/platform/base/hal/plugin/antenna/antenna.c"/>
+  </folder>
+</project>

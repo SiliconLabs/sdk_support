@@ -1,0 +1,311 @@
+<?xml version='1.0' encoding='ASCII'?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors id="EFR32BG1B132F128GJ43">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f128gj43"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f128gj43/EFR32BG1B132F128GJ43.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f128gj43.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gj43/EFR32BG1B132F128GJ43.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f128gj43.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gj43/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F128GM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f128gm32"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm32/EFR32BG1B132F128GM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f128gm32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm32/EFR32BG1B132F128GM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f128gm32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F128GM48">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f128gm48"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm48/EFR32BG1B132F128GM48.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f128gm48.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm48/EFR32BG1B132F128GM48.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f128gm48.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f128gm48/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256GD32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256gd32"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256gd32/EFR32BG1B132F256GD32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256gd32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gd32/EFR32BG1B132F256GD32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256gd32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gd32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256GJ43">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256gj43"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256gj43/EFR32BG1B132F256GJ43.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256gj43.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gj43/EFR32BG1B132F256GJ43.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256gj43.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gj43/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256GM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256gm32"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm32/EFR32BG1B132F256GM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256gm32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm32/EFR32BG1B132F256GM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256gm32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256GM48">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256gm48"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm48/EFR32BG1B132F256GM48.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256gm48.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm48/EFR32BG1B132F256GM48.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256gm48.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm48/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256GM56">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256gm56"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm56/EFR32BG1B132F256GM56.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256gm56.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm56/EFR32BG1B132F256GM56.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256gm56.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256gm56/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B132F256IM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b132f256im32"/>
+    <property key="hardwareConfigData" value="efr32bg1b132f256im32/EFR32BG1B132F256IM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b132f256im32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b132f256im32/EFR32BG1B132F256IM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b132f256im32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b132f256im32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F128GJ43">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f128gj43"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f128gj43/EFR32BG1B232F128GJ43.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f128gj43.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gj43/EFR32BG1B232F128GJ43.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f128gj43.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gj43/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F128GM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f128gm32"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm32/EFR32BG1B232F128GM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f128gm32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm32/EFR32BG1B232F128GM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f128gm32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F128GM48">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f128gm48"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm48/EFR32BG1B232F128GM48.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f128gm48.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm48/EFR32BG1B232F128GM48.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f128gm48.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f128gm48/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F256GJ43">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f256gj43"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f256gj43/EFR32BG1B232F256GJ43.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f256gj43.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gj43/EFR32BG1B232F256GJ43.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f256gj43.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gj43/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F256GM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f256gm32"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm32/EFR32BG1B232F256GM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f256gm32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm32/EFR32BG1B232F256GM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f256gm32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F256GM48">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f256gm48"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm48/EFR32BG1B232F256GM48.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f256gm48.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm48/EFR32BG1B232F256GM48.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f256gm48.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm48/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F256GM56">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f256gm56"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm56/EFR32BG1B232F256GM56.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f256gm56.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm56/EFR32BG1B232F256GM56.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f256gm56.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f256gm56/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EFR32BG1B232F256IM32">
+    <property key="partCompatibility" value="mcu.arm.efr32.bg1.efr32bg1b232f256im32"/>
+    <property key="hardwareConfigData" value="efr32bg1b232f256im32/EFR32BG1B232F256IM32.device"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b232f256im32.extension">
+    <property key="hardwareConfigData" value="efr32bg1b232f256im32/EFR32BG1B232F256IM32.deviceextension"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.efr32bg1b232f256im32.portio">
+    <property key="hardwareConfigData" value="efr32bg1b232f256im32/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.port">
+    <property key="hardwareConfigData" value="modules/PORT/PORT.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.portio">
+    <property key="hardwareConfigData" value="modules/PORTIO/PORTIO.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.pin">
+    <property key="hardwareConfigData" value="modules/PIN/PIN.pin"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.acmp0">
+    <property key="hardwareConfigData" value="modules/ACMP0/ACMP0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.acmp1">
+    <property key="hardwareConfigData" value="modules/ACMP1/ACMP1.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.adc0">
+    <property key="hardwareConfigData" value="modules/ADC0/ADC0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.antdiv">
+    <property key="hardwareConfigData" value="modules/ANTDIV/ANTDIV.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.batterymon">
+    <property key="hardwareConfigData" value="modules/BATTERYMON/BATTERYMON.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.btl_button">
+    <property key="hardwareConfigData" value="modules/BTL_BUTTON/BTL_BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.bulbpwm">
+    <property key="hardwareConfigData" value="modules/BULBPWM/BULBPWM.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.bulbpwm_color">
+    <property key="hardwareConfigData" value="modules/BULBPWM_COLOR/BULBPWM_COLOR.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.button">
+    <property key="hardwareConfigData" value="modules/BUTTON/BUTTON.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.cmu">
+    <property key="hardwareConfigData" value="modules/CMU/CMU.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.coex">
+    <property key="hardwareConfigData" value="modules/COEX/COEX.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.cs5463">
+    <property key="hardwareConfigData" value="modules/CS5463/CS5463.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.dcdc">
+    <property key="hardwareConfigData" value="modules/DCDC/DCDC.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.emu">
+    <property key="hardwareConfigData" value="modules/EMU/EMU.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.extflash">
+    <property key="hardwareConfigData" value="modules/EXTFLASH/EXTFLASH.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.ezradiopro">
+    <property key="hardwareConfigData" value="modules/EZRADIOPRO/EZRADIOPRO.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.fem">
+    <property key="hardwareConfigData" value="modules/FEM/FEM.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.gpio">
+    <property key="hardwareConfigData" value="modules/GPIO/GPIO.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.i2c0">
+    <property key="hardwareConfigData" value="modules/I2C0/I2C0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.i2csensor">
+    <property key="hardwareConfigData" value="modules/I2CSENSOR/I2CSENSOR.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.idac0">
+    <property key="hardwareConfigData" value="modules/IDAC0/IDAC0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.ioexp">
+    <property key="hardwareConfigData" value="modules/IOEXP/IOEXP.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.led">
+    <property key="hardwareConfigData" value="modules/LED/LED.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.letimer0">
+    <property key="hardwareConfigData" value="modules/LETIMER0/LETIMER0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.leuart0">
+    <property key="hardwareConfigData" value="modules/LEUART0/LEUART0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.lfxo">
+    <property key="hardwareConfigData" value="modules/LFXO/LFXO.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.modem">
+    <property key="hardwareConfigData" value="modules/MODEM/MODEM.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.pa">
+    <property key="hardwareConfigData" value="modules/PA/PA.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.pcnt0">
+    <property key="hardwareConfigData" value="modules/PCNT0/PCNT0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.prs">
+    <property key="hardwareConfigData" value="modules/PRS/PRS.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.pti">
+    <property key="hardwareConfigData" value="modules/PTI/PTI.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.pyd1698">
+    <property key="hardwareConfigData" value="modules/PYD1698/PYD1698.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.serial">
+    <property key="hardwareConfigData" value="modules/SERIAL/SERIAL.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.spidisplay">
+    <property key="hardwareConfigData" value="modules/SPIDISPLAY/SPIDISPLAY.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.spincp">
+    <property key="hardwareConfigData" value="modules/SPINCP/SPINCP.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.timer0">
+    <property key="hardwareConfigData" value="modules/TIMER0/TIMER0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.timer1">
+    <property key="hardwareConfigData" value="modules/TIMER1/TIMER1.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.uartncp">
+    <property key="hardwareConfigData" value="modules/UARTNCP/UARTNCP.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.usart0">
+    <property key="hardwareConfigData" value="modules/USART0/USART0.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.usart1">
+    <property key="hardwareConfigData" value="modules/USART1/USART1.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.vcom">
+    <property key="hardwareConfigData" value="modules/VCOM/VCOM.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.vuart">
+    <property key="hardwareConfigData" value="modules/VUART/VUART.module"/>
+  </descriptors>
+  <descriptors id="efr32.efr32bg1b.wdog">
+    <property key="hardwareConfigData" value="modules/WDOG/WDOG.module"/>
+  </descriptors>
+</model:MDescriptors>

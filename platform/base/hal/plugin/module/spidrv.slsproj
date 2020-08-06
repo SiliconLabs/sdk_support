@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.EMDRV.SPIDRV">
+  <folder name="emdrv" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="spidrv.c" uri="$(sdkInstallationPath)/platform/emdrv/spidrv/src/spidrv.c"/>
+  </folder>
+</project>

@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.mgm21.vuart" label="VUART" name="VUART" description="Serial communication over debug interface (SWO/RTT)" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="VUART.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="VUART.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="VUART.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="VUART.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="VUART.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="VUART type" description="Select the transport for VUART. SWO: Dedicated Serial Wire Output pin, input through shared memory with debug host (RTT). RTT: Bidirectional shared memory [not implemented in (W)STK]." id="VUART.HAL_VUART_TYPE.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="No VUART" value="HAL_VUART_TYPE_NONE"/>
+        <enumValue label="VUART via SWO" value="HAL_VUART_TYPE_SWO"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="VUART">
+        <subCategory label="">
+          <propertyRef refId="VUART.usedbysdk.BOOL"/>
+          <propertyRef refId="VUART.hiddenbysdk.BOOL"/>
+          <propertyRef refId="VUART.showadvanced.BOOL"/>
+          <propertyRef refId="VUART.forceenable.BOOL"/>
+          <propertyRef refId="VUART.owner.STRING"/>
+          <propertyRef refId="VUART.HAL_VUART_TYPE.ENUM"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

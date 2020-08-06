@@ -1,0 +1,266 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.mgm22.fem" label="FEM" name="FEM" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="FEM.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="FEM.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="FEM.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="FEM.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="FEM.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="RX PRS channel" description="PRS channel for RX control (FEM pin CRX). If no TX defined, it is dual use pin." id="FEM.BSP_FEM_RX_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="FEM.prs_disabled_chn_FEM_RX_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_RX0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_RX1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_RX2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_RX3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_RX4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_RX5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_RX6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_RX7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_RX8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_RX9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_RX10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_RX11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Sleep PRS channel" description="PRS channel for sleep control (FEM pin CSD). Optional: If used, must be channel immediately following RX PRS channel." id="FEM.BSP_FEM_SLEEP_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="FEM.prs_disabled_chn_FEM_SLEEP_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_SLEEP0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_SLEEP1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_SLEEP2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_SLEEP3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_SLEEP4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_SLEEP5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_SLEEP6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_SLEEP7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_SLEEP8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_SLEEP9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_SLEEP10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_SLEEP11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="TX PRS channel" description="PRS channel for TX control (FEM pin CTX). Optional: If not used, assumes CRX is dual use pin." id="FEM.BSP_FEM_TX_CHANNEL.ENUM" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+        <enumValue label="CH0" value="0"/>
+        <enumValue label="CH1" value="1"/>
+        <enumValue label="CH2" value="2"/>
+        <enumValue label="CH3" value="3"/>
+        <enumValue label="CH4" value="4"/>
+        <enumValue label="CH5" value="5"/>
+        <enumValue label="CH6" value="6"/>
+        <enumValue label="CH7" value="7"/>
+        <enumValue label="CH8" value="8"/>
+        <enumValue label="CH9" value="9"/>
+        <enumValue label="CH10" value="10"/>
+        <enumValue label="CH11" value="11"/>
+      </enumProperty>
+      <stringProperty label="PRS channel output pin" description="No PRS channel selected" id="FEM.prs_disabled_chn_FEM_TX_pin.STRING" defaultValue="" hidden="false" readonly="true"/>
+      <enumProperty label="PRS channel 0 output pin" id="FEM.BSP_FEM_TX0.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 1 output pin" id="FEM.BSP_FEM_TX1.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 2 output pin" id="FEM.BSP_FEM_TX2.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 3 output pin" id="FEM.BSP_FEM_TX3.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 4 output pin" id="FEM.BSP_FEM_TX4.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 5 output pin" id="FEM.BSP_FEM_TX5.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 6 output pin" id="FEM.BSP_FEM_TX6.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 7 output pin" id="FEM.BSP_FEM_TX7.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 8 output pin" id="FEM.BSP_FEM_TX8.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 9 output pin" id="FEM.BSP_FEM_TX9.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 10 output pin" id="FEM.BSP_FEM_TX10.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PRS channel 11 output pin" id="FEM.BSP_FEM_TX11.PIN" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Enable RX mode" description="Enable RX mode" id="FEM.HAL_FEM_RX_ACTIVE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable TX mode" description="Enable TX mode" id="FEM.HAL_FEM_TX_ACTIVE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Bypass pin" description="Select pin for the bypass (FEM pin CPS) signal (optional)" id="FEM.BSP_FEM_BYPASS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="TX power pin" description="Select pin for the tx power mode (FEM pin CHL) signal (optional)" id="FEM.BSP_FEM_TXPOWER.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Enable bypass mode" description="Enable bypass mode" id="FEM.HAL_FEM_BYPASS_ENABLE.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Enable high power tx" description="Enable high power tx on true, low power on false" id="FEM.HAL_FEM_TX_HIGH_POWER.BOOL" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="FEM">
+        <subCategory label="">
+          <propertyRef refId="FEM.usedbysdk.BOOL"/>
+          <propertyRef refId="FEM.hiddenbysdk.BOOL"/>
+          <propertyRef refId="FEM.showadvanced.BOOL"/>
+          <propertyRef refId="FEM.forceenable.BOOL"/>
+          <propertyRef refId="FEM.owner.STRING"/>
+          <propertyRef refId="FEM.BSP_FEM_RX_CHANNEL.ENUM"/>
+          <propertyRef refId="FEM.prs_disabled_chn_FEM_RX_pin.STRING"/>
+          <propertyRef refId="FEM.BSP_FEM_RX0.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX1.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX2.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX3.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX4.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX5.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX6.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX7.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX8.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX9.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX10.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_RX11.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP_CHANNEL.ENUM"/>
+          <propertyRef refId="FEM.prs_disabled_chn_FEM_SLEEP_pin.STRING"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP0.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP1.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP2.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP3.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP4.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP5.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP6.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP7.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP8.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP9.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP10.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_SLEEP11.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX_CHANNEL.ENUM"/>
+          <propertyRef refId="FEM.prs_disabled_chn_FEM_TX_pin.STRING"/>
+          <propertyRef refId="FEM.BSP_FEM_TX0.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX1.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX2.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX3.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX4.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX5.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX6.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX7.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX8.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX9.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX10.PIN"/>
+          <propertyRef refId="FEM.BSP_FEM_TX11.PIN"/>
+          <propertyRef refId="FEM.HAL_FEM_RX_ACTIVE.BOOL"/>
+          <propertyRef refId="FEM.HAL_FEM_TX_ACTIVE.BOOL"/>
+        </subCategory>
+        <subCategory label="Bypass">
+          <propertyRef refId="FEM.BSP_FEM_BYPASS.PIN"/>
+          <propertyRef refId="FEM.HAL_FEM_BYPASS_ENABLE.BOOL"/>
+        </subCategory>
+        <subCategory label="Power">
+          <propertyRef refId="FEM.BSP_FEM_TXPOWER.PIN"/>
+          <propertyRef refId="FEM.HAL_FEM_TX_HIGH_POWER.BOOL"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

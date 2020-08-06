@@ -1,0 +1,166 @@
+<?xml version='1.0' encoding='ASCII'?>
+<device:DocumentRoot xmlns:device="http://www.silabs.com/ss/hwconfig/device.ecore">
+  <device description="" label="BGM13S22F512GN" name="BGM13S22F512GN" partId="mcu.arm.efr32.bg13.bgm13s22f512gn" deviceExtensionIdRef="efr32.bgm13s22f512gn.extension" revision="A" singleMode="true">
+    <powerModel/>
+    <portIo componentIdRef="efr32.bgm13.bgm13s22f512gn.portio" name="PORTIO" revision="A">
+      <crossBars/>
+      <interfaceToPinLists/>
+      <portBanks>
+        <portBank componentIdRef="efr32.bgm13.port" displayName="PortA" name="PortA" revision="A" index="0">
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA0" name="PA0" index="0"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA1" name="PA1" index="1"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA2" name="PA2" index="2"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA3" name="PA3" index="3"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA4" name="PA4" index="4"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PA5" name="PA5" index="5"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm13.port" displayName="PortB" name="PortB" revision="A" index="1">
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PB11" name="PB11" index="11"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PB12" name="PB12" index="12"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PB13" name="PB13" index="13"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PB14" name="PB14" index="14"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PB15" name="PB15" index="15"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm13.port" displayName="PortC" name="PortC" revision="A" index="2">
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC6" name="PC6" index="6"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC7" name="PC7" index="7"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC8" name="PC8" index="8"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC9" name="PC9" index="9"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC10" name="PC10" index="10"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PC11" name="PC11" index="11"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm13.port" displayName="PortD" name="PortD" revision="A" index="3">
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD9" name="PD9" index="9"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD10" name="PD10" index="10"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD11" name="PD11" index="11"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD12" name="PD12" index="12"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD13" name="PD13" index="13"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD14" name="PD14" index="14"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PD15" name="PD15" index="15"/>
+        </portBank>
+        <portBank componentIdRef="efr32.bgm13.port" displayName="PortF" name="PortF" revision="A" index="5">
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF0" name="PF0" index="0"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF1" name="PF1" index="1"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF2" name="PF2" index="2"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF3" name="PF3" index="3"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF4" name="PF4" index="4"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF5" name="PF5" index="5"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF6" name="PF6" index="6"/>
+          <pin componentIdRef="efr32.bgm13.pin" displayName="PF7" name="PF7" index="7"/>
+        </portBank>
+      </portBanks>
+    </portIo>
+    <pinOut description="51-pin RECTS, 6p5x6p5" indicatorLocation="topleft" package="RECTS" padDescription="NONE" subtitle="(top view)">
+      <pin defaultLabel="VSS" location="1600,17900,4800,3200" number="1"/>
+      <pin defaultLabel="ANTENNA" location="1600,22900,4800,3200" number="2"/>
+      <pin defaultLabel="RF" location="1600,27900,4800,3200" number="3"/>
+      <pin defaultLabel="VSS" location="1600,32900,4800,3200" number="4"/>
+      <pin defaultLabel="VSS" location="1600,37900,4800,3200" number="5"/>
+      <pin defaultLabel="PD9" location="1600,42900,4800,3200" number="6" pinIndex="9" portBankIndex="3"/>
+      <pin defaultLabel="PD10" location="1600,47900,4800,3200" number="7" pinIndex="10" portBankIndex="3"/>
+      <pin defaultLabel="PD11" location="1600,52900,4800,3200" number="8" pinIndex="11" portBankIndex="3"/>
+      <pin defaultLabel="PD12" location="1600,57900,4800,3200" number="9" pinIndex="12" portBankIndex="3"/>
+      <pin defaultLabel="PD13" location="8400,58600,3200,4800" number="10" pinIndex="13" portBankIndex="3"/>
+      <pin defaultLabel="PD14" location="13400,58600,3200,4800" number="11" pinIndex="14" portBankIndex="3"/>
+      <pin defaultLabel="PD15" location="18400,58600,3200,4800" number="12" pinIndex="15" portBankIndex="3"/>
+      <pin defaultLabel="PA0" location="23400,58600,3200,4800" number="13" pinIndex="0" portBankIndex="0"/>
+      <pin defaultLabel="PA1" location="28400,58600,3200,4800" number="14" pinIndex="1" portBankIndex="0"/>
+      <pin defaultLabel="PA2" location="33400,58600,3200,4800" number="15" pinIndex="2" portBankIndex="0"/>
+      <pin defaultLabel="PA3" location="38400,58600,3200,4800" number="16" pinIndex="3" portBankIndex="0"/>
+      <pin defaultLabel="PA4" location="43400,58600,3200,4800" number="17" pinIndex="4" portBankIndex="0"/>
+      <pin defaultLabel="PA5" location="48400,58600,3200,4800" number="18" pinIndex="5" portBankIndex="0"/>
+      <pin defaultLabel="PB15" location="53400,58600,3200,4800" number="19" pinIndex="15" portBankIndex="1"/>
+      <pin defaultLabel="VSS" location="58600,57900,4800,3200" number="20"/>
+      <pin defaultLabel="PB14" location="58600,52900,4800,3200" number="21" pinIndex="14" portBankIndex="1"/>
+      <pin defaultLabel="VBATT" location="58600,47900,4800,3200" number="22"/>
+      <pin defaultLabel="1V8" location="58600,42900,4800,3200" number="23"/>
+      <pin defaultLabel="IOVDD" location="58600,37900,4800,3200" number="24"/>
+      <pin defaultLabel="NC" location="58600,32900,4800,3200" number="25"/>
+      <pin defaultLabel="PC6" location="58600,27900,4800,3200" number="26" pinIndex="6" portBankIndex="2"/>
+      <pin defaultLabel="PC7" location="58600,22900,4800,3200" number="27" pinIndex="7" portBankIndex="2"/>
+      <pin defaultLabel="PC8" location="58600,17900,4800,3200" number="28" pinIndex="8" portBankIndex="2"/>
+      <pin defaultLabel="PF2" location="58600,12900,4800,3200" number="29" pinIndex="2" portBankIndex="5"/>
+      <pin defaultLabel="PC9" location="58600,7900,4800,3200" number="30" pinIndex="9" portBankIndex="2"/>
+      <pin defaultLabel="VSS" location="58600,2900,4800,3200" number="31"/>
+      <pin defaultLabel="PC10" location="53400,1600,3200,4800" number="32" pinIndex="10" portBankIndex="2"/>
+      <pin defaultLabel="PC11" location="48400,1600,3200,4800" number="33" pinIndex="11" portBankIndex="2"/>
+      <pin defaultLabel="PF0" location="43400,1600,3200,4800" number="34" pinIndex="0" portBankIndex="5"/>
+      <pin defaultLabel="PF1" location="38400,1600,3200,4800" number="35" pinIndex="1" portBankIndex="5"/>
+      <pin defaultLabel="PB13" location="53400,17600,3200,4800" number="36" pinIndex="13" portBankIndex="1"/>
+      <pin defaultLabel="PB12" location="48400,17600,3200,4800" number="37" pinIndex="12" portBankIndex="1"/>
+      <pin defaultLabel="PB11" location="43400,17600,3200,4800" number="38" pinIndex="11" portBankIndex="1"/>
+      <pin defaultLabel="PF3" location="38400,17600,3200,4800" number="39" pinIndex="3" portBankIndex="5"/>
+      <pin defaultLabel="PF4" location="33400,17600,3200,4800" number="40" pinIndex="4" portBankIndex="5"/>
+      <pin defaultLabel="PF5" location="28400,17600,3200,4800" number="41" pinIndex="5" portBankIndex="5"/>
+      <pin defaultLabel="PF6" location="23400,17600,3200,4800" number="42" pinIndex="6" portBankIndex="5"/>
+      <pin defaultLabel="PF7" location="18400,17600,3200,4800" number="43" pinIndex="7" portBankIndex="5"/>
+      <pin defaultLabel="RESETn" location="13400,17600,3200,4800" number="44"/>
+      <pin defaultLabel="VSS" location="8400,17600,3200,4800" number="45"/>
+      <pin defaultLabel="VSS" location="30800,1900,4800,3200" number="46"/>
+      <pin defaultLabel="ANT_GND" location="1600,1900,4800,3200" number="47"/>
+      <pin defaultLabel="VSS" location="30800,11900,4800,3200" number="48"/>
+      <pin defaultLabel="VSS" location="1600,11900,4800,3200" number="49"/>
+      <pin defaultLabel="VSS" location="41150,37150,6700,6700" number="50"/>
+      <pin defaultLabel="VSSIO_0_0" location="17150,37150,6700,6700" number="51"/>
+    </pinOut>
+    <peripherals>
+      <peripheral componentIdRef="efr32.bgm13.acmp0" displayName="ACMP0" name="ACMP0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.acmp1" displayName="ACMP1" name="ACMP1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.adc0" displayName="ADC0" name="ADC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.antdiv" displayName="Antenna Diversity" name="ANTDIV" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.batterymon" displayName="Battery Monitor" name="BATTERYMON" revision="A" category="Third Party" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.btl_button" displayName="Bootloader Entry" name="BTL_BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.bulbpwm" displayName="PWM Lightbulb" name="BULBPWM" revision="A" category="PWM" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.bulbpwm_color" displayName="Color PWM Lightbulb" name="BULBPWM_COLOR" revision="A" category="PWM" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.button" displayName="Button" name="BUTTON" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.cmu" displayName="CMU" name="CMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.coex" displayName="Coexistence" name="COEX" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.cs5463" displayName="CS5463 Power Meter" name="CS5463" revision="A" category="Third Party" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.csen" displayName="CSEN" name="CSEN" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.dcdc" displayName="DCDC" name="DCDC" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.emu" displayName="EMU" name="EMU" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.extflash" displayName="SPI Flash" name="EXTFLASH" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.ezradiopro" displayName="EZRadioPro" name="EZRADIOPRO" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.fem" displayName="External FEM" name="FEM" revision="A" category=" Radio" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.gpio" displayName="GPIO" name="GPIO" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.i2c0" displayName="I2C0" name="I2C0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.i2c1" displayName="I2C1" name="I2C1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.i2csensor" displayName="I2C Sensor" name="I2CSENSOR" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.idac0" displayName="IDAC0" name="IDAC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.ioexp" displayName="I2C I/O Expander" name="IOEXP" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.led" displayName="LED" name="LED" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.lesense" displayName="LESENSE" name="LESENSE" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm13.letimer0" displayName="LETIMER0" name="LETIMER0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm13.leuart0" displayName="LEUART0" name="LEUART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.lfxo" displayName="LFXO" name="LFXO" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm13.modem" displayName="MODEM" name="MODEM" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.pa" displayName="PA" name="PA" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.pcnt0" displayName="PCNT0" name="PCNT0" revision="A" category="  Peripherals" hidden="true"/>
+      <peripheral componentIdRef="efr32.bgm13.prs" displayName="PRS" name="PRS" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.pti" displayName="PTI" name="PTI" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.pyd1698" displayName="PYD1698 IR Sensor" name="PYD1698" revision="A" category="Third Party" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.serial" displayName="Serial" name="SERIAL" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.spidisplay" displayName="SPI Display" name="SPIDISPLAY" revision="A" category=" HAL" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.spincp" displayName="SPI NCP" name="SPINCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.timer0" displayName="TIMER0" name="TIMER0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.timer1" displayName="TIMER1" name="TIMER1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.uartncp" displayName="UART NCP" name="UARTNCP" revision="A" category=" NCP" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.usart0" displayName="USART0" name="USART0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.usart1" displayName="USART1" name="USART1" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.usart2" displayName="USART2" name="USART2" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.vcom" displayName="Virtual COM Port" name="VCOM" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.vdac0" displayName="VDAC0" name="VDAC0" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.vuart" displayName="Virtual UART" name="VUART" revision="A" category=" Serial" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.wdog" displayName="WDOG" name="WDOG" revision="A" category="  Peripherals" hidden="false"/>
+      <peripheral componentIdRef="efr32.bgm13.wtimer0" displayName="WTIMER0" name="WTIMER0" revision="A" category="  Peripherals" hidden="false"/>
+    </peripherals>
+    <script uri="../BGM13.py">
+      <path>.</path>
+      <path>../..</path>
+      <path>..</path>
+    </script>
+    <sourceMappings initialGroup="main_template">
+      <sourceMapping uri="../BGM13.srcmap"/>
+    </sourceMappings>
+  </device>
+</device:DocumentRoot>

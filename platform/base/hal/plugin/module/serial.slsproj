@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project id="SDK.HAL.SERIAL.BASE">
+  <module id="SDK.HAL.EMDRV.UARTDRV"/>
+  <folder name="serial" partCompatibility="mcu.arm.efm32.* mcu.arm.efr32.*">
+    <file name="com.c" uri="$(sdkInstallationPath)/platform/base/hal/plugin/serial/cortexm/efm32/com.c"/>
+  </folder>
+</project>

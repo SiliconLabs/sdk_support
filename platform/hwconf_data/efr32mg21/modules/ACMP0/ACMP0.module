@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg21.acmp0" label="ACMP0" name="ACMP0" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="ACMP.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="ACMP.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="ACMP.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="ACMP.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="ACMP.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="ACMP.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+      <enumProperty label="Negative input selection" id="ACMP.BSP_ACMP_NEG.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="Positive input selection" id="ACMP.BSP_ACMP_POS.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="ACMP0">
+        <subCategory label="">
+          <propertyRef refId="ACMP.usedbysdk.BOOL"/>
+          <propertyRef refId="ACMP.hiddenbysdk.BOOL"/>
+          <propertyRef refId="ACMP.showadvanced.BOOL"/>
+          <propertyRef refId="ACMP.forceenable.BOOL"/>
+          <propertyRef refId="ACMP.owner.STRING"/>
+          <propertyRef refId="ACMP.customname.STRING"/>
+        </subCategory>
+        <subCategory label="Negative Input">
+          <propertyRef refId="ACMP.BSP_ACMP_NEG.PIN"/>
+        </subCategory>
+        <subCategory label="Positive Input">
+          <propertyRef refId="ACMP.BSP_ACMP_POS.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="ezr32.ezr32hg.uartncp" label="UARTNCP" name="UARTNCP" description="" version="ezr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="UARTNCP.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="UARTNCP.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="UARTNCP.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="UARTNCP.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="UARTNCP.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="UART port" description="Select UART port for NCP communication" id="UARTNCP.BSP_UARTNCP_USART_PORT.MOD" defaultValueIndex="0" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="UARTNCP">
+        <subCategory label="">
+          <propertyRef refId="UARTNCP.usedbysdk.BOOL"/>
+          <propertyRef refId="UARTNCP.hiddenbysdk.BOOL"/>
+          <propertyRef refId="UARTNCP.showadvanced.BOOL"/>
+          <propertyRef refId="UARTNCP.forceenable.BOOL"/>
+          <propertyRef refId="UARTNCP.owner.STRING"/>
+          <propertyRef refId="UARTNCP.BSP_UARTNCP_USART_PORT.MOD"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

@@ -1,0 +1,38 @@
+#include "config/btl_config.h"
+#include "em_gpio.h"
+
+/***************************************************************************//**
+ * Custom storage init function.
+ *
+ * This function can be implemented by the user to perform extra operations
+ * during initialization of the storage plugin, such as turning on a GPIO power
+ * pin to an external storage medium, toggling a write protect pin, etc.
+ * The custom init function is called by @ref storage_init.
+ ******************************************************************************/
+void storage_customInit(void)
+{
+#if defined(BSP_EXTFLASH_HOLD_PORT)
+  GPIO_PinModeSet(BSP_EXTFLASH_HOLD_PORT, BSP_EXTFLASH_HOLD_PIN, gpioModePushPull, 1);
+#endif
+#if defined(BSP_EXTFLASH_WP_PORT)
+  GPIO_PinModeSet(BSP_EXTFLASH_WP_PORT, BSP_EXTFLASH_WP_PIN, gpioModePushPull, 1);
+#endif
+}
+
+/***************************************************************************//**
+ * Custom storage shutdown function.
+ *
+ * This function can be implemented by the user to perform extra operations
+ * during shutdown of the storage plugin, such as turning off a GPIO power
+ * pin to an external storage medium.
+ * The custom shutdown function is called by @ref storage_shutdown.
+ ******************************************************************************/
+void storage_customShutdown(void)
+{
+#if defined(BSP_EXTFLASH_HOLD_PORT)
+  GPIO_PinModeSet(BSP_EXTFLASH_HOLD_PORT, BSP_EXTFLASH_HOLD_PIN, gpioModeDisabled, 0);
+#endif
+#if defined(BSP_EXTFLASH_WP_PORT)
+  GPIO_PinModeSet(BSP_EXTFLASH_WP_PORT, BSP_EXTFLASH_WP_PIN, gpioModeDisabled, 0);
+#endif
+}

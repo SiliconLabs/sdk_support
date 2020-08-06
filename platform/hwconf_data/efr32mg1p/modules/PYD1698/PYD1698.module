@@ -1,0 +1,48 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.efr32mg1p.pyd1698" label="PYD1698" name="PYD1698" description="Configuration for PIR sensor used on reference designs" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="PYD1698.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="PYD1698.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="PYD1698.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="PYD1698.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="PYD1698.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <enumProperty label="PYD1698 serial in" description="Select pin to connect to the serial in signal of the occupancy sensor" id="PYD1698.BSP_PYD1698_SERIN.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PYD1698 DLINK port" description="Select pin to connect to the DLINK signal of the occupancy sensor" id="PYD1698.BSP_PYD1698_DLINK.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+      <enumProperty label="PYD1698 calibration mode" description="Input signal to identify if the occupancy sensor is currently in calbration mode" id="PYD1698.BSP_PYD1698_INSTALLATION_JP.PIN" defaultValueIndex="0" hidden="false" readonly="false">
+        <enumValue label="Disabled" value="Disabled"/>
+      </enumProperty>
+    </properties>
+    <propertyCategories>
+      <category label="PYD1698">
+        <subCategory label="">
+          <propertyRef refId="PYD1698.usedbysdk.BOOL"/>
+          <propertyRef refId="PYD1698.hiddenbysdk.BOOL"/>
+          <propertyRef refId="PYD1698.showadvanced.BOOL"/>
+          <propertyRef refId="PYD1698.forceenable.BOOL"/>
+          <propertyRef refId="PYD1698.owner.STRING"/>
+          <propertyRef refId="PYD1698.BSP_PYD1698_SERIN.PIN"/>
+          <propertyRef refId="PYD1698.BSP_PYD1698_DLINK.PIN"/>
+          <propertyRef refId="PYD1698.BSP_PYD1698_INSTALLATION_JP.PIN"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

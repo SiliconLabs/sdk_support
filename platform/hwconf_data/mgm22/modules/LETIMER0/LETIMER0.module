@@ -1,0 +1,38 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="efr32.mgm22.letimer0" label="LETIMER0" name="LETIMER0" description="" version="efr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="LETIMER.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="LETIMER.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="LETIMER.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="LETIMER.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="LETIMER.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+      <stringProperty label="Custom name" id="LETIMER.customname.STRING" defaultValue="" hidden="false" readonly="false"/>
+    </properties>
+    <propertyCategories>
+      <category label="LETIMER0">
+        <subCategory label="">
+          <propertyRef refId="LETIMER.usedbysdk.BOOL"/>
+          <propertyRef refId="LETIMER.hiddenbysdk.BOOL"/>
+          <propertyRef refId="LETIMER.showadvanced.BOOL"/>
+          <propertyRef refId="LETIMER.forceenable.BOOL"/>
+          <propertyRef refId="LETIMER.owner.STRING"/>
+          <propertyRef refId="LETIMER.customname.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>

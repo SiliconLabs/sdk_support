@@ -1,0 +1,567 @@
+<?xml version='1.0' encoding='ASCII'?>
+<model:MDescriptors xmlns:model="http://www.silabs.com/ss/Studio.ecore">
+  <descriptors id="EZR32LG230F128R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r55/EZR32LG230F128R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r55/EZR32LG230F128R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r60/EZR32LG230F128R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r60/EZR32LG230F128R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r61/EZR32LG230F128R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r61/EZR32LG230F128R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r63/EZR32LG230F128R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r63/EZR32LG230F128R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r67/EZR32LG230F128R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r67/EZR32LG230F128R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r68/EZR32LG230F128R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r68/EZR32LG230F128R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F128R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f128r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f128r69/EZR32LG230F128R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f128r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f128r69/EZR32LG230F128R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f128r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f128r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r55/EZR32LG230F256R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r55/EZR32LG230F256R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r60/EZR32LG230F256R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r60/EZR32LG230F256R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r61/EZR32LG230F256R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r61/EZR32LG230F256R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r63/EZR32LG230F256R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r63/EZR32LG230F256R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r67/EZR32LG230F256R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r67/EZR32LG230F256R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r68/EZR32LG230F256R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r68/EZR32LG230F256R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F256R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f256r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f256r69/EZR32LG230F256R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f256r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f256r69/EZR32LG230F256R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f256r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f256r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r55/EZR32LG230F64R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r55/EZR32LG230F64R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r60/EZR32LG230F64R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r60/EZR32LG230F64R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r61/EZR32LG230F64R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r61/EZR32LG230F64R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r63/EZR32LG230F64R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r63/EZR32LG230F64R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r67/EZR32LG230F64R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r67/EZR32LG230F64R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r68/EZR32LG230F64R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r68/EZR32LG230F64R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG230F64R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg230f64r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg230f64r69/EZR32LG230F64R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg230f64r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg230f64r69/EZR32LG230F64R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg230f64r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg230f64r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r55/EZR32LG330F128R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r55/EZR32LG330F128R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r60/EZR32LG330F128R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r60/EZR32LG330F128R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r61/EZR32LG330F128R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r61/EZR32LG330F128R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r63/EZR32LG330F128R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r63/EZR32LG330F128R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r67/EZR32LG330F128R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r67/EZR32LG330F128R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r68/EZR32LG330F128R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r68/EZR32LG330F128R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F128R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f128r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f128r69/EZR32LG330F128R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f128r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f128r69/EZR32LG330F128R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f128r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f128r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r55/EZR32LG330F256R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r55/EZR32LG330F256R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r60/EZR32LG330F256R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r60/EZR32LG330F256R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r61/EZR32LG330F256R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r61/EZR32LG330F256R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r63/EZR32LG330F256R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r63/EZR32LG330F256R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r67/EZR32LG330F256R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r67/EZR32LG330F256R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r68/EZR32LG330F256R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r68/EZR32LG330F256R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F256R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f256r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f256r69/EZR32LG330F256R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f256r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f256r69/EZR32LG330F256R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f256r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f256r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R55">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r55g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r55/EZR32LG330F64R55.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r55.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r55/EZR32LG330F64R55.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r55.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r55/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R60">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r60g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r60/EZR32LG330F64R60.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r60.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r60/EZR32LG330F64R60.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r60.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r60/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R61">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r61g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r61/EZR32LG330F64R61.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r61.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r61/EZR32LG330F64R61.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r61.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r61/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R63">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r63g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r63/EZR32LG330F64R63.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r63.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r63/EZR32LG330F64R63.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r63.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r63/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R67">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r67g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r67/EZR32LG330F64R67.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r67.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r67/EZR32LG330F64R67.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r67.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r67/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R68">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r68g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r68/EZR32LG330F64R68.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r68.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r68/EZR32LG330F64R68.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r68.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r68/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="EZR32LG330F64R69">
+    <property key="partCompatibility" value="mcu.arm.ezr32.lg.ezr32lg330f64r69g"/>
+    <property key="hardwareConfigData" value="ezr32lg330f64r69/EZR32LG330F64R69.device"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg330f64r69.extension">
+    <property key="hardwareConfigData" value="ezr32lg330f64r69/EZR32LG330F64R69.deviceextension"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezr32lg330f64r69.portio">
+    <property key="hardwareConfigData" value="ezr32lg330f64r69/PORTIO.portio"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.port">
+    <property key="hardwareConfigData" value="modules/PORT/PORT.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.portio">
+    <property key="hardwareConfigData" value="modules/PORTIO/PORTIO.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.pin">
+    <property key="hardwareConfigData" value="modules/PIN/PIN.pin"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.acmp0">
+    <property key="hardwareConfigData" value="modules/ACMP0/ACMP0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.acmp1">
+    <property key="hardwareConfigData" value="modules/ACMP1/ACMP1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.adc0">
+    <property key="hardwareConfigData" value="modules/ADC0/ADC0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.btl_button">
+    <property key="hardwareConfigData" value="modules/BTL_BUTTON/BTL_BUTTON.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.button">
+    <property key="hardwareConfigData" value="modules/BUTTON/BUTTON.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.cmu">
+    <property key="hardwareConfigData" value="modules/CMU/CMU.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.coex">
+    <property key="hardwareConfigData" value="modules/COEX/COEX.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.dac0">
+    <property key="hardwareConfigData" value="modules/DAC0/DAC0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.emu">
+    <property key="hardwareConfigData" value="modules/EMU/EMU.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.extflash">
+    <property key="hardwareConfigData" value="modules/EXTFLASH/EXTFLASH.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ezradiopro">
+    <property key="hardwareConfigData" value="modules/EZRADIOPRO/EZRADIOPRO.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.gpio">
+    <property key="hardwareConfigData" value="modules/GPIO/GPIO.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.i2c0">
+    <property key="hardwareConfigData" value="modules/I2C0/I2C0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.i2c1">
+    <property key="hardwareConfigData" value="modules/I2C1/I2C1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.i2csensor">
+    <property key="hardwareConfigData" value="modules/I2CSENSOR/I2CSENSOR.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.ioexp">
+    <property key="hardwareConfigData" value="modules/IOEXP/IOEXP.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.lcd">
+    <property key="hardwareConfigData" value="modules/LCD/LCD.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.led">
+    <property key="hardwareConfigData" value="modules/LED/LED.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.lesense">
+    <property key="hardwareConfigData" value="modules/LESENSE/LESENSE.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.letimer0">
+    <property key="hardwareConfigData" value="modules/LETIMER0/LETIMER0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.leuart0">
+    <property key="hardwareConfigData" value="modules/LEUART0/LEUART0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.leuart1">
+    <property key="hardwareConfigData" value="modules/LEUART1/LEUART1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.lfxo">
+    <property key="hardwareConfigData" value="modules/LFXO/LFXO.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.msc">
+    <property key="hardwareConfigData" value="modules/MSC/MSC.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.pcnt0">
+    <property key="hardwareConfigData" value="modules/PCNT0/PCNT0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.pcnt1">
+    <property key="hardwareConfigData" value="modules/PCNT1/PCNT1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.pcnt2">
+    <property key="hardwareConfigData" value="modules/PCNT2/PCNT2.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.prs">
+    <property key="hardwareConfigData" value="modules/PRS/PRS.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.serial">
+    <property key="hardwareConfigData" value="modules/SERIAL/SERIAL.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.spidisplay">
+    <property key="hardwareConfigData" value="modules/SPIDISPLAY/SPIDISPLAY.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.spincp">
+    <property key="hardwareConfigData" value="modules/SPINCP/SPINCP.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.timer0">
+    <property key="hardwareConfigData" value="modules/TIMER0/TIMER0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.timer1">
+    <property key="hardwareConfigData" value="modules/TIMER1/TIMER1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.timer2">
+    <property key="hardwareConfigData" value="modules/TIMER2/TIMER2.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.timer3">
+    <property key="hardwareConfigData" value="modules/TIMER3/TIMER3.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.uart0">
+    <property key="hardwareConfigData" value="modules/UART0/UART0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.uart1">
+    <property key="hardwareConfigData" value="modules/UART1/UART1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.uartncp">
+    <property key="hardwareConfigData" value="modules/UARTNCP/UARTNCP.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.usart1">
+    <property key="hardwareConfigData" value="modules/USART1/USART1.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.usart2">
+    <property key="hardwareConfigData" value="modules/USART2/USART2.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.usartrf0">
+    <property key="hardwareConfigData" value="modules/USARTRF0/USARTRF0.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.usb">
+    <property key="hardwareConfigData" value="modules/USB/USB.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.vcom">
+    <property key="hardwareConfigData" value="modules/VCOM/VCOM.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.vuart">
+    <property key="hardwareConfigData" value="modules/VUART/VUART.module"/>
+  </descriptors>
+  <descriptors id="ezr32.ezr32lg.wdog">
+    <property key="hardwareConfigData" value="modules/WDOG/WDOG.module"/>
+  </descriptors>
+</model:MDescriptors>

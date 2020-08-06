@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='ASCII'?>
+<module:DocumentRoot xmlns:module="http://www.silabs.com/ss/hwconfig/module.ecore">
+  <module id="ezr32.ezr32wg.usb" label="USB" name="USB" description="" version="ezr">
+    <properties>
+      <enumProperty label="SDK is taking control over this module" id="USB.usedbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="SDK is hiding this module" id="USB.hiddenbysdk.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Show advanced options" id="USB.showadvanced.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <enumProperty label="Forcefully enabled in model" id="USB.forceenable.BOOL" defaultValueIndex="0" hidden="true" readonly="false">
+        <enumValue label="False" value="0"/>
+        <enumValue label="True" value="1"/>
+      </enumProperty>
+      <stringProperty label="Owned by" id="USB.owner.STRING" defaultValue="" hidden="false" readonly="true" transient="true"/>
+    </properties>
+    <propertyCategories>
+      <category label="USB">
+        <subCategory label="">
+          <propertyRef refId="USB.usedbysdk.BOOL"/>
+          <propertyRef refId="USB.hiddenbysdk.BOOL"/>
+          <propertyRef refId="USB.showadvanced.BOOL"/>
+          <propertyRef refId="USB.forceenable.BOOL"/>
+          <propertyRef refId="USB.owner.STRING"/>
+        </subCategory>
+      </category>
+    </propertyCategories>
+    <signals/>
+  </module>
+</module:DocumentRoot>
