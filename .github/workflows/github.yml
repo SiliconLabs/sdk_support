@@ -8,7 +8,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-    - uses: silabs-DavidS/close-pull-request-target@v2.2
+    - uses: SiliconLabs/close-pull-request-target@v2.2
       with:
         comment: "This repo does not accept PRs. The code in this repository is provided as-is, and questions related to this repo will not be supported. If you have a general question for Silicon Labs, visit www.silabs.com/support for assistance."
       env:
