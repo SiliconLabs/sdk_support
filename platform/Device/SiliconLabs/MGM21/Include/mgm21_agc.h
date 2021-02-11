@@ -927,4 +927,5 @@ typedef struct {
 /** @} End of group MGM21_AGC_BitFields */
 /** @} End of group MGM21_AGC */
 /** @} End of group Parts */
+
 #endif /* MGM21_AGC_H */

@@ -1,0 +1,18 @@
+!!omap
+- id: slwstk6242a
+- label: SLWSTK6242A
+- package: platform
+- description: Kit BSP support for the EZR32HG 915 MHz Wireless Starter Kit.
+- category: Platform|Board|Kit|Wireless Starter Kit
+- quality: production
+- requires:
+  - name: brd4001a
+  - name: hardware_board_from_slwstk6242a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_stk
+- tag:
+  - kit:opn:SLWSTK6242A
+  - kit:pn:WSTK6242
+  - kit:variant:A
+  - kit:revision:D01

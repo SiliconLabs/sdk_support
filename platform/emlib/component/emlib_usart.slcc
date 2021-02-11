@@ -1,0 +1,38 @@
+id: emlib_usart
+label: USART
+package: platform
+description: >
+  Universal synchronous/asynchronous receiver/transmitter (USART/UART) peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_usart.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_usart.h"
+provides:
+  - name: emlib_usart
+requires:
+  - name: device
+  - name: device_has_uart
+  - name: emlib_cmu
+  - name: emlib_common
+  - name: emlib_gpio
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-usart
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-usart
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-usart
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-usart
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-usart
+      condition: [device_sdid_200]
+    - page: emlib/api/efr32xg22/group-usart
+      condition: [device_sdid_205]

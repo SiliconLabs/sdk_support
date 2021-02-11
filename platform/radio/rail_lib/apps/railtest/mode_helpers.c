@@ -4,7 +4,7 @@
  *   AppModes
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,6 +29,7 @@
  *
  ******************************************************************************/
 
+#include <stdlib.h>
 #include "rail.h"
 #include "rail_types.h"
 #include "response_print.h"
@@ -71,7 +72,13 @@ void scheduleNextTx(void)
 {
   // Schedule the next tx if there are more coming
   if (txCount > 0 || currentAppMode() == TX_CONTINUOUS) {
-    RAIL_SetTimer(railHandle, continuousTransferPeriod * 1000, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
+    if (enableRandomTxDelay) {
+      float randBetween0and1 = ((float) rand()) / (((uint32_t) RAND_MAX) + 1);
+      float fTxDelay = continuousTransferPeriod * 1000 * randBetween0and1;
+      RAIL_SetTimer(railHandle, (uint32_t) fTxDelay, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
+    } else {
+      RAIL_SetTimer(railHandle, continuousTransferPeriod * 1000, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
+    }
   } else if (currentAppMode() == TX_N_PACKETS || currentAppMode() == TX_SCHEDULED
              || currentAppMode() == TX_UNDERFLOW || currentAppMode() == TX_CANCEL) {
     setNextAppMode(NONE, NULL);

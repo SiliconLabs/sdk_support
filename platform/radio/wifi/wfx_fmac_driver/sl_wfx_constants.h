@@ -17,6 +17,7 @@
 #ifndef SL_WFX_CONSTANTS_H
 #define SL_WFX_CONSTANTS_H
 
+#include "sl_wfx_configuration_defaults.h"
 #include "sl_status.h"
 #include "sl_wfx_api.h"
 #include <stdint.h>
@@ -161,6 +162,8 @@ static inline uint32_t uint32_identity(uint32_t x)
 
 #define SL_WAIT_FOREVER  0xFFFFFFFF
 
+#define SL_WFX_ROUND_UP_VALUE      SL_WFX_SDIO_BLOCK_SIZE
+
 #ifndef SL_WFX_DEBUG_MASK
 #define SL_WFX_DEBUG_MASK 0x0000
 #endif
@@ -177,13 +180,13 @@ static inline uint32_t uint32_identity(uint32_t x)
 #define SL_WFX_DEBUG_TX_REG  0x0200
 #define SL_WFX_DEBUG_FW_LOAD 0x0400
 
-#define PDS_KEY_A       'a'
-#define PDS_KEY_B       'b'
-#define PDS_KEY_C       'c'
-#define PDS_KEY_D       'd'
-#define PDS_KEY_E       'e'
-#define PDS_KEY_F       'f'
-#define PDS_ANTENNA_SEL_KEY       'j'
+#define SL_WFX_PDS_KEY_A                 'a'
+#define SL_WFX_PDS_KEY_B                 'b'
+#define SL_WFX_PDS_KEY_C                 'c'
+#define SL_WFX_PDS_KEY_D                 'd'
+#define SL_WFX_PDS_KEY_E                 'e'
+#define SL_WFX_PDS_KEY_F                 'f'
+#define SL_WFX_PDS_ANTENNA_SEL_KEY       'j'
 
 #define SL_WFX_PTE_INFO                  0x0900C0C0
 #define SL_WFX_MSG_ID_GENERAL_API_MASK   0x20
@@ -195,7 +198,7 @@ static inline uint32_t uint32_identity(uint32_t x)
 #define SL_WFX_MSG_INFO_SECURE_LINK_OFFSET 6
 #define SL_WFX_MSG_INFO_SECURE_LINK_MASK   0xC0
 /* Secure link constants*/
-#define SECURE_LINK_MAC_KEY_LENGTH         32
+#define SL_WFX_SECURE_LINK_MAC_KEY_LENGTH         32
 
 #define SL_WFX_SECURE_LINK_SESSION_KEY_LENGTH          (16)
 
@@ -215,6 +218,26 @@ static inline uint32_t uint32_identity(uint32_t x)
 #define SL_WFX_SECURE_LINK_NONCE_MAX_VALUE             1 << 30
 #define SL_WFX_SECURE_LINK_NONCE_WATERMARK             1 << 29
 #endif //SL_WFX_USE_SECURE_LINK
+
+#define SL_WFX_ERROR_LOGS {                                                                                          \
+    { SL_WFX_ERROR_FIRMWARE_ROLLBACK, "Rollback error", 0 },                                                         \
+    { SL_WFX_ERROR_DEPRECATED_0, "Not used anymore", 0 },                                                            \
+    { SL_WFX_ERROR_DEPRECATED_1, "Not used anymore", 0 },                                                            \
+    { SL_WFX_ERROR_INVALID_SESSION_KEY, "Session key is invalid", 0 },                                               \
+    { SL_WFX_ERROR_OOR_VOLTAGE, "Out-of-range power supply voltage", 4 },                                            \
+    { SL_WFX_ERROR_PDS_VERSION, "Wrong PDS version", 0 },                                                            \
+    { SL_WFX_ERROR_OOR_TEMPERATURE, "Out-of-range temperature", 0 },                                                 \
+    { SL_WFX_ERROR_REQ_DURING_KEY_EXCHANGE, "Requests from Host are forbidden until the end of key exchange", 0 },   \
+    { SL_WFX_ERROR_DEPRECATED_2, "Not used anymore", 0 },                                                            \
+    { SL_WFX_ERROR_DEPRECATED_3, "Not used anymore", 0 },                                                            \
+    { SL_WFX_ERROR_SECURELINK_DECRYPTION, "Error occured during message decryption", 0 },                            \
+    { SL_WFX_ERROR_SECURELINK_WRONG_ENCRYPTION_STATE, "Encryption state of the received message doesn't match", 4 }, \
+    { SL_WFX_SPI_OR_SDIO_FREQ_TOO_LOW, "Bus clock is too slow (<1kHz)", 0 },                                         \
+    { SL_WFX_ERROR_DEPRECATED_4, "Not used anymore", 0 },                                                            \
+    { SL_WFX_ERROR_DEPRECATED_5, "Not used anymore", 0 },                                                            \
+    { SL_WFX_HIF_BUS_ERROR, "HIF HW has reported an error", 4 },                                                     \
+    { SL_WFX_PDS_TESTFEATURE_MODE_ERROR, "Unknown TestFeatureMode", 0 }                                              \
+}
 
 /**************************************************************************//**
  * @addtogroup ENUM
@@ -342,6 +365,14 @@ typedef struct {
 } sl_wfx_mac_address_t;
 
 /**************************************************************************//**
+ * @struct sl_wfx_password_t
+ * @brief Structure to handle password format
+ *****************************************************************************/
+typedef struct {
+  uint8_t password[SL_WFX_PASSWORD_SIZE]; ///< Table to store a password
+} sl_wfx_password_t;
+
+/**************************************************************************//**
  * @struct sl_wfx_nonce_t
  * @brief Structure to maintain secure link counters
  *****************************************************************************/
@@ -350,6 +381,16 @@ typedef struct {
   uint32_t rx_packet_count; ///< Received packet counter
   uint32_t tx_packet_count; ///< Sent packet counter
 } sl_wfx_nonce_t;
+
+/**************************************************************************//**
+ * @struct sl_wfx_error_log_t
+ * @brief Structure used to display error logs
+ *****************************************************************************/
+typedef struct {
+  uint32_t val;
+  const char *str;
+  uint8_t param_length;
+} sl_wfx_err_log_t;
 
 /**************************************************************************//**
  * @struct sl_wfx_context_t
@@ -368,7 +409,7 @@ typedef struct {
   sl_wfx_mac_address_t mac_addr_1;         ///< Mac address used by WFx interface 1, softap
   sl_wfx_state_t state;                    ///< State of the WFx Wi-Fi chip
 #ifdef SL_WFX_USE_SECURE_LINK
-  uint8_t  secure_link_mac_key[SECURE_LINK_MAC_KEY_LENGTH];
+  uint8_t  secure_link_mac_key[SL_WFX_SECURE_LINK_MAC_KEY_LENGTH];
   sl_wfx_nonce_t secure_link_nonce;
   uint8_t  encryption_bitmap[SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE];
   uint8_t  secure_link_session_key[SL_WFX_SECURE_LINK_SESSION_KEY_LENGTH];

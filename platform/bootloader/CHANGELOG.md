@@ -1,5 +1,8 @@
 # Change Log
 
+# This file has been deprecated. Refer to Gecko Platform Release Notes at docs.silabs.com
+# for further release notes.
+
 All notable changes to the bootloader will be documented in this file. The
 version number given in the Change Log is on the format `major`.`minor`.`patch`.
 

@@ -528,7 +528,7 @@ void _executeBarrierInstructions(void);
  * @brief If the line below is uncommented we will use Ember memory APIs,
  * otherwise, we will use the C Standard library (memset,memcpy,memmove) APIs.
  */
-#define _HAL_USE_COMMON_MEMUTILS_
+// #define _HAL_USE_COMMON_MEMUTILS_
 
 ////////////////////////////////////////////////////////////////////////////////
 

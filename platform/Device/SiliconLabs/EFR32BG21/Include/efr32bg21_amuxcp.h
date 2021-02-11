@@ -248,4 +248,5 @@ typedef struct {
 /** @} End of group EFR32BG21_AMUXCP_BitFields */
 /** @} End of group EFR32BG21_AMUXCP */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_AMUXCP_H */

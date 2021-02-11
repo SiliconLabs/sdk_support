@@ -1834,4 +1834,5 @@ typedef struct {
 /** @} End of group EFR32FG22_PROTIMER_BitFields */
 /** @} End of group EFR32FG22_PROTIMER */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_PROTIMER_H */

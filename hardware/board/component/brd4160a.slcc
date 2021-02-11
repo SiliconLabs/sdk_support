@@ -1,0 +1,23 @@
+!!omap
+- id: brd4160a
+- label: BRD4160A
+- package: platform
+- description: Board support for BRD4160A.
+- category: Platform|Board|Thunderboard
+- quality: production
+- requires:
+  - name: efr32mg1p132f256gm48
+  - name: brd4160a_config
+- provides:
+  - name: brd4160a
+  - name: hardware_board
+  - name: hardware_board_tb
+  - name: hardware_board_from_tb
+  - name: hardware_board_from_sltb001a
+- recommends: []
+- template_contribution: []
+- tag:
+  - board:pn:BRD4160
+  - board:variant:A
+  - board:revision:B02
+  - board:device:efr32mg1p132f256gm48

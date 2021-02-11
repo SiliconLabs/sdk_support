@@ -1,0 +1,40 @@
+id: emlib_msc
+label: MSC
+package: platform
+description: >
+  Flash controller (MSC) peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_msc.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_msc.h"
+    - path: "em_msc_compat.h"
+provides:
+  - name: emlib_msc
+requires:
+  - name: device
+  - name: device_has_msc
+  - name: emlib_cmu
+  - name: emlib_common
+  - name: emlib_core
+  - name: emlib_system    # TODO: This dependency seems unnecessary
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-msc
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-msc
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-msc
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-msc
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-msc
+      condition: [device_sdid_200]
+    - page: emlib/api/efr32xg22/group-msc
+      condition: [device_sdid_205]

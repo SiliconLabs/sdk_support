@@ -4,7 +4,7 @@
  *   as well as transmit, receive, and various debug modes.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -34,40 +34,52 @@
 #include <string.h>
 
 #include "rail.h"
-#include "rail_features.h"
 #include "rail_ieee802154.h"
 #include "rail_zwave.h"
-#include "rail_types.h"
-#include "rail_chip_specific.h"
-#include "rail_assert_error_codes.h"
+#include "sl_rail_util_init.h"
+#include "sl_rail_util_protocol.h"
+#include "sl_rail_util_ant_div.h"
+#include "buffer_pool_allocator_config.h"
 
 #include "em_chip.h"
 #include "em_core.h"
 #include "em_rmu.h"
 #include "em_emu.h"
 
-#include "retargetserial.h"
 #include "gpiointerrupt.h"
-#ifdef EMBER_AF_PLUGIN_LCD_GRAPHICS
-#include "graphics.h"
-#endif
-#include "command_interpreter.h"
 #include "response_print.h"
 #include "buffer_pool_allocator.h"
 #include "circular_queue.h"
 
-#include "app_ci.h"
 #include "app_common.h"
 #include "app_trx.h"
-#include "railapp.h"
-
-#ifdef EMBER_AF_PLUGIN_LQI_OVERRIDE
-#include "lqi_override.h"
-#endif
 
 #ifdef RAILAPP_RMR
 #include "railapp_rmr.h"
 #endif
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  #include "sl_power_manager.h"
+#endif
+
+#include "sl_rail_test_config.h"
+
+#ifndef STATIC_ASSERT
+#ifdef __ICCARM__
+  #define STATIC_ASSERT(__condition, __errorstr) \
+  static_assert(__condition, __errorstr)
+#elif defined(__GNUC__)
+  #define STATIC_ASSERT(__condition, __errorstr) \
+  _Static_assert(__condition, __errorstr)
+#else
+  #define STATIC_ASSERT(__condition, __errorstr)
+#endif
+#endif//STATIC_ASSERT
+STATIC_ASSERT(sizeof(RailAppEvent_t) <= 36,
+              "Adjust BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX per sizeof(RailAppEvent_t) growth");
 
 // Includes for Silicon Labs-only, internal testing
 #ifdef RPC_TESTING
@@ -78,14 +90,14 @@
 #endif
 
 // Add a way to override the default setting for printingEnabled
-#if !defined(RAIL_PRINTING_DEFAULT) || (RAIL_PRINTING_DEFAULT != 0)
-#define RAIL_PRINTING_DEFAULT_BOOL true
+#if defined(SL_RAIL_UTIL_PRINTING_DEFAULT) && !(SL_RAIL_UTIL_PRINTING_DEFAULT)
+#define RAIL_PRINTING_DEFAULT_BOOL  false
 #else
-#define RAIL_PRINTING_DEFAULT_BOOL false
+#define RAIL_PRINTING_DEFAULT_BOOL  true
 #endif
 
 // Add a way to override the default setting for skipCalibrations
-#if RAIL_SKIP_CALIBRATIONS_DEFAULT
+#if defined(SL_RAIL_UTIL_SKIP_CALIBRATIONS_DEFAULT) && (SL_RAIL_UTIL_SKIP_CALIBRATIONS_DEFAULT)
 #define RAIL_SKIP_CALIBRATIONS_BOOL true
 #else
 #define RAIL_SKIP_CALIBRATIONS_BOOL false
@@ -94,10 +106,15 @@
 // External control and status variables
 Counters_t counters = { 0 };
 bool receiveModeEnabled = false;
+#if SL_RAIL_UTIL_INIT_INST0_ENABLE && SL_RAIL_UTIL_INIT_TRANSITIONS_INST0_ENABLE
+RAIL_RadioState_t rxSuccessTransition = SL_RAIL_UTIL_INIT_TRANSITION_INST0_RX_SUCCESS;
+#else
 RAIL_RadioState_t rxSuccessTransition = RAIL_RF_STATE_IDLE;
+#endif
 uint8_t logLevel = PERIPHERAL_ENABLE | ASYNC_RESPONSE;
 int32_t txCount = 0;
-uint32_t continuousTransferPeriod = APP_CONTINUOUS_TRANSFER_PERIOD;
+uint32_t continuousTransferPeriod = SL_RAIL_TEST_CONTINUOUS_TRANSFER_PERIOD;
+bool enableRandomTxDelay = false;
 uint32_t txAfterRxDelay = 0;
 int32_t txCancelDelay = -1;
 RAIL_StopMode_t txCancelMode = RAIL_STOP_MODES_NONE; // Use RAIL_Idle()
@@ -116,18 +133,21 @@ volatile bool rxProcessHeld = false;
 volatile uint32_t packetsHeld = 0U;
 
 // Internal app state variables
-static bool receivingPacket = false;
-RAIL_Events_t lastTxStatus = 0;
-RAIL_Events_t lastTxAckStatus = 0;
 static uint32_t startTransmitCounter = 0;
 uint32_t internalTransmitCounter = 0;
-uint32_t failPackets = 0;
-uint32_t ccaSuccesses = 0;
-uint32_t failAckPackets = 0;
-uint32_t sentAckPackets = 0;
-static bool packetTx = false;
-static bool finishTxSequence = false;
-static bool finishTxAckSequence = false;
+volatile uint32_t ccaSuccesses = 0;
+volatile uint32_t sentAckPackets = 0;
+
+// Globals accessed in an interrupt context declared volatile.
+static volatile bool receivingPacket = false;
+volatile RAIL_Events_t lastTxStatus = 0;
+volatile RAIL_Events_t lastTxAckStatus = 0;
+volatile uint32_t failPackets = 0;
+volatile uint32_t failAckPackets = 0;
+static volatile bool packetTx = false;
+static volatile bool finishTxSequence = false;
+static volatile bool finishTxAckSequence = false;
+
 RAIL_ScheduleTxConfig_t nextPacketTxTime = {
   0,
   RAIL_TIME_ABSOLUTE,
@@ -137,6 +157,12 @@ Queue_t railAppEventQueue;
 volatile uint32_t eventsMissed = 0U;
 static RAIL_Time_t txStartTime;
 
+// Variable which holds the receive frequency offset for the period of time
+// between when the frequency offset is measured (in either the
+// RAIL_EVENT_RX_SYNC1_DETECT event or the RAIL_EVENT_RX_SYNC2_DETECT event)
+// until reception of the packet is completed or aborted.
+RAIL_FrequencyOffset_t rxFreqOffset = RAIL_FREQUENCY_OFFSET_INVALID;
+
 // Variable which contains data of the most recently
 // received beam packet, and a bool to specify whether
 // or not one was received.
@@ -144,16 +170,16 @@ ZWaveBeamData_t beamData = {
   .channelIndex = RAIL_CHANNEL_HOPPING_INVALID_INDEX
 };
 volatile bool beamReceived = false;
-static uint32_t railTimerExpireTime = 0;
-static uint32_t railTimerConfigExpireTime = 0;
-static bool     railTimerExpired = false;
-static bool     calibrateRadio = false;
-bool newTxError = false;
-static bool     rxAckTimeout = false;
-static uint32_t ackTimeoutDuration = 0;
-volatile uint8_t eventQueueMarker = 0U;
+static volatile uint32_t railTimerExpireTime = 0;
+static volatile uint32_t railTimerConfigExpireTime = 0;
+static volatile bool     railTimerExpired = false;
+static volatile bool     calibrateRadio = false;
+bool volatile newTxError = false;
+static volatile bool     rxAckTimeout = false;
+static volatile uint32_t ackTimeoutDuration = 0;
 RAIL_Events_t enablePrintEvents = RAIL_EVENTS_NONE;
 bool printRxErrorPackets = false;
+bool printRxFreqOffsetData = false;
 bool printingEnabled = RAIL_PRINTING_DEFAULT_BOOL;
 
 // Names of RAIL_EVENT defines. This should align with rail_types.h
@@ -166,95 +192,55 @@ uint32_t channelHoppingBufferSpace[CHANNEL_HOPPING_BUFFER_SIZE];
 uint32_t *channelHoppingBuffer = channelHoppingBufferSpace;
 #endif
 
-// Allow local echo to be turned on/off for the command prompt
-#ifdef DISABLE_LOCAL_ECHO
-  #define localEcho 0
-#else
-  #define localEcho 1
-#endif
-
-#ifdef INTERNAL_COMMAND_HEADER
-  #include INTERNAL_COMMAND_HEADER
-#endif
-
-//Command line variables
-#define RAILCMD_ENTRY(command, args, callback, helpStr) \
-  COMMAND_ENTRY(command, args, callback, helpStr),
-#define RAILCMD_SEPARATOR(string) \
-  COMMAND_SEPARATOR(string),
-static CommandEntry_t commands[] = {
-  APP_CI_COMMANDS
-  RAILAPP_CI_COMMANDS
-#ifdef RAILAPP_RMR
-  RMR_CI_COMMANDS
-#endif
-#ifdef INTERNAL_COMMANDS
-  INTERNAL_COMMANDS
-#endif
-  COMMAND_ENTRY(NULL, NULL, NULL, NULL)
-};
-#undef  RAILCMD_ENTRY
-#undef  RAILCMD_SEPARATOR
-static CommandState_t ciState;
-static char ciBuffer[APP_COMMAND_INTERFACE_BUFFER_SIZE];
-
 // Channel Variable
 uint16_t channel = 0;
 
 // Generic
 RAIL_Handle_t railHandle;
 
-uint8_t txData[APP_MAX_PACKET_LENGTH] = {
-  0x0F, 0x0E, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66,
+// Make default packet work with the length-decoding schemes of 802.15.4, BLE,
+// and Z-Wave
+uint8_t txData[SL_RAIL_TEST_MAX_PACKET_LENGTH] = {
+  0x0F, 0x0E, 0x11, 0x22, 0x33, 0x44, 0x55, 0x0F,
   0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE,
 };
 uint16_t txDataLen = 16;
 
 static union {
   // Used to align this buffer as needed
-  RAIL_FIFO_ALIGNMENT_TYPE align[RX_BUFFER_SIZE / RAIL_FIFO_ALIGNMENT];
-  uint8_t fifo[TX_BUFFER_SIZE];
+  RAIL_FIFO_ALIGNMENT_TYPE align[SL_RAIL_TEST_TX_BUFFER_SIZE / RAIL_FIFO_ALIGNMENT];
+  uint8_t fifo[SL_RAIL_TEST_TX_BUFFER_SIZE];
 } txFifo;
 
 uint8_t ackData[RAIL_AUTOACK_MAX_LENGTH] = {
-  0x0F, 0x0E, 0xF1, 0xE2, 0xD3, 0xC4, 0xB5, 0xA6,
+  0x0F, 0x0E, 0xF1, 0xE2, 0xD3, 0xC4, 0xB5, 0x0F,
   0x97, 0x88, 0x79, 0x6A, 0x5B, 0x4C, 0x3D, 0x2E,
 };
 uint8_t ackDataLen = 16;
 
 // Static RAIL callbacks
-static void RAILCb_RfReady(RAIL_Handle_t railHandle);
 static void RAILCb_RssiAverageDone(RAIL_Handle_t railHandle);
-static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events);
 uint8_t RAILCb_ConvertLqi(uint8_t lqi, int8_t rssi);
 static bool RAILCb_QueueOverflow(const Queue_t *queue, void *data);
 
-static RAIL_Config_t railCfg = {
-  .eventsCallback = &RAILCb_Event
-};
-
-// Structure that holds txOptions
+// Structures that hold default TX & RX Options
 RAIL_TxOptions_t txOptions = RAIL_TX_OPTIONS_DEFAULT;
-
-// Structure that holds (default) rxOptions
 RAIL_RxOptions_t rxOptions = RAIL_RX_OPTIONS_DEFAULT;
 
 // Data Management
 RAIL_DataConfig_t railDataConfig = {
-  .txSource = TX_PACKET_DATA,
-  .rxSource = RX_PACKET_DATA,
-  .txMethod = PACKET_MODE,
-  .rxMethod = PACKET_MODE,
+  .txSource = SL_RAIL_UTIL_INIT_DATA_FORMAT_INST0_TX_SOURCE,
+  .rxSource = SL_RAIL_UTIL_INIT_DATA_FORMAT_INST0_RX_SOURCE,
+  .txMethod = SL_RAIL_UTIL_INIT_DATA_FORMAT_INST0_TX_MODE,
+  .rxMethod = SL_RAIL_UTIL_INIT_DATA_FORMAT_INST0_RX_MODE,
 };
 
 // Called during main loop
-void processInputCharacters(void);
 void sendPacketIfPending(void);
 void finishTxSequenceIfPending(void);
 void changeAppModeIfPending(void);
 void printNewTxError(void);
 void checkTimerExpiration(void);
-void updateDisplay(void);
 void processPendingCalibrations(void);
 void printAckTimeout(void);
 
@@ -290,10 +276,37 @@ static void heldRxProcess(void)
   }
 }
 
-int main(void)
+// Copy src bytes into txData array starting at offset, and update txDataLength.
+static void changeTxPayload(uint32_t offset,
+                            uint8_t *src,
+                            uint16_t srcLen,
+                            uint16_t pktLen)
 {
-  // Initialize the chip
-  CHIP_Init();
+  if (offset + srcLen <= sizeof(txData)) {   // be sure it fits
+    memcpy(&txData[offset], &src[0], srcLen);
+    txDataLen = pktLen;
+  } else {
+    responsePrintError("changeTxPayload",
+                       0xF0,
+                       "New packet data overflows the txData buffer size.");
+    while (1) ;
+  }
+}
+
+// Function called from sl_system_init before the main super loop.
+void sl_rail_test_internal_app_init(void)
+{
+#if !defined(__CROSSWORKS_ARM) && defined(__GNUC__)
+  setvbuf(stdout, NULL, _IONBF, 0);   /*Set unbuffered mode for stdout (newlib)*/
+#endif
+
+  // Get RAIL handle.
+  railHandle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
+
+  // Get proprietary channel config index, if support enabled.
+  if (SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE) {
+    configIndex = SL_RAIL_UTIL_INIT_PROTOCOL_PROPRIETARY_INST0_INDEX;
+  }
 
   // Initialize the RPC Server
   RPC_Server_Init();
@@ -307,83 +320,32 @@ int main(void)
   // Initialize hardware for application
   appHalInit();
 
+  // Initialize txOptions & rxOptions
+  sl_rail_util_ant_div_init_tx_options(&txOptions);
+  sl_rail_util_ant_div_init_rx_options(&rxOptions);
+
   // Make sure the response printer mirrors the default printingEnabled state
   responsePrintEnable(printingEnabled);
 
   // Print app initialization information.
   RAILTEST_PRINTF("\n");
-  responsePrint("reset", "App:%s,Built:%s", APP_DEMO_STRING_INIT, buildDateTime);
-
-  // Initialize Radio
-  railHandle = RAIL_Init(&railCfg, &RAILCb_RfReady);
+  responsePrint("reset", "App:%s,Built:%s", SL_RAIL_TEST_APP_NAME, buildDateTime);
 
   // Set TX FIFO, and verify that the size is correct
-  uint16_t fifoSize = RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, TX_BUFFER_SIZE);
-  if (fifoSize != TX_BUFFER_SIZE) {
+  uint16_t fifoSize = RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, SL_RAIL_TEST_TX_BUFFER_SIZE);
+  if (fifoSize != SL_RAIL_TEST_TX_BUFFER_SIZE) {
     while (1) ;
   }
 
-  // Configure Radio Calibrations
-  RAIL_ConfigCal(railHandle, RAIL_CAL_ALL);
-
-  // Load the default radio configuration.
-  channel = applyDefaultRadioConfig(railHandle, RADIO_CONFIG_DEFAULT);
+  (void) RAIL_GetChannel(railHandle, &channel);
 
   // Register an LQI conversion callback.
-#ifdef EMBER_AF_PLUGIN_LQI_OVERRIDE
-  LQI_SetOverrideEnabled(railHandle, true);
-#else
   RAIL_ConvertLqi(railHandle, &RAILCb_ConvertLqi);
-#endif
 
-  // Configure all RAIL events with appended info
-  RAIL_Events_t events = RAIL_EVENT_CAL_NEEDED
-                         | RAIL_EVENT_RSSI_AVERAGE_DONE
-                         | RAIL_EVENT_RX_ACK_TIMEOUT
-                         | RAIL_EVENT_RX_FIFO_ALMOST_FULL
-                         | RAIL_EVENT_TX_FIFO_ALMOST_EMPTY
-                         | RAIL_EVENT_RX_PACKET_RECEIVED
-                         | RAIL_EVENT_TX_PACKET_SENT
-                         | RAIL_EVENT_TXACK_PACKET_SENT
-                         | RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND
-                         | RAIL_EVENT_ZWAVE_BEAM
-                         | RAIL_EVENT_RX_PREAMBLE_DETECT
-                         | RAIL_EVENT_RX_SYNC1_DETECT
-                         | RAIL_EVENT_RX_SYNC2_DETECT
-                         | RAIL_EVENT_RX_FRAME_ERROR
-                         | RAIL_EVENT_RX_FIFO_FULL
-                         | RAIL_EVENT_RX_FIFO_OVERFLOW
-                         | RAIL_EVENT_RX_ADDRESS_FILTERED
-                         | RAIL_EVENT_RX_TIMEOUT
-                         | RAIL_EVENT_RX_SCHEDULED_RX_END
-                         | RAIL_EVENT_RX_SCHEDULED_RX_MISSED
-                         | RAIL_EVENT_RX_PACKET_ABORTED
-                         | RAIL_EVENT_RX_FILTER_PASSED
-                         | RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE
-                         | RAIL_EVENT_TX_CHANNEL_BUSY
-                         | RAIL_EVENT_TX_ABORTED
-                         | RAIL_EVENT_TX_BLOCKED
-                         | RAIL_EVENT_TX_UNDERFLOW
-                         | RAIL_EVENT_TXACK_ABORTED
-                         | RAIL_EVENT_TXACK_BLOCKED
-                         | RAIL_EVENT_TXACK_UNDERFLOW
-                         | RAIL_EVENT_TX_CHANNEL_CLEAR
-                         | RAIL_EVENT_TX_CCA_RETRY
-                         | RAIL_EVENT_TX_STARTED
-                         | RAIL_EVENT_TX_START_CCA
-                         | RAIL_EVENT_TX_SCHEDULED_TX_MISSED;
-  RAIL_ConfigEvents(railHandle, RAIL_EVENTS_ALL, events);
   RAIL_ConfigRxOptions(railHandle, RAIL_RX_OPTIONS_ALL, rxOptions);
 
-  RAIL_StateTransitions_t transitions = {
-    .success = RAIL_RF_STATE_RX,
-    .error = RAIL_RF_STATE_RX
-  };
-  RAIL_SetRxTransitions(railHandle, &transitions);
-  rxSuccessTransition = RAIL_RF_STATE_RX;
-  RAIL_SetTxTransitions(railHandle, &transitions);
   // Initialize the queue we use for tracking packets
-  if (!queueInit(&railAppEventQueue, MAX_QUEUE_LENGTH)) {
+  if (!queueInit(&railAppEventQueue, BUFFER_POOL_ALLOCATOR_POOL_SIZE)) {
     while (1) ;
   }
   queueOverflow(&railAppEventQueue, &RAILCb_QueueOverflow);
@@ -408,15 +370,32 @@ int main(void)
   (void) resetCause;
 #endif
 
-  updateDisplay();
-
-  RAILTEST_PRINTF("> ");
-  ciInitState(&ciState, ciBuffer, sizeof(ciBuffer), commands);
-
-  // Fill out the txPacket with a useful pattern so it's not
-  // all-zeros if user extends the Tx length.
+  // Fill out the default TX packet with a useful pattern so it's not
+  // all zeros if user extends the TX length.
   for (unsigned int i = txDataLen; i < sizeof(txData); i++) {
     txData[i] = i;
+  }
+
+  // Change the default TX packet payload to be protocol-specific.
+  if (SL_RAIL_UTIL_PROTOCOL_IS_IEEE802154_2G4(SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT)) {
+    // Default 802.15.4 2.4 GHz packet.
+    uint8_t changes[] = { 0x0c, 0x63, 0x88, 0xbe, 0xff, 0xff, 0xff, 0xff,
+                          0x11, 0x22, 0x04 };
+    // Change 11 bytes at offset 0 of txData, and new packet length is 11.
+    changeTxPayload(0, &changes[0], sizeof(changes), 11);
+  } else if (SL_RAIL_UTIL_PROTOCOL_IS_IEEE802154_GB868(SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT)) {
+    // Default 802.15.4 2.4 GB868 packet.
+    uint8_t changes[] = { 0x18, 0x28 };
+    // Change 2 bytes at offset 0 of txData, and new packet length is 20.
+    changeTxPayload(0, &changes[0], sizeof(changes), 20);
+  } else if (SL_RAIL_UTIL_PROTOCOL_IS_ZWAVE(SL_RAIL_UTIL_INIT_PROTOCOL_INST0_DEFAULT)) {
+    // Default Z-Wave packet.
+    uint8_t changes[] = { 0x20 };
+    // Change 1 byte at offset 7 of txData, and new packet length is 200.
+    changeTxPayload(7, &changes[0], sizeof(changes), 200);
+  } else {
+    // Use the default packet that already has length-decoding schemes for
+    // 802.15.4, BLE, and Z-Wave.
   }
 
   // Initialize autoack data
@@ -425,45 +404,42 @@ int main(void)
   // RX isn't validated yet so lets not go into receive just yet
   RAIL_StartRx(railHandle, channel, NULL); // Start in receive mode
   receiveModeEnabled = true;
+}
 
-  // Run a bootup script from flash if one exists.
-  runFlashScript();
+// Function called from sl_system_process_action within the main super loop.
+void sl_rail_test_internal_app_process_action(void)
+{
+  RPC_Server_Tick();
 
-  while (1) {
-    RPC_Server_Tick();
+  // Change app mode first so that any new actions can take effect this loop
+  changeAppModeIfPending();
 
-    processInputCharacters();
+  rfSensedCheck();
 
-    // Change app mode first so that any new actions can take effect this loop
-    changeAppModeIfPending();
+  sendPacketIfPending();
 
-    rfSensedCheck();
+  printNewTxError();
 
-    sendPacketIfPending();
+  finishTxSequenceIfPending();
 
-    printNewTxError();
+  printRailAppEvents();
 
-    finishTxSequenceIfPending();
+  checkTimerExpiration();
 
-    printRailAppEvents();
+  processPendingCalibrations();
 
-    checkTimerExpiration();
+  printAckTimeout();
 
-    updateDisplay();
-
-    processPendingCalibrations();
-
-    printAckTimeout();
-
-    heldRxProcess();
-  }
-} //main()
+  heldRxProcess();
+}
 
 /******************************************************************************
  * RAIL Callback Implementation
  *****************************************************************************/
-static void RAILCb_RfReady(RAIL_Handle_t railHandle)
+// Override weak function called by callback sli_rail_util_on_rf_ready.
+void sl_rail_util_on_rf_ready(RAIL_Handle_t railHandle)
 {
+  (void)railHandle;
   LedSet(0);
   LedSet(1);
 }
@@ -478,6 +454,13 @@ static bool RAILCb_QueueOverflow(const Queue_t *queue, void *data)
   return true; // allow the overwrite
 }
 
+void RAILCb_SwTimerExpired(RAIL_Handle_t railHandle)
+{
+  railTimerExpireTime = RAIL_GetTime();
+  railTimerConfigExpireTime = RAIL_GetTimer(railHandle);
+  railTimerExpired = true;
+}
+
 void RAILCb_TimerExpired(RAIL_Handle_t railHandle)
 {
   if (inAppMode(NONE, NULL)) {
@@ -489,11 +472,15 @@ void RAILCb_TimerExpired(RAIL_Handle_t railHandle)
       railTimerExpired = true;
     }
   } else if (currentAppMode() == PER) {
-    GPIO_PinOutToggle(PER_PORT, PER_PIN);
-    counters.perTriggers += GPIO_PinOutGet(PER_PORT, PER_PIN);
-    perCount -= GPIO_PinOutGet(PER_PORT, PER_PIN);
+#if defined (SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
+    GPIO_PinOutToggle(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN);
+    counters.perTriggers += GPIO_PinOutGet(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN);
+    perCount -= GPIO_PinOutGet(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN);
+#endif // SL_RAIL_TEST_PER_PORT && SL_RAIL_TEST_PER_PIN
     if (perCount < 1) {
-      GPIO_PinOutClear(PER_PORT, PER_PIN);
+#if defined (SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
+      GPIO_PinOutClear(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN);
+#endif // SL_RAIL_TEST_PER_PORT && SL_RAIL_TEST_PER_PIN
       enableAppMode(PER, false, NULL);
     } else {
       RAIL_SetTimer(railHandle, perDelay, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
@@ -531,8 +518,10 @@ static void RAILCb_RssiAverageDone(RAIL_Handle_t railHandle)
   rssiDoneCount++;
 }
 
-void RAILCb_AssertFailed(RAIL_Handle_t railHandle, uint32_t errorCode)
+// Override weak function called by callback RAILCb_AssertFailed.
+void sl_rail_util_on_assert_failed(RAIL_Handle_t railHandle, uint32_t errorCode)
 {
+  (void)railHandle;
   static const char* railErrorMessages[] = RAIL_ASSERT_ERROR_MESSAGES;
   const char *errorMessage = "Unknown";
 
@@ -550,7 +539,8 @@ void RAILCb_AssertFailed(RAIL_Handle_t railHandle, uint32_t errorCode)
   NVIC_SystemReset();
 }
 
-static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
+// Override weak function called by callback sli_rail_util_on_event.
+void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
 {
   enqueueEvents(events);
   if (events & RAIL_EVENT_CAL_NEEDED) {
@@ -573,10 +563,13 @@ static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   if (events & RAIL_EVENT_RX_PREAMBLE_DETECT) {
     counters.preambleDetect++;
   }
-  if (events & RAIL_EVENT_RX_SYNC1_DETECT) {
+  if (events & (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT)) {
     receivingPacket = true;
     counters.syncDetect++;
     rxFifoPrep();
+    if (printRxFreqOffsetData) {
+      rxFreqOffset = RAIL_GetRxFreqOffset(railHandle);
+    }
     if (abortRxDelay != 0) {
       RAIL_SetTimer(railHandle, abortRxDelay, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
     }
@@ -672,6 +665,11 @@ static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
       scheduleNextTx();
     }
   }
+  if (events & RAIL_EVENT_MFM_TX_BUFFER_DONE) {
+    if (RAIL_MFM_IsEnabled(railHandle)) {
+      counters.userTx++;
+    }
+  }
   if (events & RAIL_EVENT_TX_STARTED) {
     counters.userTxStarted++;
     (void) RAIL_GetTxTimePreambleStart(railHandle, RAIL_TX_STARTED_BYTES,
@@ -730,7 +728,24 @@ static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     counters.ackTx++;
     RAILCb_TxPacketSent(railHandle, true);
   }
+  if (events & RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE) {
+    RAILCb_RxChannelHoppingComplete(railHandle);
+  }
+  if (events & RAIL_EVENT_PA_PROTECTION) {
+    counters.paProtect++;
+  }
 }
+
+volatile bool allowPowerManagerSleep = false;
+// This app-level function overrides a weak power manager implementation and
+// gets called in sl_power_manager_handler.c.
+// By default prevent the RAILtest App from sleeping and
+// keep CLI responsive.
+bool app_is_ok_to_sleep(void)
+{
+  return allowPowerManagerSleep;
+}
+
 /******************************************************************************
  * Application Helper Functions
  *****************************************************************************/
@@ -761,39 +776,52 @@ void processPendingCalibrations(void)
   }
 }
 
+RAIL_FrequencyOffset_t getRxFreqOffset(void)
+{
+  RAIL_FrequencyOffset_t retVal = rxFreqOffset;
+  rxFreqOffset = RAIL_FREQUENCY_OFFSET_INVALID;
+  return retVal;
+}
+
 void checkTimerExpiration(void)
 {
   if (railTimerExpired) {
     railTimerExpired = false;
+    uint32_t paramRailTimerExpireTime = railTimerExpireTime;
+
     responsePrint("timerCb",
                   "TimerExpiredCallback:%u,ConfiguredExpireTime:%u",
-                  railTimerExpireTime,
+                  paramRailTimerExpireTime,
                   railTimerConfigExpireTime);
   }
 }
 
 void printNewTxError(void)
 {
+  RAIL_Events_t paramLastTxStatus;
+
   if (newTxError) {
     newTxError = false;
     if (lastTxStatus & RAIL_EVENT_TX_UNDERFLOW) {
       if (logLevel & ASYNC_RESPONSE) {
+        paramLastTxStatus = lastTxStatus;
         responsePrint("txPacket",
                       "txStatus:Error,"
                       "errorReason:Tx underflow or abort,"
                       "errorCode:0x%x%08x",
-                      (uint32_t)(lastTxStatus >> 32),
-                      (uint32_t)(lastTxStatus));
+                      (uint32_t)(paramLastTxStatus >> 32),
+                      (uint32_t)(paramLastTxStatus));
       }
     }
     if (lastTxStatus & RAIL_EVENT_TX_CHANNEL_BUSY) {
       if (logLevel & ASYNC_RESPONSE) {
+        paramLastTxStatus = lastTxStatus;
         responsePrint("txPacket",
                       "txStatus:Error,"
                       "errorReason:Tx channel busy,"
                       "errorCode:0x%x%08x",
-                      (uint32_t)(lastTxStatus >> 32),
-                      (uint32_t)(lastTxStatus));
+                      (uint32_t)(paramLastTxStatus >> 32),
+                      (uint32_t)(paramLastTxStatus));
       }
       counters.txChannelBusy++;
     }
@@ -819,7 +847,7 @@ void printAckTimeout(void)
 void changeChannel(uint32_t i)
 {
   channel = i;
-  redrawDisplay = true;
+  updateGraphics();
   // Apply the new channel immediately if you are in receive already
   if (receiveModeEnabled
       || ((RAIL_GetRadioState(railHandle) & RAIL_RF_STATE_RX) != 0U)) {
@@ -917,6 +945,8 @@ void finishTxSequenceIfPending(void)
     // Don't log if we didn't send any packets
     if ((logLevel & ASYNC_RESPONSE)
         && ((failPackets != 0) || (sentPackets != 0) || (ccaSuccesses != 0))) {
+      RAIL_Events_t paramLastTxStatus = lastTxStatus;
+      uint32_t paramFailPackets = failPackets;
       // Print the number of sent and failed packets
       responsePrint("txEnd",
                     "txStatus:%s,"
@@ -928,7 +958,7 @@ void finishTxSequenceIfPending(void)
                     "failed:%u,"
                     "lastTxStatus:0x%x%08x,"
                     "isAck:False",
-                    (failPackets == 0
+                    (paramFailPackets == 0
                      ? "Complete"
                      : (sentPackets == 0 ? "Error" : "Partial")),
                     sentPackets,
@@ -936,9 +966,9 @@ void finishTxSequenceIfPending(void)
                     previousTxAppendedInfo.timeSent.timePosition,
                     txStartTime,
                     ccaSuccesses,
-                    failPackets,
-                    (uint32_t)(lastTxStatus >> 32),
-                    (uint32_t)(lastTxStatus));
+                    paramFailPackets,
+                    (uint32_t)(paramLastTxStatus >> 32),
+                    (uint32_t)(paramLastTxStatus));
     }
     startTransmitCounter = internalTransmitCounter;
     failPackets = 0;
@@ -949,6 +979,9 @@ void finishTxSequenceIfPending(void)
     finishTxAckSequence = false;
 
     if ((logLevel & ASYNC_RESPONSE) && printTxAck) {
+      RAIL_Events_t paramLastTxAckStatus = lastTxAckStatus;
+      uint32_t paramFailAckPackets = failAckPackets;
+      uint32_t paramSentAckPackets = sentAckPackets;
       // Print the number of sent and failed packets
       responsePrint("txEnd",
                     "txStatus:%s,"
@@ -958,15 +991,15 @@ void finishTxSequenceIfPending(void)
                     "failed:%u,"
                     "lastTxStatus:0x%x%08x,"
                     "isAck:True",
-                    failAckPackets == 0
+                    paramFailAckPackets == 0
                     ? "Complete"
-                    : (sentAckPackets == 0 ? "Error" : "Partial"),
-                    sentAckPackets,
+                    : (paramSentAckPackets == 0 ? "Error" : "Partial"),
+                    paramSentAckPackets,
                     previousTxAckAppendedInfo.timeSent.packetTime,
                     previousTxAckAppendedInfo.timeSent.timePosition,
-                    failAckPackets,
-                    (uint32_t)(lastTxAckStatus >> 32),
-                    (uint32_t)(lastTxAckStatus));
+                    paramFailAckPackets,
+                    (uint32_t)(paramLastTxAckStatus >> 32),
+                    (uint32_t)(paramLastTxAckStatus));
     }
     sentAckPackets = 0;
     failAckPackets = 0;
@@ -989,12 +1022,13 @@ void printPacket(char *cmdName,
   responsePrintStart(cmdName);
   if (packetData != NULL) {
     responsePrintContinue(
-      "len:%d,timeUs:%u,timePos:%u,crc:%s,rssi:%d,lqi:%d,phy:%d,"
+      "len:%d,timeUs:%u,timePos:%u,crc:%s,filterMask:0x%x,rssi:%d,lqi:%d,phy:%d,"
       "isAck:%s,syncWordId:%d,antenna:%d,channelHopIdx:%d",
       packetData->dataLength,
       packetData->appendedInfo.timeReceived.packetTime,
       packetData->appendedInfo.timeReceived.timePosition,
       (packetData->appendedInfo.crcPassed) ? "Pass" : "Fail",
+      packetData->filterMask,
       packetData->appendedInfo.rssi,
       packetData->appendedInfo.lqi,
       packetData->appendedInfo.subPhyId,
@@ -1009,6 +1043,13 @@ void printPacket(char *cmdName,
         RAIL_IEEE802154_ConvertRssiToLqi(packetData->appendedInfo.lqi,
                                          packetData->appendedInfo.rssi));
     }
+    if (printRxFreqOffsetData) {
+      if (packetData->freqOffset == RAIL_FREQUENCY_OFFSET_INVALID) {
+        responsePrintContinue("freqOffset:Invalid");
+      } else {
+        responsePrintContinue("freqOffset:%d", packetData->freqOffset);
+      }
+    }
   } else {
     responsePrintContinue("len:%d", dataLength);
   }
@@ -1022,41 +1063,6 @@ void printPacket(char *cmdName,
     RAILTEST_PRINTF("}");
   }
   RAILTEST_PRINTF("}\n");
-}
-
-void processInputCharacters(void)
-{
-  char input;
-
-  // Scripted mode is in effect when scriptMarker is less than scriptedLength
-  // (scriptMarker indicates where to read from in the script entered via
-  // enterScript).
-  // If we're in scripted mode, read from the script instead of from the CI.
-  input = scriptMarker < scriptLength ? script[scriptMarker] : getchar();
-
-  while ((input != '\0') && (input != 0xFF) && ((RAIL_GetTime() - suspensionStartTime) >= suspension)) {
-    suspension = 0;
-    suspensionStartTime = 0;
-
-    // Increment the marker if we're going to process it
-    if (scriptMarker < scriptLength) {
-      scriptMarker++;
-    }
-
-    if (localEcho) {
-      if (input != '\n') {
-        RAILTEST_PRINTF("%c", input);
-        if (input == '\r') { // retargetserial no longer does CR => CRLF
-          RAILTEST_PRINTF("\n");
-        }
-      }
-    }
-    if (ciProcessInput(&ciState, &input, 1) > 0) {
-      RAILTEST_PRINTF("> ");
-      return;
-    }
-    input = scriptMarker < scriptLength ? script[scriptMarker] : getchar();
-  }
 }
 
 void enqueueEvents(RAIL_Events_t events)
@@ -1075,7 +1081,8 @@ void enqueueEvents(RAIL_Events_t events)
     // No need to disable interrupts; this is only called from interrupt
     // context and RAIL doesn't support nested interrupts/events.
     railEvent->railEvent.timestamp = RAIL_GetTime();
-    railEvent->railEvent.events = events;
+    railEvent->railEvent.events[1] = (uint32_t)(events >> 32);
+    railEvent->railEvent.events[0] = (uint32_t)(events);
 
     queueAdd(&railAppEventQueue, railEventHandle);
   }
@@ -1083,15 +1090,17 @@ void enqueueEvents(RAIL_Events_t events)
 
 void printRailEvents(RailEvent_t *railEvent)
 {
-  if ((railEvent->events >> numRailEvents) != RAIL_EVENTS_NONE) {
+  RAIL_Events_t events = (((RAIL_Events_t) railEvent->events[1] << 32)
+                          | railEvent->events[0]);
+  if ((events >> numRailEvents) != RAIL_EVENTS_NONE) {
     responsePrintError("printRailEvents", 0x2,
                        "Unknown RAIL Events:0x%x%08x",
-                       (uint32_t)(railEvent->events >> 32),
-                       (uint32_t)(railEvent->events));
+                       (uint32_t)(events >> 32),
+                       (uint32_t)(events));
     return;
   }
-  for (unsigned int i = 0U; (railEvent->events >> i) != RAIL_EVENTS_NONE; i++) {
-    if (railEvent->events & (1ULL << i)) {
+  for (unsigned int i = 0U; events != RAIL_EVENTS_NONE; i++, events >>= 1) {
+    if ((events & 1U) != RAIL_EVENTS_NONE) {
       responsePrint("event",
                     "timestamp:%u,eventName:RAIL_EVENT_%s",
                     railEvent->timestamp,
@@ -1100,62 +1109,8 @@ void printRailEvents(RailEvent_t *railEvent)
   }
 }
 
-/******************************************************************************
- * Command Interpreter Override Functions
- *****************************************************************************/
-
-// Error callback function using responsePrint
-void ciErrorCallback(char* command, CommandError_t error)
-{
-  if (error == CI_UNKNOWN_COMMAND) {
-    responsePrintError("ci",
-                       CI_UNKNOWN_COMMAND,
-                       "Unknown command '%s'",
-                       command);
-  } else if (error == CI_MAX_ARGUMENTS) {
-    responsePrintError("ci",
-                       CI_MAX_ARGUMENTS,
-                       "CI_MAX_ARGUMENTS '%s'",
-                       command);
-  } else if (error == CI_INVALID_ARGUMENTS) {
-    responsePrintError("ci",
-                       CI_INVALID_ARGUMENTS,
-                       "Invalid arguments for '%s'",
-                       command);
-  }
-}
-
-#ifdef USE_RESPONSE_HELP
-// Help callback function using responsePrint
-bool ciPrintHelp(CommandEntry_t *commands)
-{
-  responsePrintHeader("help", "command:%s,args:%s,help:%s");
-  while (commands != NULL && commands->command != NULL) {
-    char *args = commands->arguments;
-    char *helpStr = commands->helpStr;
-
-    if (commands->callback != NULL) {
-      // Make sure that we print something for NULL pointers
-      if (args == NULL) {
-        args = "";
-      }
-      if (helpStr == NULL) {
-        helpStr = "";
-      }
-
-      // Print the multiline response for this entry
-      responsePrintMulti("command:%s,args:%s,help:%s",
-                         commands->command,
-                         args,
-                         helpStr);
-    }
-    commands++;
-  }
-  return true;
-}
-#endif //USE_RESPONSE_HELP
-
 char *handleToString(RAIL_Handle_t railHandle)
 {
-  return "r";//for railtest vs MP configuration
+  (void)railHandle;
+  return "r";//for RAILtest vs MP configuration
 }

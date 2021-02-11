@@ -2463,10 +2463,10 @@ int USBH_WriteB(USBH_Ep_TypeDef *ep, void *data, int byteCount, int timeout)
 
 /* *INDENT-OFF* */
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
- * @addtogroup USB
+ * @addtogroup usb
  * @{
-
-@page usb_host USB host stack library
+ * @addtogroup usb_host
+ * @{
 
  The source files for the USB host stack resides in the usb directory
  and follows the naming convention: em_usbh<em>nnn</em>.c/h.
@@ -2805,7 +2805,10 @@ extern int RETARGET_WriteChar(char c);
  For <b>USB_VBUSOVRCUR_POLARITY</b> use <b>USB_VBUSOVRCUR_POLARITY_LOW</b>
  or <b>USB_VBUSOVRCUR_POLARITY_HIGH</b>.
 
- * @}**************************************************************************/
+ ***************************************************************************/
+
+/** @} (end addtogroup usb_host) */
+/** @} (end addtogroup usb) */
 
 #endif /* defined( USB_HOST ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */

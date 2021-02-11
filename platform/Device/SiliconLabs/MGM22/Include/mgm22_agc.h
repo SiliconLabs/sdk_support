@@ -1140,4 +1140,5 @@ typedef struct {
 /** @} End of group MGM22_AGC_BitFields */
 /** @} End of group MGM22_AGC */
 /** @} End of group Parts */
+
 #endif /* MGM22_AGC_H */

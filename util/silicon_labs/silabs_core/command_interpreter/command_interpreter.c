@@ -25,13 +25,23 @@
 
 #include "command_interpreter.h"
 
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
+// -----------------------------------------------------------------------------
+// Configuration Macros
+// -----------------------------------------------------------------------------
+// Pull in correct config file:
+#ifdef COMMAND_INTERPRETER_USE_LOCAL_CONFIG_HEADER
+  #include "command_interpreter_config.h" // component-level config file (new method)
+#else // !defined(COMMAND_INTERPRETER_USE_LOCAL_CONFIG_HEADER)
+  #ifdef CONFIGURATION_HEADER
+    #include CONFIGURATION_HEADER // application-level config file (old method)
+  #endif
 
-#ifndef MAX_COMMAND_ARGUMENTS
-#define MAX_COMMAND_ARGUMENTS 20
-#endif
+  #ifdef MAX_COMMAND_ARGUMENTS
+    #define COMMAND_INTERPRETER_NUM_ARGS_MAX MAX_COMMAND_ARGUMENTS
+  #else
+    #define COMMAND_INTERPRETER_NUM_ARGS_MAX 20U
+  #endif
+#endif // defined(COMMAND_INTERPRETER_USE_LOCAL_CONFIG_HEADER)
 
 // Define a WEAK macro to work across different compilers
 #ifdef __ICCARM__
@@ -58,7 +68,7 @@ WEAK void ciErrorCallback(char* command, CommandError_t error)
     printf("Error: Unknown command '%s'\n", command);
   } else if (error == CI_MAX_ARGUMENTS) {
     printf("Error: Cannot specify more than %d arguments\n",
-           MAX_COMMAND_ARGUMENTS);
+           COMMAND_INTERPRETER_NUM_ARGS_MAX);
   } else if (error == CI_INVALID_ARGUMENTS) {
     printf("Error: Unexpected or invalid arguments for this command\n");
   }
@@ -280,8 +290,8 @@ static bool processCommand(CommandEntry_t *commands, char *buffer)
   // Iterate through all the known commands and see if any of them match the
   // text we've received
   while (commands != NULL && commands->command != NULL) {
-    int argc = 0;
-    char *argv[MAX_COMMAND_ARGUMENTS];
+    uint32_t argc = 0;
+    char *argv[COMMAND_INTERPRETER_NUM_ARGS_MAX];
 
     // See if any of the commands match the value entered
     if ((commands->callback != NULL)
@@ -294,7 +304,7 @@ static bool processCommand(CommandEntry_t *commands, char *buffer)
       while (token != NULL) {
         argv[argc] = token;
         argc++;
-        if (argc >= MAX_COMMAND_ARGUMENTS) {
+        if (argc >= COMMAND_INTERPRETER_NUM_ARGS_MAX) {
           ciErrorCallback(buffer, CI_MAX_ARGUMENTS);
           return false;
         }

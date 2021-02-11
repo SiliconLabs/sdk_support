@@ -33,19 +33,6 @@
 
 #if defined(CRYOTIMER_PRESENT) && (CRYOTIMER_COUNT == 1)
 
-/***************************************************************************//**
- * @brief
- *   Initialize the CRYOTIMER.
- *
- * @details
- *   Use this function to initialize the CRYOTIMER.
- *   Select a prescaler setting and select a low-frequency oscillator.
- *   See the configuration structure @ref CRYOTIMER_Init_TypeDef for more
- *   details.
- *
- * @param[in] init
- *   A pointer to the initialization structure.
- ******************************************************************************/
 void CRYOTIMER_Init(const CRYOTIMER_Init_TypeDef *init)
 {
   CRYOTIMER->PERIODSEL = (uint32_t)init->period & _CRYOTIMER_PERIODSEL_MASK;

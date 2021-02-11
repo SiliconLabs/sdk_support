@@ -25,6 +25,7 @@
 
 #include "plugin/security/btl_security_aes.h"
 #include "plugin/security/btl_security_sha256.h"
+#include "plugin/security/btl_security_types.h"
 
 #include "config/btl_config.h"
 
@@ -44,6 +45,9 @@
  *   to present data and metadata contents of the GBL file to the bootloader.
  ******************************************************************************/
 
+// -----------------------------------------------------------------------------
+// Defines
+
 /// GBL file is encrypted
 #define PARSER_FLAG_ENCRYPTED               (1U << 0U)
 /// File is an EBL (version 2)
@@ -52,7 +56,13 @@
 #define PARSER_FLAG_PARSE_CUSTOM_TAGS       (1U << 5U)
 
 /// Some flags are public, some are internal to the parser
-#define PARSER_FLAGS_PUBLIC_MASK            (PARSER_FLAG_PARSE_CUSTOM_TAGS)
+#define PARSER_FLAGS_PUBLIC_MASK            PARSER_FLAG_PARSE_CUSTOM_TAGS
+
+/// GBL parser buffer size
+#define GBL_PARSER_BUFFER_SIZE              64UL
+
+// -----------------------------------------------------------------------------
+// Enums
 
 /// State in the EBL parser state machine
 typedef enum {
@@ -83,6 +93,9 @@ typedef enum {
   EblParserStateCustomTag,            ///< Parsing custom tag
   EblParserStateError                 ///< Error state
 } EblParserState_t;
+
+// -----------------------------------------------------------------------------
+// Structs
 
 /// Image parser context definition
 typedef struct {
@@ -138,6 +151,16 @@ typedef struct {
 #endif
 } ParserContext_t;
 
+/// GBL parser input buffer
+typedef struct {
+  /// Pointer to a buffer
+  const uint8_t *buffer;
+  /// Length of the buffer
+  const size_t  length;
+  /// Offset of the buffer
+  size_t        offset;
+} GblInputBuffer_t;
+
 /// @cond EXCLUDE_FROM_DOC
 #define BTL_PARSER_RECEIVED_BOOTLOADER   1U
 #define BTL_PARSER_RECEIVED_SE           2U
@@ -158,6 +181,26 @@ int32_t gbl_writeProgData(ParserContext_t *context,
                           uint8_t buffer[],
                           size_t length,
                           const BootloaderParserCallbacks_t *callbacks);
+
+/***************************************************************************//**
+ * Get data from storage and internal input buffer. This function advances the
+ * parser state.
+ *
+ * @param context         GBL parser context
+ * @param input           Input data
+ * @param outputBuffer    Output data
+ * @param outputLength    Output data length
+ * @param applySHA        Update SHA256 in the GBL parser context
+ * @param decrypt         Decrypt the output data
+ *
+ * @return Error code
+ ******************************************************************************/
+int32_t gbl_getData(ParserContext_t  *context,
+                    GblInputBuffer_t *input,
+                    uint8_t          outputBuffer[],
+                    size_t           outputLength,
+                    bool             applySHA,
+                    bool             decrypt);
 
 /** @} addtogroup EblParser */
 /** @} addtogroup ImageParser */

@@ -947,57 +947,40 @@ int USBD_Write(int epAddr, void *data, int byteCount,
   return USB_STATUS_OK;
 }
 
+/***************************************************************************//**
+ * @defgroup usb USB Stacks
+ * @{
+ * @brief Gecko USB stacks
+ * @}
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @defgroup usb_common USB Common
+ * @{
+ * @brief Common parts for both host and device USB stacks
+ * @}
+ ******************************************************************************/
 #if defined(USB_HOST)
 /***************************************************************************//**
- * @defgroup USB
+ * @defgroup usb_host USB Host
  * @{
- * @brief Gecko USB HOST and DEVICE protocol stacks.
- * @}
- ******************************************************************************/
-
-/***************************************************************************//**
- * @defgroup USB_COMMON
- * @{
- * @brief Common parts for both HOST and DEVICE USB stacks, see @ref usb_device
- *        and @ref usb_host pages for device and host library documentation.
- * @}
- ******************************************************************************/
-
-/***************************************************************************//**
- * @defgroup USB_HOST
- * @{
- * @brief Gecko USB HOST protocol stack, see @ref usb_host page for detailed documentation.
- * @}
- ******************************************************************************/
-#else
-/***************************************************************************//**
- * @defgroup USB
- * @{
- * @brief Gecko USB DEVICE protocol stack.
- * @}
- ******************************************************************************/
-
-/***************************************************************************//**
- * @defgroup USB_COMMON
- * @{
- * @brief Common parts for both HOST and DEVICE USB stacks, see @ref usb_device
- *        pages for device library documentation.
+ * @brief Gecko USB host protocol stack
  * @}
  ******************************************************************************/
 #endif
 /***************************************************************************//**
- * @defgroup USB_DEVICE
+ * @defgroup usb_device USB Device
  * @{
- * @brief Gecko USB DEVICE protocol stack, see @ref usb_device page for detailed documentation.
+ * @brief Gecko USB device protocol stack
  * @}
  ******************************************************************************/
 
 /* *INDENT-OFF* */
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
- * @addtogroup USB
+ * @addtogroup usb
  * @{
-
-@page usb_device USB device stack library
+ * @addtogroup usb_device
+ * @{
 
   The source files for the USB device stack resides in the usb directory
   and follows the naming convention: em_usbd<em>nnn</em>.c/h.
@@ -1528,7 +1511,9 @@ static int SetupCmd( const USB_Setup_TypeDef *setup )
   return retVal;
 }@endverbatim
 
- * @}**************************************************************************/
+ ***************************************************************************/
+/** @} (end addtogroup usb_devicd) */
+/** @} (end addtogroup usb) */
 
 #endif /* defined( USB_DEVICE ) */
 #endif /* defined( USB_PRESENT ) && ( USB_COUNT == 1 ) */

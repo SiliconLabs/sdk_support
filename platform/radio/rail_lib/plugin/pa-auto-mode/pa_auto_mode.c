@@ -4,7 +4,7 @@
  *   and other types.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -87,6 +87,24 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
     .min = INT16_MIN,
     .max = INT16_MAX,
     .mode = RAIL_TX_POWER_MODE_2P4_HP,
+    .band = RAIL_PA_BAND_2P4GIG
+  }
+};
+#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 3
+RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+  {
+    .min = INT16_MIN,
+    .max = INT16_MAX,
+    .mode = RAIL_TX_POWER_MODE_SUBGIG_HP,
+    .band = RAIL_PA_BAND_SUBGIG
+  }
+};
+#else
+RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+  {
+    .min = INT16_MIN,
+    .max = INT16_MAX,
+    .mode = 0,
     .band = RAIL_PA_BAND_2P4GIG
   }
 };

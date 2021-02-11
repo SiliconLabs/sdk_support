@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup I2C
+ * @addtogroup i2c
  * @{
  ******************************************************************************/
 
@@ -520,8 +515,7 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c);
 I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
                                             I2C_TransferSeq_TypeDef *seq);
 
-/** @} (end addtogroup I2C) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup i2c) */
 
 #ifdef __cplusplus
 }

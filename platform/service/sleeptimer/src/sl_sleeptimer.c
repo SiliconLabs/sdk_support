@@ -34,7 +34,8 @@
 #include "em_common.h"
 #include "em_core.h"
 #include "sl_sleeptimer.h"
-#include "sl_sleeptimer_hal.h"
+#include "sli_sleeptimer_hal.h"
+#include "sl_atomic.h"
 
 #define TIME_UNIX_EPOCH                         (1970u)
 #define TIME_NTP_EPOCH                          (1900u)
@@ -60,7 +61,7 @@ SLEEPTIMER_ENUM(sl_sleeptimer_time_format_t) {
   TIME_FORMAT_ZIGBEE_CLUSTER = 2, ///< Number of seconds since January 1, 2000, 00:00. Type is unsigned, so represented on 32 bit.
 };
 
-/// tick_count, it can wrap around.
+// tick_count, it can wrap around.
 typedef uint32_t sl_sleeptimer_tick_count_t;
 
 // Overflow counter used to provide 64-bits tick count.
@@ -91,8 +92,14 @@ static sl_sleeptimer_tick_count_t last_delta_update_count;
 // Initialization flag.
 static bool is_sleeptimer_initialized = false;
 
+// Flag that indicates if power manager's timer will expire at next compare match.
+static bool next_timer_to_expire_is_power_manager = false;
+
 // Precalculated value to avoid millisecond to tick conversion overflow.
 static uint32_t max_millisecond_conversion;
+
+// Sleep on ISR exit flag.
+static bool sleep_on_isr_exit = false;
 
 static void delta_list_insert_timer(sl_sleeptimer_timer_handle_t *handle,
                                     sl_sleeptimer_tick_count_t timeout);
@@ -114,6 +121,8 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
                                 void *callback_data,
                                 uint8_t priority,
                                 uint16_t option_flags);
+
+static void update_next_timer_to_expire_is_power_manager(void);
 
 static void delay_callback(sl_sleeptimer_timer_handle_t *handle,
                            void *data);
@@ -152,6 +161,10 @@ sl_status_t sl_sleeptimer_init(void)
     sleeptimer_hal_init_timer();
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_OF);
     timer_frequency = sleeptimer_hal_get_timer_frequency();
+    if (timer_frequency == 0) {
+      CORE_EXIT_ATOMIC();
+      return SL_STATUS_INVALID_CONFIGURATION;
+    }
 
 #if SL_SLEEPTIMER_WALLCLOCK_CONFIG
     second_count = 0;
@@ -405,6 +418,12 @@ sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flag
     time += current->delta;
     // Check if the current timer has the flags requested
     if (current->option_flags == option_flags) {
+      // Substract time since last compare match.
+      if (time > (sleeptimer_hal_get_counter() - last_delta_update_count)) {
+        time -= (sleeptimer_hal_get_counter() - last_delta_update_count);
+      } else {
+        time = 0;
+      }
       *time_remaining = time;
       CORE_EXIT_ATOMIC();
       return SL_STATUS_OK;
@@ -414,6 +433,21 @@ sl_status_t sl_sleeptimer_get_remaining_time_of_first_timer(uint16_t option_flag
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_EMPTY;
+}
+
+/**************************************************************************//**
+ * Determines if next timer to expire has the option flag
+ * "SL_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG".
+ *
+ * This function is for internal use only.
+ *****************************************************************************/
+bool sli_sleeptimer_is_power_manager_timer_next_to_expire(void)
+{
+  bool next_timer_is_power_manager;
+
+  sl_atomic_load(next_timer_is_power_manager, next_timer_to_expire_is_power_manager);
+
+  return next_timer_is_power_manager;
 }
 
 /***************************************************************************//**
@@ -444,7 +478,7 @@ uint64_t sl_sleeptimer_get_tick_count64(void)
   tick_cnt = sleeptimer_hal_get_counter();
   of_cnt = overflow_counter;
 
-  if (sleeptimer_hal_is_int_status_set(SLEEPTIMER_EVENT_OF)) {
+  if (sli_sleeptimer_hal_is_int_status_set(SLEEPTIMER_EVENT_OF)) {
     tick_cnt = sleeptimer_hal_get_counter();
     of_cnt++;
   }
@@ -713,7 +747,7 @@ uint32_t sl_sleeptimer_convert_date_to_str(char *str,
                            &date_struct);
   }
 
-  return (return_size);
+  return return_size;
 }
 
 /***************************************************************************//**
@@ -927,6 +961,8 @@ void process_timer_irq(uint8_t local_flag)
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
     sl_sleeptimer_tick_count_t delta_tot = 0u;
     sl_sleeptimer_tick_count_t current_cnt = sleeptimer_hal_get_counter();
+    sl_sleeptimer_timer_handle_t *current = NULL;
+    uint32_t nb_timer_expire = 0u;
 
     delta_tot = current_cnt - last_delta_update_count;
 
@@ -935,8 +971,8 @@ void process_timer_irq(uint8_t local_flag)
     while ((timer_head) && (delta_tot >= timer_head->delta)) {
       sl_sleeptimer_tick_count_t new_cnt;
       sl_sleeptimer_tick_count_t delta_tot_temp = delta_tot;
-      sl_sleeptimer_timer_handle_t *current = timer_head;
       sl_sleeptimer_timer_handle_t *temp = timer_head;
+      current = timer_head;
 
       last_delta_update_count = current_cnt;
 
@@ -966,10 +1002,19 @@ void process_timer_irq(uint8_t local_flag)
         current->callback(current, current->callback_data);
       }
 
+      nb_timer_expire++;
+
       new_cnt = sleeptimer_hal_get_counter();
       delta_tot += new_cnt - current_cnt;
       current_cnt = new_cnt;
       CORE_ENTER_ATOMIC();
+    }
+
+    if ((nb_timer_expire == 1u)
+        && (current->option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG)) {
+      sleep_on_isr_exit = true;
+    } else {
+      sleep_on_isr_exit = false;
     }
 
     if (timer_head) {
@@ -1090,6 +1135,8 @@ static void set_comparator_for_next_timer(void)
 
   sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   sleeptimer_hal_set_compare(compare_value);
+
+  update_next_timer_to_expire_is_power_manager();
 }
 
 /*******************************************************************************
@@ -1171,6 +1218,51 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
+}
+
+/*******************************************************************************
+ * Updates internal flag that indicates if next timer to expire is the power
+ * manager's one.
+ ******************************************************************************/
+static void update_next_timer_to_expire_is_power_manager(void)
+{
+  sl_sleeptimer_timer_handle_t *current = timer_head;
+  uint32_t delta_diff_with_first = 0;
+
+  next_timer_to_expire_is_power_manager = false;
+
+  while (delta_diff_with_first <= 1) {
+    if (current->option_flags & SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
+      next_timer_to_expire_is_power_manager = true;
+      break;
+    }
+
+    current = current->next;
+    if (current == NULL) {
+      break;
+    }
+
+    delta_diff_with_first += current->delta;
+  }
+}
+
+/**************************************************************************//**
+ * Determines if the power manager's early wakeup expired during the last ISR
+ * and it was the only timer to expire in that period.
+ *
+ * @return true if power manager sleep can return to sleep,
+ *         false otherwise.
+ *****************************************************************************/
+bool sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+  bool sleep;
+
+  CORE_ENTER_ATOMIC();
+  sleep = sleep_on_isr_exit;
+  CORE_EXIT_ATOMIC();
+
+  return sleep;
 }
 
 /*******************************************************************************
@@ -1289,7 +1381,7 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
       valid_time = false;
     }
   }
-  return (valid_time);
+  return valid_time;
 }
 
 /*******************************************************************************
@@ -1311,7 +1403,7 @@ static bool is_valid_date(sl_sleeptimer_date_t *date)
     return false;
   }
 
-  //Unix is valid until the 19th of January 2038 at 03:14:07
+  // Unix is valid until the 19th of January 2038 at 03:14:07
   if (date->year == TIME_UNIX_YEAR_MAX) {
     if ((uint8_t)date->month > (uint8_t)MONTH_JANUARY) {
       return false;
@@ -1329,256 +1421,3 @@ static bool is_valid_date(sl_sleeptimer_date_t *date)
   return true;
 }
 #endif
-
-/// @endcond
-
-/* *INDENT-OFF* */
-/* THE REST OF THE FILE IS DOCUMENTATION ONLY! */
-/// @addtogroup platform_service
-/// @{
-/// @addtogroup SLEEPTIMER
-/// @brief sleeptimer module
-/// @{
-///
-///   @details
-///   The sleeptimer.c and sleeptimer.h source files for the SLEEPTIMER device driver library are in the
-///   service/sleeptimer folder.
-///
-///   @li @ref sleeptimer_intro
-///   @li @ref sleeptimer_functionalities_overview
-///   @li @ref sleeptimer_getting_started
-///   @li @ref sleeptimer_conf
-///   @li @ref sleeptimer_api
-///   @li @ref sleeptimer_example
-///
-///   @n @section sleeptimer_intro Introduction
-///
-///   The Sleeptimer driver provides software timers, delays, timekeeping and date functionalities using a low-frequency real-time clock peripheral.
-///
-///   All Silicon Labs microcontrollers equipped with the RTC or RTCC peripheral are currently supported. Only one instance of this driver can be initialized by the application.
-///
-///   @n @section sleeptimer_functionalities_overview Functionalities overview
-///
-///   @n @subsection software_timers Software Timers
-///
-///   This functionality allows the user to create periodic and one shot timers. A user callback can be associated with a timer and is called when the timer expires.
-///
-///   Timer structures must be allocated by the user. The function is called from within an interrupt handler with interrupts enabled.
-///
-///   @n @subsection timekeeping Timekeeping
-///
-///   A 64-bits tick counter is accessible through the @li uint64_t sl_sleeptimer_get_tick_count64(void) API. It keeps the tick count since the initialization of the driver
-///
-///   The `SL_SLEEPTIMER_WALLCLOCK_CONFIG` configuration enables a UNIX timestamp (seconds count since January 1, 1970, 00:00:00).
-///
-///   This timestamp can be retrieved/modified using the following API:
-///
-///   @li sl_sleeptimer_timestamp_t sl_sleeptimer_get_time(void);
-///   @li sl_status_t sl_sleeptimer_set_time(sl_sleeptimer_timestamp_t time);
-///
-///   Convenience conversion functions are provided to convert UNIX timestamp to/from NTP and Zigbee cluster format :
-///
-///   @li sl_status_t sl_sleeptimer_convert_unix_time_to_ntp(sl_sleeptimer_timestamp_t time, uint32_t *ntp_time);
-///   @li sl_status_t sl_sleeptimer_convert_ntp_time_to_unix(uint32_t ntp_time, sl_sleeptimer_timestamp_t *time);
-///   @li sl_status_t sl_sleeptimer_convert_unix_time_to_zigbee(sl_sleeptimer_timestamp_t time, uint32_t *zigbee_time);
-///   @li sl_status_t sl_sleeptimer_convert_zigbee_time_to_unix(uint32_t zigbee_time, sl_sleeptimer_timestamp_t *time);
-///
-///   @n @subsection date Date
-///
-///   The previously described internal timestamp can also be retrieved/modified in a date format sl_sleeptimer_date_t.
-///
-///   @n <b>API :</b> @n
-///
-///   @li sl_status_t sl_sleeptimer_get_datetime(sl_sleeptimer_date_t *date);
-///   @li sl_status_t sl_sleeptimer_set_datetime(sl_sleeptimer_date_t *date);
-///
-///   @n @subsection frequency_setup Frequency Setup and Tick Count
-///
-///   This driver works with a configurable time unit called tick.
-///
-///   The frequency of the ticks is based on the clock source and the internal frequency divider.
-///
-///   One of the following clock sources must be enabled before initializing the sleeptimer:
-///
-///   @li LFXO: external crystal oscillator. Typically running at 32.768 kHz.
-///   @li LFRCO: internal oscillator running at 32.768 kHz
-///   @li ULFRCO: Ultra low-frequency oscillator running at 1.000 kHz
-///
-///   The frequency divider is selected with the `SL_SLEEPTIMER_FREQ_DIVIDER` configuration. Its value must be a power of two within the range of 1 to 32. The number of ticks per second (sleeptimer frequency) is dictated by the following formula:
-///
-///   Tick (seconds) = 1 / (clock_frequency / frequency_divider)
-///
-///   The highest resolution for a tick is 30.5 us. It is achieved with a 32.768 kHz clock and a divider of 1.
-///
-///   @n @section sleeptimer_getting_started Getting Started
-///
-///   @n @subsection  clock_selection Clock Selection
-///
-///   The sleeptimer relies on the hardware timer to operate. The hardware timer peripheral must be properly clocked from the application. Selecting the appropriate timer is crucial for design considerations. Each timer can potentially be used as a sleeptimer and is also available to the user. However, note that if a timer is used by the sleeptimer, it can't be used by the application and vice versa.
-///
-///   @n @subsection  Clock Selection in a Project without Micrium OS
-///
-///   When RTC or RTCC is selcted, the clock source for the peripheral must be configured and enabled in the application before initializing the sleeptimer module or any communication stacks. Most of the time, it consists in enabling the desired oscillators and setting up the clock source for the peripheral, like in the following example:
-///
-///   @code{.c}
-///   CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFRCO);
-///   CMU_ClockEnable(cmuClock_RTCC, true);
-///   @endcode
-///
-///   @n @subsection  clock_branch_select Clock Branch Select
-///
-///   | Clock  | Enum                    | Description                       | Frequency |
-///   |--------|-------------------------|-----------------------------------|-----------|
-///   | LFXO   | <b>cmuSelect_LFXO</b>   | Low-frequency crystal oscillator  |32.768 Khz |
-///   | LFRCO  | <b>cmuSelect_LFRCO</b>  | Low-frequency RC oscillator       |32.768 Khz |
-///   | ULFRCO | <b>cmuSelect_ULFRCO</b> | Ultra low-frequency RC oscillator |1 Khz      |
-///
-///   @n @subsection  timer_clock_enable Timer Clock Enable
-///
-///   | Module             | Enum                 | Description                                        |
-///   |--------------------|----------------------|----------------------------------------------------|
-///   | RTCC               | <b>cmuClock_RTCC</b> | Real-time counter and calendar clock (LF E branch) |
-///   | RTC                | <b>cmuClock_RTC</b>  | Real time counter clock (LF A branch)              |
-///
-///   When the Radio internal RTC (PRORTC) is selected, it is not necessary to configure the clock source for the peripheral. However, it is important to enable the desired oscillator before initializing the sleeptimer module or any communication stacks. The best oscillator available (LFXO being the first choice) will be used by the sleeptimer at initalization. The following example shows how the desired oscilator should be enabled:
-///
-///   @code{.c}
-///   CMU_OscillatorEnable(cmuSelect_LFXO, true, true);
-///   @endcode
-///
-///   @n @subsection  clock_micrium_os Clock Selection in a Project with Micrium OS
-///
-///   When Micrium OS is used, a BSP (all instances) is provided that sets up some parts of the clock tree. The sleeptimer clock source will be enabled by this bsp. However, the desired oscillator remains configurable from the file <b>bsp_cfg.h</b>.
-///
-///   The configuration `BSP_LF_CLK_SEL` determines which oscillator will be used by the sleeptimer's hardware timer peripheral. It can take the following values:
-///
-///   | Config                   | Description                       | Frequency |
-///   |--------------------------|-----------------------------------|-----------|
-///   | <b>BSP_LF_CLK_LFXO</b>   | Low-frequency crystal oscillator  |32.768 Khz |
-///   | <b>BSP_LF_CLK_LFRCO</b>  | Low-frequency RC oscillator       |32.768 Khz |
-///   | <b>BSP_LF_CLK_ULFRCO</b> | Ultra low-frequency RC oscillator |1 Khz      |
-///
-///   @n @section sleeptimer_conf Configuration Options
-///
-///   `SL_SLEEPTIMER_PERIPHERAL` can be set to one of the following values:
-///
-///   | Config                            | Description                                                                                          |
-///   | --------------------------------- |------------------------------------------------------------------------------------------------------|
-///   | `SL_SLEEPTIMER_PERIPHERAL_DEFAULT`| Selects either RTC or RTCC, depending of what is available on the platform.                          |
-///   | `SL_SLEEPTIMER_PERIPHERAL_RTCC`   | Selects RTCC                                                                                         |
-///   | `SL_SLEEPTIMER_PERIPHERAL_RTC`    | Selects RTC                                                                                          |
-///   | `SL_SLEEPTIMER_PERIPHERAL_PRORTC` | Selects Internal radio RTC. Available only on EFR32XG13, EFR32XG14, EFR32XG21 and EFR32XG22 families.|
-///
-///   `SL_SLEEPTIMER_WALLCLOCK_CONFIG` must be set to 1 to enable timestamp and date functionnalities.
-///
-///   `SL_SLEEPTIMER_FREQ_DIVIDER` must be a power of 2 within the range 1 to 32. When `SL_SLEEPTIMER_PERIPHERAL` is set to `SL_SLEEPTIMER_PERIPHERAL_PRORTC`, `SL_SLEEPTIMER_FREQ_DIVIDER` must be set to 1.
-///
-///   `SL_SLEEPTIMER_PRORTC_HAL_OWNS_IRQ_HANDLER` is only meaningful when `SL_SLEEPTIMER_PERIPHERAL` is set to `SL_SLEEPTIMER_PERIPHERAL_PRORTC`. Set to 1 if no communication stack is used in your project. Otherwise, must be set to 0.
-///
-///   @n @section sleeptimer_api The API
-///
-///   This section contains brief descriptions of the API functions. For
-///   more information about input and output parameters and return values,
-///   click on the hyperlinked function names. Most functions return an error
-///   code, @ref SL_STATUS_OK is returned on success,
-///   see @ref sl_status.h for other error codes.
-///
-///   The application code must include the @em sl_sleeptimer.h header file.
-///
-///   All API functions can be called from within interrupt handlers.
-///
-///   @ref sl_sleeptimer_init() @n
-///    These functions initialize the sleeptimer driver. Typically,
-///    @htmlonly sl_sleeptimer_init() @endhtmlonly is called once in the startup code.
-///
-///   @ref sl_sleeptimer_start_timer() @n
-///    Start a one shot 32 bits timer. When a timer expires, a user-supplied callback function
-///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
-///    details of the callback prototype.
-///
-///   @ref sl_sleeptimer_restart_timer() @n
-///    Restart a one shot 32 bits timer. When a timer expires, a user-supplied callback function
-///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
-///    details of the callback prototype.
-///
-///   @ref sl_sleeptimer_start_periodic_timer() @n
-///    Start a periodic 32 bits timer. When a timer expires, a user-supplied callback function
-///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
-///    details of the callback prototype.
-///
-///   @ref sl_sleeptimer_restart_periodic_timer() @n
-///    Restart a periodic 32 bits timer. When a timer expires, a user-supplied callback function
-///    is called. A pointer to this function is passed to
-///    @htmlonly sl_sleeptimer_start_timer()@endhtmlonly. See @ref callback for
-///    details of the callback prototype.
-///
-///   @ref sl_sleeptimer_stop_timer() @n
-///    Stop a timer.
-///
-///   @ref sl_sleeptimer_get_timer_time_remaining() @n
-///    Get the time remaining before the timer expires.
-///
-///   @ref sl_sleeptimer_delay_millisecond() @n
-///    Delay for the given number of milliseconds. This is an "active wait" delay function.
-///
-///   @ref sl_sleeptimer_is_timer_running() @n
-///    Check if a timer is running.
-///
-///   @ref sl_sleeptimer_get_time(), @ref sl_sleeptimer_set_time() @n
-///    Get or set wallclock time.
-///
-///   @ref sl_sleeptimer_ms_to_tick(), @ref sl_sleeptimer_ms32_to_tick(),
-///   @ref sl_sleeptimer_tick_to_ms(), @ref sl_sleeptimer_tick64_to_ms() @n
-///    Convert between milliseconds and RTC/RTCC
-///    counter ticks.
-///
-///   @n @anchor callback <b>The timer expiry callback function:</b> @n
-///   The callback function, prototyped as @ref sl_sleeptimer_timer_callback_t(), is called from
-///   within the RTC peripheral interrupt handler on timer expiration.
-///   @htmlonly sl_sleeptimer_timer_callback_t(sl_sleeptimer_timer_handle_t *handle, void *data)@endhtmlonly
-///
-///   @n @section sleeptimer_example Example
-///   @code{.c}
-///#include "sl_sleeptimer.h"
-///
-///void my_timer_callback(sl_sleeptimer_timer_handle_t *handle, void *data)
-///{
-///  //Code executed when the timer expire.
-///}
-///
-///int main(void)
-///{
-///  sl_status_t status;
-///  sl_sleeptimer_timer_handle_t my_timer;
-///  uint32_t timer_timeout = 300;
-///
-///  CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFRCO);
-///  CMU_ClockEnable(cmuClock_RTCC, true);
-///
-///  status = sl_sleeptimer_init();
-///  if(status != SL_STATUS_OK) {
-///    printf("Sleeptimer init error.\r\n");
-///  }
-///
-///  status = sl_sleeptimer_start_timer(&my_timer,
-///                                     timer_timeout,
-///                                     my_timer_callback,
-///                                     (void *)NULL,
-///                                     0
-///                                     0);
-///  if(status != SL_STATUS_OK) {
-///    printf("Timer not started.\r\n");
-///  }
-///
-///  while(1) {
-///  }
-///
-///  return 0;
-///}
-///   @endcode
-///
-/// @} (end addtogroup SLEEPTIMER)
-/// @} (end addtogroup platform_service)

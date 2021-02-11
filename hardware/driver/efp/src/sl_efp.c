@@ -20,8 +20,11 @@
 #include "em_cmu.h"
 #include "em_core.h"
 #include "em_gpio.h"
-#include "em_se.h"
 #include "sl_efp.h"
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+#include "sl_se_manager.h"
+#include "sli_se_manager_internal.h"
+#endif
 
 #include <stdbool.h>
 #include <math.h>
@@ -342,21 +345,23 @@ sl_status_t sl_efp_emu_ldo_enable(sl_efp_handle_t handle, bool enable)
     return SL_STATUS_OK;
 
   #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-    SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_PROTECTED_REGISTER |
-                                              SE_COMMAND_OPTION_WRITE);
-    SE_addParameter(&command, 0x4000408c);    // Address
-    SE_addParameter(&command, 1 << 14);       // Mask
+    sl_se_command_context_t cmd_ctx;
+    sl_status_t status = sl_se_init_command_context(&cmd_ctx);
+    sli_se_command_init((&cmd_ctx),
+                        SE_COMMAND_PROTECTED_REGISTER | SE_COMMAND_OPTION_WRITE);
+
+    SE_addParameter(&cmd_ctx.command, 0x4000408c);    // Address
+    SE_addParameter(&cmd_ctx.command, 1 << 14);       // Mask
     if (enable) {
-      SE_addParameter(&command, 0);           // Value
+      SE_addParameter(&cmd_ctx.command, 0);           // Value
     } else {
-      SE_addParameter(&command, 1 << 14);     // Value
+      SE_addParameter(&cmd_ctx.command, 1 << 14);     // Value
     }
 
-    SE_executeCommand(&command);
-    if (SE_readCommandResponse() != SE_RESPONSE_OK) {
-      return SL_STATUS_FAIL;
+    if (status == SL_STATUS_OK) {
+      status = sli_se_execute_and_wait(&cmd_ctx);
     }
-    return SL_STATUS_OK;
+    return status;
 
   #else
     #warning "Internal LDO control not implemented for this device family."
@@ -479,6 +484,14 @@ sl_status_t sl_efp_init(sl_efp_handle_t handle, const sl_efp_init_data_t *init)
     ret_val = sl_efp_enable_direct_mode(handle);
   }
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+  if (ret_val == SL_STATUS_OK) {
+    // We must init SE manager to support threading.
+    // See sl_efp_emu_ldo_enable().
+    ret_val = sl_se_init();
+  }
+#endif
+
   return ret_val;
 }
 
@@ -580,6 +593,15 @@ sl_status_t sl_efp_read_register_field(sl_efp_handle_t handle,
 sl_status_t sl_efp_reset(sl_efp_handle_t handle)
 {
   return sl_efp_write_register(handle,EFP01_CMD, _EFP01_CMD_RESET_MASK);
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Reprogram all EFP registers with default values.
+ ******************************************************************************/
+sl_status_t sl_efp_reset_to_default(sl_efp_handle_t handle)
+{
+  return sl_efp_write_register(handle,EFP01_CMD, _EFP01_CMD_OTP_REREAD_MASK);
 }
 
 /***************************************************************************//**

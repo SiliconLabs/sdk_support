@@ -136,4 +136,5 @@ typedef struct {
 /** @} End of group EFR32BG22_MAILBOX_BitFields */
 /** @} End of group EFR32BG22_MAILBOX */
 /** @} End of group Parts */
+
 #endif /* EFR32BG22_MAILBOX_H */

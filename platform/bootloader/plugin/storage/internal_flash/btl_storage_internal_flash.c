@@ -133,12 +133,27 @@ int32_t storage_writeRaw(uint32_t address, uint8_t *data, size_t numBytes)
     return BOOTLOADER_ERROR_STORAGE_NEEDS_ERASE;
   }
 
+#if defined(BOOTLOADER_MSC_DMA_WRITE)
+  if (flash_writeBuffer_dma(address, data, numBytes, BOOTLOADER_MSC_DMA_CHANNEL)) {
+    return BOOTLOADER_OK;
+  }
+#else
   if (flash_writeBuffer(address, data, numBytes)) {
     return BOOTLOADER_OK;
-  } else {
+  }
+#endif
+  else {
     // TODO: Better return code
     return BOOTLOADER_ERROR_STORAGE_INVALID_ADDRESS;
   }
+}
+
+int32_t storage_getDMAchannel(void) {
+#if defined(BOOTLOADER_MSC_DMA_WRITE)
+  return BOOTLOADER_MSC_DMA_CHANNEL;
+#else
+  return -1;
+#endif
 }
 
 int32_t storage_eraseRaw(uint32_t address, size_t totalLength)

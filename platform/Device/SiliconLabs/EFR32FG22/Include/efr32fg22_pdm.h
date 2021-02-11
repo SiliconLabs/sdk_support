@@ -359,4 +359,5 @@ typedef struct {
 /** @} End of group EFR32FG22_PDM_BitFields */
 /** @} End of group EFR32FG22_PDM */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_PDM_H */

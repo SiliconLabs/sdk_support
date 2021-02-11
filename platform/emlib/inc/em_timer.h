@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup TIMER
+ * @addtogroup timer
  * @{
  ******************************************************************************/
 
@@ -219,6 +214,7 @@ typedef enum {
 /** Peripheral Reflex System signal. */
 typedef uint8_t TIMER_PRSSEL_TypeDef;
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /** Deprecated PRS channel selector. New code should use an integer instead of
  *  using these deprecated enum values. */
 #define timerPRSSELCh0    0UL
@@ -233,13 +229,15 @@ typedef uint8_t TIMER_PRSSEL_TypeDef;
 #define timerPRSSELCh9    9UL
 #define timerPRSSELCh10  10UL
 #define timerPRSSELCh11  11UL
+/** @endcond */
 
 #if defined (_TIMER_CC_CFG_INSEL_MASK)
+/** PRS input type */
 typedef enum {
-  timerPrsInputNone       =  0x0,
-  timerPrsInputSync       =  _TIMER_CC_CFG_INSEL_PRSSYNC,
-  timerPrsInputAsyncLevel =  _TIMER_CC_CFG_INSEL_PRSASYNCLEVEL,
-  timerPrsInputAsyncPulse =  _TIMER_CC_CFG_INSEL_PRSASYNCPULSE,
+  timerPrsInputNone       =  0x0,                               /** No PRS input */
+  timerPrsInputSync       =  _TIMER_CC_CFG_INSEL_PRSSYNC,       /** Synchronous PRS selected */
+  timerPrsInputAsyncLevel =  _TIMER_CC_CFG_INSEL_PRSASYNCLEVEL, /** Asynchronous level PRS selected */
+  timerPrsInputAsyncPulse =  _TIMER_CC_CFG_INSEL_PRSASYNCPULSE, /** Asynchronous pulse PRS selected */
 } TIMER_PrsInput_TypeDef;
 #endif
 
@@ -403,7 +401,7 @@ typedef struct {
   TIMER_PrsOutput_t          prsOutput;
 
 #if defined(_TIMER_CC_CFG_INSEL_MASK)
-  /* When PRS input is used this field is used to configure the type of
+  /** When PRS input is used this field is used to configure the type of
    * PRS input. */
   TIMER_PrsInput_TypeDef     prsInputType;
 #endif
@@ -631,7 +629,7 @@ __STATIC_INLINE bool TIMER_SupportsDTI(const TIMER_TypeDef *ref)
  * @brief
  *   Get the Max count of the timer.
  *
- * @param[in] timer
+ * @param[in] ref
  *   Pointer to TIMER peripheral register block.
  *
  * @return
@@ -808,6 +806,10 @@ __STATIC_INLINE void TIMER_CounterSet(TIMER_TypeDef *timer, uint32_t val)
   if (!enabled) {
     TIMER_SyncWait(timer);
     timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+    while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+    }
+#endif
   }
 #endif
 }
@@ -857,6 +859,10 @@ __STATIC_INLINE void TIMER_EnableDTI(TIMER_TypeDef *timer, bool enable)
   uint32_t timerEn = timer->EN & TIMER_EN_EN;
   TIMER_SyncWait(timer);
   timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+  while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+  }
+#endif
   if (enable) {
     timer->DTCFG_SET = TIMER_DTCFG_DTEN;
   } else {
@@ -1153,8 +1159,7 @@ __STATIC_INLINE void TIMER_Unlock(TIMER_TypeDef *timer)
 }
 #endif
 
-/** @} (end addtogroup TIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup timer) */
 
 #ifdef __cplusplus
 }

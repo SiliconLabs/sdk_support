@@ -1011,4 +1011,5 @@ typedef struct {
 /** @} End of group EFR32FG22_TIMER_BitFields */
 /** @} End of group EFR32FG22_TIMER */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_TIMER_H */

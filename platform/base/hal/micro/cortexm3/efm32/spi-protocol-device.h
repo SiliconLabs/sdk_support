@@ -17,16 +17,51 @@
 #ifndef __SPI_PROTOCOL_DEVICE_H__
 #define __SPI_PROTOCOL_DEVICE_H__
 
-//The maximum SPI Protocol message size is 136 bytes. We define a buffer of
-//142 specifically for error detection during the Response Section.  By using
-//a buffer of 142, we can use the SCx_REG(TXCNT) register to monitor the state
-//of the transaction and know that if a DMA TX unload occurs we have an error.
-#define SPIP_BUFFER_SIZE             142
+// Size of SPIP VERSION and ALIVE commands (not including the frame terminator).
+#define SPIP_COMMAND_SIZE            1
+
+// Size of all error responses (not including the frame terminator).
 #define SPIP_ERROR_RESPONSE_SIZE     2
+
+// The maximum supported SPIP payload length. This should be enough to fit a
+// max EZSP or bootloader message.
 #define MAX_PAYLOAD_FRAME_LENGTH     133
-#define EZSP_LENGTH_INDEX            1
-#define RX_DMA_BYTES_LEFT_THRESHOLD  4
-// Timeout (ms) for SPI transfers
+
+// The index and size of the prefix.
+#define SPIP_PREFIX_INDEX            0
+#define SPIP_PREFIX_SIZE             1
+
+// The index and size of the length (for commands that have it).
+#define SPIP_LENGTH_INDEX            1
+#define SPIP_LENGTH_SIZE             1
+
+// Legacy name for the above.
+#define EZSP_LENGTH_INDEX            (SPIP_LENGTH_INDEX)
+
+// The size of the frame terminator (the index may vary based on the length).
+#define SPIP_FRAME_TERMINATOR_SIZE   1
+
+// The SPIP overhead, in bytes, for EZSP and bootloader payload messages
+#define SPIP_OVERHEAD                (SPIP_PREFIX_SIZE   \
+                                      + SPIP_LENGTH_SIZE \
+                                      + SPIP_FRAME_TERMINATOR_SIZE)
+
+// The maximum SPI Protocol message size.
+#define SPIP_MAX_MESSAGE_SIZE        (MAX_PAYLOAD_FRAME_LENGTH + SPIP_OVERHEAD)
+
+// We add an extra byte to the size for padding with 0xFF at the end of the
+// response transmission to keep MISO high.
+#define SPIP_MAX_WITH_PADDING        (SPIP_MAX_MESSAGE_SIZE + 1)
+
+// We define the buffer size to be twice the maximum message size so that, in
+// the worst case, it can hold a maximally sized command and response at the
+// same time. This way we can start the receive for the next command at the same
+// time as we start the transmit of the current response, making the SPIP code
+// more resilient against unexpectedly long delays in the processing of ticks
+// and interrupts (during, for instance, flash page erasure).
+#define SPIP_BUFFER_SIZE             (2 * SPIP_MAX_WITH_PADDING)
+
+// SPI transfer timeout (ms), 0 disables the feature (it will never timeout).
 #ifndef SPI_NCP_TIMEOUT
 #define SPI_NCP_TIMEOUT 0
 #endif

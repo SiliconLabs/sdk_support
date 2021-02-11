@@ -2,7 +2,7 @@
 
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include "app/util/serial/command-interpreter2.h"
 
 EmberEventControl emberAfPluginSb1GestureSensorMessageReadyEventControl;

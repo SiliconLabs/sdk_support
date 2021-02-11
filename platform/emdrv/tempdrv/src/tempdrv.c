@@ -35,6 +35,13 @@
 
 #include "tempdrv.h"
 
+/***************************************************************************//**
+ * @addtogroup tempdrv
+ * @{
+ ******************************************************************************/
+
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+
 typedef struct {
   TEMPDRV_Callback_t callback;    ///< Callback function
   uint8_t temp;                   ///< Limit temperature (EMU value)
@@ -86,13 +93,14 @@ static uint8_t fallbackEMU = 0x90;
 static uint8_t fallbackTEMP = 25;
 #endif
 
+/// @endcond
 #if (EMU_CUSTOM_IRQ_HANDLER == false)
 /***************************************************************************//**
  * @brief
  *   EMU Interrupt Handler
  *
  * @details
- *   The EMU_IRQHandler provided by TEMPDRV will call @ref TEMPDRV_IRQ_Handler.
+ *   The EMU_IRQHandler provided by TEMPDRV will call @ref TEMPDRV_IRQHandler.
  *   Configure EMU_CUSTOM_IRQ_HANDLER = true if the application wants to
  *   implement its own EMU_IRQHandler. This is typically needed if one of the
  *   non-temperature related EMU interrupt flags are in use.
@@ -103,7 +111,7 @@ void EMU_IRQHandler(void)
 }
 #endif
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   TEMPDRV Interrupt Handler
  *
@@ -138,6 +146,7 @@ void TEMPDRV_IRQHandler(void)
   updateInterrupts();
 }
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 #if defined(TEMPDRV_ERRATA_FIX)
 /* Errata */
 typedef enum ErrataState {
@@ -542,7 +551,7 @@ static void calibration(void)
   calibrationTEMP = (DItemp) + (8 * (DIemu) / 5);
 #endif
 }
-
+/// @endcond
 /* Official API */
 /***************************************************************************//**
  * @brief
@@ -627,7 +636,7 @@ Ecode_t TEMPDRV_Enable(bool enable)
  *   Get the number of active callbacks for a limit.
  *
  * @param[in] limit
- *   Limit type, refer to @ref TEMPDRV_LimitType_t.
+ *   Limit type, refer to @ref TEMPDRV_LimitType.
  *
  * @return
  *   Number of active callbacks
@@ -715,10 +724,10 @@ int8_t TEMPDRV_GetTemp(void)
  *   Temperature to trigger on given in number of &deg;C.
  *
  * @param[in] limit
- *   Limit type, refer to @ref TEMPDRV_LimitType_t. Using @ref TEMPDRV_LIMIT_LOW
- *   will register a callback when the EMU temperature reaches @ref temp &deg;C
+ *   Limit type, refer to @ref TEMPDRV_LimitType. Using @ref TEMPDRV_LIMIT_LOW
+ *   will register a callback when the EMU temperature reaches \p temp &deg;C
  *   or lower, and using @ref TEMPDRV_LIMIT_HIGH will register a callback when
- *   the EMU temperature reaches @ref temp &deg;C or higher.
+ *   the EMU temperature reaches \p temp &deg;C or higher.
  *
  * @param[in] callback
  *   User defined function to call when temperature threshold is reached or passed.
@@ -731,14 +740,14 @@ int8_t TEMPDRV_GetTemp(void)
  *   @li @ref ECODE_EMDRV_TEMPDRV_NO_INIT if the user has forgot to call @ref
  *     TEMPDRV_Init() before attempting to register a callback.
  *
- *   @li @ref ECODE_EMDRV_TEMPDRV_BAD_LIMIT is returned if @ref temp is below the
- *     current temperature and @limit is @ref TEMPDRV_LIMIT_LOW. It is also
- *     returned if @ref temp is above the current temperature and @limit is
+ *   @li @ref ECODE_EMDRV_TEMPDRV_BAD_LIMIT is returned if \p temp is below the
+ *     current temperature and \p limit is @ref TEMPDRV_LIMIT_LOW. It is also
+ *     returned if \p temp is above the current temperature and \p limit is
  *     @ref TEMPDRV_LIMIT_HIGH.
  *
  *   @li @ref ECODE_EMDRV_TEMPDRV_DUP_TEMP is returned if a duplicate callback
  *     is detected. A duplicate callback is if you attempt to register a new
- *     callback with the same @ref temp and the same @ref limit as some
+ *     callback with the same \p temp and the same \p limit as some
  *     already registered callback.
  ******************************************************************************/
 Ecode_t TEMPDRV_RegisterCallback(int8_t temp,
@@ -809,10 +818,7 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 
 /* *INDENT-OFF* */
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup emdrv
-/// @{
-/// @addtogroup TEMPDRV
-/// @brief TEMPDRV Temperature Sensor Driver
+/// @brief Temperature Sensor Driver
 /// @{
 ///
 ///   @details
@@ -848,7 +854,7 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 ///   @n @section tempdrv_conf Configuration Options
 ///
 ///   Some properties of the TEMPDRV driver are compile-time configurable. These
-///   properties are set in a file named @ref tempdrv_config.h. A template for this
+///   properties are set in a file named tempdrv_config.h. A template for this
 ///   file, containing default values, resides in the emdrv/tempdrv/config folder.
 ///   To configure TEMPDRV for your application, provide your own configuration file.
 ///   These are the available configuration parameters with default values defined.
@@ -876,7 +882,7 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 ///   find detailed information on input and output parameters and return values by
 ///   clicking on the function names. Most functions return an error
 ///   code, @ref ECODE_EMDRV_TEMPDRV_OK is returned on success,
-///   see @ref ecode.h and @ref tempdrv.h for other error codes.
+///   see ecode.h and tempdrv.h for other error codes.
 ///
 ///   Your application code must include one header file: @em tempdrv.h.
 ///
@@ -924,5 +930,6 @@ Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback)
 ///}
 ///   @endcode
 ///
-/// @} end group TEMPDRV *******************************************************
-/// @} end group emdrv *****************************************************
+/// @}  *******************************************************
+
+/** @} (end addtogroup tempdrv) */

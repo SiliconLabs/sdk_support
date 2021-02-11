@@ -36,23 +36,18 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup PN9_Plugin
- * @brief Pseudo random transmit plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_pn9 EZRADIODRV PN9 Plugin
+ * @brief EzRadio Pseudo random transmit plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -77,10 +72,9 @@ Ecode_t ezradioStopPn9(void);
 #define EZRADIODRV_PN9_PLUGIN_INIT_DEFAULT
 #endif  //#if defined( EZRADIO_PLUGIN_PN9 )
 
-/** @} (end addtogroup PN9_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_pn9) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

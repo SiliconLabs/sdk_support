@@ -904,4 +904,5 @@ typedef struct {
 /** @} End of group MGM21_SMU_BitFields */
 /** @} End of group MGM21_SMU */
 /** @} End of group Parts */
+
 #endif /* MGM21_SMU_H */

@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup PCNT
+ * @addtogroup pcnt
  * @{
  ******************************************************************************/
 
@@ -78,11 +73,16 @@ extern "C" {
 #endif
 #endif
 
+/* Define values that can be used in case some state/mode are not defined for some devices.*/
+#define PCNT_MODE_DISABLE   0xFF
+#define PCNT_CNT_EVEN_NONE  0xFF
+
 /*******************************************************************************
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
 /** Mode selection. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 typedef enum {
   /** Disable pulse counter. */
   pcntModeDisable   = _PCNT_CTRL_MODE_DISABLE,
@@ -108,6 +108,31 @@ typedef enum {
 #endif
 } PCNT_Mode_TypeDef;
 
+#else
+typedef enum {
+  /** Disable pulse counter. */
+  pcntModeDisable   = PCNT_MODE_DISABLE,
+
+  /** Single input LFACLK oversampling mode (available in EM0-EM2). */
+  pcntModeOvsSingle = _PCNT_CFG_MODE_OVSSINGLE,
+
+  /** Externally clocked single input counter mode (available in EM0-EM3). */
+  pcntModeExtSingle = _PCNT_CFG_MODE_EXTCLKSINGLE,
+
+  /** Externally clocked quadrature decoder mode (available in EM0-EM3). */
+  pcntModeExtQuad   = _PCNT_CFG_MODE_EXTCLKQUAD,
+
+  /** LFACLK oversampling quadrature decoder 1X mode (available in EM0-EM2). */
+  pcntModeOvsQuad1  = _PCNT_CFG_MODE_OVSQUAD1X,
+
+  /** LFACLK oversampling quadrature decoder 2X mode (available in EM0-EM2). */
+  pcntModeOvsQuad2  = _PCNT_CFG_MODE_OVSQUAD2X,
+
+  /** LFACLK oversampling quadrature decoder 4X mode (available in EM0-EM2). */
+  pcntModeOvsQuad4  = _PCNT_CFG_MODE_OVSQUAD4X,
+} PCNT_Mode_TypeDef;
+#endif
+
 #if defined(_PCNT_CTRL_CNTEV_MASK)
 /** Counter event selection.
  *  Note: unshifted values are being used for enumeration because multiple
@@ -123,7 +148,11 @@ typedef enum {
   pcntCntEventDown = _PCNT_CTRL_CNTEV_DOWN,
 
   /** Never counts. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   pcntCntEventNone = _PCNT_CTRL_CNTEV_NONE
+#else
+  pcntCntEventNone = PCNT_CNT_EVEN_NONE
+#endif
 } PCNT_CntEvent_TypeDef;
 #endif
 
@@ -159,7 +188,11 @@ typedef enum {
   pcntPRSCh11 = 11    /**< PRS channel 11. */
 #endif
 } PCNT_PRSSel_TypeDef;
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+typedef unsigned int PCNT_PRSSel_TypeDef;
+#endif
 
+#if defined(_PCNT_INPUT_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
 /** PRS inputs of PCNT. */
 typedef enum {
   pcntPRSInputS0 = 0, /** PRS input 0. */
@@ -198,28 +231,41 @@ typedef struct {
    * #pcntModeExtSingle modes. */
   bool                  countDown;
 
-  /** Enable filter, only available in #pcntModeOvs* modes. */
+  /** Enable filter, only available in #pcntModeOvsSingle* mode. */
   bool                  filter;
 
-#if defined(PCNT_CTRL_HYST)
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /** Enable/disable PCNT counting during debug halt. Only in OVSSINGLE and OVSQUAD modes. */
+  bool                  debugHalt;
+#endif
+
+#if defined(PCNT_CTRL_HYST) || defined(_SILICON_LABS_32B_SERIES_2)
   /** Set to true to enable hysteresis. When enabled, PCNT will always
    *  overflow and underflow to TOP/2. */
   bool                  hyst;
+#endif
 
+#if defined(PCNT_CTRL_S1CDIR)
   /** Set to true to enable S1 to determine the direction of counting in
    *  OVSSINGLE or EXTCLKSINGLE modes. @n
    *  When S1 is high, the count direction is given by CNTDIR, and when S1 is
    *  low, the count direction is the opposite. */
   bool                  s1CntDir;
+#endif
 
+#if defined(_PCNT_CTRL_CNTEV_SHIFT)
   /** Selects whether the regular counter responds to up-count events,
    *  down-count events, both, or none. */
   PCNT_CntEvent_TypeDef cntEvent;
+#endif
 
+#if defined(_PCNT_CTRL_AUXCNTEV_SHIFT)
   /** Selects whether the auxiliary counter responds to up-count events,
    *  down-count events, both, or none. */
   PCNT_CntEvent_TypeDef auxCntEvent;
+#endif
 
+#if defined(_PCNT_INPUT_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
   /** Select PRS channel as input to S0IN in PCNTx_INPUT register. */
   PCNT_PRSSel_TypeDef   s0PRS;
 
@@ -228,37 +274,65 @@ typedef struct {
 #endif
 } PCNT_Init_TypeDef;
 
-#if !defined(PCNT_CTRL_HYST)
 /** Default configuration for PCNT initialization structure. */
-#define PCNT_INIT_DEFAULT                                                         \
-  {                                                                               \
-    pcntModeDisable,                        /* Disabled by default. */            \
-    _PCNT_CNT_RESETVALUE,                   /* Default counter HW reset value. */ \
-    _PCNT_TOP_RESETVALUE,                   /* Default counter HW reset value. */ \
-    false,                                  /* Use positive edge. */              \
-    false,                                  /* Up-counting. */                    \
-    false                                   /* Filter disabled. */                \
-  }
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define DEFAULT_DEBUG_HALT  true,
 #else
-/** Default configuration for PCNT initialization structure. */
-#define PCNT_INIT_DEFAULT                                                                      \
-  {                                                                                            \
-    pcntModeDisable,                        /* Disabled by default. */                         \
-    _PCNT_CNT_RESETVALUE,                   /* Default counter HW reset value. */              \
-    _PCNT_TOP_RESETVALUE,                   /* Default counter HW reset value. */              \
-    false,                                  /* Use positive edge. */                           \
-    false,                                  /* Up-counting. */                                 \
-    false,                                  /* Filter disabled. */                             \
-    false,                                  /* Hysteresis disabled. */                         \
-    true,                                   /* Counter direction is given by CNTDIR. */        \
-    pcntCntEventUp,                         /* Regular counter counts up on upcount events. */ \
-    pcntCntEventNone,                       /* Auxiliary counter doesn't respond to events. */ \
-    pcntPRSCh0,                             /* PRS channel 0 selected as S0IN. */              \
-    pcntPRSCh0                              /* PRS channel 0 selected as S1IN. */              \
-  }
+#define DEFAULT_DEBUG_HALT
 #endif
 
-#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
+#define DEFAULT_MODE    pcntModeDisable,         /* Disabled by default. */
+
+#if defined(PCNT_CTRL_HYST) || defined(_SILICON_LABS_32B_SERIES_2)
+#define DEFAULT_HYST    false,                   /* Hysteresis disabled. */
+#else
+#define DEFAULT_HYST
+#endif
+
+#if defined(PCNT_CTRL_S1CDIR)
+#define DEFAULT_CDIR    true,                    /* Counter direction is given by CNTDIR. */
+#else
+#define DEFAULT_CDIR
+#endif
+
+#if defined(_PCNT_CTRL_CNTEV_SHIFT)
+#define DEFAULT_CNTEV    pcntCntEventUp,         /* Regular counter counts up on upcount events. */
+#else
+#define DEFAULT_CNTEV
+#endif
+
+#if defined(_PCNT_CTRL_AUXCNTEV_SHIFT)
+#define DEFAULT_AUXCNTEV    pcntCntEventNone,    /* Auxiliary counter doesn't respond to events. */
+#else
+#define DEFAULT_AUXCNTEV
+#endif
+
+#if defined(_PCNT_INPUT_MASK)
+#define DEFAULT_PRS_CH      pcntPRSCh0,          /* PRS channel 0 selected as S0IN and as S1IN. */
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+#define DEFAULT_PRS_CH      0u,
+#else
+#define DEFAULT_PRS_CH
+#endif
+
+#define PCNT_INIT_DEFAULT                                                       \
+  {                                                                             \
+    DEFAULT_MODE                          /* Default mode. */                   \
+      _PCNT_CNT_RESETVALUE,               /* Default counter HW reset value. */ \
+      _PCNT_TOP_RESETVALUE,               /* Default counter HW reset value. */ \
+      false,                              /* Use positive edge. */              \
+      false,                              /* Up-counting. */                    \
+      false,                              /* Filter disabled. */                \
+    DEFAULT_DEBUG_HALT                    /* Debug Halt enabled. */             \
+    DEFAULT_HYST                          /* Default Hysteresis. */             \
+    DEFAULT_CDIR                          /* Default CNTDIR. */                 \
+    DEFAULT_CNTEV                         /* Faults CNTEV. */                   \
+    DEFAULT_AUXCNTEV                      /* Default AUXCNTEV. */               \
+    DEFAULT_PRS_CH                        /* PRS channel 0 selected as S0IN. */ \
+      DEFAULT_PRS_CH                      /* PRS channel 0 selected as S1IN. */ \
+  }
+
+#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT) || defined(_SILICON_LABS_32B_SERIES_2)
 /** Filter initialization structure */
 typedef struct {
   /** Used only in OVSINGLE and OVSQUAD1X-4X modes. To use this, enable filter by
@@ -272,7 +346,7 @@ typedef struct {
 #endif
 
 /** Default configuration for PCNT initialization structure. */
-#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
+#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT) || defined(_SILICON_LABS_32B_SERIES_2)
 #define PCNT_FILTER_DEFAULT                                                          \
   {                                                                                  \
     0,                                      /* Default length is 5 LFACLK cycles. */ \
@@ -346,6 +420,7 @@ typedef struct {
   bool                      prsGateEnable;
 } PCNT_TCC_TypeDef;
 
+/** TCC Default. */
 #define PCNT_TCC_DEFAULT                                                                            \
   {                                                                                                 \
     tccModeDisabled,                            /* Disabled by default. */                          \
@@ -425,14 +500,17 @@ __STATIC_INLINE void PCNT_CounterSet(PCNT_TypeDef *pcnt, uint32_t count)
 }
 
 void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode);
+bool PCNT_IsEnabled(PCNT_TypeDef *pcnt);
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable);
+#endif
 void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init);
 
-#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
+#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT) || defined(_SILICON_LABS_32B_SERIES_2)
 void PCNT_FilterConfiguration(PCNT_TypeDef *pcnt, const PCNT_Filter_TypeDef *config, bool enable);
 #endif
 
-#if defined(_PCNT_INPUT_MASK)
+#if defined(_PCNT_INPUT_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
 void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
                          PCNT_PRSInput_TypeDef prsInput,
                          bool enable);
@@ -441,6 +519,7 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
 #if defined(PCNT_CTRL_TCCMODE_DEFAULT)
 void PCNT_TCCConfiguration(PCNT_TypeDef *pcnt, const PCNT_TCC_TypeDef *config);
 #endif
+
 /***************************************************************************//**
  * @brief
  *   Clear one or more pending PCNT interrupts.
@@ -454,7 +533,11 @@ void PCNT_TCCConfiguration(PCNT_TypeDef *pcnt, const PCNT_TCC_TypeDef *config);
  ******************************************************************************/
 __STATIC_INLINE void PCNT_IntClear(PCNT_TypeDef *pcnt, uint32_t flags)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   pcnt->IFC = flags;
+#else
+  pcnt->IF_CLR = flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -470,7 +553,11 @@ __STATIC_INLINE void PCNT_IntClear(PCNT_TypeDef *pcnt, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void PCNT_IntDisable(PCNT_TypeDef *pcnt, uint32_t flags)
 {
+#if defined(PCNT_HAS_SET_CLEAR)
+  pcnt->IEN_CLR = flags;
+#else
   pcnt->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -491,7 +578,11 @@ __STATIC_INLINE void PCNT_IntDisable(PCNT_TypeDef *pcnt, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void PCNT_IntEnable(PCNT_TypeDef *pcnt, uint32_t flags)
 {
+#if defined(PCNT_HAS_SET_CLEAR)
+  pcnt->IEN_SET = flags;
+#else
   pcnt->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -559,8 +650,44 @@ __STATIC_INLINE uint32_t PCNT_IntGetEnabled(PCNT_TypeDef *pcnt)
  ******************************************************************************/
 __STATIC_INLINE void PCNT_IntSet(PCNT_TypeDef *pcnt, uint32_t flags)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   pcnt->IFS = flags;
+#else
+  pcnt->IF_SET = flags;
+#endif
 }
+
+#if defined(_PCNT_LOCK_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Locks PCNT registers.
+ *
+ * @param[in] pcnt
+ *   Pointer to PCNT peripheral register block.
+ *
+ * @note When PCNT registers are locked PCNT_CFG, PCNT_EN, PCNT_SWRST, PCNT_CMD,
+ *       PCNT_CTRL, PCNT_OVSCTRL, PCNT_CNT, PCNT_TOP, and PCNT_TOPB registers
+ *       cannot be written to.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_Lock(PCNT_TypeDef *pcnt)
+{
+  pcnt->LOCK = ~PCNT_LOCK_PCNTLOCKKEY_UNLOCK;
+}
+#endif
+
+#if defined(_PCNT_LOCK_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Unlocks PCNT registers.
+ *
+ * @param[in] pcnt
+ *   Pointer to PCNT peripheral register block.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_Unlock(PCNT_TypeDef *pcnt)
+{
+  pcnt->LOCK = PCNT_LOCK_PCNTLOCKKEY_UNLOCK;
+}
+#endif
 
 void PCNT_Reset(PCNT_TypeDef *pcnt);
 
@@ -576,6 +703,10 @@ void PCNT_Reset(PCNT_TypeDef *pcnt);
  ******************************************************************************/
 __STATIC_INLINE uint32_t PCNT_TopBufferGet(PCNT_TypeDef *pcnt)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  while (pcnt->SYNCBUSY & PCNT_SYNCBUSY_TOPB) {
+  }
+#endif
   return pcnt->TOPB;
 }
 
@@ -593,13 +724,121 @@ void PCNT_TopBufferSet(PCNT_TypeDef *pcnt, uint32_t val);
  ******************************************************************************/
 __STATIC_INLINE uint32_t PCNT_TopGet(PCNT_TypeDef *pcnt)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  while (pcnt->SYNCBUSY & PCNT_SYNCBUSY_TOP) {
+  }
+#endif
   return pcnt->TOP;
 }
 
 void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val);
 
-/** @} (end addtogroup PCNT) */
-/** @} (end addtogroup emlib) */
+/***************************************************************************//**
+ * @brief
+ *   Wait for an ongoing sync of register(s) to low-frequency domain to complete.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
+ *
+ * @param[in] mask
+ *   A bitmask corresponding to SYNCBUSY register defined bits indicating
+ *   registers that must complete any ongoing synchronization.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_Sync(PCNT_TypeDef *pcnt, uint32_t mask)
+{
+  /* Avoid deadlock if modifying the same register twice when freeze mode is
+   * activated. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
+  if (pcnt->FREEZE & PCNT_FREEZE_REGFREEZE) {
+    return;
+  }
+#endif
+
+  /* Wait for any pending previous write operation to have been completed in
+   * low-frequency domain. */
+  while (pcnt->SYNCBUSY & mask)
+    ;
+}
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Start the main PCNT counter.
+ *
+ * @detail
+ *   This function will send a start command to the PCNT peripheral. The PCNT
+ *   peripheral will use some LF clock ticks before the command is executed.
+ *   The @ref PCNT_Sync() function can be used to wait for the start command
+ *   to be executed.
+ *
+ * @note
+ *   This function requires the PCNT to be enabled.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_StartMainCnt(PCNT_TypeDef *pcnt)
+{
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD_SET = PCNT_CMD_STARTCNT;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Stop the main PCNT counter.
+ *
+ * @detail
+ *   This function will send a stop command to the PCNT peripheral. The PCNT
+ *   peripheral will use some LF clock ticks before the command is executed.
+ *   The @ref PCNT_Sync() function can be used to wait for the stop command
+ *   to be executed.
+ *
+ * @note
+ *   This function requires the PCNT to be enabled.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_StopMainCnt(PCNT_TypeDef *pcnt)
+{
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD_SET = PCNT_CMD_STOPCNT;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Start the auxiliary PCNT counter.
+ *
+ * @detail
+ *   This function will send a start command to the PCNT peripheral. The PCNT
+ *   peripheral will use some LF clock ticks before the command is executed.
+ *   The @ref PCNT_Sync() function can be used to wait for the start command
+ *   to be executed.
+ *
+ * @note
+ *   This function requires the PCNT to be enabled.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_StartAuxCnt(PCNT_TypeDef *pcnt)
+{
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD_SET = PCNT_CMD_STARTAUXCNT;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Stop the auxiliary PCNT counter.
+ *
+ * @detail
+ *   This function will send a stop command to the PCNT peripheral. The PCNT
+ *   peripheral will use some LF clock ticks before the command is executed.
+ *   The @ref PCNT_Sync() function can be used to wait for the stop command
+ *   to be executed.
+ *
+ * @note
+ *   This function requires the PCNT to be enabled.
+ ******************************************************************************/
+__STATIC_INLINE void PCNT_StopAuxCnt(PCNT_TypeDef *pcnt)
+{
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD_SET = PCNT_CMD_STOPAUXCNT;
+}
+#endif
+
+/** @} (end addtogroup pcnt) */
 
 #ifdef __cplusplus
 }

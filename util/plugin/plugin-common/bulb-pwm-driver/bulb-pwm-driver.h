@@ -242,8 +242,6 @@ void halBulbPwmDriverBlinkStartCallback(void);
  */
 void halBulbPwmDriverBlinkStopCallback(void);
 
-// Legacy support for EM3xx.  To override, you need to edit the project board
-// header for the EM3xx project.
 #ifndef BULB_PWM_WHITE
   #define BULB_PWM_WHITE   HAL_BULBPWM_WHITE_ID
   #define BULB_PWM_LOWTEMP HAL_BULBPWM_LOWTEMP_ID

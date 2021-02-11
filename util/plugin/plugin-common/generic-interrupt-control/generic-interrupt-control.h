@@ -12,12 +12,23 @@
 
 // Based on architecture, include a header file to define the IRQ configuration
 // data structure
-#if defined(CORTEXM3_EFR32)
+#if  !defined(EMBER_TEST)
 #include "generic-interrupt-control-efr32.h"
 #else
-// The plugin supports em35x architectures and efr32, so if it's not efr32, it
-// must be one of the em35x chips.
-#include "generic-interrupt-control-em3xx.h"
+typedef struct tIrqCfg{
+  uint32_t irqPin;
+  uint32_t irqInPort;
+  volatile uint32_t *irqIntCfgReg;
+  uint32_t irqIntEnBit;
+  uint32_t irqFlagBit;
+  uint32_t irqMissBit;
+  uint32_t irqEdgeCfg;
+  uint32_t irqSelBit;
+  void (*irqISR)(void); // fxn pointer for non-default ISR
+  EmberEventControl *irqEventHandler; // ember event for default delayed
+                                      // handling
+} HalGenericInterruptControlIrqCfg;
+
 #endif
 
 // ------------------------------------------------------------------------------
@@ -57,10 +68,7 @@
 // with
 //        the interrupt.  It should be one of the following macros:
 //        GIC_GPIO_PORTA, GIC_GPIO_PORTB, GIC_GPIO_PORTC, or GIC_GPIO_PORTD
-// @param uint8_t irqNum: For an EM35x device, this defines the irq to be
-//        assigned to the specified GPIO port and pin.  It should be one of the
-//        following macros: GIC_IRQ_NUMA, GIC_IRQ_NUMB, GIC_IRQ_NUMC, or
-//        GIC_IRQ_NUMD.
+// @param uint8_t irqNum:
 //        For an EFR device, this can be used to set the EM4WU pin number.  If
 //        a pin is being used as a level triggered interrupt, it must be on one
 //        of the six EM4 Wake Up pins.  This field should be set with one of the

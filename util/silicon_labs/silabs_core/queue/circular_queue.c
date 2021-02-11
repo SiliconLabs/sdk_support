@@ -24,7 +24,7 @@
 bool queueInit(Queue_t *queue, uint16_t size)
 {
   // Make sure we have enough room for this queue
-  if (size > MAX_QUEUE_LENGTH || queue == NULL) {
+  if (size > CIRCULAR_QUEUE_LEN_MAX || queue == NULL) {
     return false;
   }
 
@@ -77,6 +77,25 @@ bool queueAdd(Queue_t *queue, void *data)
   CORE_EXIT_CRITICAL();
 
   return added;
+}
+
+void *queuePeek(Queue_t *queue)
+{
+  void* ptr = NULL;
+
+  // Do nothing if there's no queue given
+  if (queue == NULL) {
+    return NULL;
+  }
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  if (queue->count > 0) {
+    ptr = queue->data[queue->head];
+  }
+  CORE_EXIT_CRITICAL();
+
+  return ptr;
 }
 
 void *queueRemove(Queue_t *queue)

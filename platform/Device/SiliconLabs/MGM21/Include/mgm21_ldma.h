@@ -681,4 +681,5 @@ typedef struct {
 /** @} End of group MGM21_LDMA_BitFields */
 /** @} End of group MGM21_LDMA */
 /** @} End of group Parts */
+
 #endif /* MGM21_LDMA_H */

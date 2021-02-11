@@ -54,7 +54,7 @@ const ADC_PosSel_TypeDef pChanAportPosSelMap[] =
 { adcPosSelAVDD,                                  /* 0 - AVDD (single-ended only) */
   adcPosSelAPORT3YCH27,                           /* 1 - PB11 (single-ended or diff) */
   adcPosSelAPORT3XCH28,                           /* 2 - PB12 (single-ended or diff) */
-  adcPosSelAPORT3YCH5,                            /* 3 - PB13 (single-ended or diff) */
+  adcPosSelAPORT3YCH5,                            /* 3 - PD13 (single-ended or diff) */
   adcPosSelAPORT2YCH6,                            /* 4 - PC6  (single-ended or diff) */
   adcPosSelAPORT3XCH12,                           /* 5 - PA4  (single-ended or diff) */
   adcPosSelAPORT3YCH13,                           /* 6 - PA5  (single-ended or diff) */
@@ -63,7 +63,7 @@ const ADC_NegSel_TypeDef nChanAportNegSelMap[] =
 { adcNegSelVSS,                                   /* 0 - GND  (single-ended only) */
   adcNegSelAPORT3YCH27,                           /* 1 - PB11 (single-ended or diff) */
   adcNegSelAPORT3XCH28,                           /* 2 - PB12 (single-ended or diff) */
-  adcNegSelAPORT3YCH5,                            /* 3 - PB13 (single-ended or diff) */
+  adcNegSelAPORT3YCH5,                            /* 3 - PD13 (single-ended or diff) */
   adcNegSelAPORT2YCH6,                            /* 4 - PC6  (single-ended or diff) */
   adcNegSelAPORT3XCH12,                           /* 5 - PA4  (single-ended or diff) */
   adcNegSelAPORT3YCH13,                           /* 6 - PA5  (single-ended or diff) */

@@ -42,10 +42,10 @@
  * PAL SPI / USART configuration for the EFM32ZG_STK3200.
  * Select which USART and location is connected to the device via SPI.
  */
-#define PAL_SPI_USART_UNIT        (USART0)
-#define PAL_SPI_USART_CLOCK       (cmuClock_USART0)
-#define PAL_SPI_USART_LOCATION    (USART_ROUTE_LOCATION_LOC0)
-#define PAL_SPI_USART_DMAREQ_TXBL (DMAREQ_USART0_TXBL)
+#define PAL_SPI_USART_UNIT            (USART0)
+#define PAL_SPI_USART_CLOCK           (cmuClock_USART0)
+#define PAL_SPI_USART_LOCATION        (USART_ROUTE_LOCATION_LOC0)
+#define PAL_SPI_USART_DMAREQ_TXEMPTY  (DMAREQ_USART0_TXEMPTY)
 
 /*
  * Specify the SPI baud rate:

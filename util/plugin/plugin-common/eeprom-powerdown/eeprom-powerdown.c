@@ -24,7 +24,7 @@ void emberEepromPowerDownInitCallback(void)
   #include EMBER_AF_API_HAL
 #else
   #include "stack/include/ember-types.h"
-  #include "stack/include/event.h"
+  #include "event_control/event.h"
   #include "hal/hal.h"
 #endif
 

@@ -53,6 +53,9 @@ void sl_slist_init(sl_slist_node_t **head)
 void sl_slist_push(sl_slist_node_t **head,
                    sl_slist_node_t *item)
 {
+  EFM_ASSERT((item != NULL)
+			 && (head != NULL));
+
   item->node = *head;
   *head = item;
 }
@@ -64,6 +67,9 @@ void sl_slist_push_back(sl_slist_node_t **head,
                         sl_slist_node_t *item)
 {
   sl_slist_node_t **node_ptr = head;
+
+  EFM_ASSERT((item != NULL)
+		     && (head != NULL));
 
   while (*node_ptr != NULL) {
     node_ptr = &((*node_ptr)->node);
@@ -79,6 +85,8 @@ void sl_slist_push_back(sl_slist_node_t **head,
 sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head)
 {
   sl_slist_node_t *item;
+
+  EFM_ASSERT(head != NULL);
 
   item = *head;
   if (item == NULL) {
@@ -98,6 +106,9 @@ sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head)
 void sl_slist_insert(sl_slist_node_t *item,
                      sl_slist_node_t *pos)
 {
+  EFM_ASSERT((item != NULL)
+		     && (pos != NULL));
+
   item->node = pos->node;
   pos->node = item;
 }
@@ -108,7 +119,10 @@ void sl_slist_insert(sl_slist_node_t *item,
 void sl_slist_remove(sl_slist_node_t **head,
                      sl_slist_node_t *item)
 {
-  sl_slist_node_t * *node_ptr;
+  sl_slist_node_t **node_ptr;
+
+  EFM_ASSERT((item != NULL)
+		     && (head != NULL));
 
   for (node_ptr = head; *node_ptr != NULL; node_ptr = &((*node_ptr)->node)) {
     if (*node_ptr == item) {
@@ -128,7 +142,10 @@ void sl_slist_sort(sl_slist_node_t **head,
                                     sl_slist_node_t *item_r))
 {
   bool  swapped;
-  sl_slist_node_t * *pp_item_l;
+  sl_slist_node_t **pp_item_l;
+
+  EFM_ASSERT((head != NULL)
+             && (cmp_fnct != NULL));
 
   do {
     swapped = false;

@@ -37,9 +37,7 @@ extern "C" {
 
 /* *INDENT-OFF* */
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- * @addtogroup RAMFUNC
+ * @addtogroup ramfunc RAMFUNC - RAM Function Support
  * @brief RAM code support
  * @details
  *  Provides support for executing code from RAM.
@@ -47,7 +45,7 @@ extern "C" {
  * @{
 
   @note
-   Other cross-compiler support macros are implemented in @ref COMMON.
+   Other cross-compiler support macros are implemented in @ref common.
 
   @note
     Functions executing from RAM should not be declared as static.
@@ -154,8 +152,7 @@ extern "C" {
 #define RAMFUNC_DEFINITION_END      SL_RAMFUNC_DEFINITION_END
 /** @endcond */
 
-/** @} (end addtogroup RAMFUNC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup ramfunc) */
 
 #ifdef __cplusplus
 }

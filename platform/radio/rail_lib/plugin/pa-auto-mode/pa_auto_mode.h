@@ -4,7 +4,7 @@
  *   and other types.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,7 +30,6 @@
  ******************************************************************************/
 
 #include "rail.h"
-#include "rail_features.h"
 
 #include "em_common.h"
 

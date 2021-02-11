@@ -36,12 +36,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RMU
+ * @addtogroup rmu RMU - Reset Management Unit
  * @brief Reset Management Unit (RMU) Peripheral API
  * @details
  *  This module contains functions to control the RMU peripheral of Silicon
@@ -383,6 +378,5 @@ uint32_t RMU_ResetCauseGet(void)
 #endif
 }
 
-/** @} (end addtogroup RMU) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup rmu) */
 #endif /* defined(RMU_COUNT) && (RMU_COUNT > 0) */

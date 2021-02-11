@@ -17,26 +17,35 @@
  ******************************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "buffer_pool_allocator.h"
 
 #include "em_core.h"
 
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
-
 // -----------------------------------------------------------------------------
 // Configuration Macros
 // -----------------------------------------------------------------------------
+// Pull in correct config file:
+#ifdef BUFFER_POOL_ALLOCATOR_USE_LOCAL_CONFIG_HEADER
+  #include "buffer_pool_allocator_config.h" // component-level config file (new config method)
+#else // !defined(BUFFER_POOL_ALLOCATOR_USE_LOCAL_CONFIG_HEADER)
+  #ifdef CONFIGURATION_HEADER
+    #include CONFIGURATION_HEADER // application-level config file (old method)
+  #endif
 
-// Default to a buffer pool one buffer long with a size of 256 bytes per buffer
-#ifndef BUFFER_POOL_SIZE
-#define BUFFER_POOL_SIZE 2
-#endif
-#ifndef MAX_BUFFER_SIZE
-#define MAX_BUFFER_SIZE 256
-#endif
+  #ifdef BUFFER_POOL_SIZE
+    #define BUFFER_POOL_ALLOCATOR_POOL_SIZE BUFFER_POOL_SIZE
+  #else
+    #define BUFFER_POOL_ALLOCATOR_POOL_SIZE 2U
+  #endif
+
+  #ifdef MAX_BUFFER_SIZE
+    #define BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX MAX_BUFFER_SIZE
+  #else
+    #define BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX 256U
+  #endif
+#endif // defined(BUFFER_POOL_ALLOCATOR_USE_LOCAL_CONFIG_HEADER)
 
 #define INVALID_BUFFER_OBJ ((void*)0xFFFFFFFF)
 
@@ -45,24 +54,24 @@ typedef struct {
   // load and store multiple instructions if we overlay a structure on the
   // memory returned by the allocator.
   uint32_t refCount;
-  uint8_t data[MAX_BUFFER_SIZE];
+  uint8_t data[BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX];
 } BufferPoolObj_t;
 
-static BufferPoolObj_t memoryObjs[BUFFER_POOL_SIZE];
+static BufferPoolObj_t memoryObjs[BUFFER_POOL_ALLOCATOR_POOL_SIZE];
 
-void* memoryAllocate(uint32_t size)
+void *memoryAllocate(uint32_t size)
 {
   uint32_t i = 0;
   void *handle = INVALID_BUFFER_OBJ;
 
   // We can't support sizes greater than the maximum heap buffer size
-  if (size > MAX_BUFFER_SIZE) {
+  if (size > BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX) {
     return INVALID_BUFFER_OBJ;
   }
 
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  for (i = 0; i < BUFFER_POOL_SIZE; i++) {
+  for (i = 0; i < BUFFER_POOL_ALLOCATOR_POOL_SIZE; i++) {
     if (memoryObjs[i].refCount == 0) {
       memoryObjs[i].refCount = 1;
       handle = (void*)i;
@@ -70,6 +79,14 @@ void* memoryAllocate(uint32_t size)
     }
   }
   CORE_EXIT_CRITICAL();
+
+#if BUFFER_POOL_ALLOCATOR_CLEAR_ON_INIT != 0U
+  if (INVALID_BUFFER_OBJ != handle) {
+    memset(&memoryObjs[(uint32_t)handle].data,
+           0,
+           BUFFER_POOL_ALLOCATOR_BUFFER_SIZE_MAX);
+  }
+#endif // BUFFER_POOL_ALLOCATOR_CLEAR_ON_INIT
 
   return handle;
 }
@@ -79,7 +96,8 @@ void *memoryPtrFromHandle(void *handle)
   void *ptr = NULL;
 
   // Make sure we were given a valid handle
-  if ((handle == INVALID_BUFFER_OBJ) || ((uint32_t)handle >= BUFFER_POOL_SIZE)) {
+  if ((handle == INVALID_BUFFER_OBJ)
+      || ((uint32_t)handle >= BUFFER_POOL_ALLOCATOR_POOL_SIZE)) {
     return NULL;
   }
 

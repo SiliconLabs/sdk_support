@@ -41,15 +41,15 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup tempdrv  TEMPDRV  Temperature Driver
  * @{
  ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup TEMPDRV
- * @{
- ******************************************************************************/
-
+/**************************************************************************//**
+* @addtogroup tempdrv_error_codes Error Codes
+* @brief TEMPDRV error codes
+* @{
+******************************************************************************/
 #define ECODE_EMDRV_TEMPDRV_OK                (ECODE_OK)                              ///< Success return value.
 #define ECODE_EMDRV_TEMPDRV_NO_INIT           (ECODE_EMDRV_TEMPDRV_BASE | 0x00000001) ///< Function requires prior initialization
 #define ECODE_EMDRV_TEMPDRV_PARAM_ERROR       (ECODE_EMDRV_TEMPDRV_BASE | 0x00000002) ///< Illegal input parameter.
@@ -59,6 +59,8 @@ extern "C" {
 #define ECODE_EMDRV_TEMPDRV_TEMP_UNDER        (ECODE_EMDRV_TEMPDRV_BASE | 0x00000006) ///< Requested temperature below measurable range
 #define ECODE_EMDRV_TEMPDRV_TEMP_OVER         (ECODE_EMDRV_TEMPDRV_BASE | 0x00000007) ///< Requested temperature above measurable range
 #define ECODE_EMDRV_TEMPDRV_DUP_TEMP          (ECODE_EMDRV_TEMPDRV_BASE | 0x00000008) ///< Requested temperature is a duplicate
+
+/** @} (end addtogroup tempdrv_error_codes) */
 
 /**
  * Temperature limit. This is used in the TEMPDRV to specify the
@@ -93,7 +95,7 @@ typedef void (*TEMPDRV_Callback_t)(int8_t temp, TEMPDRV_LimitType_t limit);
  *  TEMPDRV IRQ Handler.
  *
  * @details
- *  This IRQ Handler should be called from within the EMU_IRQ_Handler in order
+ *  This IRQ Handler should be called from within the @ref EMU_IRQHandler in order
  *  to enable TEMPDRV callbacks. This is included by default with
  *  EMU_CUSTOM_IRQ_HANDLER defined as false.
  ******************************************************************************/
@@ -115,8 +117,7 @@ Ecode_t TEMPDRV_RegisterCallback(int8_t temp,
 
 Ecode_t TEMPDRV_UnregisterCallback(TEMPDRV_Callback_t callback);
 
-/** @} (end addtogroup TEMPDRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup tempdrv) */
 
 #ifdef __cplusplus
 }

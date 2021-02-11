@@ -248,4 +248,5 @@ typedef struct {
 /** @} End of group MGM21_AMUXCP_BitFields */
 /** @} End of group MGM21_AMUXCP */
 /** @} End of group Parts */
+
 #endif /* MGM21_AMUXCP_H */

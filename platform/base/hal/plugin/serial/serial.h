@@ -29,6 +29,8 @@
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
+#include "buffer_manager/buffer-management.h"
+
 /** @addtogroup serial_comm
  * Unless otherwise noted, the EmberNet stack does not use these functions,
  * and therefore the HAL is not required to implement them. However, many of
@@ -69,18 +71,16 @@
  *  and 1 and should be accessed using those numbers. The ports can be set up
  *  independently of each other.
  *
- *  To enable a port, a Use mode (buffered or FIFO) and a Queue Size must be
+ *  To enable a port, a Use mode (FIFO) and a Queue Size must be
  *  declared on the port. In FIFO mode, the Queue Size is the size of the FIFO and
  *  represents the number of bytes that can be waiting for transmission at any
- *  given time. In buffered mode, the Queue Size represents the number of whole
- *  messages that can be waiting for transmission at any given time. A single
- *  message is created for each call to any of the serial APIs.
+ *  given time.
  *
  *  To specify a Use mode and Queue Size, place declarations in the compiler
  *  preprocessor options when building your application:
  *  - <b>Use Mode:</b>
- *    -  ::EMBER_SERIAL0_MODE=::EMBER_SERIAL_BUFFER or ::EMBER_SERIAL_FIFO
- *    -  ::EMBER_SERIAL1_MODE=::EMBER_SERIAL_BUFFER or ::EMBER_SERIAL_FIFO
+ *    -  ::EMBER_SERIAL0_MODE=::EMBER_SERIAL_FIFO
+ *    -  ::EMBER_SERIAL1_MODE=::EMBER_SERIAL_FIFO
  *  - <b>Queue Size:</b>
  *    -  ::EMBER_SERIAL0_TX_QUEUE_SIZE=2
  *    -  ::EMBER_SERIAL0_RX_QUEUE_SIZE=4
@@ -88,10 +88,6 @@
  *    -  ::EMBER_SERIAL1_RX_QUEUE_SIZE=16
  *
  *  Note the following:
- *  - If buffered mode is declared, emberSerialBufferTick() should be
- *  called in the application's main event loop.
- *  - If buffered mode is declared, the Tx queue size \b MUST be <= 255
- *  - On the AVR platform, Rx & Tx queue sizes are limited to powers of 2 <= 128
  *  - By default, both ports are unused.
  *
  *  You can also use declarations to specify what should be done if an attempt
@@ -105,10 +101,7 @@
  *
  *  If ::EMBER_SERIAL0_BLOCKING or ::EMBER_SERIAL1_BLOCKING is defined,
  *  then the call to the port will block until space
- *  is available, guaranteeing that the entire message is sent. Note that
- *  in buffered mode, even if blocking mode is in effect entire messages
- *  may be dropped if insufficient stack buffers are available to hold them.
- *  When this happens, ::EMBER_NO_BUFFERS is returned.
+ *  is available, guaranteeing that the entire message is sent.
  *
  *  If no blocking mode is defined, the serial code defaults to non-blocking
  *  mode. In this event, when the queue is too short, the data that don't fit
@@ -292,8 +285,8 @@ EmberStatus emberSerialReadPartialLine(uint8_t port, char *data, uint8_t max, ui
  */
 uint16_t emberSerialWriteAvailable(uint8_t port);
 
-/** @brief Returns the number of bytes (in FIFO mode) or messages
- * (in buffered mode) that are currently queued and still being sent.
+/** @brief Returns the number of bytes that are currently queued and
+ * still being sent.
  *
  * @param port  A serial port number (0 or 1).
  *
@@ -310,8 +303,6 @@ uint16_t emberSerialWriteUsed(uint8_t port);
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialWriteByte(uint8_t port, uint8_t dataByte);
@@ -326,8 +317,6 @@ EmberStatus emberSerialWriteByte(uint8_t port, uint8_t dataByte);
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialWriteHex(uint8_t port, uint8_t dataByte);
@@ -340,8 +329,6 @@ EmberStatus emberSerialWriteHex(uint8_t port, uint8_t dataByte);
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialWriteString(uint8_t port, PGM_P string);
@@ -358,8 +345,6 @@ EmberStatus emberSerialWriteString(uint8_t port, PGM_P string);
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialPrintBytes(uint8_t port,
@@ -379,8 +364,6 @@ EmberStatus emberSerialPrintBytes(uint8_t port,
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialPrintBytesLine(uint8_t port,
@@ -409,8 +392,6 @@ EmberStatus emberSerialPrintBytesLine(uint8_t port,
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 XAP2B_PAGEZERO_ON
@@ -428,8 +409,6 @@ XAP2B_PAGEZERO_OFF
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 XAP2B_PAGEZERO_ON
@@ -442,8 +421,6 @@ XAP2B_PAGEZERO_OFF
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 XAP2B_PAGEZERO_ON
@@ -458,8 +435,6 @@ XAP2B_PAGEZERO_OFF
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialPrintfVarArg(uint8_t port, PGM_P formatString, va_list ap);
@@ -475,8 +450,6 @@ EmberStatus emberSerialPrintfVarArg(uint8_t port, PGM_P formatString, va_list ap
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
@@ -498,8 +471,6 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length);
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialWriteBuffer(uint8_t port, EmberMessageBuffer buffer, uint8_t start, uint8_t length);
@@ -514,8 +485,6 @@ EmberStatus emberSerialWriteBuffer(uint8_t port, EmberMessageBuffer buffer, uint
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 XAP2B_PAGEZERO_ON
@@ -538,18 +507,9 @@ XAP2B_PAGEZERO_OFF
  *
  * @return One of the following (see the Main Page):
  * - ::EMBER_SERIAL_TX_OVERFLOW indicates that data was dropped.
- * - ::EMBER_NO_BUFFERS indicates that there was an insufficient number of
- *  available stack buffers.
  * - ::EMBER_SUCCESS.
  */
 EmberStatus emberSerialGuaranteedPrintf(uint8_t port, PGM_P formatString, ...);
-
-/** @brief When a serial port is used in buffered mode, this must be
- * called in an application's main event loop, similar to emberTick().
- * It frees buffers that are used to queue messages. \b Note: This function
- * has no effect if FIFO mode is being used.
- */
-void emberSerialBufferTick(void);
 
 /** @brief Flushes the receive buffer in case none of the
  * incoming serial data is wanted.

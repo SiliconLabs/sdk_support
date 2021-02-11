@@ -129,7 +129,7 @@ plugin(buzzer) {
   quality=sample
   root=$HAL
 
-  architecture=efr32,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation,stm32f103ret
+  architecture=efr32,simulation,stm32f103ret
 
   providedApis=buzzer
   api.buzzer.header=plugin/buzzer/buzzer.h
@@ -138,7 +138,6 @@ plugin(buzzer) {
 
   plugin/buzzer-stub/buzzer-stub.c    (simulation)
   plugin/buzzer/buzzer-efr32.c        (efr32)
-  plugin/buzzer/buzzer-em3xx.c        (em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
   plugin/buzzer/buzzer-stm32f103ret.c (stm32f103ret)
 }
 
@@ -199,13 +198,12 @@ plugin(debug-channel) {
   root=$HAL
 
   architecture=efr32,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
-  
+
   providedApis=debug-channel
   api.debug-jtag.header=plugin/debug-jtag/debug-channel.h
-  
+
   requiredApis=hal
-  
-  plugin/debug-jtag/debug-jtag-em3xx.c  (em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+
   plugin/debug-jtag/debug-jtag-efr32.c  (efr32)
   plugin/debug-jtag/debug-jtag-sim.c    (simulation)
 
@@ -222,12 +220,12 @@ plugin(debug-channel-stub) {
   root=$HAL
 
   architecture=efr32,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
-  
+
   providedApis=debug-channel
   api.debug-jtag.header=plugin/debug-jtag/debug-channel.h
-  
+
   requiredApis=hal
-  
+
   $HAL/plugin/debug-jtag-stub/debug-jtag-stub.c (efr32,em346,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation)
 }
 
@@ -347,6 +345,13 @@ plugin(hal-library) {
   $DEVICE/SiliconLabs/em355x/Source/GCC/irqToIsrTrampolines_em355x.s (em3555+gcc)
   $DEVICE/SiliconLabs/em358x/Source/GCC/irqToIsrTrampolines_em358x.s (em3581+gcc,em3582+gcc,em3585+gcc,em3586+gcc,em3587+gcc,em3588+gcc)
   $DEVICE/SiliconLabs/em359x/Source/GCC/irqToIsrTrampolines_em359x.s (em3591+gcc,em3592+gcc,em3595+gcc,em3596+gcc,em3597+gcc,em3598+gcc)
+  $SERVICE/power_manager/src/sl_power_manager.c                      (efr32)
+  $SERVICE/power_manager/src/sl_power_manager_debug.c                (efr32)
+  $SERVICE/power_manager/src/sl_power_manager_hal_s0_s1.c            (efr32)
+  $SERVICE/power_manager/src/sl_power_manager_hal_s2.c               (efr32)
+  $SERVICE/hfxo_manager/src/sl_hfxo_manager.c                        (efr32~series[2])
+  $SERVICE/hfxo_manager/src/sl_hfxo_manager_hal_s2.c                 (efr32~series[2])
+  $COMMON/src/sl_slist.c                                             (efr32)
 
   callbacks=config/hal-callback.info
 
@@ -382,10 +387,16 @@ plugin(hal-library) {
 
   setup(additionalFiles) {
     (efr32)=PATH(ABSOLUTE):$SERVICE/mpu/inc
+    (efr32)=PATH(ABSOLUTE):$SERVICE/power_manager/inc
+    (efr32)=PATH(ABSOLUTE):$SERVICE/sleeptimer/inc
+    (efr32)=PATH(ABSOLUTE):$SERVICE/sleeptimer/src
+    (efr32)=PATH(ABSOLUTE):$HAL/hal/micro/cortexm3/efm32/config
+    (efr32~series[2])=PATH(ABSOLUTE):$SERVICE/hfxo_manager/inc
   }
 
   setup(macros){
     -DEMLIB_USER_CONFIG
+    -DSL_CATALOG_POWER_MANAGER_PRESENT
   }
 
   setup(template){
@@ -416,13 +427,12 @@ plugin(i2c-driver) {
   root=$HAL
 
   # TODO: Port this plugin to the EFR32 (EMHAL-1095).
-  architecture=em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=simulation
 
   providedApis=i2c-driver
   api.i2c-driver.header=plugin/i2c-driver/i2c-driver.h
 
   plugin/i2c-driver-stub/i2c-driver-stub.c (simulation)
-  plugin/i2c-driver/i2c-driver-em3xx.c     (em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
 
   setup(bookkeeping) {
     init=halI2cInitialize

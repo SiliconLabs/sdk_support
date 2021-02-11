@@ -1,0 +1,87 @@
+!!omap
+- id: brd2010a_config
+- label: brd2010a config
+- description: Configuration files for BRD2010A
+- package: platform
+- category: Platform|Board|Config
+- quality: production
+- ui_hints:
+    visibility: never
+- root_path: hardware/board/config
+- requires:
+  - name: brd2010a
+- provides:
+  - name: brd2010a_config
+- config_file:
+  - override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn0
+    path: brd2010a/sl_simple_button_btn0_config.h
+  - override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn1
+    path: brd2010a/sl_simple_button_btn1_config.h
+  - override:
+      component: iostream_usart
+      file_id: iostream_usart_config
+      instance: exp
+    path: brd2010a/sl_iostream_usart_exp_config.h
+  - override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led0
+    path: brd2010a/sl_simple_led_led0_config.h
+  - override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led1
+    path: brd2010a/sl_simple_led_led1_config.h
+  - override:
+      component: i2cspm
+      file_id: i2cspm_config
+      instance: sensor
+    path: brd2010a/sl_i2cspm_sensor_config.h
+  - override:
+      component: board_control
+      file_id: board_control_config
+    path: brd2010a/sl_board_control_config.h
+  - override:
+      component: spidrv
+      file_id: spidrv_config
+      instance: exp
+    path: brd2010a/sl_spidrv_exp_config.h
+  - override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: exp
+    path: brd2010a/sl_uartdrv_usart_exp_config.h
+  - override:
+      component: iostream_leuart
+      file_id: iostream_leuart_config
+      instance: vcom
+    path: brd2010a/sl_iostream_leuart_vcom_config.h
+  - override:
+      component: iostream_leuart
+      file_id: iostream_leuart_config
+      instance: exp
+    path: brd2010a/sl_iostream_leuart_exp_config.h
+  - override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd2010a/sl_device_init_lfxo_config.h
+  - override:
+      component: uartdrv_leuart
+      file_id: uartdrv_leuart_config
+      instance: vcom
+    path: brd2010a/sl_uartdrv_leuart_vcom_config.h
+  - override:
+      component: uartdrv_leuart
+      file_id: uartdrv_leuart_config
+      instance: exp
+    path: brd2010a/sl_uartdrv_leuart_exp_config.h
+  - override:
+      component: memlcd_usart
+      file_id: sl_memlcd_usart_config
+    path: brd2010a/sl_memlcd_usart_config.h

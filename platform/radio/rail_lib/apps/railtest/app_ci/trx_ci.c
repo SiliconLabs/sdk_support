@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the tx/rx commands for RAIL test applications.
+ * @brief This file implements the tx/rx commands for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -35,26 +35,65 @@
 #include <strings.h>
 #endif
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "app_common.h"
 #include "app_trx.h"
 
-RAIL_PacketTimePosition_t txTimePosition = RAIL_PACKET_TIME_DEFAULT;
-RAIL_PacketTimePosition_t rxTimePosition = RAIL_PACKET_TIME_DEFAULT;
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#include "sl_iostream_usart_vcom_config.h"
+#endif
 
-void tx(int argc, char **argv)
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) && defined(SL_CATALOG_CLI_PRESENT)
+  #if defined(SL_CLI_USE_STDIO)
+    #include "sl_iostream.h"
+    #define consumeChar()                               \
+  do {                                                  \
+    char ch;                                            \
+    (void) sl_iostream_getchar(SL_IOSTREAM_STDIN, &ch); \
+  } while (0)
+  #else
+    #define consumeChar() ((void) getchar())
+  #endif // #if defined(SL_CLI_USE_STDIO)
+#else
+  #define consumeChar()
+#endif // #if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) && defined(SL_CATALOG_CLI_PRESENT)
+
+static RAIL_Status_t identityTimestampTx(RAIL_Handle_t railHandle,
+                                         RAIL_TxPacketDetails_t *pPacketDetails)
 {
-  uint32_t newTxCount = ciGetUnsigned(argv[1]);
-  radioTransmit(newTxCount, argv[0]);
+  (void) railHandle;
+  (void) pPacketDetails;
+  return RAIL_STATUS_NO_ERROR;
+}
+
+static RAIL_Status_t identityTimestampRx(RAIL_Handle_t railHandle,
+                                         RAIL_RxPacketDetails_t *pPacketDetails)
+{
+  (void) railHandle;
+  (void) pPacketDetails;
+  return RAIL_STATUS_NO_ERROR;
+}
+
+TxTimestampFunc txTimePosition = &RAIL_GetTxTimeFrameEndAlt;
+RxTimestampFunc rxTimePosition = &RAIL_GetRxTimeSyncWordEndAlt;
+
+void tx(sl_cli_command_arg_t *args)
+{
+  uint32_t newTxCount = sl_cli_get_argument_uint32(args, 0);
+  radioTransmit(newTxCount, sl_cli_get_command_string(args, 0));
 }
 
 //deprecated
-void txWithOptions(int argc, char **argv)
+void txWithOptions(sl_cli_command_arg_t *args)
 {
-  tx(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  tx(args);
 }
 
 static const char *configuredTxAntenna(RAIL_TxOptions_t txOptions)
@@ -79,15 +118,15 @@ static const char *configuredTxAntenna(RAIL_TxOptions_t txOptions)
   }
 }
 
-void configTxOptions(int argc, char **argv)
+void configTxOptions(sl_cli_command_arg_t *args)
 {
-  if (argc > 1) {
-    txOptions = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    txOptions = sl_cli_get_argument_uint32(args, 0);
   }
 
-  responsePrint(argv[0], "waitForAck:%s,removeCrc:%s,syncWordId:%d,"
-                         "txAntenna:%s,altPreambleLen:%s,ccaPeakRssi:%s,"
-                         "ccaOnly:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "waitForAck:%s,removeCrc:%s,syncWordId:%d,"
+                                                    "txAntenna:%s,altPreambleLen:%s,ccaPeakRssi:%s,"
+                                                    "ccaOnly:%s",
                 ((txOptions & RAIL_TX_OPTION_WAIT_FOR_ACK) ? "True" : "False"),
                 ((txOptions & RAIL_TX_OPTION_REMOVE_CRC) ? "True" : "False"),
                 ((txOptions & RAIL_TX_OPTION_SYNC_WORD_ID) >> RAIL_TX_OPTION_SYNC_WORD_ID_SHIFT),
@@ -97,71 +136,86 @@ void configTxOptions(int argc, char **argv)
                 ((txOptions & RAIL_TX_OPTION_CCA_ONLY) ? "True" : "False"));
 }
 
-void txAtTime(int argc, char **argv)
+void txAtTime(sl_cli_command_arg_t *args)
 {
   // DEFAULTS: 0 ms, absolute time, postponse tx during rx
   RAIL_ScheduleTxConfig_t scheduledTxOptions = { 0 };
-  scheduledTxOptions.when = ciGetUnsigned(argv[1]);
+  scheduledTxOptions.when = sl_cli_get_argument_uint32(args, 0);
 
   // Attempt to parse the time mode if specified
-  if (argc >= 3) {
-    if (!parseTimeModeFromString(argv[2], &scheduledTxOptions.mode)) {
-      responsePrintError(argv[0], 28, "Invalid time mode");
+  if (sl_cli_get_argument_count(args) >= 2) {
+    if (!parseTimeModeFromString(sl_cli_get_argument_string(args, 1), &scheduledTxOptions.mode)) {
+      responsePrintError(sl_cli_get_command_string(args, 0), 28, "Invalid time mode");
       return;
     }
   }
 
   scheduledTxOptions.txDuringRx =
-    (argc >= 4 && strcasecmp("abort", argv[3]) == 0)
+    (sl_cli_get_argument_count(args) >= 3 && strcasecmp("abort", sl_cli_get_argument_string(args, 2)) == 0)
     ? RAIL_SCHEDULED_TX_DURING_RX_ABORT_TX
     : RAIL_SCHEDULED_TX_DURING_RX_POSTPONE_TX;
 
   setNextPacketTime(&scheduledTxOptions);
-  setNextAppMode(TX_SCHEDULED, argv[0]);
+  setNextAppMode(TX_SCHEDULED, sl_cli_get_command_string(args, 0));
 }
 
-void txAfterRx(int argc, char **argv)
+void txAfterRx(sl_cli_command_arg_t *args)
 {
-  uint32_t delay = ciGetUnsigned(argv[1]);
+  uint32_t delay = sl_cli_get_argument_uint32(args, 0);
   txAfterRxDelay = delay;
-  enableAppMode(SCHTX_AFTER_RX, (delay != 0), argv[0]);
+  enableAppMode(SCHTX_AFTER_RX, (delay != 0), sl_cli_get_command_string(args, 0));
 }
 
-void getTxDelay(int argc, char **argv)
+void getTxDelay(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "txDelay:%d", continuousTransferPeriod);
+  responsePrint(sl_cli_get_command_string(args, 0), "txDelay:%d", continuousTransferPeriod);
 }
 
-void setTxDelay(int argc, char **argv)
+void setTxDelay(sl_cli_command_arg_t *args)
 {
-  uint32_t delay = ciGetUnsigned(argv[1]);
+  uint32_t delay = sl_cli_get_argument_uint32(args, 0);
 
   continuousTransferPeriod = delay;
-  getTxDelay(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getTxDelay(args);
 }
 
-void setTxHoldOff(int argc, char **argv)
+void getRandomTxDelay(sl_cli_command_arg_t *args)
 {
-  uint32_t holdOff = ciGetUnsigned(argv[1]);
+  responsePrint(sl_cli_get_argument_string(args, 0),
+                "enableRandomTxDelay:%d", enableRandomTxDelay);
+}
+
+void setRandomTxDelay(sl_cli_command_arg_t *args)
+{
+  uint32_t enable = sl_cli_get_argument_uint32(args, 0);
+
+  enableRandomTxDelay = enable;
+  getRandomTxDelay(args);
+}
+
+void setTxHoldOff(sl_cli_command_arg_t *args)
+{
+  uint32_t holdOff = sl_cli_get_argument_uint32(args, 0);
 
   RAIL_EnableTxHoldOff(railHandle, holdOff);
-  responsePrint(argv[0], "TxHoldOff:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "TxHoldOff:%s",
                 (RAIL_IsTxHoldOffEnabled(railHandle) ? "Enabled" : "Disabled"));
 }
 
-void setTxAltPreambleLen(int argc, char **argv)
+void setTxAltPreambleLen(sl_cli_command_arg_t *args)
 {
-  uint16_t length = (uint16_t)ciGetUnsigned(argv[1]);
+  uint16_t length = sl_cli_get_argument_uint16(args, 0);
 
   RAIL_Status_t status = RAIL_SetTxAltPreambleLength(railHandle, length);
-  responsePrint(argv[0], "Result:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
 }
 
-void stopInfinitePreambleTx(int argc, char **argv)
+void stopInfinitePreambleTx(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status = RAIL_StopInfinitePreambleTx(railHandle);
-  responsePrint(argv[0], "Result:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == RAIL_STATUS_NO_ERROR) ? "Success"
                  : (status == RAIL_STATUS_INVALID_CALL) ? "Invalid Call"
                  : (status == RAIL_STATUS_INVALID_STATE) ? "Invalid State"
@@ -169,43 +223,43 @@ void stopInfinitePreambleTx(int argc, char **argv)
                 ));
 }
 
-void getSyncWords(int argc, char **argv)
+void getSyncWords(sl_cli_command_arg_t *args)
 {
   RAIL_SyncWordConfig_t syncWordConfig = { 0, };
   RAIL_Status_t status = RAIL_GetSyncWords(railHandle, &syncWordConfig);
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "Result:%s,bitlength:%u,syncWord1:%lu,syncWord2:%lu",
                 status == RAIL_STATUS_NO_ERROR ? "Success" : "Failure",
                 syncWordConfig.syncWordBits, syncWordConfig.syncWord1,
                 syncWordConfig.syncWord2);
 }
 
-void configSyncWords(int argc, char **argv)
+void configSyncWords(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
   RAIL_SyncWordConfig_t syncWordConfig = { 0, };
-  syncWordConfig.syncWordBits = (uint8_t)ciGetUnsigned(argv[1]);
-  syncWordConfig.syncWord1 = (uint32_t)ciGetUnsigned(argv[2]);
-  if (argc > 3) {
-    syncWordConfig.syncWord2 = (uint32_t)ciGetUnsigned(argv[3]);
+  syncWordConfig.syncWordBits = sl_cli_get_argument_uint8(args, 0);
+  syncWordConfig.syncWord1 = sl_cli_get_argument_uint32(args, 1);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    syncWordConfig.syncWord2 = sl_cli_get_argument_uint32(args, 2);
   } else {
     syncWordConfig.syncWord2 = syncWordConfig.syncWord1;
   }
   RAIL_Status_t status = RAIL_ConfigSyncWords(railHandle, &syncWordConfig);
-  responsePrint(argv[0], "Result:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
                 ((status == RAIL_STATUS_NO_ERROR) ? "Success" : "Failure"));
 }
 
-void rx(int argc, char **argv)
+void rx(sl_cli_command_arg_t *args)
 {
-  bool enable = ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
 
   // Don't allow Rx enable calls when scheduled Rx has been started
   if ((currentAppMode() == RX_SCHEDULED) && enable) {
-    responsePrintError(argv[0], 29, "Can't turn on receive when in ScheduledRx");
+    responsePrintError(sl_cli_get_command_string(args, 0), 29, "Can't turn on receive when in ScheduledRx");
     return;
   }
 
@@ -213,7 +267,7 @@ void rx(int argc, char **argv)
   // scheduled Rx disable call
   if ((currentAppMode() != DIRECT)
       && (currentAppMode() != RX_SCHEDULED)
-      && (!inAppMode(NONE, argv[0]))) {
+      && (!inAppMode(NONE, sl_cli_get_command_string(args, 0)))) {
     return;
   }
 
@@ -236,20 +290,20 @@ void rx(int argc, char **argv)
     receiveModeEnabled = enable;
 
     // Print out the current status of receive mode
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "Rx:%s,Idle:%s,Time:%u",
                   (enable ? "Enabled" : "Disabled"),
                   ((!enable) ? "Enabled" : "Disabled"),
                   RAIL_GetTime());
   } else {
-    responsePrintError(argv[0],
+    responsePrintError(sl_cli_get_command_string(args, 0),
                        40,
                        "Could not change receive state '%d'",
                        status);
   }
 }
 
-void rxAt(int argc, char **argv)
+void rxAt(sl_cli_command_arg_t *args)
 {
   uint32_t startTime, endTime;
   RAIL_TimeMode_t startMode, endMode;
@@ -259,30 +313,30 @@ void rxAt(int argc, char **argv)
 
   // Only allow this when app is idle or to reconfigure an active scheduled Rx
   if (!inAppMode(NONE, NULL) && !inAppMode(RX_SCHEDULED, NULL)) {
-    responsePrintError(argv[0], 30, "Cannot enter ScheduledRx when not in Idle.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 30, "Cannot enter ScheduledRx when not in Idle.");
     return;
   }
 
   // Parse out the command line parameters
-  startTime = ciGetUnsigned(argv[1]);
-  endTime   = ciGetUnsigned(argv[3]);
+  startTime = sl_cli_get_argument_uint32(args, 0);
+  endTime   = sl_cli_get_argument_uint32(args, 2);
 
-  if (!parseTimeModeFromString(argv[2], &startMode)) {
-    responsePrintError(argv[0], 25, "Invalid startMode specified");
+  if (!parseTimeModeFromString(sl_cli_get_argument_string(args, 1), &startMode)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 25, "Invalid startMode specified");
     return;
   }
-  if (!parseTimeModeFromString(argv[4], &endMode)) {
-    responsePrintError(argv[0], 26, "Invalid endMode specified");
+  if (!parseTimeModeFromString(sl_cli_get_argument_string(args, 3), &endMode)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 26, "Invalid endMode specified");
     return;
   }
 
   // Read the rxTransitionEndSchedule option if available
-  if (argc > 5) {
-    rxTransitionEndSchedule = !!ciGetUnsigned(argv[5]);
+  if (sl_cli_get_argument_count(args) >= 5) {
+    rxTransitionEndSchedule = !!sl_cli_get_argument_uint8(args, 4);
   }
   // Read the hardEnd option if available
-  if (argc > 6) {
-    hardEnd = !!ciGetUnsigned(argv[6]);
+  if (sl_cli_get_argument_count(args) >= 6) {
+    hardEnd = !!sl_cli_get_argument_uint8(args, 5);
   }
 
   // Configure scheduled receive as requested
@@ -304,7 +358,7 @@ void rxAt(int argc, char **argv)
 
   if (!scheduledRxUpdate) {
     // Attempt to put the app into scheduled receive mode
-    if (!enableAppModeSync(RX_SCHEDULED, true, argv[0])) {
+    if (!enableAppModeSync(RX_SCHEDULED, true, sl_cli_get_command_string(args, 0))) {
       return;
     }
   }
@@ -312,34 +366,34 @@ void rxAt(int argc, char **argv)
   // Enable scheduled receive mode
   uint8_t res = RAIL_ScheduleRx(railHandle, channel, &rxCfg, NULL);
   if (res != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 27, "Could not start scheduled receive %d", res);
+    responsePrintError(sl_cli_get_command_string(args, 0), 27, "Could not start scheduled receive %d", res);
     if (!scheduledRxUpdate) {
-      (void) enableAppModeSync(RX_SCHEDULED, false, argv[0]);
+      (void) enableAppModeSync(RX_SCHEDULED, false, sl_cli_get_command_string(args, 0));
     }
     return;
   }
 }
 
-void setRxOptions(int argc, char **argv)
+void setRxOptions(sl_cli_command_arg_t *args)
 {
   // Only update the rxOptions if a parameter is given otherwise just print the
   // current settings
-  if (argc > 1) {
-    RAIL_RxOptions_t newRxOptions = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    RAIL_RxOptions_t newRxOptions = sl_cli_get_argument_uint32(args, 0);
     RAIL_Status_t status = RAIL_ConfigRxOptions(railHandle,
                                                 RAIL_RX_OPTIONS_ALL,
                                                 newRxOptions);
 
     // Make sure there was no error setting the new options
     if (status != RAIL_STATUS_NO_ERROR) {
-      responsePrintError(argv[0], 31, "RxOptions:Failed");
+      responsePrintError(sl_cli_get_command_string(args, 0), 31, "RxOptions:Failed");
       return;
     }
     // Update the global rxOptions
     rxOptions = newRxOptions;
   }
 
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "storeCrc:%s,ignoreCrcErrors:%s,enableDualSync:%s,"
                 "trackAborted:%s,removeAppendedInfo:%s,rxAntenna:%s,"
                 "frameDet:%s",
@@ -352,13 +406,13 @@ void setRxOptions(int argc, char **argv)
                 (rxOptions & RAIL_RX_OPTION_DISABLE_FRAME_DETECTION) ? "Off" : "On");
 }
 
-void setTxTone(int argc, char **argv)
+void setTxTone(sl_cli_command_arg_t *args)
 {
-  uint8_t enable = ciGetUnsigned(argv[1]);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
   streamMode = RAIL_STREAM_CARRIER_WAVE;
   antOptions = RAIL_TX_OPTIONS_DEFAULT;
-  if (argc > 2) {
-    uint8_t antenna = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    uint8_t antenna = sl_cli_get_argument_uint32(args, 1);
     //Choose any antenna by default
     if (antenna == 1) {
       antOptions = RAIL_TX_OPTION_ANTENNA1;
@@ -366,16 +420,16 @@ void setTxTone(int argc, char **argv)
       antOptions = RAIL_TX_OPTION_ANTENNA0;
     }
   }
-  enableAppMode(TX_STREAM, enable, argv[0]);
+  enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
 }
 
-void setTxStream(int argc, char **argv)
+void setTxStream(sl_cli_command_arg_t *args)
 {
-  uint8_t enable = ciGetUnsigned(argv[1]);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
   RAIL_StreamMode_t stream = RAIL_STREAM_PN9_STREAM;
   antOptions = RAIL_TX_OPTIONS_DEFAULT;
-  if (argc > 3) {
-    uint8_t antenna = ciGetUnsigned(argv[3]);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    uint8_t antenna = sl_cli_get_argument_uint32(args, 2);
     //Choose any antenna by default
     if (antenna == 1) {
       antOptions = RAIL_TX_OPTION_ANTENNA1;
@@ -383,31 +437,31 @@ void setTxStream(int argc, char **argv)
       antOptions = RAIL_TX_OPTION_ANTENNA0;
     }
   }
-  if (argc > 2) {
-    stream = (RAIL_StreamMode_t) ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    stream = (RAIL_StreamMode_t) sl_cli_get_argument_uint32(args, 1);
     if (stream >= RAIL_STREAM_MODES_COUNT) {
-      responsePrintError(argv[0], 1, "Invalid stream mode");
+      responsePrintError(sl_cli_get_command_string(args, 0), 1, "Invalid stream mode");
       return;
     }
   }
   streamMode = stream;
-  enableAppMode(TX_STREAM, enable, argv[0]);
+  enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
 }
 
-void setDirectMode(int argc, char **argv)
+void setDirectMode(sl_cli_command_arg_t *args)
 {
-  uint8_t enable = ciGetUnsigned(argv[1]);
-  enableAppMode(DIRECT, enable, argv[0]);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
+  enableAppMode(DIRECT, enable, sl_cli_get_command_string(args, 0));
 }
 
-void setDirectTx(int argc, char **argv)
+void setDirectTx(sl_cli_command_arg_t *args)
 {
-  uint8_t enable = ciGetUnsigned(argv[1]);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
 
   // Make sure that direct mode is enabled to do a direct Tx
   if (currentAppMode() != DIRECT) {
-    responsePrintError(argv[0], 7, "DirectMode not enabled");
+    responsePrintError(sl_cli_get_command_string(args, 0), 7, "DirectMode not enabled");
     return;
   }
 
@@ -424,9 +478,9 @@ void setDirectTx(int argc, char **argv)
     }
   }
   if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[0], "DirectTx:%s", (enable ? "Enabled" : "Disabled"));
+    responsePrint(sl_cli_get_command_string(args, 0), "DirectTx:%s", (enable ? "Enabled" : "Disabled"));
   } else {
-    responsePrintError(argv[0], 8, "DirectMode Rx/Tx not enabled '%d'", status);
+    responsePrintError(sl_cli_get_command_string(args, 0), 8, "DirectMode Rx/Tx not enabled '%d'", status);
   }
 }
 
@@ -434,7 +488,6 @@ void setDirectTx(int argc, char **argv)
 #include "em_gpio.h"
 #include "em_emu.h"
 #include "em_core.h"
-#include "retargetserial.h"
 
 #ifndef DEBUG_SLEEP_LOOP
 #define DEBUG_SLEEP_LOOP 0
@@ -444,6 +497,8 @@ static const char *rfBands[] = { "Off", "GHz", "MHz", "Any", };
 static const char *rfSensitivity[] = { "High", "Low" };
 static RAIL_RfSenseBand_t rfBand = RAIL_RFSENSE_OFF;
 static uint32_t rfUs = 0;
+// Used for wakeup from sleep
+extern volatile bool buttonWakeEvent;
 
 static void RAILCb_SensedRf(void)
 {
@@ -453,12 +508,12 @@ static void RAILCb_SensedRf(void)
   }
 }
 
-void sleep(int argc, char **argv)
+void sleep(sl_cli_command_arg_t *args)
 {
   char* em4State = "";
   void (*em4Function)(void) = &EMU_EnterEM4;
 
-  uint8_t emMode = ciGetUnsigned(argv[1]);
+  uint8_t emMode = sl_cli_get_argument_uint8(args, 0);
   uint8_t rfSenseSyncWordNumBytes = 0U;
   uint32_t rfSenseSyncWord = 0U;
   RailRfSenseMode_t mode = RAIL_RFSENSE_MODE_OFF;
@@ -468,7 +523,7 @@ void sleep(int argc, char **argv)
   if (emMode <= 4) {
     if (emMode == 4) {
 #ifdef _SILICON_LABS_32B_SERIES_1
-      switch (argv[1][1]) {
+      switch (sl_cli_get_argument_string(args, 0)[1]) {
         case 's': case 'S': // Configure EM4 Shutoff state
           em4Function = &EMU_EnterEM4S;
           em4State = "s";
@@ -488,30 +543,30 @@ void sleep(int argc, char **argv)
 #endif
     }
     // Check for Selective(OOK) Mode
-    if (argc > 4) {
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 2
-      rfSenseSyncWordNumBytes = (ciGetUnsigned(argv[2]) > 4)
-                                ? 0 : ciGetUnsigned(argv[2]);
-      rfSenseSyncWord = ciGetUnsigned(argv[3]);
-      rfBand = ((RAIL_RfSenseBand_t) ciGetUnsigned(argv[4])
+    if (sl_cli_get_argument_count(args) >= 4) {
+#if RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK
+      rfSenseSyncWordNumBytes = (sl_cli_get_argument_uint8(args, 1) > 4)
+                                ? 0 : sl_cli_get_argument_uint32(args, 1);
+      rfSenseSyncWord = sl_cli_get_argument_uint32(args, 2);
+      rfBand = ((RAIL_RfSenseBand_t) sl_cli_get_argument_uint32(args, 3)
                 & RAIL_RFENSE_ANY_LOW_SENSITIVITY); // mask off illegal values
       mode = ((rfBand != RAIL_RFSENSE_OFF) && (rfSenseSyncWordNumBytes > 0))
              ? RAIL_RFSENSE_MODE_SELECTIVE_OOK : RAIL_RFSENSE_MODE_OFF;
 #else
-      responsePrintError(argv[0], 0x15, "RFSENSE Selective OOK Mode Unsupported");
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "RFSENSE Selective OOK Mode Unsupported");
       return;
 #endif
     } else {
       // sleep is MODAL -- we'll block here in foreground.
       // If there are new RfSense parameters, grab 'em:
-      if (argc > 2) {
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
-        responsePrintError(argv[0], 0x15, "RFSENSE Energy Detect Mode Unsupported");
+      if (sl_cli_get_argument_count(args) >= 2) {
+#if !RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "RFSENSE Energy Detect Mode Unsupported");
         return;
 #else
-        rfUs = ciGetUnsigned(argv[2]);
-        if (argc > 3) {
-          rfBand = ((RAIL_RfSenseBand_t) ciGetUnsigned(argv[3])
+        rfUs = sl_cli_get_argument_uint32(args, 1);
+        if (sl_cli_get_argument_count(args) >= 3) {
+          rfBand = ((RAIL_RfSenseBand_t) sl_cli_get_argument_uint32(args, 2)
                     & RAIL_RFENSE_ANY_LOW_SENSITIVITY); // mask off illegal values
         }
         mode = ((rfBand != RAIL_RFSENSE_OFF) && (rfUs > 0))
@@ -521,7 +576,7 @@ void sleep(int argc, char **argv)
     }
     // Only call if we plan to enable RFSENSE later.
     if (mode != RAIL_RFSENSE_MODE_OFF) {
-      if (!enableAppModeSync(RF_SENSE, true, argv[0])) {
+      if (!enableAppModeSync(RF_SENSE, true, sl_cli_get_command_string(args, 0))) {
         return;
       }
     } else {
@@ -537,11 +592,21 @@ void sleep(int argc, char **argv)
 
     // We cannot configure UART RxD for EM4 wakeup on our EFR32's so the
     // *only* wakeup possible out of EM4 is RFsense (or reset).
-    responsePrint(argv[0], "EM:%u%s,SerialWakeup:%s,RfSense:%s,RfSensitivity:%s",
+    responsePrint(sl_cli_get_command_string(args, 0), "EM:%u%s,SerialWakeup:%s,RfSense:%s,RfSensitivity:%s,ButtonWakeup:%s",
                   emMode, em4State,
+#if (defined(_SILICON_LABS_32B_SERIES_2) && ((SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortC) || (SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortD)))
+                  (emMode < 2) ? "On" : "Off",
+#else
                   (emMode < 4) ? "On" : "Off",
+#endif
                   rfBands[rfBand & RAIL_RFSENSE_ANY],
-                  rfSensitivity[(rfBand & 0x20U) >> 5U]);
+                  rfSensitivity[(rfBand & 0x20U) >> 5U],
+#if (defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT))
+                  (emMode >= 2) ? "On" : "Off"
+#else
+                  "Off"
+#endif
+                  );
     serialWaitForTxIdle();
 
     // Disable interrupts heading into RAIL_StartRfSense() so we don't miss
@@ -552,9 +617,12 @@ void sleep(int argc, char **argv)
 #ifdef _SILICON_LABS_32B_SERIES_2
     // Sleep the USART Tx pin on series 2 devices to save energy
     if (emMode >= 2) {
-      GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModeDisabled, 1);
+      GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,
+                      SL_IOSTREAM_USART_VCOM_TX_PIN,
+                      gpioModeDisabled, 1);
     }
 #endif
+
     switch (mode) {
       case RAIL_RFSENSE_MODE_SELECTIVE_OOK:
       {
@@ -583,7 +651,9 @@ void sleep(int argc, char **argv)
 
     // Configure the USART Rx pin as a GPIO interrupt for sleep-wake purposes,
     // falling-edge only
-    GPIO_IntConfig(RETARGET_RXPORT, RETARGET_RXPIN, false, true, true);
+    GPIO_IntConfig(SL_IOSTREAM_USART_VCOM_RX_PORT,
+                   SL_IOSTREAM_USART_VCOM_RX_PIN,
+                   false, true, true);
 
     serEvent = false;
     rxPacketEvent = false;
@@ -599,6 +669,9 @@ void sleep(int argc, char **argv)
     // Maintain the most recent two wakeup events in 'circular' list
     wakeReasons_t wakeReasons[2] = { { 0, 0, }, { 0, 0, }, };
    #endif//DEBUG_SLEEP_LOOP
+
+    // Used for wakeup from sleep
+    buttonWakeEvent = false;
 
     do { // Loop modally here until either RfSense or Serial event occurs
          //@TODO Should we WDOG_Feed()??
@@ -623,7 +696,12 @@ void sleep(int argc, char **argv)
       CORE_EXIT_CRITICAL(); // Briefly enable IRQs to let them run
       CORE_ENTER_CRITICAL(); // but shut back off in case we loop
       rfSensed = RAIL_IsRfSensed(railHandle);
-    } while (!rfSensed && !serEvent && !rxPacketEvent);
+    } while (!rfSensed && !serEvent && !rxPacketEvent && !buttonWakeEvent);
+
+    // Disable serial interrupt so it's not bothersome
+    GPIO_IntDisable(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
+    GPIO_IntClear(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
+
     CORE_EXIT_CRITICAL(); // Back on permanently
 
     // Here we've awoken for at least one of the desired events.
@@ -631,21 +709,26 @@ void sleep(int argc, char **argv)
     if (currentAppMode() == RF_SENSE) {
       enableAppMode(RF_SENSE, false, NULL);
     }
-    // Disable serial interrupt so it's not bothersome
-    GPIO_IntConfig(RETARGET_RXPORT, RETARGET_RXPIN, false, true, false);
 
 #ifdef _SILICON_LABS_32B_SERIES_2
     // Wake the USART Tx pin back up
     if (emMode >= 2) {
-      GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModePushPull, 1);
+      GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,
+                      SL_IOSTREAM_USART_VCOM_TX_PIN,
+                      gpioModePushPull, 1);
     }
 #endif
+
+    // eliminate compiler warning (using multiple volatile variables below)
+    bool serEventParam = serEvent;
+    bool rxPacketEventParam = rxPacketEvent;
 
     responsePrint("sleepWoke",
                   "EM:%u%s,"
                   "SerialWakeup:%s,"
                   "RfSensed:%s,"
                   "PacketRx:%s,"
+                  "ButtonWakeup:%s,"
                   "RfUs:%u"
                  #if     DEBUG_SLEEP_LOOP
                   ",\nSleeps:%llu,"
@@ -656,9 +739,10 @@ void sleep(int argc, char **argv)
                  #endif//DEBUG_SLEEP_LOOP
                   , emMode,
                   em4State,
-                  serEvent ? "Yes" : "No",
+                  serEventParam ? "Yes" : "No",
                   rfSensed ? "Yes" : "No",
-                  rxPacketEvent ? "Yes" : "No",
+                  rxPacketEventParam ? "Yes" : "No",
+                  buttonWakeEvent ? "Yes" : "No",
                   rfUs
                  #if     DEBUG_SLEEP_LOOP
                   , sleeps,
@@ -673,24 +757,24 @@ void sleep(int argc, char **argv)
                  #endif//DEBUG_SLEEP_LOOP
                   );
 
+    // Used for wakeup from sleep
+    buttonWakeEvent = false;
+
     if (serEvent) { // Consume the character entered
       if (emMode >= 2) {
         // If UART was shut down, delay and gobble likely junk
         usDelay(250000); // Pause for 250 ms
-        (void) getchar();
-        (void) getchar();
-        (void) getchar();
-        (void) getchar();
-      } else {
-        while (getchar() < 0) {
-        }                         // Gobble the character entered
+        consumeChar();
+        consumeChar();
+        consumeChar();
+        consumeChar();
       }
     }
 
     // Restart Rx if we're in Rx mode
     if (receiveModeEnabled) {
       if (RAIL_StartRx(railHandle, channel, NULL) != RAIL_STATUS_NO_ERROR) {
-        responsePrintError(argv[0], 1, "Could not start receive after sleep");
+        responsePrintError(sl_cli_get_command_string(args, 0), 1, "Could not start receive after sleep");
       }
     }
     // Restart peripherals if they were active before sleeping
@@ -698,39 +782,39 @@ void sleep(int argc, char **argv)
       PeripheralEnable();
     }
   } else {
-    responsePrintError(argv[0], 1, "Invalid EM mode %u (valid 0-4)", emMode);
+    responsePrintError(sl_cli_get_command_string(args, 0), 1, "Invalid EM mode %u (valid 0-4)", emMode);
   }
 }
 
-void rfSense(int argc, char **argv)
+void rfSense(sl_cli_command_arg_t *args)
 {
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
-  responsePrintError(argv[0], 0x15, "RFSENSE Unsupported");
+#if !RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "RFSENSE Unsupported");
   return;
 #else
   RailRfSenseMode_t mode = RAIL_RFSENSE_MODE_OFF;
   uint8_t rfSenseSyncWordNumBytes = 0U;
   uint32_t rfSenseSyncWord = 0U;
   // Check for Selective(OOK) Mode
-  if (argc > 3) {
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 2
-    rfSenseSyncWordNumBytes = (ciGetUnsigned(argv[1]) > 4)
-                              ? 0 : ciGetUnsigned(argv[1]);
-    rfSenseSyncWord = ciGetUnsigned(argv[2]);
-    rfBand = ((RAIL_RfSenseBand_t) ciGetUnsigned(argv[3])
+  if (sl_cli_get_argument_count(args) >= 3) {
+#if RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK
+    rfSenseSyncWordNumBytes = (sl_cli_get_argument_uint8(args, 0) > 4)
+                              ? 0 : sl_cli_get_argument_uint32(args, 0);
+    rfSenseSyncWord = sl_cli_get_argument_uint32(args, 1);
+    rfBand = ((RAIL_RfSenseBand_t) sl_cli_get_argument_uint32(args, 2)
               & RAIL_RFENSE_ANY_LOW_SENSITIVITY); // mask off illegal values
     mode = ((rfBand != RAIL_RFSENSE_OFF) && (rfSenseSyncWordNumBytes > 0))
            ? RAIL_RFSENSE_MODE_SELECTIVE_OOK : RAIL_RFSENSE_MODE_OFF;
 #else
-    responsePrintError(argv[0], 0x15, "RFSENSE Selective OOK Mode Unsupported");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "RFSENSE Selective OOK Mode Unsupported");
     return;
 #endif
   } else {
     // If there are RfSense parameters, grab 'em; otherwise use prior settings
-    if (argc > 1) {
-      rfUs = ciGetUnsigned(argv[1]);
-      if (argc > 2) {
-        rfBand = ((RAIL_RfSenseBand_t) ciGetUnsigned(argv[2])
+    if (sl_cli_get_argument_count(args) >= 1) {
+      rfUs = sl_cli_get_argument_uint32(args, 0);
+      if (sl_cli_get_argument_count(args) >= 2) {
+        rfBand = ((RAIL_RfSenseBand_t) sl_cli_get_argument_uint32(args, 1)
                   & RAIL_RFENSE_ANY_LOW_SENSITIVITY); // mask off illegal values
       }
       mode = ((rfBand != RAIL_RFSENSE_OFF) && (rfUs > 0))
@@ -738,7 +822,7 @@ void rfSense(int argc, char **argv)
     }
   }
 
-  if (!enableAppModeSync(RF_SENSE, mode != RAIL_RFSENSE_MODE_OFF, argv[0])) {
+  if (!enableAppModeSync(RF_SENSE, mode != RAIL_RFSENSE_MODE_OFF, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
@@ -768,7 +852,7 @@ void rfSense(int argc, char **argv)
       break;
   }
 
-  responsePrint(argv[0], "RfBand:%s,RfUs:%u,RfSensitivity:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "RfBand:%s,RfUs:%u,RfSensitivity:%s",
                 rfBands[rfBand & RAIL_RFSENSE_ANY],
                 rfUs,
                 rfSensitivity[(rfBand & 0x20U) >> 5U]);
@@ -825,34 +909,56 @@ static const char *timePosStrings[RAIL_PACKET_TIME_COUNT] = {
   "PACKET_END_UT",
 };
 
-void setTxTimePos(int argc, char **argv)
+static const TxTimestampFunc txTimeFuncs[RAIL_PACKET_TIME_COUNT] = {
+  &identityTimestampTx,
+  &identityTimestampTx,
+  &RAIL_GetTxTimePreambleStartAlt,
+  &RAIL_GetTxTimePreambleStartAlt,
+  &RAIL_GetTxTimeSyncWordEndAlt,
+  &RAIL_GetTxTimeSyncWordEndAlt,
+  &RAIL_GetTxTimeFrameEndAlt,
+  &RAIL_GetTxTimeFrameEndAlt,
+};
+
+static const RxTimestampFunc rxTimeFuncs[RAIL_PACKET_TIME_COUNT] = {
+  &identityTimestampRx,
+  &identityTimestampRx,
+  &RAIL_GetRxTimePreambleStartAlt,
+  &RAIL_GetRxTimePreambleStartAlt,
+  &RAIL_GetRxTimeSyncWordEndAlt,
+  &RAIL_GetRxTimeSyncWordEndAlt,
+  &RAIL_GetRxTimeFrameEndAlt,
+  &RAIL_GetRxTimeFrameEndAlt,
+};
+
+void setTxTimePos(sl_cli_command_arg_t *args)
 {
-  uint32_t pos = ciGetUnsigned(argv[1]);
+  uint32_t pos = sl_cli_get_argument_uint32(args, 0);
   if (pos < RAIL_PACKET_TIME_COUNT) {
-    txTimePosition = pos;
-    responsePrint(argv[0], "txTimePos:%s", timePosStrings[pos]);
+    txTimePosition = txTimeFuncs[pos];
+    responsePrint(sl_cli_get_command_string(args, 0), "txTimePos:%s", timePosStrings[pos]);
   } else {
-    responsePrintError(argv[0], 1, "Invalid TimePosition %u (valid 0-%u)",
+    responsePrintError(sl_cli_get_command_string(args, 0), 1, "Invalid TimePosition %u (valid 0-%u)",
                        pos, RAIL_PACKET_TIME_COUNT - 1);
   }
 }
 
-void setRxTimePos(int argc, char **argv)
+void setRxTimePos(sl_cli_command_arg_t *args)
 {
-  uint32_t pos = ciGetUnsigned(argv[1]);
+  uint32_t pos = sl_cli_get_argument_uint32(args, 0);
   if (pos < RAIL_PACKET_TIME_COUNT) {
-    rxTimePosition = pos;
-    responsePrint(argv[0], "rxTimePos:%s", timePosStrings[pos]);
+    rxTimePosition = rxTimeFuncs[pos];
+    responsePrint(sl_cli_get_command_string(args, 0), "rxTimePos:%s", timePosStrings[pos]);
   } else {
-    responsePrintError(argv[0], 1, "Invalid TimePosition %u (valid 0-%u)",
+    responsePrintError(sl_cli_get_command_string(args, 0), 1, "Invalid TimePosition %u (valid 0-%u)",
                        pos, RAIL_PACKET_TIME_COUNT - 1);
   }
 }
 
-void holdRx(int argc, char **argv)
+void holdRx(sl_cli_command_arg_t *args)
 {
-  rxHeld = (bool)ciGetUnsigned(argv[1]);
+  rxHeld = !!sl_cli_get_argument_uint8(args, 0);
   rxProcessHeld = !rxHeld;
-  responsePrint(argv[0], "HoldRx:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "HoldRx:%s",
                 rxHeld ? "Enabled" : "Disabled");
 }

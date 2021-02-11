@@ -1,0 +1,18 @@
+id: "bluetooth_feature_aoa_transmitter"
+label: "AoA Transmitter"
+package: "Bluetooth"
+description: >
+  Bluetooth AoA CTE transmission feature
+category: "Bluetooth|Stack|Direction Finding"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: bluetooth_stack
+  - name: device_supports_bluetooth_cte
+provides:
+  - name: "bluetooth_feature_aoa_transmitter"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_cte_transmitter_init"
+    priority: 10

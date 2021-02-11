@@ -4,7 +4,7 @@
  *   of features available across different chips.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,7 +28,6 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
 #ifndef __RAIL_FEATURES_H__
 #define __RAIL_FEATURES_H__
 
@@ -129,9 +128,54 @@ bool RAIL_Supports2p4GHzBand(RAIL_Handle_t railHandle);
 bool RAIL_SupportsSubGHzBand(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
+/// bit masked address filtering.
+/// See also runtime refinement \ref RAIL_SupportsAddrFilterAddressBitMask().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+#define RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK 1
+#else
+#define RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK 0
+#endif
+
+/**
+ * Indicate whether this chip supports bit masked address filtering
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if bit masked address filtering is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time
+ * \ref RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK.
+ */
+bool RAIL_SupportsAddrFilterAddressBitMask(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
+/// address filter mask information for incoming packets in
+/// \ref RAIL_RxPacketInfo_t::filterMask and
+/// \ref RAIL_IEEE802154_Address_t::filterMask.
+/// See also runtime refinement \ref RAIL_SupportsAddrFilterMask().
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
+#define RAIL_SUPPORTS_ADDR_FILTER_MASK 1
+#else
+#define RAIL_SUPPORTS_ADDR_FILTER_MASK 0
+#endif
+
+/**
+ * Indicate whether this chip supports address filter mask information
+ * for incoming packets in
+ * \ref RAIL_RxPacketInfo_t::filterMask and
+ * \ref RAIL_IEEE802154_Address_t::filterMask.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if address filter information is supported; false otherwise
+ *   (in which case \ref RAIL_RxPacketInfo_t::filterMask value is undefined).
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_ADDR_FILTER_MASK.
+ */
+bool RAIL_SupportsAddrFilterMask(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
 /// alternate power settings for the Power Amplifier.
 /// See also runtime refinement \ref RAIL_SupportsAlternateTxPower().
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
 #define RAIL_SUPPORTS_ALTERNATE_TX_POWER 1
 #else
 #define RAIL_SUPPORTS_ALTERNATE_TX_POWER 0
@@ -140,10 +184,10 @@ bool RAIL_SupportsSubGHzBand(RAIL_Handle_t railHandle);
 #define RAIL_FEAT_ALTERNATE_POWER_TX_SUPPORTED RAIL_SUPPORTS_ALTERNATE_TX_POWER
 
 /**
- * Indicate whether this chip supports alternate Tx power settings.
+ * Indicate whether this chip supports alternate TX power settings.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return true if alternate Tx power settings are supported; false otherwise.
+ * @return true if alternate TX power settings are supported; false otherwise.
  *
  * Runtime refinement of compile-time \ref
  * RAIL_SUPPORTS_ALTERNATE_TX_POWER.
@@ -216,7 +260,7 @@ bool RAIL_SupportsDualSyncWords(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports thermistor measurements.
 /// See also runtime refinement \ref RAIL_SupportsExternalThermistor().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3))
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 1
 #else
 #define RAIL_SUPPORTS_EXTERNAL_THERMISTOR 0
@@ -271,6 +315,26 @@ bool RAIL_SupportsPrecisionLFRCO(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_RADIO_ENTROPY.
  */
 bool RAIL_SupportsRadioEntropy(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
+/// RFSENSE Energy Detection Mode.
+/// See also runtime refinement \ref RAIL_SupportsRfSenseEnergyDetection().
+#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2))
+#define RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION 1
+#else
+#define RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION 0
+#endif
+
+/**
+ * Indicate whether RAIL supports RFSENSE Energy Detection Mode on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if RFSENSE Energy Detection Mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time
+ * \ref RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION.
+ */
+bool RAIL_SupportsRfSenseEnergyDetection(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
 /// RFSENSE Selective(OOK) Mode.
@@ -460,7 +524,7 @@ bool RAIL_BLE_SupportsAntennaSwitching(RAIL_Handle_t railHandle);
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2))
 #define RAIL_BLE_SUPPORTS_CODED_PHY RAIL_SUPPORTS_PROTOCOL_BLE
 #else
-#define RAIL_BLE_SUPPORTS_CODED_PHY 0
+#define  RAIL_BLE_SUPPORTS_CODED_PHY 0
 #endif
 /// Backwards-compatible synonym of \ref RAIL_BLE_SUPPORTS_CODED_PHY.
 #define RAIL_FEAT_BLE_CODED RAIL_BLE_SUPPORTS_CODED_PHY
@@ -474,6 +538,26 @@ bool RAIL_BLE_SupportsAntennaSwitching(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_CODED_PHY.
  */
 bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports the BLE Simulscan PHY
+/// used for Long-Range.
+/// See also runtime refinement \ref RAIL_BLE_SupportsSimulscanPhy().
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2))
+#define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY RAIL_SUPPORTS_PROTOCOL_BLE
+#else
+#define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY 0
+#endif
+
+/**
+ * Indicate whether this chip supports BLE Simulscan PHY used for Long-Range.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if BLE Simulscan PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY.
+ */
+bool RAIL_BLE_SupportsSimulscanPhy(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports BLE
 /// CTE (Constant Tone Extension) needed for Angle-of-Arrival/Departure
@@ -495,6 +579,25 @@ bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_CTE.
  */
 bool RAIL_BLE_SupportsCte(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports the
+/// Quuppa PHY.
+/// See also runtime refinement \ref RAIL_BLE_SupportsQuuppa().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#define RAIL_BLE_SUPPORTS_QUUPPA RAIL_SUPPORTS_PROTOCOL_BLE
+#else
+#define RAIL_BLE_SUPPORTS_QUUPPA 0
+#endif
+
+/**
+ * Indicate whether this chip supports the Quuppa PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Quuppa is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_QUUPPA.
+ */
+bool RAIL_BLE_SupportsQuuppa(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports BLE
 /// IQ Sampling needed for Angle-of-Arrival/Departure receives.
@@ -573,7 +676,7 @@ bool RAIL_SupportsProtocolIEEE802154(RAIL_Handle_t railHandle);
 /// 802.15.4 Wi-Fi Coexistence PHY.
 /// See also runtime refinement \ref RAIL_IEEE802154_SupportsCoexPhy().
 #if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
-#define RAIL_IEEE802154_SUPPORTS_COEX_PHY RAIL_SUPPORTS_PROTOCOL_IEEE802154
+#define RAIL_IEEE802154_SUPPORTS_COEX_PHY (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_2P4GHZ_BAND)
 #else
 #define RAIL_IEEE802154_SUPPORTS_COEX_PHY 0
 #endif
@@ -589,6 +692,21 @@ bool RAIL_SupportsProtocolIEEE802154(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_COEX_PHY.
  */
 bool RAIL_IEEE802154_SupportsCoexPhy(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports a front end module.
+/// See also runtime refinement \ref RAIL_IEEE802154_SupportsFemPhy().
+#define RAIL_IEEE802154_SUPPORTS_FEM_PHY (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_2P4GHZ_BAND)
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4
+ * front end module optimized PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if a front end module is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_FEM_PHY.
+ */
+bool RAIL_IEEE802154_SupportsFemPhy(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
 /// IEEE 802.15.4E-2012 feature subset needed for Zigbee R22 GB868.
@@ -695,6 +813,16 @@ bool RAIL_IEEE802154_SupportsEMultipurposeFrames(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_SupportsGSubsetGB868(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
+/// IEEE 802.15.4G-2012 feature subset needed for Zigbee 915MHz.
+/// See also runtime refinement
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#define RAIL_FEAT_IEEE802154_G_R23_NA_SUPPORTED \
+  (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_SUBGHZ_BAND)
+#else
+#define RAIL_FEAT_IEEE802154_SUPPORTS_G_R23_NA 0
+#endif
+
+/// Boolean to indicate whether the selected chip supports
 /// IEEE 802.15.4G-2012 reception and transmission of frames
 /// with 4-byte CRC.
 /// See also runtime refinement \ref RAIL_IEEE802154_SupportsG4ByteCrc().
@@ -777,7 +905,7 @@ bool RAIL_IEEE802154_SupportsGUnwhitenedTx(RAIL_Handle_t railHandle);
 /// canceling the frame-pending lookup event
 /// \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND
 /// when the radio transitions to a state that renders the
-/// the reporting of this event moot (i.e. too late for
+/// the reporting of this event moot (i.e., too late for
 /// the stack to influence the outgoing ACK).
 /// See also runtime refinement \ref
 /// RAIL_IEEE802154_SupportsCancelFramePendingLookup().
@@ -795,7 +923,7 @@ bool RAIL_IEEE802154_SupportsGUnwhitenedTx(RAIL_Handle_t railHandle);
  * Indicate whether this chip supports canceling the frame-pending lookup
  * event \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND when the radio
  * transitions to a state that renders the the reporting of this event moot
- * (i.e. too late for the stack to influence the outgoing ACK).
+ * (i.e., too late for the stack to influence the outgoing ACK).
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if canceling the lookup event is supported; false otherwise.
@@ -840,7 +968,7 @@ bool RAIL_IEEE802154_SupportsEarlyFramePendingLookup(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports Z-Wave.
 /// See also runtime refinement \ref RAIL_SupportsProtocolZWave().
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG >= 3)
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG >= 3) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
 #define RAIL_SUPPORTS_PROTOCOL_ZWAVE RAIL_SUPPORTS_SUBGHZ_BAND
 #else
 #define RAIL_SUPPORTS_PROTOCOL_ZWAVE 0
@@ -858,6 +986,60 @@ bool RAIL_IEEE802154_SupportsEarlyFramePendingLookup(RAIL_Handle_t railHandle);
  */
 bool RAIL_SupportsProtocolZWave(RAIL_Handle_t railHandle);
 
+/// Boolean to indicate whether the selected chip supports energy detect PHY.
+/// See also runtime refinement \ref RAIL_ZWAVE_SupportsEnergyDetectPhy().
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG >= 3)
+#define RAIL_ZWAVE_SUPPORTS_ED_PHY RAIL_SUPPORTS_PROTOCOL_ZWAVE
+#else
+#define RAIL_ZWAVE_SUPPORTS_ED_PHY 0
+#endif
+
+/**
+ * Indicate whether this chip supports the Z-Wave energy detect PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Z-Wave energy detct PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_ED_PHY.
+ */
+bool RAIL_ZWAVE_SupportsEnergyDetectPhy(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports concurrent PHY.
+/// See also runtime refinement \ref RAIL_ZWAVE_SupportsConcPhy().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#define RAIL_ZWAVE_SUPPORTS_CONC_PHY RAIL_SUPPORTS_PROTOCOL_ZWAVE
+#else
+#define RAIL_ZWAVE_SUPPORTS_CONC_PHY 0
+#endif
+
+/**
+ * Indicate whether this chip supports the Z-Wave concurrent PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Z-Wave concurrent PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_CONC_PHY.
+ */
+bool RAIL_ZWAVE_SupportsConcPhy(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports SQ-based PHY.
+/// See also runtime refinement \ref RAIL_SupportsSQPhy().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#define RAIL_SUPPORTS_SQ_PHY 1
+#else
+#define RAIL_SUPPORTS_SQ_PHY 0
+#endif
+
+/**
+ * Indicate whether this chip supports SQ-based PHY.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the SQ-based PHY is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_SQ_PHY.
+ */
+bool RAIL_SupportsSQPhy(RAIL_Handle_t railHandle);
+
 /// Boolean to indicate whether the code supports Z-Wave
 /// region information in PTI and
 /// newer RAIL_ZWAVE_RegionConfig_t structure
@@ -871,7 +1053,7 @@ bool RAIL_SupportsProtocolZWave(RAIL_Handle_t railHandle);
 #define RAIL_FEAT_ZWAVE_REGION_PTI RAIL_ZWAVE_SUPPORTS_REGION_PTI
 
 /**
- * Indicate whether this chip supports ZWave Region in PTI.
+ * Indicate whether this chip supports Z-Wave Region in PTI.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if ZWAVE Region in PTI is supported; false otherwise.
@@ -880,6 +1062,44 @@ bool RAIL_SupportsProtocolZWave(RAIL_Handle_t railHandle);
  */
 bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
 
+/// Boolean to indicate whether the selected chip supports
+/// direct mode.
+/// See also runtime refinement \ref RAIL_SupportsDirectMode().
+#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+#define RAIL_SUPPORTS_DIRECT_MODE 1
+#else
+#define RAIL_SUPPORTS_DIRECT_MODE 0
+#endif
+
+/**
+ * Indicate whether this chip supports direct mode.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if direct mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_DIRECT_MODE.
+ */
+bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
+/// MFM protocol.
+/// See also runtime refinement \ref RAIL_SupportsProtocolMfm().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#define RAIL_SUPPORTS_PROTOCOL_MFM 1
+#else
+#define RAIL_SUPPORTS_PROTOCOL_MFM 0
+#endif
+
+/**
+ * Indicate whether this chip supports MFM protocol.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if MFM protocol is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_MFM.
+ */
+bool RAIL_SupportsProtocolMfm(RAIL_Handle_t railHandle);
 /** @} */ // end of group Features
 
 /** @} */ // end of group RAIL_API

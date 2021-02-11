@@ -15,11 +15,12 @@
  *
  ******************************************************************************/
 
-#ifndef __GLIB_H
-#define __GLIB_H
+#ifndef GLIB_H
+#define GLIB_H
 
 /***************************************************************************//**
- * @addtogroup glib GLIB
+ * @addtogroup glib GLIB - Graphics Library
+ * @brief Silicon Labs Graphics Library
  * @{
  *
  * @brief Graphics Library
@@ -29,7 +30,7 @@
  *
  *  @li @ref glib_intro
  *  @li @ref glib_init
- *  @li @ref glib_color
+ *  @li @ref glib_color_sect
  *  @li @ref glib_draw_shapes
  *  @li @ref glib_draw_pixel
  *  @li @ref glib_font
@@ -68,7 +69,7 @@
  *   background color, and it also contains information on what font to use
  *   when rendering text on the display.
  *
- * @n @section glib_color Color
+ * @n @section glib_color_sect Color
  *
  *   GLIB represent color in a pixel as three 8 bit color values representing
  *   red, green and blue, giving the user support for a 24 bit color depth.
@@ -83,7 +84,7 @@
  *   GLIB also contains some common predefined colors for use in places where
  *   a 32-bit integer is used to represent the color. These predefined colors
  *   include @ref White, @ref Black, @ref Brown, @ref Orange, and many more.
- *   See the @ref glib_color.h file for the full list of colors.
+ *   See the @ref glib_color for the full list of colors.
  *
  *   Some displays are monochrome, meaning that they only support 2 colors.
  *   When using GLIB to draw shapes on these displays the applications should
@@ -219,6 +220,14 @@ typedef enum __GLIB_Font_Class{
   NumbersOnlyFont,  /**< Numbers only font. */
 } GLIB_Font_Class;
 
+/** @brief Alignment types
+ */
+typedef enum __GLIB_Align{
+  GLIB_ALIGN_LEFT,
+  GLIB_ALIGN_CENTER,
+  GLIB_ALIGN_RIGHT,
+} GLIB_Align_t;
+
 /** @brief Font definition structure
  */
 typedef struct __GLIB_Font_t{
@@ -324,6 +333,9 @@ EMSTATUS GLIB_setFont(GLIB_Context_t *pContext, GLIB_Font_t *pFont);
 
 EMSTATUS GLIB_drawString(GLIB_Context_t *pContext, const char* pString, uint32_t sLength,
                          int32_t x0, int32_t y0, bool opaque);
+
+EMSTATUS GLIB_drawStringOnLine(GLIB_Context_t *pContext, const char *pString, uint8_t line,
+                               GLIB_Align_t align, int32_t xOffset, int32_t yOffset, bool opaque);
 
 EMSTATUS GLIB_drawChar(GLIB_Context_t *pContext, char myChar, int32_t x,
                        int32_t y, bool opaque);

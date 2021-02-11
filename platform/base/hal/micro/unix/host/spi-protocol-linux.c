@@ -153,7 +153,7 @@ struct spi_ioc_transfer {
 // typically takes 1-2 mS.  Note:  if there is a failure, the code will log
 // the failure reason and assert.
 #define GPIO_SETUP_SLEEP_US            10
-#define GPIO_SETUP_MAX_LOOP_COUNT    1000
+#define GPIO_SETUP_MAX_LOOP_COUNT    10000
 
 static int ncpSpiFd = -1;
 static int ncpChipSelectFd = -1;

@@ -140,106 +140,106 @@ typedef struct {
 #define AES_PUSHLEN_DISCARD_DEFAULT                         (_AES_PUSHLEN_DISCARD_DEFAULT << 30)   /**< Shifted mode DEFAULT for AES_PUSHLEN        */
 
 /* Bit fields for AES IEN */
-#define _AES_IEN_RESETVALUE                                 0x00000000UL                                 /**< Default value for AES_IEN                   */
-#define _AES_IEN_MASK                                       0x0000003FUL                                 /**< Mask for AES_IEN                            */
-#define AES_IEN_FETCHERENDOFBLOCKIEN                        (0x1UL << 0)                                 /**< End of block interrupt enable               */
-#define _AES_IEN_FETCHERENDOFBLOCKIEN_SHIFT                 0                                            /**< Shift value for AES_FETCHERENDOFBLOCKIEN    */
-#define _AES_IEN_FETCHERENDOFBLOCKIEN_MASK                  0x1UL                                        /**< Bit mask for AES_FETCHERENDOFBLOCKIEN       */
-#define _AES_IEN_FETCHERENDOFBLOCKIEN_DEFAULT               0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_FETCHERENDOFBLOCKIEN_DEFAULT                (_AES_IEN_FETCHERENDOFBLOCKIEN_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IEN            */
-#define AES_IEN_FETCHERSTOPPEDIEN                           (0x1UL << 1)                                 /**< Stopped interrupt enable                    */
-#define _AES_IEN_FETCHERSTOPPEDIEN_SHIFT                    1                                            /**< Shift value for AES_FETCHERSTOPPEDIEN       */
-#define _AES_IEN_FETCHERSTOPPEDIEN_MASK                     0x2UL                                        /**< Bit mask for AES_FETCHERSTOPPEDIEN          */
-#define _AES_IEN_FETCHERSTOPPEDIEN_DEFAULT                  0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_FETCHERSTOPPEDIEN_DEFAULT                   (_AES_IEN_FETCHERSTOPPEDIEN_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IEN            */
-#define AES_IEN_FETCHERERRORIEN                             (0x1UL << 2)                                 /**< Error interrupt enable                      */
-#define _AES_IEN_FETCHERERRORIEN_SHIFT                      2                                            /**< Shift value for AES_FETCHERERRORIEN         */
-#define _AES_IEN_FETCHERERRORIEN_MASK                       0x4UL                                        /**< Bit mask for AES_FETCHERERRORIEN            */
-#define _AES_IEN_FETCHERERRORIEN_DEFAULT                    0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_FETCHERERRORIEN_DEFAULT                     (_AES_IEN_FETCHERERRORIEN_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IEN            */
-#define AES_IEN_PUSHERENDOFBLOCKIEN                         (0x1UL << 3)                                 /**< End of block interrupt enable               */
-#define _AES_IEN_PUSHERENDOFBLOCKIEN_SHIFT                  3                                            /**< Shift value for AES_PUSHERENDOFBLOCKIEN     */
-#define _AES_IEN_PUSHERENDOFBLOCKIEN_MASK                   0x8UL                                        /**< Bit mask for AES_PUSHERENDOFBLOCKIEN        */
-#define _AES_IEN_PUSHERENDOFBLOCKIEN_DEFAULT                0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_PUSHERENDOFBLOCKIEN_DEFAULT                 (_AES_IEN_PUSHERENDOFBLOCKIEN_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IEN            */
-#define AES_IEN_PUSHERSTOPPEDIEN                            (0x1UL << 4)                                 /**< Stopped interrupt enable                    */
-#define _AES_IEN_PUSHERSTOPPEDIEN_SHIFT                     4                                            /**< Shift value for AES_PUSHERSTOPPEDIEN        */
-#define _AES_IEN_PUSHERSTOPPEDIEN_MASK                      0x10UL                                       /**< Bit mask for AES_PUSHERSTOPPEDIEN           */
-#define _AES_IEN_PUSHERSTOPPEDIEN_DEFAULT                   0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_PUSHERSTOPPEDIEN_DEFAULT                    (_AES_IEN_PUSHERSTOPPEDIEN_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IEN            */
-#define AES_IEN_PUSHERERRORIEN                              (0x1UL << 5)                                 /**< Error interrupt enable                      */
-#define _AES_IEN_PUSHERERRORIEN_SHIFT                       5                                            /**< Shift value for AES_PUSHERERRORIEN          */
-#define _AES_IEN_PUSHERERRORIEN_MASK                        0x20UL                                       /**< Bit mask for AES_PUSHERERRORIEN             */
-#define _AES_IEN_PUSHERERRORIEN_DEFAULT                     0x00000000UL                                 /**< Mode DEFAULT for AES_IEN                    */
-#define AES_IEN_PUSHERERRORIEN_DEFAULT                      (_AES_IEN_PUSHERERRORIEN_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IEN            */
+#define _AES_IEN_RESETVALUE                                 0x00000000UL                              /**< Default value for AES_IEN                   */
+#define _AES_IEN_MASK                                       0x0000003FUL                              /**< Mask for AES_IEN                            */
+#define AES_IEN_FETCHERENDOFBLOCK                           (0x1UL << 0)                              /**< End of block interrupt enable               */
+#define _AES_IEN_FETCHERENDOFBLOCK_SHIFT                    0                                         /**< Shift value for AES_FETCHERENDOFBLOCK       */
+#define _AES_IEN_FETCHERENDOFBLOCK_MASK                     0x1UL                                     /**< Bit mask for AES_FETCHERENDOFBLOCK          */
+#define _AES_IEN_FETCHERENDOFBLOCK_DEFAULT                  0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_FETCHERENDOFBLOCK_DEFAULT                   (_AES_IEN_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IEN            */
+#define AES_IEN_FETCHERSTOPPED                              (0x1UL << 1)                              /**< Stopped interrupt enable                    */
+#define _AES_IEN_FETCHERSTOPPED_SHIFT                       1                                         /**< Shift value for AES_FETCHERSTOPPED          */
+#define _AES_IEN_FETCHERSTOPPED_MASK                        0x2UL                                     /**< Bit mask for AES_FETCHERSTOPPED             */
+#define _AES_IEN_FETCHERSTOPPED_DEFAULT                     0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_FETCHERSTOPPED_DEFAULT                      (_AES_IEN_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IEN            */
+#define AES_IEN_FETCHERERROR                                (0x1UL << 2)                              /**< Error interrupt enable                      */
+#define _AES_IEN_FETCHERERROR_SHIFT                         2                                         /**< Shift value for AES_FETCHERERROR            */
+#define _AES_IEN_FETCHERERROR_MASK                          0x4UL                                     /**< Bit mask for AES_FETCHERERROR               */
+#define _AES_IEN_FETCHERERROR_DEFAULT                       0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_FETCHERERROR_DEFAULT                        (_AES_IEN_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IEN            */
+#define AES_IEN_PUSHERENDOFBLOCK                            (0x1UL << 3)                              /**< End of block interrupt enable               */
+#define _AES_IEN_PUSHERENDOFBLOCK_SHIFT                     3                                         /**< Shift value for AES_PUSHERENDOFBLOCK        */
+#define _AES_IEN_PUSHERENDOFBLOCK_MASK                      0x8UL                                     /**< Bit mask for AES_PUSHERENDOFBLOCK           */
+#define _AES_IEN_PUSHERENDOFBLOCK_DEFAULT                   0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_PUSHERENDOFBLOCK_DEFAULT                    (_AES_IEN_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IEN            */
+#define AES_IEN_PUSHERSTOPPED                               (0x1UL << 4)                              /**< Stopped interrupt enable                    */
+#define _AES_IEN_PUSHERSTOPPED_SHIFT                        4                                         /**< Shift value for AES_PUSHERSTOPPED           */
+#define _AES_IEN_PUSHERSTOPPED_MASK                         0x10UL                                    /**< Bit mask for AES_PUSHERSTOPPED              */
+#define _AES_IEN_PUSHERSTOPPED_DEFAULT                      0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_PUSHERSTOPPED_DEFAULT                       (_AES_IEN_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IEN            */
+#define AES_IEN_PUSHERERROR                                 (0x1UL << 5)                              /**< Error interrupt enable                      */
+#define _AES_IEN_PUSHERERROR_SHIFT                          5                                         /**< Shift value for AES_PUSHERERROR             */
+#define _AES_IEN_PUSHERERROR_MASK                           0x20UL                                    /**< Bit mask for AES_PUSHERERROR                */
+#define _AES_IEN_PUSHERERROR_DEFAULT                        0x00000000UL                              /**< Mode DEFAULT for AES_IEN                    */
+#define AES_IEN_PUSHERERROR_DEFAULT                         (_AES_IEN_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IEN            */
 
 /* Bit fields for AES IF */
-#define _AES_IF_RESETVALUE                                  0x00000000UL                               /**< Default value for AES_IF                    */
-#define _AES_IF_MASK                                        0x0000003FUL                               /**< Mask for AES_IF                             */
-#define AES_IF_FETCHERENDOFBLOCKIF                          (0x1UL << 0)                               /**< End of block interrupt flag                 */
-#define _AES_IF_FETCHERENDOFBLOCKIF_SHIFT                   0                                          /**< Shift value for AES_FETCHERENDOFBLOCKIF     */
-#define _AES_IF_FETCHERENDOFBLOCKIF_MASK                    0x1UL                                      /**< Bit mask for AES_FETCHERENDOFBLOCKIF        */
-#define _AES_IF_FETCHERENDOFBLOCKIF_DEFAULT                 0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_FETCHERENDOFBLOCKIF_DEFAULT                  (_AES_IF_FETCHERENDOFBLOCKIF_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IF             */
-#define AES_IF_FETCHERSTOPPEDIF                             (0x1UL << 1)                               /**< Stopped interrupt flag                      */
-#define _AES_IF_FETCHERSTOPPEDIF_SHIFT                      1                                          /**< Shift value for AES_FETCHERSTOPPEDIF        */
-#define _AES_IF_FETCHERSTOPPEDIF_MASK                       0x2UL                                      /**< Bit mask for AES_FETCHERSTOPPEDIF           */
-#define _AES_IF_FETCHERSTOPPEDIF_DEFAULT                    0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_FETCHERSTOPPEDIF_DEFAULT                     (_AES_IF_FETCHERSTOPPEDIF_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IF             */
-#define AES_IF_FETCHERERRORIF                               (0x1UL << 2)                               /**< Error interrupt flag                        */
-#define _AES_IF_FETCHERERRORIF_SHIFT                        2                                          /**< Shift value for AES_FETCHERERRORIF          */
-#define _AES_IF_FETCHERERRORIF_MASK                         0x4UL                                      /**< Bit mask for AES_FETCHERERRORIF             */
-#define _AES_IF_FETCHERERRORIF_DEFAULT                      0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_FETCHERERRORIF_DEFAULT                       (_AES_IF_FETCHERERRORIF_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IF             */
-#define AES_IF_PUSHERENDOFBLOCKIF                           (0x1UL << 3)                               /**< End of block interrupt flag                 */
-#define _AES_IF_PUSHERENDOFBLOCKIF_SHIFT                    3                                          /**< Shift value for AES_PUSHERENDOFBLOCKIF      */
-#define _AES_IF_PUSHERENDOFBLOCKIF_MASK                     0x8UL                                      /**< Bit mask for AES_PUSHERENDOFBLOCKIF         */
-#define _AES_IF_PUSHERENDOFBLOCKIF_DEFAULT                  0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_PUSHERENDOFBLOCKIF_DEFAULT                   (_AES_IF_PUSHERENDOFBLOCKIF_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IF             */
-#define AES_IF_PUSHERSTOPPEDIF                              (0x1UL << 4)                               /**< Stopped interrupt flag                      */
-#define _AES_IF_PUSHERSTOPPEDIF_SHIFT                       4                                          /**< Shift value for AES_PUSHERSTOPPEDIF         */
-#define _AES_IF_PUSHERSTOPPEDIF_MASK                        0x10UL                                     /**< Bit mask for AES_PUSHERSTOPPEDIF            */
-#define _AES_IF_PUSHERSTOPPEDIF_DEFAULT                     0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_PUSHERSTOPPEDIF_DEFAULT                      (_AES_IF_PUSHERSTOPPEDIF_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IF             */
-#define AES_IF_PUSHERERRORIF                                (0x1UL << 5)                               /**< Error interrupt flag                        */
-#define _AES_IF_PUSHERERRORIF_SHIFT                         5                                          /**< Shift value for AES_PUSHERERRORIF           */
-#define _AES_IF_PUSHERERRORIF_MASK                          0x20UL                                     /**< Bit mask for AES_PUSHERERRORIF              */
-#define _AES_IF_PUSHERERRORIF_DEFAULT                       0x00000000UL                               /**< Mode DEFAULT for AES_IF                     */
-#define AES_IF_PUSHERERRORIF_DEFAULT                        (_AES_IF_PUSHERERRORIF_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IF             */
+#define _AES_IF_RESETVALUE                                  0x00000000UL                             /**< Default value for AES_IF                    */
+#define _AES_IF_MASK                                        0x0000003FUL                             /**< Mask for AES_IF                             */
+#define AES_IF_FETCHERENDOFBLOCK                            (0x1UL << 0)                             /**< End of block interrupt flag                 */
+#define _AES_IF_FETCHERENDOFBLOCK_SHIFT                     0                                        /**< Shift value for AES_FETCHERENDOFBLOCK       */
+#define _AES_IF_FETCHERENDOFBLOCK_MASK                      0x1UL                                    /**< Bit mask for AES_FETCHERENDOFBLOCK          */
+#define _AES_IF_FETCHERENDOFBLOCK_DEFAULT                   0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_FETCHERENDOFBLOCK_DEFAULT                    (_AES_IF_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IF             */
+#define AES_IF_FETCHERSTOPPED                               (0x1UL << 1)                             /**< Stopped interrupt flag                      */
+#define _AES_IF_FETCHERSTOPPED_SHIFT                        1                                        /**< Shift value for AES_FETCHERSTOPPED          */
+#define _AES_IF_FETCHERSTOPPED_MASK                         0x2UL                                    /**< Bit mask for AES_FETCHERSTOPPED             */
+#define _AES_IF_FETCHERSTOPPED_DEFAULT                      0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_FETCHERSTOPPED_DEFAULT                       (_AES_IF_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IF             */
+#define AES_IF_FETCHERERROR                                 (0x1UL << 2)                             /**< Error interrupt flag                        */
+#define _AES_IF_FETCHERERROR_SHIFT                          2                                        /**< Shift value for AES_FETCHERERROR            */
+#define _AES_IF_FETCHERERROR_MASK                           0x4UL                                    /**< Bit mask for AES_FETCHERERROR               */
+#define _AES_IF_FETCHERERROR_DEFAULT                        0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_FETCHERERROR_DEFAULT                         (_AES_IF_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IF             */
+#define AES_IF_PUSHERENDOFBLOCK                             (0x1UL << 3)                             /**< End of block interrupt flag                 */
+#define _AES_IF_PUSHERENDOFBLOCK_SHIFT                      3                                        /**< Shift value for AES_PUSHERENDOFBLOCK        */
+#define _AES_IF_PUSHERENDOFBLOCK_MASK                       0x8UL                                    /**< Bit mask for AES_PUSHERENDOFBLOCK           */
+#define _AES_IF_PUSHERENDOFBLOCK_DEFAULT                    0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_PUSHERENDOFBLOCK_DEFAULT                     (_AES_IF_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IF             */
+#define AES_IF_PUSHERSTOPPED                                (0x1UL << 4)                             /**< Stopped interrupt flag                      */
+#define _AES_IF_PUSHERSTOPPED_SHIFT                         4                                        /**< Shift value for AES_PUSHERSTOPPED           */
+#define _AES_IF_PUSHERSTOPPED_MASK                          0x10UL                                   /**< Bit mask for AES_PUSHERSTOPPED              */
+#define _AES_IF_PUSHERSTOPPED_DEFAULT                       0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_PUSHERSTOPPED_DEFAULT                        (_AES_IF_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IF             */
+#define AES_IF_PUSHERERROR                                  (0x1UL << 5)                             /**< Error interrupt flag                        */
+#define _AES_IF_PUSHERERROR_SHIFT                           5                                        /**< Shift value for AES_PUSHERERROR             */
+#define _AES_IF_PUSHERERROR_MASK                            0x20UL                                   /**< Bit mask for AES_PUSHERERROR                */
+#define _AES_IF_PUSHERERROR_DEFAULT                         0x00000000UL                             /**< Mode DEFAULT for AES_IF                     */
+#define AES_IF_PUSHERERROR_DEFAULT                          (_AES_IF_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IF             */
 
 /* Bit fields for AES IF_CLR */
-#define _AES_IF_CLR_RESETVALUE                              0x00000000UL                                    /**< Default value for AES_IF_CLR                */
-#define _AES_IF_CLR_MASK                                    0x0000003FUL                                    /**< Mask for AES_IF_CLR                         */
-#define AES_IF_CLR_FETCHERENDOFBLOCKIFC                     (0x1UL << 0)                                    /**< End of block interrupt flag clear           */
-#define _AES_IF_CLR_FETCHERENDOFBLOCKIFC_SHIFT              0                                               /**< Shift value for AES_FETCHERENDOFBLOCKIFC    */
-#define _AES_IF_CLR_FETCHERENDOFBLOCKIFC_MASK               0x1UL                                           /**< Bit mask for AES_FETCHERENDOFBLOCKIFC       */
-#define _AES_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT            0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT             (_AES_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IF_CLR         */
-#define AES_IF_CLR_FETCHERSTOPPEDIFC                        (0x1UL << 1)                                    /**< Stopped interrupt flag clear                */
-#define _AES_IF_CLR_FETCHERSTOPPEDIFC_SHIFT                 1                                               /**< Shift value for AES_FETCHERSTOPPEDIFC       */
-#define _AES_IF_CLR_FETCHERSTOPPEDIFC_MASK                  0x2UL                                           /**< Bit mask for AES_FETCHERSTOPPEDIFC          */
-#define _AES_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT               0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT                (_AES_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IF_CLR         */
-#define AES_IF_CLR_FETCHERERRORIFC                          (0x1UL << 2)                                    /**< Error interrupt flag clear                  */
-#define _AES_IF_CLR_FETCHERERRORIFC_SHIFT                   2                                               /**< Shift value for AES_FETCHERERRORIFC         */
-#define _AES_IF_CLR_FETCHERERRORIFC_MASK                    0x4UL                                           /**< Bit mask for AES_FETCHERERRORIFC            */
-#define _AES_IF_CLR_FETCHERERRORIFC_DEFAULT                 0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_FETCHERERRORIFC_DEFAULT                  (_AES_IF_CLR_FETCHERERRORIFC_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IF_CLR         */
-#define AES_IF_CLR_PUSHERENDOFBLOCKIFC                      (0x1UL << 3)                                    /**< FETCHERENDOFBLOCKIFC                        */
-#define _AES_IF_CLR_PUSHERENDOFBLOCKIFC_SHIFT               3                                               /**< Shift value for AES_PUSHERENDOFBLOCKIFC     */
-#define _AES_IF_CLR_PUSHERENDOFBLOCKIFC_MASK                0x8UL                                           /**< Bit mask for AES_PUSHERENDOFBLOCKIFC        */
-#define _AES_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT             0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT              (_AES_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IF_CLR         */
-#define AES_IF_CLR_PUSHERSTOPPEDIFC                         (0x1UL << 4)                                    /**< FETCHERSTOPPEDIFC                           */
-#define _AES_IF_CLR_PUSHERSTOPPEDIFC_SHIFT                  4                                               /**< Shift value for AES_PUSHERSTOPPEDIFC        */
-#define _AES_IF_CLR_PUSHERSTOPPEDIFC_MASK                   0x10UL                                          /**< Bit mask for AES_PUSHERSTOPPEDIFC           */
-#define _AES_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT                0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT                 (_AES_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IF_CLR         */
-#define AES_IF_CLR_PUSHERERRORIFC                           (0x1UL << 5)                                    /**< FETCHERERRORIFC                             */
-#define _AES_IF_CLR_PUSHERERRORIFC_SHIFT                    5                                               /**< Shift value for AES_PUSHERERRORIFC          */
-#define _AES_IF_CLR_PUSHERERRORIFC_MASK                     0x20UL                                          /**< Bit mask for AES_PUSHERERRORIFC             */
-#define _AES_IF_CLR_PUSHERERRORIFC_DEFAULT                  0x00000000UL                                    /**< Mode DEFAULT for AES_IF_CLR                 */
-#define AES_IF_CLR_PUSHERERRORIFC_DEFAULT                   (_AES_IF_CLR_PUSHERERRORIFC_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define _AES_IF_CLR_RESETVALUE                              0x00000000UL                                 /**< Default value for AES_IF_CLR                */
+#define _AES_IF_CLR_MASK                                    0x0000003FUL                                 /**< Mask for AES_IF_CLR                         */
+#define AES_IF_CLR_FETCHERENDOFBLOCK                        (0x1UL << 0)                                 /**< End of block interrupt flag clear           */
+#define _AES_IF_CLR_FETCHERENDOFBLOCK_SHIFT                 0                                            /**< Shift value for AES_FETCHERENDOFBLOCK       */
+#define _AES_IF_CLR_FETCHERENDOFBLOCK_MASK                  0x1UL                                        /**< Bit mask for AES_FETCHERENDOFBLOCK          */
+#define _AES_IF_CLR_FETCHERENDOFBLOCK_DEFAULT               0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_FETCHERENDOFBLOCK_DEFAULT                (_AES_IF_CLR_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define AES_IF_CLR_FETCHERSTOPPED                           (0x1UL << 1)                                 /**< Stopped interrupt flag clear                */
+#define _AES_IF_CLR_FETCHERSTOPPED_SHIFT                    1                                            /**< Shift value for AES_FETCHERSTOPPED          */
+#define _AES_IF_CLR_FETCHERSTOPPED_MASK                     0x2UL                                        /**< Bit mask for AES_FETCHERSTOPPED             */
+#define _AES_IF_CLR_FETCHERSTOPPED_DEFAULT                  0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_FETCHERSTOPPED_DEFAULT                   (_AES_IF_CLR_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define AES_IF_CLR_FETCHERERROR                             (0x1UL << 2)                                 /**< Error interrupt flag clear                  */
+#define _AES_IF_CLR_FETCHERERROR_SHIFT                      2                                            /**< Shift value for AES_FETCHERERROR            */
+#define _AES_IF_CLR_FETCHERERROR_MASK                       0x4UL                                        /**< Bit mask for AES_FETCHERERROR               */
+#define _AES_IF_CLR_FETCHERERROR_DEFAULT                    0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_FETCHERERROR_DEFAULT                     (_AES_IF_CLR_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define AES_IF_CLR_PUSHERENDOFBLOCK                         (0x1UL << 3)                                 /**< FETCHERENDOFBLOCKIFC                        */
+#define _AES_IF_CLR_PUSHERENDOFBLOCK_SHIFT                  3                                            /**< Shift value for AES_PUSHERENDOFBLOCK        */
+#define _AES_IF_CLR_PUSHERENDOFBLOCK_MASK                   0x8UL                                        /**< Bit mask for AES_PUSHERENDOFBLOCK           */
+#define _AES_IF_CLR_PUSHERENDOFBLOCK_DEFAULT                0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_PUSHERENDOFBLOCK_DEFAULT                 (_AES_IF_CLR_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define AES_IF_CLR_PUSHERSTOPPED                            (0x1UL << 4)                                 /**< FETCHERSTOPPEDIFC                           */
+#define _AES_IF_CLR_PUSHERSTOPPED_SHIFT                     4                                            /**< Shift value for AES_PUSHERSTOPPED           */
+#define _AES_IF_CLR_PUSHERSTOPPED_MASK                      0x10UL                                       /**< Bit mask for AES_PUSHERSTOPPED              */
+#define _AES_IF_CLR_PUSHERSTOPPED_DEFAULT                   0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_PUSHERSTOPPED_DEFAULT                    (_AES_IF_CLR_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for AES_IF_CLR         */
+#define AES_IF_CLR_PUSHERERROR                              (0x1UL << 5)                                 /**< FETCHERERRORIFC                             */
+#define _AES_IF_CLR_PUSHERERROR_SHIFT                       5                                            /**< Shift value for AES_PUSHERERROR             */
+#define _AES_IF_CLR_PUSHERERROR_MASK                        0x20UL                                       /**< Bit mask for AES_PUSHERERROR                */
+#define _AES_IF_CLR_PUSHERERROR_DEFAULT                     0x00000000UL                                 /**< Mode DEFAULT for AES_IF_CLR                 */
+#define AES_IF_CLR_PUSHERERROR_DEFAULT                      (_AES_IF_CLR_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for AES_IF_CLR         */
 
 /* Bit fields for AES CTRL */
 #define _AES_CTRL_RESETVALUE                                0x00000000UL                                  /**< Default value for AES_CTRL                  */
@@ -449,4 +449,5 @@ typedef struct {
 /** @} End of group EFR32FG22_AES_BitFields */
 /** @} End of group EFR32FG22_AES */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_AES_H */

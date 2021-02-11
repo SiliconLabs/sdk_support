@@ -21,10 +21,6 @@
 #include "hal/hal.h"
 #include "hal/micro/micro-types.h"
 
-#if (!defined(EMBER_STACK_IP))
-#include "stack/include/packet-buffer.h"
-#endif
-
 #include "serial/serial.h"
 
 // Allow some code to be disabled (and flash saved) if
@@ -47,18 +43,9 @@
   || (EMBER_SERIAL1_MODE == EMBER_SERIAL_LOWLEVEL)
   #define EM_SERIAL1_ENABLED 0
   #define EM_SER1_PORT_EN(port)     (false)
-  #define EM_SER1_PORT_FIFO(port)   (false)
-  #define EM_SER1_PORT_BUFFER(port) (false)
 #else
   #define EM_SERIAL1_ENABLED 1
   #define EM_SER1_PORT_EN(port) ((port) == 1)
-  #if     (EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO)
-    #define EM_SER1_PORT_FIFO(port)   EM_SER1_PORT_EN(port)
-    #define EM_SER1_PORT_BUFFER(port) (false)
-  #else//Must be EMBER_SERIAL_BUFFER
-    #define EM_SER1_PORT_FIFO(port)   (false)
-    #define EM_SER1_PORT_BUFFER(port) EM_SER1_PORT_EN(port)
-  #endif
   #define EM_PHYSICAL_UART
 #endif
 
@@ -68,18 +55,9 @@
   || (EMBER_SERIAL2_MODE == EMBER_SERIAL_LOWLEVEL)
   #define EM_SERIAL2_ENABLED 0
   #define EM_SER2_PORT_EN(port)     (false)
-  #define EM_SER2_PORT_FIFO(port)   (false)
-  #define EM_SER2_PORT_BUFFER(port) (false)
 #else
   #define EM_SERIAL2_ENABLED 1
   #define EM_SER2_PORT_EN(port) ((port) == 2)
-  #if     (EMBER_SERIAL2_MODE == EMBER_SERIAL_FIFO)
-    #define EM_SER2_PORT_FIFO(port)   EM_SER2_PORT_EN(port)
-    #define EM_SER2_PORT_BUFFER(port) (false)
-  #else//Must be EMBER_SERIAL_BUFFER
-    #define EM_SER2_PORT_FIFO(port)   (false)
-    #define EM_SER2_PORT_BUFFER(port) EM_SER2_PORT_EN(port)
-  #endif
   #define EM_PHYSICAL_UART
 #endif
 
@@ -96,18 +74,10 @@
     #include "hal/micro/cortexm3/usb/hid/descriptors.h"
   #endif
   #define EM_SER3_PORT_FIFO(port)   (false)
-  #define EM_SER3_PORT_BUFFER(port) (false)
 #else
   #define EM_SERIAL3_ENABLED 1
   #define EM_SER3_PORT_EN(port) ((port) == 3)
 static bool usbNAK = false;
-  #if     (EMBER_SERIAL3_MODE == EMBER_SERIAL_FIFO)
-    #define EM_SER3_PORT_FIFO(port)   EM_SER3_PORT_EN(port)
-    #define EM_SER3_PORT_BUFFER(port) (false)
-  #else//Must be EMBER_SERIAL_BUFFER
-    #define EM_SER3_PORT_FIFO(port)   (false)
-    #define EM_SER3_PORT_BUFFER(port) EM_SER3_PORT_EN(port)
-  #endif
 
   #include "hal/micro/cortexm3/usb/em_usb.h"
   #include "hal/micro/cortexm3/usb/em_usbd.h"
@@ -117,6 +87,14 @@ static bool usbNAK = false;
   && (EMBER_SERIAL3_RX_QUEUE_SIZE > 0)
     #error USB RX queue size must exceed 64 (CDC bulk endpoint size)
   #endif
+#endif
+
+#if defined(EM_SER1_FIFO_DMA_USED) || defined(EM_SER2_FIFO_DMA_USED)
+  #define FIFO_DMA_USED
+#endif
+
+#if defined(EMBER_SERIAL1_RTSCTS) || defined(EMBER_SERIAL2_RTSCTS)
+  #define RTSCTS_USED
 #endif
 
 #if defined(EM_ENABLE_SERIAL_FIFO) && defined(EM_ENABLE_SERIAL_BUFFER)
@@ -130,27 +108,14 @@ static bool usbNAK = false;
   #error Flow control is not currently supported when using both physical UARTs
 #endif
 
-#if (0                                                             \
-     || (EM_SERIAL0_ENABLED)                                       \
-  || (EM_SERIAL3_ENABLED)                                          \
-  || (defined(EM_PHYSICAL_UART) && defined(EM_ENABLE_SERIAL_FIFO)) \
-                                           )
+#if (0                       \
+     || (EM_SERIAL0_ENABLED) \
+  || (EM_SERIAL3_ENABLED)    \
+  || (defined(EM_PHYSICAL_UART) && defined(EM_ENABLE_SERIAL_FIFO)))
 #define UARTERRORMARK_NEEDED 1
 #else
 #define UARTERRORMARK_NEEDED 0
 #endif
-
-//State information for RX DMA Buffer operation
-typedef struct EmSerialBufferState {
-  const uint16_t fifoSize;
-  const uint16_t rxStartIndexB;
-  uint16_t prevCountA;
-  uint16_t prevCountB;
-  bool waitingForTailA;
-  bool waitingForTailB;
-  bool waitingForInputToB;
-  EmberMessageBuffer holdBuf[2];
-} EmSerialBufferState;
 
 #if defined(EZSP_ASH)                \
   && !defined(EMBER_SERIAL1_RTSCTS)  \
@@ -159,14 +124,15 @@ typedef struct EmSerialBufferState {
   #error EZSP-UART requires either RTS/CTS or XON/XOFF flow control!
 #endif
 
+// serial 1 and 2 HW flow control allowed in FIFO mode with DMA
 #ifdef EMBER_SERIAL1_RTSCTS
-  #if EMBER_SERIAL1_MODE != EMBER_SERIAL_BUFFER
+  #if !((EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO) && defined(EM_SER1_FIFO_DMA_USED))
   #error "Illegal serial port 1 configuration"
   #endif
 #endif
 
 #ifdef EMBER_SERIAL2_RTSCTS
-  #if EMBER_SERIAL2_MODE != EMBER_SERIAL_BUFFER
+  #if !((EMBER_SERIAL2_MODE == EMBER_SERIAL_FIFO) && defined(EM_SER2_FIFO_DMA_USED))
   #error "Illegal serial port 2 configuration"
   #endif
 #endif
@@ -219,7 +185,7 @@ static uint8_t xonTimer;        // time when last data rx'ed from host, or when
   #error "XON/XOFF is not supported on port 3"
 #endif
 
-#if defined(EMBER_SERIAL1_RTSCTS) || defined(EMBER_SERIAL2_RTSCTS)
+#if defined(RTSCTS_USED)
 void halInternalUartRxCheckRts(uint8_t port);
 
 #else
@@ -274,9 +240,6 @@ const uint8_t baudSettings[] = {
 #endif // defined(EM_PHYSICAL_UART)
 
 #if EM_SERIAL1_ENABLED
-  #if (EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER)
-  #endif//(EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER)
-
   #if    SLEEPY_IP_MODEM_UART
 //This macro is used to manipulate TxD to avoid glitching it across sleep
 //which can lead to spurrious data or framing errors seen by peer
@@ -290,14 +253,26 @@ const uint8_t baudSettings[] = {
   #endif//SLEEPY_IP_MODEM_UART
 #endif // EM_SERIAL1_ENABLED
 
+//State information for RX DMA Buffer operation
+typedef struct emDmaBufferState {
+  const uint16_t fifoSize;
+  const uint16_t rxStartIndexB;
+  uint16_t prevCountA;
+  uint16_t prevCountB;
+  bool waitingForTailA;
+  bool waitingForTailB;
+  bool waitingForInputToB;
+  EmberMessageBuffer holdBuf[2];
+} emDmaBufferState;
+
 // figure out how many buffer state structs we need
-#if (EM_SERIAL1_ENABLED                             \
-     && EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER)  \
-  && (EM_SERIAL2_ENABLED                            \
-      && EMBER_SERIAL2_MODE == EMBER_SERIAL_BUFFER) \
-  && (EM_SERIAL3_ENABLED                            \
+#if (EM_SERIAL1_ENABLED                  \
+     && defined(EM_SER1_FIFO_DMA_USED))  \
+  && (EM_SERIAL2_ENABLED                 \
+      && defined(EM_SER2_FIFO_DMA_USED)) \
+  && (EM_SERIAL3_ENABLED                 \
       && EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER)
-static EmSerialBufferState serialBufferStates[] = {
+static emDmaBufferState dmaBufferStates[] = {
   { EMBER_SERIAL1_RX_QUEUE_SIZE,
     (EMBER_SERIAL1_RX_QUEUE_SIZE / 2),
     0,
@@ -323,11 +298,11 @@ static EmSerialBufferState serialBufferStates[] = {
     false,
     { EMBER_NULL_MESSAGE_BUFFER, EMBER_NULL_MESSAGE_BUFFER } }
 };
+  #define BUFSTATE(port) (dmaBufferStates + (port) - 1)
 
-  #define BUFSTATE(port) (serialBufferStates + (port) - 1)
 #elif (EM_SERIAL1_ENABLED \
-       && EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER)
-static EmSerialBufferState serialBufferState = {
+       && defined(EM_SER1_FIFO_DMA_USED))
+static emDmaBufferState dmaBufferState = {
   EMBER_SERIAL1_RX_QUEUE_SIZE,
   (EMBER_SERIAL1_RX_QUEUE_SIZE / 2),
   0,
@@ -337,11 +312,11 @@ static EmSerialBufferState serialBufferState = {
   false,
   { EMBER_NULL_MESSAGE_BUFFER, EMBER_NULL_MESSAGE_BUFFER }
 };
+  #define BUFSTATE(port) (&dmaBufferState)
 
-  #define BUFSTATE(port) (&serialBufferState)
 #elif (EM_SERIAL2_ENABLED \
-       && EMBER_SERIAL2_MODE == EMBER_SERIAL_BUFFER)
-static EmSerialBufferState serialBufferState = {
+       && defined(EM_SER2_FIFO_DMA_USED))
+static emDmaBufferState dmaBufferState = {
   EMBER_SERIAL2_RX_QUEUE_SIZE,
   (EMBER_SERIAL2_RX_QUEUE_SIZE / 2),
   0,
@@ -351,11 +326,11 @@ static EmSerialBufferState serialBufferState = {
   false,
   { EMBER_NULL_MESSAGE_BUFFER, EMBER_NULL_MESSAGE_BUFFER }
 };
+  #define BUFSTATE(port) (&dmaBufferState)
 
-  #define BUFSTATE(port) (&serialBufferState)
 #elif (EM_SERIAL3_ENABLED \
        && EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER)
-static EmSerialBufferState serialBufferState = {
+static emDmaBufferState dmaBufferState = {
   EMBER_SERIAL3_RX_QUEUE_SIZE,
   (EMBER_SERIAL3_RX_QUEUE_SIZE / 2),
   0,
@@ -365,20 +340,62 @@ static EmSerialBufferState serialBufferState = {
   false,
   { EMBER_NULL_MESSAGE_BUFFER, EMBER_NULL_MESSAGE_BUFFER }
 };
+  #define BUFSTATE(port) (&dmaBufferState)
+#endif
 
-  #define BUFSTATE(port) (&serialBufferState)
+//State information for TX DMA Buffer operation
+typedef struct emDmaTxBufferState {
+  const uint16_t fifoSize;
+  bool usingBufferB;
+  bool waitingForUnload;
+} emDmaTxBufferState;
+
+// figure out how many buffer state structs we need
+#if (EM_SERIAL1_ENABLED                 \
+     && defined(EM_SER1_FIFO_DMA_USED)) \
+  && (EM_SERIAL2_ENABLED                \
+      && defined(EM_SER2_FIFO_DMA_USED))
+static emDmaTxBufferState dmaTxBufferStates[] = {
+  { EMBER_SERIAL1_TX_QUEUE_SIZE,
+    false,
+    false },
+  { EMBER_SERIAL2_TX_QUEUE_SIZE,
+    false,
+    false }
+};
+  #define TX_BUFSTATE(port) (dmaTxBufferStates + (port) - 1)
+
+#elif (EM_SERIAL1_ENABLED \
+       && defined(EM_SER1_FIFO_DMA_USED))
+static emDmaTxBufferState dmaTxBufferState = {
+  EMBER_SERIAL1_TX_QUEUE_SIZE,
+  false,
+  false
+};
+  #define TX_BUFSTATE(port) (&dmaTxBufferState)
+
+#elif (EM_SERIAL2_ENABLED \
+       && defined(EM_SER2_FIFO_DMA_USED))
+static emDmaTxBufferState dmaTxBufferState = {
+  EMBER_SERIAL2_TX_QUEUE_SIZE,
+  false,
+  false
+};
+  #define TX_BUFSTATE(port) (&dmaTxBufferState)
+
 #endif
 
 // prototypes
 #if defined(EM_PHYSICAL_UART)
-static void halInternalUartTxIsr(uint8_t port);
+static void halInternalUartTxIsr(uint8_t port, uint16_t causes);
 
 #endif
 #if     UARTERRORMARK_NEEDED
 static void uartErrorMark(uint8_t port, uint8_t errors);
 
 #endif//UARTERRORMARK_NEEDED
-#if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+
+#if defined(EM_ENABLE_SERIAL_FIFO) && defined(FIFO_DMA_USED)
 static void halInternalRestartUartDma(uint8_t port);
 
 #endif
@@ -387,7 +404,38 @@ static void halInternalRestartUartDma(uint8_t port);
 static void halInternalInitUartInterrupts(uint8_t halInternalInitUartPort)
 {
   #if defined(EM_ENABLE_SERIAL_FIFO)
-  if (EM_SER_MULTI(EM_SER1_PORT_FIFO(halInternalInitUartPort) || EM_SER2_PORT_FIFO(halInternalInitUartPort))) {
+  if (EM_SER1_PORT_EN(halInternalInitUartPort) || EM_SER2_PORT_EN(halInternalInitUartPort)) {
+    #if defined(FIFO_DMA_USED)
+    halInternalRestartUartDma(halInternalInitUartPort);
+
+    // don't do this for port 1 if it's being used for EZSP
+    #ifdef EZSP_ASH
+    if (halInternalInitUartPort != 1U) {
+    #endif
+    EVENT_SCxCFG(halInternalInitUartPort) |= (EVENT_SC12_CFG_RXOVF
+                                              | EVENT_SC12_CFG_FRMERR
+                                              | EVENT_SC12_CFG_PARERR);
+  #ifdef EZSP_ASH
+  }
+  #endif
+
+    // The receive side of buffer mode does not require any interrupts.
+    // The transmit side of buffer mode requires interrupts, which
+    // will be configured on demand in halInternalStartUartTx(), so just
+    // enable the top level interrupt for the transmit side.
+    EVENT_SCxFLAG(halInternalInitUartPort) = 0xFFFF;   // Clear any stale interrupts
+    NVIC_EnableIRQ(SCx_IRQn(halInternalInitUartPort));
+
+    #if defined(RTSCTS_USED)
+    if (EM_SER1_PORT_EN(halInternalInitUartPort) || EM_SER2_PORT_EN(halInternalInitUartPort)) {
+      // Software-based RTS/CTS needs interrupts on DMA buffer unloading.
+      EVENT_SCxCFG(halInternalInitUartPort) |= (EVENT_SC12_CFG_RXULDA | EVENT_SC12_CFG_RXULDB
+                                                | EVENT_SC12_CFG_TXULDA | EVENT_SC12_FLAG_TXULDB);
+      SCx_REG(halInternalInitUartPort, UARTCFG) |= (SC_UARTCFG_UARTFLOW | SC_UARTCFG_UARTRTS);
+    }
+    #endif
+
+    #else // not using DMA
     // Make the RX Valid interrupt level sensitive (instead of edge)
     // EVENT_SC1->INTMODE = EVENT_SC12_INTMODE_RXVALLEVEL;
     // Enable just RX interrupts; TX interrupts are controlled separately
@@ -397,47 +445,9 @@ static void halInternalInitUartInterrupts(uint8_t halInternalInitUartPort)
                                               | EVENT_SC12_CFG_PARERR);
     EVENT_SCxFLAG(halInternalInitUartPort) = 0xFFFF;   // Clear any stale interrupts
     NVIC_EnableIRQ(SCx_IRQn(halInternalInitUartPort));
+    #endif // DMA
   }
-  #endif
-  #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER_MULTI(EM_SER1_PORT_BUFFER(halInternalInitUartPort) || EM_SER2_PORT_BUFFER(halInternalInitUartPort))) {
-    halInternalRestartUartDma(halInternalInitUartPort);
-
-    // don't do this for port 1 if it's being used for EZSP
-      #ifdef EZSP_ASH
-    if (halInternalInitUartPort != 1U) {
-      #endif
-    EVENT_SCxCFG(halInternalInitUartPort) |= (EVENT_SC12_CFG_RXOVF
-                                              | EVENT_SC12_CFG_FRMERR
-                                              | EVENT_SC12_CFG_PARERR);
-      #ifdef EZSP_ASH
-  }
-      #endif
-
-    // The receive side of buffer mode does not require any interrupts.
-    // The transmit side of buffer mode requires interrupts, which
-    // will be configured on demand in halInternalStartUartTx(), so just
-    // enable the top level interrupt for the transmit side.
-    EVENT_SCxFLAG(halInternalInitUartPort) = 0xFFFF;   // Clear any stale interrupts
-    NVIC_EnableIRQ(SCx_IRQn(halInternalInitUartPort));
-
-      #ifdef EMBER_SERIAL1_RTSCTS
-    // TODO refactor this into a variable that can be queried at runtime
-    if (EM_SER1_PORT_EN(halInternalInitUartPort)) {
-      // Software-based RTS/CTS needs interrupts on DMA buffer unloading.
-      EVENT_SCxCFG(halInternalInitUartPort) |= (EVENT_SC12_CFG_RXULDA | EVENT_SC12_CFG_RXULDB);
-      SCx_REG(halInternalInitUartPort, UARTCFG) |= (SC_UARTCFG_UARTFLOW | SC_UARTCFG_UARTRTS);
-    }
-      #endif
-      #ifdef EMBER_SERIAL2_RTSCTS
-    if (EM_SER2_PORT_EN(halInternalInitUartPort)) {
-      // Software-based RTS/CTS needs interrupts on DMA buffer unloading.
-      EVENT_SCxCFG(halInternalInitUartPort) |= (EVENT_SC12_CFG_RXULDA | EVENT_SC12_CFG_RXULDB);
-      SCx_REG(halInternalInitUartPort, UARTCFG) |= (SC_UARTCFG_UARTFLOW | SC_UARTCFG_UARTRTS);
-    }
-      #endif
-  }
-  #endif //defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO mode
 }
 
 // init function for physical UART
@@ -459,8 +469,8 @@ static EmberStatus halInternalInitPhysicalUart(uint8_t halInternalInitPhysicalPo
   // nibbles.  <mul> is always multiplied by 100.  For <exp> <= 10,
   // that result is multipled by 2^<exp>; for <exp> > 10 that result
   // is multipled by 10^(<exp>-10).
-  tempcfg = (uint32_t)(rate >> 4U) * 100U; // multiplier
-  rate &= 0x0FU; // exponent
+  tempcfg = (uint32_t)(rate >> 4U) * 100U;   // multiplier
+  rate &= 0x0FU;   // exponent
   if (rate <= 10U) {
     tempcfg <<= rate;
   } else {
@@ -502,9 +512,9 @@ static EmberStatus halInternalInitPhysicalUart(uint8_t halInternalInitPhysicalPo
   // put the peripheral into UART mode
   SCx_REG(halInternalInitPhysicalPort, MODE) = SC_MODE_MODE_UART;
 
-  if (EM_SER1_PORT_EN(halInternalInitPhysicalPort)) { // port 1 special glitch-free case
+  if (EM_SER1_PORT_EN(halInternalInitPhysicalPort)) {   // port 1 special glitch-free case
 //snip- use CMSIS GPIO->P[] stuff
-    SC1_TXD_GPIO(GPIOCFG_OUT_ALT, 1);  // Can Assign TxD glitch-free to UART now
+    SC1_TXD_GPIO(GPIOCFG_OUT_ALT, 1);   // Can Assign TxD glitch-free to UART now
   }
 
   halInternalInitUartInterrupts(halInternalInitPhysicalPort);
@@ -596,7 +606,7 @@ EmberStatus halInternalUartInit(uint8_t port,
 
 #endif//(!defined(EM_SERIAL0_DISABLED) || !defined(EM_SERIAL1_DISABLED))
 
-#if (EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER)
+#if (EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER) && EM_SERIAL3_ENABLED
 void usbReleaseBuffer(USB_Status_TypeDef status, uint32_t xferred, uint32_t remaining)
 {
   assert(status == USB_STATUS_OK);
@@ -610,90 +620,43 @@ void halInternalStartUartTx(uint8_t port)
 {
   #if EM_SERIAL0_ENABLED
   if (EM_SER0_PORT_EN(port)) {
-      #if EMBER_SERIAL0_MODE == EMBER_SERIAL_FIFO
     EmSerialFifoQueue *q = (EmSerialFifoQueue *)emSerialTxQueues[0];
     assert(q->tail == 0);
     emDebugSendVuartMessage(q->fifo, q->used);
     q->used = 0;
     q->head = 0;
     return;
-      #elif EMBER_SERIAL0_MODE == EMBER_SERIAL_BUFFER
-    EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[0];
-    assert(q->nextByte == NULL);
-    emSerialBufferNextMessageIsr(q);
-    while (q->nextByte != NULL) {
-      emDebugSendVuartMessage(q->nextByte, (q->lastByte - q->nextByte) + 1);
-      emSerialBufferNextBlockIsr(q, 0);
-    }
-    return;
-      #endif
   }
   #endif//!defined(EM_SERIAL0_DISABLED)
 
   #if defined(EM_PHYSICAL_UART)
   // If the port is configured, go ahead and start transmit
-    #if defined(EM_ENABLE_SERIAL_FIFO)
-  if ((EM_SER1_PORT_FIFO(port) || EM_SER2_PORT_FIFO(port))
+  #if defined(EM_ENABLE_SERIAL_FIFO)
+  if ((EM_SER1_PORT_EN(port) || EM_SER2_PORT_EN(port))
       && (SCx_REG(port, MODE) == SC_MODE_MODE_UART)) {
     // Ensure UART TX interrupts are enabled,
     // and call the ISR to send any pending output
-    {
-      DECLARE_INTERRUPT_STATE;
-      DISABLE_INTERRUPTS();
-      // Enable TX interrupts
-      EVENT_SCxCFG(port) |= (EVENT_SC12_CFG_TXFREE | EVENT_SC12_CFG_TXIDLE);
-      // Pretend we got a tx interrupt
-      halInternalUartTxIsr(port);
-      RESTORE_INTERRUPTS();
-    }
+    DECLARE_INTERRUPT_STATE;
+    DISABLE_INTERRUPTS();
+    #if defined(FIFO_DMA_USED)
+    // enable interupts TX unload interrupts for DMA, and TXIDLE interrupt
+    EVENT_SCxCFG(port) |= (EVENT_SC12_CFG_TXULDA | EVENT_SC12_CFG_TXULDB | EVENT_SC12_CFG_TXIDLE);
+    #else // non DMA
+    // enable interrupst for TXFREE and TXIDLE
+    EVENT_SCxCFG(port) |= (EVENT_SC12_CFG_TXFREE | EVENT_SC12_CFG_TXIDLE);
+    #endif
+    // Pretend we got a tx interrupt
+    halInternalUartTxIsr(port, 0);
+    RESTORE_INTERRUPTS();
     return;
   }
-    #endif // defined(EM_ENABLE_SERIAL_FIFO)
-    #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if ((EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port))
-      && (SCx_REG(port, MODE) == SC_MODE_MODE_UART)) {
-    // Ensure UART TX interrupts are enabled,
-    // and call the ISR to send any pending output
-    {
-      DECLARE_INTERRUPT_STATE;
-      DISABLE_INTERRUPTS();
-      EVENT_SCxCFG(port) |= (EVENT_SC12_CFG_TXULDA | EVENT_SC12_CFG_TXULDB | EVENT_SC12_CFG_TXIDLE);
-      // Pretend we got a tx interrupt
-      halInternalUartTxIsr(port);
-      RESTORE_INTERRUPTS();
-    }
-    return;
-  }
-    #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO
   #endif // EM_PHYSICAL_UART
 
   #if EM_SERIAL3_ENABLED
   if (EM_SER3_PORT_EN(port)) {
       #if defined(CORTEXM3_EM35X_USB)
-        #if (EMBER_SERIAL3_MODE == EMBER_SERIAL_FIFO)
     usbTxData();
-        #else //Must be EMBER_SERIAL_BUFFER
-    EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[3];
-    assert(!((q->used == 0) && (q->nextByte != NULL)));
-    while ( q->used > 0 ) {
-      if ( q->nextByte == NULL ) {
-        // new message pending, but nextByte not set up yet
-        emSerialBufferNextMessageIsr(q);
-      }
-      if (!USBD_EpIsBusy(CDC_EP_IN)) {
-        USBD_Write(CDC_EP_IN, q->nextByte, (uint32_t)q->lastByte - (uint32_t)q->nextByte + 1, (USB_XferCompleteCb_TypeDef) & usbReleaseBuffer);
-
-        if (BUFSTATE(3)->holdBuf[0] != EMBER_NULL_MESSAGE_BUFFER) {
-          emberReleaseMessageBuffer(BUFSTATE(3)->holdBuf[0]);
-        }
-        BUFSTATE(3)->holdBuf[0] = q->currentBuffer;
-        emberHoldMessageBuffer(BUFSTATE(3)->holdBuf[0]);
-        emSerialBufferNextBlockIsr(q, 3);
-      } else {
-        break;
-      }
-    }       // while ( q->used > 0 )
-        #endif
     return;
       #endif
   }
@@ -705,14 +668,9 @@ void halInternalStopUartTx(uint8_t port)
   // Nothing for port 0 (virtual uart)
 
   #if defined(EM_PHYSICAL_UART)
-    #if defined(EM_ENABLE_SERIAL_FIFO)
-  if (EM_SER1_PORT_FIFO(port) || EM_SER2_PORT_FIFO(port)) {
-    // Disable TX Interrupts
-    EVENT_SCxCFG(port) &= ~(EVENT_SC12_CFG_TXFREE | EVENT_SC12_CFG_TXIDLE);
-  }
-    #endif // defined(EM_ENABLE_SERIAL_FIFO)
-    #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port)) {
+  #if defined(EM_ENABLE_SERIAL_FIFO)
+  if (EM_SER1_PORT_EN(port) || EM_SER2_PORT_EN(port)) {
+    #if defined(FIFO_DMA_USED)
     // Ensure DMA operations are complete before shutting off interrupts,
     // otherwise we might miss an important interrupt and cause a
     // packet buffer leak, e.g.
@@ -722,8 +680,12 @@ void halInternalStopUartTx(uint8_t port)
     }
     // Disable TX Interrupts
     EVENT_SCxCFG(port) &= ~(EVENT_SC12_CFG_TXULDA | EVENT_SC12_CFG_TXULDB | EVENT_SC12_CFG_TXIDLE);
+    #else
+    // Disable TX Interrupts
+    EVENT_SCxCFG(port) &= ~(EVENT_SC12_CFG_TXFREE | EVENT_SC12_CFG_TXIDLE);
+    #endif // FIFO_DMA_USED
   }
-    #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO
   #endif // defined(EM_PHYSICAL_UART)
 }
 
@@ -798,18 +760,10 @@ EmberStatus halInternalForceReadUartByte(uint8_t port, uint8_t* dataByte)
 
   #if defined(EM_PHYSICAL_UART)
     #if defined(EM_ENABLE_SERIAL_FIFO)
-  if (EM_SER1_PORT_FIFO(port) || EM_SER2_PORT_FIFO(port)) {
-    if ((SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTRXVAL) != 0U) {
-      *dataByte = (uint8_t) SCx_REG(port, DATA);
-    } else {
-      err = EMBER_SERIAL_RX_EMPTY;
-    }
-  }
-    #endif
-    #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port)) {
-    //When in buffer mode, the DMA channel is active and the RXVALID bit (as
-    //used above in FIFO mode) will never get set.  To maintain the DMA/Buffer
+  if (EM_SER1_PORT_EN(port) || EM_SER2_PORT_EN(port)) {
+    #if defined(FIFO_DMA_USED)
+    //When in FIFO DMA mode, the DMA channel is active and the RXVALID bit (as
+    //used below in non DMA mode) will never get set.  To maintain the DMA
     //model of operation, we need to break the conceptual model in this function
     //and make a function call upwards away from the hardware.  The ReadByte
     //function calls back down into halInternalUartRxPump and forces the
@@ -818,8 +772,15 @@ EmberStatus halInternalForceReadUartByte(uint8_t port, uint8_t* dataByte)
     if (emberSerialReadByte(port, dataByte) != EMBER_SUCCESS) {
       err = EMBER_SERIAL_RX_EMPTY;
     }
+    #else // not DMA
+    if ((SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTRXVAL) != 0U) {
+      *dataByte = (uint8_t) SCx_REG(port, DATA);
+    } else {
+      err = EMBER_SERIAL_RX_EMPTY;
+    }
+    #endif
   }
-    #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO
   #endif // defined(EM_PHYSICAL_UART)
 
   return err;
@@ -860,7 +821,7 @@ void halStackReceiveVuartMessage(uint8_t *data, uint8_t length)
   #endif // EM_SERIAL0_ENABLED
 }
 
-#if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+#if defined(EM_ENABLE_SERIAL_FIFO) && defined(FIFO_DMA_USED)
 static void halInternalRestartUartDma(uint8_t port)
 {
   //Reset the DMA software and restart it.
@@ -875,9 +836,12 @@ static void halInternalRestartUartDma(uint8_t port)
   BUFSTATE(port)->waitingForTailA = false;
   BUFSTATE(port)->waitingForTailB = false;
   BUFSTATE(port)->waitingForInputToB = false;
+  TX_BUFSTATE(port)->usingBufferB = false;
+  TX_BUFSTATE(port)->waitingForUnload = false;
+
   //reload all defaults addresses - they will be adjusted below if needed
-  SCx_REG(port, DMACTRL) = SC_DMACTRL_RXDMARST;
-  SCx_REG(port, RXBEGA) =  startAddress;
+  SCx_REG(port, DMACTRL) = SC_DMACTRL_RXDMARST;                               // reset DMA
+  SCx_REG(port, RXBEGA) =  startAddress;                                      //
   SCx_REG(port, RXENDA) = (startAddress + BUFSTATE(port)->fifoSize / 2 - 1);
   SCx_REG(port, RXBEGB) =  (startAddress + BUFSTATE(port)->fifoSize / 2);
   SCx_REG(port, RXENDB) = (startAddress + BUFSTATE(port)->fifoSize - 1);
@@ -897,15 +861,15 @@ static void halInternalRestartUartDma(uint8_t port)
     }
     //check to see if the head and the tail are not in the same buffer
     if ((q->tail) / (BUFSTATE(port)->rxStartIndexB)) {
-      tail = true;  //Tail in B buffer
+      tail = true;   //Tail in B buffer
     } else {
-      tail = false; //Tail in A buffer
+      tail = false;   //Tail in A buffer
     }
 
     if ((q->head) / (BUFSTATE(port)->rxStartIndexB)) {
-      head = true;  //Head in B buffer
+      head = true;   //Head in B buffer
     } else {
-      head = false; //Head in A buffer
+      head = false;   //Head in A buffer
     }
 
     if ( tail != head ) {
@@ -966,16 +930,211 @@ static void halInternalRestartUartDma(uint8_t port)
     BUFSTATE(port)->waitingForTailB = true;
   }
 }
-
-#endif // defined(EM_ENABLE_SERIAL_BUFFER)
+#endif // FIFO DMA mode
 
 #ifdef EM_PHYSICAL_UART
 void halInternalUartRxIsr(uint8_t port, uint16_t causes)
 {
   #if defined(EM_ENABLE_SERIAL_FIFO)
-  if (EM_SER_MULTI(EM_SER1_PORT_FIFO(port) || EM_SER2_PORT_FIFO(port))) {
-    EmSerialFifoQueue *q = emSerialRxQueues[port];
+  if (EM_SER1_PORT_EN(port) || EM_SER2_PORT_EN(port)) {
+    // FIFO with DMA
+    #if defined(FIFO_DMA_USED)
+    // take care of flow control
+    #if defined(EMBER_SERIAL1_RTSCTS)
+    // TODO this flow control will fail if port 2 is active
+    // If RTS is controlled by sw, this ISR is called when a buffer unloads.
+    if (causes & (EVENT_SC12_FLAG_RXULDA | EVENT_SC12_FLAG_RXULDB)) {
+      // Deassert RTS if the rx queue tail is not in an active DMA buffer:
+      // if it is, then there's at least one empty DMA buffer
+      if ( !((emSerialRxQueues[port]->tail < emSerialRxQueueSizes[port] / 2)
+             && (SCx_REG(port, DMASTAT) & SC_DMASTAT_RXACTA))
+           && !((emSerialRxQueues[port]->tail >= emSerialRxQueueSizes[port] / 2)
+                && (SCx_REG(port, DMASTAT) & SC_DMASTAT_RXACTB))) {
+        SCx_REG(port, UARTCFG) &= ~SC_UARTCFG_UARTRTS;             // deassert RTS
+      }
+        #ifdef EZSP_ASH
+      if (((causes & EVENT_SC12_FLAG_RXULDA) && (SC1_DMASTAT & SC_DMASTAT_RXOVFA))
+          || ((causes & EVENT_SC12_FLAG_RXULDB) && (SC1_DMASTAT & SC_DMASTAT_RXOVFB))) {
+        HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_OVERFLOW_ERROR);
+      }
+      if (((causes & EVENT_SC12_FLAG_RXULDA) && (SC1_DMASTAT & SC_DMASTAT_RXFRMA))
+          || ((causes & EVENT_SC12_FLAG_RXULDB) && (SC1_DMASTAT & SC_DMASTAT_RXFRMB))) {
+        HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_FRAMING_ERROR);
+      }
+      #else//!EZSP_ASH
+      causes &= ~(EVENT_SC12_FLAG_RXULDA | EVENT_SC12_FLAG_RXULDB);
+      if (causes == 0) {   // if no errors in addition, all done
+        return;
+      }
+      #endif//EZSP_ASH
+    }
+    #endif // RTSCTS
 
+    //Load all of the hardware status, then immediately reset so we can process
+    //what happened without worrying about new data changing these values.
+    //We're in an error condition anyways, so it is ok to have the DMA disabled
+    //for a while (less than 80us, while 4 bytes @ 115.2kbps is 350us)
+    EmSerialFifoQueue *q = emSerialRxQueues[port];
+    uint16_t status  = SCx_REG(port, DMASTAT);
+    uint16_t errCntA = SCx_REG(port, RXERRA);
+    uint16_t errCntB = SCx_REG(port, RXERRB);
+    uint32_t errorIdx = emSerialRxQueueSizes[port] * 2;
+    uint32_t tempIdx;
+    uint32_t startAddress = (uint32_t)q->fifo;
+
+    //interrupts acknowledged at the start of the master SC1 ISR
+    uint16_t intSrc  = causes;
+    uint8_t errorType = EMBER_SUCCESS;
+
+    SCx_REG(port, DMACTRL) = SC_DMACTRL_RXDMARST;   //to clear error
+    //state fully captured, DMA reset, now we process error and restart
+
+    if ( intSrc & EVENT_SC12_FLAG_RXOVF ) {
+      //Read the data register four times to clear
+      //the RXOVERRUN condition and empty the FIFO, giving us 4 bytes
+      //worth of time (from this point) to reenable the DMA.
+      (void) SCx_REG(port, DATA);
+      (void) SCx_REG(port, DATA);
+      (void) SCx_REG(port, DATA);
+      (void) SCx_REG(port, DATA);
+
+      if ( status & (SC_DMASTAT_RXFRMA
+                     | SC_DMASTAT_RXFRMB
+                     | SC_DMASTAT_RXPARA
+                     | SC_DMASTAT_RXPARB)) {
+        //We just emptied hardware FIFO so the overrun condition is cleared.
+        //Byte errors require special handling to roll back the serial FIFO.
+        goto dealWithByteError;
+      }
+
+      //record the error type
+      emSerialRxError[port] = EMBER_SERIAL_RX_OVERRUN_ERROR;
+
+      //check for a retriggering of the Rx overflow, don't advance FIFO if so
+      if ( !(BUFSTATE(port)->waitingForTailA && BUFSTATE(port)->waitingForTailB)) {
+        //first, move head to end of buffer head is in
+        //second, move head to end of other buffer if tail is not in other buffer
+        if ((q->head) < BUFSTATE(port)->rxStartIndexB) {
+          //head inside A
+          q->used += (BUFSTATE(port)->rxStartIndexB - q->head);
+          q->head = (BUFSTATE(port)->rxStartIndexB);
+          if ((q->tail) < BUFSTATE(port)->rxStartIndexB) {
+            //tail not inside of B
+            q->used += BUFSTATE(port)->rxStartIndexB;
+            q->head = 0;
+          }
+        } else {
+          //head inside B
+          q->used += (BUFSTATE(port)->fifoSize - q->head);
+          q->head = 0;
+          if ((q->tail) >= BUFSTATE(port)->rxStartIndexB) {
+            //tail is not inside of A
+            q->used += BUFSTATE(port)->rxStartIndexB;
+            q->head = BUFSTATE(port)->rxStartIndexB;
+          }
+        }
+      }
+
+      //Record the error position in the serial FIFO
+      if (q->used != BUFSTATE(port)->fifoSize) {
+        //mark the byte at q->head as the error
+        emSerialRxErrorIndex[port] = q->head;
+      } else {
+        //Since the FIFO is full, the error index needs special handling
+        //so there is no conflict between the head and tail looking at the same
+        //index which needs to be marked as an error.
+        emSerialRxErrorIndex[port] = RX_FIFO_FULL;
+      }
+
+      //By now the error is accounted for and the DMA hardware is reset.
+      //By definition, the overrun error means we have no room left, therefore
+      //we can't reenable the DMA.  Reset the previous counter states, and set
+      //the waitingForTail flags to true - this tells the Pump function we have
+      //data to process.  The Pump function will reenable the buffers as they
+      //become available, just like normal.
+      BUFSTATE(port)->prevCountA = 0;
+      BUFSTATE(port)->prevCountB = 0;
+      BUFSTATE(port)->waitingForInputToB = false;
+      BUFSTATE(port)->waitingForTailA = true;
+      BUFSTATE(port)->waitingForTailB = true;
+      //from this point we fall through to the end of the Isr and return.
+    } else {
+      dealWithByteError:
+      //We have a byte error to deal with and possibly more than one byte error,
+      //of different types in different DMA buffers, so check each error flag.
+      //All four error checks translate the DMA buffer's error position to their
+      //position in the serial FIFO, and compares the error locations to find
+      //the first error to occur after the head of the FIFO.  This error is the
+      //error condition that is stored and operated on.
+      if ( status & SC_DMASTAT_RXFRMA ) {
+        tempIdx = errCntA;
+        if (tempIdx < q->head) {
+          tempIdx += BUFSTATE(port)->fifoSize;
+        }
+        if (tempIdx < errorIdx) {
+          errorIdx = tempIdx;
+        }
+        errorType = EMBER_SERIAL_RX_FRAME_ERROR;
+      }
+      if ( status & SC_DMASTAT_RXFRMB ) {
+        tempIdx = (errCntB + SCx_REG(port, RXBEGB)) - startAddress;
+        if (tempIdx < q->head) {
+          tempIdx += BUFSTATE(port)->fifoSize;
+        }
+        if (tempIdx < errorIdx) {
+          errorIdx = tempIdx;
+        }
+        errorType = EMBER_SERIAL_RX_FRAME_ERROR;
+      }
+      if ( status & SC_DMASTAT_RXPARA ) {
+        tempIdx = errCntA;
+        if (tempIdx < q->head) {
+          tempIdx += BUFSTATE(port)->fifoSize;
+        }
+        if (tempIdx < errorIdx) {
+          errorIdx = tempIdx;
+        }
+        errorType = EMBER_SERIAL_RX_PARITY_ERROR;
+      }
+      if ( status & SC_DMASTAT_RXPARB ) {
+        tempIdx = (errCntB + SCx_REG(port, RXBEGB)) - startAddress;
+        if (tempIdx < q->head) {
+          tempIdx += BUFSTATE(port)->fifoSize;
+        }
+        if (tempIdx < errorIdx) {
+          errorIdx = tempIdx;
+        }
+        errorType = EMBER_SERIAL_RX_PARITY_ERROR;
+      }
+
+      //We now know the type and location of the first error.
+      //Move up to the error location and increase the used count.
+      q->head = (errorIdx % BUFSTATE(port)->fifoSize);
+      if (q->head < q->tail) {
+        q->used = ((q->head + BUFSTATE(port)->fifoSize) - q->tail);
+      } else {
+        q->used = (q->head - q->tail);
+      }
+
+      //Mark the byte at q->head as the error
+      emSerialRxError[port] = errorType;
+      if (q->used != BUFSTATE(port)->fifoSize) {
+        //mark the byte at q->head as the error
+        emSerialRxErrorIndex[port] = q->head;
+      } else {
+        //Since the FIFO is full, the error index needs special handling
+        //so there is no conflict between the head and tail looking at the same
+        //index which needs to be marked as an error.
+        emSerialRxErrorIndex[port] = RX_FIFO_FULL;
+      }
+
+      //By now the error is accounted for and the DMA hardware is reset.
+      halInternalRestartUartDma(port);
+    }
+
+    #else // not DMA
+
+    EmSerialFifoQueue *q = emSerialRxQueues[port];
     // At present we really don't care which interrupt(s)
     // occurred, just that one did.  Loop reading RXVALID
     // data (loop is necessary for bursty data otherwise
@@ -1004,7 +1163,7 @@ void halInternalUartRxIsr(uint8_t port, uint16_t causes)
 
       if ((errors == 0) && (q->used < (emSerialRxQueueSizes[port] - 1))) {
 #ifdef EMBER_SERIAL1_XONXOFF
-        if (EM_SER1_PORT_FIFO(port)) {
+        if (EM_SER1_PORT_EN(port)) {
           // Discard any XON or XOFF bytes received
           if ((incoming != ASCII_XON) && (incoming != ASCII_XOFF)) {
             FIFO_ENQUEUE(q, incoming, emSerialRxQueueWraps[port]);
@@ -1034,214 +1193,16 @@ void halInternalUartRxIsr(uint8_t port, uint16_t causes)
         uartErrorMark(port, errors);
       }
 #ifdef EMBER_SERIAL1_XONXOFF
-      if (EM_SER1_PORT_FIFO(port)
+      if (EM_SER1_PORT_EN(port)
           && (q->used >= XOFF_LIMIT) && (xcmdCount >= 0)) {
         xonXoffTxByte = ASCII_XOFF;
         halInternalStartUartTx(1);
       }
-#endif
+#endif // XONXOFF
     }   // end of while ( SC1_UARTSTAT & SC1_UARTRXVAL )
+  #endif // DMA
   }
-  #endif
-
-  #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER_MULTI(EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port))) {
-    #ifdef EMBER_SERIAL1_RTSCTS
-    // TODO this flow control will fail if port 2 is active
-    // If RTS is controlled by sw, this ISR is called when a buffer unloads.
-    if (causes & (EVENT_SC12_FLAG_RXULDA | EVENT_SC12_FLAG_RXULDB)) {
-      // Deassert RTS if the rx queue tail is not in an active DMA buffer:
-      // if it is, then there's at least one empty DMA buffer
-      if ( !((emSerialRxQueues[port]->tail < emSerialRxQueueSizes[port] / 2)
-             && (SCx_REG(port, DMASTAT) & SC_DMASTAT_RXACTA))
-           && !((emSerialRxQueues[port]->tail >= emSerialRxQueueSizes[port] / 2)
-                && (SCx_REG(port, DMASTAT) & SC_DMASTAT_RXACTB))) {
-        SCx_REG(port, UARTCFG) &= ~SC_UARTCFG_UARTRTS;           // deassert RTS
-      }
-      #ifdef EZSP_ASH
-      if (((causes & EVENT_SC12_FLAG_RXULDA) && (SC1_DMASTAT & SC_DMASTAT_RXOVFA))
-          || ((causes & EVENT_SC12_FLAG_RXULDB) && (SC1_DMASTAT & SC_DMASTAT_RXOVFB))) {
-        HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_OVERFLOW_ERROR);
-      }
-      if (((causes & EVENT_SC12_FLAG_RXULDA) && (SC1_DMASTAT & SC_DMASTAT_RXFRMA))
-          || ((causes & EVENT_SC12_FLAG_RXULDB) && (SC1_DMASTAT & SC_DMASTAT_RXFRMB))) {
-        HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_FRAMING_ERROR);
-      }
-      #else//!EZSP_ASH
-      causes &= ~(EVENT_SC12_FLAG_RXULDA | EVENT_SC12_FLAG_RXULDB);
-      if (causes == 0) {   // if no errors in addition, all done
-        return;
-      }
-      #endif//EZSP_ASH
-    }
-    #endif  //#ifdef EMBER_SERIAL1_RTSCTS
-    #ifndef EZSP_ASH
-    //Load all of the hardware status, then immediately reset so we can process
-    //what happened without worrying about new data changing these values.
-    //We're in an error condition anyways, so it is ok to have the DMA disabled
-    //for a while (less than 80us, while 4 bytes @ 115.2kbps is 350us)
-    {
-      EmSerialFifoQueue *q = emSerialRxQueues[port];
-      uint16_t status  = SCx_REG(port, DMASTAT);
-      uint16_t errCntA = SCx_REG(port, RXERRA);
-      uint16_t errCntB = SCx_REG(port, RXERRB);
-      uint32_t errorIdx = emSerialRxQueueSizes[port] * 2;
-      uint32_t tempIdx;
-      uint32_t startAddress = (uint32_t)q->fifo;
-
-      //interrupts acknowledged at the start of the master SC1 ISR
-      uint16_t intSrc  = causes;
-      uint8_t errorType = EMBER_SUCCESS;
-
-      SCx_REG(port, DMACTRL) = SC_DMACTRL_RXDMARST;   //to clear error
-      //state fully captured, DMA reset, now we process error and restart
-
-      if ( intSrc & EVENT_SC12_FLAG_RXOVF ) {
-        //Read the data register four times to clear
-        //the RXOVERRUN condition and empty the FIFO, giving us 4 bytes
-        //worth of time (from this point) to reenable the DMA.
-        (void) SCx_REG(port, DATA);
-        (void) SCx_REG(port, DATA);
-        (void) SCx_REG(port, DATA);
-        (void) SCx_REG(port, DATA);
-
-        if ( status & (SC_DMASTAT_RXFRMA
-                       | SC_DMASTAT_RXFRMB
-                       | SC_DMASTAT_RXPARA
-                       | SC_DMASTAT_RXPARB)) {
-          //We just emptied hardware FIFO so the overrun condition is cleared.
-          //Byte errors require special handling to roll back the serial FIFO.
-          goto dealWithByteError;
-        }
-
-        //record the error type
-        emSerialRxError[port] = EMBER_SERIAL_RX_OVERRUN_ERROR;
-
-        //check for a retriggering of the Rx overflow, don't advance FIFO if so
-        if ( !(BUFSTATE(port)->waitingForTailA && BUFSTATE(port)->waitingForTailB)) {
-          //first, move head to end of buffer head is in
-          //second, move head to end of other buffer if tail is not in other buffer
-          if ((q->head) < BUFSTATE(port)->rxStartIndexB) {
-            //head inside A
-            q->used += (BUFSTATE(port)->rxStartIndexB - q->head);
-            q->head = (BUFSTATE(port)->rxStartIndexB);
-            if ((q->tail) < BUFSTATE(port)->rxStartIndexB) {
-              //tail not inside of B
-              q->used += BUFSTATE(port)->rxStartIndexB;
-              q->head = 0;
-            }
-          } else {
-            //head inside B
-            q->used += (BUFSTATE(port)->fifoSize - q->head);
-            q->head = 0;
-            if ((q->tail) >= BUFSTATE(port)->rxStartIndexB) {
-              //tail is not inside of A
-              q->used += BUFSTATE(port)->rxStartIndexB;
-              q->head = BUFSTATE(port)->rxStartIndexB;
-            }
-          }
-        }
-
-        //Record the error position in the serial FIFO
-        if (q->used != BUFSTATE(port)->fifoSize) {
-          //mark the byte at q->head as the error
-          emSerialRxErrorIndex[port] = q->head;
-        } else {
-          //Since the FIFO is full, the error index needs special handling
-          //so there is no conflict between the head and tail looking at the same
-          //index which needs to be marked as an error.
-          emSerialRxErrorIndex[port] = RX_FIFO_FULL;
-        }
-
-        //By now the error is accounted for and the DMA hardware is reset.
-        //By definition, the overrun error means we have no room left, therefore
-        //we can't reenable the DMA.  Reset the previous counter states, and set
-        //the waitingForTail flags to true - this tells the Pump function we have
-        //data to process.  The Pump function will reenable the buffers as they
-        //become available, just like normal.
-        BUFSTATE(port)->prevCountA = 0;
-        BUFSTATE(port)->prevCountB = 0;
-        BUFSTATE(port)->waitingForInputToB = false;
-        BUFSTATE(port)->waitingForTailA = true;
-        BUFSTATE(port)->waitingForTailB = true;
-        //from this point we fall through to the end of the Isr and return.
-      } else {
-        dealWithByteError:
-        //We have a byte error to deal with and possibly more than one byte error,
-        //of different types in different DMA buffers, so check each error flag.
-        //All four error checks translate the DMA buffer's error position to their
-        //position in the serial FIFO, and compares the error locations to find
-        //the first error to occur after the head of the FIFO.  This error is the
-        //error condition that is stored and operated on.
-        if ( status & SC_DMASTAT_RXFRMA ) {
-          tempIdx = errCntA;
-          if (tempIdx < q->head) {
-            tempIdx += BUFSTATE(port)->fifoSize;
-          }
-          if (tempIdx < errorIdx) {
-            errorIdx = tempIdx;
-          }
-          errorType = EMBER_SERIAL_RX_FRAME_ERROR;
-        }
-        if ( status & SC_DMASTAT_RXFRMB ) {
-          tempIdx = (errCntB + SCx_REG(port, RXBEGB)) - startAddress;
-          if (tempIdx < q->head) {
-            tempIdx += BUFSTATE(port)->fifoSize;
-          }
-          if (tempIdx < errorIdx) {
-            errorIdx = tempIdx;
-          }
-          errorType = EMBER_SERIAL_RX_FRAME_ERROR;
-        }
-        if ( status & SC_DMASTAT_RXPARA ) {
-          tempIdx = errCntA;
-          if (tempIdx < q->head) {
-            tempIdx += BUFSTATE(port)->fifoSize;
-          }
-          if (tempIdx < errorIdx) {
-            errorIdx = tempIdx;
-          }
-          errorType = EMBER_SERIAL_RX_PARITY_ERROR;
-        }
-        if ( status & SC_DMASTAT_RXPARB ) {
-          tempIdx = (errCntB + SCx_REG(port, RXBEGB)) - startAddress;
-          if (tempIdx < q->head) {
-            tempIdx += BUFSTATE(port)->fifoSize;
-          }
-          if (tempIdx < errorIdx) {
-            errorIdx = tempIdx;
-          }
-          errorType = EMBER_SERIAL_RX_PARITY_ERROR;
-        }
-
-        //We now know the type and location of the first error.
-        //Move up to the error location and increase the used count.
-        q->head = (errorIdx % BUFSTATE(port)->fifoSize);
-        if (q->head < q->tail) {
-          q->used = ((q->head + BUFSTATE(port)->fifoSize) - q->tail);
-        } else {
-          q->used = (q->head - q->tail);
-        }
-
-        //Mark the byte at q->head as the error
-        emSerialRxError[port] = errorType;
-        if (q->used != BUFSTATE(port)->fifoSize) {
-          //mark the byte at q->head as the error
-          emSerialRxErrorIndex[port] = q->head;
-        } else {
-          //Since the FIFO is full, the error index needs special handling
-          //so there is no conflict between the head and tail looking at the same
-          //index which needs to be marked as an error.
-          emSerialRxErrorIndex[port] = RX_FIFO_FULL;
-        }
-
-        //By now the error is accounted for and the DMA hardware is reset.
-        halInternalRestartUartDma(port);
-      }
-    }
-    #endif // #ifndef EZSP_ASH
-  }
-  #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO
 }
 
 #endif//!defined(EM_SERIAL1_DISABLED)
@@ -1272,8 +1233,8 @@ void halInternalUart3RxIsr(uint8_t *rxData, uint8_t length, bool *rxPause)
 
 void halInternalUartRxPump(uint8_t port)
 {
-  #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port)) {
+  #if defined(EM_ENABLE_SERIAL_FIFO) && defined(FIFO_DMA_USED)
+  if (EM_SER1_PORT_EN(port) || EM_SER2_PORT_EN(port)) {
     EmSerialFifoQueue *q = emSerialRxQueues[port];
     uint8_t tail, head;
     uint16_t count = 0;
@@ -1367,10 +1328,10 @@ void halInternalUartRxPump(uint8_t port)
     }
     halInternalUartRxCheckRts(port);
   }
-  #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+  #endif // FIFO DMA mode
 
   #if EM_SERIAL3_ENABLED
-  if (EM_SER3_PORT_FIFO(port) || EM_SER3_PORT_BUFFER(port)) {
+  if (EM_SER3_PORT_EN(port)) {
     EmSerialFifoQueue *q = emSerialRxQueues[port];
     if ((usbNAK == true)
         && (EMBER_SERIAL3_RX_QUEUE_SIZE - q->used > CDC_EP_SIZE)) {
@@ -1413,10 +1374,11 @@ bool halInternalUartFlowControlRxIsEnabled(uint8_t port)
 }
 
 #endif
+
 #ifdef EMBER_SERIAL1_XONXOFF
 bool halInternalUartFlowControlRxIsEnabled(uint8_t port)
 {
-  xonTimer = halCommonGetInt16uQuarterSecondTick(); //FIXME move into new func?
+  xonTimer = halCommonGetInt16uQuarterSecondTick();   //FIXME move into new func?
   return ((xonXoffTxByte == 0) && (xcmdCount > 0));
 }
 
@@ -1442,114 +1404,138 @@ bool halInternalUartTxIsIdle(uint8_t port)
 
 #if defined(EM_PHYSICAL_UART)
 // If called outside of an ISR, it should be from within an ATOMIC block.
-static void halInternalUartTxIsr(uint8_t port)
+static void halInternalUartTxIsr(uint8_t port, uint16_t causes)
 {
   #if defined(EM_ENABLE_SERIAL_FIFO)
-  if (EM_SER_MULTI(EM_SER1_PORT_FIFO(port) || EM_SER2_PORT_FIFO(port))) {
-    EmSerialFifoQueue *q = (EmSerialFifoQueue *)emSerialTxQueues[port];
+  EmSerialFifoQueue *q = (EmSerialFifoQueue *)emSerialTxQueues[port];
 
-    // At present we really don't care which interrupt(s)
-    // occurred, just that one did.  Loop while there is
-    // room to send more data and we've got more data to
-    // send.  For UART there is no error detection.
+  // At present we really don't care which interrupt(s)
+  // occurred, just that one did.  Loop while there is
+  // room to send more data and we've got more data to
+  // send.  For UART there is no error detection.
 
 #ifdef EMBER_SERIAL1_XONXOFF
-    // Sending an XON or XOFF takes priority over data in the tx queue.
-    if (xonXoffTxByte && (SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTTXFREE)) {
-      SCx_REG(port, DATA) = xonXoffTxByte;
-      if (xonXoffTxByte == ASCII_XOFF) {
-        xcmdCount = -1;
-        HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_XOFF);
-      } else {
-        xcmdCount = (xcmdCount < 0) ? 1 : xcmdCount + 1;
-      }
-      xonXoffTxByte = 0;      // clear to indicate XON/XOFF was sent
-    }
-#endif
-    while ((q->used > 0) && (SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTTXFREE)) {
-      SCx_REG(port, DATA) = FIFO_DEQUEUE(q, emSerialTxQueueWraps[port]);
+  // Sending an XON or XOFF takes priority over data in the tx queue.
+  if (xonXoffTxByte && (SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTTXFREE)) {
+    SCx_REG(port, DATA) = xonXoffTxByte;
+    if (xonXoffTxByte == ASCII_XOFF) {
+      xcmdCount = -1;
+      HANDLE_ASH_ERROR(EMBER_COUNTER_ASH_XOFF);
+    } else {
+      xcmdCount = (xcmdCount < 0) ? 1 : xcmdCount + 1;
     }
   }
-  #endif
-  #if defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
-  if (EM_SER_MULTI(EM_SER1_PORT_BUFFER(port) || EM_SER2_PORT_BUFFER(port))) {
-    EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
+#endif // XONXOFF
 
-    // The only interrupts we care about here are UNLOAD's and IDLE.
-    // Our algorithm doesn't really care which interrupt occurred,
-    // or even if one really didn't.  If there is data to send and
-    // a DMA channel available to send it, then out it goes.
+  #if defined(FIFO_DMA_USED)
+  uint16_t cnt;
+  //interrupts acknowledged at the start of the master SC1 ISR
 
-    assert(!((q->used == 0) && (q->nextByte != NULL)));
-    while ( q->used > 0 ) {
-      if ( q->nextByte == NULL ) {
-        // new message pending, but nextByte not set up yet
-        emSerialBufferNextMessageIsr(q);
+  // The only interrupts we care about here are UNLOAD's and IDLE.
+  // Unload the A and B buffers if they are ready, and aside from that
+  // if there is data to send and a DMA channel available to send it, then
+  // out it goes.
+
+  // if waiting for unload
+  if (TX_BUFSTATE(port)->waitingForUnload) {
+    // if buffer A has been unloaded
+    if (causes & EVENT_SC12_FLAG_TXULDA) {
+      if (!TX_BUFSTATE(port)->usingBufferB) {
+        // if only using buffer A, unload using TXCNT
+        for (cnt = SCx_REG(port, TXCNT); cnt != 0U; cnt--) {
+          FIFO_DEQUEUE(q, emSerialTxQueueWraps[port]);
+        }
+        // buffer is done being used
+        TX_BUFSTATE(port)->waitingForUnload = false;
+      } else {
+        // if using both buffers wait for a TXULDB event to unload
       }
+    }
 
-      // Something to send: do we have a DMA channel to send it on?
-      // Probe for an available channel by checking the channel's
-      // SC1_DMACTRL.TX_LOAD   == 0 (channel unloaded) &&
-      // SC1_DMASTAT.TX_ACTIVE == 0 (channel not active)
-      // The latter check should be superfluous but is a safety mechanism.
-      if ( !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODA)
-           && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTA)) {
-        // Channel A is available
-        SCx_REG(port, TXBEGA)  = (uint32_t)q->nextByte;
-        SCx_REG(port, TXENDA) = (uint32_t)q->lastByte;
-        EVENT_SCxFLAG(port) = EVENT_SC12_FLAG_TXULDA;   // Ack if pending
+    // if buffer B has been unloaded
+    if (causes & EVENT_SC12_FLAG_TXULDB) {
+      // this means both buffers have been unloaded, so dequeue all bytes that
+      // were used in them
+      uint32_t txBegA = SCx_REG(port, TXBEGA);
+      uint32_t txEndA = SCx_REG(port, TXENDA);
+      uint32_t txBegB = SCx_REG(port, TXBEGB);
+      uint32_t txEndB = SCx_REG(port, TXENDB);
+
+      // set number of bytes to dequeue
+      cnt = (txEndA - txBegA + 1) + (txEndB - txBegB + 1);
+      // dequeue all of the bytes from DMA buffer B
+      // equal to q->used
+      while (cnt > 0) {
+        FIFO_DEQUEUE(q, emSerialTxQueueWraps[port]);
+        cnt--;
+      }
+      // done unloading buffers
+      TX_BUFSTATE(port)->waitingForUnload = false;
+    }
+  }
+  // if have data ready to be sent and not waiting for DMA to finish
+  if (q->used > 0 && !TX_BUFSTATE(port)->waitingForUnload) {
+    // restart DMA
+    halInternalRestartUartDma(port);
+
+    uint16_t dataStartIndex;
+    uint16_t dataEndIndex;
+    // The DMA channel stops using a buffer and unloads it when (DMA buffer start
+    // address + DMA buffer count) > DMA buffer end address
+    // Therefore the end address for each buffer must be assigned to (end index - 1)
+
+    // make sure both buffers are available by checking the channel's
+    // SC1_DMACTRL.TX_LOAD   == 0 (channel unloaded) &&
+    // SC1_DMASTAT.TX_ACTIVE == 0 (channel not active)
+    // The latter check should be superfluous but is a safety mechanism.
+    if ( !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODA)
+         && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTA)
+         && !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODB)
+         && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTB)) {
+      // the data that we want to send is between q->tail and q->head - 1
+      dataStartIndex = q->tail;
+      dataEndIndex = ((q->head == 0) ? TX_BUFSTATE(port)->fifoSize : q->head) - 1U;
+
+      if (dataEndIndex < dataStartIndex) {
+        // if the end of the data to send has wrapped around to front of queue
+        // we use both buffers, A for the head to end of queue, and B for the
+        // start of queue to the tail
+        TX_BUFSTATE(port)->usingBufferB = true;
+        SCx_REG(port, TXBEGA) = (uint32_t)&q->fifo[dataStartIndex];
+        SCx_REG(port, TXENDA) = (uint32_t)&q->fifo[TX_BUFSTATE(port)->fifoSize - 1];
+        SCx_REG(port, TXBEGB) = (uint32_t)&q->fifo[0];
+        SCx_REG(port, TXENDB) = (uint32_t)&q->fifo[dataEndIndex];
+
+        // ack if pending
+        EVENT_SCxFLAG(port) = EVENT_SC12_FLAG_TXULDA;
+        EVENT_SCxFLAG(port) = EVENT_SC12_FLAG_TXULDB;
+
+        // load DMA
         SCx_REG(port, DMACTRL) = SC_DMACTRL_TXLODA;
-        // Release previously held buffer and hold the newly-loaded one
-        // so we can safely use emSerialBufferNextBlockIsr() to check for
-        // more data to send without the risk of reusing a buffer we're
-        // in the process of DMA-ing.
-        if (BUFSTATE(port)->holdBuf[0] != EMBER_NULL_MESSAGE_BUFFER) {
-          emberReleaseMessageBuffer(BUFSTATE(port)->holdBuf[0]);
-        }
-        BUFSTATE(port)->holdBuf[0] = q->currentBuffer;
-        emberHoldMessageBuffer(BUFSTATE(port)->holdBuf[0]);
-        emSerialBufferNextBlockIsr(q, port);
-      } else
-      if ( !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODB)
-           && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTB)) {
-        // Channel B is available
-        SCx_REG(port, TXBEGB)  = (uint32_t)q->nextByte;
-        SCx_REG(port, TXENDB) = (uint32_t)q->lastByte;
-        EVENT_SCxFLAG(port) = EVENT_SC12_FLAG_TXULDB;   // Ack if pending
         SCx_REG(port, DMACTRL) = SC_DMACTRL_TXLODB;
-        // Release previously held buffer and hold the newly-loaded one
-        // so we can safely use emSerialBufferNextBlockIsr() to check for
-        // more data to send without the risk of reusing a buffer we're
-        // in the process of DMA-ing.
-        if (BUFSTATE(port)->holdBuf[1] != EMBER_NULL_MESSAGE_BUFFER) {
-          emberReleaseMessageBuffer(BUFSTATE(port)->holdBuf[1]);
-        }
-        BUFSTATE(port)->holdBuf[1] = q->currentBuffer;
-        emberHoldMessageBuffer(BUFSTATE(port)->holdBuf[1]);
-        emSerialBufferNextBlockIsr(q, port);
       } else {
-        // No channels available; can't send anything now so break out of loop
-        break;
-      }
-    }   // while ( q->used > 0 )
+        // if no wrapping, just use buffer A
+        TX_BUFSTATE(port)->usingBufferB = false;
+        SCx_REG(port, TXBEGA) = (uint32_t)&q->fifo[dataStartIndex];
+        SCx_REG(port, TXENDA) = (uint32_t)&q->fifo[dataEndIndex];
 
-    // Release previously-held buffer(s) from an earlier DMA operation
-    // if that channel is now free (i.e. it's completed the DMA and we
-    // didn't need to use that channel for more output in this call).
-    if ((BUFSTATE(port)->holdBuf[0] != EMBER_NULL_MESSAGE_BUFFER)
-        && !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODA)
-        && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTA)) {
-      emberReleaseMessageBuffer(BUFSTATE(port)->holdBuf[0]);
-      BUFSTATE(port)->holdBuf[0] = EMBER_NULL_MESSAGE_BUFFER;
+        // ack if pending
+        EVENT_SCxFLAG(port) = EVENT_SC12_FLAG_TXULDA;
+
+        // load DMA
+        SCx_REG(port, DMACTRL) = SC_DMACTRL_TXLODA;
+      }
+      TX_BUFSTATE(port)->waitingForUnload = true;
     }
-    if ((BUFSTATE(port)->holdBuf[1] != EMBER_NULL_MESSAGE_BUFFER)
-        && !(SCx_REG(port, DMACTRL) & SC_DMACTRL_TXLODB)
-        && !(SCx_REG(port, DMASTAT) & SC_DMASTAT_TXACTB)) {
-      emberReleaseMessageBuffer(BUFSTATE(port)->holdBuf[1]);
-      BUFSTATE(port)->holdBuf[1] = EMBER_NULL_MESSAGE_BUFFER;
-    }
+  }   // if (q->used > 0)
+    #else
+  // non DMA
+  // if tx is free, send data
+  while ((q->used > 0) && (SCx_REG(port, UARTSTAT) & SC_UARTSTAT_UARTTXFREE)) {
+    SCx_REG(port, DATA) = FIFO_DEQUEUE(q, emSerialTxQueueWraps[port]);
   }
-  #endif // defined(EM_ENABLE_SERIAL_BUFFER) && (EM_SERIAL1_ENABLED || EM_SERIAL2_ENABLED)
+    #endif // FIFO DMA mode
+  #endif // FIFO
 }
 
 #endif // defined(EM_PHYSICAL_UART)
@@ -1584,7 +1570,8 @@ void halInternalPowerDownUart(void)
   SC3_UARTFRAC_SAVED = SC3->UARTFRAC;
   SC3_UARTCFG_SAVED = SC3->UARTCFG;
   // TODO SC3_TXD_GPIO(GPIOCFG_OUT, 1); // Avoid gitching TxD going down
-  #endif // EM_SERIAL1_ENABLED
+  #endif // EM_SERIAL2_ENABLED
+
   #if EM_SERIAL3_ENABLED || defined (USB_MSD) || defined (USB_HID)
     #if defined(CORTEXM3_EM35X_USB)
       #ifndef USB_SUSPEND
@@ -1670,7 +1657,7 @@ void halInternalUartFlowControl(uint8_t port)
 // Must be called from within an ATOMIC block.
 static void halInternalUart1ForceXon(void)
 {
-  if (xonXoffTxByte == ASCII_XOFF) {  // if XOFF waiting to be sent, cancel it
+  if (xonXoffTxByte == ASCII_XOFF) {   // if XOFF waiting to be sent, cancel it
     xonXoffTxByte = 0;
     xcmdCount = 0;
   } else {                            // else, send XON and record the time
@@ -1720,7 +1707,7 @@ void halSc1Isr(void)
                     | EVENT_SC12_FLAG_TXULDA     // TX DMA A has room
                     | EVENT_SC12_FLAG_TXULDB)    // TX DMA B has room
        ) != 0U) {
-    halInternalUartTxIsr(1);
+    halInternalUartTxIsr(1, interrupt);
   }
 
   #if (EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO)
@@ -1770,7 +1757,7 @@ void halSc3Isr(void)
                     | EVENT_SC12_FLAG_TXULDA     // TX DMA A has room
                     | EVENT_SC12_FLAG_TXULDB)    // TX DMA B has room
        ) {
-    halInternalUartTxIsr(2);
+    halInternalUartTxIsr(2, interrupt);
   }
 
   #if (EMBER_SERIAL2_MODE == EMBER_SERIAL_FIFO)

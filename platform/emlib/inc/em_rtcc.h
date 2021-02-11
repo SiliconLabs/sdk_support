@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RTCC
+ * @addtogroup rtcc
  * @{
  ******************************************************************************/
 
@@ -165,6 +160,7 @@ typedef enum {
  *  a RTCC channel. */
 typedef uint8_t RTCC_PRSSel_TypeDef;
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /** Deprecated PRS channel values. New code should use an integer instead of
  *  using these deprecated enum values. */
 #define rtccPRSCh0    0U
@@ -179,6 +175,7 @@ typedef uint8_t RTCC_PRSSel_TypeDef;
 #define rtccPRSCh9    9U
 #define rtccPRSCh10  10U
 #define rtccPRSCh11  11U
+/** @endcond */
 
 /** Input edge select. */
 typedef enum {
@@ -881,7 +878,7 @@ __STATIC_INLINE void RTCC_SyncWait(void)
  * @brief
  *   Start RTCC counter.
  *
- * @detail
+ * @details
  *   This function will send a start command to the RTCC peripheral. The RTCC
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref RTCC_SyncWait() function can be used to wait for the start command
@@ -900,7 +897,7 @@ __STATIC_INLINE void RTCC_Start(void)
  * @brief
  *   Stop the RTCC counter.
  *
- * @detail
+ * @details
  *   This function will send a stop command to the RTCC peripheral. The RTCC
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref RTCC_SyncWait() function can be used to wait for the stop command
@@ -973,8 +970,7 @@ __STATIC_INLINE void RTCC_Unlock(void)
 #endif
 }
 
-/** @} (end addtogroup RTCC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup rtcc) */
 
 #ifdef __cplusplus
 }

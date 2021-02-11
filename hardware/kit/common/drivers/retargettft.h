@@ -30,6 +30,10 @@
 #ifndef __RETARGETTFT_H
 #define __RETARGETTFT_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The retarget TFT driver is deprecated and marked for removal in a later release."
+#endif
+
 /***************************************************************************//**
  * @addtogroup kitdrv
  * @{

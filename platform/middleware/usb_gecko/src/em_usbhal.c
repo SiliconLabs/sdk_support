@@ -79,7 +79,7 @@ char *USB_GetErrorMsgString(int error)
   return (char*)errMsg[-error];
 }
 
-#if defined(USB_USE_PRINTF)
+#if defined(USB_USE_PRINTF) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief
  *   Format and print a text string given an error code, prepends an optional user

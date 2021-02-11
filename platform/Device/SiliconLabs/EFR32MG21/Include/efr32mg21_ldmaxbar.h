@@ -80,4 +80,5 @@ typedef struct {
 /** @} End of group EFR32MG21_LDMAXBAR_BitFields */
 /** @} End of group EFR32MG21_LDMAXBAR */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_LDMAXBAR_H */

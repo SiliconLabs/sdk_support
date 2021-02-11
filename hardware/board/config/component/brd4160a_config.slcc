@@ -1,0 +1,15 @@
+!!omap
+- id: brd4160a_config
+- label: brd4160a config
+- description: Configuration files for BRD4160A
+- package: platform
+- category: Platform|Board|Config
+- quality: production
+- ui_hints:
+    visibility: never
+- root_path: hardware/board/config
+- requires:
+  - name: brd4160a
+- provides:
+  - name: brd4160a_config
+- config_file: []

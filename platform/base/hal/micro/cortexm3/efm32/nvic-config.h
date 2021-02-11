@@ -14,20 +14,33 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-#if defined (_EFR_DEVICE) || defined (CORTEXM3_EFR32_MICRO)
-    #if defined (EFR32_SERIES1_CONFIG4_MICRO)
-      #include "efr32/nvic-config-series1-config4.h"
-    #elif defined (EFR32_SERIES1_CONFIG3_MICRO)
-      #include "efr32/nvic-config-series1-config3.h"
-    #elif defined (EFR32_SERIES1_CONFIG2_MICRO)
-      #include "efr32/nvic-config-series1-config2.h"
-    #elif defined (EFR32_SERIES2_CONFIG1_MICRO)
-      #include "efr32/nvic-config-series2-config1.h"
-    #elif defined (EFR32_SERIES2_CONFIG2_MICRO)
-      #include "efr32/nvic-config-series2-config2.h"
-    #else
-      #include "efr32/nvic-config-series1-config1.h"
-    #endif
+#if !defined (CORTEXM3_EFR32)
+  #include "em_device.h"
+  #if defined (_SILICON_LABS_32B_SERIES_1_CONFIG_4)
+    #define EFR32_SERIES1_CONFIG4_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_1_CONFIG_3)
+    #define EFR32_SERIES1_CONFIG3_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_1_CONFIG_2)
+    #define EFR32_SERIES1_CONFIG2_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_1_CONFIG_1)
+    #define EFR32_SERIES1_CONFIG1_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+    #define EFR32_SERIES2_CONFIG1_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+    #define EFR32_SERIES2_CONFIG2_MICRO
+  #endif
+#endif
+
+#if defined (EFR32_SERIES1_CONFIG4_MICRO)
+  #include "efr32/nvic-config-series1-config4.h"
+#elif defined (EFR32_SERIES1_CONFIG3_MICRO)
+  #include "efr32/nvic-config-series1-config3.h"
+#elif defined (EFR32_SERIES1_CONFIG2_MICRO)
+  #include "efr32/nvic-config-series1-config2.h"
+#elif defined (EFR32_SERIES2_CONFIG1_MICRO)
+  #include "efr32/nvic-config-series2-config1.h"
+#elif defined (EFR32_SERIES2_CONFIG2_MICRO)
+  #include "efr32/nvic-config-series2-config2.h"
 #else
-    #error Unknown EFM32 micro
+  #include "efr32/nvic-config-series1-config1.h"
 #endif

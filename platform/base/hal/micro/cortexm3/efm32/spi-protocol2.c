@@ -292,7 +292,7 @@ static void nSSEL_ISR(uint8_t pin)
     // set TX packet header values
     uint16_t payloadLen = setTxHeader();
 
-    spiHandle->initData.port->CMD = USART_CMD_CLEARTX;
+    spiHandle->peripheral.usartPort->CMD = USART_CMD_CLEARTX;
 
     /* include tail padding.  this means that the padded bytes will be whatever
      * comes next in the buffer, possibly useful data, possibly garbage.  we're
@@ -304,7 +304,7 @@ static void nSSEL_ISR(uint8_t pin)
     if (txBuffer.head + packetLen <= NCP_SPI_BUFSIZE) {
       DMADRV_MemoryPeripheral(spiHandle->txDMACh,
                               spiHandle->txDMASignal,
-                              (void *)&(spiHandle->initData.port->TXDATA),
+                              (void *)&(spiHandle->peripheral.usartPort->TXDATA),
                               (void *)(txBuffer.buffer + txBuffer.head),
                               true,
                               packetLen,
@@ -321,7 +321,7 @@ static void nSSEL_ISR(uint8_t pin)
       *desc = m2pdesc;
       xfer.ldmaReqSel    = spiHandle->txDMASignal;
       desc->xfer.xferCnt = NCP_SPI_BUFSIZE - txBuffer.head - 1;
-      desc->xfer.dstAddr = (uint32_t)&(spiHandle->initData.port->TXDATA);
+      desc->xfer.dstAddr = (uint32_t)&(spiHandle->peripheral.usartPort->TXDATA);
       desc->xfer.srcAddr = (uint32_t)(txBuffer.buffer + txBuffer.head);
       desc->xfer.size    = dmadrvDataSize1;
       // Set next descriptor to mirror first but transfer from the begninning
@@ -450,12 +450,12 @@ static void restartSpiRx(void)
   // is used as the point where we begin
   // searching for the start of the packet
   // clear RX buffer
-  spiHandle->initData.port->CMD = USART_CMD_CLEARRX;
+  spiHandle->peripheral.usartPort->CMD = USART_CMD_CLEARRX;
   // Start new DMA transfer
   DMADRV_PeripheralMemory(spiHandle->rxDMACh,
                           spiHandle->rxDMASignal,
                           (void *) activeRxBuffer->buffer,
-                          (void *)&(spiHandle->initData.port->RXDATA),
+                          (void *)&(spiHandle->peripheral.usartPort->RXDATA),
                           true,
                           NCP_SPI_BUFSIZE - 1,
                           dmadrvDataSize1,

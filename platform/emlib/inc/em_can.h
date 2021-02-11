@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CAN
+ * @addtogroup can
  * @{
  ******************************************************************************/
 
@@ -583,8 +578,7 @@ __STATIC_INLINE void CAN_MessageIntSet(CAN_TypeDef *can, uint32_t flags)
   can->IF0IFS = flags;
 }
 
-/** @} (end addtogroup CAN) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup can) */
 
 #ifdef __cplusplus
 }

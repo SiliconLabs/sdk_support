@@ -157,287 +157,287 @@ typedef enum IRQn{
 #endif
 
 /** Configure part number */
-#define PART_NUMBER                              "EFR32MG22C224F512IM32" /**< Part Number */
+#define PART_NUMBER                                       "EFR32MG22C224F512IM32" /**< Part Number */
 
 /** Family / Line / Series / Config */
-#define _EFR32_MIGHTY_FAMILY                     1                                  /** Device Family Name Identifier */
-#define _EFR32_MG_FAMILY                         1                                  /** Device Family Identifier */
-#define _EFR_DEVICE                              1                                  /** Product Line Identifier */
-#define _SILICON_LABS_32B_SERIES_2                                                  /** Product Series Identifier */
-#define _SILICON_LABS_32B_SERIES                 2                                  /** Product Series Identifier */
-#define _SILICON_LABS_32B_SERIES_2_CONFIG_2                                         /** Product Config Identifier */
-#define _SILICON_LABS_32B_SERIES_2_CONFIG        2                                  /** Product Config Identifier */
-#define _SILICON_LABS_GECKO_INTERNAL_SDID        205                                /** Silicon Labs internal use only */
-#define _SILICON_LABS_GECKO_INTERNAL_SDID_205                                       /** Silicon Labs internal use only */
-#define _SILICON_LABS_SECURITY_FEATURE_SE        0                                  /** Secure Element */
-#define _SILICON_LABS_SECURITY_FEATURE_VAULT     1                                  /** Vault */
-#define _SILICON_LABS_SECURITY_FEATURE_ROT       2                                  /** Root Of Trust */
-#define _SILICON_LABS_SECURITY_FEATURE           _SILICON_LABS_SECURITY_FEATURE_ROT /** Security feature set */
-#define _SILICON_LABS_EFR32_RADIO_NONE           0                                  /** No radio present */
-#define _SILICON_LABS_EFR32_RADIO_SUBGHZ         1                                  /** Radio supports Sub-GHz */
-#define _SILICON_LABS_EFR32_RADIO_2G4HZ          2                                  /** Radio supports 2.4 GHz */
-#define _SILICON_LABS_EFR32_RADIO_DUALBAND       3                                  /** Radio supports dual band */
-#define _SILICON_LABS_EFR32_RADIO_TYPE           _SILICON_LABS_EFR32_RADIO_2G4HZ    /** Radio type */
-#define LFRCO_PRECISION_MODE                     1                                  /** Precision mode of LFRCO enabled or disabled */
+#define _EFR32_MIGHTY_FAMILY                              1                                  /** Device Family Name Identifier */
+#define _EFR32_MG_FAMILY                                  1                                  /** Device Family Identifier */
+#define _EFR_DEVICE                                       1                                  /** Product Line Identifier */
+#define _SILICON_LABS_32B_SERIES_2                                                           /** Product Series Identifier */
+#define _SILICON_LABS_32B_SERIES                          2                                  /** Product Series Identifier */
+#define _SILICON_LABS_32B_SERIES_2_CONFIG_2                                                  /** Product Config Identifier */
+#define _SILICON_LABS_32B_SERIES_2_CONFIG                 2                                  /** Product Config Identifier */
+#define _SILICON_LABS_GECKO_INTERNAL_SDID                 205                                /** Silicon Labs internal use only */
+#define _SILICON_LABS_GECKO_INTERNAL_SDID_205                                                /** Silicon Labs internal use only */
+#define _SILICON_LABS_SECURITY_FEATURE_SE                 0                                  /** Secure Element */
+#define _SILICON_LABS_SECURITY_FEATURE_VAULT              1                                  /** Vault */
+#define _SILICON_LABS_SECURITY_FEATURE_ROT                2                                  /** Root Of Trust */
+#define _SILICON_LABS_SECURITY_FEATURE                    _SILICON_LABS_SECURITY_FEATURE_ROT /** Security feature set */
+#define _SILICON_LABS_EFR32_RADIO_NONE                    0                                  /** No radio present */
+#define _SILICON_LABS_EFR32_RADIO_SUBGHZ                  1                                  /** Radio supports Sub-GHz */
+#define _SILICON_LABS_EFR32_RADIO_2G4HZ                   2                                  /** Radio supports 2.4 GHz */
+#define _SILICON_LABS_EFR32_RADIO_DUALBAND                3                                  /** Radio supports dual band */
+#define _SILICON_LABS_EFR32_RADIO_TYPE                    _SILICON_LABS_EFR32_RADIO_2G4HZ    /** Radio type */
+#define _SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM    6                                  /** Radio 2G4HZ HP PA output power */
+#define _SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT                                              /** Radio 2G4HZ HP PA is present */
+#define LFRCO_PRECISION_MODE                              1                                  /** Precision mode of LFRCO enabled or disabled */
 
 /** Memory Base addresses and limits */
-#define MSC_FLASH_MEM_BASE                       (0x00000000UL) /** MSC_FLASH base address */
-#define MSC_FLASH_MEM_SIZE                       (0x00080000UL) /** MSC_FLASH avaliable address space */
-#define MSC_FLASH_MEM_END                        (0x0007FFFFUL) /** MSC_FLASH end address */
-#define MSC_FLASH_MEM_BITS                       (0x14UL)       /** MSC_FLASH used bits */
-#define FLASH_MEM_BASE                           (0x00000000UL) /** FLASH_MEM base address */
-#define FLASH_MEM_SIZE                           (0x00080000UL) /** FLASH_MEM avaliable address space */
-#define FLASH_MEM_END                            (0x0007FFFFUL) /** FLASH_MEM end address */
-#define FLASH_MEM_BITS                           (0x14UL)       /** FLASH_MEM used bits */
-#define MSC_FLASH_USERDATA_MEM_BASE              (0x0FE00000UL) /** MSC_FLASH_USERDATA base address */
-#define MSC_FLASH_USERDATA_MEM_SIZE              (0x00000400UL) /** MSC_FLASH_USERDATA avaliable address space */
-#define MSC_FLASH_USERDATA_MEM_END               (0x0FE003FFUL) /** MSC_FLASH_USERDATA end address */
-#define MSC_FLASH_USERDATA_MEM_BITS              (0xBUL)        /** MSC_FLASH_USERDATA used bits */
-#define USERDATA_BASE                            (0x0FE00000UL) /** USERDATA base address */
-#define USERDATA_SIZE                            (0x00000400UL) /** USERDATA avaliable address space */
-#define USERDATA_END                             (0x0FE003FFUL) /** USERDATA end address */
-#define USERDATA_BITS                            (0xBUL)        /** USERDATA used bits */
-#define MSC_FLASH_DEVINFO_MEM_BASE               (0x0FE08000UL) /** MSC_FLASH_DEVINFO base address */
-#define MSC_FLASH_DEVINFO_MEM_SIZE               (0x00000400UL) /** MSC_FLASH_DEVINFO avaliable address space */
-#define MSC_FLASH_DEVINFO_MEM_END                (0x0FE083FFUL) /** MSC_FLASH_DEVINFO end address */
-#define MSC_FLASH_DEVINFO_MEM_BITS               (0xBUL)        /** MSC_FLASH_DEVINFO used bits */
-#define MSC_FLASH_CHIPCONFIG_MEM_BASE            (0x0FE0E000UL) /** MSC_FLASH_CHIPCONFIG base address */
-#define MSC_FLASH_CHIPCONFIG_MEM_SIZE            (0x00000600UL) /** MSC_FLASH_CHIPCONFIG avaliable address space */
-#define MSC_FLASH_CHIPCONFIG_MEM_END             (0x0FE0E5FFUL) /** MSC_FLASH_CHIPCONFIG end address */
-#define MSC_FLASH_CHIPCONFIG_MEM_BITS            (0xBUL)        /** MSC_FLASH_CHIPCONFIG used bits */
-#define DMEM_RAM0_RAM_MEM_BASE                   (0x20000000UL) /** DMEM_RAM0_RAM base address */
-#define DMEM_RAM0_RAM_MEM_SIZE                   (0x00008000UL) /** DMEM_RAM0_RAM avaliable address space */
-#define DMEM_RAM0_RAM_MEM_END                    (0x20007FFFUL) /** DMEM_RAM0_RAM end address */
-#define DMEM_RAM0_RAM_MEM_BITS                   (0x10UL)       /** DMEM_RAM0_RAM used bits */
-#define RAM_MEM_BASE                             (0x20000000UL) /** RAM_MEM base address */
-#define RAM_MEM_SIZE                             (0x00008000UL) /** RAM_MEM avaliable address space */
-#define RAM_MEM_END                              (0x20007FFFUL) /** RAM_MEM end address */
-#define RAM_MEM_BITS                             (0x10UL)       /** RAM_MEM used bits */
-#define CRYPTOACC_RNGOUT_FIFO_S_MEM_BASE         (0x4C024000UL) /** CRYPTOACC_RNGOUT_FIFO_S base address */
-#define CRYPTOACC_RNGOUT_FIFO_S_MEM_SIZE         (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_S avaliable address space */
-#define CRYPTOACC_RNGOUT_FIFO_S_MEM_END          (0x4C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_S end address */
-#define CRYPTOACC_RNGOUT_FIFO_S_MEM_BITS         (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_S used bits */
-#define CRYPTOACC_PKRAM_MAIN_S_MEM_BASE          (0x4C028000UL) /** CRYPTOACC_PKRAM_MAIN_S base address */
-#define CRYPTOACC_PKRAM_MAIN_S_MEM_SIZE          (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_S avaliable address space */
-#define CRYPTOACC_PKRAM_MAIN_S_MEM_END           (0x4C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_S end address */
-#define CRYPTOACC_PKRAM_MAIN_S_MEM_BITS          (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_S used bits */
-#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_BASE        (0x5C024000UL) /** CRYPTOACC_RNGOUT_FIFO_NS base address */
-#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_SIZE        (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_NS avaliable address space */
-#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_END         (0x5C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_NS end address */
-#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_BITS        (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_NS used bits */
-#define CRYPTOACC_RNGOUT_FIFO_MEM_BASE           (0x5C024000UL) /** CRYPTOACC_RNGOUT_FIFO_MEM base address */
-#define CRYPTOACC_RNGOUT_FIFO_MEM_SIZE           (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_MEM avaliable address space */
-#define CRYPTOACC_RNGOUT_FIFO_MEM_END            (0x5C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_MEM end address */
-#define CRYPTOACC_RNGOUT_FIFO_MEM_BITS           (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_MEM used bits */
-#define CRYPTOACC_PKRAM_MAIN_NS_MEM_BASE         (0x5C028000UL) /** CRYPTOACC_PKRAM_MAIN_NS base address */
-#define CRYPTOACC_PKRAM_MAIN_NS_MEM_SIZE         (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_NS avaliable address space */
-#define CRYPTOACC_PKRAM_MAIN_NS_MEM_END          (0x5C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_NS end address */
-#define CRYPTOACC_PKRAM_MAIN_NS_MEM_BITS         (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_NS used bits */
-#define CRYPTOACC_PKRAM_MAIN_MEM_BASE            (0x5C028000UL) /** CRYPTOACC_PKRAM_MAIN_MEM base address */
-#define CRYPTOACC_PKRAM_MAIN_MEM_SIZE            (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_MEM avaliable address space */
-#define CRYPTOACC_PKRAM_MAIN_MEM_END             (0x5C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_MEM end address */
-#define CRYPTOACC_PKRAM_MAIN_MEM_BITS            (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_MEM used bits */
-#define RDMEM_SEQRAM_S_MEM_BASE                  (0xA0000000UL) /** RDMEM_SEQRAM_S base address */
-#define RDMEM_SEQRAM_S_MEM_SIZE                  (0x00004000UL) /** RDMEM_SEQRAM_S avaliable address space */
-#define RDMEM_SEQRAM_S_MEM_END                   (0xA0003FFFUL) /** RDMEM_SEQRAM_S end address */
-#define RDMEM_SEQRAM_S_MEM_BITS                  (0xFUL)        /** RDMEM_SEQRAM_S used bits */
-#define RDMEM_FRCRAM_S_MEM_BASE                  (0xA0004000UL) /** RDMEM_FRCRAM_S base address */
-#define RDMEM_FRCRAM_S_MEM_SIZE                  (0x00001000UL) /** RDMEM_FRCRAM_S avaliable address space */
-#define RDMEM_FRCRAM_S_MEM_END                   (0xA0004FFFUL) /** RDMEM_FRCRAM_S end address */
-#define RDMEM_FRCRAM_S_MEM_BITS                  (0xDUL)        /** RDMEM_FRCRAM_S used bits */
-#define RDMEM_SEQRAM_NS_MEM_BASE                 (0xB0000000UL) /** RDMEM_SEQRAM_NS base address */
-#define RDMEM_SEQRAM_NS_MEM_SIZE                 (0x00004000UL) /** RDMEM_SEQRAM_NS avaliable address space */
-#define RDMEM_SEQRAM_NS_MEM_END                  (0xB0003FFFUL) /** RDMEM_SEQRAM_NS end address */
-#define RDMEM_SEQRAM_NS_MEM_BITS                 (0xFUL)        /** RDMEM_SEQRAM_NS used bits */
-#define RDMEM_SEQRAM_SEQRAM_MEM_BASE             (0xB0000000UL) /** RDMEM_SEQRAM_SEQRAM_MEM base address */
-#define RDMEM_SEQRAM_SEQRAM_MEM_SIZE             (0x00004000UL) /** RDMEM_SEQRAM_SEQRAM_MEM avaliable address space */
-#define RDMEM_SEQRAM_SEQRAM_MEM_END              (0xB0003FFFUL) /** RDMEM_SEQRAM_SEQRAM_MEM end address */
-#define RDMEM_SEQRAM_SEQRAM_MEM_BITS             (0xFUL)        /** RDMEM_SEQRAM_SEQRAM_MEM used bits */
-#define RDMEM_FRCRAM_NS_MEM_BASE                 (0xB0004000UL) /** RDMEM_FRCRAM_NS base address */
-#define RDMEM_FRCRAM_NS_MEM_SIZE                 (0x00001000UL) /** RDMEM_FRCRAM_NS avaliable address space */
-#define RDMEM_FRCRAM_NS_MEM_END                  (0xB0004FFFUL) /** RDMEM_FRCRAM_NS end address */
-#define RDMEM_FRCRAM_NS_MEM_BITS                 (0xDUL)        /** RDMEM_FRCRAM_NS used bits */
-#define RDMEM_FRCRAM_FRCRAM_MEM_BASE             (0xB0004000UL) /** RDMEM_FRCRAM_FRCRAM_MEM base address */
-#define RDMEM_FRCRAM_FRCRAM_MEM_SIZE             (0x00001000UL) /** RDMEM_FRCRAM_FRCRAM_MEM avaliable address space */
-#define RDMEM_FRCRAM_FRCRAM_MEM_END              (0xB0004FFFUL) /** RDMEM_FRCRAM_FRCRAM_MEM end address */
-#define RDMEM_FRCRAM_FRCRAM_MEM_BITS             (0xDUL)        /** RDMEM_FRCRAM_FRCRAM_MEM used bits */
+#define FLASH_MEM_BASE                                    (0x00000000UL) /** FLASH_MEM base address */
+#define FLASH_MEM_SIZE                                    (0x00080000UL) /** FLASH_MEM avaliable address space */
+#define FLASH_MEM_END                                     (0x0007FFFFUL) /** FLASH_MEM end address */
+#define FLASH_MEM_BITS                                    (0x14UL)       /** FLASH_MEM used bits */
+#define MSC_FLASH_MEM_BASE                                (0x00000000UL) /** MSC_FLASH_MEM base address */
+#define MSC_FLASH_MEM_SIZE                                (0x00080000UL) /** MSC_FLASH_MEM avaliable address space */
+#define MSC_FLASH_MEM_END                                 (0x0007FFFFUL) /** MSC_FLASH_MEM end address */
+#define MSC_FLASH_MEM_BITS                                (0x14UL)       /** MSC_FLASH_MEM used bits */
+#define MSC_FLASH_USERDATA_MEM_BASE                       (0x0FE00000UL) /** MSC_FLASH_USERDATA_MEM base address */
+#define MSC_FLASH_USERDATA_MEM_SIZE                       (0x00000400UL) /** MSC_FLASH_USERDATA_MEM avaliable address space */
+#define MSC_FLASH_USERDATA_MEM_END                        (0x0FE003FFUL) /** MSC_FLASH_USERDATA_MEM end address */
+#define MSC_FLASH_USERDATA_MEM_BITS                       (0xBUL)        /** MSC_FLASH_USERDATA_MEM used bits */
+#define USERDATA_BASE                                     (0x0FE00000UL) /** USERDATA base address */
+#define USERDATA_SIZE                                     (0x00000400UL) /** USERDATA avaliable address space */
+#define USERDATA_END                                      (0x0FE003FFUL) /** USERDATA end address */
+#define USERDATA_BITS                                     (0xBUL)        /** USERDATA used bits */
+#define MSC_FLASH_DEVINFO_MEM_BASE                        (0x0FE08000UL) /** MSC_FLASH_DEVINFO_MEM base address */
+#define MSC_FLASH_DEVINFO_MEM_SIZE                        (0x00000400UL) /** MSC_FLASH_DEVINFO_MEM avaliable address space */
+#define MSC_FLASH_DEVINFO_MEM_END                         (0x0FE083FFUL) /** MSC_FLASH_DEVINFO_MEM end address */
+#define MSC_FLASH_DEVINFO_MEM_BITS                        (0xBUL)        /** MSC_FLASH_DEVINFO_MEM used bits */
+#define MSC_FLASH_CHIPCONFIG_MEM_BASE                     (0x0FE0E000UL) /** MSC_FLASH_CHIPCONFIG_MEM base address */
+#define MSC_FLASH_CHIPCONFIG_MEM_SIZE                     (0x00000600UL) /** MSC_FLASH_CHIPCONFIG_MEM avaliable address space */
+#define MSC_FLASH_CHIPCONFIG_MEM_END                      (0x0FE0E5FFUL) /** MSC_FLASH_CHIPCONFIG_MEM end address */
+#define MSC_FLASH_CHIPCONFIG_MEM_BITS                     (0xBUL)        /** MSC_FLASH_CHIPCONFIG_MEM used bits */
+#define DMEM_RAM0_RAM_MEM_BASE                            (0x20000000UL) /** DMEM_RAM0_RAM_MEM base address */
+#define DMEM_RAM0_RAM_MEM_SIZE                            (0x00008000UL) /** DMEM_RAM0_RAM_MEM avaliable address space */
+#define DMEM_RAM0_RAM_MEM_END                             (0x20007FFFUL) /** DMEM_RAM0_RAM_MEM end address */
+#define DMEM_RAM0_RAM_MEM_BITS                            (0x10UL)       /** DMEM_RAM0_RAM_MEM used bits */
+#define RAM_MEM_BASE                                      (0x20000000UL) /** RAM_MEM base address */
+#define RAM_MEM_SIZE                                      (0x00008000UL) /** RAM_MEM avaliable address space */
+#define RAM_MEM_END                                       (0x20007FFFUL) /** RAM_MEM end address */
+#define RAM_MEM_BITS                                      (0x10UL)       /** RAM_MEM used bits */
+#define CRYPTOACC_RNGOUT_FIFO_S_MEM_BASE                  (0x4C024000UL) /** CRYPTOACC_RNGOUT_FIFO_S_MEM base address */
+#define CRYPTOACC_RNGOUT_FIFO_S_MEM_SIZE                  (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_S_MEM avaliable address space */
+#define CRYPTOACC_RNGOUT_FIFO_S_MEM_END                   (0x4C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_S_MEM end address */
+#define CRYPTOACC_RNGOUT_FIFO_S_MEM_BITS                  (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_S_MEM used bits */
+#define CRYPTOACC_PKRAM_MAIN_S_MEM_BASE                   (0x4C028000UL) /** CRYPTOACC_PKRAM_MAIN_S_MEM base address */
+#define CRYPTOACC_PKRAM_MAIN_S_MEM_SIZE                   (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_S_MEM avaliable address space */
+#define CRYPTOACC_PKRAM_MAIN_S_MEM_END                    (0x4C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_S_MEM end address */
+#define CRYPTOACC_PKRAM_MAIN_S_MEM_BITS                   (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_S_MEM used bits */
+#define CRYPTOACC_RNGOUT_FIFO_MEM_BASE                    (0x5C024000UL) /** CRYPTOACC_RNGOUT_FIFO_MEM base address */
+#define CRYPTOACC_RNGOUT_FIFO_MEM_SIZE                    (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_MEM avaliable address space */
+#define CRYPTOACC_RNGOUT_FIFO_MEM_END                     (0x5C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_MEM end address */
+#define CRYPTOACC_RNGOUT_FIFO_MEM_BITS                    (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_MEM used bits */
+#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_BASE                 (0x5C024000UL) /** CRYPTOACC_RNGOUT_FIFO_NS_MEM base address */
+#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_SIZE                 (0x00004000UL) /** CRYPTOACC_RNGOUT_FIFO_NS_MEM avaliable address space */
+#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_END                  (0x5C027FFFUL) /** CRYPTOACC_RNGOUT_FIFO_NS_MEM end address */
+#define CRYPTOACC_RNGOUT_FIFO_NS_MEM_BITS                 (0xFUL)        /** CRYPTOACC_RNGOUT_FIFO_NS_MEM used bits */
+#define CRYPTOACC_PKRAM_MAIN_MEM_BASE                     (0x5C028000UL) /** CRYPTOACC_PKRAM_MAIN_MEM base address */
+#define CRYPTOACC_PKRAM_MAIN_MEM_SIZE                     (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_MEM avaliable address space */
+#define CRYPTOACC_PKRAM_MAIN_MEM_END                      (0x5C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_MEM end address */
+#define CRYPTOACC_PKRAM_MAIN_MEM_BITS                     (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_MEM used bits */
+#define CRYPTOACC_PKRAM_MAIN_NS_MEM_BASE                  (0x5C028000UL) /** CRYPTOACC_PKRAM_MAIN_NS_MEM base address */
+#define CRYPTOACC_PKRAM_MAIN_NS_MEM_SIZE                  (0x00001000UL) /** CRYPTOACC_PKRAM_MAIN_NS_MEM avaliable address space */
+#define CRYPTOACC_PKRAM_MAIN_NS_MEM_END                   (0x5C028FFFUL) /** CRYPTOACC_PKRAM_MAIN_NS_MEM end address */
+#define CRYPTOACC_PKRAM_MAIN_NS_MEM_BITS                  (0xDUL)        /** CRYPTOACC_PKRAM_MAIN_NS_MEM used bits */
+#define RDMEM_SEQRAM_S_MEM_BASE                           (0xA0000000UL) /** RDMEM_SEQRAM_S_MEM base address */
+#define RDMEM_SEQRAM_S_MEM_SIZE                           (0x00004000UL) /** RDMEM_SEQRAM_S_MEM avaliable address space */
+#define RDMEM_SEQRAM_S_MEM_END                            (0xA0003FFFUL) /** RDMEM_SEQRAM_S_MEM end address */
+#define RDMEM_SEQRAM_S_MEM_BITS                           (0xFUL)        /** RDMEM_SEQRAM_S_MEM used bits */
+#define RDMEM_FRCRAM_S_MEM_BASE                           (0xA0004000UL) /** RDMEM_FRCRAM_S_MEM base address */
+#define RDMEM_FRCRAM_S_MEM_SIZE                           (0x00001000UL) /** RDMEM_FRCRAM_S_MEM avaliable address space */
+#define RDMEM_FRCRAM_S_MEM_END                            (0xA0004FFFUL) /** RDMEM_FRCRAM_S_MEM end address */
+#define RDMEM_FRCRAM_S_MEM_BITS                           (0xDUL)        /** RDMEM_FRCRAM_S_MEM used bits */
+#define RDMEM_SEQRAM_NS_MEM_BASE                          (0xB0000000UL) /** RDMEM_SEQRAM_NS_MEM base address */
+#define RDMEM_SEQRAM_NS_MEM_SIZE                          (0x00004000UL) /** RDMEM_SEQRAM_NS_MEM avaliable address space */
+#define RDMEM_SEQRAM_NS_MEM_END                           (0xB0003FFFUL) /** RDMEM_SEQRAM_NS_MEM end address */
+#define RDMEM_SEQRAM_NS_MEM_BITS                          (0xFUL)        /** RDMEM_SEQRAM_NS_MEM used bits */
+#define RDMEM_SEQRAM_SEQRAM_MEM_BASE                      (0xB0000000UL) /** RDMEM_SEQRAM_SEQRAM_MEM base address */
+#define RDMEM_SEQRAM_SEQRAM_MEM_SIZE                      (0x00004000UL) /** RDMEM_SEQRAM_SEQRAM_MEM avaliable address space */
+#define RDMEM_SEQRAM_SEQRAM_MEM_END                       (0xB0003FFFUL) /** RDMEM_SEQRAM_SEQRAM_MEM end address */
+#define RDMEM_SEQRAM_SEQRAM_MEM_BITS                      (0xFUL)        /** RDMEM_SEQRAM_SEQRAM_MEM used bits */
+#define RDMEM_FRCRAM_FRCRAM_MEM_BASE                      (0xB0004000UL) /** RDMEM_FRCRAM_FRCRAM_MEM base address */
+#define RDMEM_FRCRAM_FRCRAM_MEM_SIZE                      (0x00001000UL) /** RDMEM_FRCRAM_FRCRAM_MEM avaliable address space */
+#define RDMEM_FRCRAM_FRCRAM_MEM_END                       (0xB0004FFFUL) /** RDMEM_FRCRAM_FRCRAM_MEM end address */
+#define RDMEM_FRCRAM_FRCRAM_MEM_BITS                      (0xDUL)        /** RDMEM_FRCRAM_FRCRAM_MEM used bits */
+#define RDMEM_FRCRAM_NS_MEM_BASE                          (0xB0004000UL) /** RDMEM_FRCRAM_NS_MEM base address */
+#define RDMEM_FRCRAM_NS_MEM_SIZE                          (0x00001000UL) /** RDMEM_FRCRAM_NS_MEM avaliable address space */
+#define RDMEM_FRCRAM_NS_MEM_END                           (0xB0004FFFUL) /** RDMEM_FRCRAM_NS_MEM end address */
+#define RDMEM_FRCRAM_NS_MEM_BITS                          (0xDUL)        /** RDMEM_FRCRAM_NS_MEM used bits */
 
 /** Flash and SRAM limits for EFR32MG22C224F512IM32 */
-#define FLASH_BASE                               (0x00000000UL) /**< Flash Base Address */
-#define FLASH_SIZE                               (0x00080000UL) /**< Available Flash Memory */
-#define FLASH_PAGE_SIZE                          (0x00002000UL) /**< Flash Memory page size */
-#define SRAM_BASE                                (0x20000000UL) /**< SRAM Base Address */
-#define SRAM_SIZE                                (0x00008000UL) /**< Available SRAM Memory */
-#define DMA_CHAN_COUNT                           LDMA_CH_NUM    /**< Number of DMA channels */
-#define EXT_IRQ_COUNT                            64             /**< Number of External (NVIC) interrupts */
+#define FLASH_BASE                                        (0x00000000UL) /**< Flash Base Address */
+#define FLASH_SIZE                                        (0x00080000UL) /**< Available Flash Memory */
+#define FLASH_PAGE_SIZE                                   (0x00002000UL) /**< Flash Memory page size */
+#define SRAM_BASE                                         (0x20000000UL) /**< SRAM Base Address */
+#define SRAM_SIZE                                         (0x00008000UL) /**< Available SRAM Memory */
+#define DMA_CHAN_COUNT                                    LDMA_CH_NUM    /**< Number of DMA channels */
+#define EXT_IRQ_COUNT                                     64             /**< Number of External (NVIC) interrupts */
 
 /* GPIO Avalibility Info */
-#define GPIO_PA_INDEX                            0U         /**< Index of port PA */
-#define GPIO_PA_COUNT                            7U         /**< Number of pins on port PA */
-#define GPIO_PA_MASK                             (0x007FUL) /**< Port PA pin mask */
-#define GPIO_PA_PIN0                             1U         /**< GPIO pin PA0 is present. */
-#define GPIO_PA_PIN1                             1U         /**< GPIO pin PA1 is present. */
-#define GPIO_PA_PIN2                             1U         /**< GPIO pin PA2 is present. */
-#define GPIO_PA_PIN3                             1U         /**< GPIO pin PA3 is present. */
-#define GPIO_PA_PIN4                             1U         /**< GPIO pin PA4 is present. */
-#define GPIO_PA_PIN5                             1U         /**< GPIO pin PA5 is present. */
-#define GPIO_PA_PIN6                             1U         /**< GPIO pin PA6 is present. */
-#define GPIO_PB_INDEX                            1U         /**< Index of port PB */
-#define GPIO_PB_COUNT                            3U         /**< Number of pins on port PB */
-#define GPIO_PB_MASK                             (0x0007UL) /**< Port PB pin mask */
-#define GPIO_PB_PIN0                             1U         /**< GPIO pin PB0 is present. */
-#define GPIO_PB_PIN1                             1U         /**< GPIO pin PB1 is present. */
-#define GPIO_PB_PIN2                             1U         /**< GPIO pin PB2 is present. */
-#define GPIO_PC_INDEX                            2U         /**< Index of port PC */
-#define GPIO_PC_COUNT                            6U         /**< Number of pins on port PC */
-#define GPIO_PC_MASK                             (0x003FUL) /**< Port PC pin mask */
-#define GPIO_PC_PIN0                             1U         /**< GPIO pin PC0 is present. */
-#define GPIO_PC_PIN1                             1U         /**< GPIO pin PC1 is present. */
-#define GPIO_PC_PIN2                             1U         /**< GPIO pin PC2 is present. */
-#define GPIO_PC_PIN3                             1U         /**< GPIO pin PC3 is present. */
-#define GPIO_PC_PIN4                             1U         /**< GPIO pin PC4 is present. */
-#define GPIO_PC_PIN5                             1U         /**< GPIO pin PC5 is present. */
-#define GPIO_PD_INDEX                            3U         /**< Index of port PD */
-#define GPIO_PD_COUNT                            2U         /**< Number of pins on port PD */
-#define GPIO_PD_MASK                             (0x0003UL) /**< Port PD pin mask */
-#define GPIO_PD_PIN0                             1U         /**< GPIO pin PD0 is present. */
-#define GPIO_PD_PIN1                             1U         /**< GPIO pin PD1 is present. */
+#define GPIO_PA_INDEX                                     0U         /**< Index of port PA */
+#define GPIO_PA_COUNT                                     7U         /**< Number of pins on port PA */
+#define GPIO_PA_MASK                                      (0x007FUL) /**< Port PA pin mask */
+#define GPIO_PA_PIN0                                      1U         /**< GPIO pin PA0 is present. */
+#define GPIO_PA_PIN1                                      1U         /**< GPIO pin PA1 is present. */
+#define GPIO_PA_PIN2                                      1U         /**< GPIO pin PA2 is present. */
+#define GPIO_PA_PIN3                                      1U         /**< GPIO pin PA3 is present. */
+#define GPIO_PA_PIN4                                      1U         /**< GPIO pin PA4 is present. */
+#define GPIO_PA_PIN5                                      1U         /**< GPIO pin PA5 is present. */
+#define GPIO_PA_PIN6                                      1U         /**< GPIO pin PA6 is present. */
+#define GPIO_PB_INDEX                                     1U         /**< Index of port PB */
+#define GPIO_PB_COUNT                                     3U         /**< Number of pins on port PB */
+#define GPIO_PB_MASK                                      (0x0007UL) /**< Port PB pin mask */
+#define GPIO_PB_PIN0                                      1U         /**< GPIO pin PB0 is present. */
+#define GPIO_PB_PIN1                                      1U         /**< GPIO pin PB1 is present. */
+#define GPIO_PB_PIN2                                      1U         /**< GPIO pin PB2 is present. */
+#define GPIO_PC_INDEX                                     2U         /**< Index of port PC */
+#define GPIO_PC_COUNT                                     6U         /**< Number of pins on port PC */
+#define GPIO_PC_MASK                                      (0x003FUL) /**< Port PC pin mask */
+#define GPIO_PC_PIN0                                      1U         /**< GPIO pin PC0 is present. */
+#define GPIO_PC_PIN1                                      1U         /**< GPIO pin PC1 is present. */
+#define GPIO_PC_PIN2                                      1U         /**< GPIO pin PC2 is present. */
+#define GPIO_PC_PIN3                                      1U         /**< GPIO pin PC3 is present. */
+#define GPIO_PC_PIN4                                      1U         /**< GPIO pin PC4 is present. */
+#define GPIO_PC_PIN5                                      1U         /**< GPIO pin PC5 is present. */
+#define GPIO_PD_INDEX                                     3U         /**< Index of port PD */
+#define GPIO_PD_COUNT                                     2U         /**< Number of pins on port PD */
+#define GPIO_PD_MASK                                      (0x0003UL) /**< Port PD pin mask */
+#define GPIO_PD_PIN0                                      1U         /**< GPIO pin PD0 is present. */
+#define GPIO_PD_PIN1                                      1U         /**< GPIO pin PD1 is present. */
 
 /* Fixed Resource Locations */
-#define GPIO_SWCLK_PORT                          GPIO_PA_INDEX /**< Port of SWCLK.*/
-#define GPIO_SWCLK_PIN                           1U            /**< Pin of SWCLK.*/
-#define GPIO_SWDIO_PORT                          GPIO_PA_INDEX /**< Port of SWDIO.*/
-#define GPIO_SWDIO_PIN                           2U            /**< Pin of SWDIO.*/
-#define GPIO_SWV_PORT                            GPIO_PA_INDEX /**< Port of SWV.*/
-#define GPIO_SWV_PIN                             3U            /**< Pin of SWV.*/
-#define GPIO_TDI_PORT                            GPIO_PA_INDEX /**< Port of TDI.*/
-#define GPIO_TDI_PIN                             4U            /**< Pin of TDI.*/
-#define GPIO_TDO_PORT                            GPIO_PA_INDEX /**< Port of TDO.*/
-#define GPIO_TDO_PIN                             3U            /**< Pin of TDO.*/
-#define GPIO_TRACECLK_PORT                       GPIO_PA_INDEX /**< Port of TRACECLK.*/
-#define GPIO_TRACECLK_PIN                        4U            /**< Pin of TRACECLK.*/
-#define GPIO_TRACEDATA0_PORT                     GPIO_PA_INDEX /**< Port of TRACEDATA0.*/
-#define GPIO_TRACEDATA0_PIN                      3U            /**< Pin of TRACEDATA0.*/
-#define GPIO_EM4WU0_PORT                         GPIO_PA_INDEX /**< Port of EM4WU0.*/
-#define GPIO_EM4WU0_PIN                          5U            /**< Pin of EM4WU0.*/
-#define GPIO_EM4WU3_PORT                         GPIO_PB_INDEX /**< Port of EM4WU3.*/
-#define GPIO_EM4WU3_PIN                          1U            /**< Pin of EM4WU3.*/
-#define GPIO_EM4WU4_PORT                         GPIO_PB_INDEX /**< Port of EM4WU4.*/
-#define GPIO_EM4WU4_PIN                          3U            /**< Pin of EM4WU4.*/
-#define GPIO_EM4WU6_PORT                         GPIO_PC_INDEX /**< Port of EM4WU6.*/
-#define GPIO_EM4WU6_PIN                          0U            /**< Pin of EM4WU6.*/
-#define GPIO_EM4WU7_PORT                         GPIO_PC_INDEX /**< Port of EM4WU7.*/
-#define GPIO_EM4WU7_PIN                          5U            /**< Pin of EM4WU7.*/
-#define GPIO_EM4WU8_PORT                         GPIO_PC_INDEX /**< Port of EM4WU8.*/
-#define GPIO_EM4WU8_PIN                          7U            /**< Pin of EM4WU8.*/
-#define GPIO_EM4WU9_PORT                         GPIO_PD_INDEX /**< Port of EM4WU9.*/
-#define GPIO_EM4WU9_PIN                          2U            /**< Pin of EM4WU9.*/
-#define GPIO_THMSW_EN_PORT                       GPIO_PC_INDEX /**< Port of THMSW_EN.*/
-#define GPIO_THMSW_EN_PIN                        0U            /**< Pin of THMSW_EN.*/
-#define GPIO_THMSW_HALFSWITCH_PORT               GPIO_PC_INDEX /**< Port of THMSW_HALFSWITCH.*/
-#define GPIO_THMSW_HALFSWITCH_PIN                0U            /**< Pin of THMSW_HALFSWITCH.*/
-#define IADC0_VREFN_PORT                         GPIO_PB_INDEX /**< Port of VREFN.*/
-#define IADC0_VREFN_PIN                          0U            /**< Pin of VREFN.*/
-#define IADC0_VREFP_PORT                         GPIO_PA_INDEX /**< Port of VREFP.*/
-#define IADC0_VREFP_PIN                          0U            /**< Pin of VREFP.*/
-#define LFXO_LFXTAL_I_PORT                       GPIO_PD_INDEX /**< Port of LFXTAL_I.*/
-#define LFXO_LFXTAL_I_PIN                        1U            /**< Pin of LFXTAL_I.*/
-#define LFXO_LFXTAL_O_PORT                       GPIO_PD_INDEX /**< Port of LFXTAL_O.*/
-#define LFXO_LFXTAL_O_PIN                        0U            /**< Pin of LFXTAL_O.*/
-#define LFXO_LF_EXTCLK_PORT                      GPIO_PD_INDEX /**< Port of LF_EXTCLK.*/
-#define LFXO_LF_EXTCLK_PIN                       1U            /**< Pin of LF_EXTCLK.*/
+#define GPIO_SWCLK_PORT                                   GPIO_PA_INDEX /**< Port of SWCLK.*/
+#define GPIO_SWCLK_PIN                                    1U            /**< Pin of SWCLK.*/
+#define GPIO_SWDIO_PORT                                   GPIO_PA_INDEX /**< Port of SWDIO.*/
+#define GPIO_SWDIO_PIN                                    2U            /**< Pin of SWDIO.*/
+#define GPIO_SWV_PORT                                     GPIO_PA_INDEX /**< Port of SWV.*/
+#define GPIO_SWV_PIN                                      3U            /**< Pin of SWV.*/
+#define GPIO_TDI_PORT                                     GPIO_PA_INDEX /**< Port of TDI.*/
+#define GPIO_TDI_PIN                                      4U            /**< Pin of TDI.*/
+#define GPIO_TDO_PORT                                     GPIO_PA_INDEX /**< Port of TDO.*/
+#define GPIO_TDO_PIN                                      3U            /**< Pin of TDO.*/
+#define GPIO_TRACECLK_PORT                                GPIO_PA_INDEX /**< Port of TRACECLK.*/
+#define GPIO_TRACECLK_PIN                                 4U            /**< Pin of TRACECLK.*/
+#define GPIO_TRACEDATA0_PORT                              GPIO_PA_INDEX /**< Port of TRACEDATA0.*/
+#define GPIO_TRACEDATA0_PIN                               3U            /**< Pin of TRACEDATA0.*/
+#define GPIO_EM4WU0_PORT                                  GPIO_PA_INDEX /**< Port of EM4WU0.*/
+#define GPIO_EM4WU0_PIN                                   5U            /**< Pin of EM4WU0.*/
+#define GPIO_EM4WU3_PORT                                  GPIO_PB_INDEX /**< Port of EM4WU3.*/
+#define GPIO_EM4WU3_PIN                                   1U            /**< Pin of EM4WU3.*/
+#define GPIO_EM4WU4_PORT                                  GPIO_PB_INDEX /**< Port of EM4WU4.*/
+#define GPIO_EM4WU4_PIN                                   3U            /**< Pin of EM4WU4.*/
+#define GPIO_EM4WU6_PORT                                  GPIO_PC_INDEX /**< Port of EM4WU6.*/
+#define GPIO_EM4WU6_PIN                                   0U            /**< Pin of EM4WU6.*/
+#define GPIO_EM4WU7_PORT                                  GPIO_PC_INDEX /**< Port of EM4WU7.*/
+#define GPIO_EM4WU7_PIN                                   5U            /**< Pin of EM4WU7.*/
+#define GPIO_EM4WU8_PORT                                  GPIO_PC_INDEX /**< Port of EM4WU8.*/
+#define GPIO_EM4WU8_PIN                                   7U            /**< Pin of EM4WU8.*/
+#define GPIO_EM4WU9_PORT                                  GPIO_PD_INDEX /**< Port of EM4WU9.*/
+#define GPIO_EM4WU9_PIN                                   2U            /**< Pin of EM4WU9.*/
+#define GPIO_THMSW_EN_PORT                                GPIO_PC_INDEX /**< Port of THMSW_EN.*/
+#define GPIO_THMSW_EN_PIN                                 0U            /**< Pin of THMSW_EN.*/
+#define IADC0_VREFN_PORT                                  GPIO_PB_INDEX /**< Port of VREFN.*/
+#define IADC0_VREFN_PIN                                   0U            /**< Pin of VREFN.*/
+#define IADC0_VREFP_PORT                                  GPIO_PA_INDEX /**< Port of VREFP.*/
+#define IADC0_VREFP_PIN                                   0U            /**< Pin of VREFP.*/
+#define LFXO_LFXTAL_I_PORT                                GPIO_PD_INDEX /**< Port of LFXTAL_I.*/
+#define LFXO_LFXTAL_I_PIN                                 1U            /**< Pin of LFXTAL_I.*/
+#define LFXO_LFXTAL_O_PORT                                GPIO_PD_INDEX /**< Port of LFXTAL_O.*/
+#define LFXO_LFXTAL_O_PIN                                 0U            /**< Pin of LFXTAL_O.*/
+#define LFXO_LF_EXTCLK_PORT                               GPIO_PD_INDEX /**< Port of LF_EXTCLK.*/
+#define LFXO_LF_EXTCLK_PIN                                1U            /**< Pin of LF_EXTCLK.*/
 
 /* Part number capabilities */
-#define AGC_PRESENT                                /** AGC is available in this part */
-#define AGC_COUNT                                1 /** 1 AGCs available  */
-#define AMUXCP_PRESENT                             /** AMUXCP is available in this part */
-#define AMUXCP_COUNT                             1 /** 1 AMUXCPs available  */
-#define BUFC_PRESENT                               /** BUFC is available in this part */
-#define BUFC_COUNT                               1 /** 1 BUFCs available  */
-#define BURAM_PRESENT                              /** BURAM is available in this part */
-#define BURAM_COUNT                              1 /** 1 BURAMs available  */
-#define BURTC_PRESENT                              /** BURTC is available in this part */
-#define BURTC_COUNT                              1 /** 1 BURTCs available  */
-#define CMU_PRESENT                                /** CMU is available in this part */
-#define CMU_COUNT                                1 /** 1 CMUs available  */
-#define CRYPTOACC_PRESENT                          /** CRYPTOACC is available in this part */
-#define CRYPTOACC_COUNT                          1 /** 1 CRYPTOACCs available  */
-#define DCDC_PRESENT                               /** DCDC is available in this part */
-#define DCDC_COUNT                               1 /** 1 DCDCs available  */
-#define DPLL_PRESENT                               /** DPLL is available in this part */
-#define DPLL_COUNT                               1 /** 1 DPLLs available  */
-#define EMU_PRESENT                                /** EMU is available in this part */
-#define EMU_COUNT                                1 /** 1 EMUs available  */
-#define EUART_PRESENT                              /** EUART is available in this part */
-#define EUART_COUNT                              1 /** 1 EUARTs available  */
-#define FRC_PRESENT                                /** FRC is available in this part */
-#define FRC_COUNT                                1 /** 1 FRCs available  */
-#define FSRCO_PRESENT                              /** FSRCO is available in this part */
-#define FSRCO_COUNT                              1 /** 1 FSRCOs available  */
-#define GPCRC_PRESENT                              /** GPCRC is available in this part */
-#define GPCRC_COUNT                              1 /** 1 GPCRCs available  */
-#define GPIO_PRESENT                               /** GPIO is available in this part */
-#define GPIO_COUNT                               1 /** 1 GPIOs available  */
-#define HFRCO_PRESENT                              /** HFRCO is available in this part */
-#define HFRCO_COUNT                              1 /** 1 HFRCOs available  */
-#define HFXO_PRESENT                               /** HFXO is available in this part */
-#define HFXO_COUNT                               1 /** 1 HFXOs available  */
-#define I2C_PRESENT                                /** I2C is available in this part */
-#define I2C_COUNT                                2 /** 2 I2Cs available  */
-#define IADC_PRESENT                               /** IADC is available in this part */
-#define IADC_COUNT                               1 /** 1 IADCs available  */
-#define ICACHE_PRESENT                             /** ICACHE is available in this part */
-#define ICACHE_COUNT                             1 /** 1 ICACHEs available  */
-#define LDMA_PRESENT                               /** LDMA is available in this part */
-#define LDMA_COUNT                               1 /** 1 LDMAs available  */
-#define LDMAXBAR_PRESENT                           /** LDMAXBAR is available in this part */
-#define LDMAXBAR_COUNT                           1 /** 1 LDMAXBARs available  */
-#define LETIMER_PRESENT                            /** LETIMER is available in this part */
-#define LETIMER_COUNT                            1 /** 1 LETIMERs available  */
-#define LFRCO_PRESENT                              /** LFRCO is available in this part */
-#define LFRCO_COUNT                              1 /** 1 LFRCOs available  */
-#define LFXO_PRESENT                               /** LFXO is available in this part */
-#define LFXO_COUNT                               1 /** 1 LFXOs available  */
-#define MODEM_PRESENT                              /** MODEM is available in this part */
-#define MODEM_COUNT                              1 /** 1 MODEMs available  */
-#define MSC_PRESENT                                /** MSC is available in this part */
-#define MSC_COUNT                                1 /** 1 MSCs available  */
-#define PDM_PRESENT                                /** PDM is available in this part */
-#define PDM_COUNT                                1 /** 1 PDMs available  */
-#define PRORTC_PRESENT                             /** PRORTC is available in this part */
-#define PRORTC_COUNT                             1 /** 1 PRORTCs available  */
-#define PROTIMER_PRESENT                           /** PROTIMER is available in this part */
-#define PROTIMER_COUNT                           1 /** 1 PROTIMERs available  */
-#define PRS_PRESENT                                /** PRS is available in this part */
-#define PRS_COUNT                                1 /** 1 PRSs available  */
-#define RAC_PRESENT                                /** RAC is available in this part */
-#define RAC_COUNT                                1 /** 1 RACs available  */
-#define RADIOAES_PRESENT                           /** RADIOAES is available in this part */
-#define RADIOAES_COUNT                           1 /** 1 RADIOAESs available  */
-#define RDMAILBOX_PRESENT                          /** RDMAILBOX is available in this part */
-#define RDMAILBOX_COUNT                          2 /** 2 RDMAILBOXs available  */
-#define RFCRC_PRESENT                              /** RFCRC is available in this part */
-#define RFCRC_COUNT                              1 /** 1 RFCRCs available  */
-#define RFSENSE_PRESENT                            /** RFSENSE is available in this part */
-#define RFSENSE_COUNT                            1 /** 1 RFSENSEs available  */
-#define RTCC_PRESENT                               /** RTCC is available in this part */
-#define RTCC_COUNT                               1 /** 1 RTCCs available  */
-#define SMU_PRESENT                                /** SMU is available in this part */
-#define SMU_COUNT                                1 /** 1 SMUs available  */
-#define SYNTH_PRESENT                              /** SYNTH is available in this part */
-#define SYNTH_COUNT                              1 /** 1 SYNTHs available  */
-#define SYSCFG_PRESENT                             /** SYSCFG is available in this part */
-#define SYSCFG_COUNT                             1 /** 1 SYSCFGs available  */
-#define TIMER_PRESENT                              /** TIMER is available in this part */
-#define TIMER_COUNT                              5 /** 5 TIMERs available  */
-#define ULFRCO_PRESENT                             /** ULFRCO is available in this part */
-#define ULFRCO_COUNT                             1 /** 1 ULFRCOs available  */
-#define USART_PRESENT                              /** USART is available in this part */
-#define USART_COUNT                              2 /** 2 USARTs available  */
-#define WDOG_PRESENT                               /** WDOG is available in this part */
-#define WDOG_COUNT                               1 /** 1 WDOGs available  */
-#define DEVINFO_PRESENT                            /** DEVINFO is available in this part */
-#define DEVINFO_COUNT                            1 /** 1 DEVINFOs available  */
+#define AGC_PRESENT                                         /** AGC is available in this part */
+#define AGC_COUNT                                         1 /** 1 AGCs available  */
+#define AMUXCP_PRESENT                                      /** AMUXCP is available in this part */
+#define AMUXCP_COUNT                                      1 /** 1 AMUXCPs available  */
+#define BUFC_PRESENT                                        /** BUFC is available in this part */
+#define BUFC_COUNT                                        1 /** 1 BUFCs available  */
+#define BURAM_PRESENT                                       /** BURAM is available in this part */
+#define BURAM_COUNT                                       1 /** 1 BURAMs available  */
+#define BURTC_PRESENT                                       /** BURTC is available in this part */
+#define BURTC_COUNT                                       1 /** 1 BURTCs available  */
+#define CMU_PRESENT                                         /** CMU is available in this part */
+#define CMU_COUNT                                         1 /** 1 CMUs available  */
+#define CRYPTOACC_PRESENT                                   /** CRYPTOACC is available in this part */
+#define CRYPTOACC_COUNT                                   1 /** 1 CRYPTOACCs available  */
+#define DCDC_PRESENT                                        /** DCDC is available in this part */
+#define DCDC_COUNT                                        1 /** 1 DCDCs available  */
+#define DPLL_PRESENT                                        /** DPLL is available in this part */
+#define DPLL_COUNT                                        1 /** 1 DPLLs available  */
+#define EMU_PRESENT                                         /** EMU is available in this part */
+#define EMU_COUNT                                         1 /** 1 EMUs available  */
+#define EUART_PRESENT                                       /** EUART is available in this part */
+#define EUART_COUNT                                       1 /** 1 EUARTs available  */
+#define FRC_PRESENT                                         /** FRC is available in this part */
+#define FRC_COUNT                                         1 /** 1 FRCs available  */
+#define FSRCO_PRESENT                                       /** FSRCO is available in this part */
+#define FSRCO_COUNT                                       1 /** 1 FSRCOs available  */
+#define GPCRC_PRESENT                                       /** GPCRC is available in this part */
+#define GPCRC_COUNT                                       1 /** 1 GPCRCs available  */
+#define GPIO_PRESENT                                        /** GPIO is available in this part */
+#define GPIO_COUNT                                        1 /** 1 GPIOs available  */
+#define HFRCO_PRESENT                                       /** HFRCO is available in this part */
+#define HFRCO_COUNT                                       1 /** 1 HFRCOs available  */
+#define HFXO_PRESENT                                        /** HFXO is available in this part */
+#define HFXO_COUNT                                        1 /** 1 HFXOs available  */
+#define I2C_PRESENT                                         /** I2C is available in this part */
+#define I2C_COUNT                                         2 /** 2 I2Cs available  */
+#define IADC_PRESENT                                        /** IADC is available in this part */
+#define IADC_COUNT                                        1 /** 1 IADCs available  */
+#define ICACHE_PRESENT                                      /** ICACHE is available in this part */
+#define ICACHE_COUNT                                      1 /** 1 ICACHEs available  */
+#define LDMA_PRESENT                                        /** LDMA is available in this part */
+#define LDMA_COUNT                                        1 /** 1 LDMAs available  */
+#define LDMAXBAR_PRESENT                                    /** LDMAXBAR is available in this part */
+#define LDMAXBAR_COUNT                                    1 /** 1 LDMAXBARs available  */
+#define LETIMER_PRESENT                                     /** LETIMER is available in this part */
+#define LETIMER_COUNT                                     1 /** 1 LETIMERs available  */
+#define LFRCO_PRESENT                                       /** LFRCO is available in this part */
+#define LFRCO_COUNT                                       1 /** 1 LFRCOs available  */
+#define LFXO_PRESENT                                        /** LFXO is available in this part */
+#define LFXO_COUNT                                        1 /** 1 LFXOs available  */
+#define MODEM_PRESENT                                       /** MODEM is available in this part */
+#define MODEM_COUNT                                       1 /** 1 MODEMs available  */
+#define MSC_PRESENT                                         /** MSC is available in this part */
+#define MSC_COUNT                                         1 /** 1 MSCs available  */
+#define PDM_PRESENT                                         /** PDM is available in this part */
+#define PDM_COUNT                                         1 /** 1 PDMs available  */
+#define PRORTC_PRESENT                                      /** PRORTC is available in this part */
+#define PRORTC_COUNT                                      1 /** 1 PRORTCs available  */
+#define PROTIMER_PRESENT                                    /** PROTIMER is available in this part */
+#define PROTIMER_COUNT                                    1 /** 1 PROTIMERs available  */
+#define PRS_PRESENT                                         /** PRS is available in this part */
+#define PRS_COUNT                                         1 /** 1 PRSs available  */
+#define RAC_PRESENT                                         /** RAC is available in this part */
+#define RAC_COUNT                                         1 /** 1 RACs available  */
+#define RADIOAES_PRESENT                                    /** RADIOAES is available in this part */
+#define RADIOAES_COUNT                                    1 /** 1 RADIOAESs available  */
+#define RDMAILBOX_PRESENT                                   /** RDMAILBOX is available in this part */
+#define RDMAILBOX_COUNT                                   2 /** 2 RDMAILBOXs available  */
+#define RFCRC_PRESENT                                       /** RFCRC is available in this part */
+#define RFCRC_COUNT                                       1 /** 1 RFCRCs available  */
+#define RFSENSE_PRESENT                                     /** RFSENSE is available in this part */
+#define RFSENSE_COUNT                                     1 /** 1 RFSENSEs available  */
+#define RTCC_PRESENT                                        /** RTCC is available in this part */
+#define RTCC_COUNT                                        1 /** 1 RTCCs available  */
+#define SMU_PRESENT                                         /** SMU is available in this part */
+#define SMU_COUNT                                         1 /** 1 SMUs available  */
+#define SYNTH_PRESENT                                       /** SYNTH is available in this part */
+#define SYNTH_COUNT                                       1 /** 1 SYNTHs available  */
+#define SYSCFG_PRESENT                                      /** SYSCFG is available in this part */
+#define SYSCFG_COUNT                                      1 /** 1 SYSCFGs available  */
+#define TIMER_PRESENT                                       /** TIMER is available in this part */
+#define TIMER_COUNT                                       5 /** 5 TIMERs available  */
+#define ULFRCO_PRESENT                                      /** ULFRCO is available in this part */
+#define ULFRCO_COUNT                                      1 /** 1 ULFRCOs available  */
+#define USART_PRESENT                                       /** USART is available in this part */
+#define USART_COUNT                                       2 /** 2 USARTs available  */
+#define WDOG_PRESENT                                        /** WDOG is available in this part */
+#define WDOG_COUNT                                        1 /** 1 WDOGs available  */
+#define DEVINFO_PRESENT                                     /** DEVINFO is available in this part */
+#define DEVINFO_COUNT                                     1 /** 1 DEVINFOs available  */
 
 /* Include standard ARM headers for the core */
 #include "core_cm33.h"        /* Core Header File */

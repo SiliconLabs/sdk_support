@@ -39,12 +39,7 @@
 #include "em_core.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LDMA
+ * @addtogroup ldma
  * @{
  ******************************************************************************/
 
@@ -97,10 +92,9 @@ void LDMA_DeInit(void)
 
 #if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   CMU_ClockEnable(cmuClock_LDMA, false);
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   CMU_ClockEnable(cmuClock_LDMAXBAR, false);
+#endif
 #endif
 }
 
@@ -112,7 +106,7 @@ void LDMA_DeInit(void)
  *   Use this function to enable or disable an LDMA channel request. This will
  *   prevent the LDMA from proceeding after its current transaction if disabled.
  *
- * @param[in] channel
+ * @param[in] ch
  *   LDMA channel to enable or disable requests.
  *
  * @param[in] enable
@@ -165,13 +159,11 @@ void LDMA_Init(const LDMA_Init_t *init)
 #endif
 
   EFM_ASSERT(init->ldmaInitIrqPriority < (1 << __NVIC_PRIO_BITS));
-
 #if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   CMU_ClockEnable(cmuClock_LDMA, true);
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
   CMU_ClockEnable(cmuClock_LDMAXBAR, true);
+#endif
 #endif
 
 #if defined(LDMA_EN_EN)
@@ -457,6 +449,5 @@ uint32_t LDMA_TransferRemainingCount(int ch)
   return remaining + 1;
 }
 
-/** @} (end addtogroup LDMA) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup ldma) */
 #endif /* defined( LDMA_PRESENT ) && ( LDMA_COUNT == 1 ) */

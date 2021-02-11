@@ -19,10 +19,11 @@
 
 #include "stdint.h"
 
+/// CSLIB library version.
 typedef struct {
-  uint8_t major;
-  uint8_t minor;
-  uint8_t revision;
+  uint8_t major; ///< Major.
+  uint8_t minor; ///< Minor.
+  uint8_t revision; ///< Revision.
 } CSLIB_LibraryVersion_t;
 
 /// CSLIB library version.
@@ -33,7 +34,7 @@ extern CSLIB_LibraryVersion_t CSLIB_Version;
 
 /**************************************************************************//**
  *
- * @addtogroup cslib_group Capacitive Sensing Firmware Library
+ * @addtogroup cslib_group CSLIB Capacitive Sensing Library
  * @{
  *
  * @brief Capacitive sensing firmware library for Silicon Labs MCUs
@@ -136,8 +137,8 @@ uint8_t CSLIB_isSensorDebounceActive(uint8_t index);
  *
  * This function is used by the device layer of code that interfaces
  * with capacitive sensing hardware.  When @ref CSLIB_update() calls
- * into the device layer to convert a new sample set using @ref scanSensor(),
- * the device layer implementation of @ref scanSensor() should use this
+ * into the device layer to convert a new sample set using @ref CSLIB_scanSensorCB(),
+ * the device layer implementation of @ref CSLIB_scanSensorCB should use this
  * routine to push newly converted samples into the sensor node structure
  * for processing within the library.
  *
@@ -293,7 +294,7 @@ uint16_t CSLIB_getNoiseAdjustedSensorData(uint8_t index);
  * Returns value that is raw or filtered data minus the sensor's baseline.
  * flood_level can be used to remove additional margin along with baseline.
  *
- * @ return Absolute delta between baseline and raw/filtered data
+ * @return Absolute delta between baseline and raw/filtered data
  *****************************************************************************/
 uint16_t CSLIB_getNormalizedDelta(uint8_t sensor_index, uint16_t flood_level);
 
@@ -352,7 +353,7 @@ void CSLIB_checkTimerCB(void);
  * Modify capacitive sense config for baseline initialization
  *
  * Saves configuration state and makes device-level modifications appropriate
- * to baseline initialization using the scanSensor() function.
+ * to baseline initialization using the @ref CSLIB_scanSensorCB() function.
  *
  *****************************************************************************/
 void CSLIB_baselineInitEnableCB(void);

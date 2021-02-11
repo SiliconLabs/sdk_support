@@ -105,19 +105,16 @@ static int32_t installImageFromSlot(int32_t slotId)
     return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
   }
 
+#if (_SILICON_LABS_32B_SERIES == 1)
+  // The upgrade address can be placed to not overlap with application images on Series-2.
   if ((parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_BOOTLOADER)
       && !(parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_APPLICATION)) {
     BTL_DEBUG_PRINTLN("BL upg with no app");
     return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
   }
+#endif
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
-  if ((parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_SE)
-      && !(parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_APPLICATION)) {
-    BTL_DEBUG_PRINTLN("SE upg with no app");
-    return BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
-  }
-
   if ((parseContext.imageProperties.contents & BTL_IMAGE_CONTENT_SE)
       && bootload_checkSeUpgradeVersion(parseContext.imageProperties.seUpgradeVersion)) {
 #if defined(CRYPTOACC_PRESENT)

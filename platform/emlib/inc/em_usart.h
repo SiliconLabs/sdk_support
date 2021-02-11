@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup USART
+ * @addtogroup usart USART - Synchronous/Asynchronous Serial
  * @brief Universal Synchronous/Asynchronous Receiver/Transmitter
  *   Peripheral API
  * @details
@@ -63,7 +58,7 @@ extern "C" {
  * CPU intervention. It is possible to transmit and receive large frames while
  * the MCU remains in EM1 Sleep.
  *
- * This module does not support DMA configuration. The @ref UARTDRV and @ref SPIDRV drivers
+ * This module does not support DMA configuration. The UARTDRV and SPIDRV drivers
  * provide full support for DMA and more.
  *
  *  The following steps are necessary for basic operation:
@@ -83,12 +78,12 @@ extern "C" {
  *  @if DOXYDOC_P1_DEVICE
  *  @include em_usart_route_p1.c
  *  @note UART hardware flow control is not directly supported in hardware on
- *        @ref _SILICON_LABS_32B_SERIES_0 parts.
+ *        _SILICON_LABS_32B_SERIES_0 parts.
  *  @endif
  *  @if DOXYDOC_P2_DEVICE
  *  @include em_usart_route_p2.c
  *  @endif
- *  @note @ref UARTDRV supports all types of UART flow control. Software assisted
+ *  @note UARTDRV supports all types of UART flow control. Software assisted
  *        hardware flow control is available for parts without true UART hardware
  *        flow control.
  * @{
@@ -154,6 +149,7 @@ typedef enum {
 } USART_Stopbits_TypeDef;
 
 #if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
+/** Hardware Flow Control Selection. */
 typedef enum {
   usartHwFlowControlNone = 0,
   usartHwFlowControlCts = USART_ROUTEPEN_CTSPEN,
@@ -162,6 +158,7 @@ typedef enum {
 } USART_HwFlowControl_TypeDef;
 
 #elif defined(USART_CTRLX_CTSEN)
+/** Hardware Flow Control Selection. */
 typedef enum {
   usartHwFlowControlNone = 0,
   usartHwFlowControlCts,
@@ -203,6 +200,7 @@ typedef enum {
 /** PRS Channel type */
 typedef uint8_t USART_PRS_Channel_t;
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /** Deprecated PRS channel selector value.
  *  New code should use an integer instead. */
 #define usartIrDAPrsCh0       0U
@@ -233,6 +231,7 @@ typedef uint8_t USART_PRS_Channel_t;
 #define usartPrsTriggerCh5    5U
 #define usartPrsTriggerCh6    6U
 #define usartPrsTriggerCh7    7U
+/** @endcond */
 
 #if defined(_USART_I2SCTRL_MASK) && defined(USART_I2SCTRL_I2SEN)
 /** I2S format selection. */
@@ -530,6 +529,7 @@ typedef struct {
    *  of the configured USART bit period. */
   USART_IrDAPw_Typedef     irPw;
 
+#if defined(USART_IRCTRL_IRPRSEN)
   /** Enable the PRS channel selected by irPrsSel as input to IrDA module
    *  instead of TX. */
   bool                     irPrsEn;
@@ -537,6 +537,7 @@ typedef struct {
   /** PRS can be used as input to the pulse modulator instead of TX.
    *  This value selects the channel to use. */
   USART_PRS_Channel_t      irPrsSel;
+#endif
 } USART_InitIrDA_TypeDef;
 
 /** Default configuration for IrDA mode initialization structure. */
@@ -585,6 +586,7 @@ typedef struct {
   }
 #elif (_SILICON_LABS_32B_SERIES > 0)
 /* Default USART IrDA struct for Series 1 and Series 2 devices */
+#if defined(USART_IRCTRL_IRPRSEN)
 #define USART_INITIRDA_DEFAULT                                                                       \
   {                                                                                                  \
     {                                                                                                \
@@ -609,6 +611,30 @@ typedef struct {
     false,            /* Routing to PRS is disabled. */                                              \
     0                 /* PRS channel 0. */                                                           \
   }
+#else
+#define USART_INITIRDA_DEFAULT                                                                       \
+  {                                                                                                  \
+    {                                                                                                \
+      usartEnable,           /* Enable RX/TX when initialization is complete. */                     \
+      0,                     /* Use current configured reference clock for configuring baud rate. */ \
+      115200,                /* 115200 bits/s. */                                                    \
+      usartOVS16,            /* 16x oversampling. */                                                 \
+      usartDatabits8,        /* 8 data bits. */                                                      \
+      usartEvenParity,       /* Even parity. */                                                      \
+      usartStopbits1,        /* 1 stop bit. */                                                       \
+      false,                 /* Do not disable majority vote. */                                     \
+      false,                 /* Not USART PRS input mode. */                                         \
+      0,                     /* PRS channel 0. */                                                    \
+      false,                 /* Auto CS functionality enable/disable switch */                       \
+      0,                     /* Auto CS Hold cycles */                                               \
+      0,                     /* Auto CS Setup cycles */                                              \
+      usartHwFlowControlNone /* No HW flow control */                                                \
+    },                                                                                               \
+    false,            /* Rx invert disabled. */                                                      \
+    false,            /* Filtering disabled. */                                                      \
+    usartIrDAPwTHREE  /* Pulse width is set to ONE. */                                               \
+  }
+#endif
 #endif
 
 #if defined(_USART_I2SCTRL_MASK)
@@ -1028,8 +1054,7 @@ void USART_TxDouble(USART_TypeDef *usart, uint16_t data);
 void USART_TxDoubleExt(USART_TypeDef *usart, uint32_t data);
 void USART_TxExt(USART_TypeDef *usart, uint16_t data);
 
-/** @} (end addtogroup USART) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup usart) */
 
 #ifdef __cplusplus
 }

@@ -14,15 +14,12 @@
  * limitations under the License.
  *****************************************************************************/
 
+#include "sl_wfx_configuration_defaults.h"
+
 #ifdef SL_WFX_USE_SECURE_LINK
-#include "secure_link/sl_wfx_secure_link.h"
+#include "sl_wfx_secure_link.h"
 #else
 #include "sl_wfx.h"
-#endif
-
-/// Define the WEAK macro for GCC compatible compilers
-#ifndef WEAK
-#define WEAK __attribute__((weak))
 #endif
 
 /******************************************************
@@ -51,6 +48,7 @@
 sl_wfx_context_t *sl_wfx_context;
 static uint8_t   encryption_keyset;
 static uint16_t  sl_wfx_input_buffer_number;
+
 /******************************************************
 *               Static Function Declarations
 ******************************************************/
@@ -90,7 +88,6 @@ sl_status_t sl_wfx_init(sl_wfx_context_t *context)
   const char           *pds_data;
 #ifdef SL_WFX_USE_SECURE_LINK
   sl_wfx_secure_link_mode_t link_mode;
-  sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_DEFAULT;
 #endif
 
   memset(context, 0, sizeof(*context) );
@@ -179,38 +176,35 @@ sl_status_t sl_wfx_init(sl_wfx_context_t *context)
       case SL_WFX_LINK_MODE_UNTRUSTED:
         break;
       case SL_WFX_LINK_MODE_TRUSTED_EVAL:
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+        sl_wfx_host_log("--Trusted Eval mode--\r\n");
+#endif
         /* In this mode it is assumed that the key is not burned */
         result = sl_wfx_secure_link_set_mac_key(sl_wfx_context->secure_link_mac_key, SECURE_LINK_MAC_KEY_DEST_RAM);
         SL_WFX_ERROR_CHECK(result);
-      /* Falls through on purpose */
+      /* Fallthrough on purpose */
       case SL_WFX_LINK_MODE_ACTIVE:
-        // Exchange keys is only message that can be sent unencrypted
-        // when *Trusted* mode is enabled. After exchanging keys we can change
-        // the encryption bitmap without restrictions.
-
         result = sl_wfx_secure_link_renegotiate_session_key();
         SL_WFX_ERROR_CHECK(result);
 #if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
         sl_wfx_host_log("--Set SL Bitmap--\r\n");
 #endif
-        // Set the initial encryption bitmap regarding the *Secure Link* mode:
-        // - For *Trusted Eval* state: all encrypted messages except SL_CONFIGURE.
-        // - For *Trusted Enforced* state: all encrypted messages including SL_CONFIGURE.
-        // This Host default bitmap mimics the device default bitmap
-        uint8_t new_bitmap[SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE];
-        sl_wfx_init_secure_link_encryption_bitmap(new_bitmap);
-        sl_wfx_secure_link_bitmap_set_all_encrypted(new_bitmap);
+
+        sl_wfx_secure_link_bitmap_set_all_encrypted(sl_wfx_context->encryption_bitmap);
+
+        /* SL_WFX_SECURELINK_CONFIGURE_REQ_ID encryption state depends on the SecureLink mode:
+         *   - Always encrypted in TRUSTED_ENFORCED mode
+         *   - Always in clear in TRUSTED_EVAL mode
+         */
         if (link_mode == SL_WFX_LINK_MODE_TRUSTED_EVAL) {
-          sl_wfx_secure_link_bitmap_remove_request_id(new_bitmap, SL_WFX_SECURELINK_CONFIGURE_REQ_ID);
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-          sl_wfx_host_log("--Trusted Eval mode--\r\n");
-#endif
+          sl_wfx_secure_link_bitmap_remove_request_id(sl_wfx_context->encryption_bitmap, SL_WFX_SECURELINK_CONFIGURE_REQ_ID);
         }
-        // Set the default bitmap in the context
-        memcpy(sl_wfx_context->encryption_bitmap, new_bitmap, SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE);
+
         // Send this bitmap to the device
-        result = sl_wfx_secure_link_configure(new_bitmap, 0);
-        SL_WFX_ERROR_CHECK(result);
+        result = sl_wfx_secure_link_configure(sl_wfx_context->encryption_bitmap, 0);
+        if (result != SL_STATUS_OK && result != SL_STATUS_WIFI_WARNING) {
+          goto error_handler;
+        }
 #if (SL_WFX_DEBUG_MASK & (SL_WFX_DEBUG_INIT | SL_WFX_DEBUG_SLK))
         sl_wfx_host_log("--Secure Link set--\r\n");
 #endif
@@ -285,11 +279,27 @@ sl_status_t sl_wfx_deinit(void)
  * @returns Returns SL_STATUS_OK if the request has been sent correctly,
  * SL_STATUS_FAIL otherwise
  *****************************************************************************/
-sl_status_t sl_wfx_set_mac_address(const sl_wfx_mac_address_t *mac, sl_wfx_interface_t interface)
+sl_status_t sl_wfx_set_mac_address(const sl_wfx_mac_address_t *mac,
+                                   sl_wfx_interface_t interface)
 {
+  sl_status_t result;
   sl_wfx_set_mac_address_req_body_t payload;
+
   memcpy(&payload.mac_addr, &mac->octet, sizeof(payload.mac_addr));
-  return sl_wfx_send_command(SL_WFX_SET_MAC_ADDRESS_REQ_ID, &payload, sizeof(payload), interface, NULL);
+  result = sl_wfx_send_command(SL_WFX_SET_MAC_ADDRESS_REQ_ID, &payload,
+                               sizeof(payload), interface, NULL);
+
+  if (result == SL_STATUS_OK) {
+    if (interface == SL_WFX_STA_INTERFACE) {
+      memcpy(&(sl_wfx_context->mac_addr_0.octet), mac->octet,
+             sizeof(sl_wfx_mac_address_t));
+    }
+    if (interface == SL_WFX_SOFTAP_INTERFACE) {
+      memcpy(&(sl_wfx_context->mac_addr_1.octet), mac->octet,
+             sizeof(sl_wfx_mac_address_t));
+    }
+  }
+  return result;
 }
 
 /**************************************************************************//**
@@ -304,6 +314,7 @@ sl_status_t sl_wfx_set_mac_address(const sl_wfx_mac_address_t *mac, sl_wfx_inter
  *   @arg         WFM_SECURITY_MODE_WEP
  *   @arg         WFM_SECURITY_MODE_WPA2_WPA1_PSK
  *   @arg         WFM_SECURITY_MODE_WPA2_PSK
+ *   @arg         WFM_SECURITY_MODE_WPA3_SAE
  * @param prevent_roaming is equal to 1 to prevent automatic roaming between APs
  * @param management_frame_protection is equal to 1 to enable PMF mode
  * @param passkey is the passkey used by the AP. Can be the WPA hash key to
@@ -342,7 +353,11 @@ sl_status_t sl_wfx_send_join_command(const uint8_t  *ssid,
   connect_request->channel               = sl_wfx_htole16(channel);
   connect_request->security_mode         = security_mode;
   connect_request->prevent_roaming       = prevent_roaming;
-  connect_request->mgmt_frame_protection = sl_wfx_htole16(management_frame_protection);
+  if (security_mode == WFM_SECURITY_MODE_WPA3_SAE) {
+    connect_request->mgmt_frame_protection = WFM_MGMT_FRAME_PROTECTION_MANDATORY;
+  } else {
+    connect_request->mgmt_frame_protection = sl_wfx_htole16(management_frame_protection);
+  }
   connect_request->password_length       = sl_wfx_htole16(passkey_length);
   connect_request->ie_data_length        = sl_wfx_htole16(ie_data_length);
   memcpy(connect_request->ssid_def.ssid, ssid, ssid_length);
@@ -398,6 +413,7 @@ sl_status_t sl_wfx_send_disconnect_command(void)
  *   @arg         WFM_SECURITY_MODE_WEP
  *   @arg         WFM_SECURITY_MODE_WPA2_WPA1_PSK
  *   @arg         WFM_SECURITY_MODE_WPA2_PSK
+ *   @arg         WFM_SECURITY_MODE_WPA3_SAE
  * @param management_frame_protection is equal to 1 to enable PMF mode
  * @param passkey is the passkey used by the softap. Only applicable in security
  * modes different from WFM_SECURITY_MODE_OPEN.
@@ -680,50 +696,6 @@ sl_status_t sl_wfx_send_stop_scan_command(void)
 }
 
 /**************************************************************************//**
- * @brief Join or create an IBSS network
- *
- * @param ssid is the name of the IBSS network
- * @param ssid_length is the length of the SSID name
- * @param channel is the channel used by the network
- * @param security_mode is the security mode used by the network
- *   @arg         WFM_SECURITY_MODE_OPEN
- *   @arg         WFM_SECURITY_MODE_WEP
- * @param passkey is the passkey used by the network
- * @param passkey_length is the length of the passkey
- * @returns SL_STATUS_OK if the command has been sent correctly,
- * SL_STATUS_FAIL otherwise
- *****************************************************************************/
-sl_status_t sl_wfx_join_ibss_command(const uint8_t  *ssid,
-                                     uint32_t        ssid_length,
-                                     uint32_t        channel,
-                                     uint16_t        security_mode,
-                                     const uint8_t  *passkey,
-                                     uint16_t        passkey_length)
-{
-  sl_wfx_join_ibss_req_body_t payload;
-
-  payload.ssid_def.ssid_length = sl_wfx_htole32(ssid_length);
-  payload.channel              = sl_wfx_htole32(channel);
-  payload.security_mode        = sl_wfx_htole16(security_mode);
-  payload.password_length      = sl_wfx_htole16(passkey_length);
-  memcpy(payload.ssid_def.ssid, ssid, ssid_length);
-  memcpy(payload.password, passkey, passkey_length);
-
-  return sl_wfx_send_command(SL_WFX_JOIN_IBSS_REQ_ID, &payload, sizeof(payload), SL_WFX_STA_INTERFACE, NULL);
-}
-
-/**************************************************************************//**
- * @brief Send a command to stop the IBSS mode
- *
- * @returns SL_STATUS_OK if the command has been sent correctly,
- * SL_STATUS_FAIL otherwise
- *****************************************************************************/
-sl_status_t sl_wfx_leave_ibss_command(void)
-{
-  return sl_wfx_send_command(SL_WFX_LEAVE_IBSS_REQ_ID, NULL, 0, SL_WFX_STA_INTERFACE, NULL);
-}
-
-/**************************************************************************//**
  * @brief Get the signal strength of the last packets received
  *
  * @param signal_strength returns the RCPI value averaged on the last packets
@@ -745,7 +717,9 @@ sl_status_t sl_wfx_get_signal_strength(uint32_t *signal_strength)
 
   if (result == SL_STATUS_OK) {
     result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_GET_SIGNAL_STRENGTH_REQ_ID);
-    *signal_strength = sl_wfx_htole32(reply->body.rcpi);
+    if (result == SL_STATUS_OK) {
+      *signal_strength = sl_wfx_htole32(reply->body.rcpi);
+    }
   }
 
   return result;
@@ -1118,8 +1092,10 @@ sl_status_t sl_wfx_get_max_tx_power(int32_t *max_tx_power_rf_port_1,
 
   if (result == SL_STATUS_OK) {
     result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_GET_MAX_TX_POWER_REQ_ID);
-    *max_tx_power_rf_port_1 = sl_wfx_htole32(reply->body.max_tx_power_rf_port1);
-    *max_tx_power_rf_port_2 = sl_wfx_htole32(reply->body.max_tx_power_rf_port2);
+    if (result == SL_STATUS_OK) {
+      *max_tx_power_rf_port_1 = sl_wfx_htole32(reply->body.max_tx_power_rf_port1);
+      *max_tx_power_rf_port_2 = sl_wfx_htole32(reply->body.max_tx_power_rf_port2);
+    }
   }
 
   return result;
@@ -1134,21 +1110,30 @@ sl_status_t sl_wfx_get_max_tx_power(int32_t *max_tx_power_rf_port_1,
  *   @arg         SL_WFX_STA_INTERFACE
  *   @arg         SL_WFX_SOFTAP_INTERFACE
  * @returns SL_STATUS_OK if the command has been sent correctly,
+ * SL_STATUS_WOULD_OVERFLOW if the password would overflow,
  * SL_STATUS_FAIL otherwise
  *****************************************************************************/
-sl_status_t sl_wfx_get_pmk(uint8_t *password,
+sl_status_t sl_wfx_get_pmk(sl_wfx_password_t *password,
                            uint32_t *password_length,
                            sl_wfx_interface_t interface)
 {
-  sl_status_t     result;
+  sl_status_t          result;
   sl_wfx_get_pmk_cnf_t *reply = NULL;
+  uint32_t             password_length_temp;
 
   result = sl_wfx_send_command(SL_WFX_GET_PMK_REQ_ID, NULL, 0, interface, (sl_wfx_generic_confirmation_t **)&reply);
 
   if (result == SL_STATUS_OK) {
     result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_GET_PMK_REQ_ID);
-    memcpy(password, reply->body.password, sl_wfx_htole32(reply->body.password_length));
-    *password_length = sl_wfx_htole32(reply->body.password_length);
+    if (result == SL_STATUS_OK) {
+      password_length_temp = sl_wfx_htole32(reply->body.password_length);
+      if (password_length_temp <= SL_WFX_PASSWORD_SIZE) {
+        memcpy(password, reply->body.password, password_length_temp);
+        *password_length = password_length_temp;
+      } else {
+        result = SL_STATUS_WOULD_OVERFLOW;
+      }
+    }
   }
 
   return result;
@@ -1180,9 +1165,66 @@ sl_status_t sl_wfx_get_ap_client_signal_strength(const sl_wfx_mac_address_t *cli
 
   if (result == SL_STATUS_OK) {
     result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_GET_AP_CLIENT_SIGNAL_STRENGTH_REQ_ID);
-    *signal_strength = sl_wfx_htole32(reply->body.rcpi);
+    if (result == SL_STATUS_OK) {
+      *signal_strength = sl_wfx_htole32(reply->body.rcpi);
+    }
   }
 
+  return result;
+}
+
+/**************************************************************************//**
+ * @brief Send a WPA3 Auth packet
+ *
+ * @param auth_data_type is the type of the packet to send.
+ *   @arg         WFM_EXT_AUTH_DATA_TYPE_SAE_START
+ *   @arg         WFM_EXT_AUTH_DATA_TYPE_SAE_COMMIT
+ *   @arg         WFM_EXT_AUTH_DATA_TYPE_SAE_CONFIRM
+ *   @arg         WFM_EXT_AUTH_DATA_TYPE_MSK
+ * @param auth_data_length is the length of the data to be sent.
+ * @param auth_data is the data.
+ * @returns SL_STATUS_OK if the command has been sent correctly,
+ * SL_STATUS_FAIL otherwise
+ *****************************************************************************/
+sl_status_t sl_wfx_ext_auth(sl_wfx_ext_auth_data_type_t auth_data_type,
+                            uint16_t auth_data_length,
+                            const uint8_t *auth_data)
+{
+  sl_status_t                result;
+  sl_wfx_ext_auth_cnf_t      *reply            = NULL;
+  sl_wfx_generic_message_t   *frame            = NULL;
+  sl_wfx_ext_auth_req_body_t *ext_auth_request = NULL;
+  uint32_t request_length = SL_WFX_ROUND_UP_EVEN(sizeof(sl_wfx_ext_auth_req_t) + auth_data_length);
+
+  result = sl_wfx_allocate_command_buffer(&frame, SL_WFX_EXT_AUTH_REQ_ID, SL_WFX_CONTROL_BUFFER, request_length);
+  SL_WFX_ERROR_CHECK(result);
+
+  memset((void *)&frame->header.length, 0, request_length);
+
+  frame->header.info = SL_WFX_STA_INTERFACE;
+
+  ext_auth_request                   = (sl_wfx_ext_auth_req_body_t *)&frame->body;
+  ext_auth_request->auth_data_type   = sl_wfx_htole16(auth_data_type);
+  ext_auth_request->auth_data_length = sl_wfx_htole16(auth_data_length);
+  memcpy(ext_auth_request + 1, auth_data, auth_data_length);
+
+  result = sl_wfx_send_request(SL_WFX_EXT_AUTH_REQ_ID, frame, request_length);
+  SL_WFX_ERROR_CHECK(result);
+
+  result = sl_wfx_host_wait_for_confirmation(SL_WFX_EXT_AUTH_REQ_ID, SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS, (void **)&reply);
+  SL_WFX_ERROR_CHECK(result);
+
+  result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_EXT_AUTH_REQ_ID);
+
+  error_handler:
+  if (result == SL_STATUS_TIMEOUT) {
+    if (sl_wfx_context->used_buffers > 0) {
+      sl_wfx_context->used_buffers--;
+    }
+  }
+  if (frame != NULL) {
+    sl_wfx_free_command_buffer(frame, SL_WFX_EXT_AUTH_REQ_ID, SL_WFX_CONTROL_BUFFER);
+  }
   return result;
 }
 
@@ -1539,84 +1581,56 @@ sl_status_t sl_wfx_send_command(uint8_t command_id,
  * @param command_id is the ID of the command to be sent (cf. sl_wfx_cmd_api.h)
  * @param request is the pointer to the request to be sent
  * @param request_length is the size of the request to be sent
- * @returns SL_STATUS_OK if the command is sent correctly, SL_STATUS_FAIL otherwise
+ * @returns SL_STATUS_OK if the command is sent correctly,
+ * SL_STATUS_WOULD_OVERFLOW if the HIF queue is full,
+ * SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_send_request(uint8_t command_id, sl_wfx_generic_message_t *request, uint16_t request_length)
 {
-  sl_status_t result = SL_STATUS_NO_MORE_RESOURCE;
+  sl_status_t result;
+  sl_status_t unlock_result;
 
   result = sl_wfx_host_lock();
-  SL_WFX_ERROR_CHECK(result);
 
-  if (sl_wfx_context->used_buffers < sl_wfx_input_buffer_number) {
-    // Write the buffer header
-    request->header.id     = command_id;
-    request->header.length = sl_wfx_htole16(request_length);
+  if (result != SL_STATUS_OK) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
+    sl_wfx_host_log("Send request lock error %u\n", result);
+#endif
+    //if driver lock is not successful, return
+    return result;
+  }
+
+  if (sl_wfx_context->used_buffers >= sl_wfx_input_buffer_number) {
+    result = SL_STATUS_WOULD_OVERFLOW;
+    SL_WFX_ERROR_CHECK(result);
+  }
+
+  // Write the buffer header
+  request->header.id     = command_id;
+  request->header.length = sl_wfx_htole16(request_length);
 
 #ifdef SL_WFX_USE_SECURE_LINK
-    if (sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_RENEGOTIATION_PENDING
-        && command_id != SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID) {
-      result = SL_STATUS_FAIL;
-      goto error_handler;
-    }
-
-    if (sl_wfx_secure_link_encryption_required_get(command_id) == SL_WFX_SECURE_LINK_ENCRYPTION_REQUIRED) {
-      // Nonce for encryption should have RX and HP counters 0, only use TX counter
-      sl_wfx_nonce_t encryption_nonce = { 0, 0, sl_wfx_context->secure_link_nonce.tx_packet_count };
-
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-      sl_wfx_host_log("TX packet %lu\n", sl_wfx_context->secure_link_nonce.tx_packet_count);
-#endif
-
-      // Round up to next crypto block size the part that will be ciphered
-      request_length = ((request_length + 15 - 2) & ~15) + 2;
-
-      // Encrypt the data
-      result = sl_wfx_host_encode_secure_link_data(request,
-                                                   request_length - 2,
-                                                   sl_wfx_context->secure_link_session_key,
-                                                   (uint8_t *)&encryption_nonce);
-      SL_WFX_ERROR_CHECK(result);
-
-      // Write the secure link header
-      uint16_t *secure_link_header = (uint16_t *)((uint8_t *)request - 4);
-      *secure_link_header = sl_wfx_htole16((uint16_t) (sl_wfx_context->secure_link_nonce.tx_packet_count & 0xFFFF));
-      secure_link_header++;
-      *secure_link_header = sl_wfx_htole16((uint16_t) (0x4000 | ( (sl_wfx_context->secure_link_nonce.tx_packet_count >> 16) & 0x3FFF)));
-
-      sl_wfx_context->secure_link_nonce.tx_packet_count++;
-
-      if (sl_wfx_context->secure_link_nonce.tx_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK
-          && sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_DEFAULT) {
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-        sl_wfx_host_log("--SLK renegotiation needed--\r\n");
-#endif
-        //queue key re-negotiation
-        sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_NEEDED;
-      }
-
-      // Add the secure link buffer overhead and transmit
-      request_length += SL_WFX_SECURE_LINK_HEADER_SIZE + SL_WFX_SECURE_LINK_CCM_TAG_SIZE;
-      request = (sl_wfx_generic_message_t *)((uint8_t *)request - SL_WFX_SECURE_LINK_HEADER_SIZE);
-    }
+  result = sl_wfx_secure_link_send(command_id, &request, &request_length);
+  SL_WFX_ERROR_CHECK(result);
 #endif //SL_WFX_USE_SECURE_LINK
 
-    if (command_id != SL_WFX_SEND_FRAME_REQ_ID
-        && command_id != SL_WFX_SHUT_DOWN_REQ_ID) {
-      result = sl_wfx_host_setup_waited_event(command_id);
-      SL_WFX_ERROR_CHECK(result);
-    }
-
-    result = sl_wfx_host_transmit_frame(request, request_length);
+  if (command_id != SL_WFX_SEND_FRAME_REQ_ID
+      && command_id != SL_WFX_SHUT_DOWN_REQ_ID) {
+    result = sl_wfx_host_setup_waited_event(command_id);
     SL_WFX_ERROR_CHECK(result);
-
-    sl_wfx_context->used_buffers++;
   }
+
+  result = sl_wfx_host_transmit_frame(request, request_length);
+  SL_WFX_ERROR_CHECK(result);
+
+  sl_wfx_context->used_buffers++;
 
   error_handler:
-  if (result == SL_STATUS_NO_MORE_RESOURCE || sl_wfx_host_unlock()) {
-    result = SL_STATUS_FAIL;
+  unlock_result = sl_wfx_host_unlock();
+  if (unlock_result != SL_STATUS_OK) {
+    result = unlock_result;
   }
+
 #if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
   if (result != SL_STATUS_OK) {
     sl_wfx_host_log("Send request error %u\n", result);
@@ -1638,13 +1652,21 @@ sl_status_t sl_wfx_send_request(uint8_t command_id, sl_wfx_generic_message_t *re
 sl_status_t sl_wfx_receive_frame(uint16_t *ctrl_reg)
 {
   sl_status_t               result;
+  sl_status_t               unlock_result;
   sl_wfx_generic_message_t *network_rx_buffer = NULL;
   sl_wfx_received_message_type_t message_type;
   sl_wfx_buffer_type_t      buffer_type = SL_WFX_RX_FRAME_BUFFER;
   uint32_t                  read_length, frame_size;
 
   result = sl_wfx_host_lock();
-  SL_WFX_ERROR_CHECK(result);
+
+  if (result != SL_STATUS_OK) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
+    sl_wfx_host_log("Receive frame lock error %u\n", result);
+#endif
+    //if driver lock is not successful, return immediatly
+    return result;
+  }
 
   frame_size = (*ctrl_reg & SL_WFX_CONT_NEXT_LEN_MASK) * 2;
   /* if frame_size is equal to 0, read the control register to know the frame size */
@@ -1692,44 +1714,8 @@ sl_status_t sl_wfx_receive_frame(uint16_t *ctrl_reg)
   *ctrl_reg = sl_wfx_unpack_16bit_little_endian(((uint8_t *)network_rx_buffer) + frame_size);
 
 #ifdef SL_WFX_USE_SECURE_LINK
-  // Bit 14/15 of second word indicates if it is encrypted
-  if ((network_rx_buffer->header.info & SL_WFX_MSG_INFO_SECURE_LINK_MASK) != 0) {
-    uint16_t *nonce_ptr = (uint16_t *) network_rx_buffer;
-    uint32_t new_packet_count = sl_wfx_unpack_16bit_little_endian(&network_rx_buffer->header.length);
-    nonce_ptr++;
-    new_packet_count |= (*nonce_ptr & 0x3FFF) << 16;
-
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-    sl_wfx_host_log("RX packet %lu\n", new_packet_count);
-#endif
-
-    // Update secure link nonce values. Currently only RX counter is expected
-    switch ( (network_rx_buffer->header.info & SL_WFX_MSG_INFO_SECURE_LINK_MASK) >> SL_WFX_MSG_INFO_SECURE_LINK_OFFSET ) {
-      case 0x1: sl_wfx_context->secure_link_nonce.tx_packet_count = new_packet_count; break;
-      case 0x2: sl_wfx_context->secure_link_nonce.rx_packet_count = new_packet_count; break;
-      case 0x3: sl_wfx_context->secure_link_nonce.hp_packet_count = new_packet_count; break;
-      default: /* Potentially flag an error here and abort */ break;
-    }
-
-    // Encrypted data length is Total bytes read - secure link header -  2 extra bytes read of CTRL register - 2 more bytes for message length in clear
-    uint32_t decrypt_length = read_length - SL_WFX_SECURE_LINK_HEADER_SIZE - SL_WFX_SECURE_LINK_CCM_TAG_SIZE - SL_WFX_CONT_REGISTER_SIZE - 2;
-    result = sl_wfx_host_decode_secure_link_data((uint8_t*)network_rx_buffer + SL_WFX_SECURE_LINK_HEADER_SIZE + 2,
-                                                 decrypt_length,
-                                                 sl_wfx_context->secure_link_session_key);
-    SL_WFX_ERROR_CHECK(result);
-
-    if ((sl_wfx_context->secure_link_nonce.rx_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK
-         || sl_wfx_context->secure_link_nonce.hp_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK)
-        && sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_DEFAULT) {
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-      sl_wfx_host_log("--SLK renegotiation needed--\r\n");
-#endif
-      sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_NEEDED;
-    }
-
-    /* Move the buffer pointer by SL_WFX_SECURE_LINK_HEADER_SIZE bytes to point to generic_message_t data */
-    network_rx_buffer = (sl_wfx_generic_message_t *)((uint8_t *)network_rx_buffer + SL_WFX_SECURE_LINK_HEADER_SIZE);
-  }
+  result = sl_wfx_secure_link_receive(&network_rx_buffer, read_length);
+  SL_WFX_ERROR_CHECK(result);
 #endif //SL_WFX_USE_SECURE_LINK
 
   network_rx_buffer->header.length = sl_wfx_htole16(network_rx_buffer->header.length);
@@ -1742,18 +1728,14 @@ sl_status_t sl_wfx_receive_frame(uint16_t *ctrl_reg)
     sl_wfx_free_command_buffer(network_rx_buffer, network_rx_buffer->header.id, buffer_type);
   }
 #ifdef SL_WFX_USE_SECURE_LINK
-  if (sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_RENEGOTIATION_NEEDED) {
-#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
-    sl_wfx_host_log("--SLK renegotiation pending--\r\n");
-#endif
-    sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_PENDING;
-    //notify host
-    sl_wfx_host_schedule_secure_link_renegotiation();
-  }
+  result = sl_wfx_secure_link_renegotiate();
 #endif //SL_WFX_USE_SECURE_LINK
-  if (result == SL_STATUS_NO_MORE_RESOURCE || sl_wfx_host_unlock()) {
-    result = SL_STATUS_FAIL;
+
+  unlock_result = sl_wfx_host_unlock();
+  if (unlock_result != SL_STATUS_OK) {
+    result = unlock_result;
   }
+
 #if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_ERROR)
   if (result != SL_STATUS_OK) {
     sl_wfx_host_log("Receive frame error %u\n", result);
@@ -1846,11 +1828,11 @@ sl_status_t sl_wfx_set_access_mode_message(void)
  *****************************************************************************/
 sl_status_t sl_wfx_set_wake_up_bit(uint8_t state)
 {
-  sl_status_t status;
+  sl_status_t result;
   uint16_t    control_register_value;
 
-  status = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &control_register_value);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &control_register_value);
+  SL_WFX_ERROR_CHECK(result);
 
   if (state > 0) {
     control_register_value |= SL_WFX_CONT_WUP_BIT;
@@ -1858,10 +1840,10 @@ sl_status_t sl_wfx_set_wake_up_bit(uint8_t state)
     control_register_value &= ~SL_WFX_CONT_WUP_BIT;
   }
 
-  status = sl_wfx_reg_write_16(SL_WFX_CONTROL_REG_ID, control_register_value);
+  result = sl_wfx_reg_write_16(SL_WFX_CONTROL_REG_ID, control_register_value);
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -1947,36 +1929,36 @@ sl_status_t sl_wfx_disable_device_power_save(void)
  *****************************************************************************/
 static sl_status_t sl_wfx_init_chip(void)
 {
-  sl_status_t status;
+  sl_status_t result;
   uint32_t    value32;
   uint16_t    value16;
 
-  status = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
+  SL_WFX_ERROR_CHECK(result);
 
   /* General purpose registers setting */
-  status = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x07208775);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x082ec020);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x093c3c3c);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x0b322c44);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x0ca06497);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x07208775);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x082ec020);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x093c3c3c);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x0b322c44);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_reg_write_32(SL_WFX_TSET_GEN_R_W_REG_ID, 0x0ca06497);
+  SL_WFX_ERROR_CHECK(result);
 
   /* set wake-up bit */
-  status = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &value16);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &value16);
+  SL_WFX_ERROR_CHECK(result);
   value16 |= SL_WFX_CONT_WUP_BIT;
-  status = sl_wfx_reg_write_16(SL_WFX_CONTROL_REG_ID, value16);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_write_16(SL_WFX_CONTROL_REG_ID, value16);
+  SL_WFX_ERROR_CHECK(result);
 
   /* .. and wait for wake-up */
   for (uint32_t i = 0; i < 200; ++i) {
-    status = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &value16);
-    SL_WFX_ERROR_CHECK(status);
+    result = sl_wfx_reg_read_16(SL_WFX_CONTROL_REG_ID, &value16);
+    SL_WFX_ERROR_CHECK(result);
 
     if ((value16 & SL_WFX_CONT_RDY_BIT) == SL_WFX_CONT_RDY_BIT) {
       break;
@@ -1986,20 +1968,20 @@ static sl_status_t sl_wfx_init_chip(void)
   }
 
   if ((value16 & SL_WFX_CONT_RDY_BIT) != SL_WFX_CONT_RDY_BIT) {
-    status = SL_STATUS_TIMEOUT;
-    SL_WFX_ERROR_CHECK(status);
+    result = SL_STATUS_TIMEOUT;
+    SL_WFX_ERROR_CHECK(result);
   }
 
   /* check for access mode bit */
-  status = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
+  SL_WFX_ERROR_CHECK(result);
   if ((value32 & SL_WFX_CONFIG_ACCESS_MODE_BIT) == 0) {
-    status = SL_STATUS_FAIL;
-    SL_WFX_ERROR_CHECK(status);
+    result = SL_STATUS_FAIL;
+    SL_WFX_ERROR_CHECK(result);
   }
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -2009,33 +1991,33 @@ static sl_status_t sl_wfx_init_chip(void)
  *****************************************************************************/
 static sl_status_t sl_wfx_download_run_bootloader(void)
 {
-  sl_status_t status;
+  sl_status_t result;
   uint32_t    value32;
 
-  status = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_NCP_STATUS, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_NCP_STATUS, &value32);
+  SL_WFX_ERROR_CHECK(result);
 
   /* release CPU from reset and enable clock */
-  status = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &value32);
+  SL_WFX_ERROR_CHECK(result);
   value32 &= ~(SL_WFX_CONFIG_CPU_RESET_BIT | SL_WFX_CONFIG_CPU_CLK_DIS_BIT);
-  status = sl_wfx_reg_write_32(SL_WFX_CONFIG_REG_ID, value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_reg_write_32(SL_WFX_CONFIG_REG_ID, value32);
+  SL_WFX_ERROR_CHECK(result);
 
   /* Testing SRAM access */
-  status = sl_wfx_apb_write_32(ADDR_DOWNLOAD_FIFO_BASE, 0x23abc88e);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DOWNLOAD_FIFO_BASE, 0x23abc88e);
+  SL_WFX_ERROR_CHECK(result);
 
   /* Check if the write command is successful */
-  status = sl_wfx_apb_read_32(ADDR_DOWNLOAD_FIFO_BASE, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_read_32(ADDR_DOWNLOAD_FIFO_BASE, &value32);
+  SL_WFX_ERROR_CHECK(result);
   if (value32 != 0x23abc88e) {
-    status = SL_STATUS_FAIL;
-    SL_WFX_ERROR_CHECK(status);
+    result = SL_STATUS_FAIL;
+    SL_WFX_ERROR_CHECK(result);
   }
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -2048,7 +2030,7 @@ static sl_status_t sl_wfx_download_run_bootloader(void)
  *****************************************************************************/
 static sl_status_t sl_wfx_download_run_firmware(void)
 {
-  sl_status_t    status;
+  sl_status_t    result;
   uint32_t       i;
   uint32_t       value32;
   uint32_t       image_length;
@@ -2058,75 +2040,75 @@ static sl_status_t sl_wfx_download_run_firmware(void)
   uint32_t       get = 0;
   const uint8_t *buffer;
 
-  status = sl_wfx_host_init();
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_init();
+  SL_WFX_ERROR_CHECK(result);
 
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_NOT_READY);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_PUT, 0);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_GET, 0);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_READY);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_NOT_READY);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_PUT, 0);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_GET, 0);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_READY);
+  SL_WFX_ERROR_CHECK(result);
 
   // wait for INFO_READ state
-  status = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_INFO_READY, 100);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_INFO_READY, 100);
+  SL_WFX_ERROR_CHECK(result);
 
   // read info
-  status = sl_wfx_apb_read_32(0x0900C080, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_read_32(0x0900C080, &value32);
+  SL_WFX_ERROR_CHECK(result);
 
   // retrieve WF200 keyset
-  status = sl_wfx_apb_read_32(SL_WFX_PTE_INFO + 12, &value32);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_read_32(SL_WFX_PTE_INFO + 12, &value32);
+  SL_WFX_ERROR_CHECK(result);
   encryption_keyset = (value32 >> 8);
 
   // report that info is read
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_HOST_INFO_READ);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_HOST_INFO_READ);
+  SL_WFX_ERROR_CHECK(result);
 
   // wait for READY state
-  status = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_READY, 100);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_READY, 100);
+  SL_WFX_ERROR_CHECK(result);
 
   // SB misc initialization. Work around for chips < A2.
-  status = sl_wfx_apb_write_32(ADDR_DOWNLOAD_FIFO_BASE, 0xFFFFFFFF);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DOWNLOAD_FIFO_BASE, 0xFFFFFFFF);
+  SL_WFX_ERROR_CHECK(result);
 
   // write image length
   sl_wfx_host_get_firmware_size(&image_length);
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_IMAGE_SIZE, image_length - FW_HASH_SIZE - FW_SIGNATURE_SIZE - FW_KEYSET_SIZE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_IMAGE_SIZE, image_length - FW_HASH_SIZE - FW_SIGNATURE_SIZE - FW_KEYSET_SIZE);
+  SL_WFX_ERROR_CHECK(result);
 
   // get firmware keyset, which is the first FW_KEYSET_SIZE of given image
-  status = sl_wfx_host_get_firmware_data(&buffer, FW_KEYSET_SIZE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_get_firmware_data(&buffer, FW_KEYSET_SIZE);
+  SL_WFX_ERROR_CHECK(result);
 
   // check if the firmware keyset corresponds to the chip keyset
-  status = sl_wfx_compare_keysets(encryption_keyset, (char *)buffer);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_compare_keysets(encryption_keyset, (char *)buffer);
+  SL_WFX_ERROR_CHECK(result);
 
   // write image signature, which is the next FW_SIGNATURE_SIZE of given image
-  status = sl_wfx_host_get_firmware_data(&buffer, FW_SIGNATURE_SIZE);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_apb_write(ADDR_DWL_CTRL_AREA_SIGNATURE, buffer, FW_SIGNATURE_SIZE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_get_firmware_data(&buffer, FW_SIGNATURE_SIZE);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_apb_write(ADDR_DWL_CTRL_AREA_SIGNATURE, buffer, FW_SIGNATURE_SIZE);
+  SL_WFX_ERROR_CHECK(result);
 
   // write image hash, which is the next  FW_HASH_SIZE of given image
-  status = sl_wfx_host_get_firmware_data(&buffer, FW_HASH_SIZE);
-  SL_WFX_ERROR_CHECK(status);
-  status = sl_wfx_apb_write(ADDR_DWL_CTRL_AREA_FW_HASH, buffer, FW_HASH_SIZE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_get_firmware_data(&buffer, FW_HASH_SIZE);
+  SL_WFX_ERROR_CHECK(result);
+  result = sl_wfx_apb_write(ADDR_DWL_CTRL_AREA_FW_HASH, buffer, FW_HASH_SIZE);
+  SL_WFX_ERROR_CHECK(result);
 
   // write version, this is a pre-defined value (?)
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_FW_VERSION, FW_VERSION_VALUE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_FW_VERSION, FW_VERSION_VALUE);
+  SL_WFX_ERROR_CHECK(result);
 
   // notify NCP that upload is starting
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_UPLOAD_PENDING);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_UPLOAD_PENDING);
+  SL_WFX_ERROR_CHECK(result);
 
   // skip signature and hash from image length
   image_length -= (FW_HASH_SIZE + FW_SIGNATURE_SIZE + FW_KEYSET_SIZE);
@@ -2136,29 +2118,28 @@ static sl_status_t sl_wfx_download_run_firmware(void)
 
   /* Firmware downloading loop */
   for ( block = 0; block < num_blocks; block++ ) {
-    /* check the download status in NCP */
-    status = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_NCP_STATUS, &value32);
-    SL_WFX_ERROR_CHECK(status);
-
-    if (value32 != NCP_STATE_DOWNLOAD_PENDING) {
-      status = SL_STATUS_FAIL;
-      SL_WFX_ERROR_CHECK(status);
-    }
-
     /* loop until put - get <= 24K */
     for ( i = 0; i < 100; i++ ) {
-      get = 0;
-      status = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_GET, &get);
-      SL_WFX_ERROR_CHECK(status);
-
       if ((put - get) <= (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE)) {
         break;
       }
+
+      get = 0;
+      result = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_GET, &get);
+      SL_WFX_ERROR_CHECK(result);
     }
 
     if ((put - get) > (DOWNLOAD_FIFO_SIZE - DOWNLOAD_BLOCK_SIZE)) {
-      status = SL_STATUS_WIFI_FIRMWARE_DOWNLOAD_TIMEOUT;
-      SL_WFX_ERROR_CHECK(status);
+      /* check the download status in NCP */
+      result = sl_wfx_apb_read_32(ADDR_DWL_CTRL_AREA_NCP_STATUS, &value32);
+      SL_WFX_ERROR_CHECK(result);
+
+      if (value32 != NCP_STATE_DOWNLOAD_PENDING) {
+        result = SL_STATUS_FAIL;
+      } else {
+        result = SL_STATUS_WIFI_FIRMWARE_DOWNLOAD_TIMEOUT;
+      }
+      SL_WFX_ERROR_CHECK(result);
     }
 
     /* calculate the block size */
@@ -2168,11 +2149,11 @@ static sl_status_t sl_wfx_download_run_firmware(void)
     }
 
     /* send the block to SRAM */
-    status = sl_wfx_host_get_firmware_data(&buffer, block_size);
-    SL_WFX_ERROR_CHECK(status);
+    result = sl_wfx_host_get_firmware_data(&buffer, block_size);
+    SL_WFX_ERROR_CHECK(result);
     uint32_t block_address = ADDR_DOWNLOAD_FIFO_BASE + (put % DOWNLOAD_FIFO_SIZE);
-    status = sl_wfx_apb_write(block_address, buffer, block_size);
-    SL_WFX_ERROR_CHECK(status);
+    result = sl_wfx_apb_write(block_address, buffer, block_size);
+    SL_WFX_ERROR_CHECK(result);
 
 #if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_FW_LOAD)
     sl_wfx_host_log("FW> %d/%d \n\r", put, image_length);
@@ -2181,26 +2162,26 @@ static sl_status_t sl_wfx_download_run_firmware(void)
     /* update the put register */
     put += block_size;
 
-    status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_PUT, put);
-    SL_WFX_ERROR_CHECK(status);
+    result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_PUT, put);
+    SL_WFX_ERROR_CHECK(result);
   }   /* End of firmware download loop */
 
   // notify NCP that upload ended
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_UPLOAD_COMPLETE);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_UPLOAD_COMPLETE);
+  SL_WFX_ERROR_CHECK(result);
 
   // wait for authentication result
-  status = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_AUTH_OK, 100);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_poll_for_value(ADDR_DWL_CTRL_AREA_NCP_STATUS, NCP_STATE_AUTH_OK, 100);
+  SL_WFX_ERROR_CHECK(result);
 
   // notify NCP that we are happy to run firmware
-  status = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_OK_TO_JUMP);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_apb_write_32(ADDR_DWL_CTRL_AREA_HOST_STATUS, HOST_STATE_OK_TO_JUMP);
+  SL_WFX_ERROR_CHECK(result);
 
   error_handler:
   sl_wfx_host_deinit();
 
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -2217,11 +2198,11 @@ static sl_status_t sl_wfx_download_run_firmware(void)
 static sl_status_t sl_wfx_poll_for_value(uint32_t address, uint32_t polled_value, uint32_t max_retries)
 {
   uint32_t    value;
-  sl_status_t status = SL_STATUS_OK;
+  sl_status_t result = SL_STATUS_OK;
 
   for (; max_retries > 0; max_retries--) {
-    status = sl_wfx_apb_read_32(address, &value);
-    SL_WFX_ERROR_CHECK(status);
+    result = sl_wfx_apb_read_32(address, &value);
+    SL_WFX_ERROR_CHECK(result);
     if (value == polled_value) {
       break;
     } else {
@@ -2229,11 +2210,11 @@ static sl_status_t sl_wfx_poll_for_value(uint32_t address, uint32_t polled_value
     }
   }
   if (value != polled_value) {
-    status = SL_STATUS_TIMEOUT;
+    result = SL_STATUS_TIMEOUT;
   }
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -2280,13 +2261,13 @@ sl_status_t sl_wfx_set_antenna_config(sl_wfx_antenna_config_t config)
   char        pds[32] = { 0 };
   char       *current = pds;
 
-  current += sprintf(current, "{%c:{", PDS_ANTENNA_SEL_KEY);
-  current += sprintf(current, "%c:%X,", PDS_KEY_A, (unsigned int) config);
+  current += sprintf(current, "{%c:{", SL_WFX_PDS_ANTENNA_SEL_KEY);
+  current += sprintf(current, "%c:%X,", SL_WFX_PDS_KEY_A, (unsigned int) config);
   if (config == SL_WFX_ANTENNA_DIVERSITY) {
     // Set diversity mode internal, the Wi-Fi chip will control antenna allocation
-    current += sprintf(current, "%c:%X}}", PDS_KEY_B, 1);
+    current += sprintf(current, "%c:%X}}", SL_WFX_PDS_KEY_B, 1);
   } else {
-    current += sprintf(current, "%c:%X}}", PDS_KEY_B, 0);
+    current += sprintf(current, "%c:%X}}", SL_WFX_PDS_KEY_B, 0);
   }
 
   result = sl_wfx_send_configuration((const char *)pds, strlen(pds));
@@ -2305,14 +2286,17 @@ sl_status_t sl_wfx_set_antenna_config(sl_wfx_antenna_config_t config)
  *****************************************************************************/
 sl_status_t sl_wfx_get_hardware_revision_and_type(uint8_t *revision, uint8_t *type)
 {
-  uint32_t config_reg = 0;
-  sl_status_t status  = SL_STATUS_OK;
+  uint32_t    config_reg = 0;
+  sl_status_t result;
 
-  status = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &config_reg);
+  result = sl_wfx_reg_read_32(SL_WFX_CONFIG_REG_ID, &config_reg);
 
-  *type = (config_reg >> SL_WFX_CONFIG_TYPE_OFFSET) & SL_WFX_CONFIG_TYPE_MASK;
-  *revision = (config_reg >> SL_WFX_CONFIG_REVISION_OFFSET) & SL_WFX_CONFIG_REVISION_MASK;
-  return status;
+  if (result == SL_STATUS_OK) {
+    *type = (config_reg >> SL_WFX_CONFIG_TYPE_OFFSET) & SL_WFX_CONFIG_TYPE_MASK;
+    *revision = (config_reg >> SL_WFX_CONFIG_REVISION_OFFSET) & SL_WFX_CONFIG_REVISION_MASK;
+  }
+
+  return result;
 }
 
 /**************************************************************************//**
@@ -2323,14 +2307,14 @@ sl_status_t sl_wfx_get_hardware_revision_and_type(uint8_t *revision, uint8_t *ty
  *****************************************************************************/
 sl_status_t sl_wfx_get_opn(uint8_t **opn)
 {
-  sl_status_t status = SL_STATUS_FAIL;
+  sl_status_t result = SL_STATUS_FAIL;
 
   if (sl_wfx_context != NULL) {
     *opn = (uint8_t *) &(sl_wfx_context->wfx_opn);
-    status = SL_STATUS_OK;
+    result = SL_STATUS_OK;
   }
 
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -2443,20 +2427,21 @@ sl_status_t sl_wfx_allocate_command_buffer(sl_wfx_generic_message_t **buffer,
                                            sl_wfx_buffer_type_t type,
                                            uint32_t buffer_size)
 {
-  sl_status_t status;
+  sl_status_t result;
 
 #ifdef SL_WFX_USE_SECURE_LINK
   if (sl_wfx_secure_link_encryption_required_get(command_id) == SL_WFX_SECURE_LINK_ENCRYPTION_REQUIRED) {
     uint32_t padding_length = 0;
 
     // The request content (including the Wi-Fi chip buffer header) needs to be padded to the encryption block size
-    if ((buffer_size & 0x0F) > 0) {
-      padding_length = (16 - (uint8_t) (buffer_size & 0x0F) );
+    if (((buffer_size - 2) & 0x0F) > 0) {
+      padding_length = (16 - (uint8_t) ((buffer_size - 2) & 0x0F) );
     }
-    status = sl_wfx_host_allocate_buffer((void **)buffer,
+
+    result = sl_wfx_host_allocate_buffer((void **)buffer,
                                          type,
                                          buffer_size + SL_WFX_SECURE_LINK_HEADER_SIZE + padding_length + SL_WFX_SECURE_LINK_CCM_TAG_SIZE);
-    SL_WFX_ERROR_CHECK(status);
+    SL_WFX_ERROR_CHECK(result);
 
     memset((*buffer), 0, SL_WFX_SECURE_LINK_HEADER_SIZE + buffer_size + padding_length + SL_WFX_SECURE_LINK_CCM_TAG_SIZE);
 
@@ -2466,16 +2451,16 @@ sl_status_t sl_wfx_allocate_command_buffer(sl_wfx_generic_message_t **buffer,
 #endif //SL_WFX_USE_SECURE_LINK
   {
     SL_WFX_UNUSED_PARAMETER(command_id);
-    status = sl_wfx_host_allocate_buffer((void **)buffer,
+    result = sl_wfx_host_allocate_buffer((void **)buffer,
                                          type,
                                          buffer_size);
-    SL_WFX_ERROR_CHECK(status);
+    SL_WFX_ERROR_CHECK(result);
 
     memset((*buffer), 0, buffer_size);
   }
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**

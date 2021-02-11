@@ -1,0 +1,17 @@
+!!omap
+- id: slwrb4542b
+- label: SLWRB4542B
+- package: platform
+- description: Kit BSP support for the EZR32HG 434 MHz 10 dBm Radio Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_slwrb4542b
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- tag:
+  - kit:opn:SLWRB4542B
+  - kit:pn:WRB4542
+  - kit:variant:B
+  - kit:revision:A00

@@ -84,10 +84,19 @@ void btl_initAesCcm(void          *ctx,
 #endif
 
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
+
+#if defined(SEMAILBOX_PRESENT) && defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE)
+  (void)key;
+  context->aesKeyDesc.type = SL_SE_KEY_TYPE_SYMMETRIC;
+  context->aesKeyDesc.size = keySize / 8UL; // keySize in bytes
+  context->aesKeyDesc.flags = SL_SE_KEY_FLAG_NON_EXPORTABLE; // Non exportable key
+  context->aesKeyDesc.storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
+  context->aesKeyDesc.storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY;
+#else
   // Store the key
   mbedtls_aes_init(&(context->aesContext));
   mbedtls_aes_setkey_enc(&(context->aesContext), key, keySize);
-
+#endif
   // Indicate start of stream by setting offset to 0
   context->offsetInBlock = 0;
 
@@ -109,6 +118,18 @@ void btl_processAesCtrData(void          *ctx,
                            size_t        length)
 {
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;
+#if defined(SEMAILBOX_PRESENT) && defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE)
+  sl_se_command_context_t cmd_ctx;
+  sl_se_init_command_context(&cmd_ctx);
+  sl_se_aes_crypt_ctr(&cmd_ctx,
+                      &(context->aesKeyDesc),
+                      length,
+                      (uint32_t *)&(context->offsetInBlock),
+                      context->counter,
+                      context->streamBlock,
+                      input,
+                      output);
+#else
   mbedtls_aes_crypt_ctr(&(context->aesContext),
                         length,
                         &(context->offsetInBlock),
@@ -116,4 +137,5 @@ void btl_processAesCtrData(void          *ctx,
                         context->streamBlock,
                         input,
                         output);
+#endif
 }

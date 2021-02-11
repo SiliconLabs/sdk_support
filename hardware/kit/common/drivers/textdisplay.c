@@ -1027,6 +1027,7 @@ static EMSTATUS TextdisplayUpdate(TEXTDISPLAY_Device_t*  textdisplay)
         default:
           return TEXTDISPLAY_EMSTATUS_NOT_SUPPORTED;
       }
+      break;
 
     case TEXTDISPLAY_UPDATE_MODE_LINE:
 

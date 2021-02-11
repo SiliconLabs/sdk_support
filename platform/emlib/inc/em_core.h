@@ -35,13 +35,16 @@
 
 #include <stdbool.h>
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
+#if defined(EMLIB_USER_CONFIG)
+#include "emlib_config.h"
+#endif
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
 /***************************************************************************//**
- * @addtogroup CORE
+ * @addtogroup core
  * @{
  ******************************************************************************/
 
@@ -60,6 +63,40 @@
 
 /** Number of entries in a default interrupt vector table. */
 #define CORE_DEFAULT_VECTOR_TABLE_ENTRIES   (EXT_IRQ_COUNT + 16)
+
+// Interrupt priorities based on processor architecture
+#if defined(__CM3_REV) || defined(__CM4_REV) || defined(__CM7_REV) \
+ || defined(__CM23_REV) || defined(__CM33_REV)
+#define CORE_INTERRUPT_HIGHEST_PRIORITY 0
+#define CORE_INTERRUPT_DEFAULT_PRIORITY 5
+#define CORE_INTERRUPT_LOWEST_PRIORITY 7
+
+#define CORE_ATOMIC_METHOD_DEFAULT  CORE_ATOMIC_METHOD_BASEPRI
+#elif defined(__CM0_REV) || defined(__CM0PLUS_REV)
+#define CORE_INTERRUPT_HIGHEST_PRIORITY 0
+#define CORE_INTERRUPT_DEFAULT_PRIORITY 1
+#define CORE_INTERRUPT_LOWEST_PRIORITY 3
+
+#define CORE_ATOMIC_METHOD_DEFAULT  CORE_ATOMIC_METHOD_PRIMASK
+#endif
+
+#if !defined(CORE_ATOMIC_BASE_PRIORITY_LEVEL)
+/** The interrupt priority level disabled within ATOMIC regions. Interrupts
+ *  with priority level equal to or lower than this definition will be disabled
+ *  within ATOMIC regions. */
+#define CORE_ATOMIC_BASE_PRIORITY_LEVEL  3
+#endif
+
+#if !defined(CORE_ATOMIC_METHOD)
+/** Specify which method to use when implementing ATOMIC sections. You can
+ *  select between BASEPRI or PRIMASK method.
+ *  @note On Cortex-M0+ devices only PRIMASK can be used. */
+#if !defined(SL_CATALOG_DEVICE_INIT_NVIC_PRESENT)
+#define CORE_ATOMIC_METHOD    CORE_ATOMIC_METHOD_PRIMASK
+#else
+#define CORE_ATOMIC_METHOD   CORE_ATOMIC_METHOD_DEFAULT
+#endif
+#endif
 
 // Compile time sanity check.
 #if (CORE_NVIC_REG_WORDS > 3)
@@ -267,7 +304,6 @@ void  CORE_InitNvicVectorTable(uint32_t *sourceTable,
 }
 #endif
 
-/** @} (end addtogroup CORE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup core) */
 
 #endif /* EM_CORE_H */

@@ -119,9 +119,10 @@ int32_t btl_verifyEcdsaP256r1(const uint8_t *sha256,
 
   SE_executeCommand(&command);
 
-  SE_Response_t rsp = SE_readCommandResponse();
+  volatile SE_Response_t response = 0x12345678U;
+  response = SE_readCommandResponse();
 
-  if (rsp == SE_RESPONSE_OK) {
+  if (response == SE_RESPONSE_OK) {
     return BOOTLOADER_OK;
   }
 
@@ -149,7 +150,7 @@ int32_t btl_verifyEcdsaP256r1(const uint8_t *sha256,
     return BOOTLOADER_ERROR_SECURITY_INVALID_PARAM;
   }
 
-  uint32_t res;
+  volatile uint32_t res = CRYPTOLIB_CRYPTO_ERR;
   uint32_t pub[ECC_COOR_SIZE_IN_BYTES * 2U / sizeof(uint32_t)] = { 0 };
   uint32_t signature[ECC_COOR_SIZE_IN_BYTES * 2U / sizeof(uint32_t)] = { 0 };
 

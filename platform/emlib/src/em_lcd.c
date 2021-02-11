@@ -32,14 +32,10 @@
 #if defined(LCD_COUNT) && (LCD_COUNT > 0)
 #include "em_assert.h"
 #include "em_bus.h"
+#include "em_gpio.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LCD
+ * @addtogroup lcd LCD - Liquid Crystal Display
  * @brief Liquid Crystal Display (LCD) Peripheral API
  * @details
  *  This module contains functions to control the LDC peripheral of Silicon
@@ -48,6 +44,14 @@
  *  animations without the CPU intervention.
  * @{
  ******************************************************************************/
+
+/* Frame counter uses a maximum of 5 bits (FCTOP[5:0]). */
+#define LCD_FRAME_COUNTER_VAL_MAX  64
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define LCD_COM_LINES_MAX  4
+#define LCD_SEGMENT_LINES_MAX  20
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -70,6 +74,14 @@ void LCD_Init(const LCD_Init_TypeDef *lcdInit)
 
   /* Disable the controller before reconfiguration. */
   LCD_Enable(false);
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_ReadyWait();
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Initialize LCD registers to hardware reset state. */
+  LCD_Reset();
+#endif
 
   /* Make sure the other bit fields don't get affected (i.e., voltage boost). */
   dispCtrl &= ~(0
@@ -100,16 +112,15 @@ void LCD_Init(const LCD_Init_TypeDef *lcdInit)
 #if defined(_SILICON_LABS_32B_SERIES_0)
   dispCtrl |= lcdInit->vlcd;
   dispCtrl |= lcdInit->contrast;
-#endif
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  dispCtrl |= lcdInit->mode;
+#else
   dispCtrl |= (lcdInit->chargeRedistribution);
 #endif
 
   /* Update the display controller. */
   LCD->DISPCTRL = dispCtrl;
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_ModeSet(lcdInit->mode);
   LCD->FRAMERATE = lcdInit->frameRateDivider;
   LCD_ContrastSet(lcdInit->contrastLevel);
 #endif
@@ -158,7 +169,14 @@ void LCD_VLCDSelect(LCD_VLCDSel_TypeDef vlcd)
  ******************************************************************************/
 void LCD_UpdateCtrl(LCD_UpdateCtrl_TypeDef ud)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(false);  /* Ensure LCD disabled before writing WSTATIC fields. */
+  LCD_ReadyWait();
   LCD->CTRL = (LCD->CTRL & ~_LCD_CTRL_UDCTRL_MASK) | ud;
+  LCD_Enable(true);
+#else
+  LCD->CTRL = (LCD->CTRL & ~_LCD_CTRL_UDCTRL_MASK) | ud;
+#endif
 }
 
 /***************************************************************************//**
@@ -170,12 +188,27 @@ void LCD_UpdateCtrl(LCD_UpdateCtrl_TypeDef ud)
  ******************************************************************************/
 void LCD_FrameCountInit(const LCD_FrameCountInit_TypeDef *fcInit)
 {
-  uint32_t bactrl = LCD->BACTRL;
-
   EFM_ASSERT(fcInit != (void *) 0);
 
   /* Verify that the FC Top Counter is within limits. */
-  EFM_ASSERT(fcInit->top < 64);
+  EFM_ASSERT(fcInit->top < LCD_FRAME_COUNTER_VAL_MAX);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  uint32_t bacfg = LCD->BACFG;
+
+  /* Reconfigure the frame count configuration. */
+  bacfg &= ~(_LCD_BACFG_FCTOP_MASK
+             | _LCD_BACFG_FCPRESC_MASK);
+  bacfg |= (fcInit->top << _LCD_BACFG_FCTOP_SHIFT);
+  bacfg |= fcInit->prescale;
+
+  /* Set the Blink and Animation Control Register. */
+  LCD_Enable(false);  /* Ensure LCD disabled before writing WSTATIC fields. */
+  LCD_ReadyWait();
+  LCD->BACFG = bacfg;
+  LCD_Enable(true);
+#else
+  uint32_t bactrl = LCD->BACTRL;
 
   /* Reconfigure the frame count configuration. */
   bactrl &= ~(_LCD_BACTRL_FCTOP_MASK
@@ -185,6 +218,7 @@ void LCD_FrameCountInit(const LCD_FrameCountInit_TypeDef *fcInit)
 
   /* Set the Blink and Animation Control Register. */
   LCD->BACTRL = bactrl;
+#endif
 
   LCD_FrameCountEnable(fcInit->enable);
 }
@@ -202,27 +236,24 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit)
 
   EFM_ASSERT(animInit != (void *) 0);
 
-  /* Set Animation Register Values. */
+  /* Set initial Animation Register Values. */
   LCD->AREGA = animInit->AReg;
   LCD->AREGB = animInit->BReg;
 
   /* Configure the Animation Shift and Logic. */
   bactrl &= ~(_LCD_BACTRL_AREGASC_MASK
               | _LCD_BACTRL_AREGBSC_MASK
-              | _LCD_BACTRL_ALOGSEL_MASK);
+              | _LCD_BACTRL_ALOGSEL_MASK
+#if defined(_LCD_BACTRL_ALOC_MASK)
+              | _LCD_BACTRL_ALOC_MASK
+#endif
+              );
 
   bactrl |= (animInit->AShift << _LCD_BACTRL_AREGASC_SHIFT);
   bactrl |= (animInit->BShift << _LCD_BACTRL_AREGBSC_SHIFT);
   bactrl |= animInit->animLogic;
-
-#if defined(LCD_BACTRL_ALOC)
-  bactrl &= ~(_LCD_BACTRL_ALOC_MASK);
-
-  if (animInit->startSeg == 0) {
-    bactrl |= LCD_BACTRL_ALOC_SEG0TO7;
-  } else if (animInit->startSeg == 8) {
-    bactrl |= LCD_BACTRL_ALOC_SEG8TO15;
-  }
+#if defined(_LCD_BACTRL_ALOC_MASK)
+  bactrl |= animInit->startSeg;
 #endif
 
   /* Reconfigure. */
@@ -232,6 +263,7 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit)
   LCD_AnimEnable(animInit->enable);
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_0)
 /***************************************************************************//**
  * @brief
  *   Enables updating this range of LCD segment lines.
@@ -243,7 +275,6 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit)
  * @param[in] enable
  *   Boolean true to enable segment updates, false to disable updates.
  ******************************************************************************/
-#if defined(_SILICON_LABS_32B_SERIES_0)
 void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segmentRange, bool enable)
 {
   if (enable) {
@@ -251,6 +282,69 @@ void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segmentRange, bool enable)
   } else {
     LCD->SEGEN &= ~((uint32_t)segmentRange);
   }
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Enables a given LCD segment line.
+ *
+ * @param[in] seg_nbr
+ *   Segment line number.
+ *
+ * @param[in] enable
+ *   Boolean true to enable a segment, false to disable.
+ ******************************************************************************/
+void LCD_SegmentEnable(uint32_t seg_nbr, bool enable)
+{
+  /* Series 2 supports up to 20 segment lines. */
+  EFM_ASSERT(seg_nbr < 20);
+
+  if (enable) {
+    GPIO->LCDSEG_SET = 1 << seg_nbr;
+  } else {
+    GPIO->LCDSEG_CLR = 1 << seg_nbr;
+  }
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Enables a given LCD COM line.
+ *
+ * @param[in] com
+ *   COM line number.
+ *
+ * @param[in] enable
+ *   Boolean true to enable a COM , false to disable.
+ ******************************************************************************/
+void LCD_ComEnable(uint8_t com, bool enable)
+{
+  /* Series 2 supports up to 4 COM lines. */
+  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+
+  if (enable) {
+    GPIO->LCDCOM_SET = 1 << com;
+  } else {
+    GPIO->LCDCOM_CLR = 1 << com;
+  }
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Set a given DMA mode operation.
+ *
+ * @param[in] mode
+ *   DMA mode.
+ ******************************************************************************/
+void LCD_DmaModeSet(LCD_DmaMode_Typedef mode)
+{
+  LCD->BIASCTRL_CLR = _LCD_BIASCTRL_DMAMODE_MASK;
+  LCD->BIASCTRL |= mode;
 }
 #endif
 
@@ -274,6 +368,36 @@ void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segmentRange, bool enable)
  ******************************************************************************/
 void LCD_SegmentSet(int com, int bit, bool enable)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Series 2 supports up to 4 COM lines. */
+  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+
+  /* Series 2 supports up to 20 segment lines. */
+  EFM_ASSERT(bit < LCD_SEGMENT_LINES_MAX);
+
+  /* Use a bitband access for atomic bit set/clear of the segment. */
+  switch (com) {
+    case 0:
+      BUS_RegBitWrite(&(LCD->SEGD0), bit, enable);
+      break;
+
+    case 1:
+      BUS_RegBitWrite(&(LCD->SEGD1), bit, enable);
+      break;
+
+    case 2:
+      BUS_RegBitWrite(&(LCD->SEGD2), bit, enable);
+      break;
+
+    case 3:
+      BUS_RegBitWrite(&(LCD->SEGD3), bit, enable);
+      break;
+
+    default:
+      EFM_ASSERT(0);
+      break;
+  }
+#else
 #if defined(_LCD_SEGD7L_MASK)
   /* Tiny Gecko and Giant Gecko Families support up to 8 COM lines. */
   EFM_ASSERT(com < 8);
@@ -392,6 +516,7 @@ void LCD_SegmentSet(int com, int bit, bool enable)
       EFM_ASSERT(0);
       break;
   }
+#endif
 }
 
 /***************************************************************************//**
@@ -410,6 +535,50 @@ void LCD_SegmentSet(int com, int bit, bool enable)
  ******************************************************************************/
 void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  uint32_t segData;
+
+  /* Series 2 supports up to 4 COM lines. */
+  EFM_ASSERT(com < LCD_COM_LINES_MAX);
+
+  /* Series 2 supports up to 20 segment lines. */
+  EFM_ASSERT(!(mask & (~_LCD_SEGD0_MASK)));
+  EFM_ASSERT(!(bits & (~_LCD_SEGD0_MASK)));
+
+  switch (com) {
+    case 0:
+      segData     = LCD->SEGD0;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD0 = segData;
+      break;
+
+    case 1:
+      segData     = LCD->SEGD1;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD1 = segData;
+
+      break;
+    case 2:
+      segData     = LCD->SEGD2;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD2 = segData;
+      break;
+
+    case 3:
+      segData     = LCD->SEGD3;
+      segData    &= ~(mask);
+      segData    |= (mask & bits);
+      LCD->SEGD3 = segData;
+      break;
+
+    default:
+      EFM_ASSERT(0);
+      break;
+  }
+#else
   uint32_t segData;
 
   /* A maximum number of com lines. */
@@ -481,6 +650,7 @@ void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits)
       EFM_ASSERT(0);
       break;
   }
+#endif
 }
 
 #if defined(_LCD_SEGD0H_MASK)
@@ -571,24 +741,6 @@ void LCD_SegmentSetHigh(int com, uint32_t mask, uint32_t bits)
 }
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_0)
-/***************************************************************************//**
- * @brief
- *   Configure the contrast level on the LCD panel.
- *
- * @param[in] level
- *   The contrast level in range 0-31.
- ******************************************************************************/
-void LCD_ContrastSet(int level)
-{
-  EFM_ASSERT(level < 32);
-
-  LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CONLEV_MASK)
-                  | (level << _LCD_DISPCTRL_CONLEV_SHIFT);
-}
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   Configure the contrast level on the LCD panel.
@@ -598,12 +750,24 @@ void LCD_ContrastSet(int level)
  ******************************************************************************/
 void LCD_ContrastSet(int level)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0)
+  EFM_ASSERT(level < 32);
+
+  LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CONLEV_MASK)
+                  | (level << _LCD_DISPCTRL_CONLEV_SHIFT);
+
+#elif defined(_SILICON_LABS_32B_SERIES_1)
   EFM_ASSERT(level < 64);
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CONTRAST_MASK)
                   | (level << _LCD_DISPCTRL_CONTRAST_SHIFT);
-}
+#else
+  EFM_ASSERT(level < 32);
+
+  LCD->BIASCTRL = (LCD->BIASCTRL & ~_LCD_BIASCTRL_VLCD_MASK)
+                  | (level << _LCD_BIASCTRL_VLCD_SHIFT);
 #endif
+}
 
 /***************************************************************************//**
  * @brief
@@ -614,7 +778,16 @@ void LCD_ContrastSet(int level)
  ******************************************************************************/
 void LCD_BiasSet(LCD_Bias_TypeDef bias)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(false); /* Ensure LCD disabled before writing WSTATIC fields. */
+  LCD_ReadyWait();
+#endif
+
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_BIAS_MASK) | bias;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(true);
+#endif
 }
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
@@ -640,26 +813,64 @@ void LCD_VBoostSet(LCD_VBoostLevel_TypeDef vboost)
  *   Configure the bias level for a specific segment line for Direct Segment Control.
  *
  * @note
- *   When DSC is active, each configuration takes up 4 bits in the Segment
- *   Registers (SEGD0L/SEGD1H) which defines the bias level.
+ *   When DSC is active, each configuration takes up 4 bits in the corresponding
+ *   Segment Registers (SEGD0L/SEGD1H for Series 0 and 1, SEGDx for Series 2)
+ *   which defines the bias level.
  *   For optimal use of this feature, the entire SEGD-registers should be set
- *   at once in an optimized routine. Therefore, this function
- *   shows how to correctly configure the bias levels and should be used
- *   with care.
+ *   at once in an optimized routine. Therefore, this function shows how to
+ *   correctly configure the bias levels and should be used with care.
  *
  * @param[in] segmentLine
  *   A segment line number.
  *
  * @param[in] biasLevel
- *   The bias configuration level, 0-4. This value must be within the constraints
- *   defined by the LCD_DISPCTRL bias settings. For more information,
- *   see the applicable Reference Manual and data sheet.
+ *   The bias configuration level. This value must be within the constraints
+ *   defined by the LCD_DISPCTRL bias settings. For more information, see the
+ *   applicable Reference Manual and data sheet.
  ******************************************************************************/
 void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
 {
+  volatile uint32_t *segmentRegister;
   int               biasRegister;
   int               bitShift;
-  volatile uint32_t *segmentRegister;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (segmentLine >= (int)LCD_SEG_NUM) {
+    return;
+  }
+
+  /*
+   * On Series 2, the following layout is used to configure bias when DSC
+   * is active:
+   *
+   * REGISTERS | ... | 7 .. 4 | 3 .. 0 |
+   *   SEGD0   | ... |  seg4  |  seg0  |
+   *   SEGD1   | ... |  seg5  |  seg1  |
+   *   .....
+   */
+  biasRegister = segmentLine % 4;
+  bitShift     = (segmentLine / 4) * 4;
+
+  switch (biasRegister) {
+    case 0:
+      segmentRegister = &LCD->SEGD0;
+      break;
+    case 1:
+      segmentRegister = &LCD->SEGD1;
+      break;
+    case 2:
+      segmentRegister = &LCD->SEGD2;
+      break;
+    case 3:
+      segmentRegister = &LCD->SEGD3;
+      break;
+    default:
+      segmentRegister = (uint32_t *)0x00000000;
+      EFM_ASSERT(0);
+      break;
+  }
+
+#else
 
 #if !defined(_LCD_SEGD0H_MASK)
   EFM_ASSERT(segmentLine < 20);
@@ -733,8 +944,10 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
   }
 #endif
 
+#endif
+
   /* Configure a new bias setting. */
-  *segmentRegister = (*segmentRegister & ~(0xF << bitShift)) | (biasLevel << bitShift);
+  BUS_RegMaskedWrite(segmentRegister, 0xF << bitShift, biasLevel << bitShift);
 }
 #endif
 
@@ -744,32 +957,63 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
  *   Configure the bias level for a specific segment line.
  *
  * @note
- *   When DSC is active, each configuration takes up 4 bits in the Segment
- *   Registers (SEGD4L/SEGD4H) which defines bias level.
- *   For optimal use of this feature, the entire SEGD-registers should be set
- *   at once in a optimized routine. Therefore, this function
- *   shows how to correctly configure the bias levels and should be used
- *   with care.
+ *   When DSC is active, each configuration takes up 4 bits in the corresponding
+ *   Segment Registers (SEGD4L/SEGD4H for Series 0 and 1, AREGA/AREGB for
+ *   Series 2) which defines bias level.
+ *   For optimal use of this feature, the entire register set should be set
+ *   at once in a optimized routine. Therefore, this function shows how to
+ *   correctly configure the bias levels and should be used with care.
  *
  * @param[in] comLine
- *   A COM line number, 0-7.
+ *   A COM line number, between 0 and 7 for Series 0 and 1. For Series 2, max
+ *   is LCD_COM_NUM, defined in device-specific headers.
+ *
  *
  * @param[in] biasLevel
- *   The bias configuration level, 0-4. This value must be within the constraints
+ *   The bias configuration level. This value must be within the constraints
  *   defined by the LCD_DISPCTRL bias settings.
  *   For more information, see the appropriate Reference Manual and data sheet.
  ******************************************************************************/
 void LCD_BiasComSet(int comLine, int biasLevel)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  volatile uint32_t *comRegister;
+  uint32_t biasRegister;
+  uint32_t bitShift;
+
+  if (comLine >= (int)LCD_COM_NUM) {
+    return;
+  }
+
+  biasRegister = comLine % 2;
+  bitShift     = (comLine / 2) * 4;
+
+  switch (biasRegister) {
+    case 0:
+      comRegister = &LCD->AREGA;
+      break;
+    case 1:
+      comRegister = &LCD->AREGB;
+      break;
+    default:
+      comRegister = (uint32_t *)0x00000000;
+      EFM_ASSERT(0);
+      break;
+  }
+
+  BUS_RegMaskedWrite(comRegister, 0xF << bitShift, biasLevel << bitShift);
+
+#else
   int bitShift;
   EFM_ASSERT(comLine < 8);
 
   bitShift    = comLine * 4;
-  LCD->SEGD4L = (LCD->SEGD4L & ~(0xF << bitShift)) | (biasLevel << bitShift);
+  BUS_RegMaskedWrite(&(LCD->SEGD4L), 0xF << bitShift, biasLevel << bitShift);
+#endif
 }
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
  *   Configure the mode for the LCD panel.
@@ -779,26 +1023,40 @@ void LCD_BiasComSet(int comLine, int biasLevel)
  ******************************************************************************/
 void LCD_ModeSet(LCD_Mode_Typedef mode)
 {
+#if defined(_SILICON_LABS_32B_SERIES_1)
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_MODE_MASK) | mode;
+#else
+  LCD->BIASCTRL = (LCD->BIASCTRL & ~_LCD_BIASCTRL_MODE_MASK) | mode;
+#endif
 }
+#endif
 
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
  *   Configure the charge redistribution cycles for the LCD panel.
  *
- * @param[in] chgrDst
+ * @param[in] cycles
  *   Charge redistribution cycles, range 0-4.
  ******************************************************************************/
 void LCD_ChargeRedistributionCyclesSet(uint8_t cycles)
 {
   EFM_ASSERT(cycles <= 4);
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(false); /* Ensure LCD disabled before writing WSTATIC fields. */
+  LCD_ReadyWait();
+#endif
+
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
                   | (cycles << _LCD_DISPCTRL_CHGRDST_SHIFT);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(true);
+#endif
 }
 #endif
 
-/** @} (end addtogroup LCD) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup lcd) */
 
 #endif /* defined(LCD_COUNT) && (LCD_COUNT > 0) */

@@ -200,9 +200,7 @@ static void GPIO_EZRadio_INT_IRQHandler(uint8_t pin)
 /// @endcond
 
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
- * @addtogroup emdrv
- * @{
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv EZRADIODRV - EzRadio Driver
  * @brief EZR32 EzRadio Peripheral Interface Driver
  * @{
 
@@ -487,5 +485,4 @@ static void GPIO_EZRadio_INT_IRQHandler(uint8_t pin)
     advised to use higher level layers instead.
 
 
- * @} end group EZRADIODRV ****************************************************
- * @} end group emdrv ****************************************************/
+ * @} end group ezradiodrv ****************************************************/

@@ -1,3 +1,23 @@
+/***************************************************************************//**
+ * @file
+ * @brief legacy packet buffer support
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
+
+#ifndef LEGACY_PACKET_BUFFER_H
+#define LEGACY_PACKET_BUFFER_H
+
 uint8_t *emberGetLinkedBuffersPointer(Buffer buffer, uint8_t index);
 
 EmberStatus emberReallyAppendToLinkedBuffers(EmberMessageBuffer *buffer,
@@ -8,7 +28,7 @@ EmberStatus emberReallySetLinkedBuffersLength(Buffer *buffer,
                                               uint8_t newLength);
 
 uint8_t emberGetLinkedBuffersByte(Buffer buffer, uint8_t index);
-void emberSetLinkedBuffersByte(EmberMessageBuffer buffer, uint8_t index, uint8_t byte);
+void emberSetLinkedBuffersByte(Buffer buffer, uint8_t index, uint8_t byte);
 
 Buffer emberCopyLinkedBuffers(Buffer buffer);
 void emberCopyBufferBytes(Buffer to,
@@ -47,11 +67,9 @@ emberFillStackBuffer(unsigned int count, ...);
 
 #define emberSetMessageBufferLength emberSetLinkedBuffersLength
 
-/*
-   //----------------------------------------------------------------
-   // Macros for the MessageBuffer interface.
+//----------------------------------------------------------------
+// Macros for the MessageBuffer interface.
 
- */
 #define emberMessageBufferContents emGetBufferPointer
 #define emberMessageBufferLength emGetBufferLength
 
@@ -62,12 +80,10 @@ emberFillStackBuffer(unsigned int count, ...);
 
 #define emberFillLinkedBuffers(contents, length) \
   emReallyFillBuffer((contents), (length), false)
-/*
 
  #define emberFillLinkedAsyncBuffers(contents, length) \
-   emReallyFillBuffer((contents), (length), true)
+  emReallyFillBuffer((contents), (length), true)
 
- */
 #define emMessageBufferQueueAdd emBufferQueueAdd
 #define emMessageBufferQueueRemoveHead emBufferQueueRemoveHead
 #define emMessageBufferQueueRemove emBufferQueueRemove
@@ -82,7 +98,12 @@ emberFillStackBuffer(unsigned int count, ...);
 #define emberCopyToLinkedBuffers(contents, buffer, startIndex, length) \
   emReallyCopyToLinkedBuffers((const uint8_t *) (contents), (buffer), (startIndex), (length), 1)
 
+#define emCopyFromLinkedBuffers(contents, buffer, length) \
+  emReallyCopyToLinkedBuffers((const uint8_t *) (contents), (buffer), (0), (length), 0)
+
 #define emberAllocateStackBuffer() \
   emReallyAllocateBuffer(0, false)
 
 #define PACKET_BUFFER_SIZE 32
+
+#endif // LEGACY_PACKET_BUFFER_H

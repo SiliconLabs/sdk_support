@@ -189,20 +189,20 @@ typedef struct {
 /* Bit fields for HFRCO IF */
 #define _HFRCO_IF_RESETVALUE                  0x00000000UL                              /**< Default value for HFRCO_IF                  */
 #define _HFRCO_IF_MASK                        0x00000001UL                              /**< Mask for HFRCO_IF                           */
-#define HFRCO_IF_RDYIF                        (0x1UL << 0)                              /**< Ready Interrupt Flag                        */
-#define _HFRCO_IF_RDYIF_SHIFT                 0                                         /**< Shift value for HFRCO_RDYIF                 */
-#define _HFRCO_IF_RDYIF_MASK                  0x1UL                                     /**< Bit mask for HFRCO_RDYIF                    */
-#define _HFRCO_IF_RDYIF_DEFAULT               0x00000000UL                              /**< Mode DEFAULT for HFRCO_IF                   */
-#define HFRCO_IF_RDYIF_DEFAULT                (_HFRCO_IF_RDYIF_DEFAULT << 0)            /**< Shifted mode DEFAULT for HFRCO_IF           */
+#define HFRCO_IF_RDY                          (0x1UL << 0)                              /**< Ready Interrupt Flag                        */
+#define _HFRCO_IF_RDY_SHIFT                   0                                         /**< Shift value for HFRCO_RDY                   */
+#define _HFRCO_IF_RDY_MASK                    0x1UL                                     /**< Bit mask for HFRCO_RDY                      */
+#define _HFRCO_IF_RDY_DEFAULT                 0x00000000UL                              /**< Mode DEFAULT for HFRCO_IF                   */
+#define HFRCO_IF_RDY_DEFAULT                  (_HFRCO_IF_RDY_DEFAULT << 0)              /**< Shifted mode DEFAULT for HFRCO_IF           */
 
 /* Bit fields for HFRCO IEN */
 #define _HFRCO_IEN_RESETVALUE                 0x00000000UL                              /**< Default value for HFRCO_IEN                 */
 #define _HFRCO_IEN_MASK                       0x00000001UL                              /**< Mask for HFRCO_IEN                          */
-#define HFRCO_IEN_RDYIEN                      (0x1UL << 0)                              /**< RDY Interrupt Enable                        */
-#define _HFRCO_IEN_RDYIEN_SHIFT               0                                         /**< Shift value for HFRCO_RDYIEN                */
-#define _HFRCO_IEN_RDYIEN_MASK                0x1UL                                     /**< Bit mask for HFRCO_RDYIEN                   */
-#define _HFRCO_IEN_RDYIEN_DEFAULT             0x00000000UL                              /**< Mode DEFAULT for HFRCO_IEN                  */
-#define HFRCO_IEN_RDYIEN_DEFAULT              (_HFRCO_IEN_RDYIEN_DEFAULT << 0)          /**< Shifted mode DEFAULT for HFRCO_IEN          */
+#define HFRCO_IEN_RDY                         (0x1UL << 0)                              /**< RDY Interrupt Enable                        */
+#define _HFRCO_IEN_RDY_SHIFT                  0                                         /**< Shift value for HFRCO_RDY                   */
+#define _HFRCO_IEN_RDY_MASK                   0x1UL                                     /**< Bit mask for HFRCO_RDY                      */
+#define _HFRCO_IEN_RDY_DEFAULT                0x00000000UL                              /**< Mode DEFAULT for HFRCO_IEN                  */
+#define HFRCO_IEN_RDY_DEFAULT                 (_HFRCO_IEN_RDY_DEFAULT << 0)             /**< Shifted mode DEFAULT for HFRCO_IEN          */
 
 /* Bit fields for HFRCO LOCK */
 #define _HFRCO_LOCK_RESETVALUE                0x00008195UL                              /**< Default value for HFRCO_LOCK                */
@@ -217,4 +217,5 @@ typedef struct {
 /** @} End of group EFR32MG22_HFRCO_BitFields */
 /** @} End of group EFR32MG22_HFRCO */
 /** @} End of group Parts */
+
 #endif /* EFR32MG22_HFRCO_H */

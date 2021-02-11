@@ -4,7 +4,7 @@
  *   AppModes
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,13 +32,10 @@
 #include "app_common.h"
 
 #include "response_print.h"
-#include "command_interpreter.h"
 #include "buffer_pool_allocator.h"
 
 #include "rail.h"
 #include "em_core.h"
-#include "railapp_aox.h"
-
 const char *getRfStateName(RAIL_RadioState_t state)
 {
   switch (state) {
@@ -58,6 +55,47 @@ const char *getRfStateName(RAIL_RadioState_t state)
       //Check individual rail state bits if RAIL state is unknown
       return "Unknown";
   }
+}
+
+// Note this function should be supplied with a buffer of minimum char size 23
+// to avoid potential RAM corruption for worse case (though invalid) 22 character
+// string "ToIdleActiveNoFrameLbt" + string termination character.
+char *getRfStateDetailName(RAIL_RadioStateDetail_t state, char *buffer)
+{
+  if (state == RAIL_RF_STATE_DETAIL_INACTIVE) {
+    strcpy(buffer, "Inactive");
+    return buffer;
+  }
+  buffer[0] = '\0';
+  if ((state & RAIL_RF_STATE_DETAIL_TRANSITION) != 0) {
+    strcpy(buffer, "To");
+  }
+  switch (state & RAIL_RF_STATE_DETAIL_CORE_STATE_MASK) {
+    case RAIL_RF_STATE_DETAIL_IDLE_STATE:
+      strcat(buffer, "Idle");
+      break;
+    case RAIL_RF_STATE_DETAIL_RX_STATE:
+      strcat(buffer, "Rx");
+      break;
+    case RAIL_RF_STATE_DETAIL_TX_STATE:
+      strcat(buffer, "Tx");
+      break;
+    default:
+      // If we reach here and either no core radio state bits are set,
+      // or multiple core radio state bits are set, then unknown state.
+      strcpy(buffer, "Unknown");
+      return buffer;
+  }
+  if ((state & RAIL_RF_STATE_DETAIL_ACTIVE) != 0) {
+    strcat(buffer, "Active");
+  }
+  if ((state & RAIL_RF_STATE_DETAIL_NO_FRAMES) != 0) {
+    strcat(buffer, "NoFrame");
+  }
+  if ((state & RAIL_RF_STATE_DETAIL_LBT) != 0) {
+    strcat(buffer, "Lbt");
+  }
+  return buffer;
 }
 
 // Guard for CI functions to ensure a certain radio state before running
@@ -149,22 +187,17 @@ void printRailAppEvents(void)
             cmdName = "rxErr???";
             break;
         }
-#if RAIL_FEAT_BLE_AOX_SUPPORTED && !defined(RAIL_MULTIPROTOCOL)
-        // This allows RAILtest to unlock the CTE buffer for AoX when the
-        // packet is received or rx error occurs.
-        if (autoUnlockCteBuffer) {
-          bool cteBufferLocked = RAILAPP_SetCteBufferLock(0);
-          responsePrint("enableRxAutoCteBufferUnlock", "CteBuffer:%s", cteBufferLocked ? "Locked" : "Unlocked");
-        }
-#endif //RAIL_FEAT_BLE_AOX_SUPPORTED && !defined(RAIL_MULTIPROTOCOL)
         printPacket(cmdName,
                     dataPtr,
                     railtestEvent->rxPacket.dataLength,
                     &railtestEvent->rxPacket);
       } else if (railtestEvent->type == BEAM_PACKET) {
         // Now print the most recent packet we may have received in Z-Wave mode
-        responsePrint("ZWaveBeamFrame", "nodeId:0x%x,channelHopIdx:%d",
-                      railtestEvent->beamPacket.nodeId, railtestEvent->beamPacket.channelIndex);
+        responsePrint("ZWaveBeamFrame", "nodeId:0x%x,channelHopIdx:%d,lrBeam:%s,lrBeamTxPower:%d",
+                      railtestEvent->beamPacket.nodeId, railtestEvent->beamPacket.channelIndex,
+                      (railtestEvent->beamPacket.lrBeamTxPower == RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID)
+                      ? "No" : "Yes",
+                      railtestEvent->beamPacket.lrBeamTxPower);
       } else if (railtestEvent->type == RAIL_EVENT) {
         printRailEvents(&railtestEvent->railEvent);
       } else if (railtestEvent->type == MULTITIMER) {

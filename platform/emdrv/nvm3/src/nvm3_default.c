@@ -87,9 +87,16 @@ nvm3_Init_t    nvm3_defaultInitData =
   NVM3_DEFAULT_MAX_OBJECT_SIZE,
   NVM3_DEFAULT_REPACK_HEADROOM,
   &nvm3_halFlashHandle,
-#ifdef NVM3_SUPPORT_ENCRYPTION
-  NULL,
-#endif
 };
 
 nvm3_Init_t   *nvm3_defaultInit = &nvm3_defaultInitData;
+
+Ecode_t nvm3_initDefault(void)
+{
+  return nvm3_open(nvm3_defaultHandle, nvm3_defaultInit);
+}
+
+Ecode_t nvm3_deinitDefault(void)
+{
+  return nvm3_close(nvm3_defaultHandle);
+}

@@ -36,23 +36,18 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Direct_Transmit_Plugin
- * @brief Direct transmit plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_directtransmit EZRADIODRV Direct Transmit Plugin
+ * @brief EzRadio Direct transmit plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -77,10 +72,9 @@ Ecode_t ezradioStopDirectTransmit(void);
 #define EZRADIODRV_DIRECT_TRANSMIT_PLUGIN_INIT_DEFAULT
 #endif  //#if defined( EZRADIO_PLUGIN_DIRECT_TRANSMIT )
 
-/** @} (end addtogroup Direct_Transmit_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_directtransmit) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

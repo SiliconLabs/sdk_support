@@ -54,19 +54,6 @@
 // This is no longer a requirement due to the fact that we have formal page-erase
 // support built into the OTA code.  However for systems using a read-modify-write
 // driver we have support here.
-
-// The App. Bootloader for the 35x SOC prior to 4.3 did NOT have read-modify-write support.
-// Therefore the shared app. bootloader EEPROM routines CANNOT be used; a copy
-// of the EEPROM driver must be included with the application to support the OTA
-// cluster.
-// The 4.3 App. bootloader for the 35x does have arbitrary page-write support
-// and thus the shared EEPROM routines may be used on the 35x SOC.
-
-// The 250 has no shared bootloader EEPROM routines and so the application
-// must include a copy of the EEPROM driver.  The Host co-processor based models
-// must also include an EEPROM driver in their application that has arbitrary
-// page-write support.
-
 #if defined(EZSP_HOST) \
   || defined(EMBER_AF_PLUGIN_OTA_STORAGE_SIMPLE_EEPROM_ENABLE_SOC_APP_BOOTLOADER_COMPATIBILITY_MODE)
   #define eepromInit() halEepromInit()
@@ -83,7 +70,7 @@
   #define eepromShutdown() \
   halEepromShutdown()
 
-#else // EM35x SOC with 4.3 bootloader or later
+#else // SOC with 4.3 bootloader or later
   #define eepromInit() halAppBootloaderInit()
   #define eepromWrite(address, data, len) \
   halAppBootloaderWriteRawStorage((address), (data), (len))

@@ -34,6 +34,11 @@
 #include "em_assert.h"
 #include "em_common.h"
 
+/***************************************************************************//**
+ * @addtogroup gpioint
+ * @{
+ ******************************************************************************/
+
 /*******************************************************************************
  ********************************   MACROS   ***********************************
  ******************************************************************************/
@@ -93,8 +98,8 @@ void GPIOINT_Init(void)
  *   Interrupt itself must be configured externally. Function overwrites previously
  *   registered callback.
  *
- * @param[in] pin
- *   Pin number for the callback.
+ * @param[in] intNo
+ *   Pin interrupt number for the callback.
  * @param[in] callbackPtr
  *   A pointer to callback function.
  ******************************************************************************/
@@ -181,14 +186,11 @@ void GPIO_ODD_IRQHandler(void)
 
 /** @endcond */
 
-/** @} (end addtogroup GPIOINT */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup gpioint) */
 
 /* *INDENT-OFF* */
 // ******* THE REST OF THE FILE IS DOCUMENTATION ONLY !************************
-/// @addtogroup emdrv
-/// @{
-/// @addtogroup GPIOINT
+/// @addtogroup gpioint GPIOINT - GPIO Interrupt
 /// @brief GPIOINT General Purpose Input/Output Interrupt dispatcher
 /// @{
 ///
@@ -257,5 +259,4 @@ void GPIO_ODD_IRQHandler(void)
 ///
 ///   @endcode
 ///
-/// @} end group GPIOINT *******************************************************
-/// @} end group emdrv *****************************************************
+/// @} end group gpioint *******************************************************

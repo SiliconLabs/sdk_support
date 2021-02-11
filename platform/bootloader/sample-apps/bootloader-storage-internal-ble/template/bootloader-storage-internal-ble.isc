@@ -24,6 +24,7 @@ appPlugin: gpio-activation=false
 appPlugin: ezsp-gpio-activation=false
 appPlugin: internal_flash=true
 appPlugin: mbedtls=true
+appPlugin: se-manager=true
 appPlugin: parser=true
 appPlugin: parser-eblv2=false
 appPlugin: spi-driver=false
@@ -39,7 +40,7 @@ appPlugin: xmodem-uart=false
 {setupId:additionalFiles
 }
 {setupId:bootloaderStorage
-137216,120832;Slot 0
+137216,88064;Slot 0
 }
 {setupId:callbackConfiguration
 }
@@ -49,7 +50,9 @@ active=true
 }
 {setupId:information
 \{key:description
+This sample configuration of the Gecko bootloader configures the bootloader to use the internal main flash to store firmware update images. The storage configuration is set up to store a single firmware update image at a time, in a single storage slot. The storage slot is configured to start at address 0x21800, and have a size of 86 kB. This can be configured on the "Storage" tab.
 
+See UG266: Gecko Bootloader User's Guide to learn more about how to configure the bootloader, configure storage layout, enable security features, etc.
 \}
 }
 {setupId:macros

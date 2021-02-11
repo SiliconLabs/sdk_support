@@ -44,6 +44,7 @@ mbedtls: {
     ctr-drbg: {
       name: CTR-DRBG,
       macro: MBEDTLS_CTR_DRBG_C,
+      requires: aes
     },
     crypto-device-preemption: {
       name: Crypto Device Preemption,
@@ -72,9 +73,9 @@ mbedtls: {
       macro: MBEDTLS_ENTROPY_C,
       requires: sha256
     },
-    micriumos-support: {
-      name: MicriumOS support,
-      macro: MBEDTLS_MICRIUMOS,
+    md: {
+      name: Message digest wrapper,
+      macro: MBEDTLS_MD_C,
     },
     platform: {
       name: Platform Abstraction,
@@ -84,6 +85,18 @@ mbedtls: {
       name: Platform - Static memory allocation,
       macro: MBEDTLS_PLATFORM_MEMORY,
       requires: platform
+    },
+    psa: {
+      name: PSA Crypto,
+      macro: MBEDTLS_PSA_CRYPTO_C,
+      requires: ctr-drbg,
+      requires: entropy,
+      requires: md
+    },
+    psa-storage: {
+      name: PSA Crypto Storage,
+      macro: MBEDTLS_PSA_CRYPTO_STORAGE_C,
+      requires: psa
     },
     sha256: {
       name: SHA256,

@@ -83,5 +83,13 @@ const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
 
 const uint8_t* btl_getImageFileEncryptionKeyPtr(void)
 {
+#if defined(SEMAILBOX_PRESENT)
+#if defined(BOOTLOADER_USE_SYMMETRIC_KEY_FROM_SE_STORAGE)
+  return NULL;
+#else
   return (const uint8_t*)(LOCKBITS_BASE + 0x286);
+#endif
+#else
+  return (const uint8_t*)(LOCKBITS_BASE + 0x286);
+#endif
 }

@@ -32,27 +32,6 @@
 #ifdef USE_NVM3
 #include "hal/plugin/nvm3/nvm3-token.h"
 
-#if defined(NVM3_EXTFLASH)
-bool emRadioGetRandomNumbers(uint16_t *rn, uint8_t count);
-#define NVM3_CRYPTO_KEY_BYTES 16
-
-#if !defined(NVM3_TEST)
-#include "em_wdog.h"
-#define NVM3_CRYPTO_KEY_ADDRESS (LOCKBITS_BASE + (TOKEN_MFG_NVM3_CRYPTO_KEY & 0x0FFFU));
-#endif // NVM3_TEST
-
-// Function passed ot NVM3 to provide random numbers
-static uint32_t getRandomNumber(void)
-{
-  uint32_t res;
-
-  emRadioGetRandomNumbers((uint16_t *) &res, sizeof(res) / sizeof(uint16_t));
-
-  return res;
-}
-
-#endif // NVM3_EXFLASH
-
 // Global variable used by library code to know number of tokens
 #ifdef SIMEE2_TO_NVM3_UPGRADE
 uint8_t tokenCount = TOKEN_COUNT;
@@ -72,52 +51,10 @@ EmberStatus halStackInitTokens(void)
   EmberStatus ret;
   nvm3_HalInfo_t halInfo;
 
-#if defined (NVM3_EXTFLASH)
-  // Disable watchdog and reconfigure it to a longer timout period to allow
-  // nvm3_open to finish as this takes a long time with external flash
-#if !defined (NVM3_TEST) && defined(HAL_WDOG_ENABLE)
-  halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
-  WDOG_Init_TypeDef wdogInit = WDOG_INIT_DEFAULT;
-  wdogInit.enable = true;
-  wdogInit.perSel = wdogPeriod_128k;
-  wdogInit.warnSel = wdogWarnTime75pct;
-
-  WDOGn_Init(DEFAULT_WDOG, &wdogInit);
-#endif
-
-  bool cryptoKeyExists = false;
-  uint16_t nvm3CryptoKey[NVM3_CRYPTO_KEY_BYTES / 2];
-
-  // Read existing crypto key from manufacturing token
-  halInternalGetMfgTokenData((uint8_t *) nvm3CryptoKey,
-                             TOKEN_MFG_NVM3_CRYPTO_KEY,
-                             0,
-                             NVM3_CRYPTO_KEY_BYTES);
-
-  // If the existing crypto key is all FFs we assume it
-  // has not been written yet
-  for (i = 0; i < NVM3_CRYPTO_KEY_BYTES / 2; i++) {
-    cryptoKeyExists |= (nvm3CryptoKey[i] != 0xFFFFU);
-  }
-
-  // If no NVM3 crypto key exists we generate a new one and
-  // write it as a manufacturing token
-  if (!cryptoKeyExists) {
-    emRadioGetRandomNumbers(nvm3CryptoKey, NVM3_CRYPTO_KEY_BYTES / sizeof(nvm3CryptoKey[0]));
-    halInternalSetMfgTokenData(TOKEN_MFG_NVM3_CRYPTO_KEY,
-                               (uint8_t *) nvm3CryptoKey,
-                               NVM3_CRYPTO_KEY_BYTES);
-  }
-
-  nvm3_defaultInit->getRndNumber = getRandomNumber;
-  nvm3_defaultInit->cryptoKey = (uint8_t *) NVM3_CRYPTO_KEY_ADDRESS;
-
-#else // defined (NVM3_EXTFLASH)
   // Updrade is only supported when using NVM3 in internal flash
   if (halSimEeToNvm3Upgrade()) {
     return (EmberStatus) EMBER_NVM3_ERR_UPGRADE;
   }
-#endif
 
   ecode = nvm3_open(nvm3_defaultHandle, nvm3_defaultInit);
   TOKENDBG(emberSerialPrintf(SER232,
@@ -273,11 +210,6 @@ EmberStatus halStackInitTokens(void)
   // If the NVM3 cache overflows it is too small to index all live and deleted NVM3 objects
   assert(!nvm3_defaultHandle->cache.overflow);
 
-  // Disable watchdog and reconfigure it to restore original watchdog period.
-#if defined (NVM3_EXTFLASH) && defined(HAL_WDOG_ENABLE)
-  halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
-  halInternalEnableWatchDog();
-#endif
   return ret;
 }
 

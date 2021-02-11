@@ -138,9 +138,45 @@ bool parser_requireCertificateAuthenticity(void);
 bool parser_requireCertificateSignedImage(void);
 
 /***************************************************************************//**
+ * Check whether the parser requires rollback protection of applications.
+ *
+ * @return True if rollback protection of application is required, else false
+ ******************************************************************************/
+bool parser_requireAntiRollbackProtection(void);
+
+/***************************************************************************//**
+ * Check the minimum version of the applications that can be accepted.
+ *
+ * @return Minimum version of the applications that can be accepted.
+ ******************************************************************************/
+uint32_t parser_applicationMinimumVersionValid(void);
+
+/***************************************************************************//**
+ * Check whether the application version is valid and the application can
+ * be accepted.
+ *
+ * @note
+ *   This function will always return true if BOOTLOADER_ROLLBACK_PROTECTION
+ *   is not enabled from the core plugin option.
+ *
+ * @param[in] app Pointer to the application data structure contained in the
+ *                upgrade image.
+ * @param[in] checkRemainingAppUpgrades   Check remaining application upgrades.
+ *
+ * @return  True if the application version is higher or equal than
+ *          the application versions seen.
+ *          False if the application version is lower than
+ *          the application versions seen.
+ *          False if no remaining application upgrades are left when
+ *          \p checkRemainingAppUpgrades is true.
+ ******************************************************************************/
+bool parser_applicationUpgradeVersionValid(ApplicationData_t *app,
+                                           bool checkRemainingAppUpgrades);
+
+/***************************************************************************//**
  * Return the start address of the application.
  *
- * @return start address of the application
+ * @return start address of the application.
  ******************************************************************************/
 uint32_t parser_getApplicationAddress(void);
 
@@ -179,6 +215,29 @@ uint32_t parser_getBootloaderUpgradeAddress(void);
  *         ::BOOTLOADER_ERROR_PARSER_REJECTED.
  ******************************************************************************/
 bool parser_applicationUpgradeValidCallback(ApplicationData_t *app);
+
+/***************************************************************************//**
+ * Verify GBL certificate.
+ *
+ * @note The behavior of this function depends on the context state.
+ *
+ * @param[in,out]  context         GBL parser context
+ * @param[in]      input           Input data
+ * @param[in]      blProperties    Pointer to ::ApplicationProperties_t of
+ *                                 bootloader
+ * @param[in,out]  shaState        Pointer to ::Sha256Context_t used to store
+ *                                 SHA256 of GBL certificate
+ *
+ * @return @ref BOOTLOADER_ERROR_PARSER_PARSED if done parsing the current
+ *         input buffer. @ref BOOTLOADER_OK if input data is stored in the
+ *         internal buffer. @ref BOOTLOADER_OK if the certificate
+ *         in GBL is accepted. @ref BOOTLOADER_ERROR_PARSER_SIGNATURE
+ *         if the certificate in GBL is rejected.
+ ******************************************************************************/
+int32_t parser_verifyCertificate(void *context,
+                                 void *input,
+                                 void *blProperties,
+                                 void *shaState);
 
 /** @} (end addtogroup ImageParser) */
 /** @} (end addtogroup Plugin) */

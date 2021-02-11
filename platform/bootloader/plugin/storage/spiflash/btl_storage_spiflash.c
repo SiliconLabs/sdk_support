@@ -507,6 +507,10 @@ int32_t storage_writeRaw(uint32_t address, uint8_t *data, size_t numBytes)
   return BOOTLOADER_OK;
 }
 
+int32_t storage_getDMAchannel(void) {
+  return -1;
+}
+
 int32_t storage_eraseRaw(uint32_t address, size_t totalLength)
 {
   // Get device characteristics

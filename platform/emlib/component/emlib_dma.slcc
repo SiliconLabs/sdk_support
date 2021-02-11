@@ -1,0 +1,22 @@
+id: emlib_dma
+label: DMA
+package: platform
+description: >
+  Direct Memory Access (DMA) API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_dma.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_dma.h"
+provides:
+  - name: emlib_dma
+requires:
+  - name: device
+  - name: device_has_dma
+  - name: emlib_common
+  - name: emlib_cmu
+  - name: cmsis_core

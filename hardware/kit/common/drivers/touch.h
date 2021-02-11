@@ -31,6 +31,10 @@
 #ifndef __TOUCH_H
 #define __TOUCH_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The touch panel driver is deprecated and marked for removal in a later release."
+#endif
+
 #include "em_device.h"
 #include "em_adc.h"
 #include "calibrate.h"

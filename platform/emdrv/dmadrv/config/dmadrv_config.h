@@ -33,12 +33,7 @@
 #include "em_device.h"
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup DMADRV
+ * @addtogroup dmadrv
  * @{
  ******************************************************************************/
 
@@ -69,7 +64,6 @@
 #define EMDRV_DMADRV_DMA_CH_COUNT DMA_CHAN_COUNT
 #endif
 
-/** @} (end addtogroup DMADRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup dmadrv) */
 
 #endif /* __SILICON_LABS_DMADRV_CONFIG_H__ */

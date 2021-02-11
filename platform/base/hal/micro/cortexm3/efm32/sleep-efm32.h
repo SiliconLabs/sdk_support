@@ -29,6 +29,12 @@ typedef struct {
 void halInternalEm4Wakeup(void);
 
 /**
+ * @brief This function is used to subscribe to different energy changes. It will call
+   a callback on changed.
+ */
+void halEnergyModeNotificationInit(void);
+
+/**
  * @brief This function can be used to figure out why the device was woken up
  * from EM4.
  *

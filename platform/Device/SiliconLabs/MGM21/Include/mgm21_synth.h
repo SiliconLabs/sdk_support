@@ -1017,4 +1017,5 @@ typedef struct {
 /** @} End of group MGM21_SYNTH_BitFields */
 /** @} End of group MGM21_SYNTH */
 /** @} End of group Parts */
+
 #endif /* MGM21_SYNTH_H */

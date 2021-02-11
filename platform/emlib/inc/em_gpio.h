@@ -45,21 +45,10 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup GPIO
- * @{
- ******************************************************************************/
-
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #if defined(_SILICON_LABS_32B_SERIES_0) \
   && defined(_EFM32_TINY_FAMILY) || defined(_EFM32_ZERO_FAMILY)
 
@@ -469,7 +458,10 @@ extern "C" {
 /** Highest EXT GPIO interrupt number. */
 #define GPIO_EXTINTNO_MAX   15
 
-/** @endcond */
+/***************************************************************************//**
+ * @addtogroup gpio
+ * @{
+ ******************************************************************************/
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -478,36 +470,47 @@ extern "C" {
 /** GPIO ports IDs. */
 typedef enum {
 #if (_GPIO_PORT_A_PIN_COUNT > 0)
+  /** Port A. */
   gpioPortA = 0,
 #endif
 #if (_GPIO_PORT_B_PIN_COUNT > 0)
+  /** Port B. */
   gpioPortB = 1,
 #endif
 #if (_GPIO_PORT_C_PIN_COUNT > 0)
+  /** Port C. */
   gpioPortC = 2,
 #endif
 #if (_GPIO_PORT_D_PIN_COUNT > 0)
+  /** Port D. */
   gpioPortD = 3,
 #endif
 #if (_GPIO_PORT_E_PIN_COUNT > 0)
+  /** Port E. */
   gpioPortE = 4,
 #endif
 #if (_GPIO_PORT_F_PIN_COUNT > 0)
+  /** Port F. */
   gpioPortF = 5,
 #endif
 #if (_GPIO_PORT_G_PIN_COUNT > 0)
+  /** Port G. */
   gpioPortG = 6,
 #endif
 #if (_GPIO_PORT_H_PIN_COUNT > 0)
+  /** Port H. */
   gpioPortH = 7,
 #endif
 #if (_GPIO_PORT_I_PIN_COUNT > 0)
+  /** Port I. */
   gpioPortI = 8,
 #endif
 #if (_GPIO_PORT_J_PIN_COUNT > 0)
+  /** Port J. */
   gpioPortJ = 9,
 #endif
 #if (_GPIO_PORT_K_PIN_COUNT > 0)
+  /** Port K. */
   gpioPortK = 10,
 #endif
 } GPIO_Port_TypeDef;
@@ -543,8 +546,10 @@ typedef enum {
 } GPIO_DriveStrength_TypeDef;
 
 /* Deprecated enums. */
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #define gpioDriveStrengthStrong   gpioDriveStrengthStrongAlternateStrong
 #define gpioDriveStrengthWeak     gpioDriveStrengthWeakAlternateWeak
+/** @endcond */
 #endif
 
 /** Pin mode. For more details on each mode, refer to the
@@ -667,7 +672,7 @@ __STATIC_INLINE void GPIO_DbgSWDIOEnable(bool enable)
  * @note
  *   Enabling this pin is not sufficient to fully enable serial wire output,
  *   which is also dependent on issues outside the GPIO module. Refer to
- *   @ref DBG_SWOEnable().
+ *   DBG_SWOEnable().
  *
  * @param[in] enable
  *   @li false - disable serial wire viewer pin (default after reset).
@@ -744,7 +749,7 @@ __STATIC_INLINE uint32_t GPIO_EM4GetPinWakeupCause(void)
  * @note
  *   On series 0 devices EM4 gpio retention can either be turned on or off. On
  *   series 1 devices there are three EM4 GPIO retention modes available. These
- *   modes are "Disabled", "EM4EXIT" and "SWUNLATCH". Use the @ref EMU_EM4Init()
+ *   modes are "Disabled", "EM4EXIT" and "SWUNLATCH". Use the EMU_EM4Init()
  *   to configure the GPIO retention mode on a series 1 device.
  *
  *   The behavior of this function depends on the configured GPIO retention mode.
@@ -1076,6 +1081,9 @@ __STATIC_INLINE void GPIO_PinOutToggle(GPIO_Port_TypeDef port, unsigned int pin)
  *
  * @param[in] port
  *   The GPIO port to access.
+ *
+ * @return
+ *   The pad values for the GPIO port.
  ******************************************************************************/
 __STATIC_INLINE uint32_t GPIO_PortInGet(GPIO_Port_TypeDef port)
 {
@@ -1259,7 +1267,7 @@ __STATIC_INLINE void GPIO_Unlock(void)
  *
  * @details
  *   If reconfiguring a GPIO interrupt that is already enabled, it is generally
- *   recommended to disable it first, see @ref GPIO_Disable().
+ *   recommended to disable it first, see @ref GPIO_IntDisable().
  *
  *   The actual GPIO interrupt handler must be in place before enabling the
  *   interrupt.
@@ -1302,8 +1310,7 @@ __STATIC_INLINE void GPIO_IntConfig(GPIO_Port_TypeDef port,
   GPIO_ExtIntConfig(port, pin, pin, risingEdge, fallingEdge, enable);
 }
 
-/** @} (end addtogroup GPIO) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup gpio) */
 
 #ifdef __cplusplus
 }

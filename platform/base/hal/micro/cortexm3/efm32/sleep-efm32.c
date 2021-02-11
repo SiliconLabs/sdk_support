@@ -16,6 +16,7 @@
  ******************************************************************************/
 #include PLATFORM_HEADER
 #include "sleep-efm32.h"
+#include "sl_power_manager.h"
 #include "hal/micro/micro.h"
 #include "em_emu.h"
 #include "em_gpio.h"
@@ -23,14 +24,75 @@
 #include "watchdog.h"
 #include "em_wdog.h"
 
+#ifdef BOOTLOADER_OPEN
+#error no bootloader support yet
+#endif
+
 #if defined(RTCC_PRESENT) && (RTCC_COUNT == 1)
 #define SYSTIMER_IRQ_N   RTCC_IRQn
 #else
 #define SYSTIMER_IRQ_N   RTC_IRQn
 #endif
 
+#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+// On series 2, config 2 parts, the device headers define separate masks for
+// each pin interrupt. Device headers for earlier parts define a single
+// combined mask.
+  #define _GPIO_IF_EXT_MASK   (_GPIO_IF_EXTIF0_MASK    \
+                               | _GPIO_IF_EXTIF1_MASK  \
+                               | _GPIO_IF_EXTIF2_MASK  \
+                               | _GPIO_IF_EXTIF3_MASK  \
+                               | _GPIO_IF_EXTIF4_MASK  \
+                               | _GPIO_IF_EXTIF5_MASK  \
+                               | _GPIO_IF_EXTIF6_MASK  \
+                               | _GPIO_IF_EXTIF7_MASK  \
+                               | _GPIO_IF_EXTIF8_MASK  \
+                               | _GPIO_IF_EXTIF9_MASK  \
+                               | _GPIO_IF_EXTIF10_MASK \
+                               | _GPIO_IF_EXTIF11_MASK)
+
+  #define _GPIO_IEN_EXT_MASK  (_GPIO_IEN_EXTIEN0_MASK    \
+                               | _GPIO_IEN_EXTIEN1_MASK  \
+                               | _GPIO_IEN_EXTIEN2_MASK  \
+                               | _GPIO_IEN_EXTIEN3_MASK  \
+                               | _GPIO_IEN_EXTIEN4_MASK  \
+                               | _GPIO_IEN_EXTIEN5_MASK  \
+                               | _GPIO_IEN_EXTIEN6_MASK  \
+                               | _GPIO_IEN_EXTIEN7_MASK  \
+                               | _GPIO_IEN_EXTIEN8_MASK  \
+                               | _GPIO_IEN_EXTIEN9_MASK  \
+                               | _GPIO_IEN_EXTIEN10_MASK \
+                               | _GPIO_IEN_EXTIEN11_MASK)
+
+#elif defined (_SILICON_LABS_32B_SERIES_2) && !defined (_GPIO_IEN_EXT_MASK)
+// On series 2, config 1 devices, the pin interrupt mask was renamed (relative
+// to series 1).
+  #define _GPIO_IEN_EXT_MASK  _GPIO_IEN_EXTIEN_MASK
+#endif
+
+// EM Events
+#define SLEEP_EM_EVENT_MASK      (SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM0   \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM0  \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM1 \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM1  \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2 \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2  \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 \
+                                  | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3)
+
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to);
+
+static sl_power_manager_em_transition_event_info_t events_info =
+{
+  .event_mask = SLEEP_EM_EVENT_MASK,
+  .on_event = events_handler,
+};
+
+static sl_power_manager_em_transition_event_handle_t events_handle;
 static WakeEvents wakeInfo;
 static Em4WakeupCause_t em4WakeupCause;
+static bool watchdogDisableInSleep;
 
 WakeEvents halGetWakeInfo(void)
 {
@@ -71,88 +133,113 @@ static bool irqTriggered(IRQn_Type IRQn)
   return NVIC_GetPendingIRQ(IRQn) && NVIC_GetEnableIRQ(IRQn);
 }
 
-static void halInternalSleepHelper(SleepModes sleepMode, bool preserveIntState)
+void halEnergyModeNotificationInit(void)
 {
-  bool watchdogDisableInSleep;
+  sl_status_t result = sl_power_manager_init();
 
-  // SLEEPMODE_POWERDOWN and SLEEPMODE_POWERSAVE are deprecated.  Remap them
-  // to their appropriate, new mode name.
-  if (sleepMode == SLEEPMODE_POWERDOWN) {
-    sleepMode = SLEEPMODE_MAINTAINTIMER;
-  } else if (sleepMode == SLEEPMODE_POWERSAVE) {
-    sleepMode = SLEEPMODE_WAKETIMER;
-  }
+  assert(result == SL_STATUS_OK);
 
-  halSleepCallback(true, sleepMode);
-  // Disable and restore watchdog if already on and going for EM1 sleep,
-  // since we can't clear it asleep in EM1. The watchdog is frozen in
-  // EM2 and 3 and disabling it while in EM2 and 3 sleep is not needed.
-  watchdogDisableInSleep = halInternalWatchDogEnabled()
-                           && (sleepMode == SLEEPMODE_IDLE);
+  sl_power_manager_subscribe_em_transition_event(&events_handle,
+                                                 &events_info);
+}
 
-  if (watchdogDisableInSleep) {
-    halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
-  } else if (halInternalWatchDogEnabled()) {
-    halInternalWatchDogSleep();
-  }
-
-  // BASEPRI is set to 0 in order to allow interrupts to wakeup the MCU
-  // PRIMASK is set to 1 in order to block interrupt handler when MCU wakes up.
-  uint32_t primask = __get_PRIMASK();
-  __set_PRIMASK(1);
-#if (__CORTEX_M >= 3)
-  uint32_t basepri = __get_BASEPRI();
-  __set_BASEPRI(0);
-#endif
+/**
+ * @brief On All Events callback
+ *
+ * @param from EM level from where we start from
+ *
+ * @param to   EM level where we are going
+ */
+static void events_handler(sl_power_manager_em_t from,
+                           sl_power_manager_em_t to)
+{
+  if (from == SL_POWER_MANAGER_EM0) {
+    wakeInfo = 0;
 
 #if !(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
-  // For DMP NCP applications UART interrupt switching (on/off)
-  // happens before/after zigbee task yields/resumes respectively.
-  COM_InternalPowerDown(sleepMode == SLEEPMODE_IDLE);
+    // For DMP NCP applications UART interrupt switching (on/off)
+    // happens before/after zigbee task yields/resumes respectively.
+    COM_InternalPowerDown(to == SLEEPMODE_IDLE);
 #endif //!(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
-  wakeInfo = 0;
 
-#ifdef BOOTLOADER_OPEN
-  #error no bootloader support yet
-#endif
+    switch (to) {
+      case SL_POWER_MANAGER_EM1:
+        halSleepCallback(true, SLEEPMODE_IDLE);
+        watchdogDisableInSleep = halInternalWatchDogEnabled();
+        if (watchdogDisableInSleep) {
+          halInternalDisableWatchDog(MICRO_DISABLE_WATCH_DOG_KEY);
+        }
 
-  switch (sleepMode) {
-    case SLEEPMODE_IDLE:
-      EMU_EnterEM1();
-      break;
-    // there is no difference between wake/maintain timer
-    case SLEEPMODE_WAKETIMER:
-    case SLEEPMODE_MAINTAINTIMER:
-      EMU_EnterEM2(true);
-      break;
-    case SLEEPMODE_NOTIMER:
-      EMU_EnterEM3(true);
-      break;
-    case SLEEPMODE_HIBERNATE:
-      EMU_EnterEM4();
-      break;
-    default:
-      //Oops!  Invalid sleepMode parameter.
-      assert(0);
-      break;
+        COM_InternalPowerDown(true);
+        break;
+
+      case SL_POWER_MANAGER_EM0:
+        break;
+
+      case SL_POWER_MANAGER_EM2:
+        halSleepCallback(true, SLEEPMODE_WAKETIMER);
+        if (halInternalWatchDogEnabled()) {
+          halInternalWatchDogSleep();
+        }
+        break;
+
+      case SL_POWER_MANAGER_EM3:
+        halSleepCallback(true, SLEEPMODE_NOTIMER);
+        if (halInternalWatchDogEnabled()) {
+          halInternalWatchDogSleep();
+        }
+        break;
+
+      case SL_POWER_MANAGER_EM4:
+        halSleepCallback(true, SLEEPMODE_HIBERNATE);
+        break;
+
+      default:
+        break;
+    }
+  } else {
+    // restart watchdog if it was running when we entered sleep
+    // do this before dispatching interrupts while we still have tight
+    // control of code execution
+    if (watchdogDisableInSleep) {
+      WDOGn_Enable(DEFAULT_WDOG, true);
+    }
+
+#if !(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
+    // For DMP NCP applications UART interrupt switching (on/off)
+    // happens before/after zigbee task yields/resumes respectively.
+    COM_InternalPowerUp(from == SLEEPMODE_IDLE);
+#endif  //!(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
+
+    switch (from) {
+      case SL_POWER_MANAGER_EM1:
+        COM_InternalPowerUp(true);
+        halSleepCallback(false, SLEEPMODE_IDLE);
+        break;
+
+      case SL_POWER_MANAGER_EM0:
+        break;
+
+      case SL_POWER_MANAGER_EM2:
+        halSleepCallback(false, SLEEPMODE_WAKETIMER);
+        break;
+
+      case SL_POWER_MANAGER_EM3:
+        halSleepCallback(false, SLEEPMODE_NOTIMER);
+        break;
+
+      case SL_POWER_MANAGER_EM4:
+        halSleepCallback(false, SLEEPMODE_HIBERNATE);
+        break;
+
+      default:
+        break;
+    }
   }
+}
 
-#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2) && !defined (_GPIO_IF_EXT_MASK)
-  // Series 2, config 2 devices use multiple masks for
-  // all the IF EXT sources.  Earlier devices use a single IF EXT mask.
-  #define _GPIO_IF_EXT_MASK (_GPIO_IF_EXTIF0_MASK    \
-                             | _GPIO_IF_EXTIF1_MASK  \
-                             | _GPIO_IF_EXTIF2_MASK  \
-                             | _GPIO_IF_EXTIF3_MASK  \
-                             | _GPIO_IF_EXTIF4_MASK  \
-                             | _GPIO_IF_EXTIF5_MASK  \
-                             | _GPIO_IF_EXTIF6_MASK  \
-                             | _GPIO_IF_EXTIF7_MASK  \
-                             | _GPIO_IF_EXTIF8_MASK  \
-                             | _GPIO_IF_EXTIF9_MASK  \
-                             | _GPIO_IF_EXTIF10_MASK \
-                             | _GPIO_IF_EXTIF11_MASK)
-#endif // _GPIO_IF_EXT_MASK
+void sli_power_manager_on_wakeup(void)
+{
   wakeInfo = GPIO_IntGetEnabled() & _GPIO_IF_EXT_MASK;
   if (irqTriggered(GPIO_EVEN_IRQn) || irqTriggered(GPIO_ODD_IRQn)) {
     wakeInfo |= WAKE_IRQ_GPIO;
@@ -165,61 +252,53 @@ static void halInternalSleepHelper(SleepModes sleepMode, bool preserveIntState)
     wakeInfo |= WAKE_IRQ_RFSENSE;
   }
 #endif
-
-  // restart watchdog if it was running when we entered sleep
-  // do this before dispatching interrupts while we still have tight
-  // control of code execution
-  if (watchdogDisableInSleep) {
-    WDOGn_Enable(DEFAULT_WDOG, true);
-  }
-
-#if !(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
-  // For DMP NCP applications UART interrupt switching (on/off)
-  // happens before/after zigbee task yields/resumes respectively.
-  COM_InternalPowerUp(sleepMode == SLEEPMODE_IDLE);
-#endif  //!(defined(EMBER_AF_NCP) && defined(EMBER_STACK_ZIGBEE) && defined(MICRIUMOS))
-
-  if (preserveIntState) { // RTOS-friendly scheme to preserve interrupt state
-    // Restore BASEPRI and PRIMASK to previous levels.
-  #if (__CORTEX_M >= 3)
-    __set_BASEPRI(basepri);
-  #endif
-    __set_PRIMASK(primask);
-  } else { // emberHAL-compatible scheme enabling interrupts per API expectation
-    // Clear PRIMASK to enable all interrupts. Note that after this
-    // point BASEPRI=0 and PRIMASK=0 which means that all interrupts
-    // are enabled. The interrupt state is not saved/restored due to
-    // historical API restrictions.
-    __set_PRIMASK(0);
-  }
-  halSleepCallback(false, sleepMode);
 }
+
+#if defined(SL_KERNEL_PRESENT)
+bool OSCanReturnToSleep(void)
+{
+  return false;
+}
+#endif
 
 void halInternalSleep(SleepModes sleepMode)
 {
-  halInternalSleepHelper(sleepMode, false);
-}
+  sl_power_manager_em_t em_power = SL_POWER_MANAGER_EM0;
 
-#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2) && !defined (_GPIO_IEN_EXT_MASK)
-// Series 2, config 2 devices use multiple masks for
-// all IEN EXT sources.  Earlier devices use a single IEN EXT mask.
-#define _GPIO_IEN_EXT_MASK (_GPIO_IEN_EXTIEN0_MASK    \
-                            | _GPIO_IEN_EXTIEN1_MASK  \
-                            | _GPIO_IEN_EXTIEN2_MASK  \
-                            | _GPIO_IEN_EXTIEN3_MASK  \
-                            | _GPIO_IEN_EXTIEN4_MASK  \
-                            | _GPIO_IEN_EXTIEN5_MASK  \
-                            | _GPIO_IEN_EXTIEN6_MASK  \
-                            | _GPIO_IEN_EXTIEN7_MASK  \
-                            | _GPIO_IEN_EXTIEN8_MASK  \
-                            | _GPIO_IEN_EXTIEN9_MASK  \
-                            | _GPIO_IEN_EXTIEN10_MASK \
-                            | _GPIO_IEN_EXTIEN11_MASK)
-// Series 1 devices use _GPIO_IEN_EXT_MASK and series 2, config 1 devices use
-// an identical mask renamed to _GPIO_IEN_EXTIEN_MASK.
-#elif defined (_SILICON_LABS_32B_SERIES_2) && !defined (_GPIO_IEN_EXT_MASK)
-#define _GPIO_IEN_EXT_MASK _GPIO_IEN_EXTIEN_MASK
-#endif
+  if (sleepMode == SLEEPMODE_IDLE) {
+    em_power = SL_POWER_MANAGER_EM1;
+  } else if (sleepMode == SLEEPMODE_WAKETIMER
+             || sleepMode == SLEEPMODE_MAINTAINTIMER) {
+    em_power = SL_POWER_MANAGER_EM2;
+  } else if (sleepMode == SLEEPMODE_NOTIMER) {
+    em_power = SL_POWER_MANAGER_EM3;
+  } else if (sleepMode == SLEEPMODE_HIBERNATE) {
+    // Only a power on reset or external reset pin can wake the device from EM4.
+    EMU_EnterEM4();
+  }
+
+  //Add a requirement
+  sl_power_manager_add_em_requirement(em_power);
+
+  // The sleep functions will often be entered with interrupts turned off (via
+  // BASEPRI). Our API documentation states that these functions will exit with
+  // interupts on. Furthermore, Cortex-M processors will not wake up from an IRQ
+  // if it's blocked by the current BASEPRI. However, we still want to run some
+  // ode (including capturing the wake reasons) after waking but before
+  // interrupts run. We therefore will enter sleep with PRIMASK set and BASEPRI
+  // cleared.
+  CORE_CriticalDisableIrq();
+  INTERRUPTS_ON();
+
+  //Go to sleep
+  sl_power_manager_sleep();
+
+  // Renable interrupts.
+  CORE_CriticalEnableIrq();
+
+  //Remove the previous requirement
+  sl_power_manager_remove_em_requirement(em_power);
+}
 
 void halSleepWithOptions(SleepModes sleepMode, WakeMask wakeMask)
 {
@@ -242,18 +321,17 @@ void halSleepWithOptionsPreserveInts(SleepModes sleepMode, WakeMask wakeMask)
   uint32_t gpioIen = GPIO->IEN & _GPIO_IEN_EXT_MASK;
   GPIO->IEN = (GPIO->IEN & ~(_GPIO_IEN_EXT_MASK))
               | (wakeMask & _GPIO_IEN_EXT_MASK);
-  halInternalSleepHelper(sleepMode, true);
+  halInternalSleep(sleepMode);
   GPIO->IEN = (GPIO->IEN & ~(_GPIO_IEN_EXT_MASK))
               | (gpioIen & _GPIO_IEN_EXT_MASK);
   // N.B. If interrupts were disabled upon entry, any GPIOs in wakeMask
   // that were newly enabled (not in gpioIen) and caused the wakeup
   // will *not* trigger their ISR handler because interrupts remain
   // disabled here and those wakeMask GPIOs were just disabled by the
-  // GPIO IEN restoration above.  They will, however, be represented
-  // by WAKE_IRQ_GPIO in halGetWakeInfo().
+  // GPIO IEN restoration above.
 }
 
 void halSleepPreserveInts(SleepModes sleepMode)
 {
-  halInternalSleepHelper(sleepMode, true);
+  halInternalSleep(sleepMode);
 }

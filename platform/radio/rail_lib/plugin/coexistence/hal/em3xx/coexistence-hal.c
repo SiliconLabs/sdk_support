@@ -3,7 +3,7 @@
  * @brief Radio coexistence EM3XX utilities
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -17,16 +17,17 @@
 
 #include "coexistence-hal.h"
 
+#ifndef COEX_HAL_DISABLED
 #if COEX_HAL_SMALL_RHO
 #ifdef  WAKE_ON_DFL_RHO_VAR // Only define this if needed per board header
-int8u WAKE_ON_DFL_RHO_VAR = WAKE_ON_DFL_RHO;
+uint8_t WAKE_ON_DFL_RHO_VAR = WAKE_ON_DFL_RHO;
 #endif//WAKE_ON_DFL_RHO_VAR
 
 extern void emRadioHoldOffIsr(boolean active);
 
 #define RHO_ENABLED_MASK  0x01u // RHO is enabled
 #define RHO_RADIO_ON_MASK 0x02u // Radio is on (not sleeping)
-static int8u rhoState;
+static uint8_t rhoState;
 
 void COEX_HAL_Init(void)
 {
@@ -78,7 +79,7 @@ EmberStatus halSetRadioHoldOff(boolean enabled)
     INT_MISS = RHO_MISS_BIT;     //clear stale missed RHO interrupt
   }
 
-  rhoState = (rhoState & ~RHO_ENABLED_MASK) | (enabled ? RHO_ENABLED_MASK : 0);
+  rhoState = (rhoState & (uint8_t) ~RHO_ENABLED_MASK) | (enabled ? RHO_ENABLED_MASK : 0);
 
   // Reconfigure GPIOs for desired state
   ADJUST_GPIO_CONFIG_DFL_RHO(enabled);
@@ -117,7 +118,14 @@ void halStackRadioHoldOffPowerUp(void)
     INT_CFGSET = RHO_INT_EN_BIT; //enable RHO interrupt
   }
 }
+
+void COEX_HAL_CallAtomic(COEX_AtomicCallback_t cb, void *arg)
+{
+  ATOMIC((*cb)(arg); )
+}
+
 #else //!COEX_HAL_SMALL_RHO
+
 #ifdef PTA_GNT_GPIO
 static void coexGntSel(void)
 {
@@ -400,9 +408,9 @@ void COEX_HAL_Init(void)
   COEX_SetHalCallbacks(&coexHalCallbacks);
   COEX_Options_t options = COEX_OPTION_NONE;
 
-  #ifdef BSP_COEX_PWM_REQ_PORT
+  #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   COEX_HAL_ConfigPwmRequest(&ptaPwmReqCfg);
-  #endif //BSP_COEX_PWM_REQ_PORT
+  #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   #ifdef RHO_GPIO
   options |= COEX_OPTION_RHO_ENABLED;
   #endif //RHO_GPIO
@@ -441,3 +449,4 @@ void COEX_HAL_Init(void)
   #endif //RHO_GPIO
 }
 #endif //COEX_HAL_SMALL_RHO
+#endif //COEX_HAL_DISABLED

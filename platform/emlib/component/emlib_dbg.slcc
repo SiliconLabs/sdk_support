@@ -1,0 +1,22 @@
+id: emlib_dbg
+label: DBG
+package: platform
+description: >
+  Debug (DBG) API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_dbg.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_dbg.h"
+provides:
+  - name: emlib_dbg
+requires:
+  - name: device
+  - name: emlib_common
+  - name: emlib_cmu
+  - name: emlib_gpio
+  - name: cmsis_core

@@ -147,6 +147,8 @@ typedef struct BootloaderStorageFunctions {
   int32_t (*writeRaw)(uint32_t address, uint8_t *buffer, size_t length);
   /// Erase storage
   int32_t (*eraseRaw)(uint32_t address, size_t length);
+  /// Get configured DMA channel
+  int32_t (*getDMAchannel)(void);
 } BootloaderStorageFunctions_t;
 
 // -----------------------------------------------------------------------------
@@ -154,7 +156,7 @@ typedef struct BootloaderStorageFunctions {
 
 /// Context size for bootloader verification context
 #if defined(_SILICON_LABS_32B_SERIES_2)
-#define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (524)
+#define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (556)
 #else
 #define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (384)
 #endif
@@ -217,6 +219,10 @@ int32_t bootloader_readStorage(uint32_t slotId,
 /***************************************************************************//**
  * Write data to a storage slot.
  *
+ * @note
+ *   If DMA-based MSC write is enabled on the bootloader, writing data from
+ *   flash to flash is not supported on Series-1 devices.
+ *
  * @param[in] slotId ID of the slot
  * @param[in] offset Offset into the slot to start writing to
  * @param[in] buffer Buffer to read data to write from
@@ -239,7 +245,9 @@ int32_t bootloader_writeStorage(uint32_t slotId,
  *       address range unless the range starts at a page boundary.
  *       For a sequential write, the first call to this function should have
  *       a start address at a page boundary. Otherwise, the corresponding page
- *       of the starting address needs to be erased explicitly.
+ *       of the starting address needs to be erased explicitly. If DMA-based
+ *       MSC write is enabled on the bootloader, writing data from flash to
+ *       flash is not supported on Series-1 devices.
  *
  * @param[in] slotId ID of the slot
  * @param[in] offset Offset into the slot to start writing to
@@ -472,6 +480,10 @@ int32_t bootloader_readRawStorage(uint32_t address,
 /***************************************************************************//**
  * Write data to storage.
  *
+ * @note
+ *   If DMA-based MSC write is enabled on the bootloader, writing data from
+ *   flash to flash is not supported on Series-1 devices.
+ *
  * @param[in] address Address to start writing to
  * @param[in] buffer  Buffer to read data to write from
  * @param[in] length  Amount of data to write
@@ -498,6 +510,14 @@ int32_t bootloader_writeRawStorage(uint32_t address,
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
 int32_t bootloader_eraseRawStorage(uint32_t address, size_t length);
+
+/***************************************************************************//**
+ * Get allocated DMA channel for MSC write
+ *
+ * @return A positive number channel. -1 if DMA-based MSC write
+ *         is not enabled. Otherwise, an error code.
+ ******************************************************************************/
+int32_t bootloader_getAllocatedDMAChannel(void);
 
 /** @} (end addtogroup StorageInterface) */
 /** @} (end addtogroup Interface) */

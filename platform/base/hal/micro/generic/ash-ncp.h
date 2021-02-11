@@ -163,8 +163,10 @@ typedef struct
 #ifdef HAL_UARTNCP_BAUD_RATE
 #define ASH_BAUD_RATE HAL_UARTNCP_BAUD_RATE
 #else
-#if EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER
-#define ASH_BAUD_RATE   BAUD_115200
+// EMHAL-2285 if using hardware flow control we are using FIFO mode with DMA
+// which can support baud 115200
+#if (EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO) && defined(EMBER_SERIAL1_RTSCTS)
+#define ASH_BAUD_RATE    BAUD_115200
 #else
 #define ASH_BAUD_RATE    BAUD_57600
 #endif

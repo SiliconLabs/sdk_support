@@ -43,12 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup BURTC
+ * @addtogroup burtc
  * @{
  ******************************************************************************/
 
@@ -328,7 +323,6 @@ __STATIC_INLINE void BURTC_SyncWait(void)
  * @brief
  *   Start BURTC counter.
  *
- * @detail
  *   This function will send a start command to the BURTC peripheral. The BURTC
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref BURTC_SyncWait() function can be used to wait for the start command
@@ -347,7 +341,6 @@ __STATIC_INLINE void BURTC_Start(void)
  * @brief
  *   Stop the BURTC counter.
  *
- * @detail
  *   This function will send a stop command to the BURTC peripheral. The BURTC
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref BURTC_SyncWait() function can be used to wait for the stop command
@@ -430,6 +423,9 @@ __STATIC_INLINE void BURTC_RetRegSet(uint32_t num, uint32_t data)
  *
  * @param[in] num
  *   Retention Register to read
+ *
+ * @return
+ *   Value of the retention register
  ******************************************************************************/
 __STATIC_INLINE uint32_t BURTC_RetRegGet(uint32_t num)
 {
@@ -463,10 +459,11 @@ void BURTC_Enable(bool enable);
 void BURTC_CounterReset(void);
 void BURTC_CompareSet(unsigned int comp, uint32_t value);
 uint32_t BURTC_CompareGet(unsigned int comp);
+#if defined(_BURTC_CTRL_MASK)
 uint32_t BURTC_ClockFreqGet(void);
+#endif
 
-/** @} (end addtogroup BURTC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup burtc) */
 
 #ifdef __cplusplus
 }

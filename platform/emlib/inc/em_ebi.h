@@ -43,12 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup EBI
+ * @addtogroup ebi
  * @{
  ******************************************************************************/
 
@@ -81,65 +76,65 @@ extern "C" {
 #define EBI_CS3      (uint32_t)(1 << 4) /**< EBI chip select line 3. */
 
 #if defined(_EBI_ROUTE_MASK) && defined(_EBI_ROUTE_APEN_MASK)
-#define EBI_GENERIC_ALB_A0     EBI_ROUTE_ALB_A0
-#define EBI_GENERIC_ALB_A8     EBI_ROUTE_ALB_A8
-#define EBI_GENERIC_ALB_A16    EBI_ROUTE_ALB_A16
-#define EBI_GENERIC_ALB_A24    EBI_ROUTE_ALB_A24
-#define EBI_GENERIC_APEN_A0    EBI_ROUTE_APEN_A0
-#define EBI_GENERIC_APEN_A5    EBI_ROUTE_APEN_A5
-#define EBI_GENERIC_APEN_A6    EBI_ROUTE_APEN_A6
-#define EBI_GENERIC_APEN_A7    EBI_ROUTE_APEN_A7
-#define EBI_GENERIC_APEN_A8    EBI_ROUTE_APEN_A8
-#define EBI_GENERIC_APEN_A9    EBI_ROUTE_APEN_A9
-#define EBI_GENERIC_APEN_A10   EBI_ROUTE_APEN_A10
-#define EBI_GENERIC_APEN_A11   EBI_ROUTE_APEN_A11
-#define EBI_GENERIC_APEN_A12   EBI_ROUTE_APEN_A12
-#define EBI_GENERIC_APEN_A13   EBI_ROUTE_APEN_A13
-#define EBI_GENERIC_APEN_A14   EBI_ROUTE_APEN_A14
-#define EBI_GENERIC_APEN_A15   EBI_ROUTE_APEN_A15
-#define EBI_GENERIC_APEN_A16   EBI_ROUTE_APEN_A16
-#define EBI_GENERIC_APEN_A17   EBI_ROUTE_APEN_A17
-#define EBI_GENERIC_APEN_A18   EBI_ROUTE_APEN_A18
-#define EBI_GENERIC_APEN_A19   EBI_ROUTE_APEN_A19
-#define EBI_GENERIC_APEN_A20   EBI_ROUTE_APEN_A20
-#define EBI_GENERIC_APEN_A21   EBI_ROUTE_APEN_A21
-#define EBI_GENERIC_APEN_A22   EBI_ROUTE_APEN_A22
-#define EBI_GENERIC_APEN_A23   EBI_ROUTE_APEN_A23
-#define EBI_GENERIC_APEN_A24   EBI_ROUTE_APEN_A24
-#define EBI_GENERIC_APEN_A25   EBI_ROUTE_APEN_A25
-#define EBI_GENERIC_APEN_A26   EBI_ROUTE_APEN_A26
-#define EBI_GENERIC_APEN_A27   EBI_ROUTE_APEN_A27
-#define EBI_GENERIC_APEN_A28   EBI_ROUTE_APEN_A28
+#define EBI_GENERIC_ALB_A0     EBI_ROUTE_ALB_A0   /**< Pin Enable Lower Bound EBI_A[0] and upwards */
+#define EBI_GENERIC_ALB_A8     EBI_ROUTE_ALB_A8   /**< Pin Enable Lower Bound EBI_A[8] and upwards*/
+#define EBI_GENERIC_ALB_A16    EBI_ROUTE_ALB_A16  /**< Pin Enable Lower Bound EBI_A[16] and upwards */
+#define EBI_GENERIC_ALB_A24    EBI_ROUTE_ALB_A24  /**< Pin Enable Lower Bound EBI_A[24] and upwards */
+#define EBI_GENERIC_APEN_A0    EBI_ROUTE_APEN_A0  /**< All EBI_A pins enabled */
+#define EBI_GENERIC_APEN_A5    EBI_ROUTE_APEN_A5  /**< EBI_A[4:L] pins enabled */
+#define EBI_GENERIC_APEN_A6    EBI_ROUTE_APEN_A6  /**< EBI_A[5:L] pins enabled */
+#define EBI_GENERIC_APEN_A7    EBI_ROUTE_APEN_A7  /**< EBI_A[6:L] pins enabled */
+#define EBI_GENERIC_APEN_A8    EBI_ROUTE_APEN_A8  /**< EBI_A[7:L] pins enabled */
+#define EBI_GENERIC_APEN_A9    EBI_ROUTE_APEN_A9  /**< EBI_A[8:L] pins enabled */
+#define EBI_GENERIC_APEN_A10   EBI_ROUTE_APEN_A10 /**< EBI_A[9:L] pins enabled */
+#define EBI_GENERIC_APEN_A11   EBI_ROUTE_APEN_A11 /**< EBI_A[10:L] pins enabled */
+#define EBI_GENERIC_APEN_A12   EBI_ROUTE_APEN_A12 /**< EBI_A[11:L] pins enabled */
+#define EBI_GENERIC_APEN_A13   EBI_ROUTE_APEN_A13 /**< EBI_A[12:L] pins enabled */
+#define EBI_GENERIC_APEN_A14   EBI_ROUTE_APEN_A14 /**< EBI_A[13:L] pins enabled */
+#define EBI_GENERIC_APEN_A15   EBI_ROUTE_APEN_A15 /**< EBI_A[14:L] pins enabled */
+#define EBI_GENERIC_APEN_A16   EBI_ROUTE_APEN_A16 /**< EBI_A[15:L] pins enabled */
+#define EBI_GENERIC_APEN_A17   EBI_ROUTE_APEN_A17 /**< EBI_A[16:L] pins enabled */
+#define EBI_GENERIC_APEN_A18   EBI_ROUTE_APEN_A18 /**< EBI_A[17:L] pins enabled */
+#define EBI_GENERIC_APEN_A19   EBI_ROUTE_APEN_A19 /**< EBI_A[18:L] pins enabled */
+#define EBI_GENERIC_APEN_A20   EBI_ROUTE_APEN_A20 /**< EBI_A[19:L] pins enabled */
+#define EBI_GENERIC_APEN_A21   EBI_ROUTE_APEN_A21 /**< EBI_A[20:L] pins enabled */
+#define EBI_GENERIC_APEN_A22   EBI_ROUTE_APEN_A22 /**< EBI_A[21:L] pins enabled */
+#define EBI_GENERIC_APEN_A23   EBI_ROUTE_APEN_A23 /**< EBI_A[22:L] pins enabled */
+#define EBI_GENERIC_APEN_A24   EBI_ROUTE_APEN_A24 /**< EBI_A[23:L] pins enabled */
+#define EBI_GENERIC_APEN_A25   EBI_ROUTE_APEN_A25 /**< EBI_A[24:L] pins enabled */
+#define EBI_GENERIC_APEN_A26   EBI_ROUTE_APEN_A26 /**< EBI_A[25:L] pins enabled */
+#define EBI_GENERIC_APEN_A27   EBI_ROUTE_APEN_A27 /**< EBI_A[26:L] pins enabled */
+#define EBI_GENERIC_APEN_A28   EBI_ROUTE_APEN_A28 /**< EBI_A[27:L] pins enabled */
 #elif defined(_EBI_ROUTEPEN_MASK)
-#define EBI_GENERIC_ALB_A0     EBI_ROUTEPEN_ALB_A0
-#define EBI_GENERIC_ALB_A8     EBI_ROUTEPEN_ALB_A8
-#define EBI_GENERIC_ALB_A16    EBI_ROUTEPEN_ALB_A16
-#define EBI_GENERIC_ALB_A24    EBI_ROUTEPEN_ALB_A24
-#define EBI_GENERIC_APEN_A0    EBI_ROUTEPEN_APEN_A0
-#define EBI_GENERIC_APEN_A5    EBI_ROUTEPEN_APEN_A5
-#define EBI_GENERIC_APEN_A6    EBI_ROUTEPEN_APEN_A6
-#define EBI_GENERIC_APEN_A7    EBI_ROUTEPEN_APEN_A7
-#define EBI_GENERIC_APEN_A8    EBI_ROUTEPEN_APEN_A8
-#define EBI_GENERIC_APEN_A9    EBI_ROUTEPEN_APEN_A9
-#define EBI_GENERIC_APEN_A10   EBI_ROUTEPEN_APEN_A10
-#define EBI_GENERIC_APEN_A11   EBI_ROUTEPEN_APEN_A11
-#define EBI_GENERIC_APEN_A12   EBI_ROUTEPEN_APEN_A12
-#define EBI_GENERIC_APEN_A13   EBI_ROUTEPEN_APEN_A13
-#define EBI_GENERIC_APEN_A14   EBI_ROUTEPEN_APEN_A14
-#define EBI_GENERIC_APEN_A15   EBI_ROUTEPEN_APEN_A15
-#define EBI_GENERIC_APEN_A16   EBI_ROUTEPEN_APEN_A16
-#define EBI_GENERIC_APEN_A17   EBI_ROUTEPEN_APEN_A17
-#define EBI_GENERIC_APEN_A18   EBI_ROUTEPEN_APEN_A18
-#define EBI_GENERIC_APEN_A19   EBI_ROUTEPEN_APEN_A19
-#define EBI_GENERIC_APEN_A20   EBI_ROUTEPEN_APEN_A20
-#define EBI_GENERIC_APEN_A21   EBI_ROUTEPEN_APEN_A21
-#define EBI_GENERIC_APEN_A22   EBI_ROUTEPEN_APEN_A22
-#define EBI_GENERIC_APEN_A23   EBI_ROUTEPEN_APEN_A23
-#define EBI_GENERIC_APEN_A24   EBI_ROUTEPEN_APEN_A24
-#define EBI_GENERIC_APEN_A25   EBI_ROUTEPEN_APEN_A25
-#define EBI_GENERIC_APEN_A26   EBI_ROUTEPEN_APEN_A26
-#define EBI_GENERIC_APEN_A27   EBI_ROUTEPEN_APEN_A27
-#define EBI_GENERIC_APEN_A28   EBI_ROUTEPEN_APEN_A28
+#define EBI_GENERIC_ALB_A0     EBI_ROUTEPEN_ALB_A0   /**< Pin Enable Lower Bound EBI_A[0] and upwards */
+#define EBI_GENERIC_ALB_A8     EBI_ROUTEPEN_ALB_A8   /**< Pin Enable Lower Bound EBI_A[8] and upwards*/
+#define EBI_GENERIC_ALB_A16    EBI_ROUTEPEN_ALB_A16  /**< Pin Enable Lower Bound EBI_A[16] and upwards */
+#define EBI_GENERIC_ALB_A24    EBI_ROUTEPEN_ALB_A24  /**< Pin Enable Lower Bound EBI_A[24] and upwards */
+#define EBI_GENERIC_APEN_A0    EBI_ROUTEPEN_APEN_A0  /**< All EBI_A pins enabled */
+#define EBI_GENERIC_APEN_A5    EBI_ROUTEPEN_APEN_A5  /**< EBI_A[4:L] pins enabled */
+#define EBI_GENERIC_APEN_A6    EBI_ROUTEPEN_APEN_A6  /**< EBI_A[5:L] pins enabled */
+#define EBI_GENERIC_APEN_A7    EBI_ROUTEPEN_APEN_A7  /**< EBI_A[6:L] pins enabled */
+#define EBI_GENERIC_APEN_A8    EBI_ROUTEPEN_APEN_A8  /**< EBI_A[7:L] pins enabled */
+#define EBI_GENERIC_APEN_A9    EBI_ROUTEPEN_APEN_A9  /**< EBI_A[8:L] pins enabled */
+#define EBI_GENERIC_APEN_A10   EBI_ROUTEPEN_APEN_A10 /**< EBI_A[9:L] pins enabled */
+#define EBI_GENERIC_APEN_A11   EBI_ROUTEPEN_APEN_A11 /**< EBI_A[10:L] pins enabled */
+#define EBI_GENERIC_APEN_A12   EBI_ROUTEPEN_APEN_A12 /**< EBI_A[11:L] pins enabled */
+#define EBI_GENERIC_APEN_A13   EBI_ROUTEPEN_APEN_A13 /**< EBI_A[12:L] pins enabled */
+#define EBI_GENERIC_APEN_A14   EBI_ROUTEPEN_APEN_A14 /**< EBI_A[13:L] pins enabled */
+#define EBI_GENERIC_APEN_A15   EBI_ROUTEPEN_APEN_A15 /**< EBI_A[14:L] pins enabled */
+#define EBI_GENERIC_APEN_A16   EBI_ROUTEPEN_APEN_A16 /**< EBI_A[15:L] pins enabled */
+#define EBI_GENERIC_APEN_A17   EBI_ROUTEPEN_APEN_A17 /**< EBI_A[16:L] pins enabled */
+#define EBI_GENERIC_APEN_A18   EBI_ROUTEPEN_APEN_A18 /**< EBI_A[17:L] pins enabled */
+#define EBI_GENERIC_APEN_A19   EBI_ROUTEPEN_APEN_A19 /**< EBI_A[18:L] pins enabled */
+#define EBI_GENERIC_APEN_A20   EBI_ROUTEPEN_APEN_A20 /**< EBI_A[19:L] pins enabled */
+#define EBI_GENERIC_APEN_A21   EBI_ROUTEPEN_APEN_A21 /**< EBI_A[20:L] pins enabled */
+#define EBI_GENERIC_APEN_A22   EBI_ROUTEPEN_APEN_A22 /**< EBI_A[21:L] pins enabled */
+#define EBI_GENERIC_APEN_A23   EBI_ROUTEPEN_APEN_A23 /**< EBI_A[22:L] pins enabled */
+#define EBI_GENERIC_APEN_A24   EBI_ROUTEPEN_APEN_A24 /**< EBI_A[23:L] pins enabled */
+#define EBI_GENERIC_APEN_A25   EBI_ROUTEPEN_APEN_A25 /**< EBI_A[24:L] pins enabled */
+#define EBI_GENERIC_APEN_A26   EBI_ROUTEPEN_APEN_A26 /**< EBI_A[25:L] pins enabled */
+#define EBI_GENERIC_APEN_A27   EBI_ROUTEPEN_APEN_A27 /**< EBI_A[26:L] pins enabled */
+#define EBI_GENERIC_APEN_A28   EBI_ROUTEPEN_APEN_A28 /**< EBI_A[27:L] pins enabled */
 #endif
 
 /*******************************************************************************
@@ -996,8 +991,7 @@ void EBI_WriteTimingSet(uint32_t setupCycles, uint32_t strobeCycles, uint32_t ho
 void EBI_AddressTimingSet(uint32_t setupCycles, uint32_t holdCycles);
 void EBI_PolaritySet(EBI_Line_TypeDef line, EBI_Polarity_TypeDef polarity);
 
-/** @} (end addtogroup EBI) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup ebi) */
 
 #ifdef __cplusplus
 }

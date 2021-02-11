@@ -31,6 +31,7 @@
 #define SI114X_SYS_OUT
 
 #include "em_i2c.h"
+#include "em_gpio.h"
 
 typedef struct Si114xPortConfig{
   I2C_TypeDef       *i2cPort;   /**< I2C port Si114x is connected to */

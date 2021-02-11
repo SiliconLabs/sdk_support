@@ -6,7 +6,7 @@
  *   levels to dBm powers.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,14 +32,10 @@
  ******************************************************************************/
 
 #include "em_device.h"
-#include "em_assert.h"
 #include "em_cmu.h"
 #include "em_common.h"
-
 #include "pa_conversions_efr32.h"
 #include "rail.h"
-#include "rail_assert_error_codes.h"
-#include "rail_chip_specific.h"
 
 static RAIL_TxPowerCurvesConfigAlt_t powerCurvesState;
 
@@ -63,6 +59,18 @@ const RAIL_TxPowerCurves_t *RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode)
   if (mode >= RAIL_TX_POWER_MODE_NONE) {
     return NULL;
   }
+
+  // Check for *_HIGHEST invalid Tx power modes on series 2 chips
+#if defined(RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
+  if (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST) {
+    return NULL;
+  }
+#endif // RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+#if defined(RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
+  if (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST) {
+    return NULL;
+  }
+#endif // RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
 
   RAIL_TxPowerCurveAlt_t const *curve =
     powerCurvesState.curves[mode].conversion.powerCurve;
@@ -90,8 +98,8 @@ RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config)
     &powerCurvesState.curves[RAIL_TX_POWER_MODE_2P4_HP];
   current->algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR;
   current->segments = config->piecewiseSegments;
-  current->min = RAIL_TX_POWER_LEVEL_HP_MIN;
-  current->max = RAIL_TX_POWER_LEVEL_HP_MAX;
+  current->min = RAIL_TX_POWER_LEVEL_2P4_HP_MIN;
+  current->max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX;
   static RAIL_TxPowerCurveAlt_t txPower2p4 = {
     .minPower = 0U,
     .maxPower = 0U,
@@ -111,8 +119,8 @@ RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config)
   current = &powerCurvesState.curves[RAIL_TX_POWER_MODE_2P4_LP];
   current->algorithm = RAIL_PA_ALGORITHM_MAPPING_TABLE;
   current->segments = 0U;
-  current->min = RAIL_TX_POWER_LEVEL_LP_MIN;
-  current->max = RAIL_TX_POWER_LEVEL_LP_MAX;
+  current->min = RAIL_TX_POWER_LEVEL_2P4_LP_MIN;
+  current->max = RAIL_TX_POWER_LEVEL_2P4_LP_MAX;
   current->conversion.mappingTable = config->txPower24LpCurves;
 
   // Third and final PA is Sub-GHz, using a piecewise fit
@@ -120,7 +128,7 @@ RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config)
   current->algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR;
   current->segments = config->piecewiseSegments;
   current->min = RAIL_TX_POWER_LEVEL_SUBGIG_MIN;
-  current->max = RAIL_TX_POWER_LEVEL_SUBGIG_MAX;
+  current->max = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX;
   static RAIL_TxPowerCurveAlt_t txPowerSubGig = {
     .minPower = 0U,
     .maxPower = 0U,
@@ -149,6 +157,7 @@ SL_WEAK
 RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *config)
 {
   RAIL_VerifyTxPowerCurves(config);
+
   powerCurvesState = *config;
 
   return RAIL_STATUS_NO_ERROR;
@@ -162,7 +171,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
                                          RAIL_TxPower_t power)
 {
   uint32_t powerLevel;
-  int16_t powerIndex;
+  int16_t powerIndex = 0;
   uint32_t minPowerLevel;
 
   (void)railHandle;
@@ -179,12 +188,12 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   // it will always be greater, indicating that no power coercion
   // is necessary to comply with channel limitations.
   if (power >= RAIL_TX_POWER_MAX) {
-    return 255;
+    return 255U;
   }
 
   // Check for an invalid Tx power mode
   if (mode >= RAIL_TX_POWER_MODE_NONE) {
-    return 0;
+    return 0U;
   }
 
   RAIL_PaDescriptor_t const *modeInfo = &powerCurvesState.curves[mode];
@@ -208,24 +217,41 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
 
   // Check for valid paParams before using them
   if (paParams == NULL) {
-    return 0;
+    return 0U;
   }
 
   // Cap the power based on the PA settings.
   if (power > paParams->maxPower) {
+    // If we go above the maximum dbm the chip supports
+    // Then provide maximum powerLevel
     power = paParams->maxPower;
   } else if (power < paParams->minPower) {
+    // If we go below the minimum we want included in the curve fit, force it.
     power = paParams->minPower;
   } else {
   }
   // Map the power value to a 0 - 7 powerIndex value
-  // 0 -> 20dBm - 16dBm; 1 -> 16dBm - 12dBm, etc...
+  //There are 8 segments of step size of RAIL_TX_POWER_CURVE_INCREMENT in deci dBm
+  //starting from maximum RAIL_TX_POWER_CURVE_MAX in deci dBm
   // These are just starting points to give the code
   // a rough idea of which segment to use, based on
   // how they were fit. Adjustments are made later on
   // if this turns out to be incorrect.
-  powerIndex = ((power - 200) / 40);
-  powerIndex = -powerIndex;
+  RAIL_TxPower_t txPowerMax = RAIL_TX_POWER_CURVE_DEFAULT_MAX;
+  RAIL_TxPower_t txPowerIncrement = RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT;
+  // if the first curve segment starts with RAIL_TX_POWER_LEVEL_INVALID
+  //It is an extra curve segment to depict the maxpower and increment
+  // (in deci-dBm) used while generating the curves.
+  // The extra segment is only present when curve segment is generated by
+  //using values different than the default - RAIL_TX_POWER_CURVE_DEFAULT_MAX
+  // and RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT.
+  if ((paParams->powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
+    powerIndex += 1;
+    txPowerMax = paParams->powerParams[0].slope;
+    txPowerIncrement = paParams->powerParams[0].intercept;
+  }
+
+  powerIndex += ((txPowerMax - power) / txPowerIncrement);
   if (powerIndex > (int16_t)(modeInfo->segments - 1U)) {
     powerIndex = (int16_t)(modeInfo->segments - 1U);
   }
@@ -236,7 +262,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
 
     // powerLevel can only go down to 0.
     if (powerParams->intercept + powerParams->slope * power < 0) {
-      powerLevel = 0;
+      powerLevel = 0U;
     } else {
       powerLevel = powerParams->intercept + powerParams->slope * power;
     }
@@ -260,7 +286,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
     powerLevel = minPowerLevel;
   }
 
-  return powerLevel;
+  return (RAIL_TxPowerLevel_t)powerLevel;
 }
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
@@ -342,7 +368,122 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     } else if (power < powerCurve->minPower) {
       return powerCurve->minPower;
     } else {
-      return power;
+      return (RAIL_TxPower_t)power;
     }
   }
 }
+
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+SL_WEAK
+#endif
+RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
+                                         RAIL_TxPowerMode_t mode,
+                                         RAIL_TxPower_t *maxPower,
+                                         RAIL_TxPower_t *increment)
+{
+  (void)railHandle;
+  // Check for an invalid Tx power mode
+  if (mode >= RAIL_TX_POWER_MODE_NONE) {
+    return RAIL_STATUS_INVALID_PARAMETER;
+  }
+  //The power max info only for available Linear fit
+  RAIL_PaDescriptor_t const *modeInfo = &powerCurvesState.curves[mode];
+  if (modeInfo->algorithm == RAIL_PA_ALGORITHM_MAPPING_TABLE) {
+    return RAIL_STATUS_INVALID_CALL;
+  }
+  *maxPower = RAIL_TX_POWER_CURVE_DEFAULT_MAX;
+  *increment = RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT;
+  RAIL_TxPowerCurveAlt_t const *paParams = modeInfo->conversion.powerCurve;
+  if ((paParams->powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
+    *maxPower = paParams->powerParams[0].slope;
+    *increment = (RAIL_TxPower_t)paParams->powerParams[0].intercept;
+  }
+  return RAIL_STATUS_NO_ERROR;
+}
+
+// This macro is defined when Silicon Labs builds curves into the library as WEAK
+// to ensure it can be overriden by customer versions of these functions. It
+// should *not* be defined in a customer build.
+#if !defined(RAIL_PA_CONVERSIONS_WEAK)
+
+#include "sl_rail_util_pa_config.h"
+
+void sl_rail_util_pa_init(void)
+{
+#if SL_RAIL_UTIL_PA_VOLTAGE_MV > 1800
+  (void)RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
+#else
+  (void)RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesDcdc);
+#endif
+#if SL_RAIL_UTIL_PA_CALIBRATION_ENABLE
+  RAIL_EnablePaCal(true);
+#endif
+}
+
+static RAIL_TxPowerConfig_t txPowerConfig2p4Ghz = {
+  .mode = SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
+  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+};
+static RAIL_TxPowerConfig_t txPowerConfigSubGhz = {
+  .mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ,
+  .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
+  .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
+};
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void)
+{
+  return &txPowerConfig2p4Ghz;
+}
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void)
+{
+  return &txPowerConfigSubGhz;
+}
+
+void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
+                                              const RAIL_ChannelConfigEntry_t *entry)
+{
+  if (!RAIL_IsPaAutoModeEnabled(rail_handle)) {
+    RAIL_TxPowerConfig_t currentTxPowerConfig;
+    RAIL_TxPowerConfig_t *newTxPowerConfigPtr;
+    RAIL_TxPower_t txPowerDeciDbm;
+    RAIL_Status_t status;
+
+    // Get current TX Power Config.
+    status = RAIL_GetTxPowerConfig(rail_handle, &currentTxPowerConfig);
+    if (status != RAIL_STATUS_NO_ERROR) {
+      while (true) {
+      } // Error: Can't get TX Power Config
+    }
+
+    // Determine new TX Power Config.
+    if (entry->baseFrequency < 1000000000UL) {
+      newTxPowerConfigPtr = &txPowerConfigSubGhz;
+    } else {
+      newTxPowerConfigPtr = &txPowerConfig2p4Ghz;
+    }
+
+    // Call RAIL_ConfigTxPower only if TX Power Config mode has changed.
+    if (currentTxPowerConfig.mode != newTxPowerConfigPtr->mode) {
+      // Save current TX power before RAIL_ConfigTxPower (because not preserved).
+      if (currentTxPowerConfig.mode == RAIL_TX_POWER_MODE_NONE) {
+        txPowerDeciDbm = SL_RAIL_UTIL_PA_POWER_DECI_DBM;
+      } else {
+        txPowerDeciDbm = RAIL_GetTxPowerDbm(rail_handle);
+      }
+
+      // Apply new TX Power Config.
+      status = RAIL_ConfigTxPower(rail_handle, newTxPowerConfigPtr);
+      if (status != RAIL_STATUS_NO_ERROR) {
+        while (true) {
+        } // Error: Can't set TX Power Config
+      }
+      // Restore TX power after RAIL_ConfigTxPower.
+      status = RAIL_SetTxPowerDbm(rail_handle, txPowerDeciDbm);
+      if (status != RAIL_STATUS_NO_ERROR) {
+        while (true) {
+        } // Error: Can't set TX Power
+      }
+    }
+  } // !RAIL_IsPaAutoModeEnabled
+}
+#endif // !RAIL_PA_CONVERSIONS_WEAK

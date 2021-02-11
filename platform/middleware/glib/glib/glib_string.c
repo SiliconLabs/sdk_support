@@ -250,3 +250,67 @@ EMSTATUS GLIB_setFont(GLIB_Context_t *pContext, GLIB_Font_t *pFont)
     return GLIB_OK;
   }
 }
+
+/**************************************************************************//**
+*  @brief
+*  Draws a string on the specified line on the display.
+*
+*  @param pContext
+*  Pointer to a GLIB_Context_t
+*
+*  @param pString
+*  Pointer to the string that is drawn
+*
+*  @param line
+*  Specifies which line on the display to draw on.
+*
+*  @param align
+*  Horizontal alignment of the string on the line. This can be left, right or
+*  center. Note that left alignment is default.
+*
+*  @param xOffset
+*  This parameter can be used to create a margin on the left or right side of
+*  the string. Note that this argument accepts a negative value which can be
+*  useful when aligning the string to the right.
+*
+*  @param yOffset
+*  This parameter can be used to move the string further down or up a certain
+*  number of pixels. A positive value would move the string down, while a
+*  negative value would move the string up.
+*
+*  @param opaque
+*  Determines whether to show the background or color it with the background
+*  color specified by the GLIB_Context_t. If opaque == 1, the background color is used.
+*
+*  @return
+*  Returns GLIB_OK on success, or else error code
+******************************************************************************/
+EMSTATUS GLIB_drawStringOnLine(GLIB_Context_t *pContext, const char *pString, uint8_t line,
+                               GLIB_Align_t align, int32_t xOffset, int32_t yOffset, bool opaque)
+{
+  int32_t x, y;
+  size_t length;
+  size_t pixels;
+
+  length = strlen(pString);
+  pixels = length * pContext->font.fontWidth;
+  y = line * (pContext->font.fontHeight + pContext->font.lineSpacing) + yOffset;
+
+  switch (align) {
+    case GLIB_ALIGN_LEFT:
+      x = 0;
+      break;
+    case GLIB_ALIGN_CENTER:
+      x = (pContext->pDisplayGeometry->xSize - pixels) / 2;
+      break;
+    case GLIB_ALIGN_RIGHT:
+      x = pContext->pDisplayGeometry->xSize - pixels;
+      break;
+    default:
+      x = 0;
+      break;
+  }
+  x += xOffset;
+
+  return GLIB_drawString(pContext, pString, length, x, y, opaque);
+}

@@ -1,0 +1,14 @@
+id: power_manager
+label: Power Manager
+package: platform
+description: Offers a management for the power consumption. Shut down the high-frequency clock and put the system in sleep mode when possible.
+category: Services
+quality: production
+provides:
+  - name: power_manager
+requires:
+  - name: power_manager_core
+  - name: power_manager_handler
+documentation:
+  docset: gecko-platform
+  document: service/doc/power_manager/overview

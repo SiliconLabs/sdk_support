@@ -51,7 +51,7 @@ typedef struct {
   uint32_t       RESERVED1[58U];                /**< Reserved for future use                            */
   uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
   uint32_t       RESERVED3[63U];                /**< Reserved for future use                            */
-  __IOM uint32_t CTRL;                          /**< Control                                            */
+  __IOM uint32_t CTRL;                          /**< Memory System Control                              */
   uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL;                 /**< DMEM0 Retention Control                            */
   uint32_t       RESERVED5[1U];                 /**< Reserved for future use                            */
@@ -65,8 +65,8 @@ typedef struct {
   __IM uint32_t  SEQRAMECCADDR;                 /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR;                 /**< FRCRAM ECC Address                                 */
   uint32_t       RESERVED9[122U];               /**< Reserved for future use                            */
-  __IOM uint32_t ROOTDATA0;                     /**< Data Register 0                                    */
-  __IOM uint32_t ROOTDATA1;                     /**< Data Register 1                                    */
+  __IOM uint32_t ROOTDATA0;                     /**< Root Data Register 0                               */
+  __IOM uint32_t ROOTDATA1;                     /**< Root Data Register 1                               */
   __IM uint32_t  ROOTLOCKSTATUS;                /**< Lock Status                                        */
   uint32_t       RESERVED10[637U];              /**< Reserved for future use                            */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag                                     */
@@ -77,7 +77,7 @@ typedef struct {
   uint32_t       RESERVED12[58U];               /**< Reserved for future use                            */
   uint32_t       RESERVED13[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED14[63U];               /**< Reserved for future use                            */
-  __IOM uint32_t CTRL_SET;                      /**< Control                                            */
+  __IOM uint32_t CTRL_SET;                      /**< Memory System Control                              */
   uint32_t       RESERVED15[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_SET;             /**< DMEM0 Retention Control                            */
   uint32_t       RESERVED16[1U];                /**< Reserved for future use                            */
@@ -91,8 +91,8 @@ typedef struct {
   __IM uint32_t  SEQRAMECCADDR_SET;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_SET;             /**< FRCRAM ECC Address                                 */
   uint32_t       RESERVED20[122U];              /**< Reserved for future use                            */
-  __IOM uint32_t ROOTDATA0_SET;                 /**< Data Register 0                                    */
-  __IOM uint32_t ROOTDATA1_SET;                 /**< Data Register 1                                    */
+  __IOM uint32_t ROOTDATA0_SET;                 /**< Root Data Register 0                               */
+  __IOM uint32_t ROOTDATA1_SET;                 /**< Root Data Register 1                               */
   __IM uint32_t  ROOTLOCKSTATUS_SET;            /**< Lock Status                                        */
   uint32_t       RESERVED21[637U];              /**< Reserved for future use                            */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag                                     */
@@ -103,7 +103,7 @@ typedef struct {
   uint32_t       RESERVED23[58U];               /**< Reserved for future use                            */
   uint32_t       RESERVED24[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED25[63U];               /**< Reserved for future use                            */
-  __IOM uint32_t CTRL_CLR;                      /**< Control                                            */
+  __IOM uint32_t CTRL_CLR;                      /**< Memory System Control                              */
   uint32_t       RESERVED26[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_CLR;             /**< DMEM0 Retention Control                            */
   uint32_t       RESERVED27[1U];                /**< Reserved for future use                            */
@@ -117,8 +117,8 @@ typedef struct {
   __IM uint32_t  SEQRAMECCADDR_CLR;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_CLR;             /**< FRCRAM ECC Address                                 */
   uint32_t       RESERVED31[122U];              /**< Reserved for future use                            */
-  __IOM uint32_t ROOTDATA0_CLR;                 /**< Data Register 0                                    */
-  __IOM uint32_t ROOTDATA1_CLR;                 /**< Data Register 1                                    */
+  __IOM uint32_t ROOTDATA0_CLR;                 /**< Root Data Register 0                               */
+  __IOM uint32_t ROOTDATA1_CLR;                 /**< Root Data Register 1                               */
   __IM uint32_t  ROOTLOCKSTATUS_CLR;            /**< Lock Status                                        */
   uint32_t       RESERVED32[637U];              /**< Reserved for future use                            */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag                                     */
@@ -129,7 +129,7 @@ typedef struct {
   uint32_t       RESERVED34[58U];               /**< Reserved for future use                            */
   uint32_t       RESERVED35[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED36[63U];               /**< Reserved for future use                            */
-  __IOM uint32_t CTRL_TGL;                      /**< Control                                            */
+  __IOM uint32_t CTRL_TGL;                      /**< Memory System Control                              */
   uint32_t       RESERVED37[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_TGL;             /**< DMEM0 Retention Control                            */
   uint32_t       RESERVED38[1U];                /**< Reserved for future use                            */
@@ -143,8 +143,8 @@ typedef struct {
   __IM uint32_t  SEQRAMECCADDR_TGL;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_TGL;             /**< FRCRAM ECC Address                                 */
   uint32_t       RESERVED42[122U];              /**< Reserved for future use                            */
-  __IOM uint32_t ROOTDATA0_TGL;                 /**< Data Register 0                                    */
-  __IOM uint32_t ROOTDATA1_TGL;                 /**< Data Register 1                                    */
+  __IOM uint32_t ROOTDATA0_TGL;                 /**< Root Data Register 0                               */
+  __IOM uint32_t ROOTDATA1_TGL;                 /**< Root Data Register 1                               */
   __IM uint32_t  ROOTLOCKSTATUS_TGL;            /**< Lock Status                                        */
 } SYSCFG_TypeDef;
 /** @} End of group MGM22_SYSCFG */
@@ -157,112 +157,112 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for SYSCFG IF */
-#define _SYSCFG_IF_RESETVALUE                              0x00000000UL                             /**< Default value for SYSCFG_IF                 */
-#define _SYSCFG_IF_MASK                                    0x3303000FUL                             /**< Mask for SYSCFG_IF                          */
-#define SYSCFG_IF_SW0                                      (0x1UL << 0)                             /**< Software Interrupt 0                        */
-#define _SYSCFG_IF_SW0_SHIFT                               0                                        /**< Shift value for SYSCFG_SW0                  */
-#define _SYSCFG_IF_SW0_MASK                                0x1UL                                    /**< Bit mask for SYSCFG_SW0                     */
-#define _SYSCFG_IF_SW0_DEFAULT                             0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SW0_DEFAULT                              (_SYSCFG_IF_SW0_DEFAULT << 0)            /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_SW1                                      (0x1UL << 1)                             /**< Software Interrupt 1                        */
-#define _SYSCFG_IF_SW1_SHIFT                               1                                        /**< Shift value for SYSCFG_SW1                  */
-#define _SYSCFG_IF_SW1_MASK                                0x2UL                                    /**< Bit mask for SYSCFG_SW1                     */
-#define _SYSCFG_IF_SW1_DEFAULT                             0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SW1_DEFAULT                              (_SYSCFG_IF_SW1_DEFAULT << 1)            /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_SW2                                      (0x1UL << 2)                             /**< Software Interrupt 2                        */
-#define _SYSCFG_IF_SW2_SHIFT                               2                                        /**< Shift value for SYSCFG_SW2                  */
-#define _SYSCFG_IF_SW2_MASK                                0x4UL                                    /**< Bit mask for SYSCFG_SW2                     */
-#define _SYSCFG_IF_SW2_DEFAULT                             0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SW2_DEFAULT                              (_SYSCFG_IF_SW2_DEFAULT << 2)            /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_SW3                                      (0x1UL << 3)                             /**< Software Interrupt 3                        */
-#define _SYSCFG_IF_SW3_SHIFT                               3                                        /**< Shift value for SYSCFG_SW3                  */
-#define _SYSCFG_IF_SW3_MASK                                0x8UL                                    /**< Bit mask for SYSCFG_SW3                     */
-#define _SYSCFG_IF_SW3_DEFAULT                             0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SW3_DEFAULT                              (_SYSCFG_IF_SW3_DEFAULT << 3)            /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_RAMERR1B                                 (0x1UL << 16)                            /**< RAM Error 1-Bit Interrupt Flag              */
-#define _SYSCFG_IF_RAMERR1B_SHIFT                          16                                       /**< Shift value for SYSCFG_RAMERR1B             */
-#define _SYSCFG_IF_RAMERR1B_MASK                           0x10000UL                                /**< Bit mask for SYSCFG_RAMERR1B                */
-#define _SYSCFG_IF_RAMERR1B_DEFAULT                        0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_RAMERR1B_DEFAULT                         (_SYSCFG_IF_RAMERR1B_DEFAULT << 16)      /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_RAMERR2B                                 (0x1UL << 17)                            /**< RAM Error 2-Bit Interrupt Flag              */
-#define _SYSCFG_IF_RAMERR2B_SHIFT                          17                                       /**< Shift value for SYSCFG_RAMERR2B             */
-#define _SYSCFG_IF_RAMERR2B_MASK                           0x20000UL                                /**< Bit mask for SYSCFG_RAMERR2B                */
-#define _SYSCFG_IF_RAMERR2B_DEFAULT                        0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_RAMERR2B_DEFAULT                         (_SYSCFG_IF_RAMERR2B_DEFAULT << 17)      /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_SEQRAMERR1B                              (0x1UL << 24)                            /**< SEQRAM Error 1-Bit Interrupt Flag           */
-#define _SYSCFG_IF_SEQRAMERR1B_SHIFT                       24                                       /**< Shift value for SYSCFG_SEQRAMERR1B          */
-#define _SYSCFG_IF_SEQRAMERR1B_MASK                        0x1000000UL                              /**< Bit mask for SYSCFG_SEQRAMERR1B             */
-#define _SYSCFG_IF_SEQRAMERR1B_DEFAULT                     0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SEQRAMERR1B_DEFAULT                      (_SYSCFG_IF_SEQRAMERR1B_DEFAULT << 24)   /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_SEQRAMERR2B                              (0x1UL << 25)                            /**< SEQRAM Error 2-Bit Interrupt Flag           */
-#define _SYSCFG_IF_SEQRAMERR2B_SHIFT                       25                                       /**< Shift value for SYSCFG_SEQRAMERR2B          */
-#define _SYSCFG_IF_SEQRAMERR2B_MASK                        0x2000000UL                              /**< Bit mask for SYSCFG_SEQRAMERR2B             */
-#define _SYSCFG_IF_SEQRAMERR2B_DEFAULT                     0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_SEQRAMERR2B_DEFAULT                      (_SYSCFG_IF_SEQRAMERR2B_DEFAULT << 25)   /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_FRCRAMERR1BIF                            (0x1UL << 28)                            /**< FRCRAM Error 1-Bit Interrupt Flag           */
-#define _SYSCFG_IF_FRCRAMERR1BIF_SHIFT                     28                                       /**< Shift value for SYSCFG_FRCRAMERR1BIF        */
-#define _SYSCFG_IF_FRCRAMERR1BIF_MASK                      0x10000000UL                             /**< Bit mask for SYSCFG_FRCRAMERR1BIF           */
-#define _SYSCFG_IF_FRCRAMERR1BIF_DEFAULT                   0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_FRCRAMERR1BIF_DEFAULT                    (_SYSCFG_IF_FRCRAMERR1BIF_DEFAULT << 28) /**< Shifted mode DEFAULT for SYSCFG_IF          */
-#define SYSCFG_IF_FRCRAMERR2BIF                            (0x1UL << 29)                            /**< FRCRAM Error 2-Bit Interrupt Flag           */
-#define _SYSCFG_IF_FRCRAMERR2BIF_SHIFT                     29                                       /**< Shift value for SYSCFG_FRCRAMERR2BIF        */
-#define _SYSCFG_IF_FRCRAMERR2BIF_MASK                      0x20000000UL                             /**< Bit mask for SYSCFG_FRCRAMERR2BIF           */
-#define _SYSCFG_IF_FRCRAMERR2BIF_DEFAULT                   0x00000000UL                             /**< Mode DEFAULT for SYSCFG_IF                  */
-#define SYSCFG_IF_FRCRAMERR2BIF_DEFAULT                    (_SYSCFG_IF_FRCRAMERR2BIF_DEFAULT << 29) /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define _SYSCFG_IF_RESETVALUE                              0x00000000UL                           /**< Default value for SYSCFG_IF                 */
+#define _SYSCFG_IF_MASK                                    0x3303000FUL                           /**< Mask for SYSCFG_IF                          */
+#define SYSCFG_IF_SW0                                      (0x1UL << 0)                           /**< Software Interrupt 0                        */
+#define _SYSCFG_IF_SW0_SHIFT                               0                                      /**< Shift value for SYSCFG_SW0                  */
+#define _SYSCFG_IF_SW0_MASK                                0x1UL                                  /**< Bit mask for SYSCFG_SW0                     */
+#define _SYSCFG_IF_SW0_DEFAULT                             0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SW0_DEFAULT                              (_SYSCFG_IF_SW0_DEFAULT << 0)          /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_SW1                                      (0x1UL << 1)                           /**< Software Interrupt 1                        */
+#define _SYSCFG_IF_SW1_SHIFT                               1                                      /**< Shift value for SYSCFG_SW1                  */
+#define _SYSCFG_IF_SW1_MASK                                0x2UL                                  /**< Bit mask for SYSCFG_SW1                     */
+#define _SYSCFG_IF_SW1_DEFAULT                             0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SW1_DEFAULT                              (_SYSCFG_IF_SW1_DEFAULT << 1)          /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_SW2                                      (0x1UL << 2)                           /**< Software Interrupt 2                        */
+#define _SYSCFG_IF_SW2_SHIFT                               2                                      /**< Shift value for SYSCFG_SW2                  */
+#define _SYSCFG_IF_SW2_MASK                                0x4UL                                  /**< Bit mask for SYSCFG_SW2                     */
+#define _SYSCFG_IF_SW2_DEFAULT                             0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SW2_DEFAULT                              (_SYSCFG_IF_SW2_DEFAULT << 2)          /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_SW3                                      (0x1UL << 3)                           /**< Software Interrupt 3                        */
+#define _SYSCFG_IF_SW3_SHIFT                               3                                      /**< Shift value for SYSCFG_SW3                  */
+#define _SYSCFG_IF_SW3_MASK                                0x8UL                                  /**< Bit mask for SYSCFG_SW3                     */
+#define _SYSCFG_IF_SW3_DEFAULT                             0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SW3_DEFAULT                              (_SYSCFG_IF_SW3_DEFAULT << 3)          /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_RAMERR1B                                 (0x1UL << 16)                          /**< RAM 1-Bit Error Interrupt Flag              */
+#define _SYSCFG_IF_RAMERR1B_SHIFT                          16                                     /**< Shift value for SYSCFG_RAMERR1B             */
+#define _SYSCFG_IF_RAMERR1B_MASK                           0x10000UL                              /**< Bit mask for SYSCFG_RAMERR1B                */
+#define _SYSCFG_IF_RAMERR1B_DEFAULT                        0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_RAMERR1B_DEFAULT                         (_SYSCFG_IF_RAMERR1B_DEFAULT << 16)    /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_RAMERR2B                                 (0x1UL << 17)                          /**< RAM 2-Bit Error Interrupt Flag              */
+#define _SYSCFG_IF_RAMERR2B_SHIFT                          17                                     /**< Shift value for SYSCFG_RAMERR2B             */
+#define _SYSCFG_IF_RAMERR2B_MASK                           0x20000UL                              /**< Bit mask for SYSCFG_RAMERR2B                */
+#define _SYSCFG_IF_RAMERR2B_DEFAULT                        0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_RAMERR2B_DEFAULT                         (_SYSCFG_IF_RAMERR2B_DEFAULT << 17)    /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_SEQRAMERR1B                              (0x1UL << 24)                          /**< SEQRAM 1-Bit Error Interrupt Flag           */
+#define _SYSCFG_IF_SEQRAMERR1B_SHIFT                       24                                     /**< Shift value for SYSCFG_SEQRAMERR1B          */
+#define _SYSCFG_IF_SEQRAMERR1B_MASK                        0x1000000UL                            /**< Bit mask for SYSCFG_SEQRAMERR1B             */
+#define _SYSCFG_IF_SEQRAMERR1B_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SEQRAMERR1B_DEFAULT                      (_SYSCFG_IF_SEQRAMERR1B_DEFAULT << 24) /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_SEQRAMERR2B                              (0x1UL << 25)                          /**< SEQRAM 2-Bit Error Interrupt Flag           */
+#define _SYSCFG_IF_SEQRAMERR2B_SHIFT                       25                                     /**< Shift value for SYSCFG_SEQRAMERR2B          */
+#define _SYSCFG_IF_SEQRAMERR2B_MASK                        0x2000000UL                            /**< Bit mask for SYSCFG_SEQRAMERR2B             */
+#define _SYSCFG_IF_SEQRAMERR2B_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_SEQRAMERR2B_DEFAULT                      (_SYSCFG_IF_SEQRAMERR2B_DEFAULT << 25) /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_FRCRAMERR1B                              (0x1UL << 28)                          /**< FRCRAM 1-Bit Error Interrupt Flag           */
+#define _SYSCFG_IF_FRCRAMERR1B_SHIFT                       28                                     /**< Shift value for SYSCFG_FRCRAMERR1B          */
+#define _SYSCFG_IF_FRCRAMERR1B_MASK                        0x10000000UL                           /**< Bit mask for SYSCFG_FRCRAMERR1B             */
+#define _SYSCFG_IF_FRCRAMERR1B_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_FRCRAMERR1B_DEFAULT                      (_SYSCFG_IF_FRCRAMERR1B_DEFAULT << 28) /**< Shifted mode DEFAULT for SYSCFG_IF          */
+#define SYSCFG_IF_FRCRAMERR2B                              (0x1UL << 29)                          /**< FRCRAM 2-Bit Error Interrupt Flag           */
+#define _SYSCFG_IF_FRCRAMERR2B_SHIFT                       29                                     /**< Shift value for SYSCFG_FRCRAMERR2B          */
+#define _SYSCFG_IF_FRCRAMERR2B_MASK                        0x20000000UL                           /**< Bit mask for SYSCFG_FRCRAMERR2B             */
+#define _SYSCFG_IF_FRCRAMERR2B_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for SYSCFG_IF                  */
+#define SYSCFG_IF_FRCRAMERR2B_DEFAULT                      (_SYSCFG_IF_FRCRAMERR2B_DEFAULT << 29) /**< Shifted mode DEFAULT for SYSCFG_IF          */
 
 /* Bit fields for SYSCFG IEN */
-#define _SYSCFG_IEN_RESETVALUE                             0x00000000UL                               /**< Default value for SYSCFG_IEN                */
-#define _SYSCFG_IEN_MASK                                   0x3303000FUL                               /**< Mask for SYSCFG_IEN                         */
-#define SYSCFG_IEN_SW0                                     (0x1UL << 0)                               /**< Software interrupt 0                        */
-#define _SYSCFG_IEN_SW0_SHIFT                              0                                          /**< Shift value for SYSCFG_SW0                  */
-#define _SYSCFG_IEN_SW0_MASK                               0x1UL                                      /**< Bit mask for SYSCFG_SW0                     */
-#define _SYSCFG_IEN_SW0_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SW0_DEFAULT                             (_SYSCFG_IEN_SW0_DEFAULT << 0)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW1                                     (0x1UL << 1)                               /**< Software interrupt 1                        */
-#define _SYSCFG_IEN_SW1_SHIFT                              1                                          /**< Shift value for SYSCFG_SW1                  */
-#define _SYSCFG_IEN_SW1_MASK                               0x2UL                                      /**< Bit mask for SYSCFG_SW1                     */
-#define _SYSCFG_IEN_SW1_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SW1_DEFAULT                             (_SYSCFG_IEN_SW1_DEFAULT << 1)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW2                                     (0x1UL << 2)                               /**< Software interrupt 2                        */
-#define _SYSCFG_IEN_SW2_SHIFT                              2                                          /**< Shift value for SYSCFG_SW2                  */
-#define _SYSCFG_IEN_SW2_MASK                               0x4UL                                      /**< Bit mask for SYSCFG_SW2                     */
-#define _SYSCFG_IEN_SW2_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SW2_DEFAULT                             (_SYSCFG_IEN_SW2_DEFAULT << 2)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SW3                                     (0x1UL << 3)                               /**< Software interrupt 3                        */
-#define _SYSCFG_IEN_SW3_SHIFT                              3                                          /**< Shift value for SYSCFG_SW3                  */
-#define _SYSCFG_IEN_SW3_MASK                               0x8UL                                      /**< Bit mask for SYSCFG_SW3                     */
-#define _SYSCFG_IEN_SW3_DEFAULT                            0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SW3_DEFAULT                             (_SYSCFG_IEN_SW3_DEFAULT << 3)             /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_RAMERR1B                                (0x1UL << 16)                              /**< RAM Error 1-bit Interrupt Enable            */
-#define _SYSCFG_IEN_RAMERR1B_SHIFT                         16                                         /**< Shift value for SYSCFG_RAMERR1B             */
-#define _SYSCFG_IEN_RAMERR1B_MASK                          0x10000UL                                  /**< Bit mask for SYSCFG_RAMERR1B                */
-#define _SYSCFG_IEN_RAMERR1B_DEFAULT                       0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_RAMERR1B_DEFAULT                        (_SYSCFG_IEN_RAMERR1B_DEFAULT << 16)       /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_RAMERR2B                                (0x1UL << 17)                              /**< RAM Error 2-bit Interrupt Enable            */
-#define _SYSCFG_IEN_RAMERR2B_SHIFT                         17                                         /**< Shift value for SYSCFG_RAMERR2B             */
-#define _SYSCFG_IEN_RAMERR2B_MASK                          0x20000UL                                  /**< Bit mask for SYSCFG_RAMERR2B                */
-#define _SYSCFG_IEN_RAMERR2B_DEFAULT                       0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_RAMERR2B_DEFAULT                        (_SYSCFG_IEN_RAMERR2B_DEFAULT << 17)       /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SEQRAMERR1B                             (0x1UL << 24)                              /**< SEQRAM Error 1-bit Interrupt Enable         */
-#define _SYSCFG_IEN_SEQRAMERR1B_SHIFT                      24                                         /**< Shift value for SYSCFG_SEQRAMERR1B          */
-#define _SYSCFG_IEN_SEQRAMERR1B_MASK                       0x1000000UL                                /**< Bit mask for SYSCFG_SEQRAMERR1B             */
-#define _SYSCFG_IEN_SEQRAMERR1B_DEFAULT                    0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SEQRAMERR1B_DEFAULT                     (_SYSCFG_IEN_SEQRAMERR1B_DEFAULT << 24)    /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_SEQRAMERR2B                             (0x1UL << 25)                              /**< SEQRAM Error 2-bit Interrupt Enable         */
-#define _SYSCFG_IEN_SEQRAMERR2B_SHIFT                      25                                         /**< Shift value for SYSCFG_SEQRAMERR2B          */
-#define _SYSCFG_IEN_SEQRAMERR2B_MASK                       0x2000000UL                                /**< Bit mask for SYSCFG_SEQRAMERR2B             */
-#define _SYSCFG_IEN_SEQRAMERR2B_DEFAULT                    0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_SEQRAMERR2B_DEFAULT                     (_SYSCFG_IEN_SEQRAMERR2B_DEFAULT << 25)    /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_FRCRAMERR1BIEN                          (0x1UL << 28)                              /**< FRCRAM Error 1-bit Interrupt Enable         */
-#define _SYSCFG_IEN_FRCRAMERR1BIEN_SHIFT                   28                                         /**< Shift value for SYSCFG_FRCRAMERR1BIEN       */
-#define _SYSCFG_IEN_FRCRAMERR1BIEN_MASK                    0x10000000UL                               /**< Bit mask for SYSCFG_FRCRAMERR1BIEN          */
-#define _SYSCFG_IEN_FRCRAMERR1BIEN_DEFAULT                 0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_FRCRAMERR1BIEN_DEFAULT                  (_SYSCFG_IEN_FRCRAMERR1BIEN_DEFAULT << 28) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
-#define SYSCFG_IEN_FRCRAMERR2BIEN                          (0x1UL << 29)                              /**< FRCRAM Error 2-bit Interrupt Enable         */
-#define _SYSCFG_IEN_FRCRAMERR2BIEN_SHIFT                   29                                         /**< Shift value for SYSCFG_FRCRAMERR2BIEN       */
-#define _SYSCFG_IEN_FRCRAMERR2BIEN_MASK                    0x20000000UL                               /**< Bit mask for SYSCFG_FRCRAMERR2BIEN          */
-#define _SYSCFG_IEN_FRCRAMERR2BIEN_DEFAULT                 0x00000000UL                               /**< Mode DEFAULT for SYSCFG_IEN                 */
-#define SYSCFG_IEN_FRCRAMERR2BIEN_DEFAULT                  (_SYSCFG_IEN_FRCRAMERR2BIEN_DEFAULT << 29) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define _SYSCFG_IEN_RESETVALUE                             0x00000000UL                            /**< Default value for SYSCFG_IEN                */
+#define _SYSCFG_IEN_MASK                                   0x3303000FUL                            /**< Mask for SYSCFG_IEN                         */
+#define SYSCFG_IEN_SW0                                     (0x1UL << 0)                            /**< Software interrupt 0                        */
+#define _SYSCFG_IEN_SW0_SHIFT                              0                                       /**< Shift value for SYSCFG_SW0                  */
+#define _SYSCFG_IEN_SW0_MASK                               0x1UL                                   /**< Bit mask for SYSCFG_SW0                     */
+#define _SYSCFG_IEN_SW0_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SW0_DEFAULT                             (_SYSCFG_IEN_SW0_DEFAULT << 0)          /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_SW1                                     (0x1UL << 1)                            /**< Software interrupt 1                        */
+#define _SYSCFG_IEN_SW1_SHIFT                              1                                       /**< Shift value for SYSCFG_SW1                  */
+#define _SYSCFG_IEN_SW1_MASK                               0x2UL                                   /**< Bit mask for SYSCFG_SW1                     */
+#define _SYSCFG_IEN_SW1_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SW1_DEFAULT                             (_SYSCFG_IEN_SW1_DEFAULT << 1)          /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_SW2                                     (0x1UL << 2)                            /**< Software interrupt 2                        */
+#define _SYSCFG_IEN_SW2_SHIFT                              2                                       /**< Shift value for SYSCFG_SW2                  */
+#define _SYSCFG_IEN_SW2_MASK                               0x4UL                                   /**< Bit mask for SYSCFG_SW2                     */
+#define _SYSCFG_IEN_SW2_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SW2_DEFAULT                             (_SYSCFG_IEN_SW2_DEFAULT << 2)          /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_SW3                                     (0x1UL << 3)                            /**< Software interrupt 3                        */
+#define _SYSCFG_IEN_SW3_SHIFT                              3                                       /**< Shift value for SYSCFG_SW3                  */
+#define _SYSCFG_IEN_SW3_MASK                               0x8UL                                   /**< Bit mask for SYSCFG_SW3                     */
+#define _SYSCFG_IEN_SW3_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SW3_DEFAULT                             (_SYSCFG_IEN_SW3_DEFAULT << 3)          /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_RAMERR1B                                (0x1UL << 16)                           /**< RAM 1-bit Error Interrupt Enable            */
+#define _SYSCFG_IEN_RAMERR1B_SHIFT                         16                                      /**< Shift value for SYSCFG_RAMERR1B             */
+#define _SYSCFG_IEN_RAMERR1B_MASK                          0x10000UL                               /**< Bit mask for SYSCFG_RAMERR1B                */
+#define _SYSCFG_IEN_RAMERR1B_DEFAULT                       0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_RAMERR1B_DEFAULT                        (_SYSCFG_IEN_RAMERR1B_DEFAULT << 16)    /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_RAMERR2B                                (0x1UL << 17)                           /**< RAM 2-bit Error Interrupt Enable            */
+#define _SYSCFG_IEN_RAMERR2B_SHIFT                         17                                      /**< Shift value for SYSCFG_RAMERR2B             */
+#define _SYSCFG_IEN_RAMERR2B_MASK                          0x20000UL                               /**< Bit mask for SYSCFG_RAMERR2B                */
+#define _SYSCFG_IEN_RAMERR2B_DEFAULT                       0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_RAMERR2B_DEFAULT                        (_SYSCFG_IEN_RAMERR2B_DEFAULT << 17)    /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_SEQRAMERR1B                             (0x1UL << 24)                           /**< SEQRAM 1-bit Error Interrupt Enable         */
+#define _SYSCFG_IEN_SEQRAMERR1B_SHIFT                      24                                      /**< Shift value for SYSCFG_SEQRAMERR1B          */
+#define _SYSCFG_IEN_SEQRAMERR1B_MASK                       0x1000000UL                             /**< Bit mask for SYSCFG_SEQRAMERR1B             */
+#define _SYSCFG_IEN_SEQRAMERR1B_DEFAULT                    0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SEQRAMERR1B_DEFAULT                     (_SYSCFG_IEN_SEQRAMERR1B_DEFAULT << 24) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_SEQRAMERR2B                             (0x1UL << 25)                           /**< SEQRAM 2-bit Error Interrupt Enable         */
+#define _SYSCFG_IEN_SEQRAMERR2B_SHIFT                      25                                      /**< Shift value for SYSCFG_SEQRAMERR2B          */
+#define _SYSCFG_IEN_SEQRAMERR2B_MASK                       0x2000000UL                             /**< Bit mask for SYSCFG_SEQRAMERR2B             */
+#define _SYSCFG_IEN_SEQRAMERR2B_DEFAULT                    0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_SEQRAMERR2B_DEFAULT                     (_SYSCFG_IEN_SEQRAMERR2B_DEFAULT << 25) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_FRCRAMERR1B                             (0x1UL << 28)                           /**< FRCRAM 1-bit Error Interrupt Enable         */
+#define _SYSCFG_IEN_FRCRAMERR1B_SHIFT                      28                                      /**< Shift value for SYSCFG_FRCRAMERR1B          */
+#define _SYSCFG_IEN_FRCRAMERR1B_MASK                       0x10000000UL                            /**< Bit mask for SYSCFG_FRCRAMERR1B             */
+#define _SYSCFG_IEN_FRCRAMERR1B_DEFAULT                    0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_FRCRAMERR1B_DEFAULT                     (_SYSCFG_IEN_FRCRAMERR1B_DEFAULT << 28) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
+#define SYSCFG_IEN_FRCRAMERR2B                             (0x1UL << 29)                           /**< FRCRAM 2-bit Error Interrupt Enable         */
+#define _SYSCFG_IEN_FRCRAMERR2B_SHIFT                      29                                      /**< Shift value for SYSCFG_FRCRAMERR2B          */
+#define _SYSCFG_IEN_FRCRAMERR2B_MASK                       0x20000000UL                            /**< Bit mask for SYSCFG_FRCRAMERR2B             */
+#define _SYSCFG_IEN_FRCRAMERR2B_DEFAULT                    0x00000000UL                            /**< Mode DEFAULT for SYSCFG_IEN                 */
+#define SYSCFG_IEN_FRCRAMERR2B_DEFAULT                     (_SYSCFG_IEN_FRCRAMERR2B_DEFAULT << 29) /**< Shifted mode DEFAULT for SYSCFG_IEN         */
 
 /* Bit fields for SYSCFG CHIPREVHW */
 #define _SYSCFG_CHIPREVHW_RESETVALUE                       0x00000C01UL                            /**< Default value for SYSCFG_CHIPREVHW          */
@@ -570,4 +570,5 @@ typedef struct {
 /** @} End of group MGM22_SYSCFG_CFGNS_BitFields */
 /** @} End of group MGM22_SYSCFG_CFGNS */
 /** @} End of group Parts */
+
 #endif /* MGM22_SYSCFG_H */

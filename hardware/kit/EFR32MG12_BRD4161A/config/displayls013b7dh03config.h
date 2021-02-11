@@ -80,4 +80,7 @@
   #define POLARITY_INVERSION_EXTCOMIN_PAL_AUTO_TOGGLE
 #endif
 
+/* Frequency of LCD polarity inversion. */
+#define LS013B7DH03_POLARITY_INVERSION_FREQUENCY (125)
+
 #endif /* DISPLAYLS013B7DH03CONFIG_H */

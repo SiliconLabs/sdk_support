@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief RAILTEST transmit and receive
+ * @brief RAILtest transmit and receive
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,9 +36,9 @@ typedef struct BerStatus{
 } BerStatus_t;
 
 // Variables for TX
-extern RAIL_Events_t lastTxStatus;
-extern RAIL_Events_t lastTxAckStatus;
-extern uint32_t sentAckPackets;
+extern volatile RAIL_Events_t lastTxStatus;
+extern volatile RAIL_Events_t lastTxAckStatus;
+extern volatile uint32_t sentAckPackets;
 extern RAIL_TxPacketDetails_t previousTxAppendedInfo;
 extern RAIL_TxPacketDetails_t previousTxAckAppendedInfo;
 

@@ -33,7 +33,7 @@
 void emberRadioNeedsCalibratingHandler(void)
 {
   // TODO: Failsafe any critical processes or peripherals.
-  emberCalibrateCurrentChannel();
+  sl_mac_calibrate_current_channel();
 }
 
 #endif//EMBER_APPLICATION_HAS_CUSTOM_RADIO_CALIBRATION_CALLBACK

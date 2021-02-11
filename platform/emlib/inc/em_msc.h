@@ -37,6 +37,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include "em_bus.h"
+#include "em_msc_compat.h"
 #include "em_ramfunc.h"
 
 #ifdef __cplusplus
@@ -44,13 +45,8 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup MSC
- * @brief Memory System Controller API.
+ * @addtogroup msc MSC - Memory System Controller
+ * @brief Memory System Controller API
  * @details
  *  Contains functions to control the MSC, primarily the Flash.
  *  Users can perform Flash memory write and erase operations, as well as
@@ -59,9 +55,9 @@ extern "C" {
  *  features such as instruction pre-fetch, cache, and configurable branch prediction
  *  are typically available.
  *
- * @note Flash wait-state configuration is handled by @ref CMU module.
+ * @note Flash wait-state configuration is handled by @ref cmu.
  *       When core clock configuration is changed by a call to functions such as
- *       @ref CMU_ClockSelectSet() or @ref CMU_HFRCOBandSet(), then Flash wait-state
+ *       CMU_ClockSelectSet() or CMU_HFRCOBandSet(), then Flash wait-state
  *       configuration is also updated.
  *
  *  MSC resets into a safe state. To initialize the instruction interface
@@ -69,8 +65,8 @@ extern "C" {
  *  @include em_msc_init_exec.c
  *
  * @note The optimal configuration is highly application dependent. Performance
- *       benchmarking is supported by most families. See @ref MSC_StartCacheMeasurement()
- *       and @ref MSC_GetCacheMeasurement() for more details.
+ *       benchmarking is supported by most families. See MSC_StartCacheMeasurement()
+ *       and MSC_GetCacheMeasurement() for more details.
  *
  * @note
  *   The flash write and erase runs from RAM on the EFM32G devices. On all other
@@ -80,7 +76,7 @@ extern "C" {
  *   Flash erase may add ms of delay to interrupt latency if executing from Flash.
  *
  * Flash write and erase operations are supported by @ref MSC_WriteWord(),
- * @ref MSC_ErasePage(), and @ref MSC_MassErase().
+ * @ref MSC_ErasePage(), and MSC_MassErase().
  * Mass erase is supported for MCU and SoC families with larger Flash sizes.
  *
  * @note
@@ -96,7 +92,7 @@ extern "C" {
  *   except the EFM32G automatically.
  *
  * @deprecated
- *   The function called @ref MSC_WriteWordFast() is deprecated.
+ *   The function called MSC_WriteWordFast() is deprecated.
  *
  * @{
  ******************************************************************************/
@@ -152,7 +148,18 @@ typedef enum {
 } MSC_BusStrategy_Typedef;
 #endif
 
-#if defined(MSC_READCTRL_DOUTBUFEN)
+#if defined(_SYSCFG_DMEM0PORTMAPSEL_MASK)
+/** AHBHOST masters that can use alternate MPAHBRAM ports. */
+typedef enum {
+  mscDmemMasterLDMA    = _SYSCFG_DMEM0PORTMAPSEL_LDMAPORTSEL_SHIFT,
+  mscDmemMasterSRWAES  = _SYSCFG_DMEM0PORTMAPSEL_SRWAESPORTSEL_SHIFT,
+  mscDmemMasterAHBSRW  = _SYSCFG_DMEM0PORTMAPSEL_AHBSRWPORTSEL_SHIFT,
+  mscDmemMasterSRWECA0 = _SYSCFG_DMEM0PORTMAPSEL_SRWECA0PORTSEL_SHIFT,
+  mscDmemMasterSRWECA1 = _SYSCFG_DMEM0PORTMAPSEL_SRWECA1PORTSEL_SHIFT,
+} MSC_DmemMaster_TypeDef;
+#endif
+
+#if defined(MSC_READCTRL_DOUTBUFEN) || defined(MSC_RDATACTRL_DOUTBUFEN)
 /** Code execution configuration */
 typedef struct {
   bool doutBufEn;       /**< Flash dout pipeline buffer enable */
@@ -187,7 +194,9 @@ typedef struct {
   }
 #endif
 
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK) || \
+    defined(_SYSCFG_DMEM0ECCCTRL_MASK) || \
+    defined(_MPAHBRAM_CTRL_MASK)
 
 #if defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)
 /** EFM32GG11B incorporates 2 memory banks including ECC support. */
@@ -211,8 +220,11 @@ typedef struct {
     { 0, 1 },                 \
   }
 
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-/** EFR32XG21 incorporates 1 memory bank including ECC support. */
+#elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || \
+       defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || \
+       defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3))
+
+/** Series 2 chips incorporate 1 memory bank including ECC support. */
 #define MSC_ECC_BANKS  (1)
 /** Default MSC EccConfig initialization */
 #define MSC_ECCCONFIG_DEFAULT \
@@ -220,15 +232,7 @@ typedef struct {
     { false },                \
     { 0, 1 },                 \
   }
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
-/** EFR32XG21 incorporates 1 memory bank including ECC support. */
-#define MSC_ECC_BANKS  (1)
-/** Default MSC EccConfig initialization */
-#define MSC_ECCCONFIG_DEFAULT \
-  {                           \
-    { false },                \
-    { 0, 1 },                 \
-  }
+
 #else
 #error Device not supported.
 #endif
@@ -524,8 +528,14 @@ __STATIC_INLINE void MSC_BusStrategy(mscBusStrategy_Typedef mode)
 void MSC_Init(void);
 void MSC_Deinit(void);
 void MSC_ExecConfigSet(MSC_ExecConfig_TypeDef *execConfig);
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK) || \
+    defined(_SYSCFG_DMEM0ECCCTRL_MASK) || \
+    defined(_MPAHBRAM_CTRL_MASK)
 void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig);
+#endif
+
+#if defined(_SYSCFG_DMEM0PORTMAPSEL_MASK)
+void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port);
 #endif
 
 MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
@@ -533,17 +543,32 @@ MSC_WriteWord(uint32_t *address,
               void const *data,
               uint32_t numBytes);
 
+#if !defined(_SILICON_LABS_32B_SERIES_2)
 /* Note that this function is deprecated because we no longer support
  * placing msc code in ram. */
 MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
 MSC_WriteWordFast(uint32_t *address,
                   void const *data,
                   uint32_t numBytes);
+#endif
 
 MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef
 MSC_ErasePage(uint32_t *startAddress);
 
 #if defined(MSC_WRITECMD_ERASEMAIN0)
+/***************************************************************************//**
+ * @brief
+ *   Erase the entire Flash in one operation.
+ *
+ * @note
+ *   This command will erase the entire contents of the device.
+ *   Use with care, both a debug session and all contents of the flash will be
+ *   lost. The lock bit, MLW will prevent this operation from executing and
+ *   might prevent a successful mass erase.
+ *
+ * @return
+ *   Returns the status of the operation.
+ ******************************************************************************/
 SL_RAMFUNC_DECLARATOR MSC_Status_TypeDef
 MSC_MassErase(void);
 #endif
@@ -555,8 +580,7 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
                                     uint32_t numBytes);
 #endif
 
-/** @} (end addtogroup MSC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup msc) */
 
 #ifdef __cplusplus
 }

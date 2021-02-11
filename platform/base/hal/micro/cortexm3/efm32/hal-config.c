@@ -40,6 +40,11 @@
 #include "coexistence/protocol/ieee802154/coexistence-802154.h"
 #endif
 
+// Use a default LFXO precision of 500 so that it's not undefined
+#ifndef HAL_LFXO_PRECISION
+#define HAL_LFXO_PRECISION 500
+#endif
+
 static void halConfigClockInit(void)
 {
 // Initialize HFXO if used
@@ -137,6 +142,7 @@ static void halConfigClockInit(void)
   lfxoInit.ctune = BSP_CLK_LFXO_CTUNE;
     #endif
   CMU_LFXOInit(&lfxoInit);
+  CMU_LFXOPrecisionSet(HAL_LFXO_PRECISION);
   CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_LFXO_TO_40MHZ;
   #endif
 
@@ -203,6 +209,7 @@ static void halConfigClockInit(void)
   #endif
 
   CMU_LFXOInit(&lfxoInit);
+  CMU_LFXOPrecisionSet(HAL_LFXO_PRECISION);
 
   // Set system LFXO frequency
   SystemLFXOClockSet(BSP_CLK_LFXO_FREQ);
@@ -315,10 +322,23 @@ Ecode_t halConfigInit(void)
   EMU_EM23Init(&em23init);
 #endif //HAL_EMU_ENABLE
 
+// EMHAL-2448 workaround until zigbee on UC is available.
+#if defined(SL_RAIL_UTIL_RSSI_OFFSET) && (PHY_RAIL || PHY_DUALRAIL)
+  (void)RAIL_SetRssiOffset(RAIL_EFR32_HANDLE, (int8_t)SL_RAIL_UTIL_RSSI_OFFSET);
+#endif
+
   halConfigClockInit();
 
 #if (HAL_BUTTON_COUNT > 0)
+#if (defined(BSP_BUTTON0_PIN) && defined(BSP_LED0_PIN) && (((BSP_BUTTON0_PIN) == (BSP_LED0_PIN)) && ((BSP_BUTTON0_PORT) == (BSP_LED0_PORT))))  \
+  || (defined(BSP_BUTTON0_PIN) && defined(BSP_LED1_PIN) && (((BSP_BUTTON0_PIN) == (BSP_LED1_PIN)) && ((BSP_BUTTON0_PORT) == (BSP_LED1_PORT)))) \
+  || (defined(BSP_BUTTON1_PIN) && defined(BSP_LED1_PIN) && (((BSP_BUTTON1_PIN) == (BSP_LED1_PIN)) && ((BSP_BUTTON1_PORT) == (BSP_LED1_PORT)))) \
+  || (defined(BSP_BUTTON1_PIN) && defined(BSP_LED0_PIN) && (((BSP_BUTTON1_PIN) == (BSP_LED0_PIN)) && ((BSP_BUTTON1_PORT) == (BSP_LED0_PORT))))
+  // Skip Button initialization due to button and LED conflict
+  #warning "Buttons and LEDs share pins. Skipping Button initialization."
+#else
   halInternalInitButton();
+#endif
 #endif
 
 #if (HAL_LED_COUNT > 0)

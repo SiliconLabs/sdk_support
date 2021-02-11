@@ -1107,11 +1107,6 @@ typedef struct {
 #define USART_IRCTRL_IRFILT_DEFAULT             (_USART_IRCTRL_IRFILT_DEFAULT << 3)     /**< Shifted mode DEFAULT for USART_IRCTRL       */
 #define USART_IRCTRL_IRFILT_DISABLE             (_USART_IRCTRL_IRFILT_DISABLE << 3)     /**< Shifted mode DISABLE for USART_IRCTRL       */
 #define USART_IRCTRL_IRFILT_ENABLE              (_USART_IRCTRL_IRFILT_ENABLE << 3)      /**< Shifted mode ENABLE for USART_IRCTRL        */
-#define USART_IRCTRL_IRPRSEN                    (0x1UL << 7)                            /**< IrDA PRS Channel Enable                     */
-#define _USART_IRCTRL_IRPRSEN_SHIFT             7                                       /**< Shift value for USART_IRPRSEN               */
-#define _USART_IRCTRL_IRPRSEN_MASK              0x80UL                                  /**< Bit mask for USART_IRPRSEN                  */
-#define _USART_IRCTRL_IRPRSEN_DEFAULT           0x00000000UL                            /**< Mode DEFAULT for USART_IRCTRL               */
-#define USART_IRCTRL_IRPRSEN_DEFAULT            (_USART_IRCTRL_IRPRSEN_DEFAULT << 7)    /**< Shifted mode DEFAULT for USART_IRCTRL       */
 
 /* Bit fields for USART I2SCTRL */
 #define _USART_I2SCTRL_RESETVALUE               0x00000000UL                            /**< Default value for USART_I2SCTRL             */
@@ -1432,4 +1427,5 @@ typedef struct {
 /** @} End of group MGM22_USART_BitFields */
 /** @} End of group MGM22_USART */
 /** @} End of group Parts */
+
 #endif /* MGM22_USART_H */

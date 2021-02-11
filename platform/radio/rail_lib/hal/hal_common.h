@@ -3,7 +3,7 @@
  * @brief Header file for RAIL HAL common functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,9 +36,6 @@
 
 #include "em_core.h"
 #include "em_gpio.h" // For debug signal definitions
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
 
 /******************************************************************************
  * Typedefs
@@ -87,12 +84,6 @@ typedef struct debugSignal {
 /******************************************************************************
  * Function Prototypes
  *****************************************************************************/
-
-/**
- * HAL initialization function. This should be called at startup to setup the
- * HAL used by the railtest application.
- */
-void halInit(void);
 
 /**
  * HAL API to get all the known debug signals for a given chip in a unified
@@ -153,11 +144,5 @@ void halCommonMemMove(void *dest, const void *src, uint16_t bytes);
  * macro.  Something which is atomic cannot be interrupted by interrupts.
  */
 #define ATOMIC(blah)          CORE_ATOMIC_SECTION(blah)
-
-/// Set RAIL_DMA_CHANNEL to DMA_CHANNEL_DMADRV in order to a DMA channel
-/// allocated by DMADRV.
-#define DMA_CHANNEL_DMADRV 254
-/// Set RAIL_DMA_CHANNEL to DMA_CHANNEL_INVALID in order to not use DMA
-#define DMA_CHANNEL_INVALID 255
 
 #endif // __RAILTEST_HAL_H__

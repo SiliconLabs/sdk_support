@@ -24,24 +24,32 @@ void halInternalInitButton(void)
 
 uint8_t halButtonState(uint8_t button)
 {
+  (void)button;
   return BUTTON_RELEASED;
 }
 
 uint8_t halButtonPinState(uint8_t button)
 {
+  (void)button;
   return BUTTON_RELEASED;
 }
 
 uint16_t halGpioIsr(uint16_t interrupt, uint16_t pcbContext)
 {
+  (void)interrupt;
+  (void)pcbContext;
   return 0;
 }
 
 uint16_t halTimerIsr(uint16_t interrupt, uint16_t pcbContext)
 {
+  (void)interrupt;
+  (void)pcbContext;
   return 0;
 }
 
 void simulatedButtonIsr(uint8_t button, bool isPress)
 {
+  (void)button;
+  (void)isPress;
 }

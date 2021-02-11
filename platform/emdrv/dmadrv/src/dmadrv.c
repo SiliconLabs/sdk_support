@@ -279,7 +279,7 @@ Ecode_t DMADRV_Init(void)
   return ECODE_EMDRV_DMADRV_OK;
 }
 
-#if defined(EMDRV_DMADRV_LDMA)
+#if defined(EMDRV_DMADRV_LDMA) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief
  *  Start an LDMA transfer.
@@ -1235,10 +1235,8 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 /// @endcond
 
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup emdrv
-/// @{
-/// @addtogroup DMADRV
-/// @brief DMADRV Direct Memory Access Driver
+/// @addtogroup dmadrv DMADRV - DMA Driver
+/// @brief Direct Memory Access Driver
 /// @{
 ///
 ///   @details
@@ -1268,7 +1266,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///   @n @section dmadrv_conf Configuration Options
 ///
 ///   Some properties of the DMADRV driver are compile-time configurable. These
-///   properties are stored in a file named @ref dmadrv_config.h. A template for this
+///   properties are stored in a file named dmadrv_config.h. A template for this
 ///   file, containing default values, is in the emdrv/config folder.
 ///   Currently the configuration options are as follows:
 ///   @li The interrupt priority of the DMA peripheral.
@@ -1279,7 +1277,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///   Both configuration options will help reduce the driver's RAM footprint.
 ///
 ///   To configure DMADRV, provide a custom configuration file. This is an
-///   example @ref dmadrv_config.h file:
+///   example dmadrv_config.h file:
 ///   @code{.c}
 /// #ifndef __SILICON_LABS_DMADRV_CONFIG_H__
 /// #define __SILICON_LABS_DMADRV_CONFIG_H__
@@ -1293,11 +1291,6 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///   // RAM footprint.
 /// #define EMDRV_DMADRV_DMA_CH_COUNT 4
 ///
-///   // DMADRV native API configuration option.
-///   // Use the native emlib API of the DMA controller in addition to DMADRV
-///   // housekeeping functions, such as AllocateChannel/FreeChannel, and so on.
-/// #define EMDRV_DMADRV_USE_NATIVE_API
-///
 /// #endif
 ///   @endcode
 ///
@@ -1307,7 +1300,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///   For more information about input and output parameters and return values,
 ///   click on the hyperlinked function names. Most functions return an error
 ///   code, @ref ECODE_EMDRV_DMADRV_OK is returned on success,
-///   see @ref ecode.h and @ref dmadrv.h for other error codes.
+///   see @ref ecode and @ref dmadrv_error_codes for other error codes.
 ///
 ///   The application code must include @em dmadrv.h header file.
 ///
@@ -1334,10 +1327,7 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///    Start a DMA ping-pong transfer from a peripheral to memory.
 ///
 ///   @ref DMADRV_LdmaStartTransfer() @n
-///    Start a DMA transfer on an LDMA controller. This function can only be used
-///    when configuration option @ref EMDRV_DMADRV_USE_NATIVE_API is defined.
-///    It is a wrapper similar to the emlib LDMA function, but adds support for
-///    completion callback and user-defined callback function parameter.
+///    Start a DMA transfer on an LDMA controller.
 ///
 ///   @ref DMADRV_StopTransfer() @n
 ///    Stop an ongoing DMA transfer.
@@ -1385,5 +1375,4 @@ static Ecode_t StartTransfer(DmaMode_t             mode,
 ///   }
 ///   @endcode
 ///
-/// @} end group DMADRV ********************************************************
-/// @} end group emdrv *****************************************************
+/// @} end group dmadrv ********************************************************

@@ -136,4 +136,5 @@ typedef struct {
 /** @} End of group MGM22_MAILBOX_BitFields */
 /** @} End of group MGM22_MAILBOX */
 /** @} End of group Parts */
+
 #endif /* MGM22_MAILBOX_H */

@@ -32,20 +32,7 @@
 #ifndef __HAL_SERIAL_H__
 #define __HAL_SERIAL_H__
 
-
-
-
-
-
-
-
-
-// If only EmberMessageBuffer is needed, ember-types.h should suffice.
-// Some znet targets also now need this, so I'm removing the restriction below. -- Vignesh.
-
-// #if defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT) || defined(EMBER_STACK_WASP)
-  #include "stack/include/ember-types.h"
-// #endif
+#include "stack/include/ember-types.h"
 
 #ifdef CORTEXM3_EFM32_MICRO
   #include "em_usart.h"
@@ -107,8 +94,7 @@
  */
 #define EMBER_SERIAL_UNUSED 0
 #define EMBER_SERIAL_FIFO   1
-#define EMBER_SERIAL_BUFFER 2
-#define EMBER_SERIAL_LOWLEVEL 3
+#define EMBER_SERIAL_LOWLEVEL 2
 
 /** @}  END of Serial Mode Definitions */
 
@@ -117,7 +103,6 @@
 // The following tests for setting of an invalid mode
 #ifdef EMBER_SERIAL0_MODE
 #if (EMBER_SERIAL0_MODE != EMBER_SERIAL_FIFO)      \
-  && (EMBER_SERIAL0_MODE != EMBER_SERIAL_BUFFER)   \
   && (EMBER_SERIAL0_MODE != EMBER_SERIAL_LOWLEVEL) \
   && (EMBER_SERIAL0_MODE != EMBER_SERIAL_UNUSED)
   #error Invalid Serial 0 Mode
@@ -127,7 +112,6 @@
 #endif
 #ifdef EMBER_SERIAL1_MODE
 #if (EMBER_SERIAL1_MODE != EMBER_SERIAL_FIFO)      \
-  && (EMBER_SERIAL1_MODE != EMBER_SERIAL_BUFFER)   \
   && (EMBER_SERIAL1_MODE != EMBER_SERIAL_LOWLEVEL) \
   && (EMBER_SERIAL1_MODE != EMBER_SERIAL_UNUSED)
   #error Invalid Serial 1 Mode
@@ -137,7 +121,6 @@
 #endif
 #ifdef EMBER_SERIAL2_MODE
 #if (EMBER_SERIAL2_MODE != EMBER_SERIAL_FIFO)      \
-  && (EMBER_SERIAL2_MODE != EMBER_SERIAL_BUFFER)   \
   && (EMBER_SERIAL2_MODE != EMBER_SERIAL_LOWLEVEL) \
   && (EMBER_SERIAL2_MODE != EMBER_SERIAL_UNUSED)
   #error Invalid Serial 2 Mode
@@ -147,7 +130,6 @@
 #endif
 #ifdef EMBER_SERIAL3_MODE
 #if (EMBER_SERIAL3_MODE != EMBER_SERIAL_FIFO)      \
-  && (EMBER_SERIAL3_MODE != EMBER_SERIAL_BUFFER)   \
   && (EMBER_SERIAL3_MODE != EMBER_SERIAL_LOWLEVEL) \
   && (EMBER_SERIAL3_MODE != EMBER_SERIAL_UNUSED)
   #error Invalid Serial 3 Mode
@@ -157,7 +139,6 @@
 #endif
 #ifdef EMBER_SERIAL4_MODE
 #if (EMBER_SERIAL4_MODE != EMBER_SERIAL_FIFO)      \
-  && (EMBER_SERIAL4_MODE != EMBER_SERIAL_BUFFER)   \
   && (EMBER_SERIAL4_MODE != EMBER_SERIAL_LOWLEVEL) \
   && (EMBER_SERIAL4_MODE != EMBER_SERIAL_UNUSED)
   #error Invalid Serial 4 Mode
@@ -168,6 +149,27 @@
 
 // Determine if FIFO and/or Buffer modes are being used, so those sections of
 //  code may be disabled if not
+
+// EMHAL-2285: buffer mode is now FIFO mode with DMA, as is any app with hardware flow control
+#if defined(EMBER_MICRO_HAS_SC1) && ((EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER) || defined(EMBER_SERIAL1_RTSCTS))
+  #undef EMBER_SERIAL1_MODE
+  #define EMBER_SERIAL1_MODE EMBER_SERIAL_FIFO
+  #define EM_SER1_FIFO_DMA_USED
+  #ifndef EMBER_SERIAL1_TX_QUEUE_SIZE
+    #define EMBER_SERIAL1_TX_QUEUE_SIZE 128
+    #define EMBER_SERIAL1_RX_QUEUE_SIZE 128
+  #endif
+#endif
+#if defined(EMBER_MICRO_HAS_SC3) && ((EMBER_SERIAL2_MODE == EMBER_SERIAL_BUFFER) || defined(EMBER_SERIAL2_RTSCTS))
+  #undef EMBER_SERIAL2_MODE
+  #define EMBER_SERIAL2_MODE EMBER_SERIAL_FIFO
+  #define EM_SER2_FIFO_DMA_USED
+  #ifndef EMBER_SERIAL2_TX_QUEUE_SIZE
+    #define EMBER_SERIAL2_TX_QUEUE_SIZE 128
+    #define EMBER_SERIAL2_RX_QUEUE_SIZE 128
+  #endif
+#endif
+
 #if (EMBER_SERIAL0_MODE == EMBER_SERIAL_FIFO)  \
   || (EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO) \
   || (EMBER_SERIAL2_MODE == EMBER_SERIAL_FIFO) \
@@ -175,9 +177,8 @@
   || (EMBER_SERIAL4_MODE == EMBER_SERIAL_FIFO)
   #define EM_ENABLE_SERIAL_FIFO
 #endif
+
 #if (EMBER_SERIAL0_MODE == EMBER_SERIAL_BUFFER)  \
-  || (EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER) \
-  || (EMBER_SERIAL2_MODE == EMBER_SERIAL_BUFFER) \
   || (EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER) \
   || (EMBER_SERIAL4_MODE == EMBER_SERIAL_BUFFER)
   #define EM_ENABLE_SERIAL_BUFFER
@@ -203,50 +204,6 @@ typedef struct {
   /** FIFO of queue data.*/
   uint8_t fifo[];
 } EmSerialFifoQueue;
-
-/** @brief A single element of the ::EmSerialBufferQueue
- *  used for ::EMBER_SERIAL_MODE_BUFFER.
- */
-typedef struct {
-  /** Number of bytes in this buffer to write.*/
-  uint8_t length;
-
-  /** The first linked buffer.*/
-  EmberMessageBuffer buffer;
-
-  /** Starting position within the buffer.*/
-  uint8_t startIndex;
-} EmSerialBufferQueueEntry;
-
-/** @brief A basic FIFO queue that stores packet buffer chains
- *  that is used for ::EMBER_SERIAL_MODE_BUFFER.
- */
-typedef struct {
-  /** Index of next message to send */
-  uint8_t head;
-
-  /** Index of where to enqueue new messages.*/
-  uint8_t tail;
-
-  /** Number of active messages.*/
-  volatile uint8_t used;
-
-  /** Number of messages sent that need cleanup.*/
-  volatile uint8_t dead;
-
-  /** Packet buffer currently writing from, if any (used to
-   *    step down a chain of buffers).*/
-  EmberMessageBuffer currentBuffer;
-
-  /** Pointer to the next byte to send from current packet buffer.*/
-  uint8_t *nextByte;
-
-  /** Pointer to the last byte to send from current packet buffer.*/
-  uint8_t *lastByte;
-
-  /** FIFO of queued messages.*/
-  EmSerialBufferQueueEntry fifo[];
-} EmSerialBufferQueue;
 
 /** @}  END of Queue Data Structures */
 
@@ -595,33 +552,6 @@ bool halInternalUartTxIsIdle(uint8_t port);
 bool serialDropPacket(void);
 
 /** @}  END of Serial HAL APIs */
-
-/** @name Buffered Serial Utility APIs
- * The higher-level serial code implements these APIs, which the HAL uses
- * to deal with buffered serial output.
- *@{
- */
-
-/** @brief When new serial transmission is started and
- * \c bufferQueue->nextByte is equal to NULL, this can be called to set up
- * \c nextByte and \c lastByte for the next message.
- *
- * @param q  Pointer to the buffer queue structure for the port.
- */
-void emSerialBufferNextMessageIsr(EmSerialBufferQueue *q);
-
-/** @brief When a serial transmission is in progress and
- * \c bufferQueue->nextByte has been sent and incremented leaving it equal to
- * lastByte, this should be called to set up \c nextByte and \c lastByte
- * for the next block.
- *
- * @param q     Pointer to the buffer queue structure for the port.
- *
- * @param port  Serial port number (0 or 1).
- */
-void emSerialBufferNextBlockIsr(EmSerialBufferQueue *q, uint8_t port);
-
-/** @} END of Buffered serial utility APIs  */
 
 /** @name Virtual UART API
  * API used by the stack in debug builds to receive data arriving over the

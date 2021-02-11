@@ -21,9 +21,9 @@
 // Bootloader Version
 //
 #define BOOTLOADER_VERSION_MAIN_MAJOR             1
-#define BOOTLOADER_VERSION_MAIN_MINOR             10
+#define BOOTLOADER_VERSION_MAIN_MINOR             12
 #ifndef BOOTLOADER_VERSION_MAIN_CUSTOMER
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER          3
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER          0
 #endif
 
 #define BOOTLOADER_VERSION_MAIN (BOOTLOADER_VERSION_MAIN_MAJOR   << 24 \
@@ -73,7 +73,7 @@ MISRAC_ENABLE
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "api/btl_interface.h"
-#if (BTL_UPGRADE_LOCATION_BASE < (BTL_MAIN_STAGE_MAX_SIZE + BTL_FIRST_STAGE_SIZE))
+#if (BTL_UPGRADE_LOCATION_BASE < BTL_MAIN_STAGE_MAX_SIZE)
 #error "Invalid bootloader upgrade base address"
 #endif
 #endif // defined(_SILICON_LABS_32B_SERIES_2)

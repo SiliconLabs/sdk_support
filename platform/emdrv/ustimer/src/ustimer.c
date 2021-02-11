@@ -359,10 +359,8 @@ static void DelayTicksEM1(uint16_t ticks)
 
 /* *INDENT-OFF* */
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup emdrv
-/// @{
-/// @addtogroup USTIMER
-/// @brief USTIMER Microsecond Delay Timer Driver
+/// @addtogroup ustimer USTIMER - Microsecond Timer
+/// @brief Microsecond Delay Timer Driver
 /// @{
 ///
 ///@details
@@ -395,11 +393,11 @@ static void DelayTicksEM1(uint16_t ticks)
 ///@n @section ustimer_conf Configuration Options
 ///
 ///  By default the module use TIMER0. Timer resource selection is stored in a
-///  file named @ref ustimer_config.h. A template for this file, containing default
+///  file named ustimer_config.h. A template for this file, containing default
 ///  value, resides in the emdrv/config folder.
 ///
 ///  To configure USTIMER, provide your own configuration file. Here is a
-///  sample @ref ustimer_config.h file:
+///  sample ustimer_config.h file:
 ///  @code{.c}
 ///#ifndef __SILICON_LABS_USTIMER_CONFIG_H__
 ///#define __SILICON_LABS_USTIMER_CONFIG_H__
@@ -416,7 +414,7 @@ static void DelayTicksEM1(uint16_t ticks)
 ///  find detailed information on input and output parameters and return values by
 ///  clicking on the hyperlinked function names. Most functions return an error
 ///  code, @ref ECODE_EMDRV_USTIMER_OK is returned on success,
-///  see @ref ecode.h and @ref ustimer.h for other error codes.
+///  see \ref ecode for other error codes.
 ///
 ///  Your application code must include one header file: @em ustimer.h.
 ///
@@ -445,5 +443,4 @@ static void DelayTicksEM1(uint16_t ticks)
 ///}
 ///  @endcode
 ///
-/// @} end group USTIMER *******************************************************
-/// @} end group emdrv *****************************************************
+/// @} end group ustimer *******************************************************

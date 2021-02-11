@@ -91,25 +91,20 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Plugin_System
+ * @addtogroup ezradiodrv_plugin EZRADIODRV Plugin System
  * @brief EzRadio Plugin System Layer, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_Manager
- * @brief Plugin manager, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_manager EZRADIODRV Plugin Manager
+ * @brief EzRadio Plugin manager, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -347,10 +342,9 @@ void ezradioInit(EZRADIODRV_Handle_t handle);
 Ecode_t ezradioPluginManager(EZRADIODRV_Handle_t handle);
 void ezradioResetTRxFifo(void);
 
-/** @} (end addtogroup Plugin_Manager) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_manager) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

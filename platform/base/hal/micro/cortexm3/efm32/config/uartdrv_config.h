@@ -57,6 +57,13 @@
 #define UARTDRV_FC_SW_XOFF                      0x13
 #endif
 
+/// UART enable reception when sleeping.
+/// Enable reception when sleeping will use the power manager and add EM1
+/// requirement during receive operations that use DMA.
+#if !defined(UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION)
+#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         0
+#endif
+
 /** @} (end addtogroup UARTDRV) */
 /** @} (end addtogroup EM_Drivers) */
 

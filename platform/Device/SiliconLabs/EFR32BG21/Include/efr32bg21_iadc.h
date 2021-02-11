@@ -823,126 +823,119 @@ typedef struct {
 #define IADC_SCANDATA_DATA_DEFAULT                      (_IADC_SCANDATA_DATA_DEFAULT << 0) /**< Shifted mode DEFAULT for IADC_SCANDATA      */
 
 /* Bit fields for IADC SINGLE */
-#define _IADC_SINGLE_RESETVALUE                         0x00000000UL                           /**< Default value for IADC_SINGLE               */
-#define _IADC_SINGLE_MASK                               0x0003FFFFUL                           /**< Mask for IADC_SINGLE                        */
-#define _IADC_SINGLE_PINNEG_SHIFT                       0                                      /**< Shift value for IADC_PINNEG                 */
-#define _IADC_SINGLE_PINNEG_MASK                        0xFUL                                  /**< Bit mask for IADC_PINNEG                    */
-#define _IADC_SINGLE_PINNEG_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define IADC_SINGLE_PINNEG_DEFAULT                      (_IADC_SINGLE_PINNEG_DEFAULT << 0)     /**< Shifted mode DEFAULT for IADC_SINGLE        */
-#define _IADC_SINGLE_PORTNEG_SHIFT                      4                                      /**< Shift value for IADC_PORTNEG                */
-#define _IADC_SINGLE_PORTNEG_MASK                       0xF0UL                                 /**< Bit mask for IADC_PORTNEG                   */
-#define _IADC_SINGLE_PORTNEG_DEFAULT                    0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define _IADC_SINGLE_PORTNEG_GND                        0x00000000UL                           /**< Mode GND for IADC_SINGLE                    */
-#define _IADC_SINGLE_PORTNEG_PADREFNEG                  0x00000006UL                           /**< Mode PADREFNEG for IADC_SINGLE              */
-#define _IADC_SINGLE_PORTNEG_PORTA                      0x00000008UL                           /**< Mode PORTA for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTNEG_PORTB                      0x00000009UL                           /**< Mode PORTB for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTNEG_PORTC                      0x0000000AUL                           /**< Mode PORTC for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTNEG_PORTD                      0x0000000BUL                           /**< Mode PORTD for IADC_SINGLE                  */
-#define IADC_SINGLE_PORTNEG_DEFAULT                     (_IADC_SINGLE_PORTNEG_DEFAULT << 4)    /**< Shifted mode DEFAULT for IADC_SINGLE        */
-#define IADC_SINGLE_PORTNEG_GND                         (_IADC_SINGLE_PORTNEG_GND << 4)        /**< Shifted mode GND for IADC_SINGLE            */
-#define IADC_SINGLE_PORTNEG_PADREFNEG                   (_IADC_SINGLE_PORTNEG_PADREFNEG << 4)  /**< Shifted mode PADREFNEG for IADC_SINGLE      */
-#define IADC_SINGLE_PORTNEG_PORTA                       (_IADC_SINGLE_PORTNEG_PORTA << 4)      /**< Shifted mode PORTA for IADC_SINGLE          */
-#define IADC_SINGLE_PORTNEG_PORTB                       (_IADC_SINGLE_PORTNEG_PORTB << 4)      /**< Shifted mode PORTB for IADC_SINGLE          */
-#define IADC_SINGLE_PORTNEG_PORTC                       (_IADC_SINGLE_PORTNEG_PORTC << 4)      /**< Shifted mode PORTC for IADC_SINGLE          */
-#define IADC_SINGLE_PORTNEG_PORTD                       (_IADC_SINGLE_PORTNEG_PORTD << 4)      /**< Shifted mode PORTD for IADC_SINGLE          */
-#define _IADC_SINGLE_PINPOS_SHIFT                       8                                      /**< Shift value for IADC_PINPOS                 */
-#define _IADC_SINGLE_PINPOS_MASK                        0xF00UL                                /**< Bit mask for IADC_PINPOS                    */
-#define _IADC_SINGLE_PINPOS_DEFAULT                     0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define IADC_SINGLE_PINPOS_DEFAULT                      (_IADC_SINGLE_PINPOS_DEFAULT << 8)     /**< Shifted mode DEFAULT for IADC_SINGLE        */
-#define _IADC_SINGLE_PORTPOS_SHIFT                      12                                     /**< Shift value for IADC_PORTPOS                */
-#define _IADC_SINGLE_PORTPOS_MASK                       0xF000UL                               /**< Bit mask for IADC_PORTPOS                   */
-#define _IADC_SINGLE_PORTPOS_DEFAULT                    0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define _IADC_SINGLE_PORTPOS_GND                        0x00000000UL                           /**< Mode GND for IADC_SINGLE                    */
-#define _IADC_SINGLE_PORTPOS_SUPPLY                     0x00000001UL                           /**< Mode SUPPLY for IADC_SINGLE                 */
-#define _IADC_SINGLE_PORTPOS_PADREFPOS                  0x00000006UL                           /**< Mode PADREFPOS for IADC_SINGLE              */
-#define _IADC_SINGLE_PORTPOS_PORTA                      0x00000008UL                           /**< Mode PORTA for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTPOS_PORTB                      0x00000009UL                           /**< Mode PORTB for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTPOS_PORTC                      0x0000000AUL                           /**< Mode PORTC for IADC_SINGLE                  */
-#define _IADC_SINGLE_PORTPOS_PORTD                      0x0000000BUL                           /**< Mode PORTD for IADC_SINGLE                  */
-#define IADC_SINGLE_PORTPOS_DEFAULT                     (_IADC_SINGLE_PORTPOS_DEFAULT << 12)   /**< Shifted mode DEFAULT for IADC_SINGLE        */
-#define IADC_SINGLE_PORTPOS_GND                         (_IADC_SINGLE_PORTPOS_GND << 12)       /**< Shifted mode GND for IADC_SINGLE            */
-#define IADC_SINGLE_PORTPOS_SUPPLY                      (_IADC_SINGLE_PORTPOS_SUPPLY << 12)    /**< Shifted mode SUPPLY for IADC_SINGLE         */
-#define IADC_SINGLE_PORTPOS_PADREFPOS                   (_IADC_SINGLE_PORTPOS_PADREFPOS << 12) /**< Shifted mode PADREFPOS for IADC_SINGLE      */
-#define IADC_SINGLE_PORTPOS_PORTA                       (_IADC_SINGLE_PORTPOS_PORTA << 12)     /**< Shifted mode PORTA for IADC_SINGLE          */
-#define IADC_SINGLE_PORTPOS_PORTB                       (_IADC_SINGLE_PORTPOS_PORTB << 12)     /**< Shifted mode PORTB for IADC_SINGLE          */
-#define IADC_SINGLE_PORTPOS_PORTC                       (_IADC_SINGLE_PORTPOS_PORTC << 12)     /**< Shifted mode PORTC for IADC_SINGLE          */
-#define IADC_SINGLE_PORTPOS_PORTD                       (_IADC_SINGLE_PORTPOS_PORTD << 12)     /**< Shifted mode PORTD for IADC_SINGLE          */
-#define IADC_SINGLE_CFG                                 (0x1UL << 16)                          /**< Configuration Group Select                  */
-#define _IADC_SINGLE_CFG_SHIFT                          16                                     /**< Shift value for IADC_CFG                    */
-#define _IADC_SINGLE_CFG_MASK                           0x10000UL                              /**< Bit mask for IADC_CFG                       */
-#define _IADC_SINGLE_CFG_DEFAULT                        0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define _IADC_SINGLE_CFG_CONFIG0                        0x00000000UL                           /**< Mode CONFIG0 for IADC_SINGLE                */
-#define _IADC_SINGLE_CFG_CONFIG1                        0x00000001UL                           /**< Mode CONFIG1 for IADC_SINGLE                */
-#define IADC_SINGLE_CFG_DEFAULT                         (_IADC_SINGLE_CFG_DEFAULT << 16)       /**< Shifted mode DEFAULT for IADC_SINGLE        */
-#define IADC_SINGLE_CFG_CONFIG0                         (_IADC_SINGLE_CFG_CONFIG0 << 16)       /**< Shifted mode CONFIG0 for IADC_SINGLE        */
-#define IADC_SINGLE_CFG_CONFIG1                         (_IADC_SINGLE_CFG_CONFIG1 << 16)       /**< Shifted mode CONFIG1 for IADC_SINGLE        */
-#define IADC_SINGLE_CMP                                 (0x1UL << 17)                          /**< Comparison Enable                           */
-#define _IADC_SINGLE_CMP_SHIFT                          17                                     /**< Shift value for IADC_CMP                    */
-#define _IADC_SINGLE_CMP_MASK                           0x20000UL                              /**< Bit mask for IADC_CMP                       */
-#define _IADC_SINGLE_CMP_DEFAULT                        0x00000000UL                           /**< Mode DEFAULT for IADC_SINGLE                */
-#define IADC_SINGLE_CMP_DEFAULT                         (_IADC_SINGLE_CMP_DEFAULT << 17)       /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define _IADC_SINGLE_RESETVALUE                         0x00000000UL                         /**< Default value for IADC_SINGLE               */
+#define _IADC_SINGLE_MASK                               0x0003FFFFUL                         /**< Mask for IADC_SINGLE                        */
+#define _IADC_SINGLE_PINNEG_SHIFT                       0                                    /**< Shift value for IADC_PINNEG                 */
+#define _IADC_SINGLE_PINNEG_MASK                        0xFUL                                /**< Bit mask for IADC_PINNEG                    */
+#define _IADC_SINGLE_PINNEG_DEFAULT                     0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define IADC_SINGLE_PINNEG_DEFAULT                      (_IADC_SINGLE_PINNEG_DEFAULT << 0)   /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define _IADC_SINGLE_PORTNEG_SHIFT                      4                                    /**< Shift value for IADC_PORTNEG                */
+#define _IADC_SINGLE_PORTNEG_MASK                       0xF0UL                               /**< Bit mask for IADC_PORTNEG                   */
+#define _IADC_SINGLE_PORTNEG_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define _IADC_SINGLE_PORTNEG_GND                        0x00000000UL                         /**< Mode GND for IADC_SINGLE                    */
+#define _IADC_SINGLE_PORTNEG_PORTA                      0x00000008UL                         /**< Mode PORTA for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTNEG_PORTB                      0x00000009UL                         /**< Mode PORTB for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTNEG_PORTC                      0x0000000AUL                         /**< Mode PORTC for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTNEG_PORTD                      0x0000000BUL                         /**< Mode PORTD for IADC_SINGLE                  */
+#define IADC_SINGLE_PORTNEG_DEFAULT                     (_IADC_SINGLE_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define IADC_SINGLE_PORTNEG_GND                         (_IADC_SINGLE_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SINGLE            */
+#define IADC_SINGLE_PORTNEG_PORTA                       (_IADC_SINGLE_PORTNEG_PORTA << 4)    /**< Shifted mode PORTA for IADC_SINGLE          */
+#define IADC_SINGLE_PORTNEG_PORTB                       (_IADC_SINGLE_PORTNEG_PORTB << 4)    /**< Shifted mode PORTB for IADC_SINGLE          */
+#define IADC_SINGLE_PORTNEG_PORTC                       (_IADC_SINGLE_PORTNEG_PORTC << 4)    /**< Shifted mode PORTC for IADC_SINGLE          */
+#define IADC_SINGLE_PORTNEG_PORTD                       (_IADC_SINGLE_PORTNEG_PORTD << 4)    /**< Shifted mode PORTD for IADC_SINGLE          */
+#define _IADC_SINGLE_PINPOS_SHIFT                       8                                    /**< Shift value for IADC_PINPOS                 */
+#define _IADC_SINGLE_PINPOS_MASK                        0xF00UL                              /**< Bit mask for IADC_PINPOS                    */
+#define _IADC_SINGLE_PINPOS_DEFAULT                     0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define IADC_SINGLE_PINPOS_DEFAULT                      (_IADC_SINGLE_PINPOS_DEFAULT << 8)   /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define _IADC_SINGLE_PORTPOS_SHIFT                      12                                   /**< Shift value for IADC_PORTPOS                */
+#define _IADC_SINGLE_PORTPOS_MASK                       0xF000UL                             /**< Bit mask for IADC_PORTPOS                   */
+#define _IADC_SINGLE_PORTPOS_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define _IADC_SINGLE_PORTPOS_GND                        0x00000000UL                         /**< Mode GND for IADC_SINGLE                    */
+#define _IADC_SINGLE_PORTPOS_SUPPLY                     0x00000001UL                         /**< Mode SUPPLY for IADC_SINGLE                 */
+#define _IADC_SINGLE_PORTPOS_PORTA                      0x00000008UL                         /**< Mode PORTA for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTPOS_PORTB                      0x00000009UL                         /**< Mode PORTB for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTPOS_PORTC                      0x0000000AUL                         /**< Mode PORTC for IADC_SINGLE                  */
+#define _IADC_SINGLE_PORTPOS_PORTD                      0x0000000BUL                         /**< Mode PORTD for IADC_SINGLE                  */
+#define IADC_SINGLE_PORTPOS_DEFAULT                     (_IADC_SINGLE_PORTPOS_DEFAULT << 12) /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define IADC_SINGLE_PORTPOS_GND                         (_IADC_SINGLE_PORTPOS_GND << 12)     /**< Shifted mode GND for IADC_SINGLE            */
+#define IADC_SINGLE_PORTPOS_SUPPLY                      (_IADC_SINGLE_PORTPOS_SUPPLY << 12)  /**< Shifted mode SUPPLY for IADC_SINGLE         */
+#define IADC_SINGLE_PORTPOS_PORTA                       (_IADC_SINGLE_PORTPOS_PORTA << 12)   /**< Shifted mode PORTA for IADC_SINGLE          */
+#define IADC_SINGLE_PORTPOS_PORTB                       (_IADC_SINGLE_PORTPOS_PORTB << 12)   /**< Shifted mode PORTB for IADC_SINGLE          */
+#define IADC_SINGLE_PORTPOS_PORTC                       (_IADC_SINGLE_PORTPOS_PORTC << 12)   /**< Shifted mode PORTC for IADC_SINGLE          */
+#define IADC_SINGLE_PORTPOS_PORTD                       (_IADC_SINGLE_PORTPOS_PORTD << 12)   /**< Shifted mode PORTD for IADC_SINGLE          */
+#define IADC_SINGLE_CFG                                 (0x1UL << 16)                        /**< Configuration Group Select                  */
+#define _IADC_SINGLE_CFG_SHIFT                          16                                   /**< Shift value for IADC_CFG                    */
+#define _IADC_SINGLE_CFG_MASK                           0x10000UL                            /**< Bit mask for IADC_CFG                       */
+#define _IADC_SINGLE_CFG_DEFAULT                        0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define _IADC_SINGLE_CFG_CONFIG0                        0x00000000UL                         /**< Mode CONFIG0 for IADC_SINGLE                */
+#define _IADC_SINGLE_CFG_CONFIG1                        0x00000001UL                         /**< Mode CONFIG1 for IADC_SINGLE                */
+#define IADC_SINGLE_CFG_DEFAULT                         (_IADC_SINGLE_CFG_DEFAULT << 16)     /**< Shifted mode DEFAULT for IADC_SINGLE        */
+#define IADC_SINGLE_CFG_CONFIG0                         (_IADC_SINGLE_CFG_CONFIG0 << 16)     /**< Shifted mode CONFIG0 for IADC_SINGLE        */
+#define IADC_SINGLE_CFG_CONFIG1                         (_IADC_SINGLE_CFG_CONFIG1 << 16)     /**< Shifted mode CONFIG1 for IADC_SINGLE        */
+#define IADC_SINGLE_CMP                                 (0x1UL << 17)                        /**< Comparison Enable                           */
+#define _IADC_SINGLE_CMP_SHIFT                          17                                   /**< Shift value for IADC_CMP                    */
+#define _IADC_SINGLE_CMP_MASK                           0x20000UL                            /**< Bit mask for IADC_CMP                       */
+#define _IADC_SINGLE_CMP_DEFAULT                        0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
+#define IADC_SINGLE_CMP_DEFAULT                         (_IADC_SINGLE_CMP_DEFAULT << 17)     /**< Shifted mode DEFAULT for IADC_SINGLE        */
 
 /* Bit fields for IADC SCAN */
-#define _IADC_SCAN_RESETVALUE                           0x00000000UL                         /**< Default value for IADC_SCAN                 */
-#define _IADC_SCAN_MASK                                 0x0003FFFFUL                         /**< Mask for IADC_SCAN                          */
-#define _IADC_SCAN_PINNEG_SHIFT                         0                                    /**< Shift value for IADC_PINNEG                 */
-#define _IADC_SCAN_PINNEG_MASK                          0xFUL                                /**< Bit mask for IADC_PINNEG                    */
-#define _IADC_SCAN_PINNEG_DEFAULT                       0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define IADC_SCAN_PINNEG_DEFAULT                        (_IADC_SCAN_PINNEG_DEFAULT << 0)     /**< Shifted mode DEFAULT for IADC_SCAN          */
-#define _IADC_SCAN_PORTNEG_SHIFT                        4                                    /**< Shift value for IADC_PORTNEG                */
-#define _IADC_SCAN_PORTNEG_MASK                         0xF0UL                               /**< Bit mask for IADC_PORTNEG                   */
-#define _IADC_SCAN_PORTNEG_DEFAULT                      0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define _IADC_SCAN_PORTNEG_GND                          0x00000000UL                         /**< Mode GND for IADC_SCAN                      */
-#define _IADC_SCAN_PORTNEG_PADREFNEG                    0x00000006UL                         /**< Mode PADREFNEG for IADC_SCAN                */
-#define _IADC_SCAN_PORTNEG_PORTA                        0x00000008UL                         /**< Mode PORTA for IADC_SCAN                    */
-#define _IADC_SCAN_PORTNEG_PORTB                        0x00000009UL                         /**< Mode PORTB for IADC_SCAN                    */
-#define _IADC_SCAN_PORTNEG_PORTC                        0x0000000AUL                         /**< Mode PORTC for IADC_SCAN                    */
-#define _IADC_SCAN_PORTNEG_PORTD                        0x0000000BUL                         /**< Mode PORTD for IADC_SCAN                    */
-#define IADC_SCAN_PORTNEG_DEFAULT                       (_IADC_SCAN_PORTNEG_DEFAULT << 4)    /**< Shifted mode DEFAULT for IADC_SCAN          */
-#define IADC_SCAN_PORTNEG_GND                           (_IADC_SCAN_PORTNEG_GND << 4)        /**< Shifted mode GND for IADC_SCAN              */
-#define IADC_SCAN_PORTNEG_PADREFNEG                     (_IADC_SCAN_PORTNEG_PADREFNEG << 4)  /**< Shifted mode PADREFNEG for IADC_SCAN        */
-#define IADC_SCAN_PORTNEG_PORTA                         (_IADC_SCAN_PORTNEG_PORTA << 4)      /**< Shifted mode PORTA for IADC_SCAN            */
-#define IADC_SCAN_PORTNEG_PORTB                         (_IADC_SCAN_PORTNEG_PORTB << 4)      /**< Shifted mode PORTB for IADC_SCAN            */
-#define IADC_SCAN_PORTNEG_PORTC                         (_IADC_SCAN_PORTNEG_PORTC << 4)      /**< Shifted mode PORTC for IADC_SCAN            */
-#define IADC_SCAN_PORTNEG_PORTD                         (_IADC_SCAN_PORTNEG_PORTD << 4)      /**< Shifted mode PORTD for IADC_SCAN            */
-#define _IADC_SCAN_PINPOS_SHIFT                         8                                    /**< Shift value for IADC_PINPOS                 */
-#define _IADC_SCAN_PINPOS_MASK                          0xF00UL                              /**< Bit mask for IADC_PINPOS                    */
-#define _IADC_SCAN_PINPOS_DEFAULT                       0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define IADC_SCAN_PINPOS_DEFAULT                        (_IADC_SCAN_PINPOS_DEFAULT << 8)     /**< Shifted mode DEFAULT for IADC_SCAN          */
-#define _IADC_SCAN_PORTPOS_SHIFT                        12                                   /**< Shift value for IADC_PORTPOS                */
-#define _IADC_SCAN_PORTPOS_MASK                         0xF000UL                             /**< Bit mask for IADC_PORTPOS                   */
-#define _IADC_SCAN_PORTPOS_DEFAULT                      0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define _IADC_SCAN_PORTPOS_GND                          0x00000000UL                         /**< Mode GND for IADC_SCAN                      */
-#define _IADC_SCAN_PORTPOS_SUPPLY                       0x00000001UL                         /**< Mode SUPPLY for IADC_SCAN                   */
-#define _IADC_SCAN_PORTPOS_PADREFPOS                    0x00000006UL                         /**< Mode PADREFPOS for IADC_SCAN                */
-#define _IADC_SCAN_PORTPOS_PORTA                        0x00000008UL                         /**< Mode PORTA for IADC_SCAN                    */
-#define _IADC_SCAN_PORTPOS_PORTB                        0x00000009UL                         /**< Mode PORTB for IADC_SCAN                    */
-#define _IADC_SCAN_PORTPOS_PORTC                        0x0000000AUL                         /**< Mode PORTC for IADC_SCAN                    */
-#define _IADC_SCAN_PORTPOS_PORTD                        0x0000000BUL                         /**< Mode PORTD for IADC_SCAN                    */
-#define IADC_SCAN_PORTPOS_DEFAULT                       (_IADC_SCAN_PORTPOS_DEFAULT << 12)   /**< Shifted mode DEFAULT for IADC_SCAN          */
-#define IADC_SCAN_PORTPOS_GND                           (_IADC_SCAN_PORTPOS_GND << 12)       /**< Shifted mode GND for IADC_SCAN              */
-#define IADC_SCAN_PORTPOS_SUPPLY                        (_IADC_SCAN_PORTPOS_SUPPLY << 12)    /**< Shifted mode SUPPLY for IADC_SCAN           */
-#define IADC_SCAN_PORTPOS_PADREFPOS                     (_IADC_SCAN_PORTPOS_PADREFPOS << 12) /**< Shifted mode PADREFPOS for IADC_SCAN        */
-#define IADC_SCAN_PORTPOS_PORTA                         (_IADC_SCAN_PORTPOS_PORTA << 12)     /**< Shifted mode PORTA for IADC_SCAN            */
-#define IADC_SCAN_PORTPOS_PORTB                         (_IADC_SCAN_PORTPOS_PORTB << 12)     /**< Shifted mode PORTB for IADC_SCAN            */
-#define IADC_SCAN_PORTPOS_PORTC                         (_IADC_SCAN_PORTPOS_PORTC << 12)     /**< Shifted mode PORTC for IADC_SCAN            */
-#define IADC_SCAN_PORTPOS_PORTD                         (_IADC_SCAN_PORTPOS_PORTD << 12)     /**< Shifted mode PORTD for IADC_SCAN            */
-#define IADC_SCAN_CFG                                   (0x1UL << 16)                        /**< Configuration Group Select                  */
-#define _IADC_SCAN_CFG_SHIFT                            16                                   /**< Shift value for IADC_CFG                    */
-#define _IADC_SCAN_CFG_MASK                             0x10000UL                            /**< Bit mask for IADC_CFG                       */
-#define _IADC_SCAN_CFG_DEFAULT                          0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define _IADC_SCAN_CFG_CONFIG0                          0x00000000UL                         /**< Mode CONFIG0 for IADC_SCAN                  */
-#define _IADC_SCAN_CFG_CONFIG1                          0x00000001UL                         /**< Mode CONFIG1 for IADC_SCAN                  */
-#define IADC_SCAN_CFG_DEFAULT                           (_IADC_SCAN_CFG_DEFAULT << 16)       /**< Shifted mode DEFAULT for IADC_SCAN          */
-#define IADC_SCAN_CFG_CONFIG0                           (_IADC_SCAN_CFG_CONFIG0 << 16)       /**< Shifted mode CONFIG0 for IADC_SCAN          */
-#define IADC_SCAN_CFG_CONFIG1                           (_IADC_SCAN_CFG_CONFIG1 << 16)       /**< Shifted mode CONFIG1 for IADC_SCAN          */
-#define IADC_SCAN_CMP                                   (0x1UL << 17)                        /**< Comparison Enable                           */
-#define _IADC_SCAN_CMP_SHIFT                            17                                   /**< Shift value for IADC_CMP                    */
-#define _IADC_SCAN_CMP_MASK                             0x20000UL                            /**< Bit mask for IADC_CMP                       */
-#define _IADC_SCAN_CMP_DEFAULT                          0x00000000UL                         /**< Mode DEFAULT for IADC_SCAN                  */
-#define IADC_SCAN_CMP_DEFAULT                           (_IADC_SCAN_CMP_DEFAULT << 17)       /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define _IADC_SCAN_RESETVALUE                           0x00000000UL                       /**< Default value for IADC_SCAN                 */
+#define _IADC_SCAN_MASK                                 0x0003FFFFUL                       /**< Mask for IADC_SCAN                          */
+#define _IADC_SCAN_PINNEG_SHIFT                         0                                  /**< Shift value for IADC_PINNEG                 */
+#define _IADC_SCAN_PINNEG_MASK                          0xFUL                              /**< Bit mask for IADC_PINNEG                    */
+#define _IADC_SCAN_PINNEG_DEFAULT                       0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define IADC_SCAN_PINNEG_DEFAULT                        (_IADC_SCAN_PINNEG_DEFAULT << 0)   /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define _IADC_SCAN_PORTNEG_SHIFT                        4                                  /**< Shift value for IADC_PORTNEG                */
+#define _IADC_SCAN_PORTNEG_MASK                         0xF0UL                             /**< Bit mask for IADC_PORTNEG                   */
+#define _IADC_SCAN_PORTNEG_DEFAULT                      0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define _IADC_SCAN_PORTNEG_GND                          0x00000000UL                       /**< Mode GND for IADC_SCAN                      */
+#define _IADC_SCAN_PORTNEG_PORTA                        0x00000008UL                       /**< Mode PORTA for IADC_SCAN                    */
+#define _IADC_SCAN_PORTNEG_PORTB                        0x00000009UL                       /**< Mode PORTB for IADC_SCAN                    */
+#define _IADC_SCAN_PORTNEG_PORTC                        0x0000000AUL                       /**< Mode PORTC for IADC_SCAN                    */
+#define _IADC_SCAN_PORTNEG_PORTD                        0x0000000BUL                       /**< Mode PORTD for IADC_SCAN                    */
+#define IADC_SCAN_PORTNEG_DEFAULT                       (_IADC_SCAN_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define IADC_SCAN_PORTNEG_GND                           (_IADC_SCAN_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SCAN              */
+#define IADC_SCAN_PORTNEG_PORTA                         (_IADC_SCAN_PORTNEG_PORTA << 4)    /**< Shifted mode PORTA for IADC_SCAN            */
+#define IADC_SCAN_PORTNEG_PORTB                         (_IADC_SCAN_PORTNEG_PORTB << 4)    /**< Shifted mode PORTB for IADC_SCAN            */
+#define IADC_SCAN_PORTNEG_PORTC                         (_IADC_SCAN_PORTNEG_PORTC << 4)    /**< Shifted mode PORTC for IADC_SCAN            */
+#define IADC_SCAN_PORTNEG_PORTD                         (_IADC_SCAN_PORTNEG_PORTD << 4)    /**< Shifted mode PORTD for IADC_SCAN            */
+#define _IADC_SCAN_PINPOS_SHIFT                         8                                  /**< Shift value for IADC_PINPOS                 */
+#define _IADC_SCAN_PINPOS_MASK                          0xF00UL                            /**< Bit mask for IADC_PINPOS                    */
+#define _IADC_SCAN_PINPOS_DEFAULT                       0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define IADC_SCAN_PINPOS_DEFAULT                        (_IADC_SCAN_PINPOS_DEFAULT << 8)   /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define _IADC_SCAN_PORTPOS_SHIFT                        12                                 /**< Shift value for IADC_PORTPOS                */
+#define _IADC_SCAN_PORTPOS_MASK                         0xF000UL                           /**< Bit mask for IADC_PORTPOS                   */
+#define _IADC_SCAN_PORTPOS_DEFAULT                      0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define _IADC_SCAN_PORTPOS_GND                          0x00000000UL                       /**< Mode GND for IADC_SCAN                      */
+#define _IADC_SCAN_PORTPOS_SUPPLY                       0x00000001UL                       /**< Mode SUPPLY for IADC_SCAN                   */
+#define _IADC_SCAN_PORTPOS_PORTA                        0x00000008UL                       /**< Mode PORTA for IADC_SCAN                    */
+#define _IADC_SCAN_PORTPOS_PORTB                        0x00000009UL                       /**< Mode PORTB for IADC_SCAN                    */
+#define _IADC_SCAN_PORTPOS_PORTC                        0x0000000AUL                       /**< Mode PORTC for IADC_SCAN                    */
+#define _IADC_SCAN_PORTPOS_PORTD                        0x0000000BUL                       /**< Mode PORTD for IADC_SCAN                    */
+#define IADC_SCAN_PORTPOS_DEFAULT                       (_IADC_SCAN_PORTPOS_DEFAULT << 12) /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define IADC_SCAN_PORTPOS_GND                           (_IADC_SCAN_PORTPOS_GND << 12)     /**< Shifted mode GND for IADC_SCAN              */
+#define IADC_SCAN_PORTPOS_SUPPLY                        (_IADC_SCAN_PORTPOS_SUPPLY << 12)  /**< Shifted mode SUPPLY for IADC_SCAN           */
+#define IADC_SCAN_PORTPOS_PORTA                         (_IADC_SCAN_PORTPOS_PORTA << 12)   /**< Shifted mode PORTA for IADC_SCAN            */
+#define IADC_SCAN_PORTPOS_PORTB                         (_IADC_SCAN_PORTPOS_PORTB << 12)   /**< Shifted mode PORTB for IADC_SCAN            */
+#define IADC_SCAN_PORTPOS_PORTC                         (_IADC_SCAN_PORTPOS_PORTC << 12)   /**< Shifted mode PORTC for IADC_SCAN            */
+#define IADC_SCAN_PORTPOS_PORTD                         (_IADC_SCAN_PORTPOS_PORTD << 12)   /**< Shifted mode PORTD for IADC_SCAN            */
+#define IADC_SCAN_CFG                                   (0x1UL << 16)                      /**< Configuration Group Select                  */
+#define _IADC_SCAN_CFG_SHIFT                            16                                 /**< Shift value for IADC_CFG                    */
+#define _IADC_SCAN_CFG_MASK                             0x10000UL                          /**< Bit mask for IADC_CFG                       */
+#define _IADC_SCAN_CFG_DEFAULT                          0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define _IADC_SCAN_CFG_CONFIG0                          0x00000000UL                       /**< Mode CONFIG0 for IADC_SCAN                  */
+#define _IADC_SCAN_CFG_CONFIG1                          0x00000001UL                       /**< Mode CONFIG1 for IADC_SCAN                  */
+#define IADC_SCAN_CFG_DEFAULT                           (_IADC_SCAN_CFG_DEFAULT << 16)     /**< Shifted mode DEFAULT for IADC_SCAN          */
+#define IADC_SCAN_CFG_CONFIG0                           (_IADC_SCAN_CFG_CONFIG0 << 16)     /**< Shifted mode CONFIG0 for IADC_SCAN          */
+#define IADC_SCAN_CFG_CONFIG1                           (_IADC_SCAN_CFG_CONFIG1 << 16)     /**< Shifted mode CONFIG1 for IADC_SCAN          */
+#define IADC_SCAN_CMP                                   (0x1UL << 17)                      /**< Comparison Enable                           */
+#define _IADC_SCAN_CMP_SHIFT                            17                                 /**< Shift value for IADC_CMP                    */
+#define _IADC_SCAN_CMP_MASK                             0x20000UL                          /**< Bit mask for IADC_CMP                       */
+#define _IADC_SCAN_CMP_DEFAULT                          0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
+#define IADC_SCAN_CMP_DEFAULT                           (_IADC_SCAN_CMP_DEFAULT << 17)     /**< Shifted mode DEFAULT for IADC_SCAN          */
 
 /** @} End of group EFR32BG21_IADC_BitFields */
 /** @} End of group EFR32BG21_IADC */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_IADC_H */

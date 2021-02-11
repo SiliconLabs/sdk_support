@@ -4,7 +4,7 @@
  *   relevant to receiving packets
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,11 +31,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
 #include "em_core.h"
-#include "command_interpreter.h"
 #include "response_print.h"
 #include "buffer_pool_allocator.h"
 #include "circular_queue.h"
@@ -43,8 +39,6 @@
 #include "rail_features.h"
 #include "rail_zwave.h"
 #include "app_common.h"
-#include "app_ci.h"
-#include "bsp.h"
 
 // Macro to determine array size.
 #define COMMON_UTILS_COUNTOF(a) (sizeof(a) / sizeof((a)[0]))
@@ -92,6 +86,9 @@ static const ZWAVE_Region_t zwaveRegionTable[] = {
   { "IL-Israel", &RAIL_ZWAVE_REGION_IL },
   { "KR-Korea", &RAIL_ZWAVE_REGION_KR },
   { "CN-China", &RAIL_ZWAVE_REGION_CN },
+  { "USLR1-United States, Long Range 1", &RAIL_ZWAVE_REGION_US_LR1 },
+  { "USLR2-United States, Long Range 2", &RAIL_ZWAVE_REGION_US_LR2 },
+  { "USLRED-United States, Long Range End Device", &RAIL_ZWAVE_REGION_US_LR_END_DEVICE },
 };
 
 #define ZWAVE_REGION_UNDEFINED (COMMON_UTILS_COUNTOF(zwaveRegionTable))
@@ -101,13 +98,14 @@ static const char* baudrateNames[] = {
   "9600bps",
   "40Kbps",
   "100Kbps",
-  "Energy Detect",
+  "Long Range",
+  "Energy Detect"
 };
 
-void zwaveListRegions(int argc, char **argv)
+void zwaveListRegions(sl_cli_command_arg_t *args)
 {
   uint8_t i;
-  responsePrintStart(argv[0]);
+  responsePrintStart(sl_cli_get_command_string(args, 0));
   for (i = 0;
        i < (uint8_t)ZWAVE_REGION_UNDEFINED - 1;
        ++i) {
@@ -116,12 +114,12 @@ void zwaveListRegions(int argc, char **argv)
   responsePrintEnd("%i:%s", i, zwaveRegionTable[(uint8_t)ZWAVE_REGION_UNDEFINED - 1].name);
 }
 
-void zwaveStatus(int argc, char **argv)
+void zwaveStatus(sl_cli_command_arg_t *args)
 {
   bool enabled = RAIL_ZWAVE_IsEnabled(railHandle);
 
   // Report the current enabled status for ZWAVE
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "ZWAVE:%s,"
                 "Promiscuous:%s,"
                 "BeamDetect:%s",
@@ -132,16 +130,16 @@ void zwaveStatus(int argc, char **argv)
                 ? "Enabled" : "Disabled");
 }
 
-void zwaveEnable(int argc, char **argv)
+void zwaveEnable(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  if (argc > 1) {
-    bool enable = !!ciGetUnsigned(argv[1]);
-    if (argc > 2) {
-      config.options = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    bool enable = !!sl_cli_get_argument_uint8(args, 0);
+    if (sl_cli_get_argument_count(args) >= 2) {
+      config.options = sl_cli_get_argument_uint32(args, 1);
     }
 
     // Turn ZWAVE mode on or off as requested
@@ -153,26 +151,27 @@ void zwaveEnable(int argc, char **argv)
     }
   }
   // Report the current status of ZWAVE mode
-  zwaveStatus(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveStatus(args);
 }
 
-void zwaveConfigureOptions(int argc, char **argv)
+void zwaveConfigureOptions(sl_cli_command_arg_t *args)
 {
   if (!RAIL_ZWAVE_IsEnabled(railHandle)) {
-    responsePrintError(argv[0], 0x26,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x26,
                        "Need to enable Z-Wave for this command.");
     return;
   }
 
-  if (argc > 1) {
-    RAIL_ZWAVE_Options_t options = (RAIL_ZWAVE_Options_t)ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    RAIL_ZWAVE_Options_t options = (RAIL_ZWAVE_Options_t)sl_cli_get_argument_uint32(args, 0);
     RAIL_ZWAVE_ConfigOptions(railHandle, RAIL_ZWAVE_OPTIONS_ALL, options);
     config.options = options;
   }
 
   config.ackConfig.enable = RAIL_IsAutoAckEnabled(railHandle);
   // Report the status for ZWAVE options.
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "Promiscuous:%s,"
                 "BeamDetect:%s,"
                 "NodeIDFiltering:%s,"
@@ -188,99 +187,102 @@ void zwaveConfigureOptions(int argc, char **argv)
                 ? "Enabled" : "Disabled");
 }
 
-void zwaveGetRegion(int argc, char **argv)
+void zwaveGetRegion(sl_cli_command_arg_t *args)
 {
   if (configuredRegion < ZWAVE_REGION_UNDEFINED) {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "ZWaveRegion:%s,ZWaveRegionIndex:%i",
                   zwaveRegionTable[configuredRegion].name,
                   configuredRegion);
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "ZWaveRegion:Undefined,ZWaveRegionIndex:%i",
                   configuredRegion);
   }
 }
 
-void zwaveSetRegion(int argc, char **argv)
+void zwaveSetRegion(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  uint8_t region = (uint8_t)ciGetUnsigned(argv[1]);
+  uint8_t region = sl_cli_get_argument_uint8(args, 0);
   if (region >= ZWAVE_REGION_UNDEFINED) {
-    responsePrintError(argv[0], 0x25,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x25,
                        "Unsupported Z-Wave Region.");
-    zwaveListRegions(argc, argv);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    zwaveListRegions(args);
     return;
   }
   configuredRegion = region;
   if (RAIL_ZWAVE_ConfigRegion(railHandle, zwaveRegionTable[configuredRegion].config) != RAIL_STATUS_NO_ERROR) {
     configuredRegion = ZWAVE_REGION_UNDEFINED;
   }
-  zwaveGetRegion(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveGetRegion(args);
 }
 
-void zwaveSetNodeId(int argc, char **argv)
+void zwaveSetNodeId(sl_cli_command_arg_t *args)
 {
-  RAIL_ZWAVE_NodeId_t nodeId = ciGetUnsigned(argv[1]);
+  RAIL_ZWAVE_NodeId_t nodeId = sl_cli_get_argument_uint16(args, 0);
   RAIL_Status_t status = RAIL_ZWAVE_SetNodeId(railHandle, nodeId);
-  responsePrint(argv[0], "Status:%s", status ? "Error" : "Set");
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", status ? "Error" : "Set");
 }
 
-void zwaveSetHomeId(int argc, char **argv)
+void zwaveSetHomeId(sl_cli_command_arg_t *args)
 {
-  RAIL_ZWAVE_HomeId_t homeId = ciGetUnsigned(argv[1]);
-  RAIL_ZWAVE_HomeId_t homeIdHash = ciGetUnsigned(argv[2]);
+  RAIL_ZWAVE_HomeId_t homeId = sl_cli_get_argument_uint32(args, 0);
+  RAIL_ZWAVE_HomeId_t homeIdHash = sl_cli_get_argument_uint32(args, 1);
   RAIL_Status_t status = RAIL_ZWAVE_SetHomeId(railHandle, homeId, homeIdHash);
-  responsePrint(argv[0], "Status:%s", status ? "Error" : "Set");
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", status ? "Error" : "Set");
 }
 
-void zwaveGetBaudRate(int argc, char **argv)
+void zwaveGetBaudRate(sl_cli_command_arg_t *args)
 {
   uint16_t channel = -1;
   RAIL_GetChannel(railHandle, &channel);
-  if (channel < 3 && configuredRegion < ZWAVE_REGION_UNDEFINED) {
-    responsePrint(argv[0],
+  if (channel < RAIL_NUM_ZWAVE_CHANNELS
+      && configuredRegion < ZWAVE_REGION_UNDEFINED) {
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "baudrate:%s",
                   baudrateNames[zwaveRegionTable[configuredRegion].config->baudRate[channel]]);
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "baudrate:Undefined");
   }
 }
 
-void zwaveSetLowPowerLevel(int argc, char **argv)
+void zwaveSetLowPowerLevel(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
   if (!RAIL_ZWAVE_IsEnabled(railHandle)) {
-    responsePrintError(argv[0], 0x26,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x26,
                        "Need to enable Z-Wave for this command.");
     return;
   }
-  if (argc >= 3 && strcmp(argv[2], "raw") == 0) {
-    RAIL_TxPowerLevel_t powerLevelRaw = (RAIL_TxPowerLevel_t)ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 2 && strcmp(sl_cli_get_argument_string(args, 1), "raw") == 0) {
+    RAIL_TxPowerLevel_t powerLevelRaw = (RAIL_TxPowerLevel_t)sl_cli_get_argument_uint32(args, 0);
     status = RAIL_ZWAVE_SetTxLowPower(railHandle, powerLevelRaw);
   } else {
-    RAIL_TxPower_t powerLevelDbm = (RAIL_TxPower_t)ciGetUnsigned(argv[1]);
+    RAIL_TxPower_t powerLevelDbm = (RAIL_TxPower_t)sl_cli_get_argument_uint32(args, 0);
     status = RAIL_ZWAVE_SetTxLowPowerDbm(railHandle, powerLevelDbm);
   }
-  responsePrint(argv[0], "LowPowerLevel:%s", status ? "Error" : "Set");
+  responsePrint(sl_cli_get_command_string(args, 0), "LowPowerLevel:%s", status ? "Error" : "Set");
 }
 
-void zwaveGetLowPowerLevel(int argc, char **argv)
+void zwaveGetLowPowerLevel(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "powerLevelRaw:%d,powerLeveldBm:%d",
                 RAIL_ZWAVE_GetTxLowPower(railHandle),
                 RAIL_ZWAVE_GetTxLowPowerDbm(railHandle));
 }
 
-void zwaveReceiveBeam(int argc, char **argv)
+void zwaveReceiveBeam(sl_cli_command_arg_t *args)
 {
   uint8_t beamDetectIndex;
   RAIL_Status_t status = RAIL_ZWAVE_ReceiveBeam(railHandle, &beamDetectIndex, NULL);
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "status:%s",
                 (status == RAIL_STATUS_NO_ERROR) ? "Success" : "Error");
 }
@@ -299,74 +301,89 @@ void RAILCb_ZWAVE_BeamFrame(RAIL_Handle_t railHandle)
        != RAIL_STATUS_NO_ERROR)) {
     return;
   }
+
+  (void)RAIL_ZWAVE_GetLrBeamTxPower(railHandle, &beamPacket->beamPacket.lrBeamTxPower);
+
   RAIL_ZWAVE_GetBeamChannelIndex(railHandle, &beamPacket->beamPacket.channelIndex);
   queueAdd(&railAppEventQueue, beamPacketHandle);
 }
 #else //!RAIL_FEAT_ZWAVE_SUPPORTED
 
-void zwaveNotSupported(int argc, char **argv)
+void zwaveNotSupported(sl_cli_command_arg_t *args)
 {
-  (void)argc;
-  responsePrintError(argv[0], 0x56, "Z-Wave not suppported on this chip");
+  (void)args;
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x56, "Z-Wave not suppported on this chip");
 }
 
-void zwaveListRegions(int argc, char **argv)
+void zwaveListRegions(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveStatus(int argc, char **argv)
+void zwaveStatus(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveEnable(int argc, char **argv)
+void zwaveEnable(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveConfigureOptions(int argc, char **argv)
+void zwaveConfigureOptions(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveGetRegion(int argc, char **argv)
+void zwaveGetRegion(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveSetRegion(int argc, char **argv)
+void zwaveSetRegion(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveSetNodeId(int argc, char **argv)
+void zwaveSetNodeId(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveSetHomeId(int argc, char **argv)
+void zwaveSetHomeId(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveGetBaudRate(int argc, char **argv)
+void zwaveGetBaudRate(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveSetLowPowerLevel(int argc, char **argv)
+void zwaveSetLowPowerLevel(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveGetLowPowerLevel(int argc, char **argv)
+void zwaveGetLowPowerLevel(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 
-void zwaveReceiveBeam(int argc, char **argv)
+void zwaveReceiveBeam(sl_cli_command_arg_t *args)
 {
-  zwaveNotSupported(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  zwaveNotSupported(args);
 }
 #endif //RAIL_FEAT_ZWAVE_SUPPORTED

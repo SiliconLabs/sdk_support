@@ -31,9 +31,15 @@
 #ifndef EM_EUSART_H
 #define EM_EUSART_H
 #include "em_device.h"
-#if defined(EUART_PRESENT) && (EUART_COUNT > 0u)
-
+#if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
+#include "em_eusart_compat.h"
 #include <stdbool.h>
+
+/***************************************************************************//**
+ * @addtogroup eusart EUSART - Extended USART
+ * @brief Extended Universal Synchronous/Asynchronous Receiver/Transmitter
+ * @{
+ ******************************************************************************/
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -58,7 +64,16 @@ typedef enum {
 typedef enum {
   eusartDataBits7 = EUSART_FRAMECFG_DATABITS_SEVEN,     ///< 7 data bits.
   eusartDataBits8 = EUSART_FRAMECFG_DATABITS_EIGHT,     ///< 8 data bits.
-  eusartDataBits9 = EUSART_FRAMECFG_DATABITS_NINE       ///< 9 data bits.
+  eusartDataBits9 = EUSART_FRAMECFG_DATABITS_NINE,       ///< 9 data bits.
+#if defined(EUSART_PRESENT)
+  eusartDataBits10 = EUSART_FRAMECFG_DATABITS_TEN,      ///< 10 data bits, SPI mode only.
+  eusartDataBits11 = EUSART_FRAMECFG_DATABITS_ELEVEN,   ///< 11 data bits, SPI mode only.
+  eusartDataBits12 = EUSART_FRAMECFG_DATABITS_TWELVE,   ///< 12 data bits, SPI mode only.
+  eusartDataBits13 = EUSART_FRAMECFG_DATABITS_THIRTEEN, ///< 13 data bits, SPI mode only.
+  eusartDataBits14 = EUSART_FRAMECFG_DATABITS_FOURTEEN, ///< 14 data bits, SPI mode only.
+  eusartDataBits15 = EUSART_FRAMECFG_DATABITS_FIFTEEN,  ///< 15 data bits, SPI mode only.
+  eusartDataBits16 = EUSART_FRAMECFG_DATABITS_SIXTEEN,  ///< 16 data bits, SPI mode only.
+#endif
 } EUSART_Databits_TypeDef;
 
 /// Parity selection.
@@ -85,11 +100,12 @@ typedef enum {
   eusartOVS0  = EUSART_CFG0_OVS_DISABLE  ///< Oversampling disabled.
 } EUSART_OVS_TypeDef;
 
+/// HW flow control config.
 typedef enum {
-  eusartHwFlowControlNone = 0,
-  eusartHwFlowControlCts,
-  eusartHwFlowControlRts,
-  eusartHwFlowControlCtsAndRts
+  eusartHwFlowControlNone = 0, ///< No HW Flow Control.
+  eusartHwFlowControlCts,      ///< CTS HW Flow Control.
+  eusartHwFlowControlRts,      ///< RTS HW Flow Control.
+  eusartHwFlowControlCtsAndRts ///< CTS and RTS HW Flow Control.
 } EUSART_HwFlowControl_TypeDef;
 
 /// Loopback enable.
@@ -169,6 +185,32 @@ typedef enum {
   /// Enable trigger on both receive and transmit.
   eusartInvertIOEnable = (EUSART_CFG0_RXINV_ENABLE | EUSART_CFG0_TXINV_ENABLE)
 } EUSART_InvertIO_TypeDef;
+
+#if defined(EUSART_PRESENT)
+/// Clock polarity/phase mode.
+typedef enum {
+  /// Clock idle low, sample on rising edge.
+  eusartClockMode0 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+
+  /// Clock idle low, sample on falling edge.
+  eusartClockMode1 = EUSART_CFG2_CLKPOL_IDLELOW | EUSART_CFG2_CLKPHA_SAMPLETRAILING,
+
+  /// Clock idle high, sample on falling edge.
+  eusartClockMode2 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLELEADING,
+
+  /// Clock idle high, sample on rising edge.
+  eusartClockMode3 = EUSART_CFG2_CLKPOL_IDLEHIGH | EUSART_CFG2_CLKPHA_SAMPLETRAILING
+} EUSART_ClockMode_TypeDef;
+
+/// Chip select polarity.
+typedef enum {
+  /// Chip select active low.
+  eusartCsActiveLow = EUSART_CFG2_CSINV_AL,
+
+  /// Chip select active high.
+  eusartCsActiveHigh = EUSART_CFG2_CSINV_AH,
+}EUSART_CsPolarity_TypeDef;
+#endif
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -275,7 +317,86 @@ typedef struct {
 
   /// PRS channel to be used to trigger auto transmission.
   EUSART_PrsChannel_TypeDef prs_trigger_channel;
-}EUSART_PrsTriggerInit_TypeDef;
+} EUSART_PrsTriggerInit_TypeDef;
+
+#if defined(EUSART_PRESENT)
+/// SPI Advanced initialization structure.
+typedef struct {
+  /// Chip select polarity
+  EUSART_CsPolarity_TypeDef csPolarity;
+
+  /// Enable inversion of Rx and/or Tx signals.
+  EUSART_InvertIO_TypeDef invertIO;
+
+  /// Enable automatic chip select. CS is managed by the peripheral.
+  bool autoCsEnable;
+
+  /// If true, data will be send with most significant bit first.
+  bool msbFirst;
+
+  /// Auto CS setup time (before transmission) in baud cycles. Acceptable value ( 0 to 7 baud cycle).
+  uint8_t autoCsSetupTime;
+
+  /// Auto CS hold time (after transmission) in baud cycles. Acceptable value ( 0 to 7 baud cycle).
+  uint8_t autoCsHoldTime;
+
+  /// Inter-frame time in baud cycles. Acceptable value ( 0 to 7 baud cycle).
+  uint8_t autoInterFrameTime;
+
+  /// Enable AUTOTX mode. Transmits as long as the RX FIFO is not full.
+  ///  Generates underflow interrupt if the TX FIFO is empty.
+  bool autoTxEnable;
+
+  /// Default transmitted data when the TXFIFO is empty.
+  uint16_t defaultTxData;
+
+  /// Enable the automatic wake up from EM2 to EM1 for DMA Rx operation.
+  /// Only applicable to EM2 (low frequency) capable EUSART instances.
+  bool dmaWakeUpOnRx;
+
+  /// Enable EUSART capability to use a PRS channel as an input data line for the receiver.
+  /// The configured Rx GPIO signal won't be routed to the EUSART receiver.
+  bool prsRxEnable;
+
+  /// PRS Channel used to transmit data from PRS to the EUSART.
+  EUSART_PrsChannel_TypeDef prsRxChannel;
+
+  /// Enable EUSART capability to use a PRS channel as an input SPI Clock.
+  /// Slave mode only.
+  bool prsClockEnable;
+
+  /// PRS Channel used to transmit SCLK from PRS to the EUSART.
+  EUSART_PrsChannel_TypeDef prsClockChannel;
+} EUSART_SpiAdvancedInit_TypeDef;
+
+/// SPI Initialization structure.
+typedef struct {
+  /// Specifies whether TX and/or RX will be enabled when initialization completes.
+  EUSART_Enable_TypeDef enable;
+
+  /// EUSART reference clock assumed when configuring baud rate setup. Set
+  /// to 0 if using currently configured reference clock.
+  uint32_t refFreq;
+
+  /// Desired bit rate in Hz.
+  uint32_t bitRate;
+
+  /// Number of data bits in frame.
+  EUSART_Databits_TypeDef databits;
+
+  /// Select to operate in master or slave mode.
+  bool master;
+
+  /// Clock polarity/phase mode.
+  EUSART_ClockMode_TypeDef clockMode;
+
+  /// Enable Loop Back configuration.
+  EUSART_LoopbackEnable_TypeDef loopbackEnable;
+
+  /// Advanced initialization structure pointer. It can be NULL.
+  EUSART_SpiAdvancedInit_TypeDef *advancedSettings;
+} EUSART_SpiInit_TypeDef;
+#endif
 
 /// Default configuration for EUSART initialization structure in UART mode with high-frequency clock.
 #define EUSART_UART_INIT_DEFAULT_HF                                                                   \
@@ -357,6 +478,53 @@ typedef struct {
     eusartIrDAPulseWidthOne,      /* Pulse width is set to 1. */                                         \
   }
 
+#if defined(EUSART_PRESENT)
+/// Default advanced configuration for EUSART initialization structure in SPI mode with high-frequency clock.
+#define EUSART_SPI_ADVANCED_INIT_DEFAULT                                                     \
+  {                                                                                          \
+    eusartCsActiveLow,              /* CS active low.*/                                      \
+    eusartInvertIODisable,          /* Rx and Tx signal active High. */                      \
+    true,                           /* AutoCS enabled.*/                                     \
+    false,                          /* Data is sent with the least significant bit first. */ \
+    0u,                             /* CS setup time is 0 baud cycles */                     \
+    0u,                             /* CS hold time is 0 baud cycles */                      \
+    0u,                             /* Inter-frame time is 0 baud cycles */                  \
+    false,                          /* AutoTx disabled. */                                   \
+    0x0000,                         /* Default transmitted data is 0. */                     \
+    false,                          /* No DMA wake up on reception. */                       \
+    false,                          /* Do not use PRS signal as Rx signal.*/                 \
+    (EUSART_PrsChannel_TypeDef) 0u, /* EUSART Rx tied to prs channel 0. */                   \
+    false,                          /* Do not use PRS signal as SCLK signal.*/               \
+    (EUSART_PrsChannel_TypeDef) 1u, /* EUSART SCLCK tied to prs channel 1. */                \
+  }
+
+/// Default configuration for EUSART initialization structure in SPI master mode with high-frequency clock.
+#define EUSART_SPI_MASTER_INIT_DEFAULT_HF                                                             \
+  {                                                                                                   \
+    eusartEnable,              /* Enable RX/TX when initialization completed. */                      \
+    0,                         /* Use current configured reference clock for configuring baud rate.*/ \
+    10000000,                  /* 10 Mbits/s. */                                                      \
+    eusartDataBits8,           /* 8 data bits. */                                                     \
+    true,                      /* Master mode enabled. */                                             \
+    eusartClockMode0,          /* Clock idle low, sample on rising edge. */                           \
+    eusartLoopbackDisable,     /* Loop back disabled. */                                              \
+    NULL,                      /* Default advanced settings. */                                       \
+  }
+
+/// Default configuration for EUSART initialization structure in SPI slave mode with high-frequency clock.
+#define EUSART_SPI_SLAVE_INIT_DEFAULT_HF                                                              \
+  {                                                                                                   \
+    eusartEnable,              /* Enable RX/TX when initialization completed. */                      \
+    0,                         /* Use current configured reference clock for configuring baud rate.*/ \
+    10000000,                  /* 10 Mbits/s. */                                                      \
+    eusartDataBits8,           /* 8 data bits. */                                                     \
+    false,                     /* Master mode enabled. */                                             \
+    eusartClockMode0,          /* Clock idle low, sample on rising edge. */                           \
+    eusartLoopbackDisable,     /* Loop back disabled. */                                              \
+    NULL,                      /* Default advanced settings. */                                       \
+  }
+#endif
+
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
@@ -386,6 +554,16 @@ void EUSART_UartInitLf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
  ******************************************************************************/
 void EUSART_IrDAInit(EUSART_TypeDef *eusart,
                      const EUSART_IrDAInit_TypeDef *irdaInit);
+
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * Initializes the EUSART when used in SPI mode.
+ *
+ * @param eusart Pointer to the EUSART peripheral register block.
+ * @param init A pointer to the initialization structure.
+ ******************************************************************************/
+void EUSART_SpiInit(EUSART_TypeDef *eusart, const EUSART_SpiInit_TypeDef *init);
+#endif
 
 /***************************************************************************//**
  * Configures the EUSART to its reset state.
@@ -418,7 +596,7 @@ void EUSART_Enable(EUSART_TypeDef *eusart, EUSART_Enable_TypeDef enable);
 uint8_t EUSART_Rx(EUSART_TypeDef *eusart);
 
 /***************************************************************************//**
- * Receives one 8-9 bit frame with extended information.
+ * Receives one 8-16 bit frame with extended information.
  *
  * @param eusart Pointer to the EUSART peripheral register block.
  *
@@ -458,6 +636,21 @@ void EUSART_Tx(EUSART_TypeDef *eusart, uint8_t data);
  ******************************************************************************/
 void EUSART_TxExt(EUSART_TypeDef *eusart, uint16_t data);
 
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * Transmits one 8-16 bit frame and return received data.
+ *
+ * @param eusart Pointer to the EUSART peripheral register block.
+ * @param data Data to transmit.
+ *
+ * @return Data received and receive status.
+ *
+ * @note SPI master mode only.
+ * @note This function will stall if the Tx buffer is full until the buffer becomes
+ *       available.
+ ******************************************************************************/
+uint16_t EUSART_Spi_TxRx(EUSART_TypeDef *eusart, uint16_t data);
+#endif
 /***************************************************************************//**
  * Configures the baudrate (or as close as possible to a specified baudrate).
  *
@@ -612,5 +805,5 @@ __STATIC_INLINE void EUSART_IntSet(EUSART_TypeDef *eusart, uint32_t flags)
   eusart->IF_SET = flags;
 }
 
-#endif /* defined( EUART_PRESENT ) && (EUART_COUNT > 0u) */
+#endif /* defined(EUART_PRESENT) || defined(EUSART_PRESENT) */
 #endif /* EM_EUSART_H */

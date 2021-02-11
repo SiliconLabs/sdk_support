@@ -53,12 +53,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup dmadrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup DMADRV
+ * @addtogroup dmadrv_error_codes Error Codes
  * @{
  ******************************************************************************/
 
@@ -71,6 +71,7 @@ extern "C" {
 #define ECODE_EMDRV_DMADRV_ALREADY_FREED       (ECODE_EMDRV_DMADRV_BASE | 0x00000006)   ///< A DMA channel was free.
 #define ECODE_EMDRV_DMADRV_CH_NOT_ALLOCATED    (ECODE_EMDRV_DMADRV_BASE | 0x00000007)   ///< A channel is not reserved.
 
+/** @} (end addtogroup error codes) */
 /***************************************************************************//**
  * @brief
  *  DMADRV transfer completion callback function.
@@ -476,6 +477,24 @@ typedef enum {
 #endif
 #if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUART0RXFL
   dmadrvPeripheralSignal_EUART0_RXDATAV = LDMAXBAR_CH_REQSEL_SIGSEL_EUART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUART0,       ///< Trig on EUART0_RXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0TXFL
+  dmadrvPeripheralSignal_EUSART0_TXBL = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0,          ///< Trig on EUART0_TXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0RXFL
+  dmadrvPeripheralSignal_EUSART0_RXDATAV = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0,       ///< Trig on EUART0_RXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1TXFL
+  dmadrvPeripheralSignal_EUSART1_TXBL = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1,          ///< Trig on EUART1_TXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1RXFL
+  dmadrvPeripheralSignal_EUSART1_RXDATAV = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1,       ///< Trig on EUART1_RXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL
+  dmadrvPeripheralSignal_EUSART2_TXBL = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2,          ///< Trig on EUART2_TXBL.
+#endif
+#if defined LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2RXFL
+  dmadrvPeripheralSignal_EUSART2_RXDATAV = LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2,       ///< Trig on EUART2_RXBL.
 #endif
 } DMADRV_PeripheralSignal_t;
 
@@ -989,8 +1008,7 @@ Ecode_t DMADRV_TransferDone(unsigned int channelId, bool *done);
 Ecode_t DMADRV_TransferRemainingCount(unsigned int channelId,
                                       int *remaining);
 
-/** @} (end addtogroup DMADRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup dmadrv) */
 
 #ifdef __cplusplus
 }

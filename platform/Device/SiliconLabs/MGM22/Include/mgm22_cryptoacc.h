@@ -58,12 +58,12 @@ typedef struct {
   __IOM uint32_t CMD;                           /**< Command register                                   */
   __IM uint32_t  STATUS;                        /**< Status register                                    */
   uint32_t       RESERVED4[240U];               /**< Reserved for future use                            */
-  __IM uint32_t  INCL_IPS_HW_CFG;               /**< INCL_IPS_HW_CFG                                    */
-  __IM uint32_t  BA411E_HW_CFG_1;               /**< BA411E_HW_CFG_1                                    */
-  __IM uint32_t  BA411E_HW_CFG_2;               /**< BA411E_HW_CFG_2                                    */
-  __IM uint32_t  BA413_HW_CFG;                  /**< BA413_HW_CFG                                       */
-  __IM uint32_t  BA418_HW_CFG;                  /**< BA418_HW_CFG                                       */
-  __IM uint32_t  BA419_HW_CFG;                  /**< BA419_HW_CFG                                       */
+  __IM uint32_t  INCL_IPS_HW_CFG;               /**< General CRYPTOACC Hardware Configuration           */
+  __IM uint32_t  BA411E_HW_CFG_1;               /**< BA411E Hardware Configuration 1                    */
+  __IM uint32_t  BA411E_HW_CFG_2;               /**< BA411E Hardware Configuration 2                    */
+  __IM uint32_t  BA413_HW_CFG;                  /**< BA413 Hardware Configuration                       */
+  __IM uint32_t  BA418_HW_CFG;                  /**< BA418 Hardware Configuration                       */
+  __IM uint32_t  BA419_HW_CFG;                  /**< BA419 Hardware Configuration                       */
 } CRYPTOACC_TypeDef;
 /** @} End of group MGM22_CRYPTOACC */
 
@@ -140,106 +140,106 @@ typedef struct {
 #define CRYPTOACC_PUSHLEN_DISCARD_DEFAULT                         (_CRYPTOACC_PUSHLEN_DISCARD_DEFAULT << 30)   /**< Shifted mode DEFAULT for CRYPTOACC_PUSHLEN  */
 
 /* Bit fields for CRYPTOACC IEN */
-#define _CRYPTOACC_IEN_RESETVALUE                                 0x00000000UL                                       /**< Default value for CRYPTOACC_IEN             */
-#define _CRYPTOACC_IEN_MASK                                       0x0000003FUL                                       /**< Mask for CRYPTOACC_IEN                      */
-#define CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN                        (0x1UL << 0)                                       /**< End of block interrupt enable               */
-#define _CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN_SHIFT                 0                                                  /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCKIEN*/
-#define _CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN_MASK                  0x1UL                                              /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCKIEN */
-#define _CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN_DEFAULT               0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN_DEFAULT                (_CRYPTOACC_IEN_FETCHERENDOFBLOCKIEN_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
-#define CRYPTOACC_IEN_FETCHERSTOPPEDIEN                           (0x1UL << 1)                                       /**< Stopped interrupt enable                    */
-#define _CRYPTOACC_IEN_FETCHERSTOPPEDIEN_SHIFT                    1                                                  /**< Shift value for CRYPTOACC_FETCHERSTOPPEDIEN */
-#define _CRYPTOACC_IEN_FETCHERSTOPPEDIEN_MASK                     0x2UL                                              /**< Bit mask for CRYPTOACC_FETCHERSTOPPEDIEN    */
-#define _CRYPTOACC_IEN_FETCHERSTOPPEDIEN_DEFAULT                  0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_FETCHERSTOPPEDIEN_DEFAULT                   (_CRYPTOACC_IEN_FETCHERSTOPPEDIEN_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
-#define CRYPTOACC_IEN_FETCHERERRORIEN                             (0x1UL << 2)                                       /**< Error interrupt enable                      */
-#define _CRYPTOACC_IEN_FETCHERERRORIEN_SHIFT                      2                                                  /**< Shift value for CRYPTOACC_FETCHERERRORIEN   */
-#define _CRYPTOACC_IEN_FETCHERERRORIEN_MASK                       0x4UL                                              /**< Bit mask for CRYPTOACC_FETCHERERRORIEN      */
-#define _CRYPTOACC_IEN_FETCHERERRORIEN_DEFAULT                    0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_FETCHERERRORIEN_DEFAULT                     (_CRYPTOACC_IEN_FETCHERERRORIEN_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
-#define CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN                         (0x1UL << 3)                                       /**< End of block interrupt enable               */
-#define _CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN_SHIFT                  3                                                  /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCKIEN*/
-#define _CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN_MASK                   0x8UL                                              /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCKIEN  */
-#define _CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN_DEFAULT                0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN_DEFAULT                 (_CRYPTOACC_IEN_PUSHERENDOFBLOCKIEN_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
-#define CRYPTOACC_IEN_PUSHERSTOPPEDIEN                            (0x1UL << 4)                                       /**< Stopped interrupt enable                    */
-#define _CRYPTOACC_IEN_PUSHERSTOPPEDIEN_SHIFT                     4                                                  /**< Shift value for CRYPTOACC_PUSHERSTOPPEDIEN  */
-#define _CRYPTOACC_IEN_PUSHERSTOPPEDIEN_MASK                      0x10UL                                             /**< Bit mask for CRYPTOACC_PUSHERSTOPPEDIEN     */
-#define _CRYPTOACC_IEN_PUSHERSTOPPEDIEN_DEFAULT                   0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_PUSHERSTOPPEDIEN_DEFAULT                    (_CRYPTOACC_IEN_PUSHERSTOPPEDIEN_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
-#define CRYPTOACC_IEN_PUSHERERRORIEN                              (0x1UL << 5)                                       /**< Error interrupt enable                      */
-#define _CRYPTOACC_IEN_PUSHERERRORIEN_SHIFT                       5                                                  /**< Shift value for CRYPTOACC_PUSHERERRORIEN    */
-#define _CRYPTOACC_IEN_PUSHERERRORIEN_MASK                        0x20UL                                             /**< Bit mask for CRYPTOACC_PUSHERERRORIEN       */
-#define _CRYPTOACC_IEN_PUSHERERRORIEN_DEFAULT                     0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IEN              */
-#define CRYPTOACC_IEN_PUSHERERRORIEN_DEFAULT                      (_CRYPTOACC_IEN_PUSHERERRORIEN_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define _CRYPTOACC_IEN_RESETVALUE                                 0x00000000UL                                    /**< Default value for CRYPTOACC_IEN             */
+#define _CRYPTOACC_IEN_MASK                                       0x0000003FUL                                    /**< Mask for CRYPTOACC_IEN                      */
+#define CRYPTOACC_IEN_FETCHERENDOFBLOCK                           (0x1UL << 0)                                    /**< End of block interrupt enable               */
+#define _CRYPTOACC_IEN_FETCHERENDOFBLOCK_SHIFT                    0                                               /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCK */
+#define _CRYPTOACC_IEN_FETCHERENDOFBLOCK_MASK                     0x1UL                                           /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCK    */
+#define _CRYPTOACC_IEN_FETCHERENDOFBLOCK_DEFAULT                  0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_FETCHERENDOFBLOCK_DEFAULT                   (_CRYPTOACC_IEN_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define CRYPTOACC_IEN_FETCHERSTOPPED                              (0x1UL << 1)                                    /**< Stopped interrupt enable                    */
+#define _CRYPTOACC_IEN_FETCHERSTOPPED_SHIFT                       1                                               /**< Shift value for CRYPTOACC_FETCHERSTOPPED    */
+#define _CRYPTOACC_IEN_FETCHERSTOPPED_MASK                        0x2UL                                           /**< Bit mask for CRYPTOACC_FETCHERSTOPPED       */
+#define _CRYPTOACC_IEN_FETCHERSTOPPED_DEFAULT                     0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_FETCHERSTOPPED_DEFAULT                      (_CRYPTOACC_IEN_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define CRYPTOACC_IEN_FETCHERERROR                                (0x1UL << 2)                                    /**< Error interrupt enable                      */
+#define _CRYPTOACC_IEN_FETCHERERROR_SHIFT                         2                                               /**< Shift value for CRYPTOACC_FETCHERERROR      */
+#define _CRYPTOACC_IEN_FETCHERERROR_MASK                          0x4UL                                           /**< Bit mask for CRYPTOACC_FETCHERERROR         */
+#define _CRYPTOACC_IEN_FETCHERERROR_DEFAULT                       0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_FETCHERERROR_DEFAULT                        (_CRYPTOACC_IEN_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define CRYPTOACC_IEN_PUSHERENDOFBLOCK                            (0x1UL << 3)                                    /**< End of block interrupt enable               */
+#define _CRYPTOACC_IEN_PUSHERENDOFBLOCK_SHIFT                     3                                               /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCK  */
+#define _CRYPTOACC_IEN_PUSHERENDOFBLOCK_MASK                      0x8UL                                           /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCK     */
+#define _CRYPTOACC_IEN_PUSHERENDOFBLOCK_DEFAULT                   0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_PUSHERENDOFBLOCK_DEFAULT                    (_CRYPTOACC_IEN_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define CRYPTOACC_IEN_PUSHERSTOPPED                               (0x1UL << 4)                                    /**< Stopped interrupt enable                    */
+#define _CRYPTOACC_IEN_PUSHERSTOPPED_SHIFT                        4                                               /**< Shift value for CRYPTOACC_PUSHERSTOPPED     */
+#define _CRYPTOACC_IEN_PUSHERSTOPPED_MASK                         0x10UL                                          /**< Bit mask for CRYPTOACC_PUSHERSTOPPED        */
+#define _CRYPTOACC_IEN_PUSHERSTOPPED_DEFAULT                      0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_PUSHERSTOPPED_DEFAULT                       (_CRYPTOACC_IEN_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
+#define CRYPTOACC_IEN_PUSHERERROR                                 (0x1UL << 5)                                    /**< Error interrupt enable                      */
+#define _CRYPTOACC_IEN_PUSHERERROR_SHIFT                          5                                               /**< Shift value for CRYPTOACC_PUSHERERROR       */
+#define _CRYPTOACC_IEN_PUSHERERROR_MASK                           0x20UL                                          /**< Bit mask for CRYPTOACC_PUSHERERROR          */
+#define _CRYPTOACC_IEN_PUSHERERROR_DEFAULT                        0x00000000UL                                    /**< Mode DEFAULT for CRYPTOACC_IEN              */
+#define CRYPTOACC_IEN_PUSHERERROR_DEFAULT                         (_CRYPTOACC_IEN_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IEN      */
 
 /* Bit fields for CRYPTOACC IF */
-#define _CRYPTOACC_IF_RESETVALUE                                  0x00000000UL                                     /**< Default value for CRYPTOACC_IF              */
-#define _CRYPTOACC_IF_MASK                                        0x0000003FUL                                     /**< Mask for CRYPTOACC_IF                       */
-#define CRYPTOACC_IF_FETCHERENDOFBLOCKIF                          (0x1UL << 0)                                     /**< End of block interrupt flag                 */
-#define _CRYPTOACC_IF_FETCHERENDOFBLOCKIF_SHIFT                   0                                                /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCKIF*/
-#define _CRYPTOACC_IF_FETCHERENDOFBLOCKIF_MASK                    0x1UL                                            /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCKIF  */
-#define _CRYPTOACC_IF_FETCHERENDOFBLOCKIF_DEFAULT                 0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_FETCHERENDOFBLOCKIF_DEFAULT                  (_CRYPTOACC_IF_FETCHERENDOFBLOCKIF_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
-#define CRYPTOACC_IF_FETCHERSTOPPEDIF                             (0x1UL << 1)                                     /**< Stopped interrupt flag                      */
-#define _CRYPTOACC_IF_FETCHERSTOPPEDIF_SHIFT                      1                                                /**< Shift value for CRYPTOACC_FETCHERSTOPPEDIF  */
-#define _CRYPTOACC_IF_FETCHERSTOPPEDIF_MASK                       0x2UL                                            /**< Bit mask for CRYPTOACC_FETCHERSTOPPEDIF     */
-#define _CRYPTOACC_IF_FETCHERSTOPPEDIF_DEFAULT                    0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_FETCHERSTOPPEDIF_DEFAULT                     (_CRYPTOACC_IF_FETCHERSTOPPEDIF_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
-#define CRYPTOACC_IF_FETCHERERRORIF                               (0x1UL << 2)                                     /**< Error interrupt flag                        */
-#define _CRYPTOACC_IF_FETCHERERRORIF_SHIFT                        2                                                /**< Shift value for CRYPTOACC_FETCHERERRORIF    */
-#define _CRYPTOACC_IF_FETCHERERRORIF_MASK                         0x4UL                                            /**< Bit mask for CRYPTOACC_FETCHERERRORIF       */
-#define _CRYPTOACC_IF_FETCHERERRORIF_DEFAULT                      0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_FETCHERERRORIF_DEFAULT                       (_CRYPTOACC_IF_FETCHERERRORIF_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
-#define CRYPTOACC_IF_PUSHERENDOFBLOCKIF                           (0x1UL << 3)                                     /**< End of block interrupt flag                 */
-#define _CRYPTOACC_IF_PUSHERENDOFBLOCKIF_SHIFT                    3                                                /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCKIF*/
-#define _CRYPTOACC_IF_PUSHERENDOFBLOCKIF_MASK                     0x8UL                                            /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCKIF   */
-#define _CRYPTOACC_IF_PUSHERENDOFBLOCKIF_DEFAULT                  0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_PUSHERENDOFBLOCKIF_DEFAULT                   (_CRYPTOACC_IF_PUSHERENDOFBLOCKIF_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
-#define CRYPTOACC_IF_PUSHERSTOPPEDIF                              (0x1UL << 4)                                     /**< Stopped interrupt flag                      */
-#define _CRYPTOACC_IF_PUSHERSTOPPEDIF_SHIFT                       4                                                /**< Shift value for CRYPTOACC_PUSHERSTOPPEDIF   */
-#define _CRYPTOACC_IF_PUSHERSTOPPEDIF_MASK                        0x10UL                                           /**< Bit mask for CRYPTOACC_PUSHERSTOPPEDIF      */
-#define _CRYPTOACC_IF_PUSHERSTOPPEDIF_DEFAULT                     0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_PUSHERSTOPPEDIF_DEFAULT                      (_CRYPTOACC_IF_PUSHERSTOPPEDIF_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
-#define CRYPTOACC_IF_PUSHERERRORIF                                (0x1UL << 5)                                     /**< Error interrupt flag                        */
-#define _CRYPTOACC_IF_PUSHERERRORIF_SHIFT                         5                                                /**< Shift value for CRYPTOACC_PUSHERERRORIF     */
-#define _CRYPTOACC_IF_PUSHERERRORIF_MASK                          0x20UL                                           /**< Bit mask for CRYPTOACC_PUSHERERRORIF        */
-#define _CRYPTOACC_IF_PUSHERERRORIF_DEFAULT                       0x00000000UL                                     /**< Mode DEFAULT for CRYPTOACC_IF               */
-#define CRYPTOACC_IF_PUSHERERRORIF_DEFAULT                        (_CRYPTOACC_IF_PUSHERERRORIF_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define _CRYPTOACC_IF_RESETVALUE                                  0x00000000UL                                   /**< Default value for CRYPTOACC_IF              */
+#define _CRYPTOACC_IF_MASK                                        0x0000003FUL                                   /**< Mask for CRYPTOACC_IF                       */
+#define CRYPTOACC_IF_FETCHERENDOFBLOCK                            (0x1UL << 0)                                   /**< End of block interrupt flag                 */
+#define _CRYPTOACC_IF_FETCHERENDOFBLOCK_SHIFT                     0                                              /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCK */
+#define _CRYPTOACC_IF_FETCHERENDOFBLOCK_MASK                      0x1UL                                          /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCK    */
+#define _CRYPTOACC_IF_FETCHERENDOFBLOCK_DEFAULT                   0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_FETCHERENDOFBLOCK_DEFAULT                    (_CRYPTOACC_IF_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define CRYPTOACC_IF_FETCHERSTOPPED                               (0x1UL << 1)                                   /**< Stopped interrupt flag                      */
+#define _CRYPTOACC_IF_FETCHERSTOPPED_SHIFT                        1                                              /**< Shift value for CRYPTOACC_FETCHERSTOPPED    */
+#define _CRYPTOACC_IF_FETCHERSTOPPED_MASK                         0x2UL                                          /**< Bit mask for CRYPTOACC_FETCHERSTOPPED       */
+#define _CRYPTOACC_IF_FETCHERSTOPPED_DEFAULT                      0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_FETCHERSTOPPED_DEFAULT                       (_CRYPTOACC_IF_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define CRYPTOACC_IF_FETCHERERROR                                 (0x1UL << 2)                                   /**< Error interrupt flag                        */
+#define _CRYPTOACC_IF_FETCHERERROR_SHIFT                          2                                              /**< Shift value for CRYPTOACC_FETCHERERROR      */
+#define _CRYPTOACC_IF_FETCHERERROR_MASK                           0x4UL                                          /**< Bit mask for CRYPTOACC_FETCHERERROR         */
+#define _CRYPTOACC_IF_FETCHERERROR_DEFAULT                        0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_FETCHERERROR_DEFAULT                         (_CRYPTOACC_IF_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define CRYPTOACC_IF_PUSHERENDOFBLOCK                             (0x1UL << 3)                                   /**< End of block interrupt flag                 */
+#define _CRYPTOACC_IF_PUSHERENDOFBLOCK_SHIFT                      3                                              /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCK  */
+#define _CRYPTOACC_IF_PUSHERENDOFBLOCK_MASK                       0x8UL                                          /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCK     */
+#define _CRYPTOACC_IF_PUSHERENDOFBLOCK_DEFAULT                    0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_PUSHERENDOFBLOCK_DEFAULT                     (_CRYPTOACC_IF_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define CRYPTOACC_IF_PUSHERSTOPPED                                (0x1UL << 4)                                   /**< Stopped interrupt flag                      */
+#define _CRYPTOACC_IF_PUSHERSTOPPED_SHIFT                         4                                              /**< Shift value for CRYPTOACC_PUSHERSTOPPED     */
+#define _CRYPTOACC_IF_PUSHERSTOPPED_MASK                          0x10UL                                         /**< Bit mask for CRYPTOACC_PUSHERSTOPPED        */
+#define _CRYPTOACC_IF_PUSHERSTOPPED_DEFAULT                       0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_PUSHERSTOPPED_DEFAULT                        (_CRYPTOACC_IF_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
+#define CRYPTOACC_IF_PUSHERERROR                                  (0x1UL << 5)                                   /**< Error interrupt flag                        */
+#define _CRYPTOACC_IF_PUSHERERROR_SHIFT                           5                                              /**< Shift value for CRYPTOACC_PUSHERERROR       */
+#define _CRYPTOACC_IF_PUSHERERROR_MASK                            0x20UL                                         /**< Bit mask for CRYPTOACC_PUSHERERROR          */
+#define _CRYPTOACC_IF_PUSHERERROR_DEFAULT                         0x00000000UL                                   /**< Mode DEFAULT for CRYPTOACC_IF               */
+#define CRYPTOACC_IF_PUSHERERROR_DEFAULT                          (_CRYPTOACC_IF_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IF       */
 
 /* Bit fields for CRYPTOACC IF_CLR */
-#define _CRYPTOACC_IF_CLR_RESETVALUE                              0x00000000UL                                          /**< Default value for CRYPTOACC_IF_CLR          */
-#define _CRYPTOACC_IF_CLR_MASK                                    0x0000003FUL                                          /**< Mask for CRYPTOACC_IF_CLR                   */
-#define CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC                     (0x1UL << 0)                                          /**< End of block interrupt flag clear           */
-#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC_SHIFT              0                                                     /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCKIFC*/
-#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC_MASK               0x1UL                                                 /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCKIFC */
-#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT            0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT             (_CRYPTOACC_IF_CLR_FETCHERENDOFBLOCKIFC_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
-#define CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC                        (0x1UL << 1)                                          /**< Stopped interrupt flag clear                */
-#define _CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC_SHIFT                 1                                                     /**< Shift value for CRYPTOACC_FETCHERSTOPPEDIFC */
-#define _CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC_MASK                  0x2UL                                                 /**< Bit mask for CRYPTOACC_FETCHERSTOPPEDIFC    */
-#define _CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT               0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT                (_CRYPTOACC_IF_CLR_FETCHERSTOPPEDIFC_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
-#define CRYPTOACC_IF_CLR_FETCHERERRORIFC                          (0x1UL << 2)                                          /**< Error interrupt flag clear                  */
-#define _CRYPTOACC_IF_CLR_FETCHERERRORIFC_SHIFT                   2                                                     /**< Shift value for CRYPTOACC_FETCHERERRORIFC   */
-#define _CRYPTOACC_IF_CLR_FETCHERERRORIFC_MASK                    0x4UL                                                 /**< Bit mask for CRYPTOACC_FETCHERERRORIFC      */
-#define _CRYPTOACC_IF_CLR_FETCHERERRORIFC_DEFAULT                 0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_FETCHERERRORIFC_DEFAULT                  (_CRYPTOACC_IF_CLR_FETCHERERRORIFC_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
-#define CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC                      (0x1UL << 3)                                          /**< End of block interrupt flag clear           */
-#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC_SHIFT               3                                                     /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCKIFC*/
-#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC_MASK                0x8UL                                                 /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCKIFC  */
-#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT             0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT              (_CRYPTOACC_IF_CLR_PUSHERENDOFBLOCKIFC_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
-#define CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC                         (0x1UL << 4)                                          /**< Stopped interrupt flag clear                */
-#define _CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC_SHIFT                  4                                                     /**< Shift value for CRYPTOACC_PUSHERSTOPPEDIFC  */
-#define _CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC_MASK                   0x10UL                                                /**< Bit mask for CRYPTOACC_PUSHERSTOPPEDIFC     */
-#define _CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT                0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT                 (_CRYPTOACC_IF_CLR_PUSHERSTOPPEDIFC_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
-#define CRYPTOACC_IF_CLR_PUSHERERRORIFC                           (0x1UL << 5)                                          /**< Error interrupt flag clear                  */
-#define _CRYPTOACC_IF_CLR_PUSHERERRORIFC_SHIFT                    5                                                     /**< Shift value for CRYPTOACC_PUSHERERRORIFC    */
-#define _CRYPTOACC_IF_CLR_PUSHERERRORIFC_MASK                     0x20UL                                                /**< Bit mask for CRYPTOACC_PUSHERERRORIFC       */
-#define _CRYPTOACC_IF_CLR_PUSHERERRORIFC_DEFAULT                  0x00000000UL                                          /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
-#define CRYPTOACC_IF_CLR_PUSHERERRORIFC_DEFAULT                   (_CRYPTOACC_IF_CLR_PUSHERERRORIFC_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define _CRYPTOACC_IF_CLR_RESETVALUE                              0x00000000UL                                       /**< Default value for CRYPTOACC_IF_CLR          */
+#define _CRYPTOACC_IF_CLR_MASK                                    0x0000003FUL                                       /**< Mask for CRYPTOACC_IF_CLR                   */
+#define CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK                        (0x1UL << 0)                                       /**< End of block interrupt flag clear           */
+#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK_SHIFT                 0                                                  /**< Shift value for CRYPTOACC_FETCHERENDOFBLOCK */
+#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK_MASK                  0x1UL                                              /**< Bit mask for CRYPTOACC_FETCHERENDOFBLOCK    */
+#define _CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK_DEFAULT               0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK_DEFAULT                (_CRYPTOACC_IF_CLR_FETCHERENDOFBLOCK_DEFAULT << 0) /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define CRYPTOACC_IF_CLR_FETCHERSTOPPED                           (0x1UL << 1)                                       /**< Stopped interrupt flag clear                */
+#define _CRYPTOACC_IF_CLR_FETCHERSTOPPED_SHIFT                    1                                                  /**< Shift value for CRYPTOACC_FETCHERSTOPPED    */
+#define _CRYPTOACC_IF_CLR_FETCHERSTOPPED_MASK                     0x2UL                                              /**< Bit mask for CRYPTOACC_FETCHERSTOPPED       */
+#define _CRYPTOACC_IF_CLR_FETCHERSTOPPED_DEFAULT                  0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_FETCHERSTOPPED_DEFAULT                   (_CRYPTOACC_IF_CLR_FETCHERSTOPPED_DEFAULT << 1)    /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define CRYPTOACC_IF_CLR_FETCHERERROR                             (0x1UL << 2)                                       /**< Error interrupt flag clear                  */
+#define _CRYPTOACC_IF_CLR_FETCHERERROR_SHIFT                      2                                                  /**< Shift value for CRYPTOACC_FETCHERERROR      */
+#define _CRYPTOACC_IF_CLR_FETCHERERROR_MASK                       0x4UL                                              /**< Bit mask for CRYPTOACC_FETCHERERROR         */
+#define _CRYPTOACC_IF_CLR_FETCHERERROR_DEFAULT                    0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_FETCHERERROR_DEFAULT                     (_CRYPTOACC_IF_CLR_FETCHERERROR_DEFAULT << 2)      /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK                         (0x1UL << 3)                                       /**< End of block interrupt flag clear           */
+#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK_SHIFT                  3                                                  /**< Shift value for CRYPTOACC_PUSHERENDOFBLOCK  */
+#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK_MASK                   0x8UL                                              /**< Bit mask for CRYPTOACC_PUSHERENDOFBLOCK     */
+#define _CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK_DEFAULT                0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK_DEFAULT                 (_CRYPTOACC_IF_CLR_PUSHERENDOFBLOCK_DEFAULT << 3)  /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define CRYPTOACC_IF_CLR_PUSHERSTOPPED                            (0x1UL << 4)                                       /**< Stopped interrupt flag clear                */
+#define _CRYPTOACC_IF_CLR_PUSHERSTOPPED_SHIFT                     4                                                  /**< Shift value for CRYPTOACC_PUSHERSTOPPED     */
+#define _CRYPTOACC_IF_CLR_PUSHERSTOPPED_MASK                      0x10UL                                             /**< Bit mask for CRYPTOACC_PUSHERSTOPPED        */
+#define _CRYPTOACC_IF_CLR_PUSHERSTOPPED_DEFAULT                   0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_PUSHERSTOPPED_DEFAULT                    (_CRYPTOACC_IF_CLR_PUSHERSTOPPED_DEFAULT << 4)     /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
+#define CRYPTOACC_IF_CLR_PUSHERERROR                              (0x1UL << 5)                                       /**< Error interrupt flag clear                  */
+#define _CRYPTOACC_IF_CLR_PUSHERERROR_SHIFT                       5                                                  /**< Shift value for CRYPTOACC_PUSHERERROR       */
+#define _CRYPTOACC_IF_CLR_PUSHERERROR_MASK                        0x20UL                                             /**< Bit mask for CRYPTOACC_PUSHERERROR          */
+#define _CRYPTOACC_IF_CLR_PUSHERERROR_DEFAULT                     0x00000000UL                                       /**< Mode DEFAULT for CRYPTOACC_IF_CLR           */
+#define CRYPTOACC_IF_CLR_PUSHERERROR_DEFAULT                      (_CRYPTOACC_IF_CLR_PUSHERERROR_DEFAULT << 5)       /**< Shifted mode DEFAULT for CRYPTOACC_IF_CLR   */
 
 /* Bit fields for CRYPTOACC CTRL */
 #define _CRYPTOACC_CTRL_RESETVALUE                                0x00000000UL                                        /**< Default value for CRYPTOACC_CTRL            */
@@ -1024,4 +1024,5 @@ typedef struct {
 /** @} End of group MGM22_CRYPTOACC_RNGCTRL_BitFields */
 /** @} End of group MGM22_CRYPTOACC_RNGCTRL */
 /** @} End of group Parts */
+
 #endif /* MGM22_CRYPTOACC_H */

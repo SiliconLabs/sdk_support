@@ -242,4 +242,5 @@ typedef struct {
 /** @} End of group EFR32BG21_GPCRC_BitFields */
 /** @} End of group EFR32BG21_GPCRC */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_GPCRC_H */

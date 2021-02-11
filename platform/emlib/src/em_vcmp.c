@@ -34,13 +34,8 @@
 #include "em_assert.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup VCMP
- * @brief Voltage Comparator (VCMP) Peripheral API
+ * @addtogroup vcmp VCMP - Voltage Comparator
+ * @brief Supply Voltage Comparator (VCMP) Peripheral API
  * @details
  *  This module contains functions to control the VCMP peripheral of Silicon
  *  Labs 32-bit MCUs and SoCs. The VCMP monitors the input voltage supply and
@@ -161,6 +156,5 @@ void VCMP_TriggerSet(int level)
                    | (level << _VCMP_INPUTSEL_TRIGLEVEL_SHIFT);
 }
 
-/** @} (end addtogroup VCMP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup vcmp) */
 #endif /* defined(VCMP_COUNT) && (VCMP_COUNT > 0) */

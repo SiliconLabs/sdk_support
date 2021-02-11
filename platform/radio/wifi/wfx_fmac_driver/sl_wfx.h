@@ -17,15 +17,20 @@
 #ifndef SL_WFX_H
 #define SL_WFX_H
 
+#include "sl_wfx_configuration_defaults.h"
 #include "sl_wfx_host_api.h"
 #include "sl_wfx_version.h"
-#include "sl_wfx_configuration.h"
 #include "bus/sl_wfx_bus.h"
-#include "firmware/sl_wfx_registers.h"
+#include "sl_wfx_registers.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
+
+/// Define the WEAK macro for GCC compatible compilers
+#ifndef WEAK
+#define WEAK __attribute__((weak))
+#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -112,15 +117,6 @@ sl_status_t sl_wfx_enable_device_power_save(void);
 
 sl_status_t sl_wfx_disable_device_power_save(void);
 
-sl_status_t sl_wfx_join_ibss_command(const uint8_t *ssid,
-                                     uint32_t ssid_length,
-                                     uint32_t channel,
-                                     uint16_t security_mode,
-                                     const uint8_t *passkey,
-                                     uint16_t passkey_length);
-
-sl_status_t sl_wfx_leave_ibss_command(void);
-
 sl_status_t sl_wfx_get_signal_strength(uint32_t *rcpi);
 
 sl_status_t sl_wfx_add_multicast_address(const sl_wfx_mac_address_t *mac_address, sl_wfx_interface_t interface);
@@ -161,11 +157,15 @@ sl_status_t sl_wfx_get_max_tx_power(int32_t *max_tx_power_rf_port_1,
                                     int32_t *max_tx_power_rf_port_2,
                                     sl_wfx_interface_t interface);
 
-sl_status_t sl_wfx_get_pmk(uint8_t *password,
+sl_status_t sl_wfx_get_pmk(sl_wfx_password_t *password,
                            uint32_t *password_length,
                            sl_wfx_interface_t interface);
 
 sl_status_t sl_wfx_get_ap_client_signal_strength(const sl_wfx_mac_address_t *client, uint32_t *signal_strength);
+
+sl_status_t sl_wfx_ext_auth(sl_wfx_ext_auth_data_type_t auth_data_type,
+                            uint16_t auth_data_length,
+                            const uint8_t *auth_data);
 
 /*
  * Asynchronous WF200 commands

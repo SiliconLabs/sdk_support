@@ -32,12 +32,7 @@
 #include <stdbool.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup ASSERT
+ * @addtogroup assert
  * @details
  *  This module contains functions to control the ASSERT peripheral of Silicon
  *  Labs 32-bit MCUs and SoCs.
@@ -59,7 +54,7 @@
  *   providing output of assertion location.
  *
  * @note
- *   This function is not used unless @ref DEBUG_EFM is defined
+ *   This function is not used unless DEBUG_EFM is defined
  *   during preprocessing of EFM_ASSERT() usage.
  *
  * @param[in] file
@@ -78,5 +73,4 @@ void assertEFM(const char *file, int line)
 }
 #endif /* DEBUG_EFM */
 
-/** @} (end addtogroup ASSERT) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup assert) */

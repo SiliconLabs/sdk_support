@@ -34,14 +34,9 @@
 
 #include "em_assert.h"
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
 /* *INDENT-OFF* */
 /***************************************************************************//**
- * @addtogroup QSPI
+ * @addtogroup qspi QSPI Octal-SPI
  * @brief QSPI Octal-SPI Controller API
  * @details
  *  These QSPI functions provide basic support for using the QSPI peripheral
@@ -279,7 +274,6 @@ void QSPI_ExecStigCmd(QSPI_TypeDef * qspi, const QSPI_StigCmd_TypeDef * stigCmd)
   }
 }
 
-/** @} (end addtogroup QSPI) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup qspi) */
 
 #endif /* defined(QSPI_COUNT) && (QSPI_COUNT > 0) */

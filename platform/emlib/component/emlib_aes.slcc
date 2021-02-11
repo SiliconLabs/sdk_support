@@ -1,0 +1,22 @@
+id: emlib_aes
+label: AES
+package: platform
+description: >
+  AES Accelerator Peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_aes.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_aes.h"
+    - path: "em_aes_compat.h"
+provides:
+  - name: emlib_aes
+requires:
+  - name: device
+  - name: device_has_aes
+  - name: emlib_common
+  - name: cmsis_core

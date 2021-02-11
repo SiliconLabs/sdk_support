@@ -3,7 +3,7 @@
  * @brief Radio coexistence utilities
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -15,9 +15,10 @@
  *
  ******************************************************************************/
 
-#include "coexistence/common/coexistence.h"
+#include "coexistence.h"
 #include "coexistence-hal.h"
 
+#ifndef COEX_HAL_DISABLED
 #define coexReqAndGntIrqShared() \
   (reqCfg.cb == &COEX_GNT_ISR)
 
@@ -73,26 +74,26 @@ static void COEX_PHY_SEL_ISR(void);
 static COEX_Cfg_t coexCfg;
 
 static COEX_GpioConfig_t phySelectCfg = {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .index = COEX_GPIO_INDEX_PHY_SELECT,
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_ASSERTED),
   .cb = &COEX_PHY_SEL_ISR
 };
 
 static COEX_GpioConfig_t rhoCfg = {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .index = COEX_GPIO_INDEX_RHO,
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_ASSERTED
                                   | COEX_GPIO_OPTION_INT_DEASSERTED),
   .cb = &COEX_RHO_ISR
 };
 
 static COEX_GpioConfig_t gntCfg = {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .index = COEX_GPIO_INDEX_GNT,
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_DEFAULT_ASSERTED
                                   | COEX_GPIO_OPTION_INT_ASSERTED
                                   | COEX_GPIO_OPTION_INT_DEASSERTED),
@@ -100,9 +101,9 @@ static COEX_GpioConfig_t gntCfg = {
 };
 
 static COEX_GpioConfig_t reqCfg = {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .index = COEX_GPIO_INDEX_REQ,
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   .options = (COEX_GpioOptions_t)(COEX_GPIO_OPTION_INT_DEASSERTED
                                   | COEX_GPIO_OPTION_OUTPUT),
   .cb = &COEX_REQ_ISR
@@ -146,6 +147,10 @@ __STATIC_INLINE void coexReqRandomBackoff(void)
                                & COEX_OPTION_MAX_REQ_BACKOFF_MASK);
   }
 }
+
+#ifndef COEX_HAL_GetPriority
+#define COEX_HAL_GetPriority() getGpioOut(priHandle, false)
+#endif //COEX_HAL_GetPriority
 
 static void setCoexOption(COEX_Options_t option, bool enable)
 {
@@ -205,7 +210,7 @@ static void configGpio(COEX_GpioHandle_t gpioHandle,
 static void coexEventCallback(COEX_Events_t events)
 {
   if (coexRadioCallback != NULL) {
-    if (getGpioOut(priHandle, false)) {
+    if (COEX_HAL_GetPriority()) {
       events |= COEX_EVENT_PRIORITY_ASSERTED;
     }
     coexRadioCallback(events);
@@ -352,19 +357,23 @@ static void setCoexReqCallback(COEX_ReqArgs_t *reqArgs)
 
 static void coexRadioHoldOffPowerDown(void)
 {
-  coexCfg.radioOn = false;
-  // When sleeping radio, no need to monitor RHO anymore
-  disableGpioInt(rhoHandle); //clear RHO top level int enable
+  if (coexCfg.radioOn) {
+    coexCfg.radioOn = false;
+    // When sleeping radio, no need to monitor RHO anymore
+    disableGpioInt(rhoHandle); //clear RHO top level int enable
+  }
 }
 
 static void coexRadioHoldOffPowerUp(void)
 {
-  coexCfg.radioOn = true;
-  if (rhoHandle != NULL) {
-    // When waking radio, set up initial state and resume monitoring
-    disableGpioInt(rhoHandle); //ensure RHO interrupt is off
-    rhoCfg.cb(); // Manually call ISR to assess current state
-    enableGpioInt(rhoHandle, NULL); //enable RHO interrupt
+  if (!coexCfg.radioOn) {
+    coexCfg.radioOn = true;
+    if (rhoHandle != NULL) {
+      // When waking radio, set up initial state and resume monitoring
+      disableGpioInt(rhoHandle); //ensure RHO interrupt is off
+      rhoCfg.cb(); // Manually call ISR to assess current state
+      enableGpioInt(rhoHandle, NULL); //enable RHO interrupt
+    }
   }
 }
 
@@ -463,7 +472,7 @@ bool COEX_IsEnabled(void)
          || (reqHandle != NULL);
 }
 
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 static uint8_t gpioInputOverride = 0U;
 static COEX_GpioHandle_t overrideGpioHandles[COEX_GPIO_INDEX_COUNT];
 
@@ -490,13 +499,13 @@ bool COEX_SetGpioInputOverride(COEX_GpioIndex_t gpioIndex, bool enable)
   }
   return true;
 }
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 
 bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle)
 {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   overrideGpioHandles[COEX_GPIO_INDEX_PHY_SELECT] = gpioHandle;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   // Register chip specific PHY select interrupt
   configGpio(gpioHandle, &phySelectHandle, &phySelectCfg);
   COEX_PHY_SEL_ISR();
@@ -505,9 +514,9 @@ bool COEX_ConfigPhySelect(COEX_GpioHandle_t gpioHandle)
 
 bool COEX_ConfigRadioHoldOff(COEX_GpioHandle_t gpioHandle)
 {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   overrideGpioHandles[COEX_GPIO_INDEX_RHO] = gpioHandle;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   setCoexPowerStateCallbackPtr = &setCoexPowerStateCallback;
 
   // Register chip specific RHO interrupt
@@ -537,18 +546,18 @@ bool COEX_ConfigPwmRequest(COEX_GpioHandle_t gpioHandle)
 
 bool COEX_ConfigGrant(COEX_GpioHandle_t gpioHandle)
 {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   overrideGpioHandles[COEX_GPIO_INDEX_GNT] = gpioHandle;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   configGpio(gpioHandle, &gntHandle, &gntCfg);
   return true;
 }
 
 bool COEX_ConfigRequest(COEX_GpioHandle_t gpioHandle)
 {
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   overrideGpioHandles[COEX_GPIO_INDEX_REQ] = gpioHandle;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   if ((coexCfg.options & COEX_OPTION_REQ_SHARED) != 0U) {
     reqCfg.options |= COEX_GPIO_OPTION_SHARED;
   } else {
@@ -613,11 +622,11 @@ void COEX_EnablePhySelectIsr(bool enable)
 }
 
 #ifdef COEX_HAL_FAST_REQUEST
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 #define COEX_ReadRequest() isGpioInSet(reqHandle, false)
-#else //!HAL_COEX_OVERRIDE_GPIO_INPUT
+#else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 #define COEX_ReadRequest() COEX_HAL_ReadRequest()
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 
 __STATIC_INLINE void COEX_SetPriorityAndRequest(bool request, bool priority)
 {
@@ -706,7 +715,7 @@ __attribute__((optimize("-Ofast")))
 // Don't know how to optimize unsupported compiler
 #endif
 
-#if HAL_COEX_DP_ENABLED
+#if SL_RAIL_UTIL_COEX_DP_ENABLED
 __STATIC_INLINE void pulseDirectionalPriority(void)
 {
   COEX_Req_t combinedReqState = coexCfg.combinedRequestState; // Local non-volatile flavor avoids warnings
@@ -719,7 +728,7 @@ __STATIC_INLINE void pulseDirectionalPriority(void)
       // coexUpdateReqIsr() triggered by REQUEST changing, not PWM changing?
       && (setRequest != getGpioOut(reqHandle, false))
       // PRIORITY changing requiring a new priority pulse?
-      && (highPriority && !getGpioOut(priHandle, false))) {
+      && (highPriority && !COEX_HAL_GetPriority())) {
     COEX_ClearRequestAndPriority(); // then deaasert all PTA signals
   }
 }
@@ -791,27 +800,28 @@ void COEX_InitHalConfigOptions(void)
 {
   COEX_Options_t options = COEX_OPTION_NONE;
 
-  #ifdef BSP_COEX_RHO_PORT
+  #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
   options |= COEX_OPTION_RHO_ENABLED;
-  #endif //BSP_COEX_RHO_PORT
-  #if defined(BSP_COEX_REQ_PORT) || defined(BSP_COEX_GNT_PORT)
+  #endif //SL_RAIL_UTIL_COEX_RHO_PORT
+  #if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
   options |= COEX_OPTION_COEX_ENABLED;
-  #endif //defined(BSP_COEX_REQ_PORT) || defined(BSP_COEX_GNT_PORT)
-  #if HAL_COEX_REQ_BACKOFF
+  #endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
+  #if SL_RAIL_UTIL_COEX_REQ_BACKOFF
   options |= (COEX_OPTION_MAX_REQ_BACKOFF_MASK
-              & HAL_COEX_REQ_BACKOFF);
-  #endif //HAL_COEX_REQ_BACKOFF
-  #if HAL_COEX_REQ_SHARED
+              & SL_RAIL_UTIL_COEX_REQ_BACKOFF);
+  #endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
+  #if SL_RAIL_UTIL_COEX_REQ_SHARED
   options |= COEX_OPTION_REQ_SHARED;
-  #endif //HAL_COEX_REQ_SHARED
-  #if HAL_COEX_PRI_SHARED && !HAL_COEX_DP_ENABLED
+  #endif //SL_RAIL_UTIL_COEX_REQ_SHARED
+  #if SL_RAIL_UTIL_COEX_PRI_SHARED && !SL_RAIL_UTIL_COEX_DP_ENABLED
   options |= COEX_OPTION_PRI_SHARED;
-  #endif //HAL_COEX_PRI_SHARED && !HAL_COEX_DP_ENABLED
-  #if HAL_COEX_TX_ABORT
+  #endif //SL_RAIL_UTIL_COEX_PRI_SHARED && !SL_RAIL_UTIL_COEX_DP_ENABLED
+  #if SL_RAIL_UTIL_COEX_TX_ABORT
   options |= COEX_OPTION_TX_ABORT;
-  #endif //HAL_COEX_TX_ABORT
-  #if HAL_COEX_DP_ENABLED
-  COEX_HAL_ConfigDp(HAL_COEX_DP_PULSE_WIDTH_US);
+  #endif //SL_RAIL_UTIL_COEX_TX_ABORT
+  #if SL_RAIL_UTIL_COEX_DP_ENABLED
+  COEX_HAL_ConfigDp(SL_RAIL_UTIL_COEX_DP_PULSE_WIDTH_US);
   #endif
   COEX_SetOptions(options);
 }
+#endif //COEX_HAL_DISABLED

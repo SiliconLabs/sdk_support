@@ -30,7 +30,7 @@
 
 #include "em_rtcc.h"
 #include "sl_sleeptimer.h"
-#include "sl_sleeptimer_hal.h"
+#include "sli_sleeptimer_hal.h"
 #include "em_core.h"
 #include "em_cmu.h"
 
@@ -58,6 +58,9 @@ void sleeptimer_hal_init_timer(void)
 
   rtcc_init.enable = false;
   rtcc_init.presc = (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
+#if (SL_SLEEPTIMER_DEBUGRUN == 1)
+  rtcc_init.debugRun = true;
+#endif
 
   RTCC_Init(&rtcc_init);
 
@@ -162,7 +165,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
  *
  * Note: This function must be called with interrupts disabled.
  *****************************************************************************/
-bool sleeptimer_hal_is_int_status_set(uint8_t local_flag)
+bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag)
 {
   bool int_is_set = false;
   uint32_t irq_flag = RTCC_IntGet();

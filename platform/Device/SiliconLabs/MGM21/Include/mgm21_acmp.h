@@ -611,4 +611,5 @@ typedef struct {
 /** @} End of group MGM21_ACMP_BitFields */
 /** @} End of group MGM21_ACMP */
 /** @} End of group Parts */
+
 #endif /* MGM21_ACMP_H */

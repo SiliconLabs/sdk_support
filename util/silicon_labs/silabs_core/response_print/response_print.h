@@ -123,7 +123,7 @@ bool responsePrint(char *command, char *formatString, ...);
  * @param command The name of the command that's being executed.
  * @return Returns true on success and false on failure.
  */
-bool responsePrintStart(char * command);
+bool responsePrintStart(char *command);
 
 /**
  * Continue to print a single response. A call to responsePrintStart followed by
@@ -137,7 +137,7 @@ bool responsePrintStart(char * command);
  * @param ... The values to be printed based on the given formats.
  * @return Returns true on success and false on failure.
  */
-bool responsePrintContinue(char * formatString, ...);
+bool responsePrintContinue(char *formatString, ...);
 
 /**
  * Finish printing a single response. A call to responsePrintStart followed by
@@ -151,7 +151,7 @@ bool responsePrintContinue(char * formatString, ...);
  * @param ... The values to be printed based on the given formats.
  * @return Returns true on success and false on failure.
  */
-bool responsePrintEnd(char * formatString, ...);
+bool responsePrintEnd(char *formatString, ...);
 
 /**
  * Print an error message for this command. An error will use the standard
@@ -177,7 +177,6 @@ bool responsePrintError(char *command, uint8_t code, char *formatString, ...);
  * @param  precision The precision of printed float
  * @return           Number of characters printed.
  */
-
-int sprintfFloat(char * buffer, int8_t len, float f, uint8_t precision);
+int sprintfFloat(char *buffer, int8_t len, float f, uint8_t precision);
 
 #endif // RESPONSE_PRINT_H__

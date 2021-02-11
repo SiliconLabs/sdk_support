@@ -31,11 +31,11 @@
  * @return
  *   Either a pointer to the allocated space or a null pointer.
  ******************************************************************************/
-void * sl_malloc(size_t size)
+void *sl_malloc(size_t size)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  void * ptr = malloc(size);
+  void *ptr = malloc(size);
   CORE_EXIT_CRITICAL();
   return ptr;
 }
@@ -53,11 +53,11 @@ void * sl_malloc(size_t size)
  * @return
  *   Either a pointer to the allocated space or a null pointer.
  ******************************************************************************/
-void * sl_calloc(size_t nmemb, size_t size)
+void *sl_calloc(size_t nmemb, size_t size)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  void * ptr = calloc(nmemb, size);
+  void *ptr = calloc(nmemb, size);
   CORE_EXIT_CRITICAL();
   return ptr;
 }
@@ -76,11 +76,11 @@ void * sl_calloc(size_t nmemb, size_t size)
  * @return
  *   Either a pointer to the allocated space or a null pointer.
  ******************************************************************************/
-void * sl_realloc(void * ptr, size_t size)
+void *sl_realloc(void * ptr, size_t size)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
-  void * p = realloc(ptr, size);
+  void *p = realloc(ptr, size);
   CORE_EXIT_CRITICAL();
   return p;
 }

@@ -1,0 +1,17 @@
+id: "bluetooth_feature_advertiser"
+label: "Advertiser"
+package: "Bluetooth"
+description: >
+  Bluetooth Low Energy advertising feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_advertiser"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_advertiser_init"
+    priority: 3

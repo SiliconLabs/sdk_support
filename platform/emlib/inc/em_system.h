@@ -39,17 +39,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SYSTEM
+ * @addtogroup system SYSTEM - System Utils
  * @brief System API
  * @details
  *  This module contains functions to read information such as RAM and Flash size,
- *  device unique ID, chip revision, family, and part number from @ref DEVINFO and
- *  @ref SCB blocks. Functions to configure and read status from FPU are available for
+ *  device unique ID, chip revision, family, and part number from DEVINFO and
+ *  SCB blocks. Functions to configure and read status from FPU are available for
  *  compatible devices.
  * @{
  ******************************************************************************/
@@ -196,6 +191,12 @@ typedef enum {
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13P)
   systemPartFamilyZen13P = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13P,        /**< EFR32 Zen Gecko Series 1 Configuration 3 Premium Device Family. */
 #endif
+#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13L)
+  systemPartFamilyZen13L = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13L,        /**< EFR32 Zen Gecko Series 1 Configuration 3 Led Device Family. */
+#endif
+#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13S)
+  systemPartFamilyZen13S = _DEVINFO_PART_DEVICE_FAMILY_EFR32ZG13S,        /**< EFR32 Zen Gecko Series 1 Configuration 3 Sensor Device Family. */
+#endif
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32MG14P)
   systemPartFamilyMighty14P = _DEVINFO_PART_DEVICE_FAMILY_EFR32MG14P,     /**< EFR32 Mighty Gecko Series 1 Configuration 4 Premium Device Family. */
 #endif
@@ -204,15 +205,6 @@ typedef enum {
 #endif
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32MG14V)
   systemPartFamilyMighty14V = _DEVINFO_PART_DEVICE_FAMILY_EFR32MG14V,     /**< EFR32 Mighty Gecko Series 1 Configuration 4 Value Device Family. */
-#endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32BG14P)
-  systemPartFamilyBlue14P = _DEVINFO_PART_DEVICE_FAMILY_EFR32BG14P,       /**< EFR32 Blue Gecko Series 1 Configuration 4 Premium Device Family. */
-#endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32BG14B)
-  systemPartFamilyBlue14B = _DEVINFO_PART_DEVICE_FAMILY_EFR32BG14B,       /**< EFR32 Blue Gecko Series 1 Configuration 4 Basic Device Family. */
-#endif
-#if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32BG14V)
-  systemPartFamilyBlue14V = _DEVINFO_PART_DEVICE_FAMILY_EFR32BG14V,       /**< EFR32 Blue Gecko Series 1 Configuration 4 Value Device Family. */
 #endif
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_EFR32FG14P)
   systemPartFamilyFlex14P = _DEVINFO_PART_DEVICE_FAMILY_EFR32FG14P,       /**< EFR32 Flex Gecko Series 1 Configuration 4 Premium Device Family. */
@@ -235,7 +227,11 @@ typedef enum {
   systemPartFamilyMighty22 = DEVINFO_PART_FAMILY_MG | (22 << _DEVINFO_PART_FAMILYNUM_SHIFT), /**< EFR32 Mighty Gecko Series 2 Config 2 Value Device Family */
   systemPartFamilyFlex22 = DEVINFO_PART_FAMILY_FG | (22 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Flex Gecko Series 2 Config 2 Value Device Family */
   systemPartFamilyBlue22 = DEVINFO_PART_FAMILY_BG | (22 << _DEVINFO_PART_FAMILYNUM_SHIFT),   /**< EFR32 Blue Gecko Series 2 Config 2 Value Device Family */
-  systemPartFamilyXG22 = DEVINFO_PART_FAMILY_MG | (22 << _DEVINFO_PART_FAMILYNUM_SHIFT), /**< EFR32 Mighty Gecko Series 2 Config 2 Value Device Family */
+#endif
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  systemPartFamilyFlex23 = DEVINFO_PART_FAMILY_FG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),     /**< EFR32 Flex Gecko Series 2 Config 3 Value Device Family */
+  systemPartFamilyZen23 = DEVINFO_PART_FAMILY_ZG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),     /**< EFR32 Zen Gecko Series 2 Config 3 Value Device Family */
+  systemPartFamilyEfm32Pearl23 = DEVINFO_PART_FAMILY_PG | (23 << _DEVINFO_PART_FAMILYNUM_SHIFT),     /**< EFM32 Pearl Gecko Series 2 Config 3 Value Device Family */
 #endif
 /* Deprecated family #defines */
 #if defined(_DEVINFO_PART_DEVICE_FAMILY_G)
@@ -263,6 +259,16 @@ typedef enum {
                                                                   Family ID is missing
                                                                   on unprogrammed parts. */
 } SYSTEM_PartFamily_TypeDef;
+
+/** Family security capability. */
+typedef enum {
+  securityCapabilityUnknown, /**< Unknown security capability. */
+  securityCapabilityNA,      /**< Security capability not applicable. */
+  securityCapabilityBasic,   /**< Basic security capability. */
+  securityCapabilityRoT,     /**< Root of Trust security capability. */
+  securityCapabilitySE,      /**< Secure Element security capability. */
+  securityCapabilityVault    /**< Secure Vault security capability. */
+} SYSTEM_SecurityCapability_TypeDef;
 
 /*******************************************************************************
  *******************************   STRUCTS   ***********************************
@@ -298,6 +304,7 @@ SYSTEM_CalAddrVal_TypeDef;
 
 void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev);
 bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress);
+SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void);
 
 #if defined(_DEVINFO_DEVINFOREV_DEVINFOREV_MASK) || defined(_DEVINFO_INFO_DEVINFOREV_MASK)
 /***************************************************************************//**
@@ -381,7 +388,7 @@ __STATIC_INLINE uint8_t SYSTEM_GetProdRev(void)
  * @note
  *   This function retrieves SRAM size by reading the chip device
  *   info structure. If your binary is made for one specific device only,
- *   use @ref SRAM_SIZE instead.
+ *   use SRAM_SIZE instead.
  *
  * @return
  *   Size of internal SRAM (in KB).
@@ -404,6 +411,7 @@ __STATIC_INLINE uint16_t SYSTEM_GetSRAMSize(void)
   /* Do not include EFR32xG1 RAMH. */
   sizekb--;
 #endif
+
   return sizekb;
 }
 
@@ -414,7 +422,7 @@ __STATIC_INLINE uint16_t SYSTEM_GetSRAMSize(void)
  * @note
  *   This function retrieves flash size by reading the chip device
  *   info structure. If your binary is made for one specific device only,
- *   use @ref FLASH_SIZE instead.
+ *   use FLASH_SIZE instead.
  *
  * @return
  *   Size of internal flash (in KB).
@@ -439,7 +447,7 @@ __STATIC_INLINE uint16_t SYSTEM_GetFlashSize(void)
  * @note
  *   This function retrieves flash page size by reading the chip device
  *   info structure. If your binary is made for one specific device only,
- *   use @ref FLASH_PAGE_SIZE instead.
+ *   use FLASH_PAGE_SIZE instead.
  *
  * @return
  *   Page size of internal flash in bytes.
@@ -461,7 +469,7 @@ __STATIC_INLINE uint32_t SYSTEM_GetFlashPageSize(void)
     return FLASH_PAGE_SIZE;
   }
 #endif
-#endif // defined(_SILICON_LABS_32B_SERIES_0)
+#endif
 
 #if defined(_DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
   tmp = (DEVINFO->MEMINFO & _DEVINFO_MEMINFO_FLASHPAGESIZE_MASK)
@@ -521,7 +529,7 @@ __STATIC_INLINE SYSTEM_PartFamily_TypeDef SYSTEM_GetFamily(void)
          ((uint32_t)((DEVINFO->PART & _DEVINFO_PART_DEVICE_FAMILY_MASK)
                      >> _DEVINFO_PART_DEVICE_FAMILY_SHIFT));
 #else
-#error Location of device family name is not defined.
+  #error Location of device family name is not defined.
 #endif
 }
 
@@ -545,11 +553,9 @@ __STATIC_INLINE uint8_t SYSTEM_GetCalibrationTemperature(void)
 #endif
 }
 
-/** @} (end addtogroup SYSTEM) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup system) */
 
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* EM_SYSTEM_H */

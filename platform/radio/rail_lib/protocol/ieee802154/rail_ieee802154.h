@@ -3,7 +3,7 @@
  * @brief The IEEE 802.15.4 specific header file for the RAIL library.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -87,6 +87,7 @@ extern "C" {
 ///   .framesMask = RAIL_IEEE802154_ACCEPT_STANDARD_FRAMES,
 ///   .promiscuousMode = false,  // Enable format and address filtering.
 ///   .isPanCoordinator = false,
+///   .defaultFramePendingInOutgoingAcks = false,
 /// };
 ///
 /// void config154(void)
@@ -154,22 +155,30 @@ extern "C" {
 ///
 /// Address filtering will be enabled except when in promiscuous mode which can
 /// be set with RAIL_IEEE802154_SetPromiscuousMode(). The addresses may be
-/// changed at runtime. However, if you are receiving a packet while reconfiguring the
-/// address filters, you may get undesired behavior so it's safest to do this
-/// while not in receive.
+/// changed at runtime. However, if you are receiving a packet while
+/// reconfiguring the address filters, you may get undesired behavior so it's
+/// safest to do this while not in receive.
 ///
 /// Auto ACK is controlled by the ackConfig and timings fields passed to
 /// RAIL_IEEE802154_Init(). After initialization they may be controlled
 /// using the normal \ref Auto_Ack and \ref State_Transitions APIs. When in IEEE
 /// 802.15.4 mode, the ACK will generally have a 5 byte length, its Frame Type
 /// will be ACK, its Frame Version 0 (2003), and its Frame Pending bit will be
-/// set if RAIL_IEEE802154_SetFramePending() is called when the \ref
-/// RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND event is triggered. This event
-/// must be turned on by the user and will fire whenever a data request is being
-/// received so that the stack can determine whether there is pending data. Be
-/// aware that the frame pending bit must be set quickly after receiving the
-/// event or the ACK may already have been transmitted. Check the return code of
-/// RAIL_IEEE802154_SetFramePending() to be sure that the bit was set in time.
+/// false unless the \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND event is
+/// triggered in which case it will default to the
+/// \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks setting.
+/// If the default Frame Pending setting is incorrect,
+/// the app must call \ref RAIL_IEEE802154_ToggleFramePending
+/// (formerly \ref RAIL_IEEE802154_SetFramePending) while handling the
+/// \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND event.
+///
+/// This event must be turned on by the user and will fire whenever a data
+/// request is being received so that the stack can determine whether there
+/// is pending data. Be aware that if the default Frame Pending bit needs to
+/// be changed it must be done quickly otherwise the ACK may already
+/// have been transmitted with the default setting. Check the return code of
+/// RAIL_IEEE802154_ToggleFramePending() to be sure that the bit was changed
+/// in time.
 ///
 /// Transmit and receive operations are done using the standard RAIL APIs in
 /// IEEE 802.15.4 mode. To send packets using the correct CSMA configuration
@@ -197,7 +206,7 @@ RAIL_ENUM(RAIL_IEEE802154_AddressLength_t) {
  * @struct RAIL_IEEE802154_Address_t
  * @brief Representation of 802.15.4 address
  * This structure is only used for received source address information
- * needed to perform frame pending lookup.
+ * needed to perform Frame Pending lookup.
  */
 typedef struct RAIL_IEEE802154_Address{
   /** Convenient storage for different address types. */
@@ -209,6 +218,11 @@ typedef struct RAIL_IEEE802154_Address{
    * Enumeration of the received address length.
    */
   RAIL_IEEE802154_AddressLength_t length;
+  /**
+   * A bitmask representing which address filter(s) this packet has passed.
+   * It is undefined on platforms lacking \ref RAIL_SUPPORTS_ADDR_FILTER_MASK.
+   */
+  RAIL_AddrFilterMask_t filterMask;
 } RAIL_IEEE802154_Address_t;
 
 /** The maximum number of allowed addresses of each type. */
@@ -260,7 +274,7 @@ typedef struct RAIL_IEEE802154_Config {
    */
   const RAIL_IEEE802154_AddrConfig_t *addresses;
   /**
-   * Defines the ACKing configuration for the IEEE 802.15.4 implementation.
+   * Define the ACKing configuration for the IEEE 802.15.4 implementation.
    */
   RAIL_AutoAckConfig_t ackConfig;
   /**
@@ -282,6 +296,14 @@ typedef struct RAIL_IEEE802154_Config {
    * be overridden via RAIL_IEEE802154_SetPanCoordinator() afterwards.
    */
   bool isPanCoordinator;
+  /**
+   * The default value for the Frame Pending bit in outgoing ACKs for packets
+   * that triggered the \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND event.
+   * Such an ACK's Frame Pending bit can be inverted if necessary during the
+   * handling of that event by calling \ref RAIL_IEEE802154_ToggleFramePending
+   * (formerly \ref RAIL_IEEE802154_SetFramePending).
+   */
+  bool defaultFramePendingInOutgoingAcks;
 } RAIL_IEEE802154_Config_t;
 
 /**
@@ -368,6 +390,65 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(RAIL_Handle_t railHand
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoex(RAIL_Handle_t railHandle);
 
 /**
+ * Configure the radio for 2.4 GHz 802.15.4 operation with a front end module.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz operation, but with a configuration
+ * that supports a front end module. It takes the place of
+ * calling \ref RAIL_ConfigChannels. After this call,
+ * channels 11-26 will be available, giving the frequencies of those channels
+ * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioFem(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 operation with antenna diversity
+ * optimized for a front end module.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz operation, but with a configuration
+ * that supports antenna diversity and a front end module. It takes the place of
+ * calling \ref RAIL_ConfigChannels. After this call,
+ * channels 11-26 will be available, giving the frequencies of those channels
+ * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivFem(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 operation optimized for radio coexistence
+ * and a front end module.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz operation, but with a configuration
+ * that supports radio coexistence and a front end module. It takes the place of
+ * calling \ref RAIL_ConfigChannels. After this call,
+ * channels 11-26 will be available, giving the frequencies of those channels
+ * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoexFem(RAIL_Handle_t railHandle);
+
+/**
+ * Configure the radio for 2.4 GHz 802.15.4 operation with antenna diversity
+ * optimized for radio coexistence and a front end module.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4 GHz operation, but with a configuration
+ * that supports antenna diversity, radio coexistence and a front end module.
+ * It takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels 11-26 will be available, giving the frequencies of
+ * those channels on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railHandle);
+
+/**
  * Configure the radio for SubGHz GB868 863 MHz 802.15.4 operation.
  *
  * @param[in] railHandle A handle of RAIL instance.
@@ -437,7 +518,7 @@ RAIL_Status_t RAIL_IEEE802154_SetAddresses(RAIL_Handle_t railHandle,
                                            const RAIL_IEEE802154_AddrConfig_t *addresses);
 
 /**
- * Sets a PAN ID for 802.15.4 address filtering.
+ * Set a PAN ID for 802.15.4 address filtering.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] panId The 16-bit PAN ID information.
@@ -650,7 +731,7 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  *   reception and transmission based on the FCS Type bit in the
  *   received/transmitted PHY header. This includes ACK reception
  *   and automatically-generated ACKs reflect the CRC size of the
- *   incoming frame being acknowledged (i.e. their MAC payload will be
+ *   incoming frame being acknowledged (i.e., their MAC payload will be
  *   increased to 7 bytes when sending 4-byte FCS).
  *   On other platforms, only the 2-byte FCS is supported.
  * - On platforms where \ref RAIL_FEAT_IEEE802154_G_UNWHITENED_RX_SUPPORTED
@@ -710,7 +791,7 @@ RAIL_Status_t RAIL_IEEE802154_ConfigGOptions(RAIL_Handle_t railHandle,
 #define RAIL_IEEE802154_ACCEPT_MULTIPURPOSE_FRAMES (0x20)
 
 /// In standard operation, accept BEACON, DATA and COMMAND frames.
-/// Don't receive ACK frames unless waiting for ACK (i.e. only
+/// Don't receive ACK frames unless waiting for ACK (i.e., only
 /// receive expected ACKs).
 #define RAIL_IEEE802154_ACCEPT_STANDARD_FRAMES (RAIL_IEEE802154_ACCEPT_BEACON_FRAMES \
                                                 | RAIL_IEEE802154_ACCEPT_DATA_FRAMES \
@@ -754,8 +835,8 @@ RAIL_Status_t RAIL_IEEE802154_AcceptFrames(RAIL_Handle_t railHandle,
  * command byte indicating the packet is a data request. Enabling this
  * feature causes this event to be triggered earlier, right after receiving
  * the source address information in the MAC header, allowing for more time
- * to perform the lookup and call \ref RAIL_IEEE802154_SetFramePending()
- * to set Frame Pending in the outgoing ACK for the incoming frame.
+ * to perform the lookup and call \ref RAIL_IEEE802154_ToggleFramePending()
+ * to update the Frame Pending bit in the outgoing ACK for the incoming frame.
  * This feature is also necessary for handling 802.15.4 MAC-encrypted
  * frames where the MAC Command byte is encrypted (MAC Frame Version 2) --
  * see \ref RAIL_IEEE802154_ConfigEOptions().
@@ -791,17 +872,45 @@ RAIL_Status_t RAIL_IEEE802154_EnableDataFramePending(RAIL_Handle_t railHandle,
                                                      bool enable);
 
 /**
- * Set the frame pending bit on the outgoing legacy Immediate ACK.
- *
- * @param[in] railHandle A handle of RAIL instance.
+ * Alternate naming for function \ref RAIL_IEEE802154_SetFramePending
+ * to depict it is used for changing the default setting specified by
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks in
+ * an outgoing ACK.
+ */
+ #define RAIL_IEEE802154_ToggleFramePending RAIL_IEEE802154_SetFramePending
+
+/**
+ * Change the Frame Pending bit on the outgoing legacy Immediate ACK from
+ * the default specified by
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks.
+ * @param[in] railHandle A handle of RAIL instance
  * @return A status code indicating success of the function call.
  *
  * This function must only be called while processing the \ref
- * RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND, if the given source address has
- * a pending frame. It's intended only for use with 802.15.4 legacy
- * Immediate ACKs and not 802.15.4E Enhanced ACKs.
+ * RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND if the ACK
+ * for this packet should go out with its Frame Pending bit set differently
+ * than what was specified by
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks.
+ *
+ * It's intended only for use with 802.15.4 legacy Immediate ACKs and
+ * not 802.15.4E Enhanced ACKs.
  * This will return \ref RAIL_STATUS_INVALID_STATE if it is too late to
  * modify the outgoing Immediate ACK.
+
+ * @note This function is used to set the Frame Pending bit but its meaning
+ * depends on the value of
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ * while transmitting ACK.
+ * If \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ * is not set, then Frame Pending bit is set in outgoing ACK.
+ * Whereas, if \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ * is set, then Frame Pending bit is cleared in outgoing ACK.
+ *
+ * Therefore, this function is to be called if the frame is pending when
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ * is not set or if there is no frame pending when
+ * \ref RAIL_IEEE802154_Config_t::defaultFramePendingInOutgoingAcks
+ * is set.
  */
 RAIL_Status_t RAIL_IEEE802154_SetFramePending(RAIL_Handle_t railHandle);
 
@@ -816,7 +925,7 @@ RAIL_Status_t RAIL_IEEE802154_SetFramePending(RAIL_Handle_t railHandle);
  * This function must only be called when handling the \ref
  * RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND event. This will return
  * \ref RAIL_STATUS_INVALID_STATE if the address information is stale
- * (i.e. it is too late to affect the outgoing ACK).
+ * (i.e., it is too late to affect the outgoing ACK).
  */
 RAIL_Status_t RAIL_IEEE802154_GetAddress(RAIL_Handle_t railHandle,
                                          RAIL_IEEE802154_Address_t *pAddress);
@@ -834,7 +943,7 @@ RAIL_Status_t RAIL_IEEE802154_GetAddress(RAIL_Handle_t railHandle,
  * RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND, and is intended for use
  * when packet information from \ref RAIL_GetRxIncomingPacketInfo()
  * indicates an 802.15.4E Enhanced ACK must be sent instead of a legacy
- * Immediate ACK. \ref RAIL_IEEE802154_SetFramePending() should not be
+ * Immediate ACK. \ref RAIL_IEEE802154_ToggleFramePending() should not be
  * called for an Enhanced ACK; instead the Enhanced ACK's Frame Control
  * Field should have the Frame Pending bit set appropriately in its ackData.
  * This will return \ref RAIL_STATUS_INVALID_STATE if it is too late to

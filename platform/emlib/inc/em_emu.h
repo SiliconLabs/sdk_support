@@ -42,21 +42,16 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup EMU
+ * @addtogroup emu
  * @{
  ******************************************************************************/
 
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
-
 #if defined(_EMU_STATUS_VSCALE_MASK) \
   && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+/** Voltage scaling present */
 #define EMU_VSCALE_PRESENT
 #endif
 
@@ -193,6 +188,7 @@ typedef enum {
 } EMU_EM4State_TypeDef;
 
 #if defined(_EMU_EM4CTRL_EM4IORETMODE_MASK)
+/** EM4 Pin Retention Type. */
 typedef enum {
   /** No Retention: Pads enter reset state when entering EM4. */
   emuPinRetentionDisable = EMU_EM4CTRL_EM4IORETMODE_DISABLE,
@@ -222,6 +218,14 @@ typedef enum {
   emuDcdcMode_LowPower = EMU_DCDCCTRL_DCDCMODE_LOWPOWER,
 #endif
 } EMU_DcdcMode_TypeDef;
+
+typedef enum {
+  /** DCDC mode is low power. */
+  emuDcdcModeEM23_LowPower = EMU_DCDCCTRL_DCDCMODEEM23_EM23LOWPOWER,
+  /** DCDC mode is according to DCDCMODE field. */
+  emuDcdcModeEM23_Sw = EMU_DCDCCTRL_DCDCMODEEM23_EM23SW,
+} EMU_DcdcModeEM23_TypeDef;
+
 #endif
 
 #if defined(_EMU_DCDCCTRL_MASK)
@@ -304,8 +308,8 @@ typedef enum {
 #if defined(_DCDC_CTRL_MASK)
 /** DCDC mode. */
 typedef enum {
-  emuDcdcMode_Bypass,                     /**< DCDC regulator bypass. */
-  emuDcdcMode_Regulation                  /**< DCDC regulator on.     */
+  emuDcdcMode_Bypass     = _DCDC_CTRL_MODE_BYPASS,            /**< DCDC regulator bypass. */
+  emuDcdcMode_Regulation = _DCDC_CTRL_MODE_DCDCREGULATION     /**< DCDC regulator on.     */
 } EMU_DcdcMode_TypeDef;
 
 /** VREGIN comparator threshold. */
@@ -318,6 +322,7 @@ typedef enum {
 
 /** DCDC Ton max timeout. */
 typedef enum {
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) && (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
   emuDcdcTonMaxTimeout_Off    = _DCDC_CTRL_IPKTMAXCTRL_OFF,         /**< Ton max off.       */
   emuDcdcTonMaxTimeout_0P35us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_0P35us, /**< Ton max is 0.35us. */
   emuDcdcTonMaxTimeout_0P63us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_0P63us, /**< Ton max is 0.63us. */
@@ -326,6 +331,40 @@ typedef enum {
   emuDcdcTonMaxTimeout_1P47us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_1P47us, /**< Ton max is 1.47us. */
   emuDcdcTonMaxTimeout_1P75us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_1P75us, /**< Ton max is 1.75us. */
   emuDcdcTonMaxTimeout_2P03us = _DCDC_CTRL_IPKTMAXCTRL_TMAX_2P03us  /**< Ton max is 2.03us. */
+#else
+  emuDcdcTonMaxTimeout_Off    = 0,  /**< Ton max off.       */
+  emuDcdcTonMaxTimeout_0P14us = 1,
+  emuDcdcTonMaxTimeout_0P21us = 2,
+  emuDcdcTonMaxTimeout_0P28us = 3,
+  emuDcdcTonMaxTimeout_0P35us = 4,
+  emuDcdcTonMaxTimeout_0P42us = 5,
+  emuDcdcTonMaxTimeout_0P49us = 6,
+  emuDcdcTonMaxTimeout_0P56us = 7,
+  emuDcdcTonMaxTimeout_0P63us = 8,
+  emuDcdcTonMaxTimeout_0P70us = 9,
+  emuDcdcTonMaxTimeout_0P77us = 10,
+  emuDcdcTonMaxTimeout_0P84us = 11,
+  emuDcdcTonMaxTimeout_0P91us = 12,
+  emuDcdcTonMaxTimeout_0P98us = 13,
+  emuDcdcTonMaxTimeout_1P05us = 14,
+  emuDcdcTonMaxTimeout_1P12us = 15,
+  emuDcdcTonMaxTimeout_1P19us = 16,
+  emuDcdcTonMaxTimeout_1P26us = 17,
+  emuDcdcTonMaxTimeout_1P33us = 18,
+  emuDcdcTonMaxTimeout_1P40us = 19,
+  emuDcdcTonMaxTimeout_1P47us = 20,
+  emuDcdcTonMaxTimeout_1P54us = 21,
+  emuDcdcTonMaxTimeout_1P61us = 22,
+  emuDcdcTonMaxTimeout_1P68us = 23,
+  emuDcdcTonMaxTimeout_1P75us = 24,
+  emuDcdcTonMaxTimeout_1P82us = 25,
+  emuDcdcTonMaxTimeout_1P89us = 26,
+  emuDcdcTonMaxTimeout_1P96us = 27,
+  emuDcdcTonMaxTimeout_2P03us = 28,
+  emuDcdcTonMaxTimeout_2P10us = 29,
+  emuDcdcTonMaxTimeout_2P17us = 30,
+  emuDcdcTonMaxTimeout_2P24us = 31
+#endif
 } EMU_DcdcTonMaxTimeout_TypeDef;
 
 /** DCDC drive speed. */
@@ -402,9 +441,9 @@ typedef enum {
   /** High-performance voltage level. HF clock can be set to any frequency. */
   emuVScaleEM01_HighPerformance = _EMU_STATUS_VSCALE_VSCALE2,
   /** Low-power optimized voltage level. HF clock must be limited
-      to @ref CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX Hz at this voltage.
+      to CMU_VSCALEEM01_LOWPOWER_VOLTAGE_CLOCK_MAX Hz at this voltage.
       EM0/1 voltage scaling is applied when core clock frequency is
-      changed from @ref CMU or when calling @ref EMU_EM01Init() when HF
+      changed from @ref cmu or when calling @ref EMU_EM01Init() when HF
       clock is already below the limit. */
 #if defined(_SILICON_LABS_32B_SERIES_2)
   /** Minimum VSCALE level in EM0/1 is VSCALE1. */
@@ -443,66 +482,66 @@ typedef enum {
 /** Peripheral EM2 and 3 retention control. */
 typedef enum {
 #if defined(_EMU_EM23PERNORETAINCTRL_USBDIS_MASK)
-  emuPeripheralRetention_USB      = _EMU_EM23PERNORETAINCTRL_USBDIS_MASK,       /* Select USB retention control.  */
+  emuPeripheralRetention_USB      = _EMU_EM23PERNORETAINCTRL_USBDIS_MASK,       /**< Select USB retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_RTCDIS_MASK)
-  emuPeripheralRetention_RTC      = _EMU_EM23PERNORETAINCTRL_RTCDIS_MASK,       /* Select RTC retention control.  */
+  emuPeripheralRetention_RTC      = _EMU_EM23PERNORETAINCTRL_RTCDIS_MASK,       /**< Select RTC retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_ACMP3DIS_MASK)
-  emuPeripheralRetention_ACMP3    = _EMU_EM23PERNORETAINCTRL_ACMP3DIS_MASK,     /* Select ACMP3 retention control. */
+  emuPeripheralRetention_ACMP3    = _EMU_EM23PERNORETAINCTRL_ACMP3DIS_MASK,     /**< Select ACMP3 retention control. */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_ACMP2DIS_MASK)
-  emuPeripheralRetention_ACMP2    = _EMU_EM23PERNORETAINCTRL_ACMP2DIS_MASK,     /* Select ACMP2 retention control.  */
+  emuPeripheralRetention_ACMP2    = _EMU_EM23PERNORETAINCTRL_ACMP2DIS_MASK,     /**< Select ACMP2 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_ADC1DIS_MASK)
-  emuPeripheralRetention_ADC1     = _EMU_EM23PERNORETAINCTRL_ADC1DIS_MASK,      /* Select ADC1 retention control.  */
+  emuPeripheralRetention_ADC1     = _EMU_EM23PERNORETAINCTRL_ADC1DIS_MASK,      /**< Select ADC1 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_I2C2DIS_MASK)
-  emuPeripheralRetention_I2C2     = _EMU_EM23PERNORETAINCTRL_I2C2DIS_MASK,      /* Select I2C2 retention control.  */
+  emuPeripheralRetention_I2C2     = _EMU_EM23PERNORETAINCTRL_I2C2DIS_MASK,      /**< Select I2C2 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_LETIMER1DIS_MASK)
-  emuPeripheralRetention_LETIMER1 = _EMU_EM23PERNORETAINCTRL_LETIMER1DIS_MASK,  /* Select LETIMER1 retention control.  */
+  emuPeripheralRetention_LETIMER1 = _EMU_EM23PERNORETAINCTRL_LETIMER1DIS_MASK,  /**< Select LETIMER1 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_LCDDIS_MASK)
-  emuPeripheralRetention_LCD      = _EMU_EM23PERNORETAINCTRL_LCDDIS_MASK,       /* Select LCD retention control.  */
+  emuPeripheralRetention_LCD      = _EMU_EM23PERNORETAINCTRL_LCDDIS_MASK,       /**< Select LCD retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_LEUART1DIS_MASK)
-  emuPeripheralRetention_LEUART1  = _EMU_EM23PERNORETAINCTRL_LEUART1DIS_MASK,   /* Select LEUART1 retention control.  */
+  emuPeripheralRetention_LEUART1  = _EMU_EM23PERNORETAINCTRL_LEUART1DIS_MASK,   /**< Select LEUART1 retention control.  */
 #endif
-  emuPeripheralRetention_LEUART0  = _EMU_EM23PERNORETAINCTRL_LEUART0DIS_MASK,   /* Select LEUART0 retention control.  */
+  emuPeripheralRetention_LEUART0  = _EMU_EM23PERNORETAINCTRL_LEUART0DIS_MASK,   /**< Select LEUART0 retention control.  */
 #if defined(_EMU_EM23PERNORETAINCTRL_CSENDIS_MASK)
-  emuPeripheralRetention_CSEN     = _EMU_EM23PERNORETAINCTRL_CSENDIS_MASK,      /* Select CSEN retention control.  */
+  emuPeripheralRetention_CSEN     = _EMU_EM23PERNORETAINCTRL_CSENDIS_MASK,      /**< Select CSEN retention control.  */
 #endif
-  emuPeripheralRetention_LESENSE0 = _EMU_EM23PERNORETAINCTRL_LESENSE0DIS_MASK,  /* Select LESENSE0 retention control.  */
+  emuPeripheralRetention_LESENSE0 = _EMU_EM23PERNORETAINCTRL_LESENSE0DIS_MASK,  /**< Select LESENSE0 retention control.  */
 #if defined(_EMU_EM23PERNORETAINCTRL_WDOG1DIS_MASK)
-  emuPeripheralRetention_WDOG1    = _EMU_EM23PERNORETAINCTRL_WDOG1DIS_MASK,     /* Select WDOG1 retention control.  */
+  emuPeripheralRetention_WDOG1    = _EMU_EM23PERNORETAINCTRL_WDOG1DIS_MASK,     /**< Select WDOG1 retention control.  */
 #endif
-  emuPeripheralRetention_WDOG0    = _EMU_EM23PERNORETAINCTRL_WDOG0DIS_MASK,     /* Select WDOG0 retention control.  */
-  emuPeripheralRetention_LETIMER0 = _EMU_EM23PERNORETAINCTRL_LETIMER0DIS_MASK,  /* Select LETIMER0 retention control.  */
-  emuPeripheralRetention_ADC0     = _EMU_EM23PERNORETAINCTRL_ADC0DIS_MASK,      /* Select ADC0 retention control.  */
+  emuPeripheralRetention_WDOG0    = _EMU_EM23PERNORETAINCTRL_WDOG0DIS_MASK,     /**< Select WDOG0 retention control.  */
+  emuPeripheralRetention_LETIMER0 = _EMU_EM23PERNORETAINCTRL_LETIMER0DIS_MASK,  /**< Select LETIMER0 retention control.  */
+  emuPeripheralRetention_ADC0     = _EMU_EM23PERNORETAINCTRL_ADC0DIS_MASK,      /**< Select ADC0 retention control.  */
 #if defined(_EMU_EM23PERNORETAINCTRL_IDAC0DIS_MASK)
-  emuPeripheralRetention_IDAC0    = _EMU_EM23PERNORETAINCTRL_IDAC0DIS_MASK,     /* Select IDAC0 retention control.  */
+  emuPeripheralRetention_IDAC0    = _EMU_EM23PERNORETAINCTRL_IDAC0DIS_MASK,     /**< Select IDAC0 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_VDAC0DIS_MASK)
-  emuPeripheralRetention_VDAC0    = _EMU_EM23PERNORETAINCTRL_VDAC0DIS_MASK,     /* Select VDAC0 retention control.  */
+  emuPeripheralRetention_VDAC0    = _EMU_EM23PERNORETAINCTRL_VDAC0DIS_MASK,     /**< Select VDAC0 retention control.  */
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK)
-  emuPeripheralRetention_I2C1     = _EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK,      /* Select I2C1 retention control.  */
+  emuPeripheralRetention_I2C1     = _EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK,      /**< Select I2C1 retention control.  */
 #endif
-  emuPeripheralRetention_I2C0     = _EMU_EM23PERNORETAINCTRL_I2C0DIS_MASK,      /* Select I2C0 retention control.  */
-  emuPeripheralRetention_ACMP1    = _EMU_EM23PERNORETAINCTRL_ACMP1DIS_MASK,     /* Select ACMP1 retention control.  */
-  emuPeripheralRetention_ACMP0    = _EMU_EM23PERNORETAINCTRL_ACMP0DIS_MASK,     /* Select ACMP0 retention control.  */
+  emuPeripheralRetention_I2C0     = _EMU_EM23PERNORETAINCTRL_I2C0DIS_MASK,      /**< Select I2C0 retention control.  */
+  emuPeripheralRetention_ACMP1    = _EMU_EM23PERNORETAINCTRL_ACMP1DIS_MASK,     /**< Select ACMP1 retention control.  */
+  emuPeripheralRetention_ACMP0    = _EMU_EM23PERNORETAINCTRL_ACMP0DIS_MASK,     /**< Select ACMP0 retention control.  */
 #if defined(_EMU_EM23PERNORETAINCTRL_PCNT1DIS_MASK)
-  emuPeripheralRetention_PCNT2    = _EMU_EM23PERNORETAINCTRL_PCNT2DIS_MASK,     /* Select PCNT2 retention control.  */
-  emuPeripheralRetention_PCNT1    = _EMU_EM23PERNORETAINCTRL_PCNT1DIS_MASK,     /* Select PCNT1 retention control.  */
+  emuPeripheralRetention_PCNT2    = _EMU_EM23PERNORETAINCTRL_PCNT2DIS_MASK,     /**< Select PCNT2 retention control.  */
+  emuPeripheralRetention_PCNT1    = _EMU_EM23PERNORETAINCTRL_PCNT1DIS_MASK,     /**< Select PCNT1 retention control.  */
 #endif
-  emuPeripheralRetention_PCNT0    = _EMU_EM23PERNORETAINCTRL_PCNT0DIS_MASK,     /* Select PCNT0 retention control.  */
+  emuPeripheralRetention_PCNT0    = _EMU_EM23PERNORETAINCTRL_PCNT0DIS_MASK,     /**< Select PCNT0 retention control.  */
 
   emuPeripheralRetention_D1       = _EMU_EM23PERNORETAINCTRL_LETIMER0DIS_MASK
                                     | _EMU_EM23PERNORETAINCTRL_PCNT0DIS_MASK
                                     | _EMU_EM23PERNORETAINCTRL_ADC0DIS_MASK
                                     | _EMU_EM23PERNORETAINCTRL_ACMP0DIS_MASK
-                                    | _EMU_EM23PERNORETAINCTRL_LESENSE0DIS_MASK,/* Select all peripherals in domain 1. */
+                                    | _EMU_EM23PERNORETAINCTRL_LESENSE0DIS_MASK,/**< Select all peripherals in domain 1. */
   emuPeripheralRetention_D2       = _EMU_EM23PERNORETAINCTRL_ACMP1DIS_MASK
 #if defined(_EMU_EM23PERNORETAINCTRL_IDAC0DIS_MASK)
                                     | _EMU_EM23PERNORETAINCTRL_IDAC0DIS_MASK
@@ -546,7 +585,7 @@ typedef enum {
                                     | _EMU_EM23PERNORETAINCTRL_PCNT2DIS_MASK
 #endif
 #if defined(_EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK)
-                                    | _EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK    /* Select all peripherals in domain 2. */
+                                    | _EMU_EM23PERNORETAINCTRL_I2C1DIS_MASK    /**< Select all peripherals in domain 2. */
 #endif
                                     | _EMU_EM23PERNORETAINCTRL_I2C0DIS_MASK,
   emuPeripheralRetention_ALL       = emuPeripheralRetention_D1
@@ -554,7 +593,7 @@ typedef enum {
 #if defined(_EMU_EM23PERNORETAINCTRL_WDOG1DIS_MASK)
                                      | emuPeripheralRetention_WDOG1
 #endif
-                                     | emuPeripheralRetention_WDOG0,            /* Select all peripherals with retention control.  */
+                                     | emuPeripheralRetention_WDOG0,            /**< Select all peripherals with retention control.  */
 } EMU_PeripheralRetention_TypeDef;
 #endif
 
@@ -574,18 +613,18 @@ typedef enum {
 
 #if defined(EMU_VSCALE_PRESENT)
 /** EM0 and 1 initialization structure. Voltage scaling is applied when
-    the core clock frequency is changed from @ref CMU. EM0 and 1 emuVScaleEM01_HighPerformance
+    the core clock frequency is changed from @ref cmu. EM0 and 1 emuVScaleEM01_HighPerformance
     is always enabled. */
 typedef struct {
-  bool  vScaleEM01LowPowerVoltageEnable;                 /**< EM0/1 low power voltage status. */
+  bool  vScaleEM01LowPowerVoltageEnable; /**< EM0/1 low power voltage status. */
 } EMU_EM01Init_TypeDef;
 #endif
 
 #if defined(EMU_VSCALE_PRESENT)
 /** Default initialization of EM0 and 1 configuration. */
-#define EMU_EM01INIT_DEFAULT                                                               \
-  {                                                                                        \
-    false                                                /** Do not scale down in EM0/1.*/ \
+#define EMU_EM01INIT_DEFAULT                                                              \
+  {                                                                                       \
+    false                                                /* Do not scale down in EM0/1.*/ \
   }
 #endif
 
@@ -731,16 +770,16 @@ typedef struct {
 } EMU_BUInit_TypeDef;
 
 /** Default Backup Power Domain configuration. */
-#define EMU_BUINIT_DEFAULT                                                                 \
-  {                                                                                        \
-    false,                   /**< MAIN-BU Comparator is not disabloed */                   \
-    emuBuBuInactPwrCon_None, /**< No power connection wen not in backup mode */            \
-    emuBuBuActPwrCon_None,   /**< No power connection when in backup mode */               \
-    emuBuPwrRes_Res0,        /**< RES0 series resistance between main and backup power. */ \
-    emuBuVoutRes_Dis,        /**< Vout resistor is set to not connected */                 \
-    false,                   /**< BU_VIN probe is disabled */                              \
-    false,                   /**< Status export is disabled */                             \
-    true                     /**< Enable backup mode */                                    \
+#define EMU_BUINIT_DEFAULT                                                               \
+  {                                                                                      \
+    false,                   /* MAIN-BU Comparator is not disabloed */                   \
+    emuBuBuInactPwrCon_None, /* No power connection wen not in backup mode */            \
+    emuBuBuActPwrCon_None,   /* No power connection when in backup mode */               \
+    emuBuPwrRes_Res0,        /* RES0 series resistance between main and backup power. */ \
+    emuBuVoutRes_Dis,        /* Vout resistor is set to not connected */                 \
+    false,                   /* BU_VIN probe is disabled */                              \
+    false,                   /* Status export is disabled */                             \
+    true                     /* Enable backup mode */                                    \
   }
 #endif
 
@@ -750,7 +789,9 @@ typedef struct {
   EMU_DcdcMode_TypeDef            mode;             /**< DCDC mode. */
   EMU_VreginCmpThreshold_TypeDef  cmpThreshold;     /**< VREGIN comparator threshold. */
   EMU_DcdcTonMaxTimeout_TypeDef   tonMax;           /**< Ton max timeout control. */
+#if defined(_DCDC_CTRL_DCMONLYEN_MASK)
   bool                            dcmOnlyEn;        /**< DCM only mode enable. */
+#endif
   EMU_DcdcDriveSpeed_TypeDef      driveSpeedEM01;   /**< DCDC drive speed in EM0/1. */
   EMU_DcdcDriveSpeed_TypeDef      driveSpeedEM23;   /**< DCDC drive speed in EM2/3. */
   EMU_DcdcPeakCurrent_TypeDef     peakCurrentEM01;  /**< EM0/1 peak current setting. */
@@ -758,17 +799,30 @@ typedef struct {
 } EMU_DCDCInit_TypeDef;
 
 /** Default DCDC initialization. */
-#define EMU_DCDCINIT_DEFAULT                                                \
-  {                                                                         \
-    emuDcdcMode_Regulation,        /**< DCDC regulator on. */               \
-    emuVreginCmpThreshold_2v3,     /**< 2.3V VREGIN comparator treshold. */ \
-    emuDcdcTonMaxTimeout_1P19us,   /**< Ton max is 1.19us. */               \
-    true,                          /**< Enable DCM only mode. */            \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */     \
-    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */     \
-    emuDcdcPeakCurrent_Load60mA,   /**< Default peak current in EM0/1. */   \
-    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */   \
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#define EMU_DCDCINIT_DEFAULT                                                 \
+  {                                                                          \
+    emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
+    emuVreginCmpThreshold_2v3,     /**< 2.3V VREGIN comparator threshold. */ \
+    emuDcdcTonMaxTimeout_1P19us,   /**< Ton max is 1.19us. */                \
+    true,                          /**< Enable DCM only mode. */             \
+    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */      \
+    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */      \
+    emuDcdcPeakCurrent_Load60mA,   /**< Default peak current in EM0/1. */    \
+    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
   }
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#define EMU_DCDCINIT_DEFAULT                                                 \
+  {                                                                          \
+    emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
+    emuVreginCmpThreshold_2v3,     /**< 2.3V VREGIN comparator threshold. */ \
+    emuDcdcTonMaxTimeout_1P19us,   /**< Ton max is 1.19us. */                \
+    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM0/1. */      \
+    emuDcdcDriveSpeed_Default,     /**< Default efficiency in EM2/3. */      \
+    emuDcdcPeakCurrent_Load36mA,   /**< Default peak current in EM0/1. */    \
+    emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
+  }
+#endif
 #endif
 
 #if defined(_EMU_DCDCCTRL_MASK)
@@ -824,11 +878,11 @@ typedef struct {
     1800,                        /* Nominal output voltage for DVDD mode, 1.8V.  */  \
     5,                           /* Nominal EM0/1 load current of less than 5mA. */  \
     10,                          /* Nominal EM2/3/4 load current less than 10uA.  */ \
-    200,                         /* Maximum average current of 200mA
-                                    (assume strong battery or other power source). */ \
-    emuDcdcAnaPeripheralPower_AVDD,/* Select AVDD as analog power supply). */         \
-    emuDcdcLnHighEfficiency,     /* Use high-efficiency mode. */                      \
-    emuDcdcLnCompCtrl_4u7F,      /* 4.7uF DCDC capacitor. */                          \
+    200, /* Maximum average current of 200mA
+            (assume strong battery or other power source). */                 \
+    emuDcdcAnaPeripheralPower_AVDD,/* Select AVDD as analog power supply). */ \
+    emuDcdcLnHighEfficiency,     /* Use high-efficiency mode. */              \
+    emuDcdcLnCompCtrl_4u7F,      /* 4.7uF DCDC capacitor. */                  \
   }
 #endif
 
@@ -977,7 +1031,20 @@ void EMU_BUEnableSet(bool enable);
 #if defined(_EMU_DCDCCTRL_MASK) || defined(_DCDC_CTRL_MASK)
 bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit);
 void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
+#if defined(EMU_DCDCCTRL_DCDCMODEEM23)
+void EMU_DCDCModeEM23Set(EMU_DcdcModeEM23_TypeDef dcdcModeEM23);
+#endif
 bool EMU_DCDCPowerOff(void);
+#if defined(_DCDC_PFMXCTRL_IPKVAL_MASK)
+void EMU_DCDCSetPFMXModePeakCurrent(uint32_t value);
+#endif
+#if defined(_DCDC_PFMXCTRL_IPKTMAXCTRL_MASK)
+void EMU_DCDCSetPFMXTimeoutMaxCtrl(EMU_DcdcTonMaxTimeout_TypeDef value);
+#endif
+#if defined(_DCDC_EM01CTRL0_IPKVAL_MASK)
+void EMU_EM01PeakCurrentSet(const EMU_DcdcPeakCurrent_TypeDef peakCurrentEM01);
+#endif
+
 #if !defined(_DCDC_CTRL_MASK)
 void EMU_DCDCConductionModeSet(EMU_DcdcConductionMode_TypeDef conductionMode, bool rcoDefaultSet);
 bool EMU_DCDCOutputVoltageSet(uint32_t mV, bool setLpVoltage, bool setLnVoltage);
@@ -1005,14 +1072,33 @@ __STATIC_INLINE void EMU_DCDCLock(void)
 {
   DCDC->LOCK = ~DCDC_LOCK_LOCKKEY_UNLOCKKEY;
 }
+#endif
 
+#if defined(_DCDC_CTRL_MASK)
 /***************************************************************************//**
  * @brief
- *   Unlock the DCDCU so that writing to locked registers again is possible.
+ *   Unlock the DCDC so that writing to locked registers again is possible.
  ******************************************************************************/
 __STATIC_INLINE void EMU_DCDCUnlock(void)
 {
   DCDC->LOCK = DCDC_LOCK_LOCKKEY_UNLOCKKEY;
+}
+#endif
+
+#if defined(_DCDC_SYNCBUSY_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Wait for the DCDC to complete all synchronization of register changes.
+ *
+ * @param[in] mask
+ *   A bitmask corresponding to SYNCBUSY register defined bits indicating
+ *   registers that must complete any ongoing synchronization.
+ ******************************************************************************/
+__STATIC_INLINE void EMU_DCDCSync(uint32_t mask)
+{
+  while (DCDC->SYNCBUSY & mask) {
+    /* Wait for previous synchronization to finish */
+  }
 }
 #endif
 
@@ -1331,10 +1417,14 @@ __STATIC_INLINE void EMU_UnlatchPinRetention(void)
 #endif
 
 #if defined(_EMU_TEMP_TEMP_MASK)
+/** Zero degrees Celcius in Kelvin */
 #define EMU_TEMP_ZERO_C_IN_KELVIN (273.15f)
 /***************************************************************************//**
  * @brief
- *   Returns true if a temperature measurement is ready
+ *   Temperature measurement ready status
+ *
+ * @return
+ *   True if temperature measurement is ready
  ******************************************************************************/
 __STATIC_INLINE bool EMU_TemperatureReady(void)
 {
@@ -1389,8 +1479,7 @@ __STATIC_INLINE void EMU_TemperatureAvgRequest(EMU_TempAvgNum_TypeDef numSamples
 void EMU_SetBiasMode(EMU_BiasMode_TypeDef mode);
 #endif
 
-/** @} (end addtogroup EMU) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup emu) */
 
 #ifdef __cplusplus
 }

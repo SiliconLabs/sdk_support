@@ -29,20 +29,25 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup platform_service
+ * @addtogroup mpu MPU RAM execution disable utilities
+ * @brief Simple utilities to disable execution on certain memory regions
+ * @details
+ *   Simple utilities to disable execution from RAM and other selected memory
+ *   regions. Useful to protect against code injection attacks.
+ *
  * @{
  ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup sl_mpu MPU
- * @{
- * @brief MPU basic utilities.
- ******************************************************************************/
+#ifndef SL_MPU_H
+#define SL_MPU_H
 
-#ifndef MPU_H
-#define MPU_H
+#include "sl_status.h"
 
-#if defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)
+#if (defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U)) || defined(DOXYGEN)
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /***************************************************************************//**
  * Configures internal SRAM as non-executable and enable MPU.
@@ -55,26 +60,26 @@ void sl_mpu_disable_execute_from_ram(void);
 /***************************************************************************//**
  * Configures an address range as non-executable and enable MPU.
  *
- * @note This function configures the MPU in order to make an address range as
- *       non-executable. The size of the memory region must be at lease 32 bytes
- *       or bigger.
+ * @note Configures a MPU region in order to make an address range as
+ *       non-executable. The memory region must have a size of at least 32 bytes.
  *
  * @param address_begin Beginning of memory segment.
  *
  * @param address_end   End of memory segment.
  *
  * @param size          Size of memory segment.
+ *
+ * @return 0 if successful. Error code otherwise.
  ******************************************************************************/
-void sl_mpu_disable_execute(uint32_t address_begin,
-                            uint32_t address_end,
-                            uint32_t size);
-
-/** @} (end addtogroup sl_mpu) */
-/** @} (end addtogroup platform_service) */
+sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
+                                   uint32_t address_end,
+                                   uint32_t size);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* defined (__MPU_PRESENT) && (__MPU_PRESENT == 1U) */
-#endif /* MPU_H */
+#endif /* SL_MPU_H */
+
+/** @} (end addtogroup mpu) */

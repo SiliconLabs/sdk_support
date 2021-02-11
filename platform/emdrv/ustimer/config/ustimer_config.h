@@ -31,19 +31,22 @@
 #define __SILICON_LABS_USTIMER_CONFIG_H__
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ustimer
  * @{
  ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup USTIMER
- * @{
- ******************************************************************************/
+// <<< sl:start pin_tool >>>
 
-/// USTIMER configuration option. Use this define to select a TIMER resource.
-#define USTIMER_TIMER USTIMER_TIMER0
+// <timer> USTIMER
+// $[TIMER_USTIMER]
+#define USTIMER_PERIPHERAL              TIMER0
+#define USTIMER_PERIPHERAL_NO           0
+// [TIMER_USTIMER]$
 
-/** @} (end addtogroup USTIMER) */
-/** @} (end addtogroup emdrv) */
+// <<< sl:end pin_tool >>>
+
+#define USTIMER_TIMER USTIMER_PERIPHERAL_NO
+
+/** @} (end addtogroup ustimer) */
 
 #endif /* __SILICON_LABS_USTIMER_CONFIG_H__ */

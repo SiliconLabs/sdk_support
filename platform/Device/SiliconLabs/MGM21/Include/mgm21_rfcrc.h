@@ -228,4 +228,5 @@ typedef struct {
 /** @} End of group MGM21_RFCRC_BitFields */
 /** @} End of group MGM21_RFCRC */
 /** @} End of group Parts */
+
 #endif /* MGM21_RFCRC_H */

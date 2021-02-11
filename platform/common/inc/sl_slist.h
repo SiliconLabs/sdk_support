@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Single Link List.
  *******************************************************************************
@@ -42,22 +42,21 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup platform_common
+/*******************************************************************************
+ * @addtogroup slist Singly-Linked List
+ * @brief Singly-linked list
  * @{
  ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup SLIST
- * @{
- ******************************************************************************/
-
+/// List node type
 typedef struct sl_slist_node sl_slist_node_t;
 
+/// List node
 struct sl_slist_node {
-  sl_slist_node_t *node;
+  sl_slist_node_t *node; ///< List node
 };
 
+#ifndef DOXYGEN
 #define  container_of(ptr, type, member)  (type *)((uintptr_t)(ptr) - ((uintptr_t)(&((type *)0)->member)))
 
 #define  SL_SLIST_ENTRY                               container_of
@@ -67,73 +66,73 @@ struct sl_slist_node {
 #define  SL_SLIST_FOR_EACH_ENTRY(list_head, entry, type, member) for (  (entry) = SL_SLIST_ENTRY(list_head, type, member); \
                                                                         (type *)(entry) != SL_SLIST_ENTRY(NULL, type, member);    \
                                                                         (entry) = SL_SLIST_ENTRY((entry)->member.node, type, member))
+#endif
+
+// -----------------------------------------------------------------------------
+// Prototypes
 
 /*******************************************************************************
- *****************************   PROTOTYPES   **********************************
- ******************************************************************************/
-
-/***************************************************************************//**
- * Initializes a singly-linked list.
+ * Initialize a singly-linked list.
  *
  * @param    head  Pointer to pointer of head element of list.
  ******************************************************************************/
 void sl_slist_init(sl_slist_node_t **head);
 
-/***************************************************************************//**
- * Add given item at beginning of list.
+/*******************************************************************************
+ * Add given item at beginning of the list.
  *
- * @param    head  Pointer to pointer of head element of list.
+ * @param    head  Pointer to pointer of head element of the list.
  *
- * @param    item  Pointer to item to add.
+ * @param    item  Pointer to an item to add.
  ******************************************************************************/
 void sl_slist_push(sl_slist_node_t **head,
                    sl_slist_node_t *item);
 
-/***************************************************************************//**
- * Add item at end of list.
+/*******************************************************************************
+ * Add item at the end of the list.
  *
- * @param    head  Pointer to pointer of head element of list.
+ * @param    head  Pointer to the pointer of a head element of the list.
  *
- * @param    item  Pointer to item to add.
+ * @param    item  Pointer to the item to add.
  ******************************************************************************/
 void sl_slist_push_back(sl_slist_node_t **head,
                         sl_slist_node_t *item);
 
-/***************************************************************************//**
- * Removes and returns first element of list.
+/*******************************************************************************
+ * Remove and return the first element of the list.
  *
- * @param    head  Pointer to pointer of head element of list.
+ * @param    head  Pointer to he pointer of the head element of the list.
  *
  * @return   Pointer to item that was at top of the list.
  ******************************************************************************/
 sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head);
 
-/***************************************************************************//**
- * Insert item after given item.
+/*******************************************************************************
+ * Insert an item after the given item.
  *
- * @param    item  Pointer to item to add.
+ * @param    item  Pointer to an item to add.
  *
- * @param    pos   Pointer to item after which the item to add will be inserted.
+ * @param    pos   Pointer to an item after which the item to add will be inserted.
  ******************************************************************************/
 void sl_slist_insert(sl_slist_node_t *item,
                      sl_slist_node_t *pos);
 
-/***************************************************************************//**
- * Remove item from list.
+/*******************************************************************************
+ * Remove an item from the list.
  *
- * @param    head  Pointer to pointer of head element of list.
+ * @param    head  Pointer to pointer of the head element of list.
  *
- * @param    item  Pointer to item to remove.
+ * @param    item  Pointer to the item to remove.
  *
  * @note     (1) An EFM_ASSERT is thrown if the item is not found within the list.
  ******************************************************************************/
 void sl_slist_remove(sl_slist_node_t **head,
                      sl_slist_node_t *item);
 
-/***************************************************************************//**
- * Sorts list items.
+/*******************************************************************************
+ * Sort list items.
  *
- * @param    head      Pointer to pointer of head element of list.
+ * @param    head      Pointer to the pointer of the head element of the list.
  *
  * @param    cmp_fnct  Pointer to function to use for sorting the list.
  *                     item_l    Pointer to left  item.
@@ -144,8 +143,7 @@ void sl_slist_sort(sl_slist_node_t **head,
                    bool (*cmp_fnct)(sl_slist_node_t *item_l,
                                     sl_slist_node_t *item_r));
 
-/** @} (end addtogroup SLIST) */
-/** @} (end addtogroup platform_common) */
+/** @} (end addtogroup slist) */
 
 #ifdef __cplusplus
 }

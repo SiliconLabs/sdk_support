@@ -27,7 +27,14 @@
 #define SPIP_VERSION             0x82
 #define SPIP_ALIVE               0xC1
 
-#define FRAME_TERMINATOR 0xA7
+// All prefixes less than or eqaul to this are error responses.
+#define SPIP_MAX_ERROR_PREFIX    SPIP_UNSUPPORTED_COMMAND
+
+// The frame terminator byte.
+#define SPIP_FRAME_TERMINATOR    0xA7
+
+// Legacy name for the above.
+#define FRAME_TERMINATOR         SPIP_FRAME_TERMINATOR
 
 /**
  * @description  A pointer to the length byte at the start of the Payload.

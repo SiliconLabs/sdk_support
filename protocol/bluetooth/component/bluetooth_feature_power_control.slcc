@@ -1,0 +1,24 @@
+id: "bluetooth_feature_power_control"
+label:  "PowerControl"
+package: "Bluetooth"
+description: >
+  Bluetooth LE Power Control feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bt_power_control_config.h"
+source:
+  - path: "src/sl_bt_power_control_init.c"
+requires:
+  - name: "bluetooth_feature_connection"
+provides:
+  - name: "bluetooth_feature_power_control"
+template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_power_control
+  - name: bluetooth_stack_init
+    value:
+      include: "sl_bt_power_control_config.h"
+      function: "sl_bt_init_power_control"
+    priority: 4

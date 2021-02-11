@@ -19,11 +19,16 @@
 #include "btl_driver_util.h"
 #include "em_timer.h"
 
-// The processors that have been tested "so far" use 7 ticks per iteration.
-// This assumption might not be correct for all the existing processors,
-// however since we cannot use any peripheral to count the actual time passed,
-// this is, for now, the best solution to assume 7 ticks per iteration.
-#define TICKS_PER_ITERATION 7
+// Cycles used for one loop in sli_delay_loop().
+// The Cortex-M33 has a faster execution of the hw loop
+// with the same arm instructions.
+#if defined(__CORTEX_M) && (__CORTEX_M == 33U)
+  #define HW_LOOP_CYCLE  3
+#else
+  #define HW_LOOP_CYCLE  4
+#endif
+
+void sli_delay_loop(uint32_t n);
 
 static uint16_t delayTarget = 0;
 static bool expectOverflow;
@@ -31,10 +36,10 @@ static uint32_t ticksPerMillisecond = 0;
 
 void delay_microseconds(uint32_t usecs)
 {
-  uint32_t ticksPerMicrosecond = util_getClockFreq() / 1000000UL;
-  volatile uint32_t iterations = ((ticksPerMicrosecond * usecs) / TICKS_PER_ITERATION) + 1U;
-  while (iterations--) {
-    // Do nothing
+  uint32_t cyclesPerMicrosecond = util_getClockFreq() / 1000000UL;
+  uint32_t loops = (cyclesPerMicrosecond * usecs) / HW_LOOP_CYCLE;
+  if (loops > 0U) {
+    sli_delay_loop(loops);
   }
 }
 
@@ -81,12 +86,14 @@ void delay_milliseconds(uint32_t msecs, bool blocking)
 
 bool delay_expired(void)
 {
+  bool overflow = (TIMER0->IF & TIMER_IF_OF);
+
   // Expecting overflow, but it hasn't happened yet
-  if (expectOverflow && !(TIMER0->IF & TIMER_IF_OF)) {
+  if (expectOverflow && !overflow) {
     return false;
   }
   // Not expecting overflow, but it still happened
-  if (!expectOverflow && (TIMER0->IF & TIMER_IF_OF)) {
+  if (!expectOverflow && overflow) {
     return true;
   }
 

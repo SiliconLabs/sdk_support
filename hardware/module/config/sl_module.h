@@ -172,6 +172,12 @@
 #elif defined(MGM210PA32JIA)
 #include "sl_module_mgm210pa32jia.h"
 
+#elif defined(MGM210PB22JIA)
+#include "sl_module_mgm210pb22jia.h"
+
+#elif defined(MGM210PB32JIA)
+#include "sl_module_mgm210pb32jia.h"
+
 #elif defined(BGM210P022JIA)
 #include "sl_module_bgm210p022jia.h"
 
@@ -183,6 +189,12 @@
 
 #elif defined(BGM210PA32JIA)
 #include "sl_module_bgm210pa32jia.h"
+
+#elif defined(BGM210PB22JIA)
+#include "sl_module_bgm210pb22jia.h"
+
+#elif defined(BGM210PB32JIA)
+#include "sl_module_bgm210pb32jia.h"
 
 #elif defined(MGM210L022JIF)
 #include "sl_module_mgm210l022jif.h"

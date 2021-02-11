@@ -1,6 +1,7 @@
 # /*************************************************************************//**
-#  * @brief Description: Script to generate customer PA curve fits that map from
-#  *   power levels to actual powers for the EFR32.
+#  * @file
+#  * @brief Script to generate customer PA curve fits that map from
+#  *        power levels to actual powers for the EFR32.
 #  * @details
 #  *   To use this file:
 #  *   1. Load railtest configured to the desired PA onto your chip which
@@ -17,7 +18,7 @@
 #  *   5. Update HAL_PA_CURVE_HEADER to point your new file.
 #  *****************************************************************************
 #  * # License
-#  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+#  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
 #  *****************************************************************************
 #  *
 #  * SPDX-License-Identifier: Zlib
@@ -53,7 +54,11 @@ try:
 except ImportError:
   pass
 
-API_MAX_POWER = 20
+RAIL_TX_POWER_LEVEL_INVALID =  255
+API_MAX_POWER_DEFAULT  = 20
+API_INCREMENT_DEFAULT = 4
+NUM_SEGMENTS_DEFAULT = 8
+API_MAX_POWER = API_MAX_POWER_DEFAULT
 API_MIN_POWER = -50
 enablePlotting = False
 
@@ -63,7 +68,7 @@ def FitAndPlotPower(actPower, yAxisValues, min=-100, max=100):
   x = 0
   minYAxisValue = 10000
   maxYAxisValue = -1
-
+  errorflag = 0
   for pwr in actPower:
     # Select which key value pairs to use for this segment based on their power
     if (min - 1) <= pwr <= (max):
@@ -75,7 +80,9 @@ def FitAndPlotPower(actPower, yAxisValues, min=-100, max=100):
         maxYAxisValue = yAxisValues[x]
 
     x += 1
-
+  MSE = 99999
+  if (len(filtPwr) <= 1) or (len(filtYAxisValues) <=1):
+    errorflag = 1
   # Do the actual curve fit
   if filtPwr:
     if enablePlotting:
@@ -83,17 +90,21 @@ def FitAndPlotPower(actPower, yAxisValues, min=-100, max=100):
     coefficients = numpy.polyfit(filtPwr, filtYAxisValues, 1)
     polynomial = numpy.poly1d(coefficients)
     ys = polynomial(filtPwr)
+    MSE = numpy.square(numpy.subtract(filtYAxisValues,ys)).mean()
     if enablePlotting:
       fig = plt.plot(filtPwr, ys, label=polynomial)
   else:
     polynomial = [0, 0]
 
-  return minYAxisValue, maxYAxisValue, polynomial
+  return minYAxisValue, maxYAxisValue, polynomial,MSE,errorflag
 
 def GenCArrayFromPolys(polylist):
     # build the C array string
   curveSegments = []
   for i in range(0, len(polylist), 3):
+    if polylist[i] == RAIL_TX_POWER_LEVEL_INVALID :
+      curveSegments.append(CurveSegment(polylist[i], int(polylist[i+1]*10), int(polylist[i+2]*10)))
+      continue
     maxPowerLevel = polylist[i+1]
     pwrcoeff = polylist[i+2]
     curveSegments.append(CurveSegment(int(maxPowerLevel), int(pwrcoeff[1] * 100), int(pwrcoeff[0] * 1000)))
@@ -135,7 +146,11 @@ def StringFromCurveSegments(curveSegments):
   return arrayStr
 
 def AdjustMaxValues(curveSegments):
-  for i in range(1, len(curveSegments)):
+  global RAIL_TX_POWER_LEVEL_INVALID
+  start = 1
+  if curveSegments[0].maxValue == RAIL_TX_POWER_LEVEL_INVALID :
+    start = start + 1
+  for i in range(start, len(curveSegments)):
     if curveSegments[i].slope != curveSegments[i-1].slope and curveSegments[i-1].slope != 0 and curveSegments[i].slope != 0:
       # Adjust the max values so that they overlap where the curves actually intercept
       x_intercept = int((curveSegments[i-1].intercept - curveSegments[i].intercept)
@@ -194,17 +209,33 @@ class CurveSegment():
     self.intercept = intercept
 
 def CalcPowerPolys(yAxisValues, powers, increment):
+  global NUM_SEGMENTS_DEFAULT
   polylist = []
   pwr = API_MAX_POWER
-  numberOfSegments = 8
+  numberOfSegments = NUM_SEGMENTS_DEFAULT
+  #Add extra segment to store API_MAX_POWER and increment
+  
+  if (API_MAX_POWER != API_MAX_POWER_DEFAULT) or (increment != API_INCREMENT_DEFAULT):
+    numberOfSegments = numberOfSegments+1 
+  
   for x in range(0, numberOfSegments):
+    
+    if x == 0 and numberOfSegments != NUM_SEGMENTS_DEFAULT :
+      polylist.append(RAIL_TX_POWER_LEVEL_INVALID)
+      polylist.append(API_MAX_POWER)
+      polylist.append(increment)
+      continue
+    
     lowerBound = pwr - increment
     if x == (numberOfSegments - 1):
       # Large negative number, want to avoid float('-inf') due to arithmetic in
       # FitAndPlotPower
       lowerBound = -99999
-    minYAxisValue, maxYAxisValue, polycoeff = FitAndPlotPower(powers, yAxisValues, lowerBound, pwr)
-
+    minYAxisValue, maxYAxisValue, polycoeff, MSE, errorflag = FitAndPlotPower(powers, yAxisValues, lowerBound, pwr)
+    if errorflag == 1 :
+      print("WARNING :: segment {} is not generated properly".format(x))
+      print("For better fit of the curve, change maxPower (-m) or increment(-i)\n \
+      or combination of both according to the data.")
     pwr -= increment
     polylist.append(int(minYAxisValue))
     polylist.append(int(maxYAxisValue))
@@ -217,25 +248,37 @@ def CalcPowerPolys(yAxisValues, powers, increment):
 
 def main():
   global enablePlotting
-  parser = argparse.ArgumentParser(description="Utility to fit PA data to a curve that can be used in RAIL.")
+  global API_INCREMENT_DEFAULT
+  global API_MAX_POWER_DEFAULT
+  parser = argparse.ArgumentParser(description="Utility to fit PA data to a\
+  curve that can be used in RAIL.")
   parser.add_argument('csvFile',
                       type=str,
                       help="The input CSV file to parse for power information")
   parser.add_argument('-i', '--increment',
-                      type=int,
-                      default=4,
+                      type=float,
+                      default=API_INCREMENT_DEFAULT,
                       required=False,
-                      help=argparse.SUPPRESS)
+                      help="The step size to chunk the powe range. ")
+  parser.add_argument('-m', '--maxPower',
+                      type=int,
+                      default=API_MAX_POWER_DEFAULT,
+                      required=False,
+                      help="The maximum power the curve should fit.")
   parser.add_argument('-o', '--output',
                       type=str,
                       default=None,
                       required=False,
-                      help="The output file to print the results to. Will print to stdout by default.")
+                      help="The output file to print the results to. Will \
+                      print to stdout by default.")
   parser.add_argument('-p', '--plot',
                       action='store_true',
-                      help="Pass this option to enable plotting the curve fit for visual inspection")
+                      help="Pass this option to enable plotting the curve \
+                      fit for visual inspection")
   a = parser.parse_args()
-
+  if a.maxPower : 
+    global API_MAX_POWER
+    API_MAX_POWER = a.maxPower
   # Only use matplotlib if we're graphing results
   enablePlotting = a.plot
   if enablePlotting and 'plt' not in globals():
@@ -243,7 +286,7 @@ def main():
     return 1
 
   # Compute the fit and output the result
-  output = FitCharData(a.csvFile, a.increment)
+  output = FitCharData(a.csvFile, round(a.increment,1))
   if a.output == None:
     print(output)
   else:

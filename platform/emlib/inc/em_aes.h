@@ -34,6 +34,7 @@
 #include "em_device.h"
 #if defined(AES_COUNT) && (AES_COUNT > 0)
 
+#include "em_aes_compat.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus
@@ -41,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup AES
+ * @addtogroup aes AES - AES Accelerator
  * @brief Advanced Encryption Standard Accelerator (AES) Peripheral API.
  *
  * @details
@@ -296,8 +292,7 @@ void AES_OFB256(uint8_t *out,
                 const uint8_t *iv);
 #endif
 
-/** @} (end addtogroup AES) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup aes) */
 
 #ifdef __cplusplus
 }

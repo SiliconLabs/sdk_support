@@ -49,7 +49,7 @@
 #endif
 
 #if (defined(EMBER_TEST) || defined(UNIX_HOST) || defined(UNIX_HOST_SIM) || defined(EMBER_ASH_V3_TEST_APP))
-AshRxTestState ashRxTestState = { { 0 } };
+AshRxTestState ashRxTestState = { { 0 }, 0, 0, 0 };
   #define ASH_V3_DEBUG(x) x
   #define ASH_V3_DEBUG_ENABLED 1
 #else
@@ -105,7 +105,12 @@ static void emAshDmaBufferAEventHandler(Event *event);
 static void emAshDmaBufferBEventHandler(Event *event);
 static void transmit(AshMessageType type);
 
-AshTxState ashTxState = { { { 0 } } };
+AshTxState ashTxState = { { { 0 }, 0, 0, 0, 0, 0 },
+                          { { 0 }, 0, 0, 0, 0, 0 },
+                          NULL,
+                          0,
+                          0,
+                          0                        };
 
 extern EventQueue emApiAppEventQueue;
 
@@ -129,7 +134,7 @@ static EventActions transmitEventActions = {
   "transmitting"
 };
 
-static Event transmitEvent = { &transmitEventActions, NULL };
+static Event transmitEvent = { &transmitEventActions, NULL, 0 };
 
 static EventActions dmaBufferAEventActions = {
   &emApiAppEventQueue,
@@ -138,7 +143,7 @@ static EventActions dmaBufferAEventActions = {
   "dma buffer A"
 };
 
-static Event dmaBufferAEvent = { &dmaBufferAEventActions, NULL };
+static Event dmaBufferAEvent = { &dmaBufferAEventActions, NULL, 0 };
 
 static EventActions dmaBufferBEventActions = {
   &emApiAppEventQueue,
@@ -147,7 +152,7 @@ static EventActions dmaBufferBEventActions = {
   "dma buffer B"
 };
 
-static Event dmaBufferBEvent = { &dmaBufferBEventActions, NULL };
+static Event dmaBufferBEvent = { &dmaBufferBEventActions, NULL, 0 };
 
 static Event *getEvent(const AshTxDmaBuffer *buffer)
 {
@@ -285,7 +290,7 @@ static bool shouldCorruptPacket(void)
 
 static AshState ashState = ASH_STATE_RESET_TX_PRE;
 
-AshRxState ashRxState = { { 0 } };
+AshRxState ashRxState = { { 0 }, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void emEraseAndPrepareDmaBuffer(AshTxDmaBuffer *buffer)
 {
@@ -580,11 +585,13 @@ static bool isNextFrameCounter(uint8_t frameCounter)
 
 void emAshDmaBufferAEventHandler(Event *event)
 {
+  (void)event;
   resendEventHelper(&ashTxState.dmaBufferA);
 }
 
 void emAshDmaBufferBEventHandler(Event *event)
 {
+  (void)event;
   resendEventHelper(&ashTxState.dmaBufferB);
 }
 
@@ -592,6 +599,7 @@ void emPrintBytes(const uint8_t *bytes, uint16_t length, uint8_t indent)
 {
   printIndent(indent);
   uint16_t i;
+  (void)bytes; //to avoid warning
 
   for (i = 0; i < length; i++) {
     OUTPUT(0, "%X ", bytes[i]);
@@ -606,9 +614,13 @@ static void logTx(const char *string,
                   const uint8_t length,
                   bool printBytes)
 {
+  (void)string; //to avoid warning
+  (void)corrupted; //to avoid warning
+  (void)length; //to avoid warning
   ASH_V3_DEBUG
     (AshMessageType type =
       reallyGetType(packet[ASH_CONTROL_BYTE_INDEX]);
+    (void)type; //to avoid warning
     OUTPUT(0,
            "[[%s %u ASH TX %s [%u/%u] ** %s %s ** %u ",
            emAppName,
@@ -697,6 +709,7 @@ static uint8_t getControlByte(const uint8_t *data)
 //
 static void transmitEventHandler(Event *event)
 {
+  (void)event;
   transmit(LAST_ASH_MESSAGE_TYPE);
 }
 
@@ -1280,6 +1293,7 @@ uint8_t emProcessAshRxInputWithCallback(const uint8_t *data,
     // log that we've received data
     ASH_V3_DEBUG(AshMessageType type =
                    reallyGetType(ashRxTestState.rawData[ASH_CONTROL_BYTE_INDEX]);
+                 (void)type; //to avoid warning
                  OUTPUT(0,
                         "[[%s %u ASH RX %s [my OFC %u | AFC %u] "
                         "[their OFC %u | AFC %u] %u ",
@@ -1468,6 +1482,7 @@ static void printDmaBuffer(const char *name,
                            uint8_t indent)
 {
   assert(dmaBuffer->state < LAST_TX_STATE);
+  (void)name; //to avoid warning
 
   OUTPUT(indent,
          "%s %s | ",
@@ -1484,6 +1499,7 @@ static void printDmaBuffer(const char *name,
          dmaBuffer->resendCount);
 
   Event *event = getEvent(dmaBuffer);
+  (void)event; //to avoid warning
 
   OUTPUT(0,
          "%s | next @ %d |",
@@ -1511,7 +1527,7 @@ void emPrintAshState(void)
 
 static void reallyPrintAshState(uint8_t indent)
 {
-  assert(0 <= (int)ashState && (int)ashState < COUNTOF(stateStrings));
+  assert(0 <= (int)ashState && (unsigned int)ashState < COUNTOF(stateStrings));
   OUTPUT(indent, "ASH State: %s\r\n", stateStrings[ashState]);
 }
 

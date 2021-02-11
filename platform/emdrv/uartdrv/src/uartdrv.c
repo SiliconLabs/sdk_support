@@ -27,22 +27,43 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-#include <string.h>
+
+#define CURRENT_MODULE_NAME    "UARTDRV"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
 #include "uartdrv.h"
-
 #include "em_device.h"
-#include "em_emu.h"
 #include "em_gpio.h"
 #include "em_core.h"
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
 #include "gpiointerrupt.h"
 #endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#include "sl_sleeptimer.h"
+#else
+#include "em_emu.h"
+#endif
+
+#include <string.h>
+
+//****************************************************************************
 
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
 #define UART_HW_FLOW_CONTROL_SUPPORT
 #elif (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE) && defined(USART_CTRLX_CTSEN)
 #define UART_HW_FLOW_CONTROL_SUPPORT
+#endif
+
+#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
+#define HANDLES_ARE_AVAILABLE   1
+#elif defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+#define HANDLES_ARE_AVAILABLE   1
+#else
+#define HANDLES_ARE_AVAILABLE   0
 #endif
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
@@ -57,10 +78,18 @@
 #error "No valid UARTDRV DMA engine defined."
 #endif
 
-#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
+//****************************************************************************
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+struct sl_sleeptimer_timer_handle delayedTxTimer;
+#endif
+#if (HANDLES_ARE_AVAILABLE)
 static bool uartdrvHandleIsInitialized = false;
 static UARTDRV_Handle_t uartdrvHandle[EMDRV_UARTDRV_MAX_DRIVER_INSTANCES];
 #endif
+static bool enableRxWhenSleeping = UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION;
+
+//****************************************************************************
 
 static bool ReceiveDmaComplete(unsigned int channel,
                                unsigned int sequenceNo,
@@ -68,6 +97,67 @@ static bool ReceiveDmaComplete(unsigned int channel,
 static bool TransmitDmaComplete(unsigned int channel,
                                 unsigned int sequenceNo,
                                 void *userParam);
+
+/***************************************************************************//**
+ * @brief Power management functions for the uartdrv.
+ ******************************************************************************/
+static void em1RequestAdd(UARTDRV_Handle_t handle)
+{
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+  if (handle->em1RequestCount == 0) {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+  handle->em1RequestCount++;
+  CORE_EXIT_ATOMIC();
+#else
+  handle->em1RequestCount++;
+#endif
+}
+
+static void em1RequestRemove(UARTDRV_Handle_t handle)
+{
+  EFM_ASSERT(handle->em1RequestCount > 0);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+  handle->em1RequestCount--;
+  if (handle->em1RequestCount == 0) {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+  CORE_EXIT_ATOMIC();
+#else
+  handle->em1RequestCount--;
+#endif
+}
+
+static void emRequestInit(UARTDRV_Handle_t handle)
+{
+  handle->em1RequestCount = 0;
+}
+
+static void emRequestDeinit(UARTDRV_Handle_t handle)
+{
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+  sl_status_t status;
+  bool running;
+
+  CORE_ENTER_ATOMIC();
+  status = sl_sleeptimer_is_timer_running(&delayedTxTimer, &running);
+  if ((status == SL_STATUS_OK) && (running)) {
+    sl_sleeptimer_stop_timer(&delayedTxTimer);
+  }
+  CORE_EXIT_ATOMIC();
+#endif
+  if (handle->em1RequestCount > 0) {
+    handle->em1RequestCount = 1;
+    em1RequestRemove(handle);
+  }
+}
 
 /***************************************************************************//**
  * @brief Get UARTDRV_Handle_t from GPIO pin number (HW FC CTS pin interrupt).
@@ -240,7 +330,8 @@ static Ecode_t GetTailBuffer(UARTDRV_Buffer_FifoQueue_t *queue,
 static void EnableTransmitter(UARTDRV_Handle_t handle)
 {
 #if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)) \
-  || (defined(EUART_COUNT) && (EUART_COUNT > 0) )
+  || (defined(EUART_COUNT) && (EUART_COUNT > 0))                                          \
+  || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart)
 #endif
   {
@@ -278,14 +369,18 @@ static void EnableTransmitter(UARTDRV_Handle_t handle)
     handle->peripheral.leuart->ROUTE |= LEUART_ROUTE_TXPEN;
 #endif
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   else if (handle->type == uartdrvUartTypeEuart) {
     if (EUSART_StatusGet(handle->peripheral.euart) & EUSART_STATUS_RXENS) {
       EUSART_Enable(handle->peripheral.euart, eusartEnable);
     } else {
       EUSART_Enable(handle->peripheral.euart, eusartEnableTx);
     }
+#if defined(EUART_PRESENT)
     GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_TXPEN;
+#elif defined(EUSART_PRESENT)
+    GPIO->EUSARTROUTE_SET[handle->uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN;
+#endif
   }
 #endif
 }
@@ -296,7 +391,8 @@ static void EnableTransmitter(UARTDRV_Handle_t handle)
 static void DisableTransmitter(UARTDRV_Handle_t handle)
 {
 #if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)) \
-  || (defined(EUART_COUNT) && (EUART_COUNT > 0) )
+  || (defined(EUART_COUNT) && (EUART_COUNT > 0))                                          \
+  || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart)
 #endif
   {
@@ -326,14 +422,18 @@ static void DisableTransmitter(UARTDRV_Handle_t handle)
     // Disable Tx
     handle->peripheral.leuart->CMD = LEUART_CMD_TXDIS;
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   else if (handle->type == uartdrvUartTypeEuart) {
     if (EUSART_StatusGet(handle->peripheral.euart) &  EUSART_STATUS_RXENS) {
       EUSART_Enable(handle->peripheral.euart, eusartEnableRx);
     } else {
       EUSART_Enable(handle->peripheral.euart, eusartDisable);
     }
+#if defined(EUART_PRESENT)
     GPIO->EUARTROUTE_CLR->ROUTEEN = GPIO_EUART_ROUTEEN_TXPEN;
+#elif defined(EUSART_PRESENT)
+    GPIO->EUSARTROUTE_CLR[handle->uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN;
+#endif
   }
 #endif
 }
@@ -344,7 +444,8 @@ static void DisableTransmitter(UARTDRV_Handle_t handle)
 static void EnableReceiver(UARTDRV_Handle_t handle)
 {
 #if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)) \
-  || (defined(EUART_COUNT) && (EUART_COUNT > 0) )
+  || (defined(EUART_COUNT) && (EUART_COUNT > 0))                                          \
+  || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart)
 #endif
   {
@@ -382,7 +483,7 @@ static void EnableReceiver(UARTDRV_Handle_t handle)
     handle->peripheral.leuart->ROUTE |= LEUART_ROUTE_RXPEN;
 #endif
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   else if (handle->type == uartdrvUartTypeEuart) {
     if (EUSART_StatusGet(handle->peripheral.euart) &  EUSART_STATUS_TXENS) {
       EUSART_Enable(handle->peripheral.euart, eusartEnable);
@@ -399,7 +500,8 @@ static void EnableReceiver(UARTDRV_Handle_t handle)
 static void DisableReceiver(UARTDRV_Handle_t handle)
 {
 #if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)) \
-  || (defined(EUART_COUNT) && (EUART_COUNT > 0) )
+  || (defined(EUART_COUNT) && (EUART_COUNT > 0))                                          \
+  || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart)
 #endif
   {
@@ -429,7 +531,7 @@ static void DisableReceiver(UARTDRV_Handle_t handle)
     // Disable Rx
     handle->peripheral.leuart->CMD = LEUART_CMD_RXDIS;
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   else if (handle->type == uartdrvUartTypeEuart) {
     if (EUSART_StatusGet(handle->peripheral.euart) &  EUSART_STATUS_TXENS) {
       EUSART_Enable(handle->peripheral.euart, eusartEnableTx);
@@ -455,7 +557,7 @@ static void StartReceiveDma(UARTDRV_Handle_t handle,
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
   } else if (handle->type == uartdrvUartTypeLeuart) {
     rxPort = (void *)&(handle->peripheral.leuart->RXDATA);
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   } else if (handle->type == uartdrvUartTypeEuart) {
     rxPort = (void *)&(handle->peripheral.euart->RXDATA);
 #endif
@@ -464,6 +566,9 @@ static void StartReceiveDma(UARTDRV_Handle_t handle,
     return;
   }
 
+  if (enableRxWhenSleeping) {
+    em1RequestAdd(handle);
+  }
   DMADRV_PeripheralMemory(handle->rxDmaCh,
                           handle->rxDmaSignal,
                           buffer->data,
@@ -489,8 +594,10 @@ static void StartTransmitDma(UARTDRV_Handle_t handle,
     txPort = (void *)&(handle->peripheral.uart->TXDATA);
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
   } else if (handle->type == uartdrvUartTypeLeuart) {
+    // Set TX DMA wakeup request. Needed for transmit while in EM2.
+    handle->peripheral.leuart->CTRL |= LEUART_CTRL_TXDMAWU;
     txPort = (void *)&(handle->peripheral.leuart->TXDATA);
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   } else if (handle->type == uartdrvUartTypeEuart) {
     txPort = (void *)&(handle->peripheral.euart->TXDATA);
 #endif
@@ -499,6 +606,24 @@ static void StartTransmitDma(UARTDRV_Handle_t handle,
     return;
   }
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+  sl_status_t status;
+  bool running;
+
+  CORE_ENTER_ATOMIC();
+  status = sl_sleeptimer_is_timer_running(&delayedTxTimer, &running);
+  if ((status == 0) && (running)) {
+    sl_sleeptimer_stop_timer(&delayedTxTimer);
+    em1RequestRemove(handle);
+  }
+  CORE_EXIT_ATOMIC();
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+  handle->sleep = SL_POWER_MANAGER_IGNORE;
+#endif
+#endif
+
+  em1RequestAdd(handle);
   DMADRV_MemoryPeripheral(handle->txDmaCh,
                           handle->txDmaSignal,
                           txPort,
@@ -525,6 +650,10 @@ static bool ReceiveDmaComplete(unsigned int channel,
   (void)sequenceNo;
   handle = (UARTDRV_Handle_t)userParam;
   status = GetTailBuffer(handle->rxQueue, &buffer);
+
+  if (enableRxWhenSleeping) {
+    em1RequestRemove(handle);
+  }
 
   // If an abort was in progress when DMA completed, the ISR could be deferred
   // until after the critical section. In this case, the buffers no longer
@@ -575,17 +704,17 @@ static bool ReceiveDmaComplete(unsigned int channel,
     handle->peripheral.leuart->IFC = LEUART_IFC_PERR;
   } else
 #endif
-#if defined(EUART_PRESENT)
+#if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
   if (handle->type == uartdrvUartTypeEuart
-      && (handle->peripheral.euart->IF & EUSART_IF_FERRIF)) {
+      && (handle->peripheral.euart->IF & EUSART_IF_FERR)) {
     buffer->transferStatus = ECODE_EMDRV_UARTDRV_FRAME_ERROR;
     buffer->itemsRemaining = 0;
-    handle->peripheral.euart->IF_CLR = EUSART_IF_FERRIF;
+    handle->peripheral.euart->IF_CLR = EUSART_IF_FERR;
   } else if (handle->type == uartdrvUartTypeEuart
-             && (handle->peripheral.euart->IF & EUSART_IF_PERRIF)) {
+             && (handle->peripheral.euart->IF & EUSART_IF_PERR)) {
     buffer->transferStatus = ECODE_EMDRV_UARTDRV_PARITY_ERROR;
     buffer->itemsRemaining = 0;
-    handle->peripheral.euart->IF_CLR = EUSART_IF_PERRIF;
+    handle->peripheral.euart->IF_CLR = EUSART_IF_PERR;
   } else
 #endif
   {
@@ -620,6 +749,87 @@ static bool ReceiveDmaComplete(unsigned int channel,
 }
 
 /***************************************************************************//**
+ * @brief Calculate the number of sleeptimer ticks to flush the uart tx buffers.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle)
+{
+  uint32_t baud;
+  uint32_t ticks;
+
+  switch (handle->type) {
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
+    case uartdrvUartTypeLeuart:
+      baud = LEUART_BaudrateGet(handle->peripheral.leuart);
+      break;
+#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+    case uartdrvUartTypeEuart:
+      baud = EUSART_BaudrateGet(handle->peripheral.euart);
+      break;
+#endif
+    case uartdrvUartTypeUart:
+    default:
+      baud = USART_BaudrateGet(handle->peripheral.uart);
+      break;
+  }
+  // Calculate the number of sleeptimer ticks for:
+  // 3 bytes: two in FIFO and one in shift register.
+  // 12 bits pr byte: one start bit, 8 data bits, parity and 2 stop bits.
+  ticks = (sl_sleeptimer_get_timer_frequency() * 3 * 12) / baud;
+  // Round up.
+  ticks++;
+
+  return ticks;
+}
+#endif
+
+/***************************************************************************//**
+ * @brief Delayed transmit complete timer callback.
+ ******************************************************************************/
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static void TransmitDmaCompleteDelayed(sl_sleeptimer_timer_handle_t *timer_handle, void *userParam)
+{
+  (void)timer_handle;
+  UARTDRV_Handle_t uartdrv_handle = (UARTDRV_Handle_t)userParam;
+  uint32_t reg;
+  bool txComplete;
+
+  // Check if transmit is completed by checking the uart registers.
+  switch (uartdrv_handle->type) {
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
+    case uartdrvUartTypeLeuart:
+      reg = uartdrv_handle->peripheral.leuart->STATUS;
+      txComplete = reg & LEUART_STATUS_TXC;
+      break;
+#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+    case uartdrvUartTypeEuart:
+      reg = uartdrv_handle->peripheral.euart->STATUS;
+      txComplete = reg & EUSART_STATUS_TXC;
+      break;
+#endif
+    case uartdrvUartTypeUart:
+    default:
+      reg = uartdrv_handle->peripheral.uart->STATUS;
+      txComplete = reg & USART_STATUS_TXC;
+      break;
+  }
+
+  if (txComplete) {
+    // Remove the power manager request if completed.
+    em1RequestRemove(uartdrv_handle);
+#if !defined(SL_CATALOG_KERNEL_PRESENT)
+    uartdrv_handle->sleep = SL_POWER_MANAGER_SLEEP;
+#endif
+  } else {
+    // Restart the timer if not completed.
+    // May be the case if flow control is used.
+    uint32_t ticks = calculateSleeptimerTicksToFlushTxBuffers(uartdrv_handle);
+    sl_sleeptimer_start_timer(&delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
+  }
+}
+#endif
+
+/***************************************************************************//**
  * @brief DMA transfer completion callback. Called by the DMA interrupt handler.
  ******************************************************************************/
 static bool TransmitDmaComplete(unsigned int channel,
@@ -635,6 +845,13 @@ static bool TransmitDmaComplete(unsigned int channel,
 
   handle = (UARTDRV_Handle_t)userParam;
   status = GetTailBuffer(handle->txQueue, &buffer);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  uint32_t ticks = calculateSleeptimerTicksToFlushTxBuffers(handle);
+  sl_sleeptimer_start_timer(&delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
+#else
+  em1RequestRemove(handle);
+#endif
 
   // If an abort was in progress when DMA completed, the ISR could be deferred
   // until after the critical section. In this case, the buffers no longer
@@ -661,6 +878,12 @@ static bool TransmitDmaComplete(unsigned int channel,
     StartTransmitDma(handle, buffer);
   } else {
     handle->txDmaActive = false;
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
+    if (handle->type == uartdrvUartTypeLeuart) {
+      // Clear TX DMA Wakeup request
+      handle->peripheral.leuart->CTRL &= ~LEUART_CTRL_TXDMAWU;
+    }
+#endif
   }
   CORE_EXIT_ATOMIC();
   return true;
@@ -902,7 +1125,7 @@ static Ecode_t SetupGpioLeuart(UARTDRV_Handle_t handle,
 }
 #endif
 
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
 /***************************************************************************//**
  * @brief Store EUART GPIO pins into handle.
  ******************************************************************************/
@@ -958,11 +1181,11 @@ static Ecode_t ConfigGpio(UARTDRV_Handle_t handle, bool enable)
   return ECODE_EMDRV_UARTDRV_OK;
 }
 
-#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
+#if (HANDLES_ARE_AVAILABLE)
 /***************************************************************************//**
- * @brief Set index into handle pointer array.
+ * @brief Add handle to handle array.
  ******************************************************************************/
-static Ecode_t SetHandleIndex(UARTDRV_Handle_t handle)
+static Ecode_t addHandle(UARTDRV_Handle_t handle)
 {
   bool handleIsSet;
   uint32_t handleIdx;
@@ -975,9 +1198,17 @@ static Ecode_t SetHandleIndex(UARTDRV_Handle_t handle)
     uartdrvHandleIsInitialized = true;
   }
 
+  // Check if its already in the array
+  for (handleIdx = 0; handleIdx < EMDRV_UARTDRV_MAX_DRIVER_INSTANCES; handleIdx++) {
+    if (uartdrvHandle[handleIdx] == handle) {
+      return ECODE_EMDRV_UARTDRV_OK;
+    }
+  }
+
+  // Insert handle
   handleIsSet = false;
   for (handleIdx = 0; handleIdx < EMDRV_UARTDRV_MAX_DRIVER_INSTANCES; handleIdx++) {
-    if ((uartdrvHandle[handleIdx] == NULL) || (uartdrvHandle[handleIdx] == handle)) {
+    if (uartdrvHandle[handleIdx] == NULL) {
       uartdrvHandle[handleIdx] = handle;
       handleIsSet = true;
       break;
@@ -988,6 +1219,24 @@ static Ecode_t SetHandleIndex(UARTDRV_Handle_t handle)
     return ECODE_EMDRV_UARTDRV_ILLEGAL_HANDLE;
   }
 
+  return ECODE_EMDRV_UARTDRV_OK;
+}
+
+/***************************************************************************//**
+ * @brief Remove handle from handle array.
+ ******************************************************************************/
+static Ecode_t removeHandle(UARTDRV_Handle_t handle)
+{
+  uint32_t handleIdx;
+
+  if (uartdrvHandleIsInitialized) {
+    for (handleIdx = 0; handleIdx < EMDRV_UARTDRV_MAX_DRIVER_INSTANCES; handleIdx++) {
+      if (uartdrvHandle[handleIdx] == handle) {
+        uartdrvHandle[handleIdx] = NULL;
+        break;
+      }
+    }
+  }
   return ECODE_EMDRV_UARTDRV_OK;
 }
 #endif
@@ -1078,12 +1327,16 @@ Ecode_t UARTDRV_InitUart(UARTDRV_Handle_t handle,
   }
 
   memset(handle, 0, sizeof(UARTDRV_HandleData_t));
+  emRequestInit(handle);
 
-#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
-  retVal = SetHandleIndex(handle);
+#if (HANDLES_ARE_AVAILABLE)
+  retVal = addHandle(handle);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
   }
+#endif
+
+#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
   handle->fcType = initData->fcType;
 #else
   // Force init data to uartdrvFlowControlNone if flow control is excluded by EMDRV_UARTDRV_FLOW_CONTROL_ENABLE
@@ -1094,6 +1347,10 @@ Ecode_t UARTDRV_InitUart(UARTDRV_Handle_t handle,
   handle->type = uartdrvUartTypeUart;
 #if defined(_GPIO_USART_ROUTEEN_MASK)
   handle->uartNum = initData->uartNum;
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+  handle->sleep = SL_POWER_MANAGER_IGNORE;
 #endif
 
   // Set clocks and DMA requests according to available peripherals
@@ -1274,7 +1531,7 @@ Ecode_t UARTDRV_InitUart(UARTDRV_Handle_t handle,
   return ECODE_EMDRV_UARTDRV_OK;
 }
 
-#if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
+#if (defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief
  *    Initialize a LEUART driver instance.
@@ -1309,11 +1566,14 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
 
   memset(handle, 0, sizeof(UARTDRV_HandleData_t));
 
-#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
-  retVal = SetHandleIndex(handle);
+#if (HANDLES_ARE_AVAILABLE)
+  retVal = addHandle(handle);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
   }
+#endif
+
+#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
   handle->fcType = initData->fcType;
 #else
   // Force init data to uartdrvFlowControlNone if flow control is excluded by EMDRV_UARTDRV_FLOW_CONTROL_ENABLE
@@ -1324,6 +1584,10 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
   handle->type = uartdrvUartTypeLeuart;
 #if defined(_GPIO_USART_ROUTEEN_MASK)
   handle->uartNum = initData->uartNum;
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+  handle->sleep = SL_POWER_MANAGER_IGNORE;
 #endif
 
   // Set clocks and DMA requests according to available peripherals
@@ -1445,6 +1709,7 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
 
   // Discard false frames and/or IRQs
   initData->port->CMD = LEUART_CMD_CLEARRX | LEUART_CMD_CLEARTX;
+  initData->port->CTRL |= LEUART_CTRL_RXDMAWU;
 
   // Initialize DMA.
   retVal = InitializeDma(handle);
@@ -1462,7 +1727,7 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
 }
 #endif
 
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0)) || defined(DOXYGEN)
 /***************************************************************************//**
  * @brief
  *    Initialize a EUART driver instance.
@@ -1498,15 +1763,22 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   handle->type = uartdrvUartTypeEuart;
   handle->uartNum = initData->uartNum;
 
-#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
-  retVal = SetHandleIndex(handle);
+#if (HANDLES_ARE_AVAILABLE)
+  retVal = addHandle(handle);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
   }
+#endif
+
+#if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
   handle->fcType = initData->fcType;
 #else
   // Force init data to uartdrvFlowControlNone if flow control is excluded by EMDRV_UARTDRV_FLOW_CONTROL_ENABLE
   handle->fcType = uartdrvFlowControlNone;
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+  handle->sleep = SL_POWER_MANAGER_IGNORE;
 #endif
 
   // Set clocks and DMA requests according to available peripherals
@@ -1516,6 +1788,36 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     handle->uartClock   = cmuClock_EUART0;
     handle->txDmaSignal = dmadrvPeripheralSignal_EUART0_TXBL;
     handle->rxDmaSignal = dmadrvPeripheralSignal_EUART0_RXDATAV;
+    uartAdvancedInit.dmaWakeUpOnRx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = true;
+    handle->txDmaActive = false;
+    handle->rxDmaActive = false;
+#endif
+#if defined(EUSART0)
+  } else if (initData->port == EUSART0) {
+    handle->uartClock   = cmuClock_EUSART0;
+    handle->txDmaSignal = dmadrvPeripheralSignal_EUSART0_TXBL;
+    handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART0_RXDATAV;
+    uartAdvancedInit.dmaWakeUpOnRx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = true;
+    handle->txDmaActive = false;
+    handle->rxDmaActive = false;
+#endif
+#if defined(EUSART1)
+  } else if (initData->port == EUSART1) {
+    handle->uartClock   = cmuClock_EUSART1;
+    handle->txDmaSignal = dmadrvPeripheralSignal_EUSART1_TXBL;
+    handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART1_RXDATAV;
+    uartAdvancedInit.dmaWakeUpOnRx = true;
+    uartAdvancedInit.dmaWakeUpOnTx = true;
+    handle->txDmaActive = false;
+    handle->rxDmaActive = false;
+#endif
+#if defined(EUSART2)
+  } else if (initData->port == EUSART2) {
+    handle->uartClock   = cmuClock_EUSART2;
+    handle->txDmaSignal = dmadrvPeripheralSignal_EUSART2_TXBL;
+    handle->rxDmaSignal = dmadrvPeripheralSignal_EUSART2_RXDATAV;
     uartAdvancedInit.dmaWakeUpOnRx = true;
     uartAdvancedInit.dmaWakeUpOnTx = true;
     handle->txDmaActive = false;
@@ -1543,12 +1845,26 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   CMU_ClockEnable(handle->uartClock, true);
   if (initData->useLowFrequencyMode) {
     CMU_ClockEnable(cmuClock_LFRCO, true);
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     CMU_ClockEnable(cmuClock_EM23GRPACLK, true);
     CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM23GRPACLK);
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+    CMU_ClockSelectSet(handle->uartClock, cmuSelect_LFRCO);
+#else
+  #error "Please assign a LF clock to EUSART instance"
+#endif
   } else {
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     CMU_ClockEnable(cmuClock_EM01GRPACLK, true);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM01GRPACLK);
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+    if (handle->uartClock == cmuClock_EUSART0CLK) {
+      CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM01GRPCCLK);
+    }
+#else
+  #error "Please assign a HF clock to EUSART instance"
+#endif
   }
 
 #if defined(EUART_COUNT) && (EUART_COUNT > 0)
@@ -1559,7 +1875,15 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   GPIO->EUARTROUTE->RXROUTE = (initData->rxPort
                                << _GPIO_EUART_RXROUTE_PORT_SHIFT)
                               | (initData->rxPin << _GPIO_EUART_RXROUTE_PIN_SHIFT);
-#endif
+#elif defined(EUSART_COUNT) && (EUSART_COUNT > 0)
+  GPIO->EUSARTROUTE[initData->uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN;
+  GPIO->EUSARTROUTE[initData->uartNum].TXROUTE = (initData->txPort
+                                                  << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                                 | (initData->txPin << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[initData->uartNum].RXROUTE = (initData->rxPort
+                                                  << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                                 | (initData->rxPin << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+  #endif
 
   if ((retVal = SetupGpioEuart(handle, initData)) != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
@@ -1572,6 +1896,7 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
 
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
   if (initData->fcType == uartdrvFlowControlHwUart) {
+#if defined(EUART_PRESENT)
     GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
     GPIO->EUARTROUTE_SET->RTSROUTE =
       (initData->rtsPort << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
@@ -1579,7 +1904,15 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     GPIO->EUARTROUTE_SET->CTSROUTE =
       (initData->ctsPort << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
       | (initData->ctsPin << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
-
+#elif defined(EUSART_PRESENT)
+    GPIO->EUSARTROUTE_SET[initData->uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_RTSPEN;
+    GPIO->EUSARTROUTE_SET[initData->uartNum].RTSROUTE =
+      (initData->rtsPort << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
+      | (initData->rtsPin << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
+    GPIO->EUSARTROUTE_SET[initData->uartNum].CTSROUTE =
+      (initData->ctsPort << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
+      | (initData->ctsPin << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
+#endif
     uartAdvancedInit.hwFlowControl = eusartHwFlowControlCtsAndRts;
   } else if (initData->fcType == uartdrvFlowControlHw) {
     InitializeGpioFlowControl(handle);
@@ -1623,6 +1956,11 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
   if (handle == NULL) {
     return ECODE_EMDRV_UARTDRV_ILLEGAL_HANDLE;
   }
+
+#if (HANDLES_ARE_AVAILABLE)
+  removeHandle(handle);
+#endif
+
   // Stop DMA transfers.
   UARTDRV_Abort(handle, uartdrvAbortAll);
 
@@ -1641,7 +1979,7 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
     }
     handle->peripheral.leuart->CMD = LEUART_CMD_RXDIS | LEUART_CMD_TXDIS;
 
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   } else if (handle->type == uartdrvUartTypeEuart) {
     EUSART_Reset(handle->peripheral.euart);
 #endif
@@ -1666,6 +2004,8 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
   handle->txQueue->head = 0;
   handle->txQueue->tail = 0;
   handle->txQueue->used = 0;
+
+  emRequestDeinit(handle);
 
   return ECODE_EMDRV_UARTDRV_OK;
 }
@@ -1818,7 +2158,7 @@ UARTDRV_Status_t UARTDRV_GetPeripheralStatus(UARTDRV_Handle_t handle)
     }
 #endif
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart) {
     status = handle->peripheral.uart->STATUS;
   } else if ((handle->type == uartdrvUartTypeEuart)) {
@@ -2183,7 +2523,7 @@ Ecode_t  UARTDRV_ForceTransmit(UARTDRV_Handle_t handle,
     EFM_ASSERT(false);
     txState = 0;
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   if (handle->type == uartdrvUartTypeUart) {
     txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
   } else if (handle->type == uartdrvUartTypeEuart) {
@@ -2219,7 +2559,7 @@ Ecode_t  UARTDRV_ForceTransmit(UARTDRV_Handle_t handle,
     while (!(handle->peripheral.leuart->STATUS & LEUART_STATUS_TXC)) {
     }
   }
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   else if (handle->type == uartdrvUartTypeEuart) {
     while (count-- != 0U) {
       EUSART_Tx(handle->peripheral.euart, *data++);
@@ -2348,8 +2688,8 @@ Ecode_t UARTDRV_ReceiveB(UARTDRV_Handle_t handle,
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
   }
+  // Active wait, the system must be in EM0 or EM1 anyway
   while (handle->rxQueue->used > 1) {
-    EMU_EnterEM1();
   }
   EnableReceiver(handle);
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
@@ -2359,8 +2699,8 @@ Ecode_t UARTDRV_ReceiveB(UARTDRV_Handle_t handle,
   }
 #endif
   StartReceiveDma(handle, queueBuffer);
+  // Active wait, the system must be in EM0 or EM1 anyway
   while (handle->rxDmaActive) {
-    EMU_EnterEM1();
   }
   return queueBuffer->transferStatus;
 }
@@ -2479,115 +2819,129 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
     return retVal;
   }
+  // Active wait, the system must be in EM0 or EM1 anyway
   while (handle->txQueue->used > 1) {
-    EMU_EnterEM1();
   }
   StartTransmitDma(handle, queueBuffer);
   handle->hasTransmitted = true;
+  // Active wait, the system must be in EM0 or EM1 anyway
   while (handle->txDmaActive) {
-    EMU_EnterEM1();
   }
+
   return queueBuffer->transferStatus;
 }
 
-/* *INDENT-OFF* */
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void)
+{
+  sl_power_manager_on_isr_exit_t result = SL_POWER_MANAGER_IGNORE;
+  uint32_t handleIdx;
+  UARTDRV_Handle_t handle;
+
+  if (uartdrvHandleIsInitialized) {
+    for (handleIdx = 0; handleIdx < EMDRV_UARTDRV_MAX_DRIVER_INSTANCES; handleIdx++) {
+      handle = uartdrvHandle[handleIdx];
+      if (handle != NULL) {
+        if (handle->sleep == SL_POWER_MANAGER_SLEEP) {
+          handle->sleep = SL_POWER_MANAGER_IGNORE;
+          result = SL_POWER_MANAGER_SLEEP;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+#endif
+
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
- * @addtogroup emdrv
- * @{
- * @addtogroup UARTDRV
- * @brief UARTDRV Universal Asynchronous Receiver/Transmitter Driver
+ * @addtogroup uartdrv UARTDRV - UART Driver
+ * @brief Universal Asynchronous Receiver/Transmitter Driver
  * @{
 
-@details
-  The source files for the UART driver library, uartdrv.c and uartdrv.h, are in the
-  emdrv/uartdrv folder.
+   @details
+   The source files for the UART driver library, uartdrv.c and uartdrv.h, are in the
+   emdrv/uartdrv folder.
 
-  @li @ref uartdrv_intro
-  @li @ref uartdrv_conf
-  @li @ref uartdrv_api
-  @li @ref uartdrv_fc
-  @li @ref uartdrv_example
+   @li @ref uartdrv_intro
+   @li @ref uartdrv_conf
+   @li @ref uartdrv_api
+   @li @ref uartdrv_fc
+   @li @ref uartdrv_example
 
-@n @section uartdrv_intro Introduction
-  The UART driver supports the UART capabilities of the USART, UART, and LEUART
-  peripherals. The driver is fully reentrant and supports multiple driver instances.
-  The driver does not buffer or queue data. However, it queues UART transmit
-  and receive operations. Both blocking and non-blocking transfer functions are
-  available. Non-blocking transfer functions report transfer completion with
-  callback functions. Transfers are done using DMA. Simple direct/forced
-  transmit and receive functions are also available. Note that these functions
-  are blocking and not suitable for low energy applications because they use CPU
-  polling.
+   @n @section uartdrv_intro Introduction
+   The UART driver supports the UART capabilities of the USART, UART, and LEUART
+   peripherals. The driver is fully reentrant and supports multiple driver instances.
+   The driver does not buffer or queue data. However, it queues UART transmit
+   and receive operations. Both blocking and non-blocking transfer functions are
+   available. Non-blocking transfer functions report transfer completion with
+   callback functions. Transfers are done using DMA. Simple direct/forced
+   transmit and receive functions are also available. Note that these functions
+   are blocking and not suitable for low energy applications because they use CPU
+   polling.
 
-  UART hardware flow control (CTS/RTS) is fully supported by the driver. UART
-  software flow control (XON/XOFF) is partially supported by the driver. For
-  more information about flow control support, see @ref uartdrv_fc.
+   UART hardware flow control (CTS/RTS) is fully supported by the driver. UART
+   software flow control (XON/XOFF) is partially supported by the driver. For
+   more information about flow control support, see @ref uartdrv_fc.
 
-  @note Transfer completion callback functions are called from within the DMA
-  interrupt handler with interrupts disabled.
+   @note Transfer completion callback functions are called from within the DMA
+   interrupt handler with interrupts disabled.
 
-@n @section uartdrv_conf Configuration Options
+   @n @section uartdrv_conf Configuration Options
 
-  Some properties of the UARTDRV driver are compile-time configurable. These
-  properties are set in a @ref uartdrv_config.h file. A template for this
-  file, containing default values, is in the emdrv/config folder.
-  To configure UARTDRV for your application, provide a custom configuration file,
-  or override the defines on the compiler command line.
-  These are the available configuration parameters with default values defined.
-  @code
+   Some properties of the UARTDRV driver are compile-time configurable. These
+   properties are set in a uartdrv_config.h file. A template for this
+   file, containing default values, is in the emdrv/config folder.
+   To configure UARTDRV for your application, provide a custom configuration file,
+   or override the defines on the compiler command line.
+   These are the available configuration parameters with default values defined.
+   @code
 
-  // Size of the receive operation queue.
-  #define EMDRV_UARTDRV_MAX_CONCURRENT_RX_BUFS    6
+   // Set to 1 to enable hardware flow control.
+ #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
 
-  // Size of the transmit operation queue.
-  #define EMDRV_UARTDRV_MAX_CONCURRENT_TX_BUFS    6
+   // Maximum number of driver instances.
+ #define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
 
-  // Set to 1 to enable hardware flow control.
-  #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
+   // UART software flow control code: request peer to start Tx.
+ #define UARTDRV_FC_SW_XON                       0x11
 
-  // Maximum number of driver instances.
-  // This maximum applies only when EMDRV_UARTDRV_FLOW_CONTROL_ENABLE = 1.
-  #define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
+   // UART software flow control code: request peer to stop Tx.
+ #define UARTDRV_FC_SW_XOFF                      0x13
+   @endcode
 
-  // UART software flow control code: request peer to start Tx.
-  #define UARTDRV_FC_SW_XON                       0x11
+   The properties of each UART driver instance are set at run-time via the
+   @ref UARTDRV_InitUart_t data structure input parameter to the @ref UARTDRV_InitUart()
+   function for UART and USART peripherals, and the @ref UARTDRV_InitLeuart_t
+   data structure input parameter to the @ref UARTDRV_InitLeuart() function for
+   LEUART peripherals.
 
-  // UART software flow control code: request peer to stop Tx.
-  #define UARTDRV_FC_SW_XOFF                      0x13
-  @endcode
+   @n @section uartdrv_api The API
 
-  The properties of each UART driver instance are set at run-time via the
-  @ref UARTDRV_InitUart_t data structure input parameter to the @ref UARTDRV_InitUart()
-  function for UART and USART peripherals, and the @ref UARTDRV_InitLeuart_t
-  data structure input parameter to the @ref UARTDRV_InitLeuart() function for
-  LEUART peripherals.
+   This section contains brief descriptions of the functions in the API. For more
+   information on input and output parameters and return values,
+   click on the hyperlinked function names. Most functions return an error
+   code, @ref ECODE_EMDRV_UARTDRV_OK is returned on success,
+   see ecode.h and uartdrv.h for other error codes.
 
-@n @section uartdrv_api The API
+   The application code must include @em uartdrv.h header file.
 
-  This section contains brief descriptions of the functions in the API. For more
-  information on input and output parameters and return values,
-  click on the hyperlinked function names. Most functions return an error
-  code, @ref ECODE_EMDRV_UARTDRV_OK is returned on success,
-  see @ref ecode.h and @ref uartdrv.h for other error codes.
-
-  The application code must include @em uartdrv.h header file.
-
-  @ref UARTDRV_InitUart(), @ref UARTDRV_InitLeuart() and @ref UARTDRV_DeInit() @n
+   @ref UARTDRV_InitUart(), @ref UARTDRV_InitLeuart() and @ref UARTDRV_DeInit() @n
     These functions initialize and deinitialize the UARTDRV driver. Typically,
     @htmlonly UARTDRV_InitUart() @endhtmlonly (for UART/USART) or
     @htmlonly UARTDRV_InitLeuart() @endhtmlonly (for LEUART) are called once in
     the startup code.
 
-  @ref UARTDRV_GetReceiveStatus() and @ref UARTDRV_GetTransmitStatus() @n
+   @ref UARTDRV_GetReceiveStatus() and @ref UARTDRV_GetTransmitStatus() @n
     Query the status of a current transmit or receive operations. Reports number
     of items (frames) transmitted and remaining.
 
-  @ref UARTDRV_GetReceiveDepth() and  @ref UARTDRV_GetTransmitDepth() @n
+   @ref UARTDRV_GetReceiveDepth() and  @ref UARTDRV_GetTransmitDepth() @n
     Get the number of queued receive or transmit operations.
 
-  @ref UARTDRV_Transmit(), UARTDRV_Receive() @n
-  UARTDRV_TransmitB(), UARTDRV_ReceiveB() @n
-  UARTDRV_ForceTransmit() and UARTDRV_ForceReceive() @n
+   @ref UARTDRV_Transmit(), UARTDRV_Receive() @n
+   UARTDRV_TransmitB(), UARTDRV_ReceiveB() @n
+   UARTDRV_ForceTransmit() and UARTDRV_ForceReceive() @n
     Blocking and non-blocking transfer functions are included.
     The blocking versions have an uppercase B (for Blocking) at the end of
     their function name. Blocking functions do not return before the transfer
@@ -2598,115 +2952,115 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
     @ref UARTDRV_ForceTransmit() does not respect flow control.
     @ref UARTDRV_ForceReceive() forces RTS low.
 
-  @ref UARTDRV_Abort() @n
+   @ref UARTDRV_Abort() @n
     Abort current transmit or receive operations and remove all queued
     operations.
 
-  @ref UARTDRV_FlowControlSet(), @ref UARTDRV_FlowControlGetSelfStatus(), @ref UARTDRV_FlowControlSetPeerStatus() and @ref UARTDRV_FlowControlGetPeerStatus() @n
+   @ref UARTDRV_FlowControlSet(), @ref UARTDRV_FlowControlGetSelfStatus(), @ref UARTDRV_FlowControlSetPeerStatus() and @ref UARTDRV_FlowControlGetPeerStatus() @n
     Set and get flow control status of self or peer device. Note that the return
     value from these two functions depends on the flow control mode set by
     @ref UARTDRV_FlowControlSet(), @ref UARTDRV_InitUart(), or
     @ref UARTDRV_InitLeuart().
 
-  @ref UARTDRV_FlowControlIgnoreRestrain() @n
+   @ref UARTDRV_FlowControlIgnoreRestrain() @n
     Enables transmission when restrained by flow control.
 
-  @ref UARTDRV_PauseTransmit() and @ref UARTDRV_ResumeTransmit() @n
+   @ref UARTDRV_PauseTransmit() and @ref UARTDRV_ResumeTransmit() @n
     Pause a currently active transmit operation by preventing the DMA from loading
     the UART FIFO. Will not override HW flow control state (if applicable), but
     can be used in conjunction.
 
-@n @section uartdrv_fc Flow Control Support
+   @n @section uartdrv_fc Flow Control Support
 
-  If UART flow control is not required, make sure that
-  @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE is set to 0. This reduces the code size
-  and complexity of the driver.
+   If UART flow control is not required, make sure that
+   EMDRV_UARTDRV_FLOW_CONTROL_ENABLE is set to 0. This reduces the code size
+   and complexity of the driver.
 
-  Both hardware and software flow control are supported. To
-  enable either of these, set @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1 in
-  @ref uartdrv_config.h.
+   Both hardware and software flow control are supported. To
+   enable either of these, set EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1 in
+   uartdrv_config.h.
 
-@n @subsection uartdrv_fc_hw Hardware Flow Control
+   @n @subsection uartdrv_fc_hw Hardware Flow Control
 
-  UART hardware flow control uses two additional pins for flow control
-  handshaking, the clear-to-send (CTS) and ready-to-send (RTS) pins.
-  RTS is an output and CTS is an input. These are active-low signals.
-  When CTS is high, the UART transmitter should stop sending frames.
-  A receiver should set RTS high when it is no longer capable of
-  receiving data.
+   UART hardware flow control uses two additional pins for flow control
+   handshaking, the clear-to-send (CTS) and ready-to-send (RTS) pins.
+   RTS is an output and CTS is an input. These are active-low signals.
+   When CTS is high, the UART transmitter should stop sending frames.
+   A receiver should set RTS high when it is no longer capable of
+   receiving data.
 
-  @par Peripheral Hardware Flow Control
+   @par Peripheral Hardware Flow Control
 
-  Newer devices, such as EFR32MG1 and EFM32PG1, natively support CTS/RTS in
-  the USART peripheral hardware. To enable hardware flow control, perform the
-  following steps:
+   Newer devices natively support CTS/RTS in
+   the USART peripheral hardware. To enable hardware flow control, perform the
+   following steps:
 
-  - Set EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
-  - In the @ref UARTDRV_InitUart_t struct passed to @ref UARTDRV_InitUart(), set
+   - Set EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
+   - In the @ref UARTDRV_InitUart_t struct passed to @ref UARTDRV_InitUart(), set
     @ref UARTDRV_InitUart_t.fcType = uartdrvFlowControlHwUart.
-  - Define the pins for CTS and RTS by setting ctsPort, ctsPin, rtsPort
+   - Define the pins for CTS and RTS by setting ctsPort, ctsPin, rtsPort
     and rtsPin in the init struct.
-  - Also define the CTS and RTS locations by setting portLocationCts and
+   - Also define the CTS and RTS locations by setting portLocationCts and
     portLocationRts in the init struct.
 
-  @par GPIO Hardware Flow Control
+   @par GPIO Hardware Flow Control
 
-  To support hardware flow control on devices that don't have UART CTS/RTS
-  hardware support, the driver includes the GPIOINT driver to emulate a
-  hardware implementation of UART CTS/RTS flow control on these devices.
+   To support hardware flow control on devices that don't have UART CTS/RTS
+   hardware support, the driver includes the GPIOINT driver to emulate a
+   hardware implementation of UART CTS/RTS flow control on these devices.
 
-  To enable hardware flow control, perform the following steps:
+   To enable hardware flow control, perform the following steps:
 
-  - Set @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
-  - UART/USART: In the @ref UARTDRV_InitUart_t struct passed to
+   - Set EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
+   - UART/USART: In the @ref UARTDRV_InitUart_t struct passed to
     @ref UARTDRV_InitUart(), set
     @ref UARTDRV_InitUart_t.fcType = uartdrvFlowControlHw.
-  - LEUART: In the @ref UARTDRV_InitLeuart_t struct passed to
+   - LEUART: In the @ref UARTDRV_InitLeuart_t struct passed to
     @ref UARTDRV_InitLeuart(), set
     @ref UARTDRV_InitLeuart_t.fcType = uartdrvFlowControlHw.
-  - Define the pins for CTS and RTS by setting ctsPort, ctsPin, rtsPort and
+   - Define the pins for CTS and RTS by setting ctsPort, ctsPin, rtsPort and
     rtsPin in the same init struct.
 
-  @note Because of the limitations in GPIO interrupt hardware, you cannot select
-  CTS pins in multiple driver instances with the same pin number. For example, pin A0 and
-  B0 cannot serve as CTS pins in two concurrent driver instances.
+   @note Because of the limitations in GPIO interrupt hardware, you cannot select
+   CTS pins in multiple driver instances with the same pin number. For example, pin A0 and
+   B0 cannot serve as CTS pins in two concurrent driver instances.
 
-  RTS is set high whenever there are no Rx operations queued. The UART
-  transmitter is halted when the CTS pin goes high. The transmitter completes
-  the current frame before halting. DMA transfers are also halted.
+   RTS is set high whenever there are no Rx operations queued. The UART
+   transmitter is halted when the CTS pin goes high. The transmitter completes
+   the current frame before halting. DMA transfers are also halted.
 
-@n @subsection uartdrv_fc_sw Software Flow Control
+   @n @subsection uartdrv_fc_sw Software Flow Control
 
-  UART software flow control uses in-band signaling, meaning the receiver sends
-  special flow control characters to the transmitter and thereby removes
-  the need for dedicated wires for flow control. The two symbols
-  UARTDRV_FC_SW_XON and UARTDRV_FC_SW_XOFF are defined in @ref uartdrv_config.h.
+   UART software flow control uses in-band signaling, meaning the receiver sends
+   special flow control characters to the transmitter and thereby removes
+   the need for dedicated wires for flow control. The two symbols
+   UARTDRV_FC_SW_XON and UARTDRV_FC_SW_XOFF are defined in uartdrv_config.h.
 
-  To enable support for software flow control, perform the following steps:
+   To enable support for software flow control, perform the following steps:
 
-  - Set @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
-  - UART/USART: In the @ref UARTDRV_InitUart_t structure passed to
+   - Set EMDRV_UARTDRV_FLOW_CONTROL_ENABLE to 1.
+   - UART/USART: In the @ref UARTDRV_InitUart_t structure passed to
     @ref UARTDRV_InitUart(), set
     @ref UARTDRV_InitUart_t.fcType = uartdrvFlowControlSw.
-  - LEUART: In the @ref UARTDRV_InitLeuart_t structure passed to
+   - LEUART: In the @ref UARTDRV_InitLeuart_t structure passed to
     @ref UARTDRV_InitLeuart(), set
     @ref UARTDRV_InitLeuart_t.fcType = uartdrvFlowControlSw.
 
-  @note Software flow control is partial only.
+   @note Software flow control is partial only.
 
-  The application must monitor buffers and make decisions on when to send XON/
-  XOFF. XON/XOFF can be sent to the peer using @ref UARTDRV_FlowControlSet().
-  Though @ref UARTDRV_FlowControlSet() will pause the active transmit operation
-  to send a flow control character, there is no way to guarantee the order.
-  If the application implements a specific packet format where the flow control
-  codes may appear only in fixed positions, the application should not
-  use @ref UARTDRV_FlowControlSet() but implement read and write of XON/XOFF
-  into packet buffers. If the application code fully implements all the flow
-  control logic, @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE should be set to 0
-  to reduce code space.
+   The application must monitor buffers and make decisions on when to send XON/
+   XOFF. XON/XOFF can be sent to the peer using @ref UARTDRV_FlowControlSet().
+   Though @ref UARTDRV_FlowControlSet() will pause the active transmit operation
+   to send a flow control character, there is no way to guarantee the order.
+   If the application implements a specific packet format where the flow control
+   codes may appear only in fixed positions, the application should not
+   use @ref UARTDRV_FlowControlSet() but implement read and write of XON/XOFF
+   into packet buffers. If the application code fully implements all the flow
+   control logic, EMDRV_UARTDRV_FLOW_CONTROL_ENABLE should be set to 0
+   to reduce code space.
 
-@n @section uartdrv_example Example
-  @if DOXYDOC_P1_DEVICE
+   @n @section uartdrv_example Example
+   @if DOXYDOC_P1_DEVICE
     @if DOXYDOC_EFM32G
     @include uartdrv_example_p1_nomvdis.c
     @endif
@@ -2716,13 +3070,12 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
     @ifnot (DOXYDOC_EFM32G || DOXYDOC_EZR32HG)
     @include uartdrv_example_p1.c
     @endif
-  @endif
-  @if DOXYDOC_P2_DEVICE
-  @include uartdrv_example_p2.c
-  @endif
-  @if DOXYDOC_S2_DEVICE
-  @include uartdrv_example_s2.c
-  @endif
+   @endif
+   @if DOXYDOC_P2_DEVICE
+   @include uartdrv_example_p2.c
+   @endif
+   @if DOXYDOC_S2_DEVICE
+   @include uartdrv_example_s2.c
+   @endif
 
- * @} end group UARTDRV *******************************************************
- * @} end group emdrv *********************************************************/
+ * @} end group uartdrv *********************************************************/

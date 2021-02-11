@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup DBG
+ * @addtogroup dbg
  * @{
  ******************************************************************************/
 
@@ -93,7 +88,9 @@ __STATIC_INLINE bool DBG_Connected(void)
 void DBG_SWOEnable(unsigned int location);
 #endif
 
+#if defined(LOCKBITS_BASE) && !defined(_EFM32_GECKO_FAMILY)
 void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode);
+#endif
 
 #if defined (EMU_CTRL_EM2DBGEN)
 /***************************************************************************//**
@@ -126,8 +123,7 @@ __STATIC_INLINE void DBG_EM2DebugEnable(bool enable)
 }
 #endif
 
-/** @} (end addtogroup DBG) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup dbg) */
 
 #ifdef __cplusplus
 }

@@ -1834,4 +1834,5 @@ typedef struct {
 /** @} End of group MGM22_PROTIMER_BitFields */
 /** @} End of group MGM22_PROTIMER */
 /** @} End of group Parts */
+
 #endif /* MGM22_PROTIMER_H */

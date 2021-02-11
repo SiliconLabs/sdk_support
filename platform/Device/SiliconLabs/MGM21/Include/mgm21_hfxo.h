@@ -444,4 +444,5 @@ typedef struct {
 /** @} End of group MGM21_HFXO_BitFields */
 /** @} End of group MGM21_HFXO */
 /** @} End of group Parts */
+
 #endif /* MGM21_HFXO_H */

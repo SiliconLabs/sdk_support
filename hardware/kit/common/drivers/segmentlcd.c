@@ -514,6 +514,10 @@ void SegmentLCD_Init(bool useBoost)
     LCD_VBoostSet(LCD_BOOST_LEVEL);
     LCD_VLCDSelect(lcdVLCDSelVExtBoost);
     CMU->LCDCTRL |= CMU_LCDCTRL_VBOOSTEN;
+#elif defined(_SILICON_LABS_32B_SERIES_1)
+    /* Set charge pump mode and adjust contrast */
+    LCD_ModeSet(lcdModeCpIntOsc);
+    LCD_ContrastSet(LCD_BOOST_CONTRAST);
 #endif
   }
 

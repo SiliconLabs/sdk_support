@@ -1,0 +1,33 @@
+id: emlib_adc
+label: ADC
+package: platform
+description: >
+  Analog to Digital Converter (ADC) Peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_adc.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_adc.h"
+provides:
+  - name: emlib_adc
+requires:
+  - name: device
+  - name: device_has_adc
+  - name: emlib_common
+  - name: emlib_cmu
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-adc
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-adc
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-adc
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-adc
+      condition: [device_sdid_95]

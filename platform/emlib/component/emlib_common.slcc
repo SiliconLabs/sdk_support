@@ -1,0 +1,39 @@
+id: emlib_common
+label: Common Headers
+package: platform
+description: >
+  Common headers for EMLIB, providing atomic bit access, macros for alignment,
+  min/max/ceil/floor, ramfunc, pack, section, weak, noreturn, fallthrough and versioning.
+category: Platform|Peripheral
+quality: production
+component_root_path: platform/emlib
+source:
+  - path: "src/em_assert.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_assert.h"
+    - path: "em_bus.h"
+    - path: "em_common.h"
+    - path: "em_ramfunc.h"
+    - path: "em_version.h"
+provides:
+  - name: "emlib_common"
+requires:
+  - name: "cmsis_core"
+  - name: "device"
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-common
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-common
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-common
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-common
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-common
+      condition: [device_sdid_200]
+    - page: emlib/api/efr32xg22/group-common
+      condition: [device_sdid_205]

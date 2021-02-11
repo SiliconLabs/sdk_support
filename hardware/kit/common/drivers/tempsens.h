@@ -31,6 +31,10 @@
 #ifndef __TEMPSENS_H
 #define __TEMPSENS_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The DS75 temperature sensor driver is deprecated and marked for removal in a later release."
+#endif
+
 #include "em_device.h"
 
 /***************************************************************************//**

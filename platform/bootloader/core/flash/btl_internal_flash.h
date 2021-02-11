@@ -35,6 +35,15 @@ MISRAC_ENABLE
  * @{
  ******************************************************************************/
 
+// -----------------------------------------------------------------------------
+// Defines
+
+/// DMA Channel for MSC write
+#define SL_GBL_MSC_LDMA_CHANNEL     2
+
+// -----------------------------------------------------------------------------
+// Prototypes
+
 /**
  * Erase a flash page
  *
@@ -44,20 +53,25 @@ MISRAC_ENABLE
 bool flash_erasePage(uint32_t address);
 
 /**
- * Write a word to internal flash
+ * Write buffer to internal flash
  *
- * @param address Address in internal flash to write word to
- * @param data Word to write
- * @returns True if operation was successful
+ * @param address   Starting address to write data to. Must be half-word aligned.
+ * @param data      Data buffer to write to internal flash
+ * @param length    Amount of bytes in the data buffer to write
+ * @param ch        DMA channel to use
+ * @return True if operation was successful
  */
-bool flash_writeWord(uint32_t address, uint32_t data);
+bool flash_writeBuffer_dma(uint32_t       address,
+                           void           *data,
+                           size_t         length,
+                           int            ch);
 
 /**
  * Write buffer to internal flash
  *
- * @param address Starting address to write data to. Must be half-word aligned.
- * @param data    Data buffer to write to internal flash
- * @param length  Amount of bytes in the data buffer to write
+ * @param address   Starting address to write data to. Must be half-word aligned.
+ * @param data      Data buffer to write to internal flash
+ * @param length    Amount of bytes in the data buffer to write
  * @return True if operation was successful
  */
 bool flash_writeBuffer(uint32_t       address,

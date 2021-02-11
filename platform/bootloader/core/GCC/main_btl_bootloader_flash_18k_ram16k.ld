@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @brief Linker script for Silicon Labs EFM32 and EFR32 devices with
- *        18kB bootloader area
+ *        18kB bootloader area with 16k RAM.
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -14,7 +14,6 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
-
 
 MEMORY
 {
@@ -217,5 +216,5 @@ SECTIONS
   ASSERT(__StackLimit >= __HeapLimit, "region RAM overflowed with stack")
 
   /* Check if FLASH usage exceeds FLASH size */
-  ASSERT( (LENGTH(FLASH) - 0x4) >= (__etext + SIZEOF(.data) - ORIGIN(FLASH)), "FLASH memory overflowed !")
+  ASSERT( (LENGTH(FLASH) - 0x4 - 0x20) >= (__etext + SIZEOF(.data) - ORIGIN(FLASH)), "FLASH memory overflowed !")
 }

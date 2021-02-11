@@ -257,4 +257,5 @@ typedef struct {
 /** @} End of group MGM22_AMUXCP_BitFields */
 /** @} End of group MGM22_AMUXCP */
 /** @} End of group Parts */
+
 #endif /* MGM22_AMUXCP_H */

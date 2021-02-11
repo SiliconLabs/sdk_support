@@ -3,7 +3,7 @@
  * @brief The BLE specific header file for the RAIL library.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -243,7 +243,20 @@ void RAIL_BLE_Deinit(RAIL_Handle_t railHandle);
 bool RAIL_BLE_IsEnabled(RAIL_Handle_t railHandle);
 
 /**
- * Switch the Viterbi 1 Mbps BLE PHY.
+ * Switch to the 1 Mbps Quuppa PHY.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return Status code indicating success of the function call.
+ *
+ * You can use this function to switch to the Quuppa PHY.
+ *
+ * @note Not all chips support the 1Mbps Quuppa PHY. This API should return RAIL_STATUS_INVALID_CALL if
+ * unsupported by the hardware we're building for.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhyQuuppa(RAIL_Handle_t railHandle);
+
+/**
+ * Switch to the Viterbi 1 Mbps BLE PHY.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @return A status code indicating success of the function call.
@@ -259,7 +272,7 @@ bool RAIL_BLE_IsEnabled(RAIL_Handle_t railHandle);
 RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsViterbi(RAIL_Handle_t railHandle);
 
 /**
- * Switch the legacy non-Viterbi 1 Mbps BLE PHY.
+ * Switch to the legacy non-Viterbi 1 Mbps BLE PHY.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @return A status code indicating success of the function call.
@@ -273,7 +286,7 @@ RAIL_Status_t RAIL_BLE_ConfigPhy1MbpsViterbi(RAIL_Handle_t railHandle);
 RAIL_Status_t RAIL_BLE_ConfigPhy1Mbps(RAIL_Handle_t railHandle);
 
 /**
- * Switch the Viterbi 2 Mbps BLE PHY.
+ * Switch to the Viterbi 2 Mbps BLE PHY.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @return A status code indicating success of the function call.
@@ -287,7 +300,7 @@ RAIL_Status_t RAIL_BLE_ConfigPhy1Mbps(RAIL_Handle_t railHandle);
 RAIL_Status_t RAIL_BLE_ConfigPhy2MbpsViterbi(RAIL_Handle_t railHandle);
 
 /**
- * Switch the legacy non-Viterbi 2 Mbps BLE PHY.
+ * Switch to the legacy non-Viterbi 2 Mbps BLE PHY.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @return A status code indicating success of the function call.
@@ -310,9 +323,10 @@ RAIL_Status_t RAIL_BLE_ConfigPhy2Mbps(RAIL_Handle_t railHandle);
  *
  * Use this function to switch back to BLE Coded PHY from the default
  * 1 Mbps option. You may only call this function after initializing BLE and
- * while the radio is idle. When using a BLE Coded PHY, the subPhy in
- * RAIL_AppendedInfo_t marks the coding of the received packet. A subPhy of 0
- * marks a 500 kbps packet, and a subPhy of 1 marks a 125 kbps packet.
+ * while the radio is idle. When using a BLE Coded PHY, the \ref
+ * RAIL_RxPacketDetails_t::subPhyId marks the coding of the received packet.
+ * A subPhyId of 0 marks a 500 kbps packet, and a subPhyId of 1 marks a 125
+ * kbps packet.
  *
  * @note The EFR32XG1, EFR32XG12, and EFR32XG14 families do not support BLE
  *   Coded PHYs.
@@ -321,7 +335,27 @@ RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
                                       RAIL_BLE_Coding_t bleCoding);
 
 /**
- * Helper function to change BLE radio parameters.
+ * Switch to the Simulscan PHY.
+ *
+ * @param[in] railHandle A handle for RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * Use this function to switch to the BLE Simulscan PHY. You may only
+ * call this function after initializing BLE and while the radio is idle.
+ * When using Simulscan PHY, the \ref RAIL_RxPacketDetails_t::subPhyId
+ * marks the coding of the received packet. A subPhyId of 0 marks a
+ * 500 kbps packet, a subPhyId of 1 marks a 125 kbps packet, and a
+ * subPhyId of 2 marks a 1 Mbps packet.
+ *
+ * @note: The Simulscan PHY is supported only on 2.4 GHz Series-2 parts.
+ * The preprocessor symbol \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY and the
+ * runtime function \ref RAIL_BLE_SupportsSimulscanPhy() may be used to
+ * test for support of the Simulscan PHY.
+ */
+RAIL_Status_t RAIL_BLE_ConfigPhySimulscan(RAIL_Handle_t railHandle);
+
+/**
+ * Change BLE radio parameters.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @param[in] crcInit The value to use for CRC initialization.
@@ -335,7 +369,8 @@ RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
  * This function can be used to switch radio parameters on every connection
  * and/or channel change. It is BLE-aware and will set the access address,
  * preamble, CRC initialization value, and whitening configuration without
- * requiring you to load a new radio configuration.
+ * requiring you to load a new radio configuration. This function should not be
+ * called while the radio is active.
  */
 RAIL_Status_t RAIL_BLE_ConfigChannelRadioParams(RAIL_Handle_t railHandle,
                                                 uint32_t crcInit,
@@ -344,7 +379,7 @@ RAIL_Status_t RAIL_BLE_ConfigChannelRadioParams(RAIL_Handle_t railHandle,
                                                 bool disableWhitening);
 
 /**
- * Change the current BLE PHY and go into receive
+ * Change the current BLE PHY and go into receive.
  *
  * @param[in] railHandle A handle for RAIL instance.
  * @param[in] phy Indicates which PHY to receive on
@@ -358,7 +393,7 @@ RAIL_Status_t RAIL_BLE_ConfigChannelRadioParams(RAIL_Handle_t railHandle,
  * for sending BLE test mode packets that don't have this turned on.
  * @return A status code indicating success of the function call.
  *
- * This function is used to implement axillary packet reception, as defined in
+ * This function is used to implement auxiliary packet reception, as defined in
  * the BLE specification. The radio will be put into IDLE, the PHY and channel
  * will be changed, and then receive will be entered at the start time given.
  * The new receive will have a timeout of 30 us, which means that this function
@@ -397,37 +432,47 @@ RAIL_ENUM_GENERIC(RAIL_BLE_AoxOptions_t, uint16_t) {
   RAIL_BLE_AOX_OPTIONS_CONNLESS_SHIFT = 1,
   /** Shift position of \ref RAIL_BLE_AOX_OPTIONS_CONN_SHIFT bit */
   RAIL_BLE_AOX_OPTIONS_CONN_SHIFT = 2,
+  /** Shift position of \ref RAIL_BLE_AOX_OPTIONS_LOCK_CTE_BUFFER_SHIFT bit */
+  RAIL_BLE_AOX_OPTIONS_LOCK_CTE_BUFFER_SHIFT = 3,
 };
 
 /**
  * Deprecated AOX options
  */
-#define RAIL_BLE_AOX_OPTIONS_DO_SWITCH    (0U)
+#define RAIL_BLE_AOX_OPTIONS_DO_SWITCH           (0U)
 /**
  * Deprecated AOX options
  */
-#define RAIL_BLE_AOX_OPTIONS_TX_ENABLED   (0U)
+#define RAIL_BLE_AOX_OPTIONS_TX_ENABLED          (0U)
 /**
  * Deprecated AOX options
  */
-#define RAIL_BLE_AOX_OPTIONS_RX_ENABLED   (0U)
+#define RAIL_BLE_AOX_OPTIONS_RX_ENABLED          (0U)
 
+/**
+ * Disable the AoX feature.
+ */
+#define RAIL_BLE_AOX_OPTIONS_DISABLED            (0U)
 /**
  * Sets one of the two AoX sampling/switching modes: 1 us or 2 us window.
  */
-#define RAIL_BLE_AOX_OPTIONS_SAMPLE_MODE  (1U << RAIL_BLE_AOX_OPTIONS_SAMPLE_MODE_SHIFT)
+#define RAIL_BLE_AOX_OPTIONS_SAMPLE_MODE         (1U << RAIL_BLE_AOX_OPTIONS_SAMPLE_MODE_SHIFT)
 /**
  * Enables connectionless AoX Rx packets.
  */
-#define RAIL_BLE_AOX_OPTIONS_CONNLESS     (1U << RAIL_BLE_AOX_OPTIONS_CONNLESS_SHIFT)
+#define RAIL_BLE_AOX_OPTIONS_CONNLESS            (1U << RAIL_BLE_AOX_OPTIONS_CONNLESS_SHIFT)
 /**
  * Enables connection based AoX Rx packets.
  */
-#define RAIL_BLE_AOX_OPTIONS_CONN         (1U << RAIL_BLE_AOX_OPTIONS_CONN_SHIFT)
+#define RAIL_BLE_AOX_OPTIONS_CONN                (1U << RAIL_BLE_AOX_OPTIONS_CONN_SHIFT)
+/**
+ * Enables connection based AoX Rx packets.
+ */
+#define RAIL_BLE_AOX_OPTIONS_DISABLE_BUFFER_LOCK (1U << RAIL_BLE_AOX_OPTIONS_BUFFER_LOCK_SHIFT)
 /**
  * Enables connection based or connectionless AoX Rx packets.
  */
-#define RAIL_BLE_AOX_OPTIONS_ENABLED      (RAIL_BLE_AOX_OPTIONS_CONN | RAIL_BLE_AOX_OPTIONS_CONNLESS)
+#define RAIL_BLE_AOX_OPTIONS_ENABLED             (RAIL_BLE_AOX_OPTIONS_CONN | RAIL_BLE_AOX_OPTIONS_CONNLESS)
 
 /**
  * @struct RAIL_BLE_AoxConfig_t
@@ -450,9 +495,7 @@ typedef struct RAIL_BLE_AoxConfig {
   /**
    * Address to first element of antenna pattern array.
    */
-  // @TODO: Can we change this to uint8_t* and make non-word-aligned
-  // memory accesses in the sequencer?
-  uint32_t * antArrayAddr;
+  uint8_t * antArrayAddr;
   /**
    * Size of the antenna pattern array.
    */
@@ -492,7 +535,7 @@ typedef struct RAIL_BLE_AoxAntennaConfig {
 } RAIL_BLE_AoxAntennaConfig_t;
 
 /**
- * Locks/unlocks the CTE buffer from the application's perspective. The radio
+ * Lock/unlock the CTE buffer from the application's perspective. The radio
  * will write to the buffer only if the bit is NOT set at the beginning of the
  * sampling period. The radio will set the bit once the sampling period starts
  * to indicate that some CTE data has been collected, which will not be
@@ -555,12 +598,8 @@ RAIL_Status_t RAIL_BLE_InitCte(RAIL_Handle_t railHandle);
  * This function must be called before \ref RAIL_BLE_ConfigAox and
  * \ref RAIL_BLE_InitCte, else a \ref RAIL_STATUS_INVALID_CALL is returned.
  *
- * If \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT is set to 0 or antCount in
- * \ref RAIL_BLE_AoxAntennaConfig_t is 0, then \ref RAIL_STATUS_INVALID_CALL is
- * returned.
- *
- * If user configures more pins i.e; antCount in
- * \ref RAIL_BLE_AoxAntennaConfig_t than allowed
+ * If user configures more pins, i.e., antCount in
+ * \ref RAIL_BLE_AoxAntennaConfig_t, than allowed
  * \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT, then the API returns
  * \ref RAIL_STATUS_INVALID_PARAMETER.
  *

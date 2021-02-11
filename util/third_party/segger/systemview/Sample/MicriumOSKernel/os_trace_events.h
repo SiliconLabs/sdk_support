@@ -61,15 +61,11 @@
 *********************************************************************************************************
 */
 
-#if (OS_CFG_TRACE_EN == DEF_ENABLED)
+// DEPRECATION NOTICE: OS_TRACE_INIT() will be deprecated and replaced by SEGGER_SYSVIEW_Conf().
+
 #define  OS_TRACE_INIT()                             SEGGER_SYSVIEW_Conf()
 #define  OS_TRACE_START()                            SEGGER_SYSVIEW_Start()
 #define  OS_TRACE_STOP()                             SEGGER_SYSVIEW_Stop()
-#else
-#define  OS_TRACE_INIT()
-#define  OS_TRACE_START()
-#define  OS_TRACE_STOP()
-#endif
 
 
 /*
@@ -78,7 +74,6 @@
 *********************************************************************************************************
 */
 
-#if (OS_CFG_TRACE_EN == DEF_ENABLED)
 #define  OS_TRACE_ID_OFFSET                          (32u)
 
 #define  OS_TRACE_ID_TICK_INCREMENT                  ( 1u + OS_TRACE_ID_OFFSET)
@@ -112,8 +107,6 @@
 #define  OS_TRACE_ID_MEM_GET                         (29u + OS_TRACE_ID_OFFSET)
 #define  OS_TRACE_ID_TASK_SUSPEND                    (30u + OS_TRACE_ID_OFFSET)
 #define  OS_TRACE_ID_TASK_RESUME                     (31u + OS_TRACE_ID_OFFSET)
-#endif
-
 
 /*
 *********************************************************************************************************
@@ -121,7 +114,6 @@
 *********************************************************************************************************
 */
 
-#if (OS_CFG_TRACE_EN == DEF_ENABLED)
 #define  OS_TRACE_TASK_CREATE(p_tcb)                if (p_tcb != 0) {                            \
                                                       SEGGER_SYSVIEW_OnTaskCreate((U32)p_tcb);   \
                                                       SYSVIEW_AddTask((U32)p_tcb,                \
@@ -277,170 +269,6 @@
 #define  OS_TRACE_FLAG_PEND_EXIT(RetVal)
 #define  OS_TRACE_MEM_PUT_EXIT(RetVal)
 #define  OS_TRACE_MEM_GET_EXIT(RetVal)
-#endif
-
-
-/*
-*********************************************************************************************************
-*                                     UNUSED FUNCTIONS (OTHER RECORDERS)
-*********************************************************************************************************
-*/
-
-#define  OS_TRACE_MUTEX_DEL(p_mutex)
-#define  OS_TRACE_MUTEX_POST(p_mutex)
-#define  OS_TRACE_MUTEX_PEND(p_mutex)
-#define  OS_TRACE_TASK_MSG_Q_POST(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND(p_msg_q)
-#define  OS_TRACE_TASK_SEM_POST(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND(p_tcb)
-#define  OS_TRACE_SEM_DEL(p_sem)
-#define  OS_TRACE_SEM_POST(p_sem)
-#define  OS_TRACE_SEM_PEND(p_sem)
-#define  OS_TRACE_Q_DEL(p_q)
-#define  OS_TRACE_Q_POST(p_q)
-#define  OS_TRACE_Q_PEND(p_q)
-#define  OS_TRACE_FLAG_DEL(p_grp)
-#define  OS_TRACE_FLAG_POST(p_grp)
-#define  OS_TRACE_FLAG_PEND(p_grp)
-#define  OS_TRACE_MEM_PUT(p_mem)
-#define  OS_TRACE_MEM_GET(p_mem)
-#define  OS_TRACE_MUTEX_POST_FAILED(p_mutex)
-#define  OS_TRACE_MUTEX_PEND_FAILED(p_mutex)
-#define  OS_TRACE_MUTEX_PEND_BLOCK(p_mutex)
-#define  OS_TRACE_TASK_MSG_Q_POST_FAILED(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND_FAILED(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND_BLOCK(p_msg_q)
-#define  OS_TRACE_TASK_SEM_POST_FAILED(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND_FAILED(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND_BLOCK(p_tcb)
-#define  OS_TRACE_SEM_POST_FAILED(p_sem)
-#define  OS_TRACE_SEM_PEND_FAILED(p_sem)
-#define  OS_TRACE_SEM_PEND_BLOCK(p_sem)
-#define  OS_TRACE_Q_POST_FAILED(p_q)
-#define  OS_TRACE_Q_PEND_FAILED(p_q)
-#define  OS_TRACE_Q_PEND_BLOCK(p_q)
-#define  OS_TRACE_FLAG_POST_FAILED(p_grp)
-#define  OS_TRACE_FLAG_PEND_FAILED(p_grp)
-#define  OS_TRACE_FLAG_PEND_BLOCK(p_grp)
-#define  OS_TRACE_MEM_PUT_FAILED(p_mem)
-#define  OS_TRACE_MEM_GET_FAILED(p_mem)
-#define  OS_TRACE_TASK_PRIO_CHANGE(p_tcb, prio)
-
-#else                                                           /* End of OS_CFG_TRACE_EN == DEF_ENABLED                */
-
-#define  OS_TRACE_TICK_INCREMENT(OSTickCtr)
-
-#define  OS_TRACE_TASK_CREATE(p_tcb)
-#define  OS_TRACE_TASK_DEL(p_tcb)
-#define  OS_TRACE_TASK_READY(p_tcb)
-#define  OS_TRACE_TASK_SWITCHED_IN(p_tcb)
-#define  OS_TRACE_TASK_DLY(dly_ticks)
-#define  OS_TRACE_TASK_SUSPEND(p_tcb)
-#define  OS_TRACE_TASK_SUSPENDED(p_tcb)
-#define  OS_TRACE_TASK_RESUME(p_tcb)
-#define  OS_TRACE_TASK_PREEMPT(p_tcb)
-
-#define  OS_TRACE_ISR_BEGIN(isr_id)
-#define  OS_TRACE_ISR_END()
-
-#define  OS_TRACE_ISR_ENTER()
-#define  OS_TRACE_ISR_EXIT()
-
-#define  OS_TRACE_TASK_MSG_Q_CREATE(p_msg_q, p_name)
-#define  OS_TRACE_TASK_MSG_Q_POST(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_POST_FAILED(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND_FAILED(p_msg_q)
-#define  OS_TRACE_TASK_MSG_Q_PEND_BLOCK(p_msg_q)
-
-#define  OS_TRACE_TASK_SEM_CREATE(p_tcb, p_name)
-#define  OS_TRACE_TASK_SEM_POST(p_tcb)
-#define  OS_TRACE_TASK_SEM_POST_FAILED(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND_FAILED(p_tcb)
-#define  OS_TRACE_TASK_SEM_PEND_BLOCK(p_tcb)
-
-#define  OS_TRACE_MUTEX_CREATE(p_mutex, p_name)
-#define  OS_TRACE_MUTEX_DEL(p_mutex)
-#define  OS_TRACE_MUTEX_POST(p_mutex)
-#define  OS_TRACE_MUTEX_POST_FAILED(p_mutex)
-#define  OS_TRACE_MUTEX_PEND(p_mutex)
-#define  OS_TRACE_MUTEX_PEND_FAILED(p_mutex)
-#define  OS_TRACE_MUTEX_PEND_BLOCK(p_mutex)
-
-#define  OS_TRACE_MUTEX_TASK_PRIO_INHERIT(p_tcb, prio)
-#define  OS_TRACE_MUTEX_TASK_PRIO_DISINHERIT(p_tcb, prio)
-
-#define  OS_TRACE_SEM_CREATE(p_sem, p_name)
-#define  OS_TRACE_SEM_DEL(p_sem)
-#define  OS_TRACE_SEM_POST(p_sem)
-#define  OS_TRACE_SEM_POST_FAILED(p_sem)
-#define  OS_TRACE_SEM_PEND(p_sem)
-#define  OS_TRACE_SEM_PEND_FAILED(p_sem)
-#define  OS_TRACE_SEM_PEND_BLOCK(p_sem)
-
-#define  OS_TRACE_Q_CREATE(p_q, p_name)
-#define  OS_TRACE_Q_DEL(p_q)
-#define  OS_TRACE_Q_POST(p_q)
-#define  OS_TRACE_Q_POST_FAILED(p_q)
-#define  OS_TRACE_Q_PEND(p_q)
-#define  OS_TRACE_Q_PEND_FAILED(p_q)
-#define  OS_TRACE_Q_PEND_BLOCK(p_q)
-
-#define  OS_TRACE_FLAG_CREATE(p_grp, p_name)
-#define  OS_TRACE_FLAG_DEL(p_grp)
-#define  OS_TRACE_FLAG_POST(p_grp)
-#define  OS_TRACE_FLAG_POST_FAILED(p_grp)
-#define  OS_TRACE_FLAG_PEND(p_grp)
-#define  OS_TRACE_FLAG_PEND_FAILED(p_grp)
-#define  OS_TRACE_FLAG_PEND_BLOCK(p_grp)
-
-#define  OS_TRACE_MEM_CREATE(p_mem, p_name)
-#define  OS_TRACE_MEM_PUT(p_mem)
-#define  OS_TRACE_MEM_PUT_FAILED(p_mem)
-#define  OS_TRACE_MEM_GET(p_mem)
-#define  OS_TRACE_MEM_GET_FAILED(p_mem)
-
-#define  OS_TRACE_TASK_PRIO_CHANGE(p_tcb, prio)
-
-#define  OS_TRACE_MUTEX_DEL_ENTER(p_mutex, opt)
-#define  OS_TRACE_MUTEX_POST_ENTER(p_mutex, opt)
-#define  OS_TRACE_MUTEX_PEND_ENTER(p_mutex, timeout, opt, p_ts)
-#define  OS_TRACE_TASK_MSG_Q_POST_ENTER(p_msg_q, p_void, msg_size, opt)
-#define  OS_TRACE_TASK_MSG_Q_PEND_ENTER(p_msg_q, timeout, opt, p_msg_size, p_ts)
-#define  OS_TRACE_TASK_SEM_POST_ENTER(p_tcb, opt)
-#define  OS_TRACE_TASK_SEM_PEND_ENTER(p_tcb, timeout, opt, p_ts)
-#define  OS_TRACE_SEM_DEL_ENTER(p_sem, opt)
-#define  OS_TRACE_SEM_POST_ENTER(p_sem, opt)
-#define  OS_TRACE_SEM_PEND_ENTER(p_sem, timeout, opt, p_ts)
-#define  OS_TRACE_Q_DEL_ENTER(p_q, opt)
-#define  OS_TRACE_Q_POST_ENTER(p_q, p_void, msg_size, opt)
-#define  OS_TRACE_Q_PEND_ENTER(p_q, timeout, opt, p_msg_size, p_ts)
-#define  OS_TRACE_FLAG_DEL_ENTER(p_grp, opt)
-#define  OS_TRACE_FLAG_POST_ENTER(p_grp, flags, opt)
-#define  OS_TRACE_FLAG_PEND_ENTER(p_grp, flags, timeout, opt, p_ts)
-#define  OS_TRACE_MEM_PUT_ENTER(p_mem, p_blk)
-#define  OS_TRACE_MEM_GET_ENTER(p_mem)
-
-#define  OS_TRACE_MUTEX_DEL_EXIT(RetVal)
-#define  OS_TRACE_MUTEX_POST_EXIT(RetVal)
-#define  OS_TRACE_MUTEX_PEND_EXIT(RetVal)
-#define  OS_TRACE_TASK_MSG_Q_POST_EXIT(RetVal)
-#define  OS_TRACE_TASK_MSG_Q_PEND_EXIT(RetVal)
-#define  OS_TRACE_TASK_SEM_POST_EXIT(RetVal)
-#define  OS_TRACE_TASK_SEM_PEND_EXIT(RetVal)
-#define  OS_TRACE_SEM_DEL_EXIT(RetVal)
-#define  OS_TRACE_SEM_POST_EXIT(RetVal)
-#define  OS_TRACE_SEM_PEND_EXIT(RetVal)
-#define  OS_TRACE_Q_DEL_EXIT(RetVal)
-#define  OS_TRACE_Q_POST_EXIT(RetVal)
-#define  OS_TRACE_Q_PEND_EXIT(RetVal)
-#define  OS_TRACE_FLAG_DEL_EXIT(RetVal)
-#define  OS_TRACE_FLAG_POST_EXIT(RetVal)
-#define  OS_TRACE_FLAG_PEND_EXIT(RetVal)
-#define  OS_TRACE_MEM_PUT_EXIT(RetVal)
-#define  OS_TRACE_MEM_GET_EXIT(RetVal)
-
 #endif
 
 

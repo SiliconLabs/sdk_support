@@ -42,12 +42,7 @@
 /** @endcond */
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LESENSE
+ * @addtogroup lesense LESENSE - Low Energy Sensor
  * @brief Low Energy Sensor (LESENSE) Peripheral API
  * @details
  *  This module contains functions to control the LESENSE peripheral of Silicon
@@ -58,18 +53,25 @@
  ******************************************************************************/
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 #if defined(_LESENSE_ROUTE_MASK)
 #define GENERIC_LESENSE_ROUTE    LESENSE->ROUTE
 #else
 #define GENERIC_LESENSE_ROUTE    LESENSE->ROUTEPEN
 #endif
+#else
+#define GENERIC_LESENSE_ROUTE    GPIO->LESENSEROUTE.ROUTEEN
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
 /* DACOUT mode only available on channel 0, 1, 2, 3, 12, 13, 14, 15 */
 #define DACOUT_SUPPORT  0xF00F
-#else
+#elif defined(_SILICON_LABS_32B_SERIES_1)
 /* DACOUT mode only available on channel 4, 5, 7, 10, 12, 13 */
 #define DACOUT_SUPPORT  0x34B0
+#else
+/* DACOUT mode only available on channel 0, 1, 2 */
+#define DACOUT_SUPPORT  0x7
 #endif
 /** @endcond */
 
@@ -120,6 +122,21 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
   EFM_ASSERT((uint32_t)init->perCtrl.dacPresc < 32U);
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (LESENSE->EN != 0U) {
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
+
   /* Reset LESENSE registers if requested. */
   if (reqReset) {
     LESENSE_Reset();
@@ -140,6 +157,7 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
    * SCANRES in CNT_RES after each scan, enable/disable to always write to the
    * result buffer, even if it is full, and enable/disable LESENSE running in debug
    * mode. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   LESENSE->CTRL =
     ((uint32_t)init->coreCtrl.prsSel         << _LESENSE_CTRL_PRSSEL_SHIFT)
     | (uint32_t)init->coreCtrl.scanConfSel
@@ -153,8 +171,20 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
     | ((uint32_t)init->coreCtrl.storeScanRes << _LESENSE_CTRL_STRSCANRES_SHIFT)
     | ((uint32_t)init->coreCtrl.bufOverWr    << _LESENSE_CTRL_BUFOW_SHIFT)
     | ((uint32_t)init->coreCtrl.debugRun     << _LESENSE_CTRL_DEBUGRUN_SHIFT);
+#else
+  EFM_ASSERT(init->coreCtrl.fifoTrigLevel < 16);
+  LESENSE->CFG = (uint32_t)init->coreCtrl.scanConfSel
+                 | (uint32_t)init->coreCtrl.wakeupOnDMA
+                 | ((uint32_t)init->coreCtrl.fifoTrigLevel << _LESENSE_CFG_RESFIDL_SHIFT)
+                 | ((uint32_t)init->coreCtrl.dualSample    << _LESENSE_CFG_DUALSAMPLE_SHIFT)
+                 | ((uint32_t)init->coreCtrl.storeScanRes  << _LESENSE_CFG_STRSCANRES_SHIFT)
+                 | ((uint32_t)init->coreCtrl.debugRun      << _LESENSE_CFG_DEBUGRUN_SHIFT);
 
-  /* Set scan mode in the CTRL register using the provided function. Don't
+  /* Set PRS input */
+  PRS->CONSUMER_LESENSE_START = init->coreCtrl.prsSel;
+#endif
+
+  /* Set scan mode in the CTRL/CFG register using the provided function. Don't
    * start scanning immediately. */
   LESENSE_ScanModeSet((LESENSE_ScanMode_TypeDef)init->coreCtrl.scanStart, false);
 
@@ -168,7 +198,9 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
                      | ((uint32_t)init->perCtrl.dacCh1En       << _LESENSE_PERCTRL_DACCH1EN_SHIFT)
 #endif
                      | ((uint32_t)init->perCtrl.dacCh0Data     << _LESENSE_PERCTRL_DACCH0DATA_SHIFT)
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
                      | ((uint32_t)init->perCtrl.dacCh1Data     << _LESENSE_PERCTRL_DACCH1DATA_SHIFT)
+#endif
 #if defined(_LESENSE_PERCTRL_DACCH0CONV_MASK)
                      | ((uint32_t)init->perCtrl.dacCh0ConvMode << _LESENSE_PERCTRL_DACCH0CONV_SHIFT)
                      | ((uint32_t)init->perCtrl.dacCh0OutMode  << _LESENSE_PERCTRL_DACCH0OUT_SHIFT)
@@ -187,7 +219,11 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
                      | ((uint32_t)init->coreCtrl.invACMP0      << _LESENSE_PERCTRL_ACMP0INV_SHIFT)
                      | ((uint32_t)init->coreCtrl.invACMP1      << _LESENSE_PERCTRL_ACMP1INV_SHIFT)
 #endif
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
                      | (uint32_t)init->perCtrl.warmupMode;
+#else
+  ;
+#endif
 
   /* The LESENSE decoder general control configuration.
    * Set the decoder input source and select PRS input for decoder bits.
@@ -198,24 +234,32 @@ void LESENSE_Init(const LESENSE_Init_TypeDef * init, bool reqReset)
    * Enable/disable decoder hysteresis on interrupt requests.
    * Enable/disable count mode on LESPRS0 and LESPRS1. */
   LESENSE->DECCTRL =
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
     (uint32_t)init->decCtrl.decInput
     | ((uint32_t)init->decCtrl.prsChSel0 << _LESENSE_DECCTRL_PRSSEL0_SHIFT)
     | ((uint32_t)init->decCtrl.prsChSel1 << _LESENSE_DECCTRL_PRSSEL1_SHIFT)
     | ((uint32_t)init->decCtrl.prsChSel2 << _LESENSE_DECCTRL_PRSSEL2_SHIFT)
     | ((uint32_t)init->decCtrl.prsChSel3 << _LESENSE_DECCTRL_PRSSEL3_SHIFT)
-    | ((uint32_t)init->decCtrl.chkState  << _LESENSE_DECCTRL_ERRCHK_SHIFT)
-    | ((uint32_t)init->decCtrl.intMap    << _LESENSE_DECCTRL_INTMAP_SHIFT)
+    | ((uint32_t)init->decCtrl.chkState  << _LESENSE_DECCTRL_ERRCHK_SHIFT) |
+#endif
+    ((uint32_t)init->decCtrl.intMap    << _LESENSE_DECCTRL_INTMAP_SHIFT)
     | ((uint32_t)init->decCtrl.hystPRS0  << _LESENSE_DECCTRL_HYSTPRS0_SHIFT)
     | ((uint32_t)init->decCtrl.hystPRS1  << _LESENSE_DECCTRL_HYSTPRS1_SHIFT)
     | ((uint32_t)init->decCtrl.hystPRS2  << _LESENSE_DECCTRL_HYSTPRS2_SHIFT)
     | ((uint32_t)init->decCtrl.hystIRQ   << _LESENSE_DECCTRL_HYSTIRQ_SHIFT)
     | ((uint32_t)init->decCtrl.prsCount  << _LESENSE_DECCTRL_PRSCNT_SHIFT);
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Set the initial LESENSE decoder state. */
   LESENSE_DecoderStateSet((uint32_t)init->decCtrl.initState);
 
   /* The LESENSE bias control configuration. */
   LESENSE->BIASCTRL = (uint32_t)init->coreCtrl.biasMode;
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LESENSE->EN_SET = LESENSE_EN_EN;
+#endif
 }
 
 /***************************************************************************//**
@@ -251,11 +295,33 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
   uint32_t clkDiv  = 1UL;  /* Clock divisor value (2^pcPresc). */
   uint32_t pcTop   = 63UL; /* Period counter top value (max. 63). */
   uint32_t calcScanFreq;   /* Variable for testing the calculation algorithm. */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 
   /* If refFreq is set to 0, the currently-configured reference clock is
    * assumed. */
   if (!refFreq) {
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_0)
     refFreq = CMU_ClockFreqGet(cmuClock_LESENSE);
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+    refFreq = CMU_ClockFreqGet(cmuClock_LESENSEHF);
+#endif
   }
 
   /* The maximum value of pcPresc is 128. AS a result, using the reference frequency less than
@@ -293,6 +359,13 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
   /* For testing the calculation algorithm. */
   calcScanFreq = ((uint32_t)refFreq / ((uint32_t)(1UL + pcTop) * clkDiv));
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
+
   return calcScanFreq;
 }
 
@@ -326,7 +399,11 @@ void LESENSE_ScanModeSet(LESENSE_ScanMode_TypeDef scanMode,
                          bool start)
 {
   uint32_t tmp; /* temporary storage of the CTRL register value */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Save the CTRL register value to tmp.
    * Be aware of the effects of the non-atomic Read-Modify-Write cycle. */
   tmp = LESENSE->CTRL & ~(_LESENSE_CTRL_SCANMODE_MASK);
@@ -336,6 +413,35 @@ void LESENSE_ScanModeSet(LESENSE_ScanMode_TypeDef scanMode,
 
   /* Write the new value to the CTRL register. */
   LESENSE->CTRL = tmp;
+#else
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+
+  /* Save the CTRL register value to tmp.
+   * Be aware of the effects of the non-atomic Read-Modify-Write cycle. */
+  tmp = LESENSE->CFG & ~(_LESENSE_CFG_SCANMODE_MASK);
+  /* Setting the requested scanMode to the CTRL register. Casting signed int
+   * (enumeration) to unsigned long (uint32_t). */
+  tmp |= (uint32_t)scanMode;
+  /* Write the new value to the CTRL register. */
+  LESENSE->CFG = tmp;
+
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled || start) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 
   /* Start the sensor scanning if requested. */
   if (start) {
@@ -364,9 +470,27 @@ void LESENSE_ScanModeSet(LESENSE_ScanMode_TypeDef scanMode,
 void LESENSE_StartDelaySet(uint8_t startDelay)
 {
   uint32_t tmp; /* Temporary storage of the TIMCTRL register value */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
 
   /* Sanity check of the startDelay. */
   EFM_ASSERT(startDelay < 4U);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 
   /* Save the TIMCTRL register value to tmp.
    * Be aware of the effects of the non-atomic Read-Modify-Write cycle. */
@@ -376,6 +500,13 @@ void LESENSE_StartDelaySet(uint8_t startDelay)
 
   /* Write the new value to the TIMCTRL register. */
   LESENSE->TIMCTRL = tmp;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -406,6 +537,22 @@ void LESENSE_ClkDivSet(LESENSE_ChClk_TypeDef clk,
                        LESENSE_ClkPresc_TypeDef clkDiv)
 {
   uint32_t tmp;
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 
   /* Select the clock to prescale. */
   switch (clk) {
@@ -438,6 +585,13 @@ void LESENSE_ClkDivSet(LESENSE_ChClk_TypeDef clk,
       EFM_ASSERT(0);
       break;
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -499,6 +653,23 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
 {
   uint32_t tmp; /* A service variable. */
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
+
   /* A sanity check of configuration parameters. */
   EFM_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
   EFM_ASSERT(confCh->exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
@@ -557,6 +728,7 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
   /* Configure the channel-specific counter comparison mode, optional result
    * forwarding to decoder, optional counter value storing, and optional result
    * inverting on scan channel chIdx in LESENSE_CHchIdx_EVAL. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   LESENSE->CH[chIdx].EVAL =
     (uint32_t)confCh->compMode
     | ((uint32_t)confCh->shiftRes    << _LESENSE_CH_EVAL_DECODE_SHIFT)
@@ -566,6 +738,15 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
     | ((uint32_t)confCh->evalMode    << _LESENSE_CH_EVAL_MODE_SHIFT)
 #endif
   ;
+#else
+  LESENSE->CH[chIdx].EVALCFG =
+    (uint32_t)confCh->compMode
+    | ((uint32_t)confCh->shiftRes    << _LESENSE_CH_EVALCFG_DECODE_SHIFT)
+    | ((uint32_t)confCh->storeCntRes << _LESENSE_CH_EVALCFG_STRSAMPLE_SHIFT)
+    | ((uint32_t)confCh->invRes      << _LESENSE_CH_EVALCFG_SCANRESINV_SHIFT)
+    | ((uint32_t)confCh->evalMode    << _LESENSE_CH_EVALCFG_MODE_SHIFT)
+  ;
+#endif
 
   /* Configure the analog comparator (ACMP) threshold and decision threshold for
    * the counter separately with the function provided for that. */
@@ -581,6 +762,13 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
 
   /* Enable/disable scan channel chIdx. */
   BUS_RegBitWrite(&LESENSE->CHEN, chIdx, confCh->enaScanCh);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -603,6 +791,7 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
 void LESENSE_AltExConfig(const LESENSE_ConfAltEx_TypeDef * confAltEx)
 {
   uint32_t i;
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   uint32_t tmp;
 
   /* Configure the alternate excitation mapping.
@@ -657,6 +846,17 @@ void LESENSE_AltExConfig(const LESENSE_ConfAltEx_TypeDef * confAltEx)
       EFM_ASSERT(0);
       break;
   }
+#else
+  /* Iterate through all 16 alternate excitation channels. */
+  for (i = 0U; i < 16U; ++i) {
+    /* Enable/disable the alternate excitation channel pin i. */
+    /* An atomic read-modify-write using BUS_RegBitWrite function to
+     * support reconfiguration during the LESENSE operation. */
+    BUS_RegBitWrite(&GENERIC_LESENSE_ROUTE,
+                    i,
+                    confAltEx->AltEx[i].enablePin);
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -760,6 +960,10 @@ void LESENSE_ChannelTimingSet(uint8_t chIdx,
                               uint8_t sampleDelay,
                               uint16_t measDelay)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
+
   /* A sanity check of parameters. */
   EFM_ASSERT(exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
   EFM_ASSERT(measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
@@ -768,12 +972,34 @@ void LESENSE_ChannelTimingSet(uint8_t chIdx,
   EFM_ASSERT(sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
+
   /* A channel-specific timing configuration on the scan channel chIdx.
    * Setting excitation time, sampling delay, and measurement delay. */
   LESENSE->CH[chIdx].TIMING =
     ((uint32_t)exTime        << _LESENSE_CH_TIMING_EXTIME_SHIFT)
     | ((uint32_t)sampleDelay << _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT)
     | ((uint32_t)measDelay   << _LESENSE_CH_TIMING_MEASUREDLY_SHIFT);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -801,7 +1027,7 @@ void LESENSE_ChannelTimingSet(uint8_t chIdx,
  *   DACn_CH1DATA). In this case, the valid range is 0-4095 (12 bits).
  *
  *   @li If perCtrl.dacCh0Data or perCtrl.dacCh1Data is set to
- *   #lesenseACMPThres, acmpThres defines the 6-bit Vdd scaling factor of ACMP
+ *   lesenseACMPThres, acmpThres defines the 6-bit Vdd scaling factor of ACMP
  *   negative input (VDDLEVEL in ACMP_INPUTSEL register). In this case, the
  *   valid range is 0-63 (6 bits).
  *
@@ -814,11 +1040,29 @@ void LESENSE_ChannelThresSet(uint8_t chIdx,
                              uint16_t cntThres)
 {
   uint32_t tmp; /* A temporary storage */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
 
   /* A sanity check for acmpThres only, cntThres is a 16 bit value. */
   EFM_ASSERT(acmpThres < 4096U);
   /* A sanity check for the LESENSE channel ID. */
   EFM_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 
   /* Save the INTERACT register value of channel chIdx to tmp.
    * Be aware of the effects of the non-atomic Read-Modify-Write cycle. */
@@ -828,6 +1072,7 @@ void LESENSE_ChannelThresSet(uint8_t chIdx,
   /* Write the new value to the INTERACT register. */
   LESENSE->CH[chIdx].INTERACT = tmp;
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Save the EVAL register value of channel chIdx to tmp.
    * Be aware of the effects of the non-atomic Read-Modify-Write cycle. */
   tmp = LESENSE->CH[chIdx].EVAL & ~(_LESENSE_CH_EVAL_COMPTHRES_MASK);
@@ -835,9 +1080,27 @@ void LESENSE_ChannelThresSet(uint8_t chIdx,
   tmp |= (uint32_t)cntThres << _LESENSE_CH_EVAL_COMPTHRES_SHIFT;
   /* Write the new value to the EVAL register. */
   LESENSE->CH[chIdx].EVAL = tmp;
+#else
+
+  LESENSE->EN_SET = LESENSE_EN_EN;
+
+  LESENSE->CH[chIdx].EVALTHRES = (uint32_t)cntThres << _LESENSE_CH_EVALTHRES_EVALTHRES_SHIFT;
+
+  while (LESENSE->SYNCBUSY) {
+    /* Wait for all synchronizations to finish */
+  }
+  if (!enabled) {
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+
+#endif
 }
 
-#if defined(_LESENSE_CH_EVAL_MODE_MASK)
+#if defined(_LESENSE_CH_EVAL_MODE_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
  *   Configure a Sliding Window evaluation mode for a specific channel.
@@ -868,11 +1131,49 @@ void LESENSE_ChannelSlidingWindow(uint8_t chIdx,
                                   uint32_t initValue)
 {
   LESENSE_CH_TypeDef * ch = &LESENSE->CH[chIdx];
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
 
   LESENSE_WindowSizeSet(windowSize);
+
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   ch->EVAL = (ch->EVAL & ~(_LESENSE_CH_EVAL_COMPTHRES_MASK | _LESENSE_CH_EVAL_MODE_MASK))
              | (initValue << _LESENSE_CH_EVAL_COMPTHRES_SHIFT)
              | LESENSE_CH_EVAL_MODE_SLIDINGWIN;
+#else
+
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+
+  /* Set Channel Sliding Window config */
+  ch->EVALCFG = (ch->EVALCFG & ~_LESENSE_CH_EVALCFG_MODE_MASK)
+                | LESENSE_CH_EVALCFG_MODE_SLIDINGWIN;
+
+  LESENSE->EN_SET = LESENSE_EN_EN;
+  ch->EVALTHRES = (ch->EVALTHRES & ~_LESENSE_CH_EVALTHRES_EVALTHRES_MASK)
+                  | (initValue << _LESENSE_CH_EVALTHRES_EVALTHRES_SHIFT);
+  while (LESENSE->SYNCBUSY) {
+    /* Wait for all synchronizations to finish */
+  }
+  if (!enabled) {
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -905,11 +1206,47 @@ void LESENSE_ChannelStepDetection(uint8_t chIdx,
                                   uint32_t initValue)
 {
   LESENSE_CH_TypeDef * ch = &LESENSE->CH[chIdx];
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+#endif
 
   LESENSE_StepSizeSet(stepSize);
+
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   ch->EVAL = (ch->EVAL & ~(_LESENSE_CH_EVAL_COMPTHRES_MASK | _LESENSE_CH_EVAL_MODE_MASK))
              | (initValue << _LESENSE_CH_EVAL_COMPTHRES_SHIFT)
              | LESENSE_CH_EVAL_MODE_STEPDET;
+#else
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+
+  ch->EVALCFG = (ch->EVALCFG & ~_LESENSE_CH_EVALCFG_MODE_MASK)
+                | LESENSE_CH_EVALCFG_MODE_STEPDET;
+
+  LESENSE->EN_SET = LESENSE_EN_EN;
+  ch->EVALTHRES = (ch->EVALTHRES & ~_LESENSE_CH_EVALTHRES_EVALTHRES_MASK)
+                  | (initValue << _LESENSE_CH_EVALTHRES_EVALTHRES_SHIFT);
+  while (LESENSE->SYNCBUSY) {
+    /* Wait for all synchronizations to finish */
+  }
+  if (!enabled) {
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -931,8 +1268,32 @@ void LESENSE_ChannelStepDetection(uint8_t chIdx,
  ******************************************************************************/
 void LESENSE_WindowSizeSet(uint32_t windowSize)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool enabled = false;
+
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+#endif
+
   LESENSE->EVALCTRL = (LESENSE->EVALCTRL & ~_LESENSE_EVALCTRL_WINSIZE_MASK)
                       | windowSize;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -999,6 +1360,7 @@ void LESENSE_DecoderStateAllConfig(const LESENSE_DecStAll_TypeDef * confDecStAll
 void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
                                 uint32_t decSt)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Sanity check of configuration parameters */
   EFM_ASSERT(decSt < LESENSE_NUM_DECODER_STATES);
   EFM_ASSERT((uint32_t)confDecSt->confA.compMask < 16U);
@@ -1029,8 +1391,44 @@ void LESENSE_DecoderStateConfig(const LESENSE_DecStDesc_TypeDef * confDecSt,
     | ((uint32_t)confDecSt->confB.compVal   << _LESENSE_ST_TCONFB_COMP_SHIFT)
     | ((uint32_t)confDecSt->confB.nextState << _LESENSE_ST_TCONFB_NEXTSTATE_SHIFT)
     | ((uint32_t)confDecSt->confB.setInt    << _LESENSE_ST_TCONFB_SETIF_SHIFT);
+#else
+  bool enabled = false;
+
+  /* Sanity check of configuration parameters */
+  EFM_ASSERT(decSt < LESENSE_NUM_DECODER_STATES);
+  EFM_ASSERT((uint32_t)confDecSt->compMask < 16U);
+  EFM_ASSERT((uint32_t)confDecSt->compVal < 16U);
+  EFM_ASSERT((uint32_t)confDecSt->curState < LESENSE_NUM_DECODER_STATES);
+  EFM_ASSERT((uint32_t)confDecSt->nextState < LESENSE_NUM_DECODER_STATES);
+
+  if (LESENSE->EN != 0U) {
+    enabled = true;
+    /* Wait for synchronization before writing to EN register */
+    while (LESENSE->SYNCBUSY) {
+      /* Wait for all synchronizations to finish */
+    }
+    /* Disable LESENSE module */
+    LESENSE->EN_CLR = LESENSE_EN_EN;
+    while (LESENSE->EN & _LESENSE_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+  }
+
+  LESENSE->ST[decSt].ARC =  (uint32_t)confDecSt->prsAct
+                           | ((uint32_t)confDecSt->compMask  << _LESENSE_ST_ARC_SMASK_SHIFT)
+                           | ((uint32_t)confDecSt->compVal   << _LESENSE_ST_ARC_SCOMP_SHIFT)
+                           | ((uint32_t)confDecSt->curState  << _LESENSE_ST_ARC_CURSTATE_SHIFT)
+                           | ((uint32_t)confDecSt->nextState << _LESENSE_ST_ARC_NEXTSTATE_SHIFT)
+                           | ((uint32_t)confDecSt->setInt    << _LESENSE_ST_ARC_SETIF_SHIFT);
+
+  /* Re-Enable LESENSE module if it was enabled in the first place. */
+  if (enabled == true) {
+    LESENSE->EN_SET = LESENSE_EN_EN;
+  }
+#endif
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   Set the LESENSE decoder state.
@@ -1053,6 +1451,7 @@ void LESENSE_DecoderStateSet(uint32_t decSt)
 
   LESENSE->DECSTATE = decSt & _LESENSE_DECSTATE_DECSTATE_MASK;
 }
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -1206,6 +1605,11 @@ void LESENSE_ResultBufferClear(void)
      returning. */
   while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
     ;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  while (LESENSE->STATUS & _LESENSE_STATUS_FLUSHING_MASK)
+    ;
+#endif
 }
 
 /***************************************************************************//**
@@ -1220,9 +1624,12 @@ void LESENSE_ResultBufferClear(void)
  *   to configure the default values of the RAM mapped LESENSE registers.
  *   LESENSE_Reset() can be called on initialization by setting the @p reqReset
  *   parameter to true in LESENSE_Init().
+ *   Starting from Series 2 Config 3 (xG23 and higher), this function leaves
+ *   LESENSE in the disabled state.
  ******************************************************************************/
 void LESENSE_Reset(void)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   uint32_t i;
 
   /* Disable all LESENSE interrupts first. */
@@ -1244,16 +1651,22 @@ void LESENSE_Reset(void)
 
   /* Reset LESENSE configuration registers */
   LESENSE->CTRL      = _LESENSE_CTRL_RESETVALUE;
+
   LESENSE->PERCTRL   = _LESENSE_PERCTRL_RESETVALUE;
   LESENSE->DECCTRL   = _LESENSE_DECCTRL_RESETVALUE;
   LESENSE->BIASCTRL  = _LESENSE_BIASCTRL_RESETVALUE;
+
 #if defined(_LESENSE_EVALCTRL_MASK)
   LESENSE->EVALCTRL  = _LESENSE_EVALCTRL_RESETVALUE;
   LESENSE->PRSCTRL   = _LESENSE_PRSCTRL_RESETVALUE;
 #endif
+
   LESENSE->CHEN      = _LESENSE_CHEN_RESETVALUE;
   LESENSE->IDLECONF  = _LESENSE_IDLECONF_RESETVALUE;
   LESENSE->ALTEXCONF = _LESENSE_ALTEXCONF_RESETVALUE;
+
+  /* Reset SENSORSTATE register */
+  LESENSE->SENSORSTATE = _LESENSE_SENSORSTATE_RESETVALUE;
 
   /* Disable LESENSE to control GPIO pins. */
 #if defined(_LESENSE_ROUTE_MASK)
@@ -1274,14 +1687,16 @@ void LESENSE_Reset(void)
     LESENSE->ST[i].TCONFA = _LESENSE_ST_TCONFA_RESETVALUE;
     LESENSE->ST[i].TCONFB = _LESENSE_ST_TCONFB_RESETVALUE;
   }
-
-  /* Wait for the write operation to the CMD register to complete before
+  /* Wait for the write operation to complete before
      returning. */
-  while (LESENSE_SYNCBUSY_CMD & LESENSE->SYNCBUSY)
+  while (LESENSE->SYNCBUSY & LESENSE_SYNCBUSY_CMD)
     ;
+#else
+  LESENSE->SWRST_SET = LESENSE_SWRST_SWRST;
+  while (LESENSE->SWRST & _LESENSE_SWRST_RESETTING_MASK) ;
+#endif
 }
 
-/** @} (end addtogroup LESENSE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup lesense) */
 
 #endif /* defined(LESENSE_COUNT) && (LESENSE_COUNT > 0) */

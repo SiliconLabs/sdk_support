@@ -36,17 +36,12 @@
 #include "em_msc.h"
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup nvm3
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup NVM3
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup NVM3Hal
+ * @addtogroup nvm3hal
  * @{
  ******************************************************************************/
 
@@ -146,7 +141,6 @@ static Ecode_t nvm3_halFlashGetInfo(nvm3_HalInfo_t *halInfo)
   halInfo->writeSize = NVM3_HAL_WRITE_SIZE_16;
 #endif
   halInfo->pageSize = SYSTEM_GetFlashPageSize();
-  halInfo->systemUnique = SYSTEM_GetUnique();
 
   return ECODE_NVM3_OK;
 }
@@ -156,14 +150,18 @@ static void nvm3_halFlashAccess(nvm3_HalNvmAccessCode_t access)
   (void)access;
 }
 
-Ecode_t nvm3_halFlashReadWords(nvm3_HalPtr_t nvmAdr, void *dst, size_t wordCnt)
+static Ecode_t nvm3_halFlashReadWords(nvm3_HalPtr_t nvmAdr, void *dst, size_t wordCnt)
 {
   uint32_t *pSrc = (uint32_t *)nvmAdr;
   uint32_t *pDst = dst;
 
-  while (wordCnt > 0U) {
-    *pDst++ = *pSrc++;
-    wordCnt--;
+  if ((((size_t)pSrc % 4) == 0) && (((size_t)pDst % 4) == 0)) {
+    while (wordCnt > 0U) {
+      *pDst++ = *pSrc++;
+      wordCnt--;
+    }
+  } else {
+    (void)memcpy(dst, nvmAdr, wordCnt * sizeof(uint32_t));
   }
 
   return ECODE_NVM3_OK;
@@ -216,15 +214,14 @@ static Ecode_t nvm3_halFlashPageErase(nvm3_HalPtr_t nvmAdr)
  ******************************************************************************/
 
 const nvm3_HalHandle_t nvm3_halFlashHandle = {
-  .open = nvm3_halFlashOpen,
-  .close = nvm3_halFlashClose,
-  .getInfo = nvm3_halFlashGetInfo,
-  .access = nvm3_halFlashAccess,
-  .pageErase = nvm3_halFlashPageErase,
-  .readWords = nvm3_halFlashReadWords,
-  .writeWords = nvm3_halFlashWriteWords,
+  .open = nvm3_halFlashOpen,                    ///< Set the open function
+  .close = nvm3_halFlashClose,                  ///< Set the close function
+  .getInfo = nvm3_halFlashGetInfo,              ///< Set the get-info function
+  .access = nvm3_halFlashAccess,                ///< Set the access function
+  .pageErase = nvm3_halFlashPageErase,          ///< Set the page-erase function
+  .readWords = nvm3_halFlashReadWords,          ///< Set the read-words function
+  .writeWords = nvm3_halFlashWriteWords,        ///< Set the write-words function
 };
 
-/** @} (end addtogroup NVM3Hal) */
-/** @} (end addtogroup NVM3) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup nvm3hal) */
+/** @} (end addtogroup nvm3) */

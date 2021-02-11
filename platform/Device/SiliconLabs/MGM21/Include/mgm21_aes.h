@@ -331,4 +331,5 @@ typedef struct {
 /** @} End of group MGM21_AES_BitFields */
 /** @} End of group MGM21_AES */
 /** @} End of group Parts */
+
 #endif /* MGM21_AES_H */

@@ -1,0 +1,84 @@
+id: rail_util_coex
+label: RAIL Utility, Coexistence
+description: Utility to aid with RAIL Coexistence Support
+package: platform
+category: Platform|Radio
+quality: production
+requires:
+  - name: rail_lib
+  - name: gpiointerrupt
+  - name: emlib_gpio
+  - name: emlib_prs
+  - name: emlib_timer
+  - name: emlib_cmu
+  - name: rail_util_ieee802154_stack_event
+    condition:
+      - ot_stack
+  - name: rail_util_ieee802154_phy_select
+    condition:
+      - ot_stack
+  - name: status
+  - name: ustimer
+provides:
+  - name: rail_util_coex
+documentation:
+  docset: rail
+  document: rail-util-coex
+config_file:
+  - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg1x/sl_rail_util_coex_config.h
+    condition:
+      - device_series_1
+  - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg2x/sl_rail_util_coex_config.h
+    condition:
+      - device_series_2
+  - path: platform/radio/rail_lib/plugin/coexistence/config/sl_rail_util_coex_common_config.h
+include:
+  - path: platform/radio/rail_lib/plugin/coexistence/common
+    file_list:
+      - path: coexistence.h
+  - path: platform/radio/rail_lib/plugin/coexistence/hal/efr32
+    file_list:
+      - path: coexistence-hal.h
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble
+    file_list:
+      - path: coexistence-ble.h
+      - path: coexistence-ble-ll.h
+    condition:
+      - bluetooth_stack
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
+    file_list:
+      - path: coexistence-802154.h
+    condition:
+      - ot_stack
+  - path: platform/radio/rail_lib/common
+    file_list:
+      - path: rail_module.h
+source:
+  - path: platform/radio/rail_lib/plugin/coexistence/common/coexistence.c
+  - path: platform/radio/rail_lib/plugin/coexistence/common/coexistence-pwm.c
+  - path: platform/radio/rail_lib/plugin/coexistence/hal/efr32/coexistence-directional-priority.c
+  - path: platform/radio/rail_lib/plugin/coexistence/hal/efr32/coexistence-hal.c
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble.c
+    condition:
+      - bluetooth_stack
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble-counters.c
+    condition:
+      - bluetooth_stack
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
+    condition:
+      - ot_stack
+template_contribution:
+  - name: rail_util_ieee802154_callbacks
+    value:
+      include: coexistence-802154.h
+      handler: sl_rail_util_coex_on_event
+    priority: -9010
+  - name: rail_util_ieee802154_phy_select_callbacks
+    value:
+      include: coexistence-802154.h
+      runtime_phy_select: SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+      get_phy_select: sl_rail_util_coex_is_coex_phy_selected
+      radio_config: SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX
+    priority: -9010
+  - name: component_catalog
+    value: rail_util_coex

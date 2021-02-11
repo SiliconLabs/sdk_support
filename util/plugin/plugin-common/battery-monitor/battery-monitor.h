@@ -40,6 +40,6 @@ void halBatteryMonitorInitialize(void);
  *
  * @param voltageMilliV  The battery level measured, in milli volts.
  */
-void emberAfPluginBatteryMonitorDataCallback(uint16_t voltageMilliV);
+void emberAfPluginBatteryMonitorDataReadyCallback(uint16_t batteryVoltageMilliV);
 
 #endif // __BATTERY_MONITOR_H__

@@ -8,7 +8,7 @@
  *   is too great.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,241 +37,209 @@
 #include <stdlib.h>
 #include <string.h>
 
-#if !defined(__ICCARM__)
-// IAR doesn't have strings.h and puts those declarations in string.h
-#include <strings.h>
-#endif
-
-#include "command_interpreter.h"
-#include "response_print.h"
-
 #include "rail.h"
 #include "app_common.h"
-#ifdef EMBER_AF_PLUGIN_FLASH_DATA
-#include "flash_data.h"
+#include "response_print.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
 #endif
+#include "sl_cli_storage_ram_instances.h"
+#if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
+  #include "sl_cli_storage_nvm3_instances.h"
+#endif
+#include "sl_cli_delay.h"
 
-// The command script buffer in RAM
-static char ramScript[SCRIPT_LENGTH] = { '\0' };
+static bool flashCommandScriptExists;
+static bool ramCommandScriptExists;
 
-// The pointer used to refer to the command script used in scripted mode.
-// Point to the RAM script buffer by default (as opposed to one in flash).
-char *script = &ramScript[0];
-// The index of the current character being read while in scripted mode
-uint16_t scriptMarker = 0;
-// The length of the string in script. Memory for 'script' is not allocated
-// by default, otherwise we could just use strlen(script)
-uint16_t scriptLength = 0;
-
-// Duration of time for which CI suspension is effective
-uint32_t suspension = 0;
-// Time at which CI suspension started
-uint32_t suspensionStartTime = 0;
-
-void printScript(int argc, char **argv)
+// non-blocking wait
+void wait(sl_cli_command_arg_t *args)
 {
-  bool useFlash = (argc >= 2) && !!ciGetUnsigned(argv[1]);
-  bool success = true;
-  script = &ramScript[0]; // default to script buffer in RAM
+  // Relative time by default
+  RAIL_TimeMode_t timeMode = RAIL_TIME_DELAY;
 
-  if (useFlash) {
-#ifndef EMBER_AF_PLUGIN_FLASH_DATA
-    responsePrintError(argv[0], 0x12, "Flash support not enabled");
+  if (sl_cli_get_argument_count(args) >= 2 && !parseTimeModeFromString(sl_cli_get_argument_string(args, 1), &timeMode)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x3, "Invalid time mode");
     return;
-#else
-    if (RAIL_STATUS_NO_ERROR == FD_ReadData((uint8_t **)&script, NULL)) {
-      success = ('\0' == *script) ? false : true;
-    } else {
-      success = false;
-    }
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
-  } else if ('\0' == *script) {
-    success = false;
   }
 
-  responsePrint(argv[0],
-                "location:%s,status:%s,script:%s",
-                useFlash ? "flash" : "RAM",
-                success ? "Success" : "Failure",
-                success ? script : "(none)");
+  RAIL_Time_t timeStart = RAIL_GetTime();
+  RAIL_Time_t timeDurationUs = sl_cli_get_argument_uint32(args, 0);
+
+  // In the code, everything is handled as relative time, so convert this
+  // to a relative value
+  if (timeMode == RAIL_TIME_ABSOLUTE) {
+    timeDurationUs -= timeStart;
+  }
+
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "currentTime:%u,delay:%u,resumeTime:%u",
+                timeStart,
+                timeDurationUs,
+                timeDurationUs + timeStart);
+
+  // Take into account the time it took to printf above.
+  uint32_t extraOffset = RAIL_GetTime() - timeStart;
+  if (extraOffset < timeDurationUs) {
+    timeDurationUs -= extraOffset;
+  } else {
+    timeDurationUs = 0;
+  }
+
+  // Remove the optional 2nd CLI argument so sl_cli_delay_command works.
+  // Also, convert microsecond time delay into milliseconds.
+  uint32_t timeDurationMs = timeDurationUs / 1000; // convert us to ms
+  args->argc = 2; // pass only cmd and delay (and not optional argument)
+  args->argv[1] = (void *)&timeDurationMs;
+
+  // Call the non-blocking wait function (with a relative delay in ms).
+  sl_cli_delay_command(args);
 }
 
-void enterScript(int argc, char **argv)
+void enterScript(sl_cli_command_arg_t *args)
 {
-  bool useFlash = (argc >= 2) && !!ciGetUnsigned(argv[1]);
+  bool useFlash = (sl_cli_get_argument_count(args) >= 1)
+                  && !!sl_cli_get_argument_uint8(args, 0);
   bool success = true;
 
+  // Don't pass along the optional input argument.
+  args->argc = 1; // pass only cmd (and not optional argument)
+
   if (useFlash) {
-#ifndef EMBER_AF_PLUGIN_FLASH_DATA
-    responsePrintError(argv[0], 0x12, "Flash support not enabled");
-    return;
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
-  }
-
-  // Scripted mode is indicated by scriptMarker being less than scriptLength.
-  // Set this all the way to the end of the script so we're definitely not in
-  // scripted mode.
-  scriptMarker = SCRIPT_LENGTH;
-  ramScript[0] = '\0';
-
-  uint16_t index = 0;
-  char input;
-  bool endScriptFound = false;
-  // Read from the input until we hit the max length, or until we hit
-  // 'endScript', which gets us out of scriptEntry mode.
-  while (index < (SCRIPT_LENGTH - 1)) {
-    input = getchar();
-    if (input != '\0' && input != 0xFF) {
-      ramScript[index] = input;
-      index++;
-
-      RAILTEST_PRINTF("%c", input);
-      if (input == '\r') {
-        RAILTEST_PRINTF("\n"); // retargetserial no longer does CR => CRLF
-        ramScript[index] = '\n';
-        index++;
-      }
-
-      if (index >= sizeof("endScript") - 1
-          && strncasecmp("endScript",
-                         &(ramScript[index - sizeof("endScript") + 1]),
-                         sizeof("endScript") - 1) == 0) {
-        RAILTEST_PRINTF("\r\n");
-        endScriptFound = true;
-        ramScript[index - sizeof("endScript") + 1] = '\0';
-        break;
-      }
+    // Use flash.
+#if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
+    if (flashCommandScriptExists) {
+      sl_cli_storage_nvm3_clear(args);
     }
-  }
-
-  // Take measures whether or not a script was successfully entered just now.
-  if (endScriptFound) {
-    scriptLength = strlen(ramScript);
-  } else {
-    ramScript[0] = '\0';
-    success = false;
-  }
-
-#ifdef EMBER_AF_PLUGIN_FLASH_DATA
-  // Determine if the script should be saved to flash.
-  if (useFlash && success) {
-    // Only indicate a successful flash if the write was successful.
-    if (RAIL_STATUS_NO_ERROR
-        != FD_WriteData((uint8_t *)&ramScript[0],
-                        scriptLength + 1)) { // + 1 for null terminator
-      success = false;
-    }
-  }
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
-
-  // Print what was entered
-  responsePrint(argv[0],
-                "location:%s,status:%s,script:%s",
-                useFlash ? "flash" : "RAM",
-                success ? "Success" : "Failure",
-                *ramScript == '\0' ? "(none)" : ramScript);
-}
-
-void clearScript(int argc, char **argv)
-{
-  bool useFlash = (argc >= 2) && !!ciGetUnsigned(argv[1]);
-  bool success = true;
-
-  // Determine if the script should be cleared from flash or not.
-  if (useFlash) {
-#ifndef EMBER_AF_PLUGIN_FLASH_DATA
-    responsePrintError(argv[0], 0x12, "Flash support not enabled");
-    return;
+    flashCommandScriptExists = true;
+    sl_cli_storage_nvm3_define(args);
 #else
-    if (RAIL_STATUS_NO_ERROR != FD_ClearData()) { // clear script in flash
-      success = false;
-    }
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
+    (void)flashCommandScriptExists;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Flash support not enabled");
+    return;
+#endif
   } else {
-    ramScript[0] = '\0';
+    // Use RAM.
+    if (ramCommandScriptExists) {
+      sl_cli_storage_ram_clear(args);
+    }
+    ramCommandScriptExists = true;
+    sl_cli_storage_ram_define(args);
   }
 
-  // Scripted mode is indicated by scriptMarker being less than scriptLength
-  scriptLength = 0;
-
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "location:%s,status:%s",
                 useFlash ? "flash" : "RAM",
                 success ? "Success" : "Failure");
 }
 
-void runScript(int argc, char **argv)
+void clearScript(sl_cli_command_arg_t *args)
 {
-  bool useFlash = (argc >= 2) && !!ciGetUnsigned(argv[1]);
+  bool useFlash = (sl_cli_get_argument_count(args) >= 1)
+                  && !!sl_cli_get_argument_uint8(args, 0);
   bool success = true;
-  script = &ramScript[0]; // default to script in RAM
 
-  // Determine if the script should be run from flash or RAM.
+  // Don't pass along the optional input argument.
+  args->argc = 1; // pass only cmd (and not optional argument)
+
   if (useFlash) {
-#ifndef EMBER_AF_PLUGIN_FLASH_DATA
-    responsePrintError(argv[0], 0x12, "Flash support not enabled");
-    return;
+    // Use flash.
+#if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
+    flashCommandScriptExists = false;
+    sl_cli_storage_nvm3_clear(args);
 #else
-    uint32_t length;
-    if (RAIL_STATUS_NO_ERROR == FD_ReadData((uint8_t **)&script, &length)) {
-      scriptLength = length - 1; // -1 to remove the NULL string terminator
-      success = ('\0' == *script) ? false : true;
-    } else {
-      success = false;
-    }
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
-  } else if (*script == '\0') {
-    success = false;
+    (void)flashCommandScriptExists;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Flash support not enabled");
+    return;
+#endif
   } else {
-    scriptLength = strlen(script); // NULL string terminator already removed
+    // Use RAM.
+    ramCommandScriptExists = false;
+    sl_cli_storage_ram_clear(args);
   }
 
-  // Scripted mode is indicated by scriptMarker being less than scriptLength.
-  scriptMarker = success ? 0 : SCRIPT_LENGTH;
-
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "location:%s,status:%s",
                 useFlash ? "flash" : "RAM",
-                success ? "Running" : "Failure");
+                success ? "Success" : "Failure");
 }
 
-// If there's a script save in flash, run it.
-void runFlashScript(void)
+void printScript(sl_cli_command_arg_t *args)
 {
-#ifdef EMBER_AF_PLUGIN_FLASH_DATA
-  // Only run a flash script if one exists.
-  RAIL_Status_t status = FD_ReadData((uint8_t **)&script, NULL);
-  if ((RAIL_STATUS_NO_ERROR == status) && (script[0] != '\0')) {
-    char *input[2];
-    input[0] = "runScript";
-    input[1] = "1";
-    runScript(2, input); // emulate CLI command "runScript 1"
-  }
-#endif // EMBER_AF_PLUGIN_FLASH_DATA
-}
+  bool useFlash = (sl_cli_get_argument_count(args) >= 1)
+                  && !!sl_cli_get_argument_uint8(args, 0);
+  bool success = false;
+  uint32_t scriptCount = 0U;
 
-void wait(int argc, char **argv)
-{
-  // Relative time by default
-  RAIL_TimeMode_t timeMode = RAIL_TIME_DELAY;
+  // Don't pass along the optional input argument.
+  args->argc = 1; // pass only cmd (and not optional argument)
 
-  if (argc > 2 && !parseTimeModeFromString(argv[2], &timeMode)) {
-    responsePrintError(argv[0], 0x3, "Invalid time mode");
+  if (useFlash) {
+    // Use flash.
+#if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
+    scriptCount = sl_cli_storage_nvm3_count(args->handle);
+    if (scriptCount > 0U) {
+      sl_cli_storage_nvm3_list(args);
+      success = true;
+    }
+#else
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Flash support not enabled");
     return;
+#endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
+  } else {
+    // Use RAM.
+    scriptCount = sl_cli_storage_ram_count(args->handle);
+    if (scriptCount > 0U) {
+      sl_cli_storage_ram_list(args);
+      success = true;
+    }
   }
 
-  suspensionStartTime = RAIL_GetTime();
-  suspension = ciGetUnsigned(argv[1]);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "location:%s,status:%s,scriptCount:%u",
+                useFlash ? "flash" : "RAM",
+                success ? "Success" : "Failure",
+                scriptCount);
+}
 
-  // In the code, everything is handled as relative time, so convert this
-  // to a relative value
-  if (timeMode == RAIL_TIME_ABSOLUTE) {
-    suspension -= suspensionStartTime;
+void runScript(sl_cli_command_arg_t *args)
+{
+  bool useFlash = (sl_cli_get_argument_count(args) >= 1)
+                  && !!sl_cli_get_argument_uint8(args, 0);
+  bool success = false;
+  uint32_t scriptCount = 0U;
+
+  // Don't pass along the optional input argument.
+  args->argc = 1; // pass only cmd (and not optional argument)
+
+  if (useFlash) {
+    // Use flash.
+#if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
+    scriptCount = sl_cli_storage_nvm3_count(args->handle);
+    if (scriptCount > 0U) {
+      sl_cli_storage_nvm3_execute(args);
+      success = true;
+    }
+#else
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Flash support not enabled");
+    return;
+#endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
+  } else {
+    // Use RAM.
+    scriptCount = sl_cli_storage_ram_count(args->handle);
+    if (scriptCount > 0U) {
+      sl_cli_storage_ram_execute(args);
+      success = true;
+    }
   }
 
-  responsePrint(argv[0],
-                "currentTime:%u,delay:%u,resumeTime:%u",
-                suspensionStartTime,
-                suspension,
-                suspensionStartTime + suspension);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "location:%s,status:%s",
+                useFlash ? "flash" : "RAM",
+                success ? "Success" : "Failure");
 }

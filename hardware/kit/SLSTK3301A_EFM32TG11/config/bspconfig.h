@@ -32,7 +32,7 @@
 #define SILICON_LABS_BSPCONFIG_H
 
 #define BSP_STK
-#define BSP_STK_BRD2204A
+#define BSP_STK_BRD2102A
 
 #define BSP_BCC_USART         USART1
 #define BSP_BCC_CLK           cmuClock_USART1

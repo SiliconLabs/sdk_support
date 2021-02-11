@@ -20,7 +20,7 @@
 
 //Host processors do not use Ember Message Buffers.
 #ifndef EZSP_HOST
-  #include "stack/include/packet-buffer.h"
+  #include "buffer_manager/buffer-management.h"
 #endif
 
 #include "hal/hal.h"
@@ -454,32 +454,6 @@ EmberStatus emberSerialPrintfVarArg(uint8_t port, PGM_P formatString, va_list ap
       if (!emPrintfInternal(emberSerialWriteData, port, formatString, ap)) {
         stat = EMBER_ERR_FATAL;
       }
-      break;
-    }
-  #endif
-  #ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER: {
-      EmberMessageBuffer buff = emberAllocateStackBuffer();
-      if (buff == EMBER_NULL_MESSAGE_BUFFER) {
-        stat = EMBER_NO_BUFFERS;
-        break;
-      }
-      if (emPrintfInternal(emberAppendToLinkedBuffers,
-                           buff,
-                           formatString,
-                           ap)) {
-        stat = emberSerialWriteBuffer(port, buff, 0, emberMessageBufferLength(buff));
-      } else {
-        stat = EMBER_NO_BUFFERS;
-      }
-      // Refcounts may be manipulated in ISR if DMA used
-      {
-        DECLARE_INTERRUPT_STATE;
-        DISABLE_INTERRUPTS();
-        emberReleaseMessageBuffer(buff);
-        RESTORE_INTERRUPTS();
-      }
-
       break;
     }
   #endif

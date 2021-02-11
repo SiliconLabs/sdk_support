@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file specifies GPIO pin information for RAIL test applications.
+ * @brief This file specifies GPIO pin information for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -37,7 +37,6 @@
 
 #include "em_core.h"
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
@@ -46,21 +45,20 @@
 
 #include "em_device.h"
 #include "em_cmu.h"
-#include "em_rtcc.h"
 #include "em_gpio.h"
 
-void setGpioOutPin(int argc, char** argv)
+void setGpioOutPin(sl_cli_command_arg_t *args)
 {
   //check number of arguments
-  if (argc < 4) {
-    responsePrint(argv[0], "Error:Not enough inputs.");
+  if (sl_cli_get_argument_count(args) < 3) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Error:Not enough inputs.");
     return;
   }
 
   GPIO_Port_TypeDef port;
   uint16_t portMask;
 
-  char portChar = *(argv[1]);
+  char portChar = *(sl_cli_get_argument_string(args, 0));
   int16_t diff = portChar - 'a';
   int16_t diffCap = portChar - 'A';
   int16_t diffNum = portChar - '0';
@@ -73,26 +71,26 @@ void setGpioOutPin(int argc, char** argv)
   } else if (diffNum >= 0 && diffNum <= GPIO_PORT_MAX) {
     port = (GPIO_Port_TypeDef)diffNum;
   } else {
-    responsePrint(argv[0], "Error:%s is not a valid port.", argv[1]);
+    responsePrint(sl_cli_get_command_string(args, 0), "Error:%s is not a valid port.", sl_cli_get_argument_string(args, 0));
     return;
   }
 
   portMask = _GPIO_PORT_MASK(port);
-  uint8_t pin = (uint8_t) ciGetUnsigned(argv[2]);
+  uint8_t pin = sl_cli_get_argument_uint8(args, 1);
 
   if (((portMask >> pin) & 0x1) == 0U) {
-    responsePrint(argv[0], "Error:The pin you are configuring is unavailable. \
+    responsePrint(sl_cli_get_command_string(args, 0), "Error:The pin you are configuring is unavailable. \
                             Port %s has the following port mask: %x",
-                  argv[1], portMask);
+                  sl_cli_get_argument_string(args, 0), portMask);
     return;
   }
 
   //set the pin based on the input value
-  uint8_t val = (uint8_t) ciGetUnsigned(argv[3]);
+  uint8_t val = sl_cli_get_argument_uint8(args, 2);
   GPIO_PinModeSet(port,
                   pin,
                   gpioModePushPull,
                   val);
 
-  responsePrint(argv[0], "Status:Success.");
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:Success.");
 }

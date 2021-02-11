@@ -145,10 +145,12 @@ typedef struct {
 #define _DEVINFO_PART_FAMILY_FG                                  0x00000000UL                            /**< Mode FG for DEVINFO_PART                    */
 #define _DEVINFO_PART_FAMILY_MG                                  0x00000001UL                            /**< Mode MG for DEVINFO_PART                    */
 #define _DEVINFO_PART_FAMILY_BG                                  0x00000002UL                            /**< Mode BG for DEVINFO_PART                    */
+#define _DEVINFO_PART_FAMILY_PG                                  0x00000005UL                            /**< Mode PG for DEVINFO_PART                    */
 #define DEVINFO_PART_FAMILY_DEFAULT                              (_DEVINFO_PART_FAMILY_DEFAULT << 24)    /**< Shifted mode DEFAULT for DEVINFO_PART       */
 #define DEVINFO_PART_FAMILY_FG                                   (_DEVINFO_PART_FAMILY_FG << 24)         /**< Shifted mode FG for DEVINFO_PART            */
 #define DEVINFO_PART_FAMILY_MG                                   (_DEVINFO_PART_FAMILY_MG << 24)         /**< Shifted mode MG for DEVINFO_PART            */
 #define DEVINFO_PART_FAMILY_BG                                   (_DEVINFO_PART_FAMILY_BG << 24)         /**< Shifted mode BG for DEVINFO_PART            */
+#define DEVINFO_PART_FAMILY_PG                                   (_DEVINFO_PART_FAMILY_PG << 24)         /**< Shifted mode PG for DEVINFO_PART            */
 
 /* Bit fields for DEVINFO MEMINFO */
 #define _DEVINFO_MEMINFO_RESETVALUE                              0x00000000UL                                  /**< Default value for DEVINFO_MEMINFO           */
@@ -897,4 +899,5 @@ typedef struct {
 /** @} End of group EFR32FG22_DEVINFO_BitFields */
 /** @} End of group EFR32FG22_DEVINFO */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_DEVINFO_H */

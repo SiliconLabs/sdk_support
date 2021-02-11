@@ -31,32 +31,37 @@
 #define __SILICON_LABS_TEMPDRV_CONFIG_H__
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup tempdrv
  * @{
  ******************************************************************************/
 
-/***************************************************************************//**
- * @addtogroup TEMPDRV
- * @{
- ******************************************************************************/
+// <<< Use Configuration Wizard in Context Menu >>>
 
-// Callback table depth (for high and low callbacks each)
+// <h>Temperature Driver Configuration
+
 #ifndef TEMPDRV_CUSTOM_CALLBACK_DEPTH
+// <o TEMPDRV_CUSTOM_CALLBACK_DEPTH> Callback table depth (for high and low callbacks each)
+// <i> Default: 5
 #define TEMPDRV_CUSTOM_CALLBACK_DEPTH 5
 #endif
 
-// Allow temperature sensor to wake the device up from EM4
 #ifndef TEMPDRV_EM4WAKEUP
-#define TEMPDRV_EM4WAKEUP false
+// <q TEMPDRV_EM4WAKEUP> Allow temperature sensor to wake the device up from EM4
+// <i> Default: 0
+#define TEMPDRV_EM4WAKEUP 0
 #endif
 
-// Allow TEMPDRV to define the EMU_IRQ_Handler. Enable if EMU_IRQ_Handler is
-// defined elsewhere.
 #ifndef EMU_CUSTOM_IRQ_HANDLER
-#define EMU_CUSTOM_IRQ_HANDLER false
+// <q EMU_CUSTOM_IRQ_HANDLER> Allow EMU_IRQ_Handler to be defined
+// <i> elsewhere than in temperature driver.
+// <i> Default: 0
+#define EMU_CUSTOM_IRQ_HANDLER 0
 #endif
 
-/** @} (end addtogroup TEMPDRV) */
-/** @} (end addtogroup emdrv) */
+// </h>
+
+// <<< end of configuration section >>>
+
+/** @} (end addtogroup tempdrv) */
 
 #endif /* __SILICON_LABS_TEMPDRV_CONFIG_H__ */

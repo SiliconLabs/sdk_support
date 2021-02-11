@@ -48,18 +48,13 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup nvm3
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup NVM3
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup NVM3Hal
- * @brief NVM3 HAL module
+ * @addtogroup nvm3hal NVM3 HAL
+ * @brief NVM3 Hardware Abstraction Layer
  * @{
  * @details
  * This module provides the interface to the NVM. By having all NVM access
@@ -77,10 +72,10 @@ extern "C" {
 #define NVM3_HAL_WRITE_SIZE_32    0     ///< Only single writes are allowed
 #define NVM3_HAL_WRITE_SIZE_16    1     ///< Two writes are allowed
 
-#define NVM3_HAL_NVM_ACCESS_NONE  0
-#define NVM3_HAL_NVM_ACCESS_RD    1
-#define NVM3_HAL_NVM_ACCESS_RDWR  2
-#define NVM3_HAL_NVM_ACCESS_NOP   3
+#define NVM3_HAL_NVM_ACCESS_NONE  0     ///< No access
+#define NVM3_HAL_NVM_ACCESS_RD    1     ///< Read access
+#define NVM3_HAL_NVM_ACCESS_RDWR  2     ///< Read and write access
+#define NVM3_HAL_NVM_ACCESS_NOP   3     ///< Ignore
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
@@ -104,14 +99,14 @@ typedef void   *nvm3_HalPtr_t;
 /// @brief Device NVM capabilities
 
 typedef struct nvm3_HalInfo {
-  uint16_t deviceFamily;
-  uint8_t writeSize;
-  uint8_t memoryMapped;
-  size_t pageSize;
-  uint64_t systemUnique;
+  uint16_t deviceFamily;        ///< Device family.
+  uint8_t writeSize;            ///< Write-size: 0=32-bit, 1=16-bit.
+  uint8_t memoryMapped;         ///< Memory-mapped: 0=not memory mapped, 1=memory mapped.
+  size_t pageSize;              ///< The data storage page size.
+  uint64_t systemUnique;        ///< Obsolete. Was used to support external flash.
 } nvm3_HalInfo_t;
 
-typedef uint8_t nvm3_HalNvmAccessCode_t;
+typedef uint8_t nvm3_HalNvmAccessCode_t; ///< Definition of the access data type.
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
@@ -233,19 +228,19 @@ typedef Ecode_t (*nvm3_HalReadWords_t)(nvm3_HalPtr_t nvmAdr, void *dst, size_t w
  ******************************************************************************/
 typedef Ecode_t (*nvm3_HalWriteWords_t)(nvm3_HalPtr_t nvmAdr, void const *pSrc, size_t cnt);
 
+/// @brief The HAL handle definition.
 typedef struct {
-  nvm3_HalOpen_t          open;
-  nvm3_HalClose_t         close;
-  nvm3_HalGetInfo_t       getInfo;
-  nvm3_HalNvmAccess_t     access;
-  nvm3_HalPageErase_t     pageErase;
-  nvm3_HalReadWords_t     readWords;
-  nvm3_HalWriteWords_t    writeWords;
+  nvm3_HalOpen_t          open;         ///< Pointer to the open function
+  nvm3_HalClose_t         close;        ///< Pointer to the close function
+  nvm3_HalGetInfo_t       getInfo;      ///< Pointer to the get-info function
+  nvm3_HalNvmAccess_t     access;       ///< Pointer to the access function
+  nvm3_HalPageErase_t     pageErase;    ///< Pointer to the page-erase function
+  nvm3_HalReadWords_t     readWords;    ///< Pointer to the read-words function
+  nvm3_HalWriteWords_t    writeWords;   ///< Pointer to the write-words function
 } nvm3_HalHandle_t;
 
-/** @} (end addtogroup NVM3Hal) */
-/** @} (end addtogroup NVM3) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup nvm3hal) */
+/** @} (end addtogroup nvm3) */
 
 #ifdef __cplusplus
 }

@@ -1,9 +1,12 @@
-id: "rtt"
-version: 1
+id: "segger_rtt"
+label: "SEGGER RTT"
 package: "platform"
 description: "SEGGER RTT"
-category: "Platform|Util"
-quality: "internal"
+category: "Platform|Utilities|RTT"
+quality: "production"
+define:
+- name: "RTT_USE_ASM"
+  value: "0"
 config_file:
   - path: "util/third_party/segger/systemview/Config/SEGGER_RTT_Conf.h"
 source:
@@ -14,4 +17,4 @@ include:
       - path: "SEGGER.h"
       - path: "SEGGER_RTT.h"
 provides:
-  - name: "rtt"
+  - name: "segger_rtt"

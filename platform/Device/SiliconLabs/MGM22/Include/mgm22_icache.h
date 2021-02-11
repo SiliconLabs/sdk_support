@@ -235,13 +235,14 @@ typedef struct {
 #define _ICACHE_IEN_AHITOF_MASK                0x4UL                                    /**< Bit mask for ICACHE_AHITOF                  */
 #define _ICACHE_IEN_AHITOF_DEFAULT             0x00000000UL                             /**< Mode DEFAULT for ICACHE_IEN                 */
 #define ICACHE_IEN_AHITOF_DEFAULT              (_ICACHE_IEN_AHITOF_DEFAULT << 2)        /**< Shifted mode DEFAULT for ICACHE_IEN         */
-#define ICACHE_IEN_RAMERRORIEN                 (0x1UL << 8)                             /**< RAM error Interrupt Enable                  */
-#define _ICACHE_IEN_RAMERRORIEN_SHIFT          8                                        /**< Shift value for ICACHE_RAMERRORIEN          */
-#define _ICACHE_IEN_RAMERRORIEN_MASK           0x100UL                                  /**< Bit mask for ICACHE_RAMERRORIEN             */
-#define _ICACHE_IEN_RAMERRORIEN_DEFAULT        0x00000000UL                             /**< Mode DEFAULT for ICACHE_IEN                 */
-#define ICACHE_IEN_RAMERRORIEN_DEFAULT         (_ICACHE_IEN_RAMERRORIEN_DEFAULT << 8)   /**< Shifted mode DEFAULT for ICACHE_IEN         */
+#define ICACHE_IEN_RAMERROR                    (0x1UL << 8)                             /**< RAM error Interrupt Enable                  */
+#define _ICACHE_IEN_RAMERROR_SHIFT             8                                        /**< Shift value for ICACHE_RAMERROR             */
+#define _ICACHE_IEN_RAMERROR_MASK              0x100UL                                  /**< Bit mask for ICACHE_RAMERROR                */
+#define _ICACHE_IEN_RAMERROR_DEFAULT           0x00000000UL                             /**< Mode DEFAULT for ICACHE_IEN                 */
+#define ICACHE_IEN_RAMERROR_DEFAULT            (_ICACHE_IEN_RAMERROR_DEFAULT << 8)      /**< Shifted mode DEFAULT for ICACHE_IEN         */
 
 /** @} End of group MGM22_ICACHE_BitFields */
 /** @} End of group MGM22_ICACHE */
 /** @} End of group Parts */
+
 #endif /* MGM22_ICACHE_H */

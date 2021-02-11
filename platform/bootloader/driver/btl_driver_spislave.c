@@ -165,8 +165,8 @@ void spislave_init(void)
   // Clock peripherals
 #if defined(CMU_CTRL_HFPERCLKEN)
   CMU->CTRL |= CMU_CTRL_HFPERCLKEN;
-  CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_GPIO;
-  CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_LDMA;
+  CMU_ClockEnable(cmuClock_GPIO, true);
+  CMU_ClockEnable(cmuClock_LDMA, true);
   CMU_ClockEnable(BTL_SPISLAVE_CLOCK, true);
 #endif
 #if defined(_CMU_CLKEN0_MASK)
@@ -225,7 +225,6 @@ void spislave_init(void)
   GPIO->USARTROUTE[BTL_SPISLAVE_NUM].CSROUTE = 0
                                                | (BSP_SPINCP_CS_PORT << _GPIO_USART_CSROUTE_PORT_SHIFT)
                                                | (BSP_SPINCP_CS_PIN  << _GPIO_USART_CSROUTE_PIN_SHIFT);
-
   GPIO->USARTROUTE[BTL_SPISLAVE_NUM].ROUTEEN = 0
                                                | GPIO_USART_ROUTEEN_TXPEN
                                                | GPIO_USART_ROUTEEN_CSPEN

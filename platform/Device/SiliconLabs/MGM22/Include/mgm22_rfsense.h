@@ -211,30 +211,30 @@ typedef struct {
 /* Bit fields for RFSENSE IF */
 #define _RFSENSE_IF_RESETVALUE                   0x00000000UL                           /**< Default value for RFSENSE_IF                */
 #define _RFSENSE_IF_MASK                         0x00000003UL                           /**< Mask for RFSENSE_IF                         */
-#define RFSENSE_IF_RFSENSEIF                     (0x1UL << 0)                           /**< RFSENSE Interrupt Flag                      */
-#define _RFSENSE_IF_RFSENSEIF_SHIFT              0                                      /**< Shift value for RFSENSE_RFSENSEIF           */
-#define _RFSENSE_IF_RFSENSEIF_MASK               0x1UL                                  /**< Bit mask for RFSENSE_RFSENSEIF              */
-#define _RFSENSE_IF_RFSENSEIF_DEFAULT            0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IF                 */
-#define RFSENSE_IF_RFSENSEIF_DEFAULT             (_RFSENSE_IF_RFSENSEIF_DEFAULT << 0)   /**< Shifted mode DEFAULT for RFSENSE_IF         */
-#define RFSENSE_IF_SEQIF                         (0x1UL << 1)                           /**< Sequencer Interrupt Flag                    */
-#define _RFSENSE_IF_SEQIF_SHIFT                  1                                      /**< Shift value for RFSENSE_SEQIF               */
-#define _RFSENSE_IF_SEQIF_MASK                   0x2UL                                  /**< Bit mask for RFSENSE_SEQIF                  */
-#define _RFSENSE_IF_SEQIF_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IF                 */
-#define RFSENSE_IF_SEQIF_DEFAULT                 (_RFSENSE_IF_SEQIF_DEFAULT << 1)       /**< Shifted mode DEFAULT for RFSENSE_IF         */
+#define RFSENSE_IF_RFSENSE                       (0x1UL << 0)                           /**< RFSENSE Interrupt Flag                      */
+#define _RFSENSE_IF_RFSENSE_SHIFT                0                                      /**< Shift value for RFSENSE_RFSENSE             */
+#define _RFSENSE_IF_RFSENSE_MASK                 0x1UL                                  /**< Bit mask for RFSENSE_RFSENSE                */
+#define _RFSENSE_IF_RFSENSE_DEFAULT              0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IF                 */
+#define RFSENSE_IF_RFSENSE_DEFAULT               (_RFSENSE_IF_RFSENSE_DEFAULT << 0)     /**< Shifted mode DEFAULT for RFSENSE_IF         */
+#define RFSENSE_IF_SEQ                           (0x1UL << 1)                           /**< Sequencer Interrupt Flag                    */
+#define _RFSENSE_IF_SEQ_SHIFT                    1                                      /**< Shift value for RFSENSE_SEQ                 */
+#define _RFSENSE_IF_SEQ_MASK                     0x2UL                                  /**< Bit mask for RFSENSE_SEQ                    */
+#define _RFSENSE_IF_SEQ_DEFAULT                  0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IF                 */
+#define RFSENSE_IF_SEQ_DEFAULT                   (_RFSENSE_IF_SEQ_DEFAULT << 1)         /**< Shifted mode DEFAULT for RFSENSE_IF         */
 
 /* Bit fields for RFSENSE IEN */
 #define _RFSENSE_IEN_RESETVALUE                  0x00000000UL                           /**< Default value for RFSENSE_IEN               */
 #define _RFSENSE_IEN_MASK                        0x00000003UL                           /**< Mask for RFSENSE_IEN                        */
-#define RFSENSE_IEN_RFSENSEIEN                   (0x1UL << 0)                           /**< RFSENSE Interrrupt Enable                   */
-#define _RFSENSE_IEN_RFSENSEIEN_SHIFT            0                                      /**< Shift value for RFSENSE_RFSENSEIEN          */
-#define _RFSENSE_IEN_RFSENSEIEN_MASK             0x1UL                                  /**< Bit mask for RFSENSE_RFSENSEIEN             */
-#define _RFSENSE_IEN_RFSENSEIEN_DEFAULT          0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IEN                */
-#define RFSENSE_IEN_RFSENSEIEN_DEFAULT           (_RFSENSE_IEN_RFSENSEIEN_DEFAULT << 0) /**< Shifted mode DEFAULT for RFSENSE_IEN        */
-#define RFSENSE_IEN_SEQIEN                       (0x1UL << 1)                           /**< Sequencer Interrupt Enable                  */
-#define _RFSENSE_IEN_SEQIEN_SHIFT                1                                      /**< Shift value for RFSENSE_SEQIEN              */
-#define _RFSENSE_IEN_SEQIEN_MASK                 0x2UL                                  /**< Bit mask for RFSENSE_SEQIEN                 */
-#define _RFSENSE_IEN_SEQIEN_DEFAULT              0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IEN                */
-#define RFSENSE_IEN_SEQIEN_DEFAULT               (_RFSENSE_IEN_SEQIEN_DEFAULT << 1)     /**< Shifted mode DEFAULT for RFSENSE_IEN        */
+#define RFSENSE_IEN_RFSENSE                      (0x1UL << 0)                           /**< RFSENSE Interrrupt Enable                   */
+#define _RFSENSE_IEN_RFSENSE_SHIFT               0                                      /**< Shift value for RFSENSE_RFSENSE             */
+#define _RFSENSE_IEN_RFSENSE_MASK                0x1UL                                  /**< Bit mask for RFSENSE_RFSENSE                */
+#define _RFSENSE_IEN_RFSENSE_DEFAULT             0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IEN                */
+#define RFSENSE_IEN_RFSENSE_DEFAULT              (_RFSENSE_IEN_RFSENSE_DEFAULT << 0)    /**< Shifted mode DEFAULT for RFSENSE_IEN        */
+#define RFSENSE_IEN_SEQ                          (0x1UL << 1)                           /**< Sequencer Interrupt Enable                  */
+#define _RFSENSE_IEN_SEQ_SHIFT                   1                                      /**< Shift value for RFSENSE_SEQ                 */
+#define _RFSENSE_IEN_SEQ_MASK                    0x2UL                                  /**< Bit mask for RFSENSE_SEQ                    */
+#define _RFSENSE_IEN_SEQ_DEFAULT                 0x00000000UL                           /**< Mode DEFAULT for RFSENSE_IEN                */
+#define RFSENSE_IEN_SEQ_DEFAULT                  (_RFSENSE_IEN_SEQ_DEFAULT << 1)        /**< Shifted mode DEFAULT for RFSENSE_IEN        */
 
 /* Bit fields for RFSENSE CALCFG */
 #define _RFSENSE_CALCFG_RESETVALUE               0x01050010UL                                 /**< Default value for RFSENSE_CALCFG            */
@@ -527,4 +527,5 @@ typedef struct {
 /** @} End of group MGM22_RFSENSE_BitFields */
 /** @} End of group MGM22_RFSENSE */
 /** @} End of group Parts */
+
 #endif /* MGM22_RFSENSE_H */

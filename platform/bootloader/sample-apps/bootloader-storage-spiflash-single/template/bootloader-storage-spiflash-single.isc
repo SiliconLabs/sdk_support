@@ -24,6 +24,7 @@ appPlugin: gpio-activation=false
 appPlugin: ezsp-gpio-activation=false
 appPlugin: internal_flash=false
 appPlugin: mbedtls=true
+appPlugin: se-manager=true
 appPlugin: parser=true
 appPlugin: parser-eblv2=false
 appPlugin: spi-driver=true

@@ -43,12 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup VDAC
+ * @addtogroup vdac VDAC - Voltage DAC
  * @brief Digital to Analog Voltage Converter (VDAC) Peripheral API
  *
  * @details
@@ -90,6 +85,7 @@ extern "C" {
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /** Validation of VDAC register block pointer reference for assert statements.*/
+
 #define VDAC_REF_VALID(ref)   ((ref) == VDAC0)
 
 /** @endcond */
@@ -98,6 +94,7 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
+#if !defined(_SILICON_LABS_32B_SERIES_2)
 /** Channel refresh period. */
 typedef enum {
   vdacRefresh8  = _VDAC_CTRL_REFRESHPERIOD_8CYCLES,  /**< Refresh every 8 clock cycles. */
@@ -233,7 +230,201 @@ typedef struct {
     vdacTrigModeSw,   /* Conversion trigged by CH0DATA or COMBDATA write. */    \
     false,            /* Channel conversion set to continuous. */               \
   }
+#else // defined(_SILICON_LABS_32B_SERIES_2)
 
+/** Channel refresh period. */
+typedef enum {
+  vdacRefresh2    = _VDAC_CFG_REFRESHPERIOD_CYCLES2,    /**< Refresh every 2 clock cycles. */
+  vdacRefresh4    = _VDAC_CFG_REFRESHPERIOD_CYCLES4,    /**< Refresh every 4 clock cycles. */
+  vdacRefresh8    = _VDAC_CFG_REFRESHPERIOD_CYCLES8,    /**< Refresh every 8 clock cycles. */
+  vdacRefresh16   = _VDAC_CFG_REFRESHPERIOD_CYCLES16,   /**< Refresh every 16 clock cycles. */
+  vdacRefresh32   = _VDAC_CFG_REFRESHPERIOD_CYCLES32,   /**< Refresh every 32 clock cycles. */
+  vdacRefresh64   = _VDAC_CFG_REFRESHPERIOD_CYCLES64,   /**< Refresh every 64 clock cycles. */
+  vdacRefresh128  = _VDAC_CFG_REFRESHPERIOD_CYCLES128,  /**< Refresh every 128 clock cycles. */
+  vdacRefresh256  = _VDAC_CFG_REFRESHPERIOD_CYCLES256,  /**< Refresh every 256 clock cycles. */
+} VDAC_Refresh_TypeDef;
+
+/** Timer overflow period. */
+typedef enum {
+  vdacCycles2  = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES2,    /**< Overflows every 2 clock cycles. */
+  vdacCycles4  = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES4,    /**< Overflows every 4 clock cycles. */
+  vdacCycles8  = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES8,    /**< Overflows every 8 clock cycles. */
+  vdacCycles16 = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES16,   /**< Overflows every 16 clock cycles. */
+  vdacCycles32 = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES32,   /**< Overflows every 32 clock cycles. */
+  vdacCycles64 = _VDAC_CFG_TIMEROVRFLOWPERIOD_CYCLES64    /**< Overflows every 64 clock cycles. */
+} VDAC_TimerOverflow_TypeDef;
+
+/** Reference voltage for VDAC. */
+typedef enum {
+  vdacRef1V25   = _VDAC_CFG_REFRSEL_V125,   /**< Internal 1.25 V band gap reference. */
+  vdacRef2V5    = _VDAC_CFG_REFRSEL_V25,    /**< Internal 2.5 V band gap reference. */
+  vdacRefAvdd   = _VDAC_CFG_REFRSEL_VDD,    /**< AVDD reference. */
+  vdacRefExtPin = _VDAC_CFG_REFRSEL_EXT,    /**< External pin reference. */
+} VDAC_Ref_TypeDef;
+
+typedef enum {
+  vdacRefreshSrcNone          = _VDAC_CH0CFG_REFRESHSOURCE_NONE,        /**< No refresh source. */
+  vdacRefreshSrcRefreshTimer  = _VDAC_CH0CFG_REFRESHSOURCE_REFRESHTIMER,/**< Refresh triggered by refresh timer overflow. */
+  vdacRefreshSrcSyncPrs       = _VDAC_CH0CFG_REFRESHSOURCE_SYNCPRS,     /**< Refresh triggered by sync PRS. */
+  vdacRefreshSrcAsyncPrs      = _VDAC_CH0CFG_REFRESHSOURCE_ASYNCPRS,    /**< Refresh triggered by async PRS. */
+} VDAC_RefreshSource_TypeDef;
+
+/** Channel conversion trigger mode. */
+typedef enum {
+  vdacTrigModeNone          = _VDAC_CH0CFG_TRIGMODE_NONE,           /**< No conversion trigger source selected. */
+  vdacTrigModeSw            = _VDAC_CH0CFG_TRIGMODE_SW,             /**< Channel is triggered by CHnDATA or COMBDATA write. */
+  vdacTrigModeSyncPrs       = _VDAC_CH0CFG_TRIGMODE_SYNCPRS,        /**< Channel is triggered by Sync PRS input. */
+  vdacTrigModeLesense       = _VDAC_CH0CFG_TRIGMODE_LESENSE,        /**< Channel is triggered by LESENSE. */
+  vdacTrigModeInternalTimer = _VDAC_CH0CFG_TRIGMODE_INTERNALTIMER,  /**< Channel is triggered by Internal Timer. */
+  vdacTrigModeAsyncPrs      = _VDAC_CH0CFG_TRIGMODE_ASYNCPRS        /**< Channel is triggered by Async PRS input. */
+} VDAC_TrigMode_TypeDef;
+
+/** Channel power mode. */
+typedef enum {
+  vdacPowerModeHighPower    = _VDAC_CH0CFG_POWERMODE_HIGHPOWER,     /**< High power buffer mode. */
+  vdacPowerModeLowPower     = _VDAC_CH0CFG_POWERMODE_LOWPOWER       /**< Low power buffer mode. */
+} VDAC_PowerMode_TypeDef;
+
+/** VDAC channel Abus port selection. */
+typedef enum {
+  /** NoneSelected  */
+  vdacChPortNone    = _VDAC_OUTCTRL_ABUSPORTSELCH0_NONE,
+  vdacChPortA       = _VDAC_OUTCTRL_ABUSPORTSELCH0_PORTA,
+  vdacChPortB       = _VDAC_OUTCTRL_ABUSPORTSELCH0_PORTB,
+  vdacChPortC       = _VDAC_OUTCTRL_ABUSPORTSELCH0_PORTC,
+  vdacChPortD       = _VDAC_OUTCTRL_ABUSPORTSELCH0_PORTD,
+} VDAC_ChPortSel_t;
+
+/*******************************************************************************
+ *******************************   STRUCTS   ***********************************
+ ******************************************************************************/
+
+/** VDAC initialization structure, common for both channels. */
+typedef struct {
+  /** Number of prescaled CLK_DAC + 1 for the vdac to warmup. */
+  uint32_t                    warmupTime;
+
+  /** Halt during debug. */
+  bool                        dbgHalt;
+
+  /** Always allow clk_dac. */
+  bool                        onDemandClk;
+
+  /** DMA Wakeup. */
+  bool                        dmaWakeUp;
+
+  /** Bias keep warm enable. */
+  bool                        biasKeepWarm;
+
+  /** Channel refresh period. */
+  VDAC_Refresh_TypeDef        refresh;
+
+  /** Internal timer overflow period. */
+  VDAC_TimerOverflow_TypeDef  timerOverflow;
+
+  /** Prescaler for VDAC clock. Clock is source clock divided by prescaler+1. */
+  uint32_t                    prescaler;
+
+  /** Reference voltage to use. */
+  VDAC_Ref_TypeDef            reference;
+
+  /** Enable/disable reset of prescaler on CH 0 start. */
+  bool                        ch0ResetPre;
+
+  /** Sine reset mode. */
+  bool                        sineReset;
+
+  /** Enable/disable sine mode. */
+  bool                        sineEnable;
+
+  /** Select if single ended or differential output mode. */
+  bool                        diff;
+} VDAC_Init_TypeDef;
+
+/** Default configuration for VDAC initialization structure. */
+#define VDAC_INIT_DEFAULT                                                                            \
+  {                                                                                                  \
+    _VDAC_CFG_WARMUPTIME_DEFAULT, /* Number of prescaled DAC_CLK for Vdac to warmup. */              \
+    false,                        /* Continue while debugging. */                                    \
+    true,                         /* On demand clock. */                                             \
+    false,                        /* DMA wake up. */                                                 \
+    false,                        /* Bias keep warm. */                                              \
+    vdacRefresh8,                 /* Refresh every 8th cycle. */                                     \
+    vdacCycles2,                  /* Internal overflow every 8th cycle. */                           \
+    0,                            /* No prescaling. */                                               \
+    vdacRef1V25,                  /* 1.25 V internal low noise reference. */                         \
+    false,                        /* Do not reset prescaler on CH 0 start. */                        \
+    false,                        /* Sine wave is stopped at the sample its currently outputting. */ \
+    false,                        /* Disable sine mode. */                                           \
+    false                         /* Differential mode. */                                           \
+  }
+
+/** VDAC channel initialization structure. */
+typedef struct {
+  /** Enable channel. */
+  bool                        enable;
+
+  /** Warm-up mode, keep VDAC on (in idle) - or shutdown between conversions.*/
+  bool                        warmupKeepOn;
+
+  /** Select high capacitance load mode in conjunction with high power. */
+  bool                        highCapLoadEnable;
+
+  /** Channel x FIFO Low threshold data valid level. */
+  uint32_t                    fifoLowDataThreshold;
+
+  /** Channel refresh source. */
+  VDAC_RefreshSource_TypeDef  chRefreshSource;
+
+  /** Channel conversion trigger mode. */
+  VDAC_TrigMode_TypeDef       trigMode;
+
+  /** Channel power mode. */
+  VDAC_PowerMode_TypeDef      powerMode;
+
+  /** Set channel conversion mode to sample/shut-off mode. Default is
+   *  continuous.*/
+  bool                        sampleOffMode;
+
+  /** Vdac channel output pin. */
+  uint32_t                    pin;
+
+  /** Vdac channel output port. */
+  VDAC_ChPortSel_t            port;
+
+  /** Short High power and low power output. */
+  bool                        shortOutput;
+
+  /**  Alternative output enable. */
+  bool                        auxOutEnable;
+
+  /**  Main output enable. */
+  bool                        mainOutEnable;
+
+  /**  Channel output hold time. */
+  uint32_t                    holdOutTime;
+} VDAC_InitChannel_TypeDef;
+
+/** Default configuration for VDAC channel initialization structure. */
+#define VDAC_INITCHANNEL_DEFAULT                                                      \
+  {                                                                                   \
+    false,                  /* Leave channel disabled when initialization is done. */ \
+    false,                  /* Turn off between sample off conversions.*/             \
+    true,                   /* Enable High cap mode. */                               \
+    0,                      /* Fifo data low watermark at 0. */                       \
+    vdacRefreshSrcNone,     /* Channel refresh source. */                             \
+    vdacTrigModeSw,         /* Conversion trigged by CH0DATA or COMBDATA write. */    \
+    vdacPowerModeHighPower, /* High power mode enabled. */                            \
+    false,                  /* Continuous conversion mode. */                         \
+    0,                      /* ABUS pin selected. */                                  \
+    vdacChPortNone,         /* No Analog bus port selected. */                        \
+    false,                  /* Output not shorted */                                  \
+    false,                  /* Alternative output disabled. */                        \
+    true,                   /* Main output enabled. */                                \
+    0                       /* Hold out time. Previously called settle time */        \
+  }
+
+#endif
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
@@ -246,6 +437,36 @@ void VDAC_Init(VDAC_TypeDef *vdac, const VDAC_Init_TypeDef *init);
 void VDAC_InitChannel(VDAC_TypeDef *vdac,
                       const VDAC_InitChannel_TypeDef *init,
                       unsigned int ch);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *  Sinemode start/stop
+ *
+ * @details
+ *   This function send the sine mode start/stop signal to the DAC.
+ *
+ * @param[in] vdac
+ *   Pointer to VDAC peripheral register block.
+ *
+ * @param[in] start
+ *   True to start the Sine mode, false to stop it.
+ ******************************************************************************/
+__STATIC_INLINE void VDAC_SineModeStart(VDAC_TypeDef *vdac, bool start)
+{
+  EFM_ASSERT(VDAC_REF_VALID(vdac));
+
+  while (vdac->STATUS & VDAC_STATUS_SYNCBUSY) ;
+
+  if (start) {
+    vdac->CMD = VDAC_CMD_SINEMODESTART;
+    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) == 0) ;
+  } else {
+    vdac->CMD = VDAC_CMD_SINEMODESTOP;
+    while ((vdac->STATUS & VDAC_STATUS_SINEACTIVE) != 0) ;
+  }
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -264,8 +485,13 @@ void VDAC_InitChannel(VDAC_TypeDef *vdac,
 __STATIC_INLINE void VDAC_Channel0OutputSet(VDAC_TypeDef *vdac,
                                             uint32_t value)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   EFM_ASSERT(value <= _VDAC_CH0DATA_MASK);
   vdac->CH0DATA = value;
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  EFM_ASSERT(value <= _VDAC_CH0F_MASK);
+  vdac->CH0F = value;
+#endif
 }
 
 /***************************************************************************//**
@@ -285,8 +511,13 @@ __STATIC_INLINE void VDAC_Channel0OutputSet(VDAC_TypeDef *vdac,
 __STATIC_INLINE void VDAC_Channel1OutputSet(VDAC_TypeDef *vdac,
                                             uint32_t value)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   EFM_ASSERT(value <= _VDAC_CH1DATA_MASK);
   vdac->CH1DATA = value;
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  EFM_ASSERT(value <= _VDAC_CH1F_MASK);
+  vdac->CH1F = value;
+#endif
 }
 
 /***************************************************************************//**
@@ -302,7 +533,11 @@ __STATIC_INLINE void VDAC_Channel1OutputSet(VDAC_TypeDef *vdac,
  ******************************************************************************/
 __STATIC_INLINE void VDAC_IntClear(VDAC_TypeDef *vdac, uint32_t flags)
 {
+#if defined(VDAC_HAS_SET_CLEAR)
+  vdac->IF_CLR = flags;
+#else
   vdac->IFC = flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -318,7 +553,11 @@ __STATIC_INLINE void VDAC_IntClear(VDAC_TypeDef *vdac, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void VDAC_IntDisable(VDAC_TypeDef *vdac, uint32_t flags)
 {
+#if defined(VDAC_HAS_SET_CLEAR)
+  vdac->IEN_CLR = flags;
+#else
   vdac->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -339,7 +578,11 @@ __STATIC_INLINE void VDAC_IntDisable(VDAC_TypeDef *vdac, uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void VDAC_IntEnable(VDAC_TypeDef *vdac, uint32_t flags)
 {
+#if defined(VDAC_HAS_SET_CLEAR)
+  vdac->IEN_SET = flags;
+#else
   vdac->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -401,14 +644,36 @@ __STATIC_INLINE uint32_t VDAC_IntGetEnabled(VDAC_TypeDef *vdac)
  ******************************************************************************/
 __STATIC_INLINE void VDAC_IntSet(VDAC_TypeDef *vdac, uint32_t flags)
 {
+#if defined(VDAC_HAS_SET_CLEAR)
+  vdac->IF_SET = flags;
+#else
   vdac->IFS = flags;
+#endif
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *    Get Vdac Status register.
+ *
+ * @return
+ *    Current STATUS register value.
+ ******************************************************************************/
+__STATIC_INLINE uint32_t VDAC_GetStatus(VDAC_TypeDef *vdac)
+{
+  return vdac->STATUS;
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 uint32_t VDAC_PrescaleCalc(uint32_t vdacFreq, bool syncMode, uint32_t hfperFreq);
+#else
+uint32_t VDAC_PrescaleCalc(uint32_t vdacFreq);
+#endif
+
 void VDAC_Reset(VDAC_TypeDef *vdac);
 
-/** @} (end addtogroup VDAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup vdac) */
 
 #ifdef __cplusplus
 }

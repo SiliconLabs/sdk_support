@@ -740,4 +740,5 @@ typedef struct {
 /** @} End of group EFR32MG22_I2C_BitFields */
 /** @} End of group EFR32MG22_I2C */
 /** @} End of group Parts */
+
 #endif /* EFR32MG22_I2C_H */

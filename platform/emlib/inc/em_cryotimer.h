@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CRYOTIMER
+ * @addtogroup cryotimer CRYOTIMER - Ultra Low Energy Timer
  * @brief Ultra Low Energy Timer/Counter (CRYOTIMER) Peripheral API
  *
  * @details
@@ -101,7 +96,7 @@ extern "C" {
  * @details
  *   All the low frequency oscillators can be used in EM4, however, the
  *   oscillator that is used must be be configured to be retained when going
- *   into EM4. This can be configured by using functions in the @ref EMU module.
+ *   into EM4. This can be configured by using functions in the @ref emu module.
  *   See @ref EMU_EM4Init and @ref EMU_EM4Init_TypeDef. If an oscillator is
  *   retained in EM4, the user is also responsible for unlatching the retained
  *   configuration on a wakeup from EM4.
@@ -218,7 +213,7 @@ typedef struct {
  *   Clear the CRYOTIMER period interrupt.
  *
  * @param[in] flags
- *   CRYOTIMER interrupt sources to clear. Use @ref CRYOTIMER_IFC_PERIOD.
+ *   CRYOTIMER interrupt sources to clear. Use CRYOTIMER_IFC_PERIOD.
  ******************************************************************************/
 __STATIC_INLINE void CRYOTIMER_IntClear(uint32_t flags)
 {
@@ -234,7 +229,7 @@ __STATIC_INLINE void CRYOTIMER_IntClear(uint32_t flags)
  *
  * @return
  *   Pending CRYOTIMER interrupt sources. The only interrupt source available
- *   for the CRYOTIMER is @ref CRYOTIMER_IF_PERIOD.
+ *   for the CRYOTIMER is CRYOTIMER_IF_PERIOD.
  ******************************************************************************/
 __STATIC_INLINE uint32_t CRYOTIMER_IntGet(void)
 {
@@ -268,7 +263,7 @@ __STATIC_INLINE uint32_t CRYOTIMER_IntGetEnabled(void)
  *   Enable one or more CRYOTIMER interrupts.
  *
  * @param[in] flags
- *   CRYOTIMER interrupt sources to enable. Use @ref CRYOTIMER_IEN_PERIOD.
+ *   CRYOTIMER interrupt sources to enable. Use CRYOTIMER_IEN_PERIOD.
  ******************************************************************************/
 __STATIC_INLINE void CRYOTIMER_IntEnable(uint32_t flags)
 {
@@ -280,7 +275,7 @@ __STATIC_INLINE void CRYOTIMER_IntEnable(uint32_t flags)
  *   Disable one or more CRYOTIMER interrupts.
  *
  * @param[in] flags
- *   CRYOTIMER interrupt sources to disable. Use @ref CRYOTIMER_IEN_PERIOD.
+ *   CRYOTIMER interrupt sources to disable. Use CRYOTIMER_IEN_PERIOD.
  ******************************************************************************/
 __STATIC_INLINE void CRYOTIMER_IntDisable(uint32_t flags)
 {
@@ -296,7 +291,7 @@ __STATIC_INLINE void CRYOTIMER_IntDisable(uint32_t flags)
  *
  * @param[in] flags
  *   CRYOTIMER interrupt sources to set to pending. Use
- *   @ref CRYOTIMER_IFS_PERIOD.
+ *   CRYOTIMER_IFS_PERIOD.
  ******************************************************************************/
 __STATIC_INLINE void CRYOTIMER_IntSet(uint32_t flags)
 {
@@ -379,14 +374,26 @@ __STATIC_INLINE void CRYOTIMER_Enable(bool enable)
                   (uint32_t)enable);
 }
 
+/***************************************************************************//**
+ * @brief
+ *   Initialize the CRYOTIMER.
+ *
+ * @details
+ *   Use this function to initialize the CRYOTIMER.
+ *   Select a prescaler setting and select a low-frequency oscillator.
+ *   See the configuration structure @ref CRYOTIMER_Init_TypeDef for more
+ *   details.
+ *
+ * @param[in] init
+ *   A pointer to the initialization structure.
+ ******************************************************************************/
 void CRYOTIMER_Init(const CRYOTIMER_Init_TypeDef *init);
 
 #ifdef __cplusplus
 }
 #endif
 
-/** @} (end addtogroup CRYOTIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup cryotimer) */
 
 #endif /* defined(CRYOTIMER_PRESENT) && (CRYOTIMER_COUNT == 1) */
 #endif /* EM_CRYOTIMER_H */

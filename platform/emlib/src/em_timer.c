@@ -34,12 +34,7 @@
 #include "em_assert.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup TIMER
+ * @addtogroup timer TIMER - Timer/Counter
  * @brief Timer/Counter (TIMER) Peripheral API
  * @details
  *   The timer module consists of three main parts:
@@ -162,6 +157,10 @@ void TIMER_Init(TIMER_TypeDef *timer, const TIMER_Init_TypeDef *init)
 #if defined (_TIMER_CFG_PRESC_SHIFT)
   TIMER_SyncWait(timer);
   timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+  while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+  }
+#endif
   timer->CFG = ((uint32_t)init->prescale << _TIMER_CFG_PRESC_SHIFT)
                | ((uint32_t)init->clkSel << _TIMER_CFG_CLKSEL_SHIFT)
                | ((uint32_t)init->mode   << _TIMER_CFG_MODE_SHIFT)
@@ -238,6 +237,10 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
 #if defined (_TIMER_CC_CFG_MASK)
   TIMER_SyncWait(timer);
   timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+  while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+  }
+#endif
   timer->CC[ch].CFG =
     ((uint32_t)init->mode        << _TIMER_CC_CFG_MODE_SHIFT)
     | (init->filter              ?   TIMER_CC_CFG_FILT_ENABLE : 0)
@@ -301,6 +304,10 @@ void TIMER_InitDTI(TIMER_TypeDef *timer, const TIMER_InitDTI_TypeDef *init)
 #if defined (_TIMER_DTCFG_MASK)
   TIMER_SyncWait(timer);
   timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+  while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+  }
+#endif
   timer->DTCFG = (init->autoRestart       ?   TIMER_DTCFG_DTDAS   : 0)
                  | (init->enablePrsSource ?   TIMER_DTCFG_DTPRSEN : 0);
   if (init->enablePrsSource) {
@@ -392,6 +399,10 @@ void TIMER_Reset(TIMER_TypeDef *timer)
 
   EFM_ASSERT(TIMER_REF_VALID(timer));
 
+#if defined(TIMER_EN_EN)
+  timer->EN_SET = TIMER_EN_EN;
+#endif 
+
   /* Make sure disabled first, before resetting other registers. */
   timer->CMD = TIMER_CMD_STOP;
 
@@ -442,6 +453,10 @@ void TIMER_Reset(TIMER_TypeDef *timer)
   TIMER_SyncWait(timer);
   /* CFG registers must be reset after the timer is disabled */
   timer->EN_CLR = TIMER_EN_EN;
+#if defined(_TIMER_EN_DISABLING_MASK)
+  while (timer->EN & _TIMER_EN_DISABLING_MASK) {
+  }
+#endif
   timer->CFG = _TIMER_CFG_RESETVALUE;
   for (i = 0; TIMER_CH_VALID(i); i++) {
     timer->CC[i].CFG = _TIMER_CC_CFG_RESETVALUE;
@@ -467,6 +482,5 @@ void TIMER_SyncWait(TIMER_TypeDef * timer)
 }
 #endif
 
-/** @} (end addtogroup TIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup timer) */
 #endif /* defined(TIMER_COUNT) && (TIMER_COUNT > 0) */

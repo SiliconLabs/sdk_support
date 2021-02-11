@@ -30,7 +30,7 @@
  * @return Returns a handle to a buffer at least size bytes long or NULL if no
  *   buffer could be allocated.
  */
-void* memoryAllocate(uint32_t size);
+void *memoryAllocate(uint32_t size);
 
 /**
  * Free the buffer pointed to by handle. This will only decrement the reference
@@ -42,10 +42,11 @@ void* memoryAllocate(uint32_t size);
 void memoryFree(void *handle);
 
 /**
- * Take a memory handle and get the data pointer associated with it. This will
- * return NULL if passed an invalid or unallocated handle.
+ * Take a memory handle and get the data pointer associated with it.
  * @param handle The handle to get the pointer for. Must match the value
  *   returned by the memoryAllocate() function.
+ * @return Returns the pointer to memory associated with the provided memory
+ *   handle. Returns NULL if passed an invalid or unallocated handle.
  */
 void *memoryPtrFromHandle(void *handle);
 

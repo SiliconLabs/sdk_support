@@ -740,4 +740,5 @@ typedef struct {
 /** @} End of group MGM21_I2C_BitFields */
 /** @} End of group MGM21_I2C */
 /** @} End of group Parts */
+
 #endif /* MGM21_I2C_H */

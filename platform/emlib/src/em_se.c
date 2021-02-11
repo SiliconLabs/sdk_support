@@ -36,19 +36,14 @@
 #include "em_system.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SE
+ * @addtogroup se
  * @{
  ******************************************************************************/
 
 /*******************************************************************************
  ******************************   DEFINES    ***********************************
  ******************************************************************************/
-
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /* OTP initialization structure defines. */
 #define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ENABLE (1 << 16)
 #define SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_VERIFY_CERTIFICATE (1 << 17)
@@ -79,12 +74,13 @@
 #define ROOT_MB_OUTPUT_STATUS_CONFIG_BITS_MASK  (0xFFFF)
 
 #endif // #if defined(CRYPTOACC_PRESENT)
+/** @endcond */
 
 /*******************************************************************************
  ******************************   TYPEDEFS   ***********************************
  ******************************************************************************/
 #if defined(CRYPTOACC_PRESENT)
-
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 // Root Code Input Mailbox structure
 typedef struct {
   volatile uint32_t magic;
@@ -102,8 +98,35 @@ typedef struct {
   volatile uint32_t length;
   volatile uint32_t data[0];
 } root_OutputMailbox_t;
+/** @endcond */
 
 #endif // #if defined(CRYPTOACC_PRESENT)
+
+/*******************************************************************************
+ **************************   STATIC FUNCTIONS   *******************************
+ ******************************************************************************/
+
+#if defined(SEMAILBOX_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *   Write to FIFO
+ *
+ * @param value
+ *   Value to write to FIFO
+ ******************************************************************************/
+#if defined(_SEMAILBOX_FIFO_RESETVALUE)
+__STATIC_INLINE void writeToFifo(uint32_t value)
+{
+  SEMAILBOX_HOST->FIFO = value;
+}
+#else
+__STATIC_INLINE void writeToFifo(uint32_t value)
+{
+  SEMAILBOX_HOST->FIFO[0].DATA = value;
+}
+#endif
+
+#endif // SEMAILBOX_PRESENT
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -232,15 +255,15 @@ void SE_executeCommand(SE_Command_t *command)
   SEMAILBOX_HOST->TX_HEADER = sizeof(uint32_t) * (4 + command->num_parameters);
 
   // Write command into FIFO
-  SEMAILBOX_HOST->FIFO[0].DATA = command->command;
+  writeToFifo(command->command);
 
   // Write DMA descriptors into FIFO
-  SEMAILBOX_HOST->FIFO[0].DATA = (uint32_t)command->data_in;
-  SEMAILBOX_HOST->FIFO[0].DATA = (uint32_t)command->data_out;
+  writeToFifo((uint32_t)command->data_in);
+  writeToFifo((uint32_t)command->data_out);
 
   // Write applicable parameters into FIFO
   for (size_t i = 0; i < command->num_parameters; i++) {
-    SEMAILBOX_HOST->FIFO[0].DATA = command->parameters[i];
+    writeToFifo(command->parameters[i]);
   }
 
 #elif defined(CRYPTOACC_PRESENT)
@@ -312,194 +335,6 @@ void SE_executeCommand(SE_Command_t *command)
 #endif // #if defined(SEMAILBOX_PRESENT)
 
   return;
-}
-
-/***************************************************************************//**
- * @brief
- *   Init pubkey or pubkey signature.
- *
- * @details
- *   Initialize public key stored in the SE, or its corresponding signature. The
- *   command can be used to write:
- *   * @ref SE_KEY_TYPE_BOOT -- public key used to perform secure boot
- *   * @ref SE_KEY_TYPE_AUTH -- public key used to perform secure debug
- *
- * @note
- *   These keys can not be overwritten, so this command can only be issued once
- *   per key per part.
- *
- * @param[in] key_type
- *   ID of key type to initialize.
- *
- * @param[in] pubkey
- *   Pointer to a buffer that contains the public key or signature.
- *   Must be word aligned and have a length of 64 bytes.
- *
- * @param[in] numBytes
- *   Length of pubkey buffer (64 bytes).
- *
- * @param[in] signature
- *   If true, initialize signature for the specified key type instead of the
- *   public key itself.
- *
- * @return
- *   One of the @ref SE_RESPONSE return codes.
- * @retval SE_RESPONSE_OK when the command was executed successfully
- * @retval SE_RESPONSE_TEST_FAILED when the pubkey is not set
- * @retval SE_RESPONSE_INVALID_PARAMETER when an invalid type is passed
- ******************************************************************************/
-SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature)
-{
-  uint32_t commandWord;
-  SE_Response_t res = SE_RESPONSE_INVALID_COMMAND;
-
-  EFM_ASSERT((key_type == SE_KEY_TYPE_BOOT)
-             || (key_type == SE_KEY_TYPE_AUTH));
-
-  EFM_ASSERT(numBytes == 64);
-  EFM_ASSERT(!((size_t)pubkey & 3U));
-
-  // Find parity word
-  volatile uint32_t parity = 0;
-  for (size_t i = 0; i < numBytes / 4; i++) {
-    parity = parity ^ ((uint32_t *)pubkey)[i];
-  }
-
-  // SE command structures
-#if defined(SEMAILBOX_PRESENT)
-  commandWord =
-    (signature) ? SE_COMMAND_INIT_PUBKEY_SIGNATURE : SE_COMMAND_INIT_PUBKEY;
-#elif defined(CRYPTOACC_PRESENT)
-  (void)signature;
-  commandWord = SE_COMMAND_INIT_PUBKEY;
-#endif
-  SE_Command_t command = SE_COMMAND_DEFAULT(commandWord | key_type);
-
-  SE_DataTransfer_t parityData = SE_DATATRANSFER_DEFAULT(&parity, 4);
-  SE_addDataInput(&command, &parityData);
-
-  SE_DataTransfer_t pubkeyData = SE_DATATRANSFER_DEFAULT(pubkey, numBytes);
-  SE_addDataInput(&command, &pubkeyData);
-
-  SE_executeCommand(&command);
-#if defined(SEMAILBOX_PRESENT)
-  res = SE_readCommandResponse();
-#endif
-  return res;
-}
-
-/***************************************************************************//**
- * @brief
- *   Initialize SE one-time-programmable (OTP) configuration.
- *
- * @details
- *   Configuration is performed by setting the desired options in the
- *   @ref SE_OTPInit_t structure.
- *
- *   This function can be used to enable secure boot, to configure flash page
- *   locking, and to enable anti-rollback protection when using the SE to
- *   perform an application upgrade, typically a Gecko bootloader upgrade.
- *
- *   Before secure boot can be enabled, the public key used for secure boot
- *   verification must be uploaded using @ref SE_initPubkey().
- *
- * @warning
- *   This command can only be executed once per device! When the configuration
- *   has been programmed it is not possible to update any of the fields.
- *
- * @param[in] otp_init
- *   @ref SE_OTPInit_t structure containing the SE configuration.
- *
- * @return
- *   One of the @ref SE_RESPONSE return codes.
- * @retval SE_RESPONSE_OK when the command was executed successfully
- ******************************************************************************/
-SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
-{
-  volatile uint32_t mcuSettingsFlags = 0;
-
-  SE_Response_t res = SE_RESPONSE_INVALID_COMMAND;
-
-  if (otp_init->enableSecureBoot) {
-    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ENABLE;
-
-#if defined(SEMAILBOX_PRESENT)
-    uint8_t pubkey[64];
-    res = SE_readPubkey(SE_KEY_TYPE_BOOT, &pubkey, 64, false);
-    if (res != SE_RESPONSE_OK) {
-      return SE_RESPONSE_ABORT;
-    }
-#endif
-  }
-  if (otp_init->verifySecureBootCertificate) {
-    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_VERIFY_CERTIFICATE;
-  }
-  if (otp_init->enableAntiRollback) {
-    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ANTI_ROLLBACK;
-  }
-
-  if (otp_init->secureBootPageLockNarrow && otp_init->secureBootPageLockFull) {
-    return SE_RESPONSE_ABORT;
-  }
-  if (otp_init->secureBootPageLockNarrow) {
-    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_NARROW;
-  }
-  if (otp_init->secureBootPageLockFull) {
-    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_FULL;
-  }
-
-  // Find parity word
-  uint32_t parity = 0;
-  parity = parity ^ mcuSettingsFlags;
-
-  volatile uint32_t parameters[2] = {
-    parity,
-    sizeof(mcuSettingsFlags)
-  };
-
-  // SE command structures
-  SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_INIT_OTP);
-
-#if defined(SEMAILBOX_PRESENT)
-  volatile struct ReservedSettings {
-    uint8_t reserved1[16];
-    uint8_t reserved2[2];
-    uint8_t reserved3[2];
-  } reservedSettings = {
-    { 0x00 },
-    { 0xFF },
-    { 0x00 }
-  };
-
-  for (size_t i = 0; i < 5; i++) {
-    parity = parity ^ ((uint32_t*)(&reservedSettings))[i];
-  }
-  parameters[0] = parity;
-  parameters[1] = parameters[1] + sizeof(reservedSettings);
-
-  SE_DataTransfer_t parametersData = SE_DATATRANSFER_DEFAULT(&parameters, 8);
-  SE_addDataInput(&command, &parametersData);
-
-  SE_DataTransfer_t mcuSettingsFlagsData = SE_DATATRANSFER_DEFAULT(&mcuSettingsFlags, sizeof(mcuSettingsFlags));
-  SE_addDataInput(&command, &mcuSettingsFlagsData);
-
-  SE_DataTransfer_t reservedSettingsData = SE_DATATRANSFER_DEFAULT(&reservedSettings, sizeof(reservedSettings));
-  SE_addDataInput(&command, &reservedSettingsData);
-
-  SE_executeCommand(&command);
-
-  res = SE_readCommandResponse();
-#elif defined(CRYPTOACC_PRESENT)
-  SE_DataTransfer_t parametersData = SE_DATATRANSFER_DEFAULT(&parameters, 8);
-  SE_addDataInput(&command, &parametersData);
-
-  SE_DataTransfer_t mcuSettingsFlagsData = SE_DATATRANSFER_DEFAULT(&mcuSettingsFlags, sizeof(mcuSettingsFlags));
-  SE_addDataInput(&command, &mcuSettingsFlagsData);
-
-  SE_executeCommand(&command);
-#endif
-
-  return res;
 }
 
 #if defined(CRYPTOACC_PRESENT)
@@ -587,10 +422,10 @@ SE_Response_t SE_getVersion(uint32_t *version)
 
 /***************************************************************************//**
  * @brief
- *   Get Root Code Configuration Status bits
+ *   Get Root Code configuration and status bits
  *
  * @details
- *   This function returns the current Root Code Configuration Status bits.
+ *   This function returns the current Root Code configuration and status bits.
  *   The following list explains what the different bits in cfgStatus indicate.
  *   A bit value of 1 means enabled, while 0 means disabled:
  *    * [0]: Secure boot
@@ -598,6 +433,12 @@ SE_Response_t SE_getVersion(uint32_t *version)
  *    * [2]: Anti-rollback
  *    * [3]: Narrow page lock
  *    * [4]: Full page lock
+ *   The following status bits can be read with Root Code versions
+ *   higher than 1.2.2.
+ *    * [10]: Debug port lock
+ *    * [11]: Device erase enabled
+ *    * [12]: Secure debug enabled
+ *    * [15]: Debug port register state, 1 if the debug port is locked.
  *
  * @param[out]  cfgStatus
  *   Pointer to location to copy Configuration Status bits into.
@@ -818,12 +659,231 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
 
 #endif // #if defined(CRYPTOACC_PRESENT)
 
+/*******************************************************************************
+ *****************************   DEPRECATED    *********************************
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup se_deprecated
+ *
+ * @{
+ ******************************************************************************/
+
+/*******************************************************************************
+*  The following functions have been deprecated and will be removed in a future
+*  version of emlib. All high-level functionality have been moved to the SE
+*  manager.
+*******************************************************************************/
+
+/***************************************************************************//**
+ * @brief
+ *
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
+ *   Init pubkey or pubkey signature.
+ *
+ * @details
+ *   Initialize public key stored in the SE, or its corresponding signature. The
+ *   command can be used to write:
+ *   * SE_KEY_TYPE_BOOT -- public key used to perform secure boot
+ *   * SE_KEY_TYPE_AUTH -- public key used to perform secure debug
+ *
+ * @note
+ *   These keys can not be overwritten, so this command can only be issued once
+ *   per key per part.
+ *
+ * @param[in] key_type
+ *   ID of key type to initialize.
+ *
+ * @param[in] pubkey
+ *   Pointer to a buffer that contains the public key or signature.
+ *   Must be word aligned and have a length of 64 bytes.
+ *
+ * @param[in] numBytes
+ *   Length of pubkey buffer (64 bytes).
+ *
+ * @param[in] signature
+ *   If true, initialize signature for the specified key type instead of the
+ *   public key itself.
+ *
+ * @return
+ *   One of the SE_RESPONSE return codes.
+ * @retval SE_RESPONSE_OK when the command was executed successfully
+ * @retval SE_RESPONSE_TEST_FAILED when the pubkey is not set
+ * @retval SE_RESPONSE_INVALID_PARAMETER when an invalid type is passed
+ ******************************************************************************/
+SE_Response_t SE_initPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, bool signature)
+{
+  uint32_t commandWord;
+  SE_Response_t res = SE_RESPONSE_INVALID_COMMAND;
+
+  EFM_ASSERT((key_type == SE_KEY_TYPE_BOOT)
+             || (key_type == SE_KEY_TYPE_AUTH));
+
+  EFM_ASSERT(numBytes == 64);
+  EFM_ASSERT(!((size_t)pubkey & 3U));
+
+  // Find parity word
+  volatile uint32_t parity = 0;
+  for (size_t i = 0; i < numBytes / 4; i++) {
+    parity = parity ^ ((uint32_t *)pubkey)[i];
+  }
+
+  // SE command structures
+#if defined(SEMAILBOX_PRESENT)
+  commandWord =
+    (signature) ? SE_COMMAND_INIT_PUBKEY_SIGNATURE : SE_COMMAND_INIT_PUBKEY;
+#elif defined(CRYPTOACC_PRESENT)
+  (void)signature;
+  commandWord = SE_COMMAND_INIT_PUBKEY;
+#endif
+  SE_Command_t command = SE_COMMAND_DEFAULT(commandWord | key_type);
+
+  SE_DataTransfer_t parityData = SE_DATATRANSFER_DEFAULT(&parity, 4);
+  SE_addDataInput(&command, &parityData);
+
+  SE_DataTransfer_t pubkeyData = SE_DATATRANSFER_DEFAULT(pubkey, numBytes);
+  SE_addDataInput(&command, &pubkeyData);
+
+  SE_executeCommand(&command);
+#if defined(SEMAILBOX_PRESENT)
+  res = SE_readCommandResponse();
+#endif
+  return res;
+}
+
+/***************************************************************************//**
+ * @brief
+ *
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
+ *   Initialize SE one-time-programmable (OTP) configuration.
+ *
+ * @details
+ *   Configuration is performed by setting the desired options in the
+ *   @ref SE_OTPInit_t structure.
+ *
+ *   This function can be used to enable secure boot, to configure flash page
+ *   locking, and to enable anti-rollback protection when using the SE to
+ *   perform an application upgrade, typically a Gecko bootloader upgrade.
+ *
+ *   Before secure boot can be enabled, the public key used for secure boot
+ *   verification must be uploaded using @ref SE_initPubkey().
+ *
+ * @warning
+ *   This command can only be executed once per device! When the configuration
+ *   has been programmed it is not possible to update any of the fields.
+ *
+ * @param[in] otp_init
+ *   @ref SE_OTPInit_t structure containing the SE configuration.
+ *
+ * @return
+ *   One of the SE_RESPONSE return codes.
+ * @retval SE_RESPONSE_OK when the command was executed successfully
+ ******************************************************************************/
+SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init)
+{
+  uint32_t mcuSettingsFlags = 0;
+
+  SE_Response_t res = SE_RESPONSE_INVALID_COMMAND;
+
+  if (otp_init->enableSecureBoot) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ENABLE;
+
+#if defined(SEMAILBOX_PRESENT)
+    uint8_t pubkey[64];
+    res = SE_readPubkey(SE_KEY_TYPE_BOOT, &pubkey, 64, false);
+    if (res != SE_RESPONSE_OK) {
+      return SE_RESPONSE_ABORT;
+    }
+#endif
+  }
+  if (otp_init->verifySecureBootCertificate) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_VERIFY_CERTIFICATE;
+  }
+  if (otp_init->enableAntiRollback) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_ANTI_ROLLBACK;
+  }
+
+  if (otp_init->secureBootPageLockNarrow && otp_init->secureBootPageLockFull) {
+    return SE_RESPONSE_ABORT;
+  }
+  if (otp_init->secureBootPageLockNarrow) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_NARROW;
+  }
+  if (otp_init->secureBootPageLockFull) {
+    mcuSettingsFlags |= SE_OTP_MCU_SETTINGS_FLAG_SECURE_BOOT_PAGE_LOCK_FULL;
+  }
+
+  // Find parity word
+  volatile uint32_t parity = 0;
+  parity = parity ^ mcuSettingsFlags;
+
+  volatile uint32_t parameters[2] = {
+    parity,
+    sizeof(mcuSettingsFlags)
+  };
+
+  // SE command structures
+  SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_INIT_OTP);
+
+#if defined(SEMAILBOX_PRESENT)
+  static struct ReservedSettings {
+    uint8_t reserved1[16];
+    uint8_t reserved2[2];
+    uint8_t reserved3[2];
+  } reservedSettings = {
+    { 0x00 },
+    { 0xFF },
+    { 0x00 }
+  };
+
+  for (size_t i = 0; i < 5; i++) {
+    parity = parity ^ ((uint32_t*)(&reservedSettings))[i];
+  }
+  parameters[0] = parity;
+  parameters[1] = parameters[1] + sizeof(reservedSettings);
+
+  SE_DataTransfer_t parametersData = SE_DATATRANSFER_DEFAULT(&parameters, 8);
+  SE_addDataInput(&command, &parametersData);
+
+  SE_DataTransfer_t mcuSettingsFlagsData = SE_DATATRANSFER_DEFAULT((volatile void *)&mcuSettingsFlags, sizeof(mcuSettingsFlags));
+  SE_addDataInput(&command, &mcuSettingsFlagsData);
+
+  SE_DataTransfer_t reservedSettingsData = SE_DATATRANSFER_DEFAULT((volatile void *)&reservedSettings, sizeof(reservedSettings));
+  SE_addDataInput(&command, &reservedSettingsData);
+
+  SE_executeCommand(&command);
+
+  res = SE_readCommandResponse();
+#elif defined(CRYPTOACC_PRESENT)
+  SE_DataTransfer_t parametersData = SE_DATATRANSFER_DEFAULT(&parameters, 8);
+  SE_addDataInput(&command, &parametersData);
+
+  SE_DataTransfer_t mcuSettingsFlagsData = SE_DATATRANSFER_DEFAULT((volatile void *)&mcuSettingsFlags, sizeof(mcuSettingsFlags));
+  SE_addDataInput(&command, &mcuSettingsFlagsData);
+
+  SE_executeCommand(&command);
+#endif
+
+  return res;
+}
+
 #if defined(SEMAILBOX_PRESENT)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Writes data to User Data section in MTP. Write data must be aligned to
  *    word size and contain a number of bytes that is divisable by four.
+ *
  * @note
  *   It is recommended to erase the flash page before performing a write.
  *
@@ -834,7 +894,7 @@ SE_Response_t SE_ackCommand(SE_Command_t *command)
  * @param[in] numBytes
  *   Number of bytes to write to flash. NB: Must be divisable by four.
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully or a
  *                        signature was successfully verified,
  * @retval SE_RESPONSE_INVALID_COMMAND when the command ID was not recognized,
@@ -866,9 +926,14 @@ SE_Response_t SE_writeUserData(uint32_t offset,
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Erases User Data section in MTP.
+ *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully or a
  *                        signature was successfully verified,
  * @retval SE_RESPONSE_INVALID_COMMAND when the command ID was not recognized,
@@ -893,13 +958,17 @@ SE_Response_t SE_eraseUserData()
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Returns the current boot status, versions and system configuration.
  *
  * @param[out] status
  *   @ref SE_Status_t containing current SE status.
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK upon command completion. Errors are encoded in the
  *                        different parts of the returned status object.
  ******************************************************************************/
@@ -935,6 +1004,10 @@ SE_Response_t SE_getStatus(SE_Status_t *status)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Read the serial number of the SE module.
  *
  * @param[out] serial
@@ -961,13 +1034,17 @@ SE_Response_t SE_serialNumber(void *serial)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Read pubkey or pubkey signature.
  *
  * @details
  *   Read out a public key stored in the SE, or its signature. The command can
  *   be used to read:
- *   * @ref SE_KEY_TYPE_BOOT
- *   * @ref SE_KEY_TYPE_AUTH
+ *   * SE_KEY_TYPE_BOOT
+ *   * SE_KEY_TYPE_AUTH
  *
  * @param[in] key_type
  *   ID of key type to read.
@@ -984,7 +1061,7 @@ SE_Response_t SE_serialNumber(void *serial)
  *   specified public key instead of the public key itself.
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully
  * @retval SE_RESPONSE_TEST_FAILED when the pubkey is not set
  * @retval SE_RESPONSE_INVALID_PARAMETER when an invalid type is passed
@@ -1012,9 +1089,13 @@ SE_Response_t SE_readPubkey(uint32_t key_type, void *pubkey, uint32_t numBytes, 
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Returns the current debug lock configuration.
  * @param[out] status
- *   The command returns a @ref DebugStatus_t with the current status of the
+ *   The command returns a @ref SE_DebugStatus_t with the current status of the
  *   debug configuration.
  * @return
  *   One of the SE_RESPONSE return codes.
@@ -1044,6 +1125,10 @@ SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Enables the debug lock for the part.
  * @details
  *   The debug port will be closed and the only way to open it is through
@@ -1051,7 +1136,7 @@ SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status)
  *   enabled).
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR there was a problem locking the debug port.
  ******************************************************************************/
@@ -1065,6 +1150,10 @@ SE_Response_t SE_debugLockApply(void)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Enables the secure debug functionality.
  * @details
  *   Enables the secure debug functionality. This functionality makes it
@@ -1076,7 +1165,7 @@ SE_Response_t SE_debugLockApply(void)
  *   @ref SE_initPubkey() or the corresponding DCI command.
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INVALID_COMMAND if debug port is locked.
  * @retval SE_RESPONSE_INVALID_PARAMETER if secure debug certificates are
@@ -1093,12 +1182,16 @@ SE_Response_t SE_debugSecureEnable(void)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Disables the secure debug functionality.
  * @details
  *   Disables the secure debug functionality that can be used to open a
  *   locked debug port.
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
  ******************************************************************************/
@@ -1112,6 +1205,10 @@ SE_Response_t SE_debugSecureDisable(void)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Performs a device mass erase and debug unlock.
  *
  * @details
@@ -1125,7 +1222,7 @@ SE_Response_t SE_debugSecureDisable(void)
  *   commissioning information in the secure element.
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INVALID_COMMAND if device erase is disabled.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
@@ -1140,6 +1237,10 @@ SE_Response_t SE_deviceErase(void)
 
 /***************************************************************************//**
  * @brief
+ * @deprecated
+ *   This function has been moved to the SE manager, and will be removed in a
+ *   future version of emlib.
+ *
  *   Disabled device erase functionality.
  *
  * @details
@@ -1153,7 +1254,7 @@ SE_Response_t SE_deviceErase(void)
  *   This command permanently disables the device erase functionality!
  *
  * @return
- *   One of the @ref SE_RESPONSE return codes.
+ *   One of the SE_RESPONSE return codes.
  * @retval SE_RESPONSE_OK when the command was executed successfully.
  * @retval SE_RESPONSE_INTERNAL_ERROR if there was a problem during execution.
  ******************************************************************************/
@@ -1167,7 +1268,7 @@ SE_Response_t SE_deviceEraseDisable(void)
 
 #endif // #if defined(SEMAILBOX_PRESENT)
 
-/** @} (end addtogroup SE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup deprecated_se) */
+/** @} (end addtogroup se) */
 
 #endif /* defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) */

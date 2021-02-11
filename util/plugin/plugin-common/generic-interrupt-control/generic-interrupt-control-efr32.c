@@ -12,7 +12,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include EMBER_AF_API_GENERIC_INTERRUPT_CONTROL
 #include "hal/hal.h"
 #include "hal/micro/micro-common.h"

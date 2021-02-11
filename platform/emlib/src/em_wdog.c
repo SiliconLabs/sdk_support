@@ -35,12 +35,7 @@
 #include "em_core.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup WDOG
+ * @addtogroup wdog WDOG - Watchdog
  * @brief Watchdog (WDOG) Peripheral API
  * @details
  *  This module contains functions to control the WDOG peripheral of Silicon
@@ -49,7 +44,7 @@
  * @{
  ******************************************************************************/
 
-/* In some scenarioes when the watchdog is disabled the synchronization
+/** In some scenarioes when the watchdog is disabled the synchronization
  * register might be set and not be cleared until the watchdog is enabled
  * again. This will happen when for instance some watchdog register is modified
  * while the watchdog clock is disabled. In these scenarioes we need to make
@@ -95,6 +90,10 @@ void WDOGn_Enable(WDOG_TypeDef *wdog, bool enable)
     while (wdog->SYNCBUSY & WDOG_SYNCBUSY_CMD) {
     }
     wdog->EN_CLR = WDOG_EN_EN;
+#if defined(_WDOG_EN_DISABLING_MASK)
+    while (wdog->EN & _WDOG_EN_DISABLING_MASK) {
+    }
+#endif
   } else {
     wdog->EN_SET = WDOG_EN_EN;
   }
@@ -211,6 +210,11 @@ void WDOGn_Init(WDOG_TypeDef *wdog, const WDOG_Init_TypeDef *init)
       // Wait for any potential synchronization to finish
     }
     wdog->EN_CLR = WDOG_EN_EN;
+#if defined(_WDOG_EN_DISABLING_MASK)
+    while (wdog->EN & _WDOG_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+#endif
   }
 
   wdog->CFG = (init->debugRun       ? WDOG_CFG_DEBUGRUN   : 0U)
@@ -338,6 +342,5 @@ void WDOGn_Unlock(WDOG_TypeDef *wdog)
 #endif
 }
 
-/** @} (end addtogroup WDOG) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup wdog) */
 #endif /* defined(WDOG_COUNT) && (WDOG_COUNT > 0) */

@@ -3,7 +3,7 @@
  * @brief This file contains the radio coexistence interface.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -104,9 +104,9 @@ COEX_ENUM(COEX_GpioIndex_t) {
  * @brief Configuration structure for an individual GPIO.
  */
 typedef struct COEX_GpioConfig{
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   COEX_GpioIndex_t index;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   /** Function called when GPIO is toggled **/
   void (*cb)(void);
 

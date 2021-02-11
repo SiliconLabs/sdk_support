@@ -43,13 +43,8 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup GPCRC
- * @brief General Purpose Cyclic Redundancy Check (GPCRC) API.
+ * @addtogroup gpcrc GPCRC - General Purpose CRC
+ * @brief General Purpose Cyclic Redundancy Check (GPCRC) API
  *
  * @details
  * The GPCRC API functions provide full support for the GPCRC peripheral.
@@ -72,7 +67,7 @@ extern "C" {
  * There are two ways of sending input data to the GPCRC. Either write
  * the input data into the input data register using input functions
  * @ref GPCRC_InputU32, @ref GPCRC_InputU16 and @ref GPCRC_InputU8, or the
- * user can configure @ref LDMA to transfer data directly to one of the GPCRC
+ * user can configure @ref ldma to transfer data directly to one of the GPCRC
  * input data registers.
  *
  * <b> Examples of GPCRC usage: </b>
@@ -341,8 +336,7 @@ __STATIC_INLINE uint32_t GPCRC_DataReadByteReversed(GPCRC_TypeDef * gpcrc)
   return gpcrc->DATABYTEREV;
 }
 
-/** @} (end addtogroup GPCRC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup gpcrc) */
 
 #ifdef __cplusplus
 }

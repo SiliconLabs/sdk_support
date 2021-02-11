@@ -217,4 +217,5 @@ typedef struct {
 /** @} End of group MGM21_HFRCO_BitFields */
 /** @} End of group MGM21_HFRCO */
 /** @} End of group Parts */
+
 #endif /* MGM21_HFRCO_H */

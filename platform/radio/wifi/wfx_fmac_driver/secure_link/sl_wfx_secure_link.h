@@ -40,6 +40,12 @@ sl_status_t sl_wfx_secure_link_renegotiate_session_key(void);
 
 sl_status_t sl_wfx_secure_link_configure(const uint8_t *encryption_bitmap, uint8_t disable_session_key_protection);
 
+sl_status_t sl_wfx_secure_link_send(uint8_t command_id, sl_wfx_generic_message_t **request, uint16_t *request_length);
+
+sl_status_t sl_wfx_secure_link_receive(sl_wfx_generic_message_t **network_rx_buffer, uint32_t read_length);
+
+sl_status_t sl_wfx_secure_link_renegotiate(void);
+
 void sl_wfx_secure_link_bitmap_set_all_encrypted(uint8_t *bitmap);
 
 void sl_wfx_secure_link_bitmap_add_request_id(uint8_t *bitmap, uint8_t request_id);

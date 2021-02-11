@@ -36,17 +36,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup COMM_Layer
+ * @addtogroup ezradiodrv_comm EZRADIODRV Comm Layer
  * @brief EzRadio Communication Layer
  * @{
  ******************************************************************************/
@@ -67,9 +62,8 @@ uint8_t ezradio_comm_SendCmdGetResp(uint8_t cmdByteCount, uint8_t* pCmdData,
                                     uint8_t respByteCount, uint8_t* pRespData);
 void ezradio_comm_ClearCTS(void);
 
-/** @} (end addtogroup Comm_Layer) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_comm) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

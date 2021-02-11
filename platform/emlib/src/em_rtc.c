@@ -35,12 +35,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RTC
+ * @addtogroup rtc RTC - Real Time Counter
  * @brief Real Time Counter (RTC) Peripheral API
  * @details
  *  This module contains functions to control the RTC peripheral of Silicon
@@ -378,6 +373,5 @@ void RTC_CounterReset(void)
   RTC_Enable(true);
 }
 
-/** @} (end addtogroup RTC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup rtc) */
 #endif /* defined(RTC_COUNT) && (RTC_COUNT > 0) */

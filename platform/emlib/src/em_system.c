@@ -33,12 +33,7 @@
 #include <stddef.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SYSTEM
+ * @addtogroup system
  * @{
  ******************************************************************************/
 
@@ -128,5 +123,51 @@ bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
   return false;
 }
 
-/** @} (end addtogroup SYSTEM) */
-/** @} (end addtogroup emlib) */
+/***************************************************************************//**
+ * @brief
+ *   Get family security capability.
+ *
+ * @note
+ *   This function retrives family security capability. The security capabilities
+ *   are represented by ::SYSTEM_SecurityCapability_TypeDef.
+ *
+ * @return
+ *   Security capability of MCU.
+ ******************************************************************************/
+SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void)
+{
+#if (_SILICON_LABS_32B_SERIES == 2)
+  SYSTEM_PartFamily_TypeDef partFamily;
+  partFamily = SYSTEM_GetFamily();
+
+  if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
+       >> _DEVINFO_PART_FAMILYNUM_SHIFT) == 21UL) {
+    // Series 2 Config 1 device family
+    uint16_t partNumber = SYSTEM_GetPartNumber();
+    // Check for B in part number.
+    if ((partNumber / 1000) == 1) {
+      return securityCapabilityVault;
+    } else {
+      return securityCapabilitySE;
+    }
+  } else if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
+              >>  _DEVINFO_PART_FAMILYNUM_SHIFT) == 22UL) {
+    // Series 2 Config 2 device family
+    return securityCapabilityRoT;
+  } else if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
+              >>  _DEVINFO_PART_FAMILYNUM_SHIFT) == 23UL) {
+    // Series 2 Config 3 device family
+    return securityCapabilitySE;
+  }
+
+  return securityCapabilityUnknown;
+#elif (_SILICON_LABS_32B_SERIES == 1)
+  return securityCapabilityBasic;
+#elif (_SILICON_LABS_32B_SERIES == 0)
+  return securityCapabilityNA;
+#else
+  return securityCapabilityUnknown;
+#endif
+}
+
+/** @} (end addtogroup system) */

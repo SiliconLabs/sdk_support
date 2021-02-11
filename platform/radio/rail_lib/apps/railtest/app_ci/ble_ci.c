@@ -4,7 +4,7 @@
  *   relevant to receiving packets
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,14 +32,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "rail_ble.h"
 
 #include "app_common.h"
-#include "app_ci.h"
 
 static const uint8_t blePacket[] = {
   0x02, 0x1A, 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA, 0x02,
@@ -48,11 +46,11 @@ static const uint8_t blePacket[] = {
 };
 PhySwitchToRx_t phySwitchToRx;
 
-void bleStatus(int argc, char **argv);
+void bleStatus(sl_cli_command_arg_t *args);
 
-void bleEnable(int argc, char **argv)
+void bleEnable(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
 
   // Turn BLE mode on or off as requested
   if (enable) {
@@ -63,23 +61,24 @@ void bleEnable(int argc, char **argv)
   }
 
   // Report the current status of BLE mode
-  bleStatus(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  bleStatus(args);
 }
 
-void bleStatus(int argc, char **argv)
+void bleStatus(sl_cli_command_arg_t *args)
 {
   bool enabled = RAIL_BLE_IsEnabled(railHandle);
 
   // Report the current enabled status for BLE
-  responsePrint(argv[0], "BLE:%s", enabled ? "Enabled" : "Disabled");
+  responsePrint(sl_cli_get_command_string(args, 0), "BLE:%s", enabled ? "Enabled" : "Disabled");
 }
 
-void bleSet1MbpsPhy(int argc, char **argv)
+void bleSet1MbpsPhy(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status;
   bool isViterbi;
-  if (argc == 2) {
-    isViterbi = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) == 1) {
+    isViterbi = !!sl_cli_get_argument_uint8(args, 0);
   } else {
     isViterbi = 0;
   }
@@ -89,15 +88,15 @@ void bleSet1MbpsPhy(int argc, char **argv)
   } else {
     status = RAIL_BLE_ConfigPhy1Mbps(railHandle);
   }
-  responsePrint(argv[0], "Status:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", getStatusMessage(status));
 }
 
-void bleSet2MbpsPhy(int argc, char **argv)
+void bleSet2MbpsPhy(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status;
   bool isViterbi;
-  if (argc == 2) {
-    isViterbi = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) == 1) {
+    isViterbi = !!sl_cli_get_argument_uint8(args, 0);
   } else {
     isViterbi = 0;
   }
@@ -107,24 +106,36 @@ void bleSet2MbpsPhy(int argc, char **argv)
   } else {
     status = RAIL_BLE_ConfigPhy2Mbps(railHandle);
   }
-  responsePrint(argv[0], "Status:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", getStatusMessage(status));
 }
 
-void bleSetCoding(int argc, char **argv)
+void bleSetCoding(sl_cli_command_arg_t *args)
 {
   // Make sure BLE mode is enabled so that the call below can succeed
   if (!RAIL_BLE_IsEnabled(railHandle)) {
-    responsePrintError(argv[0], 0x31, "BLE mode not enabled");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "BLE mode not enabled");
     return;
   }
 
-  RAIL_BLE_Coding_t coding = (RAIL_BLE_Coding_t) ciGetUnsigned(argv[1]);
+  RAIL_BLE_Coding_t coding = (RAIL_BLE_Coding_t) sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_BLE_ConfigPhyCoded(railHandle, coding);
-  responsePrint(argv[0], "Status:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", getStatusMessage(status));
+}
+
+void bleSetSimulscan(sl_cli_command_arg_t *args)
+{
+  // Make sure BLE mode is enabled so that the call below can succeed
+  if (!RAIL_BLE_IsEnabled(railHandle)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "BLE mode not enabled");
+    return;
+  }
+
+  RAIL_Status_t status = RAIL_BLE_ConfigPhySimulscan(railHandle);
+  responsePrint(sl_cli_get_command_string(args, 0), "Status:%s", getStatusMessage(status));
 }
 
 // channel, accessAddress, crcInit, whitening
-void bleSetChannelParams(int argc, char **argv)
+void bleSetChannelParams(sl_cli_command_arg_t *args)
 {
   // Default to the parameters for advertising channels
   uint32_t accessAddress = 0x8E89BED6UL;
@@ -135,21 +146,21 @@ void bleSetChannelParams(int argc, char **argv)
 
   // Make sure BLE mode is enabled so that the call below can succeed
   if (!RAIL_BLE_IsEnabled(railHandle)) {
-    responsePrintError(argv[0], 0x31, "BLE mode not enabled");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "BLE mode not enabled");
     return;
   }
 
-  if (argc > 1) {
-    logicalChannel = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    logicalChannel = sl_cli_get_argument_uint8(args, 0);
   }
-  if (argc > 2) {
-    accessAddress = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    accessAddress = sl_cli_get_argument_uint32(args, 1);
   }
-  if (argc > 3) {
-    crcInit = ciGetUnsigned(argv[3]);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    crcInit = sl_cli_get_argument_uint32(args, 2);
   }
-  if (argc > 4) {
-    disableWhitening = !!ciGetUnsigned(argv[4]);
+  if (sl_cli_get_argument_count(args) >= 4) {
+    disableWhitening = !!sl_cli_get_argument_uint8(args, 3);
   }
 
   res = RAIL_BLE_ConfigChannelRadioParams(railHandle,
@@ -158,7 +169,7 @@ void bleSetChannelParams(int argc, char **argv)
                                           logicalChannel,
                                           disableWhitening);
   if (res == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "LogicalChannel:%d,"
                   "AccessAddress:0x%0.8X,"
                   "CrcInit:0x%0.8X,"
@@ -168,23 +179,23 @@ void bleSetChannelParams(int argc, char **argv)
                   crcInit,
                   disableWhitening ? "Disabled" : "Enabled");
   } else {
-    responsePrintError(argv[0], 0x32, "Setting channel parameters failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x32, "Setting channel parameters failed");
   }
 }
 
-void bleAdvertisingConfig(int argc, char **argv)
+void bleAdvertisingConfig(sl_cli_command_arg_t *args)
 {
-  uint8_t advChannel = ciGetUnsigned(argv[1]);
+  uint8_t advChannel = sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t res;
 
   // Make sure BLE mode is enabled so that the call below can succeed
   if (!RAIL_BLE_IsEnabled(railHandle)) {
-    responsePrintError(argv[0], 0x31, "BLE mode not enabled");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "BLE mode not enabled");
     return;
   }
 
   if ((advChannel < 37) || (advChannel > 39)) {
-    responsePrintError(argv[0], 0x30, "Invalid advertising channel");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x30, "Invalid advertising channel");
     return;
   }
 
@@ -195,7 +206,7 @@ void bleAdvertisingConfig(int argc, char **argv)
                                           advChannel,  // Channel
                                           false);      // Disable Whitening
   if (res != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x32, "Setting channel parameters failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x32, "Setting channel parameters failed");
     return;
   }
 
@@ -207,17 +218,18 @@ void bleAdvertisingConfig(int argc, char **argv)
     changeChannel(39); // Logical channel 39 is physical channel 39
   }
 
-  responsePrint(argv[0], "AdvertisingChannel:%d", advChannel);
+  responsePrint(sl_cli_get_command_string(args, 0), "AdvertisingChannel:%d", advChannel);
 
   // Load up a suitable advertising packet
   memcpy(txData, blePacket, sizeof(blePacket));
   txDataLen = sizeof(blePacket);
-  printTxPacket(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  printTxPacket(args);
 }
 
-void blePhySwitchToRx(int argc, char **argv)
+void blePhySwitchToRx(sl_cli_command_arg_t *args)
 {
-  phySwitchToRx.enable = ciGetUnsigned(argv[1]);
+  phySwitchToRx.enable = !!sl_cli_get_argument_uint8(args, 0);
   if (phySwitchToRx.enable) {
     phySwitchToRx.phy = RAIL_BLE_1Mbps;
     phySwitchToRx.physicalChannel = 0U;
@@ -227,29 +239,29 @@ void blePhySwitchToRx(int argc, char **argv)
     phySwitchToRx.logicalChannel = 37U;
     phySwitchToRx.disableWhitening = false;
 
-    if (argc > 2) {
-      phySwitchToRx.phy = ciGetUnsigned(argv[2]);
+    if (sl_cli_get_argument_count(args) >= 2) {
+      phySwitchToRx.phy = sl_cli_get_argument_uint8(args, 1);
     }
-    if (argc > 3) {
-      phySwitchToRx.timeDelta = ciGetUnsigned(argv[3]);
+    if (sl_cli_get_argument_count(args) >= 3) {
+      phySwitchToRx.timeDelta = sl_cli_get_argument_uint32(args, 2);
     }
-    if (argc > 4) {
-      phySwitchToRx.physicalChannel = ciGetUnsigned(argv[4]);
+    if (sl_cli_get_argument_count(args) >= 4) {
+      phySwitchToRx.physicalChannel = sl_cli_get_argument_uint16(args, 3);
     }
-    if (argc > 5) {
-      phySwitchToRx.logicalChannel = ciGetUnsigned(argv[5]);
+    if (sl_cli_get_argument_count(args) >= 5) {
+      phySwitchToRx.logicalChannel = sl_cli_get_argument_uint16(args, 4);
     }
-    if (argc > 6) {
-      phySwitchToRx.accessAddress = ciGetUnsigned(argv[6]);
+    if (sl_cli_get_argument_count(args) >= 6) {
+      phySwitchToRx.accessAddress = sl_cli_get_argument_uint32(args, 5);
     }
-    if (argc > 7) {
-      phySwitchToRx.crcInit = ciGetUnsigned(argv[7]);
+    if (sl_cli_get_argument_count(args) >= 7) {
+      phySwitchToRx.crcInit = sl_cli_get_argument_uint32(args, 6);
     }
-    if (argc > 8) {
-      phySwitchToRx.disableWhitening = ciGetUnsigned(argv[8]);
+    if (sl_cli_get_argument_count(args) >= 8) {
+      phySwitchToRx.disableWhitening = !!sl_cli_get_argument_uint8(args, 7);
     }
   }
 
   char *enabled = phySwitchToRx.enable ? "Enabled" : "Disabled";
-  responsePrint(argv[0], "PhySwitchToRx:%s", enabled);
+  responsePrint(sl_cli_get_command_string(args, 0), "PhySwitchToRx:%s", enabled);
 }

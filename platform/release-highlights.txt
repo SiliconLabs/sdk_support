@@ -1,27 +1,21 @@
-What is new in Gecko Platform 2.7.3.0:
-* EMLIB: Added function to write flash using DMA
-* EMLIB: Added functions to read EMU internal temperature sensor on Series-1 and 2 products
-* RAIL: Added runtime APIs to check RAIL features
-* Bootloader: Added new internal storage sample app for devices with 352kB internal flash
-* Bootloader: Added certification support for secure boot and GBL image parser for EFR32xG22
-* Service: Added support for Sleep Timer to use the Radio real-time clock as hardware timer and hence free up RTCC for application usage.
+What's new in Gecko Platform 3.1.0.0
+* Peripherals: Include handling pcntModeOvsQuadx modes in PCNT_Init
+* Services: New NVM3 function that enables reading only parts of a data object
+* Common:
+  * Platform converted to use BASEPRI interrupt levels, vs. PRIMASK interrupt enable/disable
+  * MCU SDK 6.0 integrated into Common platform.
+* Security:
+  * Mbed TLS updated to version 2.24.0
+  * Added attestation support in SE Manager
+* Operating System: Platform components are now compatible with any kernel providing a CMSIS-RTOS2 implementation.
+* Examples:
+  * Added alpha quality Hello World and Micro Speech examples for TensorFlow Lite for Microcontrollers.
+  * Added several common sample apps for EFM and EFR devices.
+  * Removed several MCU sample apps.
+* Boards and External Devices: Added better support for 60 Ohm ESR crystals.
+* Other Platform Components: Added alpha support for TensorFlow Lite for Microcontrollers version 2.3.1.
+* RAIL Library: EFR32FG23 Alpha 2 Support
 
-What is new in Gecko Platform 2.7.2.0:
-* CMSIS: Added device files for BGM22 and MGM22 families
-* EMLIB: Added Dead-Time insertion on more than TIMER0 where available
-* Bootloader: Added API to read bootloader certificate version on Series-2 devices
 
-What is new in Gecko Platform 2.7.1.0:
-* RAIL: Addd external thermistor interface
-* RAIL: Added new stream API
-* NVM: Fixed data corruption bug
 
-What is new in Gecko Platform 2.7.0.0:
-* RAIL: Added support for a mode to select the best PA for a given power level
-* RAIL: Added support for new IEEE 802.15.4G-2012 features
-* ARM mbed TLS: Added AES-GCM support for Series-2
-* Gecko Bootloader: Added certificate support
-* Gecko Bootloader: Added EZSP GPIO plugin
-* Gecko Bootloader: Added EUART driver
-* Added driver for the new EFP PMIC device
-* Updated LwIP package to version 2.1.2
+

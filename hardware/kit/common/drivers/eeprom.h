@@ -31,6 +31,10 @@
 #ifndef __EEPROM_H
 #define __EEPROM_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The EEPROM driver is deprecated and marked for removal in a later release."
+#endif
+
 #include "em_device.h"
 
 /***************************************************************************//**

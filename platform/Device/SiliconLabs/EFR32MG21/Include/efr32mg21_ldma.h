@@ -681,4 +681,5 @@ typedef struct {
 /** @} End of group EFR32MG21_LDMA_BitFields */
 /** @} End of group EFR32MG21_LDMA */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_LDMA_H */

@@ -6,7 +6,7 @@
  *   to dBm powers.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,10 +31,10 @@
  *
  ******************************************************************************/
 
-#ifndef __PA_CURVE_TYPES_EFR32_H_
-#define __PA_CURVE_TYPES_EFR32_H_
+#ifndef PA_CURVE_TYPES_EFR32_H
+#define PA_CURVE_TYPES_EFR32_H
 
-#include "rail_chip_specific.h"
+#include "rail_types.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,6 +53,13 @@ extern "C" {
  * powerLevel is the 0-252/0-248/1-7 values used in the RAIL_Get/SetTxPower
  * functions, and power is the actual output power of the PA, specified
  * in deci-dBm.
+ *
+ * @note If the curves are generated with
+ * maxPower and increment other than \ref RAIL_TX_POWER_CURVE_DEFAULT_MAX and
+ * \ref RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT respectively, then the first
+ * \ref RAIL_TxPowerCurveSegment_t has its maxPowerLevel equal to
+ * \ref RAIL_TX_POWER_LEVEL_INVALID and its slope and intercept stores the
+ * maxPower and increment in deci-dBm respectively.
  */
 typedef struct RAIL_TxPowerCurveSegment {
   /** The highest power level that this segment will be used to convert */
@@ -195,13 +202,6 @@ typedef struct RAIL_PaDescriptor {
   RAIL_PowerConversion_t conversion;
 } RAIL_PaDescriptor_t;
 
-/// The number of PA's on this chip.
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 2
-#define RAIL_NUM_PA (2U)
-#else
-#define RAIL_NUM_PA (3U)
-#endif
-
 /**
  * @typedef RAIL_TxPowerCurvesConfigAlt_t
  *
@@ -218,4 +218,4 @@ typedef struct RAIL_TxPowerCurvesConfigAlt {
 }
 #endif
 
-#endif
+#endif // PA_CURVE_TYPES_EFR32_H

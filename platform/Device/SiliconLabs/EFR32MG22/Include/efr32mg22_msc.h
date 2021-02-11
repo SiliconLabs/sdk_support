@@ -54,7 +54,7 @@ typedef struct {
   __IOM uint32_t IF;                            /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN;                           /**< Interrupt Enable Register                          */
   uint32_t       RESERVED1[3U];                 /**< Reserved for future use                            */
-  __IM uint32_t  USERDATASIZE;                  /**< user data regsion size                             */
+  __IM uint32_t  USERDATASIZE;                  /**< User Data Region Size Register                     */
   __IOM uint32_t CMD;                           /**< Command Register                                   */
   __IOM uint32_t LOCK;                          /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD;                  /**< Mass erase and User data page lock word            */
@@ -82,7 +82,7 @@ typedef struct {
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable Register                          */
   uint32_t       RESERVED13[3U];                /**< Reserved for future use                            */
-  __IM uint32_t  USERDATASIZE_SET;              /**< user data regsion size                             */
+  __IM uint32_t  USERDATASIZE_SET;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_SET;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_SET;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_SET;              /**< Mass erase and User data page lock word            */
@@ -110,7 +110,7 @@ typedef struct {
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable Register                          */
   uint32_t       RESERVED25[3U];                /**< Reserved for future use                            */
-  __IM uint32_t  USERDATASIZE_CLR;              /**< user data regsion size                             */
+  __IM uint32_t  USERDATASIZE_CLR;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_CLR;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_CLR;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_CLR;              /**< Mass erase and User data page lock word            */
@@ -138,7 +138,7 @@ typedef struct {
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag Register                            */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable Register                          */
   uint32_t       RESERVED37[3U];                /**< Reserved for future use                            */
-  __IM uint32_t  USERDATASIZE_TGL;              /**< user data regsion size                             */
+  __IM uint32_t  USERDATASIZE_TGL;              /**< User Data Region Size Register                     */
   __IOM uint32_t CMD_TGL;                       /**< Command Register                                   */
   __IOM uint32_t LOCK_TGL;                      /**< Configuration Lock Register                        */
   __IOM uint32_t MISCLOCKWORD_TGL;              /**< Mass erase and User data page lock word            */
@@ -280,17 +280,17 @@ typedef struct {
 #define _MSC_STATUS_WDATAREADY_MASK               0x8UL                                          /**< Bit mask for MSC_WDATAREADY                 */
 #define _MSC_STATUS_WDATAREADY_DEFAULT            0x00000001UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_WDATAREADY_DEFAULT             (_MSC_STATUS_WDATAREADY_DEFAULT << 3)          /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_ERASEABORTED                   (0x1UL << 4)                                   /**< The Current Flash Erase Operation Aborte    */
+#define MSC_STATUS_ERASEABORTED                   (0x1UL << 4)                                   /**< Erase Operation Aborted                     */
 #define _MSC_STATUS_ERASEABORTED_SHIFT            4                                              /**< Shift value for MSC_ERASEABORTED            */
 #define _MSC_STATUS_ERASEABORTED_MASK             0x10UL                                         /**< Bit mask for MSC_ERASEABORTED               */
 #define _MSC_STATUS_ERASEABORTED_DEFAULT          0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_ERASEABORTED_DEFAULT           (_MSC_STATUS_ERASEABORTED_DEFAULT << 4)        /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_PENDING                        (0x1UL << 5)                                   /**< Write command is in queue                   */
+#define MSC_STATUS_PENDING                        (0x1UL << 5)                                   /**< Write Command In Queue                      */
 #define _MSC_STATUS_PENDING_SHIFT                 5                                              /**< Shift value for MSC_PENDING                 */
 #define _MSC_STATUS_PENDING_MASK                  0x20UL                                         /**< Bit mask for MSC_PENDING                    */
 #define _MSC_STATUS_PENDING_DEFAULT               0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
 #define MSC_STATUS_PENDING_DEFAULT                (_MSC_STATUS_PENDING_DEFAULT << 5)             /**< Shifted mode DEFAULT for MSC_STATUS         */
-#define MSC_STATUS_TIMEOUT                        (0x1UL << 6)                                   /**< Write command timeout flag                  */
+#define MSC_STATUS_TIMEOUT                        (0x1UL << 6)                                   /**< Write Command Timeout                       */
 #define _MSC_STATUS_TIMEOUT_SHIFT                 6                                              /**< Shift value for MSC_TIMEOUT                 */
 #define _MSC_STATUS_TIMEOUT_MASK                  0x40UL                                         /**< Bit mask for MSC_TIMEOUT                    */
 #define _MSC_STATUS_TIMEOUT_DEFAULT               0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
@@ -304,7 +304,7 @@ typedef struct {
 #define MSC_STATUS_REGLOCK_DEFAULT                (_MSC_STATUS_REGLOCK_DEFAULT << 16)            /**< Shifted mode DEFAULT for MSC_STATUS         */
 #define MSC_STATUS_REGLOCK_UNLOCKED               (_MSC_STATUS_REGLOCK_UNLOCKED << 16)           /**< Shifted mode UNLOCKED for MSC_STATUS        */
 #define MSC_STATUS_REGLOCK_LOCKED                 (_MSC_STATUS_REGLOCK_LOCKED << 16)             /**< Shifted mode LOCKED for MSC_STATUS          */
-#define MSC_STATUS_PWRON                          (0x1UL << 24)                                  /**< Flash power on status                       */
+#define MSC_STATUS_PWRON                          (0x1UL << 24)                                  /**< Flash Power On Status                       */
 #define _MSC_STATUS_PWRON_SHIFT                   24                                             /**< Shift value for MSC_PWRON                   */
 #define _MSC_STATUS_PWRON_MASK                    0x1000000UL                                    /**< Bit mask for MSC_PWRON                      */
 #define _MSC_STATUS_PWRON_DEFAULT                 0x00000000UL                                   /**< Mode DEFAULT for MSC_STATUS                 */
@@ -342,11 +342,11 @@ typedef struct {
 #define _MSC_IF_PWRUPF_MASK                       0x100UL                               /**< Bit mask for MSC_PWRUPF                     */
 #define _MSC_IF_PWRUPF_DEFAULT                    0x00000000UL                          /**< Mode DEFAULT for MSC_IF                     */
 #define MSC_IF_PWRUPF_DEFAULT                     (_MSC_IF_PWRUPF_DEFAULT << 8)         /**< Shifted mode DEFAULT for MSC_IF             */
-#define MSC_IF_PWROFFIF                           (0x1UL << 9)                          /**< Flash Power Off Sequence Complete Flag      */
-#define _MSC_IF_PWROFFIF_SHIFT                    9                                     /**< Shift value for MSC_PWROFFIF                */
-#define _MSC_IF_PWROFFIF_MASK                     0x200UL                               /**< Bit mask for MSC_PWROFFIF                   */
-#define _MSC_IF_PWROFFIF_DEFAULT                  0x00000000UL                          /**< Mode DEFAULT for MSC_IF                     */
-#define MSC_IF_PWROFFIF_DEFAULT                   (_MSC_IF_PWROFFIF_DEFAULT << 9)       /**< Shifted mode DEFAULT for MSC_IF             */
+#define MSC_IF_PWROFF                             (0x1UL << 9)                          /**< Flash Power Off Sequence Complete Flag      */
+#define _MSC_IF_PWROFF_SHIFT                      9                                     /**< Shift value for MSC_PWROFF                  */
+#define _MSC_IF_PWROFF_MASK                       0x200UL                               /**< Bit mask for MSC_PWROFF                     */
+#define _MSC_IF_PWROFF_DEFAULT                    0x00000000UL                          /**< Mode DEFAULT for MSC_IF                     */
+#define MSC_IF_PWROFF_DEFAULT                     (_MSC_IF_PWROFF_DEFAULT << 9)         /**< Shifted mode DEFAULT for MSC_IF             */
 
 /* Bit fields for MSC IEN */
 #define _MSC_IEN_RESETVALUE                       0x00000000UL                          /**< Default value for MSC_IEN                   */
@@ -371,11 +371,11 @@ typedef struct {
 #define _MSC_IEN_PWRUPF_MASK                      0x100UL                               /**< Bit mask for MSC_PWRUPF                     */
 #define _MSC_IEN_PWRUPF_DEFAULT                   0x00000000UL                          /**< Mode DEFAULT for MSC_IEN                    */
 #define MSC_IEN_PWRUPF_DEFAULT                    (_MSC_IEN_PWRUPF_DEFAULT << 8)        /**< Shifted mode DEFAULT for MSC_IEN            */
-#define MSC_IEN_PWROFFIEN                         (0x1UL << 9)                          /**< Flash Power Off Seq done irq enable         */
-#define _MSC_IEN_PWROFFIEN_SHIFT                  9                                     /**< Shift value for MSC_PWROFFIEN               */
-#define _MSC_IEN_PWROFFIEN_MASK                   0x200UL                               /**< Bit mask for MSC_PWROFFIEN                  */
-#define _MSC_IEN_PWROFFIEN_DEFAULT                0x00000000UL                          /**< Mode DEFAULT for MSC_IEN                    */
-#define MSC_IEN_PWROFFIEN_DEFAULT                 (_MSC_IEN_PWROFFIEN_DEFAULT << 9)     /**< Shifted mode DEFAULT for MSC_IEN            */
+#define MSC_IEN_PWROFF                            (0x1UL << 9)                          /**< Flash Power Off Seq done irq enable         */
+#define _MSC_IEN_PWROFF_SHIFT                     9                                     /**< Shift value for MSC_PWROFF                  */
+#define _MSC_IEN_PWROFF_MASK                      0x200UL                               /**< Bit mask for MSC_PWROFF                     */
+#define _MSC_IEN_PWROFF_DEFAULT                   0x00000000UL                          /**< Mode DEFAULT for MSC_IEN                    */
+#define MSC_IEN_PWROFF_DEFAULT                    (_MSC_IEN_PWROFF_DEFAULT << 9)        /**< Shifted mode DEFAULT for MSC_IEN            */
 
 /* Bit fields for MSC USERDATASIZE */
 #define _MSC_USERDATASIZE_RESETVALUE              0x00000004UL                                  /**< Default value for MSC_USERDATASIZE          */
@@ -467,4 +467,5 @@ typedef struct {
 /** @} End of group EFR32MG22_MSC_BitFields */
 /** @} End of group EFR32MG22_MSC */
 /** @} End of group Parts */
+
 #endif /* EFR32MG22_MSC_H */

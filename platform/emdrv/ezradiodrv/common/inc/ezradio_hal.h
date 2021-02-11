@@ -38,18 +38,13 @@ extern "C" {
 #include "ezradiodrv_config.h"
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup HAL_Layer
- * @brief EzRadio HAL Layer
+ * @addtogroup ezradiodrv_hal EZRADIODRV HAL
+ * @brief EzRadio Hardware Abstraction Layer
  * @{
  ******************************************************************************/
 
@@ -74,9 +69,8 @@ void    ezradio_hal_SpiReadData     (uint8_t byteCount, uint8_t* pData);
 
 void ezradio_hal_SpiWriteReadData(uint8_t byteCount, uint8_t* txData, uint8_t* rxData);
 
-/** @} (end addtogroup HAL_Layer) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_hal) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

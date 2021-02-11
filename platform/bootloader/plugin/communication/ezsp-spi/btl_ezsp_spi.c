@@ -19,7 +19,7 @@
 
 #include "em_device.h"
 #include "em_gpio.h"
-
+#include "em_cmu.h"
 #include "plugin/communication/ezsp-spi/btl_ezsp_spi.h"
 #include "driver/btl_driver_delay.h"
 #include "driver/btl_driver_spislave.h"
@@ -85,9 +85,9 @@ static ImageProperties_t imageProps = {
   .application = { 0 }
 };
 
-ParserContext_t parserContext;
-DecryptContext_t decryptContext;
-AuthContext_t authContext;
+static ParserContext_t parserContext;
+static DecryptContext_t decryptContext;
+static AuthContext_t authContext;
 
 // ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
 // Local function prototypes
@@ -110,7 +110,7 @@ void communication_init(void)
   // Setup EZSP-specific GPIO (nHOST_INT, nWAKE)
 #if defined(CMU_CTRL_HFPERCLKEN)
   CMU->CTRL |= CMU_CTRL_HFPERCLKEN;
-  CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_GPIO;
+  CMU_ClockEnable(cmuClock_GPIO, true);
 #endif
 
   GPIO_PinModeSet(BSP_SPINCP_NHOSTINT_PORT,

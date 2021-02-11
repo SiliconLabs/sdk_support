@@ -34,12 +34,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup EBI
+ * @addtogroup ebi EBI - External Bus Interface
  * @brief EBI External Bus Interface (EBI) Peripheral API
  * @details
  *  This module contains functions to control the EBI peripheral of Silicon
@@ -1181,7 +1176,6 @@ void EBI_AltMapEnable(bool enable)
 
 #endif
 
-/** @} (end addtogroup EBI) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup ebi) */
 
 #endif /* defined(EBI_COUNT) && (EBI_COUNT > 0) */

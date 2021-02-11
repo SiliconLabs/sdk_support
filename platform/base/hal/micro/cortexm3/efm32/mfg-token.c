@@ -35,7 +35,7 @@
   #define SILABS_DEVINFO_EUI64_HIGH  (DEVINFO->UNIQUEH)
 #elif defined(_SILICON_LABS_32B_SERIES_2)
   #include "em_se.h"
-  #include "../../../../../../util/third_party/mbedtls/sl_crypto/include/se_management.h"
+  #include "se_management.h"
   #define SILABS_DEVINFO_EUI64_LOW   (DEVINFO->EUI64L)
   #define SILABS_DEVINFO_EUI64_HIGH  (DEVINFO->EUI64H)
 // Unlike Series1 EFR devices, Series2 devices do not have an explicit

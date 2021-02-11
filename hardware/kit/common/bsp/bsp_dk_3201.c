@@ -1234,8 +1234,8 @@ static void SpiControl(BSP_SpiControl_TypeDef device)
       break;
 
     case BSP_SPI_OFF:
-      USART_Reset(USART1);
-      CMU_ClockEnable(cmuClock_USART1, false);
+      USART_Reset(BSP_SPI_USART_USED);
+      CMU_ClockEnable(BSP_SPI_USART_CLK, false);
       break;
   }
 }

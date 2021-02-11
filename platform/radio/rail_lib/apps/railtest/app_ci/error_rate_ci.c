@@ -3,7 +3,7 @@
  * @brief This file provides functionality to test RAIL error rates.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,14 +30,13 @@
 
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "app_common.h"
-#include "app_ci.h"
 #include "app_trx.h"
 #include "em_core.h"
+#include "sl_rail_test_config.h"
 
 // Variables for PER testing
 uint32_t perCount;
@@ -48,21 +47,26 @@ BerStatus_t berStats = { 0 };
 bool berTestModeEnabled = false;
 static uint32_t berBytesToTest = 0;
 
-void startPerMode(int argc, char **argv)
+void startPerMode(sl_cli_command_arg_t *args)
 {
-  uint32_t packets = ciGetUnsigned(argv[1]);
-  uint32_t delayUs = ciGetUnsigned(argv[2]);
+#if defined(SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
+  uint32_t packets = sl_cli_get_argument_uint32(args, 0);
+  uint32_t delayUs = sl_cli_get_argument_uint32(args, 1);
 
-  if (!enableAppModeSync(PER, packets != 0, argv[0])) {
+  if (!enableAppModeSync(PER, packets != 0, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  resetCounters(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  resetCounters(args);
 
   perCount = packets;
   perDelay = delayUs / 2;
   if (packets > 0) {
     RAIL_SetTimer(railHandle, perDelay, RAIL_TIME_DELAY, &RAILCb_TimerExpired);
   }
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0, "To run PER commands, SL_RAIL_TEST_PER_PORT and SL_RAIL_TEST_PER_PIN must be configured for use.");
+#endif //defined(SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
 }
 
 void updateStats(int32_t newValue, Stats_t *stats)
@@ -90,8 +94,9 @@ float variance(const Stats_t stats)
   return stats.varianceTimesSamples / (stats.samples - 1);
 }
 
-void getPerStats(int argc, char **argv)
+void getPerStats(sl_cli_command_arg_t *args)
 {
+#if defined(SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
   char bufRssiMean[10];
   char bufRssiMin[10];
   char bufRssiMax[10];
@@ -102,7 +107,7 @@ void getPerStats(int argc, char **argv)
   sprintfFloat(bufRssiMax, sizeof(bufRssiMax), ((float) counters.rssi.max) / 4, 2);
   sprintfFloat(bufRssiVariance, sizeof(bufRssiVariance), variance(counters.rssi) / 16, 0);
 
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "PerTriggers:%u,"
                 "RssiMean:%s,"
                 "RssiMin:%s,"
@@ -113,6 +118,9 @@ void getPerStats(int argc, char **argv)
                 bufRssiMin,
                 bufRssiMax,
                 bufRssiVariance);
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0, "To run PER commands, SL_RAIL_TEST_PER_PORT and SL_RAIL_TEST_PER_PIN must be configured for use.");
+#endif //defined(SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
 }
 
 void berResetStats(uint32_t numBytes)
@@ -128,7 +136,7 @@ void berResetStats(uint32_t numBytes)
   berStats.bytesTotal = numBytes;
 }
 
-void berConfigSet(int argc, char **argv)
+void berConfigSet(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status;
   uint16_t rxThreshold, packetLength;
@@ -144,7 +152,7 @@ void berConfigSet(int argc, char **argv)
   railDataConfig.rxMethod = FIFO_MODE;
   status = RAIL_ConfigData(railHandle, &railDataConfig);
   if (status) {
-    responsePrintError(argv[0], status, "Error calling RAIL_ConfigData().");
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "Error calling RAIL_ConfigData().");
   }
 
   // configure RX FIFO
@@ -157,20 +165,21 @@ void berConfigSet(int argc, char **argv)
 
   RAIL_EnablePti(railHandle, false);
 
-  berBytesToTest = ciGetUnsigned(argv[1]);
+  berBytesToTest = sl_cli_get_argument_uint32(args, 0);
   berResetStats(berBytesToTest);
 
-  responsePrint(argv[0], "NumBytes:%d", berBytesToTest);
+  responsePrint(sl_cli_get_command_string(args, 0), "NumBytes:%d", berBytesToTest);
 }
 
-void berRx(int argc, char **argv)
+void berRx(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
 
-  if (!enableAppModeSync(BER, enable, argv[0])) {
+  if (!enableAppModeSync(BER, enable, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  resetCounters(argc, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  resetCounters(args);
 
   RAIL_Idle(railHandle, RAIL_IDLE_ABORT, true);
   RAIL_ResetFifo(railHandle, true, true);
@@ -182,7 +191,7 @@ void berRx(int argc, char **argv)
   }
 }
 
-void berStatusGet(int argc, char **argv)
+void berStatusGet(sl_cli_command_arg_t *args)
 {
   float percentDone;
   float percentBitError;
@@ -219,7 +228,7 @@ void berStatusGet(int argc, char **argv)
   // from the stream, but the bits under test will not be continuous. Abort
   // testing and notify the user if this is the case.
   if (counters.rxOfEvent) {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "BitsToTest:%u,"
                   "BitsTested:0,"
                   "PercentDone:0.00,"
@@ -236,7 +245,7 @@ void berStatusGet(int argc, char **argv)
     sprintfFloat(bufPercentDone, sizeof(bufPercentDone), percentDone, 2);
     sprintfFloat(bufPercentBitError, sizeof(bufPercentBitError), percentBitError, 2);
 
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "BitsToTest:%u,"
                   "BitsTested:%u,"
                   "PercentDone:%s,"
@@ -252,16 +261,16 @@ void berStatusGet(int argc, char **argv)
   }
 }
 
-void throughput(int argc, char **argv)
+void throughput(sl_cli_command_arg_t *args)
 {
-  uint32_t numberOfPackets = ciGetUnsigned(argv[1]);
+  uint32_t numberOfPackets = sl_cli_get_argument_uint32(args, 0);
   RAIL_Status_t txStatus = RAIL_STATUS_INVALID_STATE;
   uint32_t start = RAIL_GetTime();
   if (RAIL_WriteTxFifo(railHandle,
                        txData,
                        txDataLen,
                        true) != txDataLen) {
-    responsePrint(argv[0], "WriteTxFifo Error");
+    responsePrint(sl_cli_get_command_string(args, 0), "WriteTxFifo Error");
     return;
   }
   for (uint32_t packets = 0; packets < numberOfPackets; packets++) {
@@ -273,11 +282,11 @@ void throughput(int argc, char **argv)
                          txData,
                          txDataLen,
                          true) != txDataLen) {
-      responsePrint(argv[0], "WriteTxFifo Error");
+      responsePrint(sl_cli_get_command_string(args, 0), "WriteTxFifo Error");
       return;
     }
   }
   uint32_t stop = RAIL_GetTime();
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "elapsedTime:%u", (stop - start));
 }

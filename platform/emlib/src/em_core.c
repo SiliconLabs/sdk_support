@@ -30,18 +30,9 @@
 #include "em_core.h"
 #include "em_assert.h"
 
-#if defined(EMLIB_USER_CONFIG)
-#include "emlib_config.h"
-#endif
-
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
 /* *INDENT-OFF* */
 // *****************************************************************************
-///  @addtogroup CORE
+///  @addtogroup core CORE - Core Interrupt
 ///  @brief Core interrupt handling API
 ///
 ///  @li @ref core_intro
@@ -259,20 +250,6 @@
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
-
-#if !defined(CORE_ATOMIC_BASE_PRIORITY_LEVEL)
-/** The interrupt priority level disabled within ATOMIC regions. Interrupts
- *  with priority level equal to or lower than this definition will be disabled
- *  within ATOMIC regions. */
-#define CORE_ATOMIC_BASE_PRIORITY_LEVEL   3
-#endif
-
-#if !defined(CORE_ATOMIC_METHOD)
-/** Specify which method to use when implementing ATOMIC sections. You can
- *  select between BASEPRI or PRIMASK method.
- *  @note On Cortex-M0+ devices only PRIMASK can be used. */
-#define CORE_ATOMIC_METHOD    CORE_ATOMIC_METHOD_PRIMASK
-#endif
 
 #if !defined(CORE_INTERRUPT_ENTRY)
 // Some RTOSes must be notified on interrupt entry (and exit).
@@ -606,7 +583,7 @@ void CORE_YieldNvicMask(const CORE_nvicMask_t *enable)
  *   Utility function to set an IRQn bit in a NVIC enable/disable mask.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt.
+ *   The IRQn_Type enumerator for the interrupt.
  *
  * @param[in,out] mask
  *   The mask to set the interrupt bit in.
@@ -622,7 +599,7 @@ void CORE_NvicMaskSetIRQ(IRQn_Type irqN, CORE_nvicMask_t *mask)
  *   Utility function to clear an IRQn bit in a NVIC enable/disable mask.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt.
+ *   The IRQn_Type enumerator for the interrupt.
  *
  * @param[in,out] mask
  *   The mask to clear the interrupt bit in.
@@ -651,7 +628,7 @@ SL_WEAK bool CORE_InIrqContext(void)
  *   Check if a specific interrupt is disabled or blocked.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt to check.
+ *   The IRQn_Type enumerator for the interrupt to check.
  *
  * @return
  *   True if the interrupt is disabled or blocked.
@@ -768,7 +745,7 @@ bool CORE_GetNvicMaskDisableState(const CORE_nvicMask_t *mask)
  *   Check if an NVIC interrupt is disabled.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt to check.
+ *   The IRQn_Type enumerator for the interrupt to check.
  *
  * @return
  *   True if the interrupt is disabled.
@@ -788,7 +765,7 @@ bool CORE_NvicIRQDisabled(IRQn_Type irqN)
  *   Utility function to get the handler for a specific interrupt.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt.
+ *   The IRQn_Type enumerator for the interrupt.
  *
  * @return
  *   The handler address.
@@ -807,7 +784,7 @@ void *CORE_GetNvicRamTableHandler(IRQn_Type irqN)
  *   Utility function to set the handler for a specific interrupt.
  *
  * @param[in] irqN
- *   The @ref IRQn_Type enumerator for the interrupt.
+ *   The IRQn_Type enumerator for the interrupt.
  *
  * @param[in] handler
  *   The handler address.
@@ -901,5 +878,4 @@ void CORE_InitNvicVectorTable(uint32_t *sourceTable,
   SCB->VTOR = (uint32_t)targetTable;
 }
 
-/** @} (end addtogroup CORE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup core) */

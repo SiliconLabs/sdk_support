@@ -165,6 +165,8 @@ typedef enum {
 #define LCD_CMU_CLK_PRE         cmuClkDiv_8
 #define LCD_CMU_CLK_DIV         cmuClkDiv_8
 
+#define LCD_BOOST_CONTRAST      0x1D
+
 #define LCD_INIT_DEF                \
   {                                 \
     true,                           \

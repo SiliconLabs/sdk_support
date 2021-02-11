@@ -1,0 +1,61 @@
+id: psa_crypto
+package: platform
+label: PSA Crypto
+description: |-
+  This component provides support for the PSA Crypto API, providing access to
+  a high-level interface to various cryptographic operations.
+
+  For configuration of PSA Crypto, please refer to the common mbed TLS
+  component (mbedtls_core).
+
+category: Platform|Security
+quality: production
+component_root_path: util/third_party/crypto/mbedtls
+source:
+  - path: library/psa_crypto.c
+  - path: library/psa_crypto_driver_wrappers.c
+  - path: library/psa_crypto_slot_management.c
+  - path: library/psa_crypto_storage.c
+  - path: library/psa_its_file.c
+    unless: [psa_its]
+include:
+  - path: library
+    file_list:
+      - path: psa_crypto_core.h
+      - path: psa_crypto_driver_wrappers.h
+      - path: psa_crypto_invasive.h
+      - path: psa_crypto_its.h
+      - path: psa_crypto_se.h
+      - path: psa_crypto_service_integration.h
+      - path: psa_crypto_slot_management.h
+      - path: psa_crypto_storage.h
+requires:
+  - name: mbedtls_aes
+  - name: mbedtls_asn1
+  - name: mbedtls_base64
+  - name: mbedtls_ccm
+  - name: mbedtls_chachapoly
+  - name: mbedtls_cipher
+  - name: mbedtls_cmac
+  - name: mbedtls_core
+  - name: mbedtls_ecc
+  - name: mbedtls_ecdh
+  - name: mbedtls_ecdsa
+  - name: mbedtls_gcm
+  - name: mbedtls_hash
+  - name: mbedtls_jpake
+  - name: mbedtls_md5
+  - name: mbedtls_mpi
+  - name: mbedtls_pem
+  - name: mbedtls_random
+  - name: mbedtls_sha
+  - name: mbedtls_x509
+  - name: psa_driver
+provides:
+  - name: psa_crypto
+  - name: mbedtls
+    condition:
+      - psa_crypto
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_PSA_CRYPTO_C

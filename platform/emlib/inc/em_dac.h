@@ -43,12 +43,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup DAC
+ * @addtogroup dac
  * @{
  ******************************************************************************/
 
@@ -391,8 +386,7 @@ __STATIC_INLINE void DAC_IntSet(DAC_TypeDef *dac, uint32_t flags)
 uint8_t DAC_PrescaleCalc(uint32_t dacFreq, uint32_t hfperFreq);
 void DAC_Reset(DAC_TypeDef *dac);
 
-/** @} (end addtogroup DAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup dac) */
 
 #ifdef __cplusplus
 }

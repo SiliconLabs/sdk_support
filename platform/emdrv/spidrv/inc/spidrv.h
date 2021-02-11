@@ -46,12 +46,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup spidrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup SPIDRV
+ * @addtogroup spidrv_error_codes Error Codes
  * @{
  ******************************************************************************/
 
@@ -65,6 +65,7 @@ extern "C" {
 #define ECODE_EMDRV_SPIDRV_ABORTED           (ECODE_EMDRV_SPIDRV_BASE | 0x00000007)   ///< An SPI transfer has been aborted.
 #define ECODE_EMDRV_SPIDRV_MODE_ERROR        (ECODE_EMDRV_SPIDRV_BASE | 0x00000008)   ///< SPI master used slave API or vica versa.
 #define ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR   (ECODE_EMDRV_SPIDRV_BASE | 0x00000009)   ///< Unable to allocate DMA channels.
+/** @} (end addtogroup error codes) */
 
 /// SPI driver instance type.
 typedef enum SPIDRV_Type{
@@ -98,6 +99,16 @@ typedef enum SPIDRV_SlaveStart{
   spidrvSlaveStartDelayed = 1     ///< Transfer starts when the bus is idle (CS deasserted).
 } SPIDRV_SlaveStart_t;
 
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/// Type of a USART peripheral
+typedef enum SPIDRV_UsartType{
+  spidrvPeripheralTypeUsart = 0,         ///< USART peripheral
+#if defined(EUSART_PRESENT)
+  spidrvPeripheralTypeEusart = 1         ///< EUSART peripheral
+#endif
+} SPIDRV_PeripheralType_t;
+
+/// @endcond
 struct SPIDRV_HandleData;
 
 /***************************************************************************//**
@@ -129,9 +140,9 @@ typedef void (*SPIDRV_Callback_t)(struct SPIDRV_HandleData *handle,
 /// Contains a number of SPIDRV configuration options.
 /// This structure is passed to @ref SPIDRV_Init() when initializing a SPIDRV
 /// instance. Some common initialization data sets are predefined in
-/// @ref SPIDRV_MASTER_USART0 and friends.
-typedef struct SPIDRV_Init{
-  USART_TypeDef       *port;            ///< The USART used for SPI.
+/// @ref spidrv_init_structs
+typedef struct SPIDRV_Init {
+  void               *port;             ///< The USART used for SPI.
 #if defined(_USART_ROUTELOC0_MASK)
   uint8_t             portLocationTx;   ///< A location number for the SPI Tx pin.
   uint8_t             portLocationRx;   ///< A location number for the SPI Rx pin.
@@ -163,25 +174,31 @@ typedef struct SPIDRV_Init{
 /// The handle is allocated by the application using the SPIDRV.
 /// Several concurrent driver instances can exist in an application. The application is
 /// neither supposed to write or read the contents of the handle.
-typedef struct SPIDRV_HandleData{
+typedef struct SPIDRV_HandleData {
   /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
-  SPIDRV_Init_t       initData;
-  unsigned int        txDMACh;
-  unsigned int        rxDMACh;
+  union {
+    USART_TypeDef           *usartPort;
+#if defined(EUSART_PRESENT)
+    EUSART_TypeDef          *eusartPort;
+#endif
+  } peripheral;
+  SPIDRV_Init_t             initData;
+  unsigned int              txDMACh;
+  unsigned int              rxDMACh;
   DMADRV_PeripheralSignal_t txDMASignal;
   DMADRV_PeripheralSignal_t rxDMASignal;
-  SPIDRV_Callback_t   userCallback;
-  uint32_t            dummyRx;
-  int                 transferCount;
-  int                 remaining;
-  int                 csPort;
-  int                 csPin;
-  Ecode_t             transferStatus;
-  volatile enum { spidrvStateIdle = 0, spidrvStateTransferring = 1 } state;
-  CMU_Clock_TypeDef   usartClock;
-  volatile bool       blockingCompleted;
-  int                 em1RequestCount;
-
+  SPIDRV_Callback_t         userCallback;
+  uint32_t                  dummyRx;
+  int                       transferCount;
+  int                       remaining;
+  GPIO_Port_TypeDef         portCs;
+  uint8_t                   pinCs;
+  Ecode_t                   transferStatus;
+  volatile enum             { spidrvStateIdle = 0, spidrvStateTransferring = 1 } state;
+  CMU_Clock_TypeDef         usartClock;
+  volatile bool             blockingCompleted;
+  int                       em1RequestCount;
+  SPIDRV_PeripheralType_t   peripheralType;
   #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
   sl_sleeptimer_timer_handle_t timer;
   #endif
@@ -191,6 +208,11 @@ typedef struct SPIDRV_HandleData{
 /// An SPI driver instance handle.
 typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
 
+/***************************************************************************//**
+ * @addtogroup spidrv_init_structs Init Configuration Data
+ * Example default configuration data for \ref SPIDRV_Init
+ * @{
+ ******************************************************************************/
 #if defined(_USART_ROUTELOC0_MASK)   /* Series 1 devices */
 
 #if defined(USART0)
@@ -756,6 +778,139 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
   }
 #endif /* _USART_ROUTELOC0_MASK */
 
+#if defined(EUSART0)
+#define SPIDRV_MASTER_EUSART0                                        \
+  {                                                                  \
+    EUSART0,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART0                                         \
+  {                                                                  \
+    EUSART0,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#endif
+
+#if defined(EUSART1)
+#define SPIDRV_MASTER_EUSART1                                        \
+  {                                                                  \
+    EUSART1,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART1                                         \
+  {                                                                  \
+    EUSART1,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#endif
+
+#if defined(EUSART2)
+#define SPIDRV_MASTER_EUSART2                                        \
+  {                                                                  \
+    EUSART2,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART2                                         \
+  {                                                                  \
+    EUSART2,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    2,                        /* EUSART Tx port location number   */ \
+    3,                        /* EUSART Rx port location number   */ \
+    4,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#endif
+/** @} (end addtogroup Configuration data) */
+
 Ecode_t   SPIDRV_AbortTransfer(SPIDRV_Handle_t handle);
 
 Ecode_t   SPIDRV_DeInit(SPIDRV_Handle_t handle);
@@ -847,8 +1002,7 @@ Ecode_t   SPIDRV_STransmitB(SPIDRV_Handle_t handle,
                             int count,
                             int timeoutMs);
 
-/** @} (end addtogroup SPIDRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup spidrv) */
 
 #ifdef __cplusplus
 }

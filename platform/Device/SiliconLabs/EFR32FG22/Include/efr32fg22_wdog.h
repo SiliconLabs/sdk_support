@@ -357,4 +357,5 @@ typedef struct {
 /** @} End of group EFR32FG22_WDOG_BitFields */
 /** @} End of group EFR32FG22_WDOG */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_WDOG_H */

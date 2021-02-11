@@ -21,13 +21,7 @@
 
 #if defined(MBEDTLS_ENTROPY_C)
 
-// Use TRNG as default entropy source where it exists and RAIL entropy as fallback
-#if defined(MBEDTLS_TRNG_PRESENT)
-#define MBEDTLS_TRNG_C
-#elif defined (MBEDTLS_ENTROPY_RAIL_PRESENT)
-#define MBEDLTS_ENTROPY_RAIL_C
-#define MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL
-#endif
+#include "em_device.h"
 
 // Include if ADC entropy should be available for application to use
 #if defined(MBEDTLS_ENTROPY_ADC_PRESENT) && defined(MBEDTLS_ENTROPY_ADC_APP)
@@ -41,12 +35,12 @@
  * Integrate the provided default entropy source into the mbed
  * TLS entropy infrastructure.
  *
- * Requires MBEDTLS_TRNG_C || MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL || SEMAILBOX || CRYPTOACC_PRESENT
+ * Requires MBEDTLS_TRNG_PRESENT || MBEDTLS_ENTROPY_RAIL_PRESENT || SEMAILBOX_PRESENT || CRYPTOACC_PRESENT
  */
-#if (defined(MBEDTLS_TRNG_C)                    \
-  || defined(MBEDTLS_ENTROPY_HARDWARE_ALT_RAIL) \
-  || defined(SEMAILBOX_PRESENT)                 \
-  || defined(CRYPTOACC_PRESENT))
+#if defined(MBEDTLS_TRNG_PRESENT)          \
+  || defined(MBEDTLS_ENTROPY_RAIL_PRESENT) \
+  || defined(SEMAILBOX_PRESENT)            \
+  || defined(CRYPTOACC_PRESENT)
 #define MBEDTLS_ENTROPY_HARDWARE_ALT
 #endif
 

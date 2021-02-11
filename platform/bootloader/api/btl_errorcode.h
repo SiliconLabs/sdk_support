@@ -123,6 +123,9 @@
 /// Continue calling function
 #define BOOTLOADER_ERROR_STORAGE_CONTINUE \
   (BOOTLOADER_ERROR_STORAGE_BASE | 0x07L)
+/// Generic storage error
+#define BOOTLOADER_ERROR_STORAGE_GENERIC \
+  (BOOTLOADER_ERROR_STORAGE_BASE | 0x08L)
 
 /** @} addtogroup StorageError */
 

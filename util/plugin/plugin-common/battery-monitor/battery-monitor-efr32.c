@@ -13,7 +13,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include "hal/hal.h"
 
 #include EMBER_AF_API_BATTERY_MONITOR
@@ -169,7 +169,7 @@ uint16_t halGetBatteryVoltageMilliV(void)
 
 // This event will sample the ADC during a radio transmission and notify any
 // interested parties of a new valid battery voltage level via the
-// emberAfPluginBatteryMonitorDataCallback
+// emberAfPluginBatteryMonitorDataReadyCallback
 void emberAfPluginBatteryMonitorReadADCEventHandler(void)
 {
   uint32_t flags;
@@ -202,7 +202,7 @@ void emberAfPluginBatteryMonitorReadADCEventHandler(void)
     // filter the voltage to prevent spikes from overly influencing data
     voltageMilliV = filterVoltageSample(voltageMilliV);
 
-    emberAfPluginBatteryMonitorDataCallback(voltageMilliV);
+    emberAfPluginBatteryMonitorDataReadyCallback(voltageMilliV);
     lastReportedVoltageMilliV = voltageMilliV;
     lastBatteryMeasureTick = currentMsTick;
   }

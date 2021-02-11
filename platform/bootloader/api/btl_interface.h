@@ -141,36 +141,64 @@ typedef struct {
   // ------------------------------
   /// Function table for storage plugin
   const BootloaderStorageFunctions_t *storage;
+  // ------------------------------
+  /// Parse a buffer and get application and bootloader upgrade metadata from the buffer.
+  int32_t (*parseImageInfo)(BootloaderParserContext_t *context,
+                            uint8_t                    data[],
+                            size_t                     numBytes,
+                            ApplicationData_t          *appInfo,
+                            uint32_t                   *bootloaderVersion);
+  // ------------------------------
+  /// Size of context buffer used by bootloader image parser to store parser state
+  uint32_t (*parserContextSize)(void);
+  // ------------------------------
+  /// Remaining number of application upgrades
+  uint32_t (*remainingApplicationUpgrades)(void);
 } MainBootloaderTable_t;
+
+// --------------------------------
+// Bootloader defines
+
+/// Bootloader version major version shift value
+#define BOOTLOADER_VERSION_MAJOR_SHIFT (24U)
+/// Bootloader version minor version shift value
+#define BOOTLOADER_VERSION_MINOR_SHIFT (16U)
+/// Bootloader version major version mask
+#define BOOTLOADER_VERSION_MAJOR_MASK (0xFF000000U)
+/// Bootloader version minor version mask
+#define BOOTLOADER_VERSION_MINOR_MASK (0x00FF0000U)
 
 // --------------------------------
 // Bootloader capabilities
 
 /// Bootloader enforces signed application upgrade images
-#define BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_SIGNATURE   (1 << 0)
+#define BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_SIGNATURE        (1 << 0)
 /// Bootloader enforces encrypted application upgrade images
-#define BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_ENCRYPTION  (1 << 1)
+#define BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_ENCRYPTION       (1 << 1)
 /// @brief Bootloader enforces signature verification of the application image
 ///        before every boot
-#define BOOTLOADER_CAPABILITY_ENFORCE_SECURE_BOOT         (1 << 2)
+#define BOOTLOADER_CAPABILITY_ENFORCE_SECURE_BOOT              (1 << 2)
 
 /// Bootloader has the capability of being upgraded
-#define BOOTLOADER_CAPABILITY_BOOTLOADER_UPGRADE          (1 << 4)
+#define BOOTLOADER_CAPABILITY_BOOTLOADER_UPGRADE               (1 << 4)
 
 /// Bootloader has the capability of parsing EBL files
-#define BOOTLOADER_CAPABILITY_EBL                         (1 << 5)
+#define BOOTLOADER_CAPABILITY_EBL                              (1 << 5)
 /// Bootloader has the capability of parsing signed EBL files
-#define BOOTLOADER_CAPABILITY_EBL_SIGNATURE               (1 << 6)
+#define BOOTLOADER_CAPABILITY_EBL_SIGNATURE                    (1 << 6)
 /// Bootloader has the capability of parsing encrypted EBL files
-#define BOOTLOADER_CAPABILITY_EBL_ENCRYPTION              (1 << 7)
-
+#define BOOTLOADER_CAPABILITY_EBL_ENCRYPTION                   (1 << 7)
+/// @brief Bootloader enforces signature verification of the application image
+///        before every boot using certificate
+#define BOOTLOADER_CAPABILITY_ENFORCE_CERTIFICATE_SECURE_BOOT  (1 << 8)
+/// Bootloader has the capability of application rollback protection
+#define BOOTLOADER_CAPABILITY_ROLLBACK_PROTECTION              (1 << 9)
 /// @brief Bootloader has the capability of storing data in an internal or
 /// external storage medium
 #define BOOTLOADER_CAPABILITY_STORAGE                     (1 << 16)
 /// @brief Bootloader has the capability of communicating with host processors
 /// using a communication interface
 #define BOOTLOADER_CAPABILITY_COMMUNICATION               (1 << 20)
-
 // --------------------------------
 // Magic constants for bootloader tables
 
@@ -375,6 +403,15 @@ bool bootloader_verifyApplication(uint32_t startAddress);
  * @return True if signature verification is enforced, else false.
  ******************************************************************************/
 bool bootloader_secureBootEnforced(void);
+
+#if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+/***************************************************************************//**
+ * Count the total remaining number of application upgrades.
+ *
+ * @return remaining number of application upgrades.
+ ******************************************************************************/
+uint32_t bootloader_remainingApplicationUpgrades(void);
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**

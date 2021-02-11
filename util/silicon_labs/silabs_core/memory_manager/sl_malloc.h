@@ -22,9 +22,9 @@
 
 #include <stddef.h>
 
-void * sl_malloc(size_t size);
-void * sl_calloc(size_t nmemb, size_t size);
-void * sl_realloc(void * ptr, size_t size);
+void *sl_malloc(size_t size);
+void *sl_calloc(size_t nmemb, size_t size);
+void *sl_realloc(void * ptr, size_t size);
 void sl_free(void * ptr);
 
 #endif // SL_MALLOC_H

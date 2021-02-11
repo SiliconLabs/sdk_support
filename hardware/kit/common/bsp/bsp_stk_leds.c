@@ -124,8 +124,7 @@ int BSP_LedsInit(void)
   CMU_ClockEnable(cmuClock_HFPER, true);
 #endif
 
-#if (_SILICON_LABS_32B_SERIES < 2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   CMU_ClockEnable(cmuClock_GPIO, true);
 #endif
 

@@ -36,23 +36,18 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Auto_ACK_Plugin
- * @brief Auto acknowledge plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_autoack EZRADIODRV Auto Ack Plugin
+ * @brief EzRadio Auto acknowledge plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -107,10 +102,9 @@ void ezradioSkipAutoAck(EZRADIODRV_AutoAckHandle_t *autoAckHandle);
 
 #endif //#if defined( EZRADIO_PLUGIN_AUTO_ACK ) && defined( EZRADIO_PLUGIN_TRANSMIT ) && defined( EZRADIO_PLUGIN_RECEIVE )
 
-/** @} (end addtogroup Auto_ACK_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_autoack) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

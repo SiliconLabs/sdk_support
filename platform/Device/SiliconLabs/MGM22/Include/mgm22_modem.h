@@ -3762,4 +3762,5 @@ typedef struct {
 /** @} End of group MGM22_MODEM_BitFields */
 /** @} End of group MGM22_MODEM */
 /** @} End of group Parts */
+
 #endif /* MGM22_MODEM_H */

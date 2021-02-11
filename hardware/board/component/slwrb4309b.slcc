@@ -1,0 +1,18 @@
+!!omap
+- id: slwrb4309b
+- label: SLWRB4309B
+- package: platform
+- description: Kit BSP support for the xGM210L Wireless Gecko Lighting Module Radio
+    Board.
+- category: Platform|Board|Kit|Radio Board
+- quality: production
+- requires:
+  - name: hardware_board_from_slwrb4309b
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_rb
+- tag:
+  - kit:opn:SLWRB4309B
+  - kit:pn:WRB4309
+  - kit:variant:B
+  - kit:revision:A00

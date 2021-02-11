@@ -88,8 +88,8 @@ void USBX_ResetCb(void);
 void USBX_DeviceStateChangeCb(USBD_State_TypeDef oldState,
                               USBD_State_TypeDef newState);
 int USBX_SetupCmdCb(const USB_Setup_TypeDef *setup);
-int USBX_inXferCompleteCb(USB_Status_TypeDef, uint16_t, uint16_t remaining);
-int USBX_outXferCompleteCb(USB_Status_TypeDef, uint16_t, uint16_t remaining);
+int USBX_inXferCompleteCb(USB_Status_TypeDef status, uint32_t xferred, uint32_t remaining);
+int USBX_outXferCompleteCb(USB_Status_TypeDef status, uint32_t xferred, uint32_t remaining);
 
 #ifdef __cplusplus
 }

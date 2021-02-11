@@ -4,7 +4,7 @@
  * @version 5.7.0
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -18,7 +18,7 @@
 #ifndef EFP_H
 #define EFP_H
 
-#include "i2cspm.h"
+#include "sl_i2cspm.h"
 #include "sl_efp01.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -30,19 +30,15 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup extdrv
- * @{
- ******************************************************************************/
 
 /* *INDENT-OFF* */
 /***************************************************************************//**
- * @addtogroup SL_EFP EFP Driver
+ * @addtogroup sl_efp EFP - Energy Friendly PMIC
  * @{
 
 @brief EFP (Energy Friendly PMIC) driver.
 
-@section EFP_DOC EFP (Energy Friendly PMIC) driver documentation
+@section EFP_DOC EFP (Energy Friendly PMIC) Driver Documentation
 
   @li @ref sl_efp_intro
   @li @ref sl_efp_configuration
@@ -53,7 +49,7 @@ extern "C" {
   The EFP is a flexible, highly efficient, multi-output power
   management IC. This driver provides an API to configure and control EFP ICs.
   The EFP is controlled by the host SoC using an I2C bus. The driver support
-  systems with multipple EFP ICs.
+  systems with multiple EFP ICs.
 
 @n @section sl_efp_configuration Configuring the EFP driver
 
@@ -68,7 +64,7 @@ extern "C" {
       I2C mode. I2C mode change EFP energy mode with I2C commands, direct mode
       use level transitions on I2C SDA and SCL lines. This provides fast energy
       mode transitions. Direct mode is achieved by host SoC using GPIO bit-banging
-      or automatically by EMU hardware on SoCs with builtin EFP support (check
+      or automatically by EMU hardware on SoCs with built in EFP support (check
       EMU section of reference manual for EFP support).
   @li EFP interrupt. The EFP has an interrupt line that can be useful for a host
       SoC. Set this option to have the EFP driver configure a GPIO for this use.
@@ -95,7 +91,7 @@ extern "C" {
 // <o EFP_INSTANCE_EM_CTRL_MODE> Selects method of controlling EFP Energy Mode (EM) transitions.
 // <efp_em_transition_mode_gpio_bitbang=> GPIO driven direct mode EM transitions
 // <efp_em_transition_mode_i2c=> I2C transfers control EM transitions
-// <efp_em_transition_mode_emu=> Builtin EMU controlled direct mode EM transitions
+// <efp_em_transition_mode_emu=> Built in EMU controlled direct mode EM transitions
 // <i> Default: efp_em_transition_mode_gpio_bitbang
 #define EFP_INSTANCE_EM_CTRL_MODE       efp_em_transition_mode_gpio_bitbang
 
@@ -361,6 +357,7 @@ sl_status_t sl_efp_read_register_field(sl_efp_handle_t handle,
                                        uint8_t addr, uint8_t *data,
                                        uint8_t mask, uint8_t pos);
 sl_status_t sl_efp_reset(sl_efp_handle_t handle);
+sl_status_t sl_efp_reset_to_default(sl_efp_handle_t handle);
 sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
                                           sl_efp_em_transition_mode_t mode);
 sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
@@ -459,7 +456,7 @@ sl_status_t sl_efp_enter_em2(sl_efp_handle_t handle);
  *   Measure average VDD.
  *
  * @note
- *   This function will measure VDDA or VDDB depending of the voltage on the
+ *   This function measures VDDA or VDDB depending of the voltage on the
  *   VDDA pin after power on. If VDDA is powered this function returns a VDDA
  *   reading, otherwise a VDDB reading is returned.
  *
@@ -467,7 +464,7 @@ sl_status_t sl_efp_enter_em2(sl_efp_handle_t handle);
  *   EFP instance handle.
  *
  * @param[out] voltage_mv
- *   Average VDD voltage expressed in miilivolts.
+ *   Average VDD voltage expressed in millivolts.
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
@@ -479,7 +476,7 @@ sl_status_t sl_efp_get_vdd_avg(sl_efp_handle_t handle, uint16_t *voltage_mv);
  *   Measure maximum VDD.
  *
  * @note
- *   This function will measure VDDA or VDDB depending of the voltage on the
+ *   This function measures VDDA or VDDB depending of the voltage on the
  *   VDDA pin after power on. If VDDA is powered this function returns a VDDA
  *   reading, otherwise a VDDB reading is returned.
  *
@@ -487,7 +484,7 @@ sl_status_t sl_efp_get_vdd_avg(sl_efp_handle_t handle, uint16_t *voltage_mv);
  *   EFP instance handle.
  *
  * @param[out] voltage_mv
- *   Maximum VDD voltage expressed in miilivolts.
+ *   Maximum VDD voltage expressed in millivolts.
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
@@ -499,7 +496,7 @@ sl_status_t sl_efp_get_vdd_max(sl_efp_handle_t handle, uint16_t *voltage_mv);
  *   Measure minimum VDD.
  *
  * @note
- *   This function will measure VDDA or VDDB depending of the voltage on the
+ *   This function measures VDDA or VDDB depending of the voltage on the
  *   VDDA pin after power on. If VDDA is powered this function returns a VDDA
  *   reading, otherwise a VDDB reading is returned.
  *
@@ -606,6 +603,18 @@ sl_status_t sl_efp_read_register_field(sl_efp_handle_t handle,
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
  ******************************************************************************/
 sl_status_t sl_efp_reset(sl_efp_handle_t handle);
+
+/***************************************************************************//**
+ * @brief
+ *   Reprogram all EFP registers with default values.
+ *
+ * @param[in] handle
+ *   EFP instance handle.
+ *
+ * @return
+ *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ ******************************************************************************/
+sl_status_t sl_efp_reset_to_default(sl_efp_handle_t handle);
 
 /***************************************************************************//**
  * @brief
@@ -908,8 +917,8 @@ sl_status_t sl_efp_write_register_field(sl_efp_handle_t handle,
                                         uint8_t addr, uint8_t data,
                                         uint8_t mask, uint8_t pos);
 
-/** @} (end addtogroup SL_EFP) */
-/** @} (end addtogroup extdrv) */
+/** @} (end addtogroup sl_efp) */
+
 
 #ifdef __cplusplus
 }

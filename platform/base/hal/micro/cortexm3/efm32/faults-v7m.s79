@@ -62,6 +62,12 @@ HardFault_Handler:
 BusFault_Handler:
         b.w fault
 
+// The Simple MPU integration test takes over this function, so rename the
+// default handler in that case
+#if defined(REGRESSION_TEST) && defined(INCLUDE_MPU_TEST)
+  #define mpu_fault_handler mpu_fault_handler_default
+#endif
+
 // MemManage_Handler is now consumed by the Simple MPU Driver in emdrv, which
 // will call mpu_fault_handler
         __CODE__

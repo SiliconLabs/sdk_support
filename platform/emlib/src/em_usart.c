@@ -39,16 +39,6 @@
 #include "em_gpio.h"
 #endif
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup USART
- * @{
- ******************************************************************************/
-
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -188,10 +178,13 @@ static void prsRxInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 #elif defined(USART_CTRLX_RXPRSEN)
   if (usart == USART0) {
     PRS->CONSUMER_USART0_RX = ch;
-  } else if (usart == USART1) {
+  }
+#if defined(USART1)
+  else if (usart == USART1) {
     PRS->CONSUMER_USART1_RX = ch;
   }
-#if USART_COUNT > 2
+#endif
+#if defined(USART2)
   else if (usart == USART2) {
     PRS->CONSUMER_USART2_RX = ch;
   }
@@ -201,6 +194,7 @@ static void prsRxInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 }
 #endif
 
+#if defined(USART_IRCTRL_IRPRSEN)
 /***************************************************************************//**
  * @brief
  *   Configure a PRS channel as USART Ir input
@@ -213,23 +207,45 @@ static void prsRxInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
  ******************************************************************************/
 static void prsIrInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 {
-#if defined(_USART_IRCTRL_IRPRSSEL_MASK)
+#if defined(_USART_IRCTRL_IRPRSSEL_SHIFT)
   usart->IRCTRL |= ((uint32_t)ch << _USART_IRCTRL_IRPRSSEL_SHIFT)
                    | USART_IRCTRL_IRPRSEN;
 #else
+  (void)ch;
+  usart->IRCTRL |= USART_IRCTRL_IRPRSEN;
+#endif
+}
+#endif
+
+#if defined(USART_IRCTRL_IRPRSEN) && defined(CONSUMER_USART0_IR)
+/***************************************************************************//**
+ * @brief
+ *   Configure a PRS channel as USART Ir input
+ *
+ * @param[in] usart
+ *   A pointer to the USART/UART peripheral register block.
+ *
+ * @param[in] ch
+ *   PRS channel.
+ ******************************************************************************/
+static void prsIrInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
+{
   if (usart == USART0) {
     PRS->CONSUMER_USART0_IR = ch;
-  } else if (usart == USART1) {
+  }
+#if defined(USART1)
+  else if (usart == USART1) {
     PRS->CONSUMER_USART1_IR = ch;
   }
-#if USART_COUNT > 2
+#endif
+#if defined(USART2)
   else if (usart == USART2) {
     PRS->CONSUMER_USART2_IR = ch;
   }
 #endif
   usart->IRCTRL |= USART_IRCTRL_IRPRSEN;
-#endif
 }
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -249,9 +265,12 @@ static void prsTriggerInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 #else
   if (usart == USART0) {
     PRS->CONSUMER_USART0_TRIGGER = ch;
-  } else if (usart == USART1) {
+  }
+#if USART_COUNT > 1
+  else if (usart == USART1) {
     PRS->CONSUMER_USART1_TRIGGER = ch;
   }
+#endif
 #if USART_COUNT > 2
   else if (usart == USART2) {
     PRS->CONSUMER_USART2_TRIGGER = ch;
@@ -262,6 +281,11 @@ static void prsTriggerInput(USART_TypeDef *usart, USART_PRS_Channel_t ch)
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup usart
+ * @{
  ******************************************************************************/
 
 /***************************************************************************//**
@@ -458,7 +482,7 @@ uint32_t USART_BaudrateCalc(uint32_t refFreq,
      *
      * br = (128 * fHFPERCLK)/(256 + CLKDIV)
      */
-    oversample = 1; /* Not used in sync mode, i.e., 1 */
+    oversample = 1;   /* Not used in sync mode, i.e., 1 */
     factor     = 128;
   } else {
     /*
@@ -773,9 +797,19 @@ void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init)
 #elif defined(USART_CTRLX_CTSEN)
   if ((init->hwFlowControl == usartHwFlowControlRts)
       || (init->hwFlowControl == usartHwFlowControlCtsAndRts)) {
+#if USART_COUNT > 1
     GPIO->USARTROUTE_SET[USART_NUM(usart)].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
+#else
+    //! @todo cleanup when ADM is updated to have USART_NUM macros
+    GPIO->USARTROUTE_SET[0].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
+#endif
   } else {
+#if USART_COUNT > 1
     GPIO->USARTROUTE_CLR[USART_NUM(usart)].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
+#else
+    //! @todo cleanup when ADM is updated to have USART_NUM macros
+    GPIO->USARTROUTE_CLR[0].ROUTEEN = GPIO_USART_ROUTEEN_RTSPEN;
+#endif
   }
 
   if ((init->hwFlowControl == usartHwFlowControlCts)
@@ -913,9 +947,12 @@ void USARTn_InitIrDA(USART_TypeDef *usart, const USART_InitIrDA_TypeDef *init)
   /* Configure IrDA. */
   usart->IRCTRL = (uint32_t)init->irPw
                   | ((init->irFilt ? 1UL : 0UL) << _USART_IRCTRL_IRFILT_SHIFT);
+
+#if defined(USART_IRCTRL_IRPRSEN)
   if (init->irPrsEn) {
     prsIrInput(usart, init->irPrsSel);
   }
+#endif
 
   /* Enable IrDA. */
   usart->IRCTRL |= USART_IRCTRL_IREN;
@@ -1378,6 +1415,5 @@ void USART_TxExt(USART_TypeDef *usart, uint16_t data)
   usart->TXDATAX = (uint32_t)data;
 }
 
-/** @} (end addtogroup USART) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup usart) */
 #endif /* defined(USART_COUNT) && (USART_COUNT > 0) */

@@ -22,6 +22,16 @@
 extern "C" {
 #endif
 
+/***************************************************************************//**
+ * @addtogroup glib
+ * @{
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup glib_color GLIB Colors
+ * @brief Predefined Colors
+ * @{
+ ******************************************************************************/
 /* A Set of color defines. This is a subset of the X11 colors */
 #define AliceBlue               (0x00F0F8FF)  /**< AliceBlue               */
 #define AntiqueWhite            (0x00FAEBD7)  /**< AntiqueWhite            */
@@ -176,5 +186,8 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
+
+/** @} (end addtogroup glib_color) */
+/** @} (end addtogroup glib) */
 
 #endif

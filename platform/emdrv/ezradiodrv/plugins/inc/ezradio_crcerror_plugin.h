@@ -36,23 +36,18 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CRC_Error_Plugin
- * @brief CRC error plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_crcerror EZRADIODRV CRC Error Plugin
+ * @brief EzRadio CRC error plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -76,10 +71,9 @@ typedef struct EZRADIODRV_PacketCrcErrorHandle{
 
 #endif //#if defined( EZRADIO_PLUGIN_CRC_ERROR )
 
-/** @} (end addtogroup CRC_Error_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_crcerror) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

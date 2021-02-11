@@ -10,6 +10,7 @@
     <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_FREQ.INT" value="50000000"/>
     <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_PRESENT.BOOL" value="1"/>
     <property object="CMU" propertyId="CMU.BSP_CLK_LFXO_PRESENT.BOOL" value="1"/>
+    <property object="CMU" propertyId="CMU.HAL_CLK_LFXO_PRECISION.INT" value="100"/>
     <property object="DCDC" propertyId="ABPeripheral.included" value="true"/>
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
     <property object="GPIO" propertyId="GPIO.BSP_TRACE_SWO.PIN" value="PF2"/>

@@ -36,12 +36,7 @@
 #include <stddef.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup ADC
+ * @addtogroup adc ADC - Analog to Digital Converter
  * @brief Analog to Digital Converter (ADC) Peripheral API
  * @details
  *  This module contains functions to control the ADC peripheral of Silicon
@@ -361,9 +356,9 @@ static void ADC_LoadDevinfoCal(ADC_TypeDef *adc,
  *   In addition, single and/or scan control configuration must be done. See
  *   @ref ADC_InitSingle() and @ref ADC_InitScan() respectively.
  *   For ADC architectures with the ADCn->SCANINPUTSEL register, use
- *   @ref ADC_ScanSingleEndedInputAdd() to configure single-ended scan inputs or
- *   @ref ADC_ScanDifferentialInputAdd() to configure differential scan inputs.
- *   @ref ADC_ScanInputClear() is also provided for applications that need to update
+ *   ADC_ScanSingleEndedInputAdd() to configure single-ended scan inputs or
+ *   ADC_ScanDifferentialInputAdd() to configure differential scan inputs.
+ *   ADC_ScanInputClear() is also provided for applications that need to update
  *   the input configuration.
  *
  * @note
@@ -482,6 +477,9 @@ void ADC_ScanInputClear(ADC_InitScan_TypeDef *scanInit)
  *   ADC_InitScan_TypeDef structure updated from this function will be passed to
  *   ADC_InitScan().
  *
+ * @param[in] scanInit
+ *   ADC scan initialization structure
+ *
  * @param[in] inputGroup
  *   ADC scan input group. See section 25.3.4 in the reference manual for
  *   more information.
@@ -505,15 +503,15 @@ uint32_t ADC_ScanSingleEndedInputAdd(ADC_InitScan_TypeDef *scanInit,
 
   scanInit->diff = false;
 
-  /* Check for unsupported APORTs. */
-  EFM_ASSERT((singleEndedSel <= adcPosSelAPORT0YCH0)
-             || (singleEndedSel >= adcPosSelAPORT0YCH15));
-
   /* Check for an illegal group. */
   EFM_ASSERT((unsigned)inputGroup < 4U);
 
   /* Decode the input group select by shifting right by 3. */
   newSel = (unsigned)singleEndedSel >> 3;
+  /* Map 0Y channels to 0X. */
+  if ((newSel == 2) || (newSel == 3)) {
+    newSel -= 2;
+  }
 
   currentSel = (scanInit->scanInputConfig.scanInputSel
                 >> ((unsigned)inputGroup * 8U)) & 0xFFU;
@@ -692,9 +690,9 @@ uint32_t ADC_ScanDifferentialInputAdd(ADC_InitScan_TypeDef *scanInit,
  *   must be set explicitly (CAL register). For other references, the
  *   calibration is updated with values defined during manufacturing.
  *   For ADC architectures with the ADCn->SCANINPUTSEL register, use
- *   @ref ADC_ScanSingleEndedInputAdd() to configure single-ended scan inputs or
- *   @ref ADC_ScanDifferentialInputAdd() to configure differential scan inputs.
- *   @ref ADC_ScanInputClear() is also provided for applications that need to update
+ *   ADC_ScanSingleEndedInputAdd() to configure single-ended scan inputs or
+ *   ADC_ScanDifferentialInputAdd() to configure differential scan inputs.
+ *   ADC_ScanInputClear() is also provided for applications that need to update
  *   the input configuration.
  *
  * @note
@@ -1134,6 +1132,5 @@ uint8_t ADC_TimebaseCalc(uint32_t hfperFreq)
   return (uint8_t)(hfperFreq - 1UL);
 }
 
-/** @} (end addtogroup ADC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup adc) */
 #endif /* defined(ADC_COUNT) && (ADC_COUNT > 0) */

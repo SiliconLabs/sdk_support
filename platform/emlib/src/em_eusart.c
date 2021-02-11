@@ -29,19 +29,9 @@
  ******************************************************************************/
 
 #include "em_eusart.h"
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if defined(EUART_PRESENT) || defined(EUSART_PRESENT)
 #include "em_cmu.h"
 #include <stddef.h>
-
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup EUSART
- * @{
- ******************************************************************************/
 
 /*******************************************************************************
  *********************************   DEFINES   *********************************
@@ -51,17 +41,25 @@
   #define EUSART_REF_VALID(ref)    ((ref) == EUART0)
   #define EUSART_EM2_CAPABLE(ref)  (true)
   #define EUSART_RX_FIFO_SIZE  4u
+#elif defined(EUSART_PRESENT)
+  #define EUSART_REF_VALID(ref)    (EUSART_NUM(ref) != -1)
+  #define EUSART_RX_FIFO_SIZE  16u
 #endif
-
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
+static CMU_Clock_TypeDef EUSART_ClockGet(EUSART_TypeDef *eusart);
+
 static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
                                    const EUSART_UartInit_TypeDef *init,
                                    const EUSART_IrDAInit_TypeDef *irdaInit);
+
+#if defined(EUSART_PRESENT)
+static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
+                                  const EUSART_SpiInit_TypeDef  *init);
+#endif
 
 /***************************************************************************//**
  * Wait for ongoing sync of register(s) to the low-frequency domain to complete.
@@ -83,11 +81,14 @@ __STATIC_INLINE void eusart_sync(EUSART_TypeDef *eusart, uint32_t mask)
  *   Calculate baudrate for a given reference frequency, clock division,
  *   and oversampling rate.
  ******************************************************************************/
-__STATIC_INLINE uint32_t EUSART_BaudrateCalc(uint32_t refFreq,
-                                             uint32_t clkdiv,
-                                             EUSART_OVS_TypeDef ovs);
+__STATIC_INLINE uint32_t EUSART_AsyncBaudrateCalc(uint32_t refFreq,
+                                                  uint32_t clkdiv,
+                                                  EUSART_OVS_TypeDef ovs);
 
-/** @endcond */
+/***************************************************************************//**
+ *   Execute the EUSART peripheral disabling sequence.
+ ******************************************************************************/
+__STATIC_INLINE void EUSART_Disable(EUSART_TypeDef *eusart);
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -106,6 +107,9 @@ void EUSART_UartInitHf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
   // Assert features specific to HF.
   // The oversampling must not be disabled when using a high frequency clock.
   EFM_ASSERT(init->oversampling != eusartOVS0);
+
+  // Uart mode only supports up to 9 databits frame.
+  EFM_ASSERT(init->databits <= eusartDataBits9);
 
   // Initialize EUSART with common features to HF and LF.
   EUSART_AsyncInitCommon(eusart, init, NULL);
@@ -130,14 +134,25 @@ void EUSART_UartInitLf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
   // LFXO, LFRCO, ULFRCO can be a clock source in LF.
 #if defined(DEBUG_EFM) || defined(DEBUG_EFM_USER)
   {
-    CMU_Select_TypeDef clock_source;
-    clock_source = CMU_ClockSelectGet(cmuClock_EUART0);
+    CMU_Select_TypeDef clock_source = (CMU_Select_TypeDef) NULL;
+#if defined(EUART_PRESENT)
+    if (eusart == EUART0) {
+      clock_source = CMU_ClockSelectGet(cmuClock_EUART0);
+    }
+#endif
+#if defined(EUSART_PRESENT) && defined(EUSART0)
+    if (eusart == EUSART0) {
+      clock_source = CMU_ClockSelectGet(cmuClock_EUSART0);
+    }
+#endif
     EFM_ASSERT((clock_source == cmuSelect_LFRCO) || (clock_source == cmuSelect_ULFRCO) || (clock_source == cmuSelect_LFXO));
   }
 #endif
+  // Uart mode only supports up to 9 databits frame.
+  EFM_ASSERT(init->databits <= eusartDataBits9);
   // The oversampling must be disabled when using a low frequency clock.
   EFM_ASSERT(init->oversampling == eusartOVS0);
-  // The Mojority Vote must be disabled when using a low frequency clock.
+  // The Majority Vote must be disabled when using a low frequency clock.
   EFM_ASSERT(init->majorityVote == eusartMajorityVoteDisable);
   // Number of stop bits can only be 1 or 2 in LF.
   EFM_ASSERT((init->stopbits == eusartStopbits1) || (init->stopbits == eusartStopbits2));
@@ -179,43 +194,77 @@ void EUSART_IrDAInit(EUSART_TypeDef *eusart,
   // Initialize EUSART with common features to HF and LF.
   EUSART_AsyncInitCommon(eusart, &irdaInit->init, irdaInit);
 }
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * Initializes the EUSART when used in SPI mode.
+ ******************************************************************************/
+void EUSART_SpiInit(EUSART_TypeDef *eusart, EUSART_SpiInit_TypeDef const *init)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(EUSART_REF_VALID(eusart));
+  // Init structure must be provided.
+  EFM_ASSERT(init);
+  if (init->master) {
+    EFM_ASSERT(init->bitRate <= 20000000);
+
+    if (init->advancedSettings) {
+      EFM_ASSERT(!(init->advancedSettings->prsClockEnable));
+    }
+  } else {
+    EFM_ASSERT(init->bitRate <= 10000000);
+  }
+
+  EUSART_SyncInitCommon(eusart, init);
+}
+#endif
 
 /***************************************************************************//**
  * Configure the EUSART to its reset state.
  ******************************************************************************/
 void EUSART_Reset(EUSART_TypeDef *eusart)
 {
-  uint8_t i = 0;
-  // Make sure the module exists on the selected chip.
-  EFM_ASSERT(EUSART_REF_VALID(eusart));
+  // 1. Properly disable the module
+  EUSART_Disable(eusart);
 
-  // Enable peripheral to reset internal state.
-  eusart->EN_SET = EUSART_EN_EN;
-  eusart_sync(eusart, (EUSART_SYNCBUSY_RXDIS | EUSART_SYNCBUSY_TXDIS | EUSART_SYNCBUSY_TXTRIDIS | EUSART_SYNCBUSY_RXBLOCKDIS));
-  eusart->CMD = EUSART_CMD_RXDIS | EUSART_CMD_TXDIS | EUSART_CMD_TXTRIDIS | EUSART_CMD_CLEARTX | EUSART_CMD_RXBLOCKDIS;
-  eusart_sync(eusart, (EUSART_SYNCBUSY_RXDIS | EUSART_SYNCBUSY_TXDIS | EUSART_SYNCBUSY_TXTRIDIS | EUSART_SYNCBUSY_RXBLOCKDIS));
-  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
-  eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
-  // Clear Rx FIFO.
-  for (i = 0; i < EUSART_RX_FIFO_SIZE; i++) {
-    eusart->RXDATA;
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  // Manual toggling tx_sclk_mst to synchronize handshake
+  // when switching from SPI master to other modes
+  // so module is disabling correctly.
+  uint32_t forcedClkCycle = 4u;
+
+  while (forcedClkCycle--) {
+    eusart->CFG2_SET = _EUSART_CFG2_CLKPHA_MASK;
+    eusart->CFG2_CLR = _EUSART_CFG2_CLKPHA_MASK;
   }
-
-  // Ensure that the peripheral is disabled while configuring.
-  eusart->EN_CLR = EUSART_EN_EN;
-
+#endif
+  // All registers that end with CFG should be programmed before EUSART gets enabled (EUSARTn_EN is set).
   // Set all configurable register to its reset value.
-  eusart->CFG0 = _EUSART_CFG0_RESETVALUE;
+  // Note: Program desired settings to all registers that have names ending with CFG in the following sequence:
+  //  a. CFG2
+#if defined(EUSART_PRESENT)
+  eusart->CFG2 = _EUSART_CFG2_RESETVALUE;
+#endif
+  //  b. CFG1
   eusart->CFG1 = _EUSART_CFG1_RESETVALUE;
+  //  c. CFG0
+  eusart->CFG0 = _EUSART_CFG0_RESETVALUE;
+  //  d. FRAMECFG, DTXDATCFG, TIMINGCFG (Any sequence)
   eusart->FRAMECFG = _EUSART_FRAMECFG_RESETVALUE;
+#if defined(EUSART_PRESENT)
+  eusart->DTXDATCFG = _EUSART_DTXDATCFG_RESETVALUE;
+#endif
+  eusart->TIMINGCFG = _EUSART_TIMINGCFG_RESETVALUE;
   eusart->IRHFCFG = _EUSART_IRHFCFG_RESETVALUE;
   eusart->IRLFCFG = _EUSART_IRLFCFG_RESETVALUE;
-  eusart->TIMINGCFG = _EUSART_TIMINGCFG_RESETVALUE;
   eusart->STARTFRAMECFG = _EUSART_STARTFRAMECFG_RESETVALUE;
   eusart->SIGFRAMECFG = _EUSART_SIGFRAMECFG_RESETVALUE;
   eusart->TRIGCTRL = _EUSART_TRIGCTRL_RESETVALUE;
   eusart->IEN = _EUSART_IEN_RESETVALUE;
-  eusart->IF_CLR = _EUSART_IF_MASK;;
+  eusart->IF_CLR = _EUSART_IF_MASK;
+
+  // no need to sync while EN=0, multiple writes can be queued up,
+  // and the last one will synchronize once EN=1
+  eusart->CLKDIV = _EUSART_CLKDIV_RESETVALUE;
 }
 
 /***************************************************************************//**
@@ -223,13 +272,13 @@ void EUSART_Reset(EUSART_TypeDef *eusart)
  ******************************************************************************/
 void EUSART_Enable(EUSART_TypeDef *eusart, EUSART_Enable_TypeDef enable)
 {
-  uint32_t tmp = 0;;
+  uint32_t tmp = 0;
 
   // Make sure that the module exists on the selected chip.
   EFM_ASSERT(EUSART_REF_VALID(eusart));
 
   if (enable == eusartDisable) {
-    eusart->EN_CLR = EUSART_EN_EN;
+    EUSART_Disable(eusart);
   } else {
     // Enable peripheral to configure Rx and Tx.
     eusart->EN_SET = EUSART_EN_EN;
@@ -303,8 +352,27 @@ void EUSART_TxExt(EUSART_TypeDef *eusart, uint16_t data)
   eusart->TXDATA = (uint32_t)data;
 }
 
+#if defined(EUSART_PRESENT)
 /***************************************************************************//**
- * Configures the baudrate (or as close as possible to a specified baudrate).
+ * Transmits one 8-16 bit frame and return received data.
+ ******************************************************************************/
+uint16_t EUSART_Spi_TxRx(EUSART_TypeDef *eusart, uint16_t data)
+{
+  // Check that transmit FIFO is not full.
+  while (!(eusart->STATUS & EUSART_STATUS_TXFL)) {
+  }
+  eusart->TXDATA = (uint32_t)data;
+
+  // Wait for Rx data to be available.
+  while (!(eusart->STATUS & EUSART_STATUS_RXFL)) {
+  }
+  return (uint16_t)eusart->RXDATA;
+}
+#endif
+
+/***************************************************************************//**
+ * Configures the baudrate (or as close as possible to a specified baudrate)
+ * depending on the current mode of the EU(S)ART peripheral.
  *
  * @note (1) When the oversampling is disabled, the peripheral clock frequency
  *           must be at least three times higher than the chosen baud rate.
@@ -314,7 +382,6 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
                         uint32_t baudrate)
 {
   uint32_t          clkdiv;
-  CMU_Clock_TypeDef clock;
   uint8_t           oversample;
 
   // Prevent dividing by 0.
@@ -323,96 +390,128 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
   // Make sure the module exists on the selected chip.
   EFM_ASSERT(EUSART_REF_VALID(eusart));
 
-  // The peripheral must be enabled to configure the baud rate.
-  EFM_ASSERT(eusart->EN == EUSART_EN_EN);
-
-  /*
-   * Use integer division to avoid forcing in float division
-   * utils, and yet keep rounding effect errors to a minimum.
-   *
-   * CLKDIV is given by:
-   *
-   * CLKDIV = 256 * (fUARTn/(oversample * br) - 1)
-   * or
-   * CLKDIV = (256 * fUARTn)/(oversample * br) - 256
-   *
-   * Since fUARTn may be derived from HFCORECLK, consider the overflow when
-   * using integer arithmetic.
-   *
-   * The basic problem with integer division in the above formula is that
-   * the dividend (256 * fUARTn) may become higher than the maximum 32 bit
-   * integer. Yet, the dividend should be evaluated first before dividing
-   * to get as small rounding effects as possible.
-   * Also, harsh restrictions on the maximum fUARTn value should not be made.
-   *
-   * Since the last 3 bits of CLKDIV are don't care, base the
-   * integer arithmetic on the below formula:
-   *
-   * CLKDIV/8 = ((32*fUARTn)/(br * Oversample)) - 32
-   *
-   * and calculate 1/8 of CLKDIV first. This allows for fUARTn
-   * up to 128 MHz without overflowing a 32 bit value.
-   */
-
   // Get the current frequency.
   if (!refFreq) {
-    if (eusart == EUART0) {
-      clock = cmuClock_EUART0;
-    } else {
-      EFM_ASSERT(0);
-      return;
+    refFreq = CMU_ClockFreqGet(EUSART_ClockGet(eusart));
+  }
+
+#if defined(EUSART_PRESENT)
+  // In synchronous mode (ex: SPI)
+  if (eusart->CFG0 & _EUSART_CFG0_SYNC_MASK ) {
+    EFM_ASSERT(baudrate <= refFreq);
+
+    EUSART_Enable_TypeDef txrxEnStatus = eusartDisable;
+    bool wasEnabled = (eusart->EN & _EUSART_EN_EN_MASK) == true;
+    clkdiv = refFreq / baudrate - 1;
+
+    if (wasEnabled) {
+      eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK | _EUSART_SYNCBUSY_TXEN_MASK);
+
+      // Save the state of the reveiver and transmitter before disabling the peripheral.
+      if (eusart->STATUS & (_EUSART_STATUS_RXENS_MASK | _EUSART_STATUS_TXENS_MASK)) {
+        txrxEnStatus = eusartEnable;
+      } else if (eusart->STATUS & (_EUSART_STATUS_RXENS_MASK)) {
+        txrxEnStatus = eusartEnableRx;
+      } else if (eusart->STATUS & (_EUSART_STATUS_TXENS_MASK)) {
+        txrxEnStatus = eusartEnableTx;
+      } else {
+        EFM_ASSERT(false);
+      }
+
+      // Disable the eusart to be able to modify the CFG2 register.
+      EUSART_Disable(eusart);
     }
 
-    refFreq = CMU_ClockFreqGet(clock);
+    // In Synchronous mode the clock divider that is managing the bitRate
+    // is located inside the sdiv bitfield of the CFG2 register instead of
+    // the CLKDIV register combined with the oversample setting for asynchronous mode.
+    eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_SDIV_MASK)) | ((clkdiv << _EUSART_CFG2_SDIV_SHIFT) & _EUSART_CFG2_SDIV_MASK);
+
+    if (wasEnabled) {
+      EUSART_Enable(eusart, txrxEnStatus);
+    }
+  } else // In synchronous mode (ex: UART)
+#endif
+  {
+    // The peripheral must be enabled to configure the baud rate.
+    EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+
+    /*
+     * Use integer division to avoid forcing in float division
+     * utils, and yet keep rounding effect errors to a minimum.
+     *
+     * CLKDIV is given by:
+     *
+     * CLKDIV = 256 * (fUARTn/(oversample * br) - 1)
+     * or
+     * CLKDIV = (256 * fUARTn)/(oversample * br) - 256
+     *
+     * Since fUARTn may be derived from HFCORECLK, consider the overflow when
+     * using integer arithmetic.
+     *
+     * The basic problem with integer division in the above formula is that
+     * the dividend (256 * fUARTn) may become higher than the maximum 32 bit
+     * integer. Yet, the dividend should be evaluated first before dividing
+     * to get as small rounding effects as possible.
+     * Also, harsh restrictions on the maximum fUARTn value should not be made.
+     *
+     * Since the last 3 bits of CLKDIV are don't care, base the
+     * integer arithmetic on the below formula:
+     *
+     * CLKDIV/8 = ((32*fUARTn)/(br * Oversample)) - 32
+     *
+     * and calculate 1/8 of CLKDIV first. This allows for fUARTn
+     * up to 128 MHz without overflowing a 32 bit value.
+     */
+
+    // Map oversampling.
+    switch (eusart->CFG0 & _EUSART_CFG0_OVS_MASK) {
+      case eusartOVS16:
+        EFM_ASSERT(baudrate <= (refFreq / 16));
+        oversample = 16;
+        break;
+
+      case eusartOVS8:
+        EFM_ASSERT(baudrate <= (refFreq / 8));
+        oversample = 8;
+        break;
+
+      case eusartOVS6:
+        EFM_ASSERT(baudrate <= (refFreq / 6));
+        oversample = 6;
+        break;
+
+      case eusartOVS4:
+        EFM_ASSERT(baudrate <= (refFreq / 4));
+        oversample = 4;
+        break;
+
+      case eusartOVS0:
+        EFM_ASSERT(refFreq >= (3 * baudrate)); // See Note #1.
+        oversample = 1;
+        break;
+
+      default:
+        // Invalid input
+        EFM_ASSERT(0);
+        return;
+    }
+
+    // Calculate and set the CLKDIV with fractional bits.
+    clkdiv  = (32 * refFreq) / (baudrate * oversample);
+    clkdiv -= 32;
+    clkdiv *= 8;
+
+    // Verify that the resulting clock divider is within limits.
+    EFM_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
+
+    // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
+    clkdiv &= _EUSART_CLKDIV_MASK;
+
+    eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
+    eusart->CLKDIV = clkdiv;
+    eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
   }
-
-  // Map oversampling.
-  switch (eusart->CFG0 & _EUSART_CFG0_OVS_MASK) {
-    case eusartOVS16:
-      EFM_ASSERT(baudrate <= (refFreq / 16));
-      oversample = 16;
-      break;
-
-    case eusartOVS8:
-      EFM_ASSERT(baudrate <= (refFreq / 8));
-      oversample = 8;
-      break;
-
-    case eusartOVS6:
-      EFM_ASSERT(baudrate <= (refFreq / 6));
-      oversample = 6;
-      break;
-
-    case eusartOVS4:
-      EFM_ASSERT(baudrate <= (refFreq / 4));
-      oversample = 4;
-      break;
-
-    case eusartOVS0:
-      EFM_ASSERT(refFreq >= (3 * baudrate)); // See Note #1.
-      oversample = 1;
-      break;
-
-    default:
-      // Invalid input
-      EFM_ASSERT(0);
-      return;
-  }
-
-  // Calculate and set the CLKDIV with fractional bits.
-  clkdiv  = (32 * refFreq) / (baudrate * oversample);
-  clkdiv -= 32;
-  clkdiv *= 8;
-
-  // Verify that the resulting clock divider is within limits.
-  EFM_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
-
-  // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
-  clkdiv &= _EUSART_CLKDIV_MASK;
-
-  eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
-  eusart->CLKDIV = clkdiv;
-  eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
 }
 
 /***************************************************************************//**
@@ -421,29 +520,38 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
 uint32_t EUSART_BaudrateGet(EUSART_TypeDef *eusart)
 {
   uint32_t freq;
-  CMU_Clock_TypeDef clock;
-  EUSART_OVS_TypeDef ovs;
+  uint32_t div = 1;
+  uint32_t br = 0;
+  EUSART_OVS_TypeDef ovs = eusartOVS0;
 
   // Make sure the module exists on the selected chip.
   EFM_ASSERT(EUSART_REF_VALID(eusart));
 
-  if (eusart == EUART0) {
-    clock = cmuClock_EUART0;
-  } else {
-    EFM_ASSERT(0);
-    return 0u;
-  }
-  ovs = (EUSART_OVS_TypeDef)(eusart->CFG0 & _EUSART_CFG0_OVS_MASK);
-  freq = CMU_ClockFreqGet(clock);
+  freq = CMU_ClockFreqGet(EUSART_ClockGet(eusart));
 
-  return EUSART_BaudrateCalc(freq, eusart->CLKDIV, ovs);
+#if defined(EUSART_PRESENT)
+  // In synchronous mode (ex: SPI)
+  if (eusart->CFG0 & _EUSART_CFG0_SYNC_MASK) {
+    div = (eusart->CFG2 & _EUSART_CFG2_SDIV_MASK) >> _EUSART_CFG2_SDIV_SHIFT;
+    br = freq / (div + 1);
+  }
+  // In synchronous mode (ex: UART)
+  else
+#endif
+  {
+    div = eusart->CLKDIV;
+    ovs = (EUSART_OVS_TypeDef)(eusart->CFG0 & _EUSART_CFG0_OVS_MASK);
+    br = EUSART_AsyncBaudrateCalc(freq, div, ovs);
+  }
+
+  return br;
 }
 
 /***************************************************************************//**
  * Enable/Disable reception operations until the configured start frame is
  * received.
  ******************************************************************************/
-void  EUSART_RxBlock(EUSART_TypeDef *eusart, EUSART_BlockRx_TypeDef enable)
+void EUSART_RxBlock(EUSART_TypeDef *eusart, EUSART_BlockRx_TypeDef enable)
 {
   uint32_t tmp;
 
@@ -454,7 +562,7 @@ void  EUSART_RxBlock(EUSART_TypeDef *eusart, EUSART_BlockRx_TypeDef enable)
   tmp  &= (_EUSART_CMD_RXBLOCKEN_MASK | _EUSART_CMD_RXBLOCKDIS_MASK);
 
   eusart_sync(eusart, EUSART_SYNCBUSY_RXBLOCKEN | EUSART_SYNCBUSY_RXBLOCKDIS);
-  eusart->CMD = tmp;
+  eusart->CMD_SET = tmp;
   eusart_sync(eusart, EUSART_SYNCBUSY_RXBLOCKEN | EUSART_SYNCBUSY_RXBLOCKDIS);
 
   tmp = 0u;
@@ -506,7 +614,26 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
   // The peripheral must be enabled to configure the PRS trigger.
   EFM_ASSERT(eusart->EN == EUSART_EN_EN);
 
-  PRS->CONSUMER_EUART0_TRIGGER_SET = (init->prs_trigger_channel & _PRS_CONSUMER_EUART0_TRIGGER_MASK);
+#if defined(EUART_PRESENT)
+  PRS->CONSUMER_EUART0_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUART0_TRIGGER_MASK);
+#else
+#if defined(EUSART0)
+  if (eusart == EUSART0) {
+    PRS->CONSUMER_EUSART0_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART0_TRIGGER_MASK);
+  }
+#endif
+#if defined(EUSART1)
+  if (eusart == EUSART1) {
+    PRS->CONSUMER_EUSART1_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART1_TRIGGER_MASK);
+  }
+#endif
+#if defined(EUSART2)
+  if (eusart == EUSART2) {
+    PRS->CONSUMER_EUSART2_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART2_TRIGGER_MASK);
+  }
+#endif
+
+#endif
 
   tmp   = ((uint32_t)(init->prs_trigger_enable));
   tmp  &= (_EUSART_TRIGCTRL_RXTEN_MASK | _EUSART_TRIGCTRL_TXTEN_MASK);
@@ -520,10 +647,295 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
   eusart_sync(eusart, EUSART_SYNCBUSY_RXTEN | EUSART_SYNCBUSY_TXTEN);
 }
 
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+/***************************************************************************//**
+ * Gets the clock associated to the specified EUSART instance.
+ *
+ * @param eusart Pointer to the EUSART peripheral register block.
+ *
+ * @return Clock corresponding to the eusart.
+ ******************************************************************************/
+static CMU_Clock_TypeDef EUSART_ClockGet(EUSART_TypeDef *eusart)
+{
+  CMU_Clock_TypeDef clock;
+
+#if defined(EUART0)
+  if (eusart == EUART0) {
+    clock = cmuClock_EUART0;
+  }
+#endif
+#if defined(EUSART0)
+  if (eusart == EUSART0) {
+    clock = cmuClock_EUSART0;
+  }
+#endif
+#if defined(EUSART1)
+  else if (eusart == EUSART1) {
+    clock = cmuClock_EUSART1;
+  }
+#endif
+#if defined(EUSART2)
+  else if (eusart == EUSART2) {
+    clock = cmuClock_EUSART2;
+  }
+#endif
+  else {
+    EFM_ASSERT(0);
+    return (CMU_Clock_TypeDef)0u;
+  }
+  return clock;
+}
+
+/***************************************************************************//**
+ * Initializes the EUSART with asynchronous common settings to high
+ * and low frequency clock.
+ *
+ * @param eusart Pointer to the EUSART peripheral register block.
+ * @param init A pointer to the initialization structure.
+ * @param irdaInit Pointer to IrDA initialization structure.
+ ******************************************************************************/
+static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
+                                   const EUSART_UartInit_TypeDef  *init,
+                                   const EUSART_IrDAInit_TypeDef  *irdaInit)
+{
+  // LF register about to be modified requires sync busy check.
+  if (eusart->EN) {
+    eusart_sync(eusart, _EUSART_SYNCBUSY_MASK);
+  }
+  // Initialize EUSART registers to hardware reset state.
+  EUSART_Reset(eusart);
+
+  // Configure frame format
+  eusart->FRAMECFG = (eusart->FRAMECFG & ~(_EUSART_FRAMECFG_DATABITS_MASK
+                                           | _EUSART_FRAMECFG_STOPBITS_MASK
+                                           | _EUSART_FRAMECFG_PARITY_MASK))
+                     | (uint32_t)(init->databits)
+                     | (uint32_t)(init->parity)
+                     | (uint32_t)(init->stopbits);
+
+  // Configure global configuration register 0.
+  eusart->CFG0 = (eusart->CFG0 & ~(_EUSART_CFG0_OVS_MASK
+                                   | _EUSART_CFG0_LOOPBK_MASK
+                                   | _EUSART_CFG0_MVDIS_MASK))
+                 | (uint32_t)(init->oversampling)
+                 | (uint32_t)(init->loopbackEnable)
+                 | (uint32_t)(init->majorityVote);
+
+  if (init->baudrate == 0) {
+    eusart->CFG0 |= EUSART_CFG0_AUTOBAUDEN;
+  }
+
+  if (init->advancedSettings) {
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->dmaHaltOnError << _EUSART_CFG0_ERRSDMA_SHIFT;
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->txAutoTristate << _EUSART_CFG0_AUTOTRI_SHIFT;
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->invertIO & (_EUSART_CFG0_RXINV_MASK | _EUSART_CFG0_TXINV_MASK);
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->collisionDetectEnable << _EUSART_CFG0_CCEN_SHIFT;
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->multiProcessorEnable << _EUSART_CFG0_MPM_SHIFT;
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->multiProcessorAddressBitHigh << _EUSART_CFG0_MPAB_SHIFT;
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->msbFirst << _EUSART_CFG0_MSBF_SHIFT;
+
+    // Configure global configuration register 1.
+    eusart->CFG1 = (uint32_t)init->advancedSettings->dmaWakeUpOnRx << _EUSART_CFG1_RXDMAWU_SHIFT
+                   | (uint32_t)init->advancedSettings->dmaWakeUpOnTx << _EUSART_CFG1_TXDMAWU_SHIFT;
+
+    if (init->advancedSettings->hwFlowControl == eusartHwFlowControlCts
+        || init->advancedSettings->hwFlowControl == eusartHwFlowControlCtsAndRts) {
+      eusart->CFG1 |= EUSART_CFG1_CTSEN;
+    }
+    // Enable RTS route pin if necessary. CTS is an input so it is enabled by default.
+    if ((init->advancedSettings->hwFlowControl == eusartHwFlowControlRts)
+        || (init->advancedSettings->hwFlowControl == eusartHwFlowControlCtsAndRts)) {
+#if defined(EUART0)
+      GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
+#elif defined(EUSART0)
+      GPIO->EUSARTROUTE_SET[EUSART_NUM(eusart)].ROUTEEN = GPIO_EUSART_ROUTEEN_RTSPEN;
+#endif
+    } else {
+#if defined(EUART0)
+      GPIO->EUARTROUTE_CLR->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
+#elif defined(EUSART0)
+      GPIO->EUSARTROUTE_CLR[EUSART_NUM(eusart)].ROUTEEN = GPIO_EUSART_ROUTEEN_RTSPEN;
+#endif
+    }
+    eusart->STARTFRAMECFG_SET = (uint32_t)init->advancedSettings->startFrame;
+    if (init->advancedSettings->startFrame) {
+      eusart->CFG1 |= EUSART_CFG1_SFUBRX;
+    }
+    if (init->advancedSettings->prsRxEnable) {
+      eusart->CFG1 |= EUSART_CFG1_RXPRSEN;
+      //Configure PRS channel as input data line for EUSART.
+#if defined(EUART_PRESENT)
+      PRS->CONSUMER_EUART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUART0_RX_MASK);
+#elif defined(EUSART_PRESENT)
+      if (eusart == EUSART0) {
+        PRS->CONSUMER_EUSART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART0_RX_MASK);
+      }
+#if defined(EUSART1)
+      if (eusart == EUSART1) {
+      }
+      PRS->CONSUMER_EUSART1_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART1_RX_MASK);
+#endif
+#if defined(EUSART2)
+      if (eusart == EUSART2) {
+        PRS->CONSUMER_EUSART2_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART2_RX_MASK);
+      }
+#endif
+#endif
+    }
+  }
+
+  if (irdaInit) {
+    if (irdaInit->irDALowFrequencyEnable) {
+      eusart->IRLFCFG_SET = (uint32_t)(EUSART_IRLFCFG_IRLFEN);
+    } else {
+      // Configure IrDA HF configuration register.
+      eusart->IRHFCFG_SET = (eusart->IRHFCFG & ~(_EUSART_IRHFCFG_IRHFEN_MASK
+                                                 | _EUSART_IRHFCFG_IRHFEN_MASK
+                                                 | _EUSART_IRHFCFG_IRHFFILT_MASK))
+                            | (uint32_t)(EUSART_IRHFCFG_IRHFEN)
+                            | (uint32_t)(irdaInit->irDAPulseWidth)
+                            | (uint32_t)(irdaInit->irDARxFilterEnable);
+    }
+  }
+
+  // Enable EUSART IP.
+  EUSART_Enable(eusart, eusartEnable);
+
+  // Configure the baudrate if auto baud detection is not used.
+  if (init->baudrate) {
+    EUSART_BaudrateSet(eusart, init->refFreq, init->baudrate);
+  }
+
+  // Finally enable the Rx and/or Tx channel (as specified).
+  EUSART_Enable(eusart, init->enable);
+  while (~EUSART_StatusGet(eusart) & (_EUSART_STATUS_RXIDLE_MASK | _EUSART_STATUS_TXIDLE_MASK)) {
+  }
+}
+
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * Initializes the EUSART with synchronous common settings to high
+ * and low frequency clock.
+ *
+ * @param eusart Pointer to the EUSART peripheral register block.
+ * @param init A pointer to the initialization structure.
+ ******************************************************************************/
+static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
+                                  EUSART_SpiInit_TypeDef const *init)
+{
+  void* advanceSetting_ptr = (void*)init->advancedSettings; // Used to avoid GCC over optimization.
+
+  // LF register about to be modified requires sync busy check.
+  if (eusart->EN) {
+    eusart_sync(eusart, _EUSART_SYNCBUSY_MASK);
+  }
+
+  // Initialize EUSART registers to hardware reset state.
+  EUSART_Reset(eusart);
+
+  // Configure global configuration register 2.
+  eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_MASTER_MASK
+                                   | _EUSART_CFG2_CLKPOL_MASK
+                                   | _EUSART_CFG2_CLKPHA_MASK))
+                 | (uint32_t)(init->master)
+                 | (uint32_t)(init->clockMode);
+
+  if (advanceSetting_ptr) {
+    // Configure global configuration register 2.
+    eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_AUTOCS_MASK
+                                     | _EUSART_CFG2_AUTOTX_MASK
+                                     | _EUSART_CFG2_CSINV_MASK
+                                     | _EUSART_CFG2_CLKPRSEN_MASK))
+                   | (uint32_t)(init->advancedSettings->autoCsEnable << _EUSART_CFG2_AUTOCS_SHIFT)
+                   | (uint32_t)(init->advancedSettings->autoTxEnable << _EUSART_CFG2_AUTOTX_SHIFT)
+                   | (uint32_t)(init->advancedSettings->csPolarity)
+                   | (uint32_t)(init->advancedSettings->prsClockEnable << _EUSART_CFG2_CLKPRSEN_SHIFT);
+
+    // Only applicable to EM2 (low frequency) capable EUSART instances.
+    eusart->CFG1 = (uint32_t)(init->advancedSettings->dmaWakeUpOnRx << _EUSART_CFG1_RXDMAWU_SHIFT)
+                   |  (uint32_t)(init->advancedSettings->prsRxEnable << _EUSART_CFG1_RXPRSEN_SHIFT);
+  }
+
+  eusart->CFG0 = (eusart->CFG0 & ~(_EUSART_CFG0_SYNC_MASK
+                                   | _EUSART_CFG0_LOOPBK_MASK))
+                 | (uint32_t)(_EUSART_CFG0_SYNC_SYNC)
+                 | (uint32_t)(init->loopbackEnable);
+
+  if (advanceSetting_ptr) {
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->invertIO & (_EUSART_CFG0_RXINV_MASK | _EUSART_CFG0_TXINV_MASK);
+    eusart->CFG0 |= (uint32_t)init->advancedSettings->msbFirst << _EUSART_CFG0_MSBF_SHIFT;
+
+    // Configure global configurationTiming register.
+    eusart->TIMINGCFG = (eusart->TIMINGCFG & ~(_EUSART_TIMINGCFG_CSSETUP_MASK
+                                               | _EUSART_TIMINGCFG_CSHOLD_MASK
+                                               | _EUSART_TIMINGCFG_ICS_MASK))
+                        | ((uint32_t)(init->advancedSettings->autoCsSetupTime << _EUSART_TIMINGCFG_CSSETUP_SHIFT)
+                           & _EUSART_TIMINGCFG_CSSETUP_MASK)
+                        | ((uint32_t)(init->advancedSettings->autoCsHoldTime << _EUSART_TIMINGCFG_CSHOLD_SHIFT)
+                           & _EUSART_TIMINGCFG_CSHOLD_MASK)
+                        | ((uint32_t)(init->advancedSettings->autoInterFrameTime << _EUSART_TIMINGCFG_ICS_SHIFT)
+                           & _EUSART_TIMINGCFG_ICS_MASK);
+  }
+
+  // Configure frame format
+  eusart->FRAMECFG = (eusart->FRAMECFG & ~(_EUSART_FRAMECFG_DATABITS_MASK))
+                     | (uint32_t)(init->databits);
+
+  if (advanceSetting_ptr) {
+    eusart->DTXDATCFG = (init->advancedSettings->defaultTxData & _EUSART_DTXDATCFG_MASK);
+
+    if (init->advancedSettings->prsRxEnable) {
+      //Configure PRS channel as input data line for EUSART.
+      if (eusart == EUSART0) {
+        PRS->CONSUMER_EUSART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART0_RX_MASK);
+      }
+#if defined(EUSART1)
+      if (eusart == EUSART1) {
+        PRS->CONSUMER_EUSART1_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART1_RX_MASK);
+      }
+#endif
+#if defined(EUSART2)
+      if (eusart == EUSART2) {
+        PRS->CONSUMER_EUSART2_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART2_RX_MASK);
+      }
+#endif
+    }
+
+    if (init->advancedSettings->prsClockEnable) {
+      //Configure PRS channel as SCLK input for EUSART.
+      if (eusart == EUSART0) {
+        PRS->CONSUMER_EUSART0_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART0_CLK_MASK);
+      }
+#if defined(EUSART1)
+      if (eusart == EUSART1) {
+        PRS->CONSUMER_EUSART1_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART1_CLK_MASK);
+      }
+#endif
+#if defined(EUSART2)
+      if (eusart == EUSART2) {
+        PRS->CONSUMER_EUSART2_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART2_CLK_MASK);
+      }
+#endif
+    }
+  }
+
+  // Set baudrate for synchronous operation mode.
+  EUSART_BaudrateSet(eusart, init->refFreq, init->bitRate);
+
+  // Enable EUSART IP.
+  EUSART_Enable(eusart, eusartEnable);
+
+  // Finally enable the Rx and/or Tx channel (as specified).
+  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
+  eusart->CMD = (uint32_t)init->enable;
+  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
+  while (~EUSART_StatusGet(eusart) & (_EUSART_STATUS_RXIDLE_MASK | _EUSART_STATUS_TXIDLE_MASK)) {
+  }
+}
+#endif
+
 /***************************************************************************//**
  * Calculate baudrate for a given reference frequency, clock division,
- * and oversampling rate.
+ * and oversampling rate when the module is in UART mode.
  *
  * @param refFreq The EUSART reference clock frequency in Hz that will be used.
  * @param clkdiv Clock division factor to be used.
@@ -531,9 +943,9 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
  *
  * @return Computed baudrate from given settings.
  ******************************************************************************/
-__STATIC_INLINE uint32_t EUSART_BaudrateCalc(uint32_t refFreq,
-                                             uint32_t clkdiv,
-                                             EUSART_OVS_TypeDef ovs)
+__STATIC_INLINE uint32_t EUSART_AsyncBaudrateCalc(uint32_t refFreq,
+                                                  uint32_t clkdiv,
+                                                  EUSART_OVS_TypeDef ovs)
 {
   uint32_t oversample;
   uint64_t divisor;
@@ -639,108 +1051,44 @@ __STATIC_INLINE uint32_t EUSART_BaudrateCalc(uint32_t refFreq,
 }
 
 /***************************************************************************//**
- * Initializes the EUSART with asynchronous common settings to high
- * and low frequency clock.
+ * Perform EUSART Module disablement - resetting all internal flops/FSM.
  *
  * @param eusart Pointer to the EUSART peripheral register block.
- * @param init A pointer to the initialization structure.
- * @param irdaInit Pointer to IrDA initialization structure.
  ******************************************************************************/
-static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
-                                   const EUSART_UartInit_TypeDef  *init,
-                                   const EUSART_IrDAInit_TypeDef  *irdaInit)
+__STATIC_INLINE void EUSART_Disable(EUSART_TypeDef *eusart)
 {
-  // LF register about to be modified requires sync busy check.
-  if (eusart->EN) {
-    eusart_sync(eusart, _EUSART_SYNCBUSY_MASK);
-  }
-  // Initialize EUSART registers to hardware reset state.
-  EUSART_Reset(eusart);
-
-  // Configure frame format
-  eusart->FRAMECFG = (eusart->FRAMECFG & ~(_EUSART_FRAMECFG_DATABITS_MASK
-                                           | _EUSART_FRAMECFG_STOPBITS_MASK
-                                           | _EUSART_FRAMECFG_PARITY_MASK))
-                     | (uint32_t)(init->databits)
-                     | (uint32_t)(init->parity)
-                     | (uint32_t)(init->stopbits);
-
-  // Configure global configuration register 0.
-  eusart->CFG0 = (eusart->CFG0 & ~(_EUSART_CFG0_OVS_MASK
-                                   | _EUSART_CFG0_LOOPBK_MASK
-                                   | _EUSART_CFG0_MVDIS_MASK))
-                 | (uint32_t)(init->oversampling)
-                 | (uint32_t)(init->loopbackEnable)
-                 | (uint32_t)(init->majorityVote);
-
-  if (init->baudrate == 0) {
-    eusart->CFG0 |= EUSART_CFG0_AUTOBAUDEN;
-  }
-
-  if (init->advancedSettings) {
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->dmaHaltOnError << _EUSART_CFG0_ERRSDMA_SHIFT;
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->txAutoTristate << _EUSART_CFG0_AUTOTRI_SHIFT;
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->invertIO & (_EUSART_CFG0_RXINV_MASK | _EUSART_CFG0_TXINV_MASK);
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->collisionDetectEnable << _EUSART_CFG0_CCEN_SHIFT;
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->multiProcessorEnable << _EUSART_CFG0_MPM_SHIFT;
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->multiProcessorAddressBitHigh << _EUSART_CFG0_MPAB_SHIFT;
-    eusart->CFG0 |= (uint32_t)init->advancedSettings->msbFirst << _EUSART_CFG0_MSBF_SHIFT;
-
-    // Configure global configuration register 1.
-    eusart->CFG1 = (uint32_t)init->advancedSettings->dmaWakeUpOnRx << _EUSART_CFG1_RXDMAWU_SHIFT
-                   | (uint32_t)init->advancedSettings->dmaWakeUpOnTx << _EUSART_CFG1_TXDMAWU_SHIFT;
-
-    if (init->advancedSettings->hwFlowControl == eusartHwFlowControlCts
-        || init->advancedSettings->hwFlowControl == eusartHwFlowControlCtsAndRts) {
-      eusart->CFG1 |= EUSART_CFG1_CTSEN;
+  if (eusart->EN & _EUSART_EN_EN_MASK) {
+    // This step should be skipped especially in Synchronous Slave mode when
+    // external SCLK is not running and CS is active
+#if defined(EUSART_PRESENT)
+    if (!(eusart->CFG0 & _EUSART_CFG0_SYNC_MASK) || (eusart->CFG2 & _EUSART_CFG2_MASTER_MASK))
+#endif
+    {
+      // General Programming Guideline to properly disable the module:
+      // 1a. Disable TX and RX using TXDIS and RXDIS cmd
+      eusart->CMD = EUSART_CMD_TXDIS | EUSART_CMD_RXDIS;
+      // 1b. Poll for EUSARTn_SYNCBUSY.TXDIS and EUSARTn_SYNCBUSY.RXDIS to go low;
+      eusart_sync(eusart, (EUSART_SYNCBUSY_TXDIS | EUSART_SYNCBUSY_RXDIS));
+      // 1c. Wait for EUSARTn_STATUS.TXENS and EUSARTn_STATUS.RXENS to go low
+      while (eusart->STATUS & (_EUSART_STATUS_TXENS_MASK | _EUSART_STATUS_RXENS_MASK)) {
+      }
     }
-    // Enable RTS route pin if necessary. CTS is an input so it is enabled by default.
-    if ((init->advancedSettings->hwFlowControl == eusartHwFlowControlRts)
-        || (init->advancedSettings->hwFlowControl == eusartHwFlowControlCtsAndRts)) {
-      GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
-    } else {
-      GPIO->EUARTROUTE_CLR->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+    // Read data until FIFO is emptied
+    // but taking care not to underflow the receiver
+    while (eusart->STATUS & EUSART_STATUS_RXFL) {
+      eusart->RXDATA;
     }
-    eusart->STARTFRAMECFG_SET = (uint32_t)init->advancedSettings->startFrame;
-    if (init->advancedSettings->startFrame) {
-      eusart->CFG1 |= EUSART_CFG1_SFUBRX;
+#endif
+
+    eusart->EN_CLR = EUSART_EN_EN;
+
+#if defined(_EUSART_EN_DISABLING_MASK)
+    // 2. Polling for EUSARTn_EN.DISABLING = 0.
+    while (eusart->EN & _EUSART_EN_DISABLING_MASK) {
     }
-    if (init->advancedSettings->prsRxEnable) {
-      eusart->CFG1 |= EUSART_CFG1_RXPRSEN;
-      //Configure PRS channel as input data line for EUSART.
-      PRS->CONSUMER_EUART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUART0_RX_MASK);
-    }
-  }
-
-  if (irdaInit) {
-    if (irdaInit->irDALowFrequencyEnable) {
-      eusart->IRLFCFG_SET = (uint32_t)(EUSART_IRLFCFG_IRLFEN);
-    } else {
-      // Configure IrDA HF configuration register.
-      eusart->IRHFCFG_SET = (eusart->IRHFCFG & ~(_EUSART_IRHFCFG_IRHFEN_MASK
-                                                 | _EUSART_IRHFCFG_IRHFEN_MASK
-                                                 | _EUSART_IRHFCFG_IRHFFILT_MASK))
-                            | (uint32_t)(EUSART_IRHFCFG_IRHFEN)
-                            | (uint32_t)(irdaInit->irDAPulseWidth)
-                            | (uint32_t)(irdaInit->irDARxFilterEnable);
-    }
-  }
-
-  // Enable EUSART IP.
-  eusart->EN_SET = EUSART_EN_EN;
-
-  // Configure the baudrate if auto baud detection is not used.
-  if (init->baudrate) {
-    EUSART_BaudrateSet(eusart, init->refFreq, init->baudrate);
-  }
-
-  // Finally enable the Rx and/or Tx channel (as specified).
-  EUSART_Enable(eusart, init->enable);
-  while (~EUSART_StatusGet(eusart) & (_EUSART_STATUS_RXIDLE_MASK | _EUSART_STATUS_TXIDLE_MASK)) {
+#endif
   }
 }
-/** @endcond */
 
-/** @} (end addtogroup EUSART) */
-/** @} (end addtogroup emlib) */
-#endif /* defined(EUART_COUNT) && (EUART_COUNT > 0) */
+#endif /* defined(EUART_PRESENT) || defined(EUSART_PRESENT) */

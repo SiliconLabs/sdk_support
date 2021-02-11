@@ -1111,4 +1111,5 @@ typedef struct {
 /** @} End of group MGM22_SYNTH_BitFields */
 /** @} End of group MGM22_SYNTH */
 /** @} End of group Parts */
+
 #endif /* MGM22_SYNTH_H */

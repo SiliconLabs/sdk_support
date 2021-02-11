@@ -42,12 +42,7 @@ extern "C" {
 #include <stdbool.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup QSPI
+ * @addtogroup qspi
  * @{
  ******************************************************************************/
 
@@ -332,8 +327,7 @@ __STATIC_INLINE void QSPI_IntDisable(QSPI_TypeDef * qspi, uint32_t flags)
   qspi->IRQMASK = ~flags & (~_QSPI_IRQMASK_MASK);
 }
 
-/** @} (end addtogroup QSPI) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup qspi) */
 
 #ifdef __cplusplus
 }

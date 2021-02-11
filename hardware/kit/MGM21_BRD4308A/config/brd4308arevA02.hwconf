@@ -13,6 +13,7 @@
     <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_CTUNE.INT" value="133"/>
     <property object="CMU" propertyId="CMU.BSP_CLK_HFXO_PRESENT.BOOL" value="1"/>
     <property object="CMU" propertyId="CMU.BSP_CLK_LFXO_PRESENT.BOOL" value="1"/>
+    <property object="CMU" propertyId="CMU.HAL_CLK_LFXO_PRECISION.INT" value="100"/>
 
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
     

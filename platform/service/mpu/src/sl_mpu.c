@@ -39,6 +39,10 @@
 
 #define MPU_RBAR_VALUE    ARM_MPU_RBAR(0u, ARM_MPU_SH_NON, 0, 1, 1)
 
+// ARM memory map SRAM location and size.
+#define MPU_ARM_SRAM_MEM_BASE          0x20000000
+#define MPU_ARM_SRAM_MEM_SIZE          0x20000000
+
 // Number of sub-regions per MPU region.
 #define MPU_SUBREGION_NBR             8u
 
@@ -90,7 +94,6 @@ static void mpu_compute_region_data(uint32_t section_begin,
 static uint32_t region_nbr = 0;
 
 /**************************************************************************//**
- * Enables simplified MPU driver. Configures internal SRAM as non-executable.
  *****************************************************************************/
 void sl_mpu_disable_execute_from_ram(void)
 {
@@ -103,9 +106,9 @@ void sl_mpu_disable_execute_from_ram(void)
   uint32_t rbar;
 
   // Region end address LSB are always considered 1F.
-  mpu_region_begin = SRAM_BASE;
+  mpu_region_begin = MPU_ARM_SRAM_MEM_BASE;
   mpu_region_end = (RAMFUNC_SECTION_SIZE > 0) ? (RAMFUNC_SECTION_BEGIN & MPU_RBAR_BASE_Msk) - 32u
-                   : (SRAM_BASE + SRAM_SIZE);
+                   : (MPU_ARM_SRAM_MEM_BASE + MPU_ARM_SRAM_MEM_SIZE);
 
   ARM_MPU_SetMemAttr(0, ARM_MPU_ATTR(ARM_MPU_ATTR_MEMORY_(1, 0, 1, 0), 0));
 
@@ -119,7 +122,7 @@ void sl_mpu_disable_execute_from_ram(void)
   if (RAMFUNC_SECTION_SIZE > 0u) {
     // Region end address LSB are always considered 1F.
     mpu_region_begin = (RAMFUNC_SECTION_END + 31u) & MPU_RLAR_LIMIT_Msk;
-    mpu_region_end = SRAM_BASE + SRAM_SIZE - 32u;
+    mpu_region_end = MPU_ARM_SRAM_MEM_BASE + MPU_ARM_SRAM_MEM_SIZE - 32u;
 
     // A bug exists in some versions of ARM_MPU_RBAR(). Set base addr manually.
     rbar = MPU_RBAR_VALUE | (mpu_region_begin & MPU_RBAR_BASE_Msk);
@@ -134,9 +137,9 @@ void sl_mpu_disable_execute_from_ram(void)
   (void) mpu_region_end;
 
   // Set background RAM region as execute never
-  region_size_encoded = mpu_region_size_encode(SRAM_SIZE);
+  region_size_encoded = mpu_region_size_encode(MPU_ARM_SRAM_MEM_SIZE);
   ARM_MPU_SetRegionEx(region_nbr,
-                      SRAM_BASE,
+                      MPU_ARM_SRAM_MEM_BASE,
                       ((region_size_encoded << MPU_RASR_SIZE_Pos) & MPU_RASR_SIZE_Msk)
                       | (ARM_MPU_AP_FULL << MPU_RASR_AP_Pos)
                       | MPU_RASR_B_Msk
@@ -186,9 +189,9 @@ void sl_mpu_disable_execute_from_ram(void)
 /**************************************************************************//**
  * Enables simplified MPU driver. Configures memory address as non-executable.
  *****************************************************************************/
-void sl_mpu_disable_execute(uint32_t address_begin,
-                            uint32_t address_end,
-                            uint32_t size)
+sl_status_t sl_mpu_disable_execute(uint32_t address_begin,
+                                   uint32_t address_end,
+                                   uint32_t size)
 {
   uint32_t mpu_region_begin = 0u;
   uint32_t mpu_region_end = 0u;
@@ -236,9 +239,13 @@ void sl_mpu_disable_execute(uint32_t address_begin,
   sr_size = mpu_region_size / MPU_SUBREGION_NBR;
   // Check if sr_size is zero to satisfy MISRA
   sr_size = (sr_size != 0) ? sr_size : MPU_SUBREGION_USE_MIN_SIZE / MPU_SUBREGION_NBR;
-  srd_msk = (1u << ((mpu_region_end - address_end) / sr_size)) - 1u;
-  srd_msk = srd_msk << (((address_end - mpu_region_begin - 1u) / sr_size) + 1u);
-  srd_msk |= (1u << ((address_begin - mpu_region_begin) / sr_size)) - 1u;
+  srd_msk = (1u << (((mpu_region_end - address_end) + (sr_size - 1)) / sr_size)) - 1u;
+  srd_msk = srd_msk << ((address_end - mpu_region_begin - 1u) / sr_size);
+  srd_msk |= (1u << (((address_begin - mpu_region_begin) + (sr_size - 1)) / sr_size)) - 1u;
+
+  if (srd_msk == 0xFF) {
+    return SL_STATUS_INVALID_RANGE;
+  }
 
   // Set region as execute never.
   region_size_encoded = mpu_region_size_encode(mpu_region_size);
@@ -258,6 +265,8 @@ void sl_mpu_disable_execute(uint32_t address_begin,
 
   __DSB();
   __ISB();
+
+  return SL_STATUS_OK;
 }
 
 #ifndef ARM_MPU_ARMV8_H

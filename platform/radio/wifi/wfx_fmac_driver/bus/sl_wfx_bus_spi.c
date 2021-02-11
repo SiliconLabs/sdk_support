@@ -16,7 +16,7 @@
 
 #include "sl_wfx_bus.h"
 #include "sl_wfx_host_api.h"
-#include "firmware/sl_wfx_registers.h"
+#include "sl_wfx_registers.h"
 
 #define SET_WRITE 0x7FFF /* usage: and operation */
 #define SET_READ 0x8000  /* usage: or operation */

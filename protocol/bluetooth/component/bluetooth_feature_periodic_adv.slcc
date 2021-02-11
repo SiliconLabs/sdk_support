@@ -1,0 +1,19 @@
+id: "bluetooth_feature_periodic_adv"
+label: "Periodic Advertising"
+package: "Bluetooth"
+description: >
+  Bluetooth periodic advertising feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_periodic_adv"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_init_periodic_advertising"
+    priority: 10
+    unless:
+      - "device_sdid_80"

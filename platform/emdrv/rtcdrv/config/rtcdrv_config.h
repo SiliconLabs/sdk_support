@@ -46,12 +46,7 @@
 /// @endcond
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RTCDRV
+ * @addtogroup rtcdrv
  * @{
  ******************************************************************************/
 
@@ -68,7 +63,6 @@
 //#define EMDRV_RTCDRV_USE_LFRCO
 //#define EMDRV_RTCDRV_USE_PLFRCO
 
-/** @} (end addtogroup RTCDRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup rtcdrv) */
 
 #endif /* SILICON_LABS_RTCDRV_CONFIG_H */

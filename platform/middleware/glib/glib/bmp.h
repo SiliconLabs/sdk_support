@@ -32,6 +32,12 @@
  * @{
  ******************************************************************************/
 
+/***************************************************************************//**
+ * @addtogroup glib_bmp GLIB BMP
+ * @brief Bitmap Support
+ * @{
+ ******************************************************************************/
+
 /** BMP base error code */
 #define ECODE_BMP_BASE    0x00000000
 
@@ -126,6 +132,7 @@ __packed struct __BMP_Header
 };
 #endif
 
+/** @brief BMP Module header structure. */
 typedef struct __BMP_Header   BMP_Header;
 
 /** @brief BMP palette structure to hold palette pointer and size
@@ -165,6 +172,7 @@ int32_t BMP_getImageDataSize(void);
 int32_t BMP_getDataOffset(void);
 int32_t BMP_getFileSize(void);
 
+/** @} (end addtogroup bmp) */
 /** @} (end addtogroup glib) */
 
 #endif /* __BMP_H_ */

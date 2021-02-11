@@ -15,51 +15,100 @@
  *
  ******************************************************************************/
 
-// These buffers are contiguous blocks of bytes.  Buffers are allocated
-// linearly from a single chunk of memory.  When space gets short any
-// buffers still in use can be moved to the beginning of buffer memory,
-// which consolidates any unused space.
-//
-// 'Buffer' values are actually offsets from the beginning of buffer
-// memory.  Using uint8_ts would require additional memory for the
-// mapping between the uint8_ts and memory locations.
-//
-// In fact, Buffers are offsets from one before the beginning of buffer
-// memory.  The first buffer is thus 0x0001.  This allows us to use 0x0000
-// as the null buffer, just as C uses zero for the null pointer.
-//
-// In general the buffer functions are not safe for use in ISRs.
-// The one exception is the PHY->MAC queue, which is handled specially.
-// It is safe for an ISR to allocate a new buffer and put it on the
-// PHY->MAC queue.
+/**
+ * @addtogroup packet_buffer
+ * These buffers are contiguous blocks of bytes.  Buffers are allocated
+ * linearly from a single chunk of memory.  When space gets short any
+ * buffers still in use can be moved to the beginning of buffer memory,
+ * which consolidates any unused space.
+ *
+ * 'Buffer' values are actually offsets from the beginning of buffer
+ * memory.  Using uint8_ts would require additional memory for the
+ * mapping between the uint8_ts and memory locations.
+ *
+ * In fact, Buffers are offsets from one before the beginning of buffer
+ * memory.  The first buffer is thus 0x0001.  This allows us to use 0x0000
+ * as the null buffer, just as C uses zero for the null pointer.
+ *
+ * In general the buffer functions are not safe for use in ISRs.
+ * The one exception is the PHY->MAC queue, which is handled specially.
+ * It is safe for an ISR to allocate a new buffer and put it on the
+ * PHY->MAC queue.
+ *
+ * Any code which holds on to buffers beyond the context in which they
+ * are allocated must provide a marking function to prevent them from
+ * being garbage collected.  See emReclaimUnusedBuffers for details.
+ * @{
+ */
 
 #ifndef __BUFFER_MANAGEMENT_H__
 #define __BUFFER_MANAGEMENT_H__
 
+typedef uint16_t Buffer;
+#define NULL_BUFFER 0x0000
+
+typedef Buffer MessageBufferQueue;
+typedef Buffer PacketHeader;
+typedef Buffer EmberMessageBuffer;
+
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+/** @brief Allocates a buffer
+ *
+ */
+Buffer emAllocateBuffer(uint16_t dataSizeInBytes);
+#else
 Buffer emReallyAllocateBuffer(uint16_t dataSizeInBytes, bool async);
 
 #define emAllocateBuffer(dataSizeInBytes) \
   emReallyAllocateBuffer(dataSizeInBytes, false)
+#endif
 
+/** @brief gets a pointer to the specified buffer
+ *
+ */
 uint8_t *emGetBufferPointer(Buffer buffer);
 
+/** @brief gets the length of the specified buffer
+ *
+ */
 uint16_t emGetBufferLength(Buffer buffer);
 
-// 'contents' may be NULL, in which case NULL_BUFFER is returned.
+/** @brief allocates a buffer and fills it with the given null terminated string
+ *
+ * 'contents' may be NULL, in which case NULL_BUFFER is returned.
+ */
 Buffer emFillStringBuffer(const uint8_t *contents);
 
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+/** @brief Allocates a buffer and fills with length bytes of contents
+ *
+ */
+Buffer emFillBuffer(const uint8_t *contents, uint16_t length);
+#else
 #define emFillBuffer(contents, length) \
   emReallyFillBuffer(contents, length, false)
 
 Buffer emReallyFillBuffer(const uint8_t *contents, uint16_t length, bool async);
+#endif
 
+/** @brief returns the number of bytes of buffer space currently in use
+ *
+ */
 uint16_t emBufferBytesUsed(void);
+/** @brief returns the number of available bytes remaining in the buffer system
+ *
+ */
 uint16_t emBufferBytesRemaining(void);
+/** @brief returns the number of bytes allocated to the buffer system
+ *
+ */
+uint16_t emBufferBytesTotal(void);
 
 // Every buffer has two links to other buffers.  For packets, these
 // are used to organize buffers into queues and to associate header
 // and payload buffers.
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 Buffer emGetBufferLink(Buffer buffer, uint8_t i);
 void emSetBufferLink(Buffer buffer, uint8_t i, Buffer newLink);
 
@@ -82,9 +131,14 @@ void emResetBufferTracking(void);
 uint16_t emGetTrackedBufferBytes(void);
 void emResetTraceTracker(void);
 uint16_t emGetTracedBytes(void);
+#endif
 
+/** @brief returns whether the given buffer is valid
+ *
+ */
 bool emIsValidBuffer(Buffer buffer);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Buffer space can be reserved to prevent it from being allocated
 // asynchronously (typically by the radio receive ISR).  Reserving
 // buffer space splits the available memory into two parts, with
@@ -109,65 +163,76 @@ Buffer emAllocateIndirectBuffer(uint8_t *contents,
 
 bool emSetReservedBufferSpace(uint16_t dataSizeInBytes);
 void emEndBufferSpaceReservation(void);
+#endif
 
 //----------------------------------------------------------------
 
-// Truncates the buffer.  New length cannot be longer than the old length.
-
+/** @brief Truncates the buffer.  New length cannot be longer than the old length.
+ *
+ */
 void emSetBufferLength(Buffer buffer, uint16_t length);
 
-// Ditto, but remove bytes from the front of the buffer rather than the end.
+/** @brief Truncates the buffer, removing bytes from the front.  New length cannot be longer than the old length.
+ *
+ */
 void emSetBufferLengthFromEnd(Buffer buffer, uint16_t length);
-
-// Reclaims all buffers not reachable from 'roots', the PHY->MAC
-// queue, by one of marker functions.  The marker functions should
-// call their argument on all known buffer references.
-//
-// The idea is that single top level references, such as a queue,
-// can be put in 'roots', whereas buffers stored in data structures,
-// such as the retry table, are handled by marker functions.  See
-// emMarkRetryBuffers() in stack/routing/util/retry.c, for example.
-//
-// Surviving buffers moved to the beginning of the heap, which
-// amalgamates the free memory into a single contiguous block.  This
-// should only be called when there are no references to buffers outside
-// of 'roots', the PHY->MAC queue, and the locations passed to
-// the marker functions.
-//
-// IMPORTANT: BufferMarker routines should not reference buffers after
-// they have been marked.  The buffers may be in an inconsistent state
-// until the reclaimation has completed.
-
-//
-// Right:
-//   void myBufferMarker(void)
-//   {
-//     ... myBuffer ...
-//     emMarkBuffer(&myBuffer);
-//   }
-//
-// Wrong:
-//   void myBufferMarker(void)
-//   {
-//     emMarkBuffer(&myBuffer);
-//     ... myBuffer ...
-//   }
-//
 
 typedef void (*Marker)(Buffer *buffer);
 typedef void (*BufferMarker)(void);
 
+/** @brief Reclaims unused buffers and compacts the heap
+ *
+ * Reclaims all buffers not reachable from 'roots', the PHY->MAC
+ * queue, by one of marker functions.  The marker functions should
+ * call their argument on all known buffer references.
+ *
+ * The idea is that single top level references, such as a queue,
+ * can be put in 'roots', whereas buffers stored in data structures,
+ * such as the retry table, are handled by marker functions.
+ *
+ * Surviving buffers moved to the beginning of the heap, which
+ * amalgamates the free memory into a single contiguous block.  This
+ * should only be called when there are no references to buffers outside
+ * of 'roots', the PHY->MAC queue, and the locations passed to
+ * the marker functions.
+ *
+ * IMPORTANT: BufferMarker routines should not reference buffers after
+ * they have been marked.  The buffers may be in an inconsistent state
+ * until the reclaimation has completed.
+
+ *
+ * Right:
+ *   void myBufferMarker(void)
+ *   {
+ *     ... myBuffer ...
+ *     emMarkBuffer(&myBuffer);
+ *   }
+ *
+ * Wrong:
+ *   void myBufferMarker(void)
+ *   {
+ *     emMarkBuffer(&myBuffer);
+ *     ... myBuffer ...
+ *   }
+ *
+ */
+void emReclaimUnusedBuffers(const BufferMarker *markers);
+
+/** @brief Marks the passed buffer.  Called from Marker function
+ */
 void emMarkBuffer(Buffer *root);
 
-// emMarkBufferWeak only operates during the update references phase
-// if emMark Buffer is called on the same buffer elsewhere, the weak
-// reference will be updated.  If a buffer is only weakly marked, the
-// update phase will replace it with NULL_BUFFER
+/** @brief weakly mark buffer
+ *
+ * emMarkBufferWeak only operates during the update references phase
+ * if emMark Buffer is called on the same buffer elsewhere, the weak
+ * reference will be updated.  If a buffer is only weakly marked, the
+ * update phase will replace it with NULL_BUFFER
+ */
 void emMarkBufferWeak(Buffer *root);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 bool emMarkAmalgamateQueue(Buffer *queue);
-
-void emReclaimUnusedBuffers(const BufferMarker *markers);
 
 void emReclaimUnusedBuffersAndAmalgamate(const BufferMarker *markers,
                                          uint8_t* scratchpad,
@@ -177,35 +242,33 @@ void emPrintBuffers(uint8_t port, const BufferMarker *markers);
 
 // A utility for marking a buffer via a pointer to its contents.
 void emMarkBufferPointer(void **pointerLoc);
+#endif
 
-// Applications that use buffers must mark them by defining this function.
-// The stack uses this when reclaiming unused buffers.
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Only used by flex
+/** Applications that use buffers must mark them by defining this function.
+ * The stack uses this when reclaiming unused buffers.
+ */
 void emberMarkApplicationBuffersHandler(void);
+#endif
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 uint16_t emBufferChainByteLength(Buffer buffer, uint8_t link);
 #define emTotalPayloadLength(buffer) \
   (emBufferChainByteLength((buffer), 1))
+#endif
 
-void emCopyFromLinkedBuffers(uint8_t *to, Buffer from, uint16_t count);
-
-// Buffers referenced by ISRs must be protected in order to avoid
-// problems during reclamations.  A protected buffer may be referenced
-// from ISRs, but only via the location passed to
-// emInterruptProtectBuffer().  The link fields of a protected object
-// may not be read or written during an ISR.
-
-void emInterruptProtectBuffer(Buffer *bufferLocation);
-void emClearInterruptProtectBuffer(Buffer buffer);
-
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 // The PHY->MAC queue is special in that it can be added to in ISR context.
-
-bool emPhyToMacQueueAddIsr(uint8_t *packet, uint8_t length, uint8_t padding);
 void emPhyToMacQueueAdd(Buffer newTail);
 Buffer emPhyToMacQueueRemoveHead(void);
 bool emPhyToMacQueueIsEmpty(void);
 void emEmptyPhyToMacQueue(void);
-void emPhyToMacQueueItemAddedCallback(void);
-void emPhyToMacQueueFreelistAdd(Buffer buffer);
+
+void emMultiPhyToMacQueueAdd(uint8_t mac_index, Buffer newTail);
+Buffer emMultiPhyToMacQueueRemoveHead(uint8_t mac_index);
+bool emMultiPhyToMacQueueIsEmpty(uint8_t mac_index);
+void emMultiEmptyPhyToMacQueue(uint8_t mac_index);
 
 // Allow the wakeup code to save and restore the heap pointer.  This is
 // much faster than emReclaimUnusedBuffers() but requires that the caller
@@ -256,10 +319,19 @@ void emEndBufferUsage(void);
 //----------------------------------------------------------------
 // The heap is allocated elsewhere.
 
+#ifdef EMBER_STACK_CONNECT
+// temporary workaround for merging unified mac without merging flex
 extern uint16_t heapMemory[];
+extern const uint32_t heapMemorySize;
+#else
+extern uint16_t *heapMemory;
 extern uint32_t heapMemorySize;
+#endif
 
 // This is a no-op on real hardware.  It only has an effect in simulation.
 void emResizeHeap(uint32_t newSize);
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
+/** @} END addtogroup */
 
 #endif

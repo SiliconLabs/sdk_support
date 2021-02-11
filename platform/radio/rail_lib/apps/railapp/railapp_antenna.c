@@ -3,7 +3,7 @@
  * @brief Source file for RAIL antenna functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,15 +28,37 @@
  *
  ******************************************************************************/
 
-#include "command_interpreter.h"
+#ifdef CLI_INTERFACE
+#include "app_common.h"
 #include "response_print.h"
+#endif
 
 #include "rail.h"
-#include "rail_types.h"
-#include "rail_chip_specific.h"
+#include "railapp_antenna.h"
+
+#include "sl_rail_util_ant_div.h"
+#include "sl_rail_util_rf_path.h"
 
 extern RAIL_Handle_t railHandle;
-extern RAIL_AntennaConfig_t halAntennaConfig;
+RAIL_AntennaConfig_t halAntennaConfig;
+
+/***************************************************************************//**
+ * @brief
+ *   Configure Antenna Diversity (ANTDIV) selection.
+ *
+ * @details
+ *   Provide access to set system function, where its source file changes for
+ *   each platform. Allows use with existing RPC config for all platforms.
+ *
+ * @param[in] antSel Updates Antenna Diversity
+ *            @li RAILAPP_ANTENNA_0 : ANTENNA0 is used
+ *            @li RAILAPP_ANTENNA_1 : ANTENNA1 is used
+ *            @li RAILAPP_ANTENNA_AUTO : ANTENNA selection is automatic/last used
+ ******************************************************************************/
+RAIL_Status_t RAILAPP_SetAntDiv(RAILAPP_AntennaSel_t antSel)
+{
+  return (RAIL_ConfigRxOptions(railHandle, RAIL_RX_OPTION_ANTENNA_AUTO, antSel));
+}
 
 /***************************************************************************//**
  * @brief
@@ -47,23 +69,24 @@ extern RAIL_AntennaConfig_t halAntennaConfig;
  *   for each platform. Allows use with existing RPC config for all platforms.
  *
  * @param rfPath Sets the default antenna path.
- *
  ******************************************************************************/
 void RAILAPP_SetRfPath(RAIL_AntennaSel_t rfPath)
 {
  #ifdef  _SILICON_LABS_32B_SERIES_2
+  /* Antenna internal RF Path to use */
+  sl_rail_util_ant_div_get_antenna_config(&halAntennaConfig);
   halAntennaConfig.defaultPath = rfPath;
   RAIL_ConfigAntenna(railHandle, &halAntennaConfig);
- #else//!_SILICON_LABS_32B_SERIES_2
+ #else//!_SILICON_LABS_32B_SERIES_2 */
   (void) rfPath;
- #endif//_SILICON_LABS_32B_SERIES_2
+ #endif//_SILICON_LABS_32B_SERIES_2 */
 }
 
 #ifdef CLI_INTERFACE
-void CI_SetRfPath(int argc, char **argv)
+void CI_SetRfPath(sl_cli_command_arg_t *args)
 {
-  uint32_t rfPath = ciGetUnsigned(argv[1]);
+  uint32_t rfPath = sl_cli_get_argument_uint32(args, 0);
   RAILAPP_SetRfPath(rfPath);
-  responsePrint(argv[0], "RfPath:%d", rfPath);
+  responsePrint(sl_cli_get_command_string(args, 0), "RfPath:%d", rfPath);
 }
 #endif

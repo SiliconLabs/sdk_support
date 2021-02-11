@@ -223,4 +223,5 @@ typedef struct {
 /** @} End of group EFR32BG22_DPLL_BitFields */
 /** @} End of group EFR32BG22_DPLL */
 /** @} End of group Parts */
+
 #endif /* EFR32BG22_DPLL_H */

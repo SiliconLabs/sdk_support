@@ -35,14 +35,9 @@
 #include "em_system.h"
 #include "em_assert.h"
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
 /* *INDENT-OFF* */
 /***************************************************************************//**
- * @addtogroup OPAMP
+ * @addtogroup opamp OPAMP - Operational Amplifier
  * @brief Operational Amplifier (OPAMP) peripheral API
  * @details
  *  This module contains functions to:
@@ -251,9 +246,8 @@
  *   A pointer to the VDAC peripheral register block.
  * @endif
  *
- *
  * @param[in] opa
- *   Selects an OPA, valid values are @ref OPA0, @ref OPA1, and @ref OPA2.
+ *   Selects an OPA, valid values are OPA0, OPA1, and OPA2.
  ******************************************************************************/
 void OPAMP_Disable(
 #if defined(_SILICON_LABS_32B_SERIES_0)
@@ -361,7 +355,7 @@ void OPAMP_Disable(
  * @endif
  *
  * @param[in] opa
- *   Selects an OPA, valid values are @ref OPA0, @ref OPA1, and @ref OPA2.
+ *   Selects an OPA, valid values are OPA0, OPA1, and OPA2.
  *
  * @param[in] init
  *   A pointer to a structure containing OPAMP initialization information.
@@ -703,8 +697,7 @@ void OPAMP_Enable(
 #endif
 }
 
-/** @} (end addtogroup OPAMP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup opamp) */
 
 #endif /* (defined(OPAMP_PRESENT) && (OPAMP_COUNT == 1)
        || defined(VDAC_PRESENT) && (VDAC_COUNT > 0) */

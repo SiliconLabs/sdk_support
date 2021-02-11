@@ -23,6 +23,7 @@
 #include "em_gpio.h"
 #include "em_prs.h"
 #include "em_cryotimer.h"
+#include "sleep-efm32.h"
 #include "sl_sleeptimer.h"
 #include "em_chip.h"
 #include "gpiointerrupt.h"
@@ -41,6 +42,10 @@
 #if defined (_EFR_DEVICE)
 #include "tempdrv.h"
 #include "sleep-efm32.h"
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#include "sl_hfxo_manager.h"
 #endif
 
 #ifdef BSP_STK
@@ -86,7 +91,7 @@ void RAILCb_ConfigFrameTypeLength(RAIL_Handle_t railHandle,
 }
 #endif //!PHY_RAIL_MP && !PHY_RAILGB_MP && !defined(EMBER_STACK_CONNECT)
 #else//!(PHY_RAIL || PHY_DUALRAIL)
-#include "rail_chip_specific.h"
+#include "rail_types.h"
 #endif//(PHY_RAIL || PHY_DUALRAIL)
 
 #if defined (_EFR_DEVICE)
@@ -219,13 +224,9 @@ void halInit(void)
   // This differs from EM3xx, where the MPU config disallows running from all
   // RAM. The expectation is that the application will disable the MPU around
   // calls to RAM functions. On EM3xx, the MPU is also set up with regions for
-  // flash, peripherals, and the guard area between the stack and heap. See 
+  // flash, peripherals, and the guard area between the stack and heap. See
   // the mpu-config.h header for your specific EM3xx variant for more info.
-  // Due to a known incompatibility, the Simple MPU component is not used to
-  // initialize the MPU when running DMP or other Micrium-based applications.
-#if !defined(MICRIUMOS)
   sl_mpu_disable_execute_from_ram();
-#endif
 
   // Determine and record the reason for the reset.  Because this code uses
   // static variables in RAM, it must be performed after RAM segements are
@@ -257,7 +258,12 @@ void halInit(void)
 
   /* Configure board. Select either EBI or SPI mode. */
   CHIP_Init();
-  
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  // Initialize the HFXO manager on Series 2 devices before HFXO initialization
+  sl_hfxo_manager_init_hardware();
+#endif
+
 #if defined (_EFR_DEVICE)
   EMU_UnlatchPinRetention();
 #endif
@@ -274,6 +280,13 @@ void halInit(void)
 #endif
 
   halInternalStartSystemTimer();
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  // Initialize the HFXO manager after halConfigInit() is done
+  sl_hfxo_manager_init();
+#endif
+
+  halEnergyModeNotificationInit();
 
 #if (PHY_RAIL || PHY_DUALRAIL)
 #if (BSP_PA_VOLTAGE > 1800) || defined (_SILICON_LABS_32B_SERIES_2)

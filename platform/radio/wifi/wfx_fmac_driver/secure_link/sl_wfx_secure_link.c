@@ -112,23 +112,20 @@ uint8_t sl_wfx_secure_link_encryption_required_get(uint8_t request_id)
  *****************************************************************************/
 sl_status_t sl_wfx_secure_link_set_mac_key(const uint8_t *sl_mac_key, sl_wfx_securelink_mac_key_dest_t destination)
 {
-  sl_status_t       status;
+  sl_status_t       result;
   sl_wfx_set_securelink_mac_key_req_body_t request;
   sl_wfx_set_securelink_mac_key_cnf_t *reply = NULL;
 
-  // Hardcode destination to RAM until we have secure link sorted!!
-  destination = SECURE_LINK_MAC_KEY_DEST_RAM;
-
-  request.otp_or_ram= destination;
+  request.otp_or_ram = destination;
   memcpy(request.key_value, sl_mac_key, SL_WFX_KEY_VALUE_SIZE);
 
-  status = sl_wfx_send_command(SL_WFX_SET_SECURELINK_MAC_KEY_REQ_ID, &request, sizeof(request), SL_WFX_STA_INTERFACE, (sl_wfx_generic_confirmation_t **)&reply);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_send_command(SL_WFX_SET_SECURELINK_MAC_KEY_REQ_ID, &request, sizeof(request), SL_WFX_STA_INTERFACE, (sl_wfx_generic_confirmation_t **)&reply);
+  SL_WFX_ERROR_CHECK(result);
 
-  status = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_SET_SECURELINK_MAC_KEY_REQ_ID);
+  result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_SET_SECURELINK_MAC_KEY_REQ_ID);
 
   error_handler:
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -141,41 +138,41 @@ sl_status_t sl_wfx_secure_link_set_mac_key(const uint8_t *sl_mac_key, sl_wfx_sec
  *****************************************************************************/
 sl_status_t sl_wfx_secure_link_exchange_keys(const uint8_t *sl_mac_key, uint8_t *sl_host_pub_key)
 {
-  sl_status_t       status = SL_STATUS_OK;
+  sl_status_t       result = SL_STATUS_OK;
   sl_wfx_generic_message_t  *request_packet = NULL;
   sl_wfx_securelink_exchange_pub_keys_cnf_t     *response_packet = NULL;
   sl_wfx_securelink_exchange_pub_keys_req_body_t *request = NULL;
-  uint32_t                      request_length = SL_WFX_ROUND_UP_EVEN(sizeof(sl_wfx_securelink_exchange_pub_keys_req_t));
+  uint32_t          request_length = SL_WFX_ROUND_UP_EVEN(sizeof(sl_wfx_securelink_exchange_pub_keys_req_t));
 
-  status = sl_wfx_allocate_command_buffer(&request_packet, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, SL_WFX_CONTROL_BUFFER, request_length);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_allocate_command_buffer(&request_packet, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, SL_WFX_CONTROL_BUFFER, request_length);
+  SL_WFX_ERROR_CHECK(result);
 
   request = (sl_wfx_securelink_exchange_pub_keys_req_body_t *)&request_packet->body;
 
-#ifdef SL_WFX_SLK_CURVE25519
+#if SL_WFX_SLK_CURVE25519
   request->algorithm = sl_wfx_htole32(SECURE_LINK_CURVE25519);
 #else
   request->algorithm = sl_wfx_htole32(SECURE_LINK_KDF);
 #endif
 
-  status = sl_wfx_host_compute_pub_key(request, sl_mac_key);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_compute_pub_key(request, sl_mac_key);
+  SL_WFX_ERROR_CHECK(result);
 
   memcpy(sl_host_pub_key, &request->host_pub_key, SL_WFX_HOST_PUB_KEY_SIZE);
 
-  status = sl_wfx_send_request(SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, request_packet, request_length);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_send_request(SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, request_packet, request_length);
+  SL_WFX_ERROR_CHECK(result);
 
-  status = sl_wfx_host_wait_for_confirmation(SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS, (void **)&response_packet);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_host_wait_for_confirmation(SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, SL_WFX_DEFAULT_REQUEST_TIMEOUT_MS, (void **)&response_packet);
+  SL_WFX_ERROR_CHECK(result);
 
-  status = sl_wfx_get_status_code(sl_wfx_htole32(response_packet->body.status), SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID);
+  result = sl_wfx_get_status_code(sl_wfx_htole32(response_packet->body.status), SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID);
 
   error_handler:
   if (request_packet != NULL) {
     sl_wfx_free_command_buffer(request_packet, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID, SL_WFX_CONTROL_BUFFER);
   }
-  return status;
+  return result;
 }
 
 /**************************************************************************//**
@@ -215,6 +212,11 @@ sl_status_t sl_wfx_secure_link_renegotiate_session_key(void)
   result = sl_wfx_get_status_code(sl_wfx_htole32(exchange_pub_keys_ind->body.status), SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_IND_ID);
   SL_WFX_ERROR_CHECK(result);
 
+  // reset nonce counters as soon as possible
+  sl_wfx_context->secure_link_nonce.hp_packet_count = 0;
+  sl_wfx_context->secure_link_nonce.rx_packet_count = 0;
+  sl_wfx_context->secure_link_nonce.tx_packet_count = 0;
+
   result = sl_wfx_host_verify_pub_key(exchange_pub_keys_ind, sl_wfx_context->secure_link_mac_key, sl_host_pub_key);
   SL_WFX_ERROR_CHECK(result);
 
@@ -244,20 +246,174 @@ sl_status_t sl_wfx_secure_link_renegotiate_session_key(void)
  *****************************************************************************/
 sl_status_t sl_wfx_secure_link_configure(const uint8_t *encryption_bitmap, uint8_t disable_session_key_protection)
 {
-  sl_status_t            status;
+  sl_status_t result;
   sl_wfx_securelink_configure_req_body_t request;
+  sl_wfx_securelink_configure_cnf_t *reply = NULL;
 
   memcpy(request.encr_bmp, encryption_bitmap, SL_WFX_ENCR_BMP_SIZE);
   request.disable_session_key_protection = sl_wfx_htole32(disable_session_key_protection);
 
-  status = sl_wfx_send_command(SL_WFX_SECURELINK_CONFIGURE_REQ_ID, &request, sizeof(request), SL_WFX_STA_INTERFACE, NULL);
-  SL_WFX_ERROR_CHECK(status);
+  result = sl_wfx_send_command(SL_WFX_SECURELINK_CONFIGURE_REQ_ID,
+                               &request,
+                               sizeof(request),
+                               SL_WFX_STA_INTERFACE,
+                               (sl_wfx_generic_confirmation_t **)&reply);
 
-  /* New bitmap successfully set to wf200, save it as the new working bitmap */
-  memcpy(sl_wfx_context->encryption_bitmap, encryption_bitmap, SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE);
+  if (result == SL_STATUS_OK) {
+    result = sl_wfx_get_status_code(sl_wfx_htole32(reply->body.status), SL_WFX_GET_SIGNAL_STRENGTH_REQ_ID);
+    if (result == SL_STATUS_OK) {
+      memcpy(sl_wfx_context->encryption_bitmap, reply->body.encr_bmp, SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE);
+    }
+    // Return a warning if one or more bits of the bitmap were not applied by the firmware.
+    if (memcmp(request.encr_bmp, reply->body.encr_bmp, SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE)) {
+      result = SL_STATUS_WIFI_WARNING;
+    }
+  }
+
+  return result;
+}
+
+sl_status_t sl_wfx_secure_link_send(uint8_t command_id, sl_wfx_generic_message_t **request, uint16_t *request_length)
+{
+  sl_status_t result = SL_STATUS_OK;
+
+  if (sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_RENEGOTIATION_PENDING
+      && command_id != SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID) {
+    result = SL_STATUS_FAIL;
+    goto error_handler;
+  }
+
+  if (sl_wfx_secure_link_encryption_required_get(command_id) == SL_WFX_SECURE_LINK_ENCRYPTION_REQUIRED) {
+    // Nonce for encryption should have RX and HP counters 0, only use TX counter
+    sl_wfx_nonce_t encryption_nonce = { 0, 0, sl_wfx_context->secure_link_nonce.tx_packet_count };
+
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+    sl_wfx_host_log("TX packet %lu\n", sl_wfx_context->secure_link_nonce.tx_packet_count);
+#endif
+
+    // Round up to next crypto block size the part that will be ciphered
+    *request_length = ((*request_length + 15 - 2) & ~15) + 2;
+
+    // Encrypt the data
+    result = sl_wfx_host_encode_secure_link_data(*request,
+                                                 *request_length - 2,
+                                                 sl_wfx_context->secure_link_session_key,
+                                                 (uint8_t *)&encryption_nonce);
+    SL_WFX_ERROR_CHECK(result);
+
+    // Write the secure link header
+    uint16_t *secure_link_header = (uint16_t *)((uint8_t *)*request - 4);
+    *secure_link_header = sl_wfx_htole16((uint16_t) (sl_wfx_context->secure_link_nonce.tx_packet_count & 0xFFFF));
+    secure_link_header++;
+    *secure_link_header = sl_wfx_htole16((uint16_t) (0x4000 | ( (sl_wfx_context->secure_link_nonce.tx_packet_count >> 16) & 0x3FFF)));
+
+    sl_wfx_context->secure_link_nonce.tx_packet_count++;
+
+    if (sl_wfx_context->secure_link_nonce.tx_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK
+        && sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_DEFAULT) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+      sl_wfx_host_log("--SLK renegotiation needed--\r\n");
+#endif
+      //queue key re-negotiation
+      sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_NEEDED;
+    }
+
+    // Add the secure link buffer overhead and transmit
+    *request_length += SL_WFX_SECURE_LINK_HEADER_SIZE + SL_WFX_SECURE_LINK_CCM_TAG_SIZE;
+    *request = (sl_wfx_generic_message_t *)((uint8_t *)*request - SL_WFX_SECURE_LINK_HEADER_SIZE);
+  }
 
   error_handler:
-  return status;
+  return result;
+}
+
+sl_status_t sl_wfx_secure_link_receive(sl_wfx_generic_message_t **network_rx_buffer, uint32_t read_length)
+{
+  sl_status_t result = SL_STATUS_OK;
+  uint8_t has_encrypt_header;
+  // Bit 14/15 of second word indicates if the message is encrypted
+  uint8_t encrypt_type = ((*network_rx_buffer)->header.info & SL_WFX_MSG_INFO_SECURE_LINK_MASK) >> SL_WFX_MSG_INFO_SECURE_LINK_OFFSET;
+
+  // Currently only RX counter is expected
+  switch (encrypt_type) {
+    case 0x0: has_encrypt_header = SL_WFX_SECURE_LINK_ENCRYPTION_NOT_REQUIRED; break;
+    case 0x2: has_encrypt_header = SL_WFX_SECURE_LINK_ENCRYPTION_REQUIRED; break;
+    default:
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+      sl_wfx_host_log("--SLK wrong counter type--\r\n");
+#endif
+      result = SL_STATUS_FAIL;
+      SL_WFX_ERROR_CHECK(result);
+  }
+
+  if (has_encrypt_header) {
+    uint16_t *nonce_ptr = (uint16_t *) *network_rx_buffer;
+    uint32_t new_packet_count = sl_wfx_unpack_16bit_little_endian(&((*network_rx_buffer)->header.length));
+    nonce_ptr++;
+    new_packet_count |= (*nonce_ptr & 0x3FFF) << 16;
+
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+    sl_wfx_host_log("RX packet %lu\n", new_packet_count);
+#endif
+
+    // Update secure link nonce values
+    if (sl_wfx_context->secure_link_nonce.rx_packet_count != new_packet_count) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+      sl_wfx_host_log("--SLK counter mismatch-- %lu %lu\r\n", sl_wfx_context->secure_link_nonce.rx_packet_count, new_packet_count);
+#endif
+      result = SL_STATUS_FAIL;
+      SL_WFX_ERROR_CHECK(result);
+    }
+
+    // Encrypted data length is Total bytes read - secure link header -  2 extra bytes read of CTRL register - 2 more bytes for message length in clear
+    uint32_t decrypt_length = read_length - SL_WFX_SECURE_LINK_HEADER_SIZE - SL_WFX_SECURE_LINK_CCM_TAG_SIZE - SL_WFX_CONT_REGISTER_SIZE - 2;
+    result = sl_wfx_host_decode_secure_link_data((uint8_t*)*network_rx_buffer + SL_WFX_SECURE_LINK_HEADER_SIZE + 2,
+                                               decrypt_length,
+                                               sl_wfx_context->secure_link_session_key);
+    SL_WFX_ERROR_CHECK(result);
+
+    sl_wfx_context->secure_link_nonce.rx_packet_count = (sl_wfx_context->secure_link_nonce.rx_packet_count + 1) & ~0xC0000000;
+
+    if ((sl_wfx_context->secure_link_nonce.rx_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK
+         || sl_wfx_context->secure_link_nonce.hp_packet_count > SL_WFX_SECURE_LINK_NONCE_WATERMARK)
+        && sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_DEFAULT) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+      sl_wfx_host_log("--SLK renegotiation needed--\r\n");
+#endif
+      sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_NEEDED;
+    }
+
+    /* Move the buffer pointer by SL_WFX_SECURE_LINK_HEADER_SIZE bytes to point to generic_message_t data */
+    *network_rx_buffer = (sl_wfx_generic_message_t *)((uint8_t *)*network_rx_buffer + SL_WFX_SECURE_LINK_HEADER_SIZE);
+  }
+
+  /* Check received message encryption state corresponds to the expectations from the SLK bitmap */
+  if (sl_wfx_secure_link_encryption_required_get((*network_rx_buffer)->header.id) != has_encrypt_header) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+    sl_wfx_host_log("--SLK encryption state mismatch--\r\n");
+#endif
+    result = SL_STATUS_FAIL;
+    SL_WFX_ERROR_CHECK(result);
+  }
+
+  error_handler:
+  return result;
+}
+
+sl_status_t sl_wfx_secure_link_renegotiate(void)
+{
+  sl_status_t result = SL_STATUS_OK;
+
+  if (sl_wfx_context->secure_link_renegotiation_state == SL_WFX_SECURELINK_RENEGOTIATION_NEEDED) {
+#if (SL_WFX_DEBUG_MASK & SL_WFX_DEBUG_SLK)
+    sl_wfx_host_log("--SLK renegotiation pending--\r\n");
+#endif
+    sl_wfx_context->secure_link_renegotiation_state = SL_WFX_SECURELINK_RENEGOTIATION_PENDING;
+    //notify host
+    result = sl_wfx_host_schedule_secure_link_renegotiation();
+  }
+
+  return result;
 }
 
 /** @} end GENERAL_DRIVER_API */
@@ -267,44 +423,11 @@ sl_status_t sl_wfx_secure_link_configure(const uint8_t *encryption_bitmap, uint8
  *
  * @param bitmap is the bitmap that must be updated
  *
- * @note It is advised to apply these changes to a transitory bitmap. Its data will be copied
- * to the sl_wfx_context bitmap once the sl_wfx_send_secure_link_encryption_bitmap() has
- * completed successfully.
- * @note SL_WFX_EXCEPTION_IND_ID, SL_WFX_ERROR_IND_ID, SL_WFX_STARTUP_IND_ID, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID
- * and SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_IND_ID cannot be encrypted and are excluded from this function.
- * @note SL_WFX_WAKEUP_IND_ID is empty and there is no point encrypting it.
- * @note SL_WFX_SEND_FRAME_REQ_ID, SL_WFX_RECEIVED_IND_ID are not encrypted by default as enabling encryption
- * for these can lower the throughput. If needed, use sl_wfx_secure_link_bitmap_add_request_id() separately.
+ * @note WFX firmware automatically adjusts for commands that should never or always be encrypted
  *****************************************************************************/
 void sl_wfx_secure_link_bitmap_set_all_encrypted(uint8_t *bitmap)
 {
-  /* Enabling secure link on all fullmac/splitmac/mib commands except for the send/receive data commands
-   * We don't want an attacker to be able to control:
-   *    > Connecting or disconnecting from an AP
-   *    > Starting or stopping softAP and softAP settings
-   *    > Who is connected (or the host thinks is connected) to a softAP
-   *    > What multicast groups the device is subscribed too
-   *    > Roaming of device between APs
-   * Having any of these commands sent in the clear could be used to influence
-   * the client application to potentially mine data (eg connecting to a network
-   * that the client application wouldn't allow or setting up an impromptu mesh network
-   * between multiple nodes with a softap) or brick the devices.
-   */
-
   memset(bitmap, 0xFF, SL_WFX_SECURE_LINK_ENCRYPTION_BITMAP_SIZE);
-
-  // Some messages ignore the bitmap setting, remove them so that the driver and the device stay in sync
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, 4);  /* 3 split mac commands should be excluded */
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, 30);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, 132);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_EXCEPTION_IND_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_ERROR_IND_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_STARTUP_IND_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_WAKEUP_IND_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_REQ_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_SECURELINK_EXCHANGE_PUB_KEYS_IND_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_SEND_FRAME_REQ_ID);
-  sl_wfx_secure_link_bitmap_remove_request_id(bitmap, SL_WFX_RECEIVED_IND_ID);
 }
 
 /**************************************************************************//**

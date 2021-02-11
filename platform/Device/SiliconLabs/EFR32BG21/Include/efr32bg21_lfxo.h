@@ -277,4 +277,5 @@ typedef struct {
 /** @} End of group EFR32BG21_LFXO_BitFields */
 /** @} End of group EFR32BG21_LFXO */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_LFXO_H */

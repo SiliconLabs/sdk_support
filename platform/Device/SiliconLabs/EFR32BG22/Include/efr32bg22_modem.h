@@ -3762,4 +3762,5 @@ typedef struct {
 /** @} End of group EFR32BG22_MODEM_BitFields */
 /** @} End of group EFR32BG22_MODEM */
 /** @} End of group Parts */
+
 #endif /* EFR32BG22_MODEM_H */

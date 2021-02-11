@@ -357,4 +357,5 @@ typedef struct {
 /** @} End of group MGM22_WDOG_BitFields */
 /** @} End of group MGM22_WDOG */
 /** @} End of group Parts */
+
 #endif /* MGM22_WDOG_H */

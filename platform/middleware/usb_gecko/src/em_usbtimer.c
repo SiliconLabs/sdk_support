@@ -140,7 +140,10 @@ static void DelayTicks(uint16_t ticks)
 
 /** @endcond */
 
-/** @addtogroup USB_COMMON
+/** @addtogroup usb
+ *  @{*/
+
+/** @addtogroup usb_common
  *  @{*/
 
 /***************************************************************************//**
@@ -337,7 +340,8 @@ void USBTIMER_Stop(uint32_t id)
 }
 #endif /* ( NUM_QTIMERS > 0 ) */
 
-/** @} (end addtogroup USB_COMMON) */
+/** @} (end addtogroup usb_common) */
+/** @} (end addtogroup usb) */
 
 #if (NUM_QTIMERS > 0)
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */

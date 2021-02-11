@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CSEN
+ * @addtogroup csen CSEN - Capacitive Sense
  * @brief Capacitive Sense (CSEN) Peripheral API.
  *
  * @details
@@ -359,16 +354,17 @@ typedef struct {
   CSEN_PRSSel_TypeDef           prsSel;
 
   /** CSEN input to APORT channel mapping. */
-  CSEN_InputSel_TypeDef         input0To7;
-  CSEN_InputSel_TypeDef         input8To15;
-  CSEN_InputSel_TypeDef         input16To23;
-  CSEN_InputSel_TypeDef         input24To31;
-  CSEN_InputSel_TypeDef         input32To39;
-  CSEN_InputSel_TypeDef         input40To47;
-  CSEN_InputSel_TypeDef         input48To55;
-  CSEN_InputSel_TypeDef         input56To63;
+  CSEN_InputSel_TypeDef         input0To7;   /** CSEN input select 0-7. */
+  CSEN_InputSel_TypeDef         input8To15;  /** CSEN input select 8-15. */
+  CSEN_InputSel_TypeDef         input16To23; /** CSEN input select 6-23. */
+  CSEN_InputSel_TypeDef         input24To31; /** CSEN input select 24-31. */
+  CSEN_InputSel_TypeDef         input32To39; /** CSEN input select 32-39. */
+  CSEN_InputSel_TypeDef         input40To47; /** CSEN input select 40-47. */
+  CSEN_InputSel_TypeDef         input48To55; /** CSEN input select 48-55. */
+  CSEN_InputSel_TypeDef         input56To63; /** CSEN input select 56-63. */
 } CSEN_Init_TypeDef;
 
+/** CSEN default initialization. */
 #define CSEN_INIT_DEFAULT                                             \
   {                                                                   \
     false,                      /* Charge pump low accuracy mode. */  \
@@ -469,6 +465,7 @@ typedef struct {
   CSEN_GainSel_TypeDef          gainSel;
 } CSEN_InitMode_TypeDef;
 
+/** CSEN default mode initialization. */
 #define CSEN_INITMODE_DEFAULT                                          \
   {                                                                    \
     csenSampleModeSingle,       /* Sample one input and stop. */       \
@@ -731,7 +728,6 @@ __STATIC_INLINE void CSEN_Start(CSEN_TypeDef *csen)
 }
 
 /** @} (end addtogroup CSEN) */
-/** @} (end addtogroup emlib) */
 
 #ifdef __cplusplus
 }

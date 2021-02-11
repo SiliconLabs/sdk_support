@@ -3,7 +3,7 @@
  * @brief Packet traffic arbitration interface.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -43,13 +43,13 @@
 /** @brief The following definitions are helpers for managing
  *  Radio HoldOff and should not be modified.
  */
-#if     (HAL_COEX_ENABLE && defined(BSP_COEX_RHO_PORT))
+#if     (SL_RAIL_UTIL_COEX_ENABLED && defined(SL_RAIL_UTIL_COEX_RHO_PORT))
 // Initial bootup configuration is for Radio HoldOff
   #define halInternalInitRadioHoldOff() halSetRadioHoldOff(true)
-#else//!(HAL_COEX_ENABLE && defined(BSP_COEX_RHO_PORT))
+#else//!(SL_RAIL_UTIL_COEX_ENABLED && defined(SL_RAIL_UTIL_COEX_RHO_PORT))
 // Initial bootup configuration is for default
   #define halInternalInitRadioHoldOff() /* no-op */
-#endif//(HAL_COEX_ENABLE && defined(BSP_COEX_RHO_PORT))
+#endif//(SL_RAIL_UTIL_COEX_ENABLED && defined(SL_RAIL_UTIL_COEX_RHO_PORT))
 
 //@} //END OF RADIO HOLDOFF CONFIGURATION DEFINITIONS
 
@@ -67,13 +67,13 @@
  */
 //@{
 
-#if     (HAL_COEX_ENABLE && (defined(BSP_COEX_REQ_PORT) || defined(BSP_COEX_GNT_PORT)))
+#if     (SL_RAIL_UTIL_COEX_ENABLED && (defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)))
 // Initial bootup configuration is to enable PTA
   #define halInternalInitPta() halPtaSetEnable(true)
-#else//!(HAL_COEX_ENABLE && (defined(BSP_COEX_REQ_PORT) || defined(BSP_COEX_GNT_PORT)))
+#else//!(SL_RAIL_UTIL_COEX_ENABLED && (defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)))
 // Initial bootup configuration is not to enable PTA
   #define halInternalInitPta() /* no-op */
-#endif//(HAL_COEX_ENABLE && (defined(BSP_COEX_REQ_PORT) || defined(BSP_COEX_GNT_PORT)))
+#endif//(SL_RAIL_UTIL_COEX_ENABLED && (defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)))
 
 //@} //END OF PTA CONFIGURATION DEFINITIONS
 
@@ -270,7 +270,7 @@ uint8_t halPtaGetPhySelectTimeout(void);
 // Get the override input value of a GPIO
 bool halPtaGetGpioInputOverride(halPtaGpioIndex_t gpioIndex);
 
-// If HAL_COEX_OVERRIDE_GPIO_INPUT is enabled,
+// If SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT is enabled,
 // the input value of a PTA is read from a virtual GPIO
 // rather than the physical PTA GPIO
 EmberStatus halPtaSetGpioInputOverride(halPtaGpioIndex_t gpioIndex, bool enabled);

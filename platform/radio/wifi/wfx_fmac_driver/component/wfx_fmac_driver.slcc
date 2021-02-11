@@ -1,0 +1,92 @@
+id: "wfx_fmac_driver"
+label: "WFx FMAC driver"
+package: "platform"
+category: "Wi-Fi"
+quality: "production"
+description: "Driver for WFx Wi-Fi transceiver."
+provides:
+  - name: "wfx_fmac_driver"
+requires:
+  - name: "wfx_bus_interface"
+  - name: "micriumos"
+  - name: "emlib_gpio"
+root_path: "platform/radio/wifi/wfx_fmac_driver"
+include:
+  - path: "./"
+    file_list:
+      - path: "sl_wfx.h"
+      - path: "sl_wfx_constants.h"
+      - path: "sl_wfx_host_api.h"
+      - path: "sl_wfx_version.h"
+      - path: "sl_wfx_configuration_defaults.h"
+  - path: "bus/"
+    file_list:
+      - path: "sl_wfx_bus.h"
+  - path: "firmware/"
+    file_list:
+      - path: "sl_wfx_api.h"
+      - path: "sl_wfx_cmd_api.h"
+      - path: "sl_wfx_general_api.h"
+      - path: "sl_wfx_general_error_api.h"
+      - path: "sl_wfx_registers.h"
+      - path: "sl_wfx_wf200_C0.h"
+  - path: "wfx_host/"
+    file_list:
+      - path: "sl_wfx_host.h"
+      - path: "sl_wfx_task.h"
+  - path: "pds/brd8022a"
+    condition: [brd8022a]
+    file_list:
+      - path: "sl_wfx_pds.h"
+  - path: "pds/brd8023a"
+    condition: [brd8023a]
+    file_list:
+      - path: "sl_wfx_pds.h"
+source:
+  - path: "sl_wfx.c"
+  - path: "bus/sl_wfx_bus.c"
+  - path: "wfx_host/sl_wfx_host.c"
+  - path: "wfx_host/sl_wfx_task.c"
+config_file:
+  - path: "config/sl_wfx_configuration.h"
+    file_id: "sl_wfx_configuration"
+  - path: "config/sl_wfx_host_pinout.h"
+    file_id: "sl_wfx_host_pinout"
+  - override:
+      component: "wfx_fmac_driver"
+      file_id: "sl_wfx_host_pinout"
+    path: "config/brd2204a/sl_wfx_host_pinout.h"
+    condition: [brd2204a]
+  - override:
+      component: "wfx_fmac_driver"
+      file_id: "sl_wfx_host_pinout"
+    path: "config/brd416Xa/sl_wfx_host_pinout.h"
+    condition: [brd4161a]
+  - override:
+      component: "wfx_fmac_driver"
+      file_id: "sl_wfx_host_pinout"
+    path: "config/brd416Xa/sl_wfx_host_pinout.h"
+    condition: [brd4162a]
+  - override:
+      component: "wfx_fmac_driver"
+      file_id: "sl_wfx_host_pinout"
+    path: "config/brd416Xa/sl_wfx_host_pinout.h"
+    condition: [brd4163a]
+  - override:
+      component: "wfx_fmac_driver"
+      file_id: "sl_wfx_host_pinout"
+    path: "config/brd416Xa/sl_wfx_host_pinout.h"
+    condition: [brd4164a]
+template_contribution:
+  - name: component_catalog
+    value: wfx_fmac_driver
+  - name: component_catalog
+    value: wfx_board
+    condition: [brd8022a]
+  - name: component_catalog
+    value: wfx_board
+    condition: [brd8023a]
+
+documentation:
+  docset: wifi/wf200/rtos
+  document: group-f-u-l-l-m-a-c-d-r-i-v-e-r-a-p-i

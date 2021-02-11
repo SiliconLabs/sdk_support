@@ -492,4 +492,5 @@ typedef struct {
 /** @} End of group MGM21_LETIMER_BitFields */
 /** @} End of group MGM21_LETIMER */
 /** @} End of group Parts */
+
 #endif /* MGM21_LETIMER_H */

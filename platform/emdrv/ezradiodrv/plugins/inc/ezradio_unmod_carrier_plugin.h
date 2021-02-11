@@ -34,25 +34,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Unmod_Carrier_Plugin
- * @brief Unmodulated Carrier plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_crcerror EZRADIODRV Unmod Carrier Plugin
+ * @brief EzRadio Unmodulated Carrier plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -77,10 +71,9 @@ Ecode_t ezradioStopUnmodulatedCarrier(void);
 #define EZRADIODRV_UNMOD_CARRIER_PLUGIN_INIT_DEFAULT
 #endif  //#if defined( EZRADIO_PLUGIN_UNMOD_CARRIER )
 
-/** @} (end addtogroup Unmod_Carrier_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_carrier) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

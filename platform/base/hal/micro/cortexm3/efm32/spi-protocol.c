@@ -24,19 +24,36 @@
 #include "gpiointerrupt.h"
 #include "hal/micro/cortexm3/efm32/spi-protocol-device.h"
 
-uint8_t halHostBuffer[SPIP_BUFFER_SIZE];
-uint8_t spipErrorResponseBuffer[SPIP_ERROR_RESPONSE_SIZE];
-//Provide easy references the buffers for EZSP
-uint8_t *halHostFrame = halHostBuffer + EZSP_LENGTH_INDEX;
+// Buffer for RX data (sent from the Host to the NCP)
+static uint8_t commandBuffer[SPIP_BUFFER_SIZE];
+// Buffer for TX data (to send from the NCP to the host)
+static uint8_t responseBuffer[SPIP_BUFFER_SIZE];
+// Buffer for override frame to send in response to an error or reset
+static uint8_t spipErrorResponseBuffer[SPIP_ERROR_RESPONSE_SIZE];
+
+// Provide the stack with its own buffer to isolate it from the lower level SPIP
+// buffers. We keep the old pointer (halHostFrame) for type compatibility.
+uint8_t stackBuffer[SPIP_MAX_WITH_PADDING];
+uint8_t * halHostFrame = stackBuffer;
+
+// Keep track of where we think the host data starts in commandBuffer.
+// The vast majority of the time, this should be at the beginning (offset 0).
+// However, in some rare cases (notably when our nSSEL ISR cannot run for an
+// extended period of time that corresponds to a packet transition), the command
+// bytes may be pulled out of the USART peripheral by the SPIDRV transfer that
+// was set up to transmit the previous response. This means the command will
+// start later in the buffer.
+static uint32_t commandOffset = 0;
 
 // legacy support
 bool spipFlagWakeFallingEdge;  //flag for detecting a falling edge on nWAKE
 
 struct {
-  volatile enum { spipNcpIdle = 0,    \
-                  spipNcpCommand = 1, \
-                  spipNcpWait = 2,    \
-                  spipNcpResponse = 3} state;
+  volatile enum { spipNcpIdle = 0,     \
+                  spipNcpCommand = 1,  \
+                  spipNcpWait = 2,     \
+                  spipNcpResponse = 3, \
+                  spipNcpDone = 4        } state;
   bool overrideResponse;      //flag for indicating errors or SPIP boot
   bool wakeup;                //flag for detecting a falling edge on nWAKE
   bool idleHostInt;           //flag for idling nHOST_INT at proper time
@@ -51,9 +68,6 @@ static void nSSEL_ISR(uint8_t pin);
 static void nWAKE_ISR(uint8_t pin);
 static void processSpipCommandAndRespond(uint8_t spipResponse);
 static void setSpipErrorBuffer(uint8_t spiByte);
-static void spiTxCallback(SPIDRV_Handle_t handle,
-                          Ecode_t transferStatus,
-                          int itemsTransferred);
 static void wipeAndRestartSpi(void);
 
 void halHostCallback(bool haveData)
@@ -90,6 +104,9 @@ void halHostSerialInit(void)
   spipErrorResponseBuffer[1] = halGetEm2xxResetInfo(); //inject reset cause
   spipNcpState.responseLength = 0;           //default length of zero
 
+  MEMSET(commandBuffer, 0xFF, SPIP_BUFFER_SIZE);
+  MEMSET(responseBuffer, 0xFF, SPIP_BUFFER_SIZE);
+
   halHostSerialPowerup();
 }
 
@@ -107,8 +124,10 @@ void halHostSerialPowerup(void)
   GPIOINT_Init();
 
   #if (!defined(DISABLE_NWAKE)) && (!defined(HAL_CONFIG) || defined(BSP_SPINCP_NWAKE_PIN))
-  // Initialize nWAKE as input with falling edge interrupt
+  // Disable the interrupt before configuration in case there's a conflict in
+  // interrupt numbering.
   GPIO_IntDisable(1 << BSP_SPINCP_NWAKE_PIN);
+  // Initialize nWAKE as input with falling edge interrupt.
   GPIO_PinModeSet(BSP_SPINCP_NWAKE_PORT,
                   BSP_SPINCP_NWAKE_PIN,
                   gpioModeInputPullFilter,
@@ -121,11 +140,13 @@ void halHostSerialPowerup(void)
   GPIOINT_CallbackRegister(BSP_SPINCP_NWAKE_PIN, nWAKE_ISR);
   #endif
 
-  // Initialize nSSEL as input with rising/falling edge interrupts
+  // Disable the interrupt before configuration in case there's a conflict in
+  // interrupt numbering.
   GPIO_IntDisable(1 << SPI_NCP_CS_PIN);
+  // Initialize nSSEL as input with rising/falling edge interrupts
   GPIO_PinModeSet(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, gpioModeInputPullFilter, 1);
-  GPIO_IntConfig(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, true, true, true);
   GPIOINT_CallbackRegister(SPI_NCP_CS_PIN, nSSEL_ISR);
+  GPIO_IntConfig(SPI_NCP_CS_PORT, SPI_NCP_CS_PIN, true, true, true);
 
   // ----- Account for Noise and Crosstalk ------ //
   // on some hardware configurations there is a lot of noise and bootloading can fail
@@ -145,6 +166,12 @@ void halHostSerialPowerdown(void)
   while (nSSEL_IS_ASSERTED()) {
     halResetWatchdog();
   }
+
+  // Disable the interrupt on CS first so that it won't be triggered by the pin
+  // configuration done by SPIDRV_DeInit().
+  GPIO_IntDisable(1 << SPI_NCP_CS_PIN);
+  // Deinitialize spidrv to remove requirement on em1.
+  SPIDRV_DeInit(spiHandle);
 }
 
 bool halHostSerialTick(bool responseReady)
@@ -160,6 +187,7 @@ bool halHostSerialTick(bool responseReady)
     validCommand = halInternalHostSerialTick(responseReady);
     RESTORE_INTERRUPTS();
   }
+
   return validCommand;
 }
 
@@ -168,13 +196,141 @@ void halNcpClearWakeFlag(void)
   spipFlagWakeFallingEdge = false;
 }
 
+static uint8_t getHostByte(uint32_t index)
+{
+  return commandBuffer[commandOffset + index];
+}
+
+static uint8_t getHostCommandLength(void)
+{
+  return getHostByte(SPIP_LENGTH_INDEX) + SPIP_OVERHEAD;
+}
+
+static void shiftHostCommand(void)
+{
+  uint32_t lcv;
+  uint32_t length = getHostCommandLength();
+
+  // Verify that the computed start and length won't make us try to index off
+  // the end of the buffer. This _should_ already be guaranteed by the size of
+  // the buffer and earlier (non-assert) checks, so violating this is a
+  // programming error and needs to be looked at more closely (it could also
+  // indicate the start or length have changed due to memory corruption since
+  // they were checked).
+  assert(commandOffset + length <= SPIP_BUFFER_SIZE);
+
+  // Shift the received command so it's where the stack expects it
+  for (lcv = 0; lcv < length; lcv++) {
+    halHostFrame[lcv] = getHostByte(lcv + SPIP_LENGTH_INDEX);
+  }
+
+  commandOffset = 0;
+}
+
+static int itemsTransferred, itemsRemaining;
+static bool findHostCommand(void)
+{
+  bool validCommand = false;
+
+  SPIDRV_GetTransferStatus(spiHandle, &itemsTransferred, &itemsRemaining);
+
+  // Skip any leading idle bytes. These could be present because the host is
+  // actually sending idle bytes, but it's more likely that we weren't able to
+  // turn the SPI driver around from the previous response transmission to start
+  // a new receive in time for this command and we're processing those idle
+  // bytes. We keep looking until we find a non-idle byte, we run out of data,
+  // or the message is potentially too big to fit in our buffer.
+  while (getHostByte(SPIP_PREFIX_INDEX) == 0xFF
+         && commandOffset < itemsTransferred
+         && commandOffset < SPIP_MAX_WITH_PADDING) {
+    commandOffset++;
+  }
+
+  // Are we still waiting for the length byte? If so, try again later after the
+  // host has sent more data
+  if (itemsTransferred <= (commandOffset + SPIP_LENGTH_INDEX)) {
+    return validCommand;
+  }
+
+  switch (getHostByte(SPIP_PREFIX_INDEX)) {
+    case 0x0A:
+      processSpipCommandAndRespond(SPIP_VERSION);
+      break;
+    case 0x0B:
+      processSpipCommandAndRespond(SPIP_ALIVE);
+      break;
+    case 0xFD: //The Command is a Bootloader Frame
+    //Fall into EZSP Frame since processing the rest of the command is
+    //the same. The only difference is responding with the Unsupported
+    //SPI Command error
+    case 0xFE: //The Command is an EZSP Frame
+      if (getHostByte(SPIP_LENGTH_INDEX) > MAX_PAYLOAD_FRAME_LENGTH) {
+        // If the received length is too big, send an error response.
+        setSpipErrorBuffer(SPIP_OVERSIZED_EZSP);
+        spipNcpState.state = spipNcpWait;
+        halInternalHostSerialTick(true); //respond immediately!
+      } else if (itemsTransferred >= (getHostCommandLength() + commandOffset)) {
+        // The above check means that we've gotten as many bytes of the command
+        // as we expect to given the length field, so stop receiving and start
+        // processing it.
+        SPIDRV_AbortTransfer(spiHandle);
+
+        // We enable RX blocking here after the command is fully received and
+        // disable it when we start sending the response (or, if the frame is
+        // aborted before that point, when we start the receive for the next
+        // command). See the comment when the SPIDRV transfer is started in the
+        // spipNcpWait case of halInternalHostSerialTick's switch statement for
+        // the rationale.
+        spiHandle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKEN;
+
+        // Transition state to wait for TX buffer ready
+        spipNcpState.state = spipNcpWait;
+
+        //check for Frame Terminator, it must be there!
+        if (spipNcpState.overrideResponse) {
+          halInternalHostSerialTick(true); //respond immediately!
+        } else if (getHostByte(getHostCommandLength() - SPIP_FRAME_TERMINATOR_SIZE)
+                   != SPIP_FRAME_TERMINATOR) {
+          //no frame terminator found!  report missing F.T.
+          setSpipErrorBuffer(SPIP_MISSING_FT);
+          halInternalHostSerialTick(true); //respond immediately!
+        } else if (getHostByte(SPIP_PREFIX_INDEX) == 0xFD) {
+          //load error response buffer with Unsupported SPI Command error
+          setSpipErrorBuffer(SPIP_UNSUPPORTED_COMMAND);
+          halInternalHostSerialTick(true); //respond immediately!
+        } else {
+          shiftHostCommand();
+          responseBuffer[SPIP_PREFIX_INDEX] = 0xFE; //mark the response EZSP Frame
+          validCommand = true; //there is a valid command
+        }
+      }
+      break;
+    case 0xFF: // Idle byte
+    // Intentional fall through since 0xFF is not a supported command
+    // and we weren't able to find anything else in a full message's
+    // worth of bytes (which should account for the possibility
+    // mentioned above that we're processing idle bytes from sending the
+    // the previous response). Might also be acceptable to send
+    // SPIP_OVERSIZED_EZSP
+    default:
+      // Load error response buffer with Unsupported SPI Command error
+      setSpipErrorBuffer(SPIP_UNSUPPORTED_COMMAND);
+      spipNcpState.state = spipNcpWait;
+      halInternalHostSerialTick(true); //respond immediately!
+      break;
+  }
+
+  return validCommand;
+}
+
 //One layer of indirection is used so calling the public function will actually
 //result in the real Tick function (this internal one) being wrapped between a
 //DISABLE_INTERRUPTS() and RESTORE_INTERRUPTS() to prevent potential corruption
 //from the nSSEL interrupt.
-static int itemsTransferred, itemsRemaining;
 static bool halInternalHostSerialTick(bool responseReady)
 {
+  bool validCommand = false;
+
   if (spipNcpState.overrideResponse && nSSEL_IS_NEGATED()) {
     CLR_nHOST_INT();
   }
@@ -199,71 +355,28 @@ static bool halInternalHostSerialTick(bool responseReady)
       }
 
       if (spiHandle->state == spidrvStateIdle) {
+        // Clear out anything remaining in the USART's FIFOs
+        spiHandle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
         SPIDRV_SReceive(spiHandle,
-                        halHostBuffer,
+                        commandBuffer,
                         SPIP_BUFFER_SIZE,
                         NULL,
                         SPI_NCP_TIMEOUT);
+        // Disable RX blocking so we can receive the next command. See the
+        // comment when the SPIDRV transfer is started in the spipNcpWait case
+        // of halInternalHostSerialTick's switch statement for the rationale.
+        spiHandle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKDIS;
         break;
       } else if (nSSEL_IS_ASSERTED()) {
         SET_nHOST_INT();
         spipNcpState.state = spipNcpCommand;
+        commandOffset = 0;
         // fall through to the spiNcpCommand case immediately
       } else {
         break;
       }
     case spipNcpCommand:
-      SPIDRV_GetTransferStatus(spiHandle, &itemsTransferred, &itemsRemaining);
-      if (itemsTransferred > 1) {
-        SET_nHOST_INT();
-        switch (halHostBuffer[0]) {
-          case 0x0A:
-            // Transition state to wait for TX buffer ready
-            spipNcpState.state = spipNcpWait;
-            processSpipCommandAndRespond(SPIP_VERSION);
-            break;
-          case 0x0B:
-            // Transition state to wait for TX buffer ready
-            spipNcpState.state = spipNcpWait;
-            processSpipCommandAndRespond(SPIP_ALIVE);
-            break;
-          case 0xFD: //The Command is a Bootloader Frame
-          //Fall into EZSP Frame since processing the rest of the command is
-          //the same. The only difference is responding with the Unsupported
-          //SPI Command error
-          case 0xFE: //The Command is an EZSP Frame
-            if (halHostBuffer[1] > MAX_PAYLOAD_FRAME_LENGTH) {
-              wipeAndRestartSpi();
-              setSpipErrorBuffer(SPIP_OVERSIZED_EZSP);
-              return false; //dump! (interrupt flags are cleared above)
-            } else if (itemsTransferred >= halHostBuffer[1] + 3) {
-              // Transition state to wait for TX buffer ready
-              spipNcpState.state = spipNcpWait;
-              //check for Frame Terminator, it must be there!
-              if (spipNcpState.overrideResponse) {
-                halInternalHostSerialTick(true); //respond immediately!
-                return false; //we overrode the command
-              } else if (halHostBuffer[halHostBuffer[1] + 2]
-                         != FRAME_TERMINATOR) {
-                //no frame terminator found!  report missing F.T.
-                setSpipErrorBuffer(SPIP_MISSING_FT);
-                halInternalHostSerialTick(true); //respond immediately!
-                return false; //we overrode the command
-              } else if (halHostBuffer[0] == 0xFD) {
-                //load error response buffer with Unsupported SPI Command error
-                setSpipErrorBuffer(SPIP_UNSUPPORTED_COMMAND);
-                halInternalHostSerialTick(true); //respond immediately!
-                return false; //we overrode the command
-              } else {
-                halHostBuffer[0] = 0xFE; //mark the response EZSP Frame
-                return true; //there is a valid command
-              }
-            }
-
-          default:
-            break;
-        }
-      }
+      validCommand = findHostCommand();
       break;
     case spipNcpWait:
       if (spipNcpState.idleHostInt) {
@@ -274,74 +387,165 @@ static bool halInternalHostSerialTick(bool responseReady)
         if (spipNcpState.overrideResponse) {
           spipNcpState.overrideResponse = false; //we no longer need to override
           //override whatever was sent with the error response message
-          MEMCOPY(halHostBuffer,
+          MEMCOPY(responseBuffer,
                   spipErrorResponseBuffer,
                   SPIP_ERROR_RESPONSE_SIZE);
         }
-        //add Frame Terminator and record true Response length
-        if ( halHostBuffer[0] < 0x05 ) {
-          halHostBuffer[1 + 1] = FRAME_TERMINATOR;
-          spipNcpState.responseLength = 3;  //true Response length
-        } else if ((halHostBuffer[0] == 0xFE) //EZSP Payload
-                   || (halHostBuffer[0] == 0xFD)) { //Bootloader Payload
-          //guard against oversized messages which could cause serious problems
-          assert(halHostBuffer[1] <= MAX_PAYLOAD_FRAME_LENGTH);
-          halHostBuffer[halHostBuffer[1] + 1 + 1] = FRAME_TERMINATOR;
-          halHostBuffer[halHostBuffer[1] + 1 + 2] = 0xFF; // pad so MISO stays high
-          spipNcpState.responseLength = halHostBuffer[1] + 3; //true Response length
+
+        int previousResponseLength = spipNcpState.responseLength;
+        // Set the true response length and copy bytes if needed
+        if ( responseBuffer[SPIP_PREFIX_INDEX] <= SPIP_MAX_ERROR_PREFIX ) {
+          // Error response.
+          spipNcpState.responseLength = SPIP_ERROR_RESPONSE_SIZE
+                                        + SPIP_FRAME_TERMINATOR_SIZE;
+        } else if ((responseBuffer[SPIP_PREFIX_INDEX] == 0xFE)
+                   || (responseBuffer[SPIP_PREFIX_INDEX] == 0xFD)) {
+          // EZSP or bootloader payload.
+          // Guard against oversized messages.
+          assert(halHostFrame[0] <= MAX_PAYLOAD_FRAME_LENGTH);
+          spipNcpState.responseLength = halHostFrame[0] + SPIP_OVERHEAD;
+          MEMCOPY(responseBuffer + SPIP_LENGTH_INDEX,
+                  halHostFrame,
+                  halHostFrame[0] + SPIP_LENGTH_SIZE);
         } else {
-          halHostBuffer[1] = FRAME_TERMINATOR;
-          spipNcpState.responseLength = 2;  //true Response length
+          // SPIP command (VERSION or ALIVE).
+          spipNcpState.responseLength = SPIP_COMMAND_SIZE
+                                        + SPIP_FRAME_TERMINATOR_SIZE;
         }
 
-        SPIDRV_AbortTransfer(spiHandle);
-        Ecode_t val = SPIDRV_STransmit(spiHandle,
-                                       halHostBuffer,
-                                       spipNcpState.responseLength,
-                                       spiTxCallback,
+        //add Frame Terminator
+        responseBuffer[spipNcpState.responseLength
+                       - SPIP_FRAME_TERMINATOR_SIZE] = SPIP_FRAME_TERMINATOR;
+
+        // Clear the remainder (if any) of the previous response to prevent
+        // potential data leakage.
+        for (int i = spipNcpState.responseLength;
+             i < previousResponseLength;
+             i++) {
+          responseBuffer[i] = 0xFF;
+        }
+
+        // CLEARRX and CLEARTX do what the the names imply, clearing the
+        // respective FIFOs (although apparently not the shift register, so
+        // there is an extra 0xFF byte sent when switching from receiving the
+        // command to sending the response).
+        spiHandle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
+        // Start a new transfer to send the response and also double as a
+        // backstop receive for the next command (in case the nSSEL ISR can't
+        // run in time to set up a new receive).
+        Ecode_t val = SPIDRV_STransfer(spiHandle,
+                                       responseBuffer,
+                                       commandBuffer,
+                                       SPIP_BUFFER_SIZE,
+                                       NULL,
                                        SPI_NCP_TIMEOUT);
-        CLR_nHOST_INT();
+
+        // Disable RXBLOCK, which was enabled in findHostCommand or
+        // processSpipCommandAndRespond after the full command was received.
+        // This feature stops bytes that the USART receives from entering the RX
+        // FIFO without losing count of the clock pulses like disabling the RX
+        // chain would.
+        // We have to do this because SPIDRV uses the count from the RX DMA to
+        // determine how many bytes actually went out across the line (as
+        // opposed to just being loaded into the FIFO), but it sets up the RX
+        // DMA before the TX. If the host is clocking out bytes around the time
+        // this happens, it's possible a byte is received and pulled out by the
+        // RX DMA but the TX DMA is set up too late to get its byte sent. This
+        // throws off the count and causes us to abort the transfer one byte too
+        // early. Using RXBLOCK prevents this by delaying the RX until after the
+        // TX DMA has been set up.
+        // It's conceivable that blocking might cause the opposite problem (an
+        // extra, uncounted, TX), but this is unlikely and has never been
+        // observed. It would also be less impactful even if it did happen
+        // because either the transfer would eventually be aborted anyway due to
+        // the rising edge of the chip select line or we'd capture the next
+        // command as part of the backstop receive set up above.
+        spiHandle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKDIS;
         spipNcpState.state = spipNcpResponse;
+        // Indicate to the host that it should start clocking out the response
+        CLR_nHOST_INT();
       }
       break;
     case spipNcpResponse:
       SPIDRV_GetTransferStatus(spiHandle, &itemsTransferred, &itemsRemaining);
-      // deassert nHOST_INT once a byte has been received;
+
       if (itemsTransferred > 0) {
+        // Deassert nHOST_INT once a byte has been sent
         SET_nHOST_INT();
+        if (itemsTransferred >= (spipNcpState.responseLength + 1)) {
+          // Start a pure receive for the next command when all bytes have been
+          // transmitted. The extra byte in the calculation above accounts for the
+          // extra 0xFF byte sent when transitioning between command and response.
+          // With a fresh receive, we won't have to search through the bytes we
+          // received while transmitting our response to find the next command,
+          // which decreases the probability of finding a false command byte.
+          SPIDRV_AbortTransfer(spiHandle);
+          SPIDRV_SReceive(spiHandle,
+                          commandBuffer,
+                          SPIP_BUFFER_SIZE,
+                          NULL,
+                          SPI_NCP_TIMEOUT);
+          spipNcpState.state = spipNcpDone;
+        }
       }
       break;
+    case spipNcpDone:
     default:
       break;
   }
-  return false;
+
+  return validCommand;
 }
 
-// nSSEL signal (rising edge-triggered)
+// nSSEL signal (rising and falling edge triggered)
 static void nSSEL_ISR(uint8_t pin)
 {
+  // Are we in a transaction?
   if (nSSEL_IS_ASSERTED()) {
-    return;
-  }
-  // Rising edge of SS means the host is no longer receiving SPI transfers
-  // Abort the transfer, triggering the callback which will reset the state of
-  // the spi protocol
-  if (spipNcpState.state == spipNcpResponse) {
-    SPIDRV_AbortTransfer(spiHandle);
-  }
-  // Reset back to idle state
-  spipNcpState.state = spipNcpIdle;
+    // If we are starting a transaction, deassert nHOST_INT and reset the tick
+    // state machine immediately (it's possible we missed the rising edge due to
+    // interrupts being disabled).
+    SET_nHOST_INT();
+    spipNcpState.state = spipNcpIdle;
+  } else {
+    // If we are not in a transaction, we have more time to prepare for the next
+    // one. We should still stop and restart the transfer as soon as possible,
+    // though, so as to avoid possibly spilling over into it and interrupting a
+    // receive that's already progress. We do, however, still need to get the
+    // status of the previous transfer so we can detect aborted transactions.
+    if (spipNcpState.state < spipNcpDone) {
+      SPIDRV_AbortTransfer(spiHandle);
+      SPIDRV_GetTransferStatus(spiHandle, &itemsTransferred, &itemsRemaining);
 
-  if (!spipNcpState.idleHostInt) {
-    //we still have more to tell the Host
-    CLR_nHOST_INT();
+      // Clear out anything remaining in the USART's FIFOs
+      spiHandle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+      SPIDRV_SReceive(spiHandle,
+                      commandBuffer,
+                      SPIP_BUFFER_SIZE,
+                      NULL,
+                      SPI_NCP_TIMEOUT);
+
+      // Disable RX blocking so we can receive the next command. See the comment
+      // when the SPIDRV transfer is started in the spipNcpWait case of
+      // halInternalHostSerialTick's switch statement for the rationale.
+      spiHandle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKDIS;
+
+      if ((spipNcpState.state >= spipNcpResponse)
+          && (itemsTransferred < spipNcpState.responseLength)) {
+        setSpipErrorBuffer(SPIP_ABORTED_TRANSACTION);
+      }
+    }
+
+    // Indicate to the host when we still have more to say. We check nSSEL again
+    // in case it's changed.
+    if (!spipNcpState.idleHostInt && nSSEL_IS_NEGATED()) {
+      CLR_nHOST_INT();
+    }
+
+    spipNcpState.state = spipNcpIdle;
+    halInternalHostSerialTick(false);
   }
-  SPIDRV_SReceive(spiHandle,
-                  halHostBuffer,
-                  SPIP_BUFFER_SIZE,
-                  NULL,
-                  SPI_NCP_TIMEOUT);
-  halInternalHostSerialTick(false);
 }
 
 // nWAKE signal (falling edge-triggered)
@@ -355,14 +559,24 @@ static void processSpipCommandAndRespond(uint8_t spipResponse)
 {
   // Disable reception while processing
   SPIDRV_AbortTransfer(spiHandle);
+
+  // We enable RX blocking here after the command is fully received and disable
+  // it when we start sending the response (or, if the frame is aborted before
+  // that point, when we start the receive for the next command). See the
+  // comment when the SPIDRV transfer is started in the spipNcpWait case of
+  // halInternalHostSerialTick's switch statement for the rationale.
+  spiHandle->peripheral.usartPort->CMD = USART_CMD_RXBLOCKEN;
+
   //check for Frame Terminator, it must be there!
-  if (halHostBuffer[1] == FRAME_TERMINATOR) {
+  if (getHostByte(1) == SPIP_FRAME_TERMINATOR) {
     //override with the supplied spipResponse
-    halHostBuffer[0] = spipResponse;
+    responseBuffer[SPIP_PREFIX_INDEX] = spipResponse;
   } else {
     //no frame terminator found!  report missing F.T.
     setSpipErrorBuffer(SPIP_MISSING_FT);
   }
+  commandOffset = 0;
+  spipNcpState.state = spipNcpWait;
   halInternalHostSerialTick(true); //respond immediately!
 }
 
@@ -376,17 +590,6 @@ static void setSpipErrorBuffer(uint8_t spiByte)
   }
 }
 
-static void spiTxCallback(SPIDRV_Handle_t handle,
-                          Ecode_t transferStatus,
-                          int itemsTransferred)
-{
-  // make sure nHOST_INT was idled in case response/send was faster than tick
-  SET_nHOST_INT();
-  //if we have not sent the exact right number of bytes, Transaction is corrupt
-  if ((itemsTransferred != spipNcpState.responseLength)) {
-    setSpipErrorBuffer(SPIP_ABORTED_TRANSACTION);
-  }
-}
 static void wipeAndRestartSpi(void)
 {
   // Deinitialize SPI driver

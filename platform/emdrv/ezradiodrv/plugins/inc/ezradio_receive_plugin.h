@@ -36,23 +36,18 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv_plugin
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup Plugin_System
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup Receive_Plugin
- * @brief Receive plugin, see @ref ezradiodrv_plugin
+ * @addtogroup ezradiodrv_plugin_receive EZRADIODRV Receive Plugin
+ * @brief EzRadio Receive plugin, see @ref ezradiodrv_plugin
  *        for detailed documentation.
  * @{
  ******************************************************************************/
@@ -82,10 +77,9 @@ Ecode_t ezradioStartRx(EZRADIODRV_Handle_t radioHandle);
 
 #endif //#if defined( EZRADIO_PLUGIN_RECEIVE )
 
-/** @} (end addtogroup Receive_Plugin) */
-/** @} (end addtogroup Plugin_System) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_plugin_receive) */
+/** @} (end addtogroup ezradiodrv_plugin) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

@@ -31,6 +31,10 @@
 #ifndef __TFTDIRECT_H
 #define __TFTDIRECT_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The SSD119 TFT direct mode init is deprecated and marked for removal in a later release."
+#endif
+
 #include <stdbool.h>
 #include "em_device.h"
 #include "em_ebi.h"

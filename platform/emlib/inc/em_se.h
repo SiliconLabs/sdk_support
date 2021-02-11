@@ -31,6 +31,7 @@
 #define EM_SE_H
 
 #include "em_device.h"
+#include "em_common.h"
 
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 
@@ -43,28 +44,26 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SE
+ * @addtogroup se SE - Secure Element
  *
  * @brief Secure Element peripheral API
  *
  * @details
  *   Abstraction of the Secure Element's mailbox interface.
  *
- *   @note Although commands to interact with the mailbox directly are
- *   available, it is always recommended to use the higher level APIs available
- *   in em_se and through mbedTLS.
+ *   For series 2 devices with a part number that is xG23 or higher, the
+ *   following step is necessary for basic operation:
+ *
+ *   Clock enable:
+ *   @code
+     CMU_ClockEnable(cmuClock_SEMAILBOX, true);@endcode
+ *
+ *   @note The high-level SE API has been moved to the SE manager, and the
+ *   implementation in em_se should not be used.
  *
  *   @note Using the SE's mailbox is not thread-safe in emlib, and accessing the
- *   SE's mailbox both in regular and IRQ context is not safe, either. If
- *   mbedTLS is compiled into the application, SE operations should be wrapped
- *   in se_management_acquire()/se_management_release() calls to synchronize
- *   access. If mbedTLS is not in use, it is the user's responsibility to not
- *   trigger simultaneous use of the SE mailbox.
+ *   SE's mailbox both in regular and IRQ context is not safe. SE operations
+ *   should be performed using the SE manager if possible.
  *
  * @{
  ******************************************************************************/
@@ -73,8 +72,235 @@ extern "C" {
  ******************************   DEFINES    ***********************************
  ******************************************************************************/
 
-#if defined(SEMAILBOX_PRESENT)
+#if defined(CRYPTOACC_PRESENT)
+/** Root Code Mailbox is invalid. */
+#define SE_RESPONSE_MAILBOX_INVALID         0x00FE0000UL
+/** Root Code Mailbox magic word */
+#define SE_RESPONSE_MAILBOX_VALID           0xE5ECC0DEUL
+#endif
 
+/** Response status codes for the Secure Element */
+#define SE_RESPONSE_MASK                    0x000F0000UL
+/** Command executed successfully or signature was successfully validated. */
+#define SE_RESPONSE_OK                      0x00000000UL
+
+/** Maximum amount of parameters supported by the hardware FIFO */
+#define SE_FIFO_MAX_PARAMETERS              13U
+
+/** Stop datatransfer */
+#define SE_DATATRANSFER_STOP                0x00000001UL
+/** Discard datatransfer */
+#define SE_DATATRANSFER_DISCARD             0x40000000UL
+/** Realign datatransfer */
+#define SE_DATATRANSFER_REALIGN             0x20000000UL
+/** Datatransfer Const Address*/
+#define SE_DATATRANSFER_CONSTADDRESS        0x10000000UL
+/** Stop Length Mask */
+#define SE_DATATRANSFER_LENGTH_MASK         0x0FFFFFFFUL
+
+/** Maximum amount of parameters for largest command in defined command set */
+#ifndef SE_MAX_PARAMETERS
+#define SE_MAX_PARAMETERS                   4U
+#endif
+
+/* Sanity-check defines */
+#if SE_MAX_PARAMETERS > SE_FIFO_MAX_PARAMETERS
+#error "Trying to configure more parameters than supported by the hardware"
+#endif
+
+/*******************************************************************************
+ ******************************   TYPEDEFS   ***********************************
+ ******************************************************************************/
+
+/**
+ * SE DMA transfer descriptor. Can be linked to each other to provide
+ * scatter-gather behavior.
+ */
+typedef struct {
+  volatile void* volatile data; /**< Data pointer */
+  void* volatile next;          /**< Next descriptor */
+  volatile uint32_t length;     /**< Length */
+} SE_DataTransfer_t;
+
+/** Default initialization of data transfer struct */
+#define SE_DATATRANSFER_DEFAULT(address, length)                               \
+  {                                                                            \
+    (void*)(address),                  /* Pointer to data block */             \
+    (void*)SE_DATATRANSFER_STOP,       /* This is the last block by default */ \
+    (length) | SE_DATATRANSFER_REALIGN /* Add size, use realign by default */  \
+  }
+
+/**
+ * SE Command structure to which all commands to the SE must adhere.
+ */
+typedef struct {
+  uint32_t command;                      /**< SE Command */
+  SE_DataTransfer_t* data_in;            /**< Input data */
+  SE_DataTransfer_t* data_out;           /**< Output data */
+  uint32_t parameters[SE_MAX_PARAMETERS];/**< Parameters */
+  size_t num_parameters;                 /**< Number of parameters */
+} SE_Command_t;
+
+/** Default initialization of command struct */
+#define SE_COMMAND_DEFAULT(command)       \
+  {                                       \
+    (command),        /* Given command */ \
+    NULL,             /* No data in */    \
+    NULL,             /* No data out */   \
+    { 0, 0, 0, 0 },   /* No parameters */ \
+    0                 /* No parameters */ \
+  }
+
+/** Possible responses to a command */
+typedef uint32_t SE_Response_t;
+
+/*******************************************************************************
+ *****************************   PROTOTYPES   **********************************
+ ******************************************************************************/
+
+void SE_addDataInput(SE_Command_t *command,
+                     SE_DataTransfer_t *data);
+
+void SE_addDataOutput(SE_Command_t *command,
+                      SE_DataTransfer_t *data);
+
+void SE_addParameter(SE_Command_t *command, uint32_t parameter);
+
+void SE_executeCommand(SE_Command_t *command);
+
+#if defined(CRYPTOACC_PRESENT)
+SE_Response_t SE_getVersion(uint32_t *version);
+SE_Response_t SE_getConfigStatusBits(uint32_t *cfgStatus);
+SE_Response_t SE_ackCommand(SE_Command_t *command);
+#endif // #if defined(CRYPTOACC_PRESENT)
+
+// Utilities
+#if defined(SEMAILBOX_PRESENT)
+__STATIC_INLINE bool SE_isCommandCompleted(void);
+__STATIC_INLINE SE_Response_t SE_readCommandResponse(void);
+#elif defined(CRYPTOACC_PRESENT)
+bool SE_isCommandCompleted(void);
+uint32_t SE_readExecutedCommand(void);
+SE_Response_t SE_readCommandResponse(void);
+#endif // #if defined(SEMAILBOX_PRESENT)
+
+__STATIC_INLINE void SE_waitCommandCompletion(void);
+__STATIC_INLINE void SE_disableInterrupt(uint32_t flags);
+__STATIC_INLINE void SE_enableInterrupt(uint32_t flags);
+
+#if defined(SEMAILBOX_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *   Check whether the running command has completed.
+ *
+ * @details
+ *   This function polls the SE-to-host mailbox interrupt flag.
+ *
+ * @return True if a command has completed and the result is available
+ ******************************************************************************/
+__STATIC_INLINE bool SE_isCommandCompleted(void)
+{
+  return (bool)(SEMAILBOX_HOST->RX_STATUS & SEMAILBOX_RX_STATUS_RXINT);
+}
+#endif
+
+/***************************************************************************//**
+ * @brief
+ *   Wait for completion of the current command.
+ *
+ * @details
+ *   This function "busy"-waits until the execution of the ongoing instruction
+ *   has completed.
+ ******************************************************************************/
+__STATIC_INLINE void SE_waitCommandCompletion(void)
+{
+  /* Wait for completion */
+  while (!SE_isCommandCompleted()) {
+  }
+}
+
+#if defined(SEMAILBOX_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *   Read the status of the previously executed command.
+ *
+ * @details
+ *   This function reads the status of the previously executed command.
+ *
+ * @note
+ *   The command response needs to be read for every executed command, and can
+ *   only be read once per executed command (FIFO behavior).
+ *
+ * @return
+ *   One of the SE_RESPONSE return codes:
+ *   SE_RESPONSE_OK when the command was executed successfully or a signature
+ *   was successfully verified.
+ ******************************************************************************/
+__STATIC_INLINE SE_Response_t SE_readCommandResponse(void)
+{
+  SE_waitCommandCompletion();
+  return (SE_Response_t)(SEMAILBOX_HOST->RX_HEADER & SE_RESPONSE_MASK);
+}
+#endif // #if defined(SEMAILBOX_PRESENT)
+
+/***************************************************************************//**
+ * @brief
+ *   Disable one or more SE interrupts.
+ *
+ * @param[in] flags
+ *   SE interrupt sources to disable. Use a bitwise logic OR combination of
+ *   valid interrupt flags for the Secure Element module
+ *    (SE_CONFIGURATION_(TX/RX)INTEN).
+ ******************************************************************************/
+__STATIC_INLINE void SE_disableInterrupt(uint32_t flags)
+{
+#if defined(SEMAILBOX_PRESENT)
+  SEMAILBOX_HOST->CONFIGURATION &= ~flags;
+#else
+  (void) flags;
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Enable one or more SE interrupts.
+ *
+ * @param[in] flags
+ *   SE interrupt sources to enable. Use a bitwise logic OR combination of
+ *   valid interrupt flags for the Secure Element module
+ *   (SEMAILBOX_CONFIGURATION_TXINTEN or SEMAILBOX_CONFIGURATION_RXINTEN).
+ ******************************************************************************/
+__STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
+{
+#if defined(SEMAILBOX_PRESENT)
+  SEMAILBOX_HOST->CONFIGURATION |= flags;
+#else
+  (void) flags;
+#endif
+}
+
+/*******************************************************************************
+ *****************************   DEPRECATED    *********************************
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @addtogroup se_deprecated Deprecated Functions
+ * @brief Deprecated Functions
+ *
+ * @deprecated
+ *   The following functions have been deprecated and will be removed in a
+ *   future version of emlib. All high-level functionality have been moved to
+ *   the SE manager.
+ *
+ * @{
+ ******************************************************************************/
+
+/*******************************************************************************
+ ******************************   DEFINES    ***********************************
+ ******************************************************************************/
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+#if defined(SEMAILBOX_PRESENT)
 /* Command words for the Security Engine. */
 #if (defined(_SILICON_LABS_SECURITY_FEATURE) \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
@@ -177,10 +403,11 @@ extern "C" {
 #define SE_COMMAND_SET_UPGRADEFLAG_SE       0xFE030000UL
 #define SE_COMMAND_SET_UPGRADEFLAG_HOST     0xFE030001UL
 
-#define SE_COMMAND_READ_PUBKEY              0xFF080001UL
 #define SE_COMMAND_INIT_PUBKEY_SIGNATURE    0xFF090001UL
 #define SE_COMMAND_READ_PUBKEY_SIGNATURE    0xFF0A0001UL
+#endif /* SEMAILBOX_PRESENT */
 
+#if defined(SEMAILBOX_PRESENT)
 /* Command options for the Secure Element commands. */
 /** Use MD5 as hash algorithm */
 #define SE_COMMAND_OPTION_HASH_MD5          0x00000100UL
@@ -241,17 +468,7 @@ extern "C" {
 /** Magic paramater for deleting user data */
 #define SE_COMMAND_OPTION_ERASE_UD          0xDE1E7EADUL
 
-#elif defined(CRYPTOACC_PRESENT)
-/* Root Code Mailbox is invalid. */
-#define SE_RESPONSE_MAILBOX_INVALID         0x00FE0000UL
-/* Root Code Mailbox magic word */
-#define SE_RESPONSE_MAILBOX_VALID           0xE5ECC0DEUL
-#endif
-
-/* Response status codes for the Secure Element */
-#define SE_RESPONSE_MASK                    0x000F0000UL
-/** Command executed successfully or signature was successfully validated. */
-#define SE_RESPONSE_OK                      0x00000000UL
+#endif /* SEMAILBOX_PRESENT */
 
 /** Pubkey types */
 #define SE_KEY_TYPE_BOOT                    0x00000100UL
@@ -259,6 +476,8 @@ extern "C" {
 
 #define SE_COMMAND_INIT_OTP                 0xFF000001UL
 #define SE_COMMAND_INIT_PUBKEY              0xFF070001UL
+
+#define SE_COMMAND_READ_PUBKEY              0xFF080001UL
 
 /**
  * Command was not recognized as a valid command, or is not allowed in the
@@ -292,71 +511,13 @@ extern "C" {
 /* Abort status code is given when no operation is attempted. */
 #define SE_RESPONSE_ABORT                   0x00FF0000UL
 
-/** Maximum amount of parameters supported by the hardware FIFO */
-#define SE_FIFO_MAX_PARAMETERS              13U
-
-#define SE_DATATRANSFER_STOP                0x00000001UL
-#define SE_DATATRANSFER_DISCARD             0x40000000UL
-#define SE_DATATRANSFER_REALIGN             0x20000000UL
-#define SE_DATATRANSFER_CONSTADDRESS        0x10000000UL
-#define SE_DATATRANSFER_LENGTH_MASK         0x0FFFFFFFUL
-
-/** Maximum amount of parameters for largest command in defined command set */
-#ifndef SE_MAX_PARAMETERS
-#define SE_MAX_PARAMETERS                   4U
-#endif
-
-/* Sanity-check defines */
-#if SE_MAX_PARAMETERS > SE_FIFO_MAX_PARAMETERS
-#error "Trying to configure more parameters than supported by the hardware"
-#endif
+/** @endcond */
 
 /*******************************************************************************
  ******************************   TYPEDEFS   ***********************************
  ******************************************************************************/
 
-/**
- * SE DMA transfer descriptor. Can be linked to each other to provide
- * scatter-gather behavior.
- */
-typedef struct {
-  volatile void* volatile data;
-  void* volatile next;
-  volatile uint32_t length;
-} SE_DataTransfer_t;
-
-/** Default initialization of data transfer struct */
-#define SE_DATATRANSFER_DEFAULT(address, length)                               \
-  {                                                                            \
-    (void*)(address),                  /* Pointer to data block */             \
-    (void*)SE_DATATRANSFER_STOP,       /* This is the last block by default */ \
-    (length) | SE_DATATRANSFER_REALIGN /* Add size, use realign by default */  \
-  }
-
-/**
- * SE Command structure to which all commands to the SE must adhere.
- */
-typedef struct {
-  uint32_t command;
-  SE_DataTransfer_t* data_in;
-  SE_DataTransfer_t* data_out;
-  uint32_t parameters[SE_MAX_PARAMETERS];
-  size_t num_parameters;
-} SE_Command_t;
-
-/** Default initialization of command struct */
-#define SE_COMMAND_DEFAULT(command)       \
-  {                                       \
-    (command),        /* Given command */ \
-    NULL,             /* No data in */    \
-    NULL,             /* No data out */   \
-    { 0, 0, 0, 0 },   /* No parameters */ \
-    0                 /* No parameters */ \
-  }
-
-/** Possible responses to a command */
-typedef uint32_t SE_Response_t;
-
+/** SE OTP initialization struct */
 typedef struct {
   /** Enable secure boot for the host. */
   bool enableSecureBoot;
@@ -375,6 +536,7 @@ typedef struct {
   bool secureBootPageLockFull;
 } SE_OTPInit_t;
 
+/** SE debug status */
 typedef struct {
   /** Whether debug lock is enabled */
   bool debugLockEnabled;
@@ -384,6 +546,7 @@ typedef struct {
   bool secureDebugEnabled;
 } SE_DebugStatus_t;
 
+/** SE status */
 typedef struct {
   /** Boot status code / error code (Bits [7:0]). */
   uint32_t bootStatus;
@@ -401,15 +564,13 @@ typedef struct {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-void SE_addDataInput(SE_Command_t *command,
-                     SE_DataTransfer_t *data);
+SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init) SL_DEPRECATED_API_SDK_3_0;
 
-void SE_addDataOutput(SE_Command_t *command,
-                      SE_DataTransfer_t *data);
-
-void SE_addParameter(SE_Command_t *command, uint32_t parameter);
-
-void SE_executeCommand(SE_Command_t *command);
+SE_Response_t SE_initPubkey(uint32_t key_type,
+                            void* pubkey,
+                            uint32_t numBytes,
+                            bool signature)
+SL_DEPRECATED_API_SDK_3_0;
 
 SE_Response_t SE_initOTP(SE_OTPInit_t *otp_init);
 
@@ -423,9 +584,10 @@ SE_Response_t SE_initPubkey(uint32_t key_type,
 // User data commands
 SE_Response_t SE_writeUserData(uint32_t offset,
                                void *data,
-                               uint32_t numBytes);
+                               uint32_t numBytes)
+SL_DEPRECATED_API_SDK_3_0;
 
-SE_Response_t SE_eraseUserData(void);
+SE_Response_t SE_eraseUserData(void) SL_DEPRECATED_API_SDK_3_0;
 
 // Initialization commands
 SE_Response_t SE_readPubkey(uint32_t key_type,
@@ -434,143 +596,26 @@ SE_Response_t SE_readPubkey(uint32_t key_type,
                             bool signature);
 
 // Debug commands
-SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status);
-SE_Response_t SE_debugLockApply(void);
-SE_Response_t SE_debugSecureEnable(void);
-SE_Response_t SE_debugSecureDisable(void);
-SE_Response_t SE_deviceEraseDisable(void);
-SE_Response_t SE_deviceErase(void);
+SE_Response_t SE_debugLockStatus(SE_DebugStatus_t *status) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_debugLockApply(void) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_debugSecureEnable(void) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_debugSecureDisable(void) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_deviceEraseDisable(void) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_deviceErase(void) SL_DEPRECATED_API_SDK_3_0;
 
 // Device status commands
-SE_Response_t SE_getStatus(SE_Status_t *output);
-SE_Response_t SE_serialNumber(void *serial);
-
-#elif defined(CRYPTOACC_PRESENT)
-
-SE_Response_t SE_getVersion(uint32_t *version);
-SE_Response_t SE_getConfigStatusBits(uint32_t *cfgStatus);
-SE_Response_t SE_ackCommand(SE_Command_t *command);
+SE_Response_t SE_getStatus(SE_Status_t *output) SL_DEPRECATED_API_SDK_3_0;
+SE_Response_t SE_serialNumber(void *serial) SL_DEPRECATED_API_SDK_3_0;
 
 #endif // #if defined(SEMAILBOX_PRESENT)
 
-// Utilities
-#if defined(SEMAILBOX_PRESENT)
-__STATIC_INLINE bool SE_isCommandCompleted(void);
-__STATIC_INLINE SE_Response_t SE_readCommandResponse(void);
-#elif defined(CRYPTOACC_PRESENT)
-bool SE_isCommandCompleted(void);
-uint32_t SE_readExecutedCommand(void);
-SE_Response_t SE_readCommandResponse(void);
-#endif // #if defined(SEMAILBOX_PRESENT)
-
-__STATIC_INLINE void SE_waitCommandCompletion(void);
-__STATIC_INLINE void SE_disableInterrupt(uint32_t flags);
-__STATIC_INLINE void SE_enableInterrupt(uint32_t flags);
-
-#if defined(SEMAILBOX_PRESENT)
-/***************************************************************************//**
- * @brief
- *   Check whether the running command has completed.
- *
- * @details
- *   This function polls the SE-to-host mailbox interrupt flag.
- *
- * @return True if a command has completed and the result is available
- ******************************************************************************/
-__STATIC_INLINE bool SE_isCommandCompleted(void)
-{
-  return (bool)(SEMAILBOX_HOST->RX_STATUS & SEMAILBOX_RX_STATUS_RXINT);
-}
-#endif
-
-/***************************************************************************//**
- * @brief
- *   Wait for completion of the current command.
- *
- * @details
- *   This function "busy"-waits until the execution of the ongoing instruction
- *   has completed.
- ******************************************************************************/
-__STATIC_INLINE void SE_waitCommandCompletion(void)
-{
-  /* Wait for completion */
-  while (!SE_isCommandCompleted()) {
-  }
-}
-
-#if defined(SEMAILBOX_PRESENT)
-/***************************************************************************//**
- * @brief
- *   Read the status of the previously executed command.
- *
- * @details
- *   This function reads the status of the previously executed command.
- *
- * @note
- *   The command response needs to be read for every executed command, and can
- *   only be read once per executed command (FIFO behavior).
- *
- * @return
- *   One of the SE_RESPONSE return codes:
- *   SE_RESPONSE_OK when the command was executed successfully or a signature
- *   was successfully verified,
- *   SE_RESPONSE_INVALID_COMMAND when the command ID was not recognized,
- *   SE_RESPONSE_AUTHORIZATION_ERROR when the command is not authorized,
- *   SE_RESPONSE_INVALID_SIGNATURE when signature verification failed,
- *   SE_RESPONSE_BUS_ERROR when a bus error was thrown during the command, e.g.
- *   because of conflicting Secure/Non-Secure memory accesses,
- *   SE_RESPONSE_CRYPTO_ERROR on an internal SE failure, or
- *   SE_RESPONSE_INVALID_PARAMETER when an invalid parameter was passed
- ******************************************************************************/
-__STATIC_INLINE SE_Response_t SE_readCommandResponse(void)
-{
-  SE_waitCommandCompletion();
-  return (SE_Response_t)(SEMAILBOX_HOST->RX_HEADER & SE_RESPONSE_MASK);
-}
-#endif // #if defined(SEMAILBOX_PRESENT)
-
-/***************************************************************************//**
- * @brief
- *   Disable one or more SE interrupts.
- *
- * @param[in] flags
- *   SE interrupt sources to disable. Use a bitwise logic OR combination of
- *   valid interrupt flags for the Secure Element module
- *    (SE_CONFIGURATION_(TX/RX)INTEN).
- ******************************************************************************/
-__STATIC_INLINE void SE_disableInterrupt(uint32_t flags)
-{
-#if defined(SEMAILBOX_PRESENT)
-  SEMAILBOX_HOST->CONFIGURATION &= ~flags;
-#else
-  (void) flags;
-#endif
-}
-
-/***************************************************************************//**
- * @brief
- *   Enable one or more SE interrupts.
- *
- * @param[in] flags
- *   SE interrupt sources to enable. Use a bitwise logic OR combination of
- *   valid interrupt flags for the Secure Element module
- *   (SEMAILBOX_CONFIGURATION_TXINTEN or SEMAILBOX_CONFIGURATION_RXINTEN).
- ******************************************************************************/
-__STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
-{
-#if defined(SEMAILBOX_PRESENT)
-  SEMAILBOX_HOST->CONFIGURATION |= flags;
-#else
-  (void) flags;
-#endif
-}
+/** @} (end addtogroup se_deprecated) */
 
 #ifdef __cplusplus
 }
 #endif
 
-/** @} (end addtogroup SE) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup se) */
 
 #endif /* defined(SEMAILBOX_PRESENT)
        || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) */

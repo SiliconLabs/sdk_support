@@ -20,6 +20,7 @@
 #include "em_device.h"
 #include "em_gpio.h"
 #include "btl_ezsp_gpio_activation.h"
+#include "em_cmu.h"
 
 // Map GPIO activation polarity settings to GPIO pin states
 #define HIGH 0
@@ -31,7 +32,7 @@ bool ezsp_gpio_enterBootloader(void)
 
 #if defined(CMU_HFBUSCLKEN0_GPIO)
   // Enable GPIO clock
-  CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_GPIO;
+  CMU_ClockEnable(cmuClock_GPIO, true);
 #endif
 #if defined(_CMU_CLKEN0_MASK)
   // Enable GPIO clock
@@ -55,7 +56,7 @@ bool ezsp_gpio_enterBootloader(void)
 
 #if defined(CMU_HFBUSCLKEN0_GPIO)
   // Disable GPIO clock
-  CMU->HFBUSCLKEN0 &= ~CMU_HFBUSCLKEN0_GPIO;
+  CMU_ClockEnable(cmuClock_GPIO, false);
 #endif
 
   return pressed;

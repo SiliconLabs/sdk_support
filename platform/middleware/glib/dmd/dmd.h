@@ -24,7 +24,8 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup DMD Dot Matrix Display
+ * @addtogroup dmd DMD - Dot Matrix Display
+ * @brief Hardware abstraction layer for dot matrix displays
  * @{
  *
  * The DMD interface is the hardware abstraction layer for a physical display.
@@ -35,18 +36,16 @@
  *
  * @section dmd_drivers DMD Drivers
  *
- * GLIB provides a dot matrix display driver for the LCD controller SSD2119
- * (@ref dmd_ssd2119.c) which is used on the Silicon Labs Development Kit.
- *
- * GLIB also provides a DMD driver for the Sharp Memory LCD screens used
- * on the Silicon Labs Starter Kit (@ref dmd_display.c). This driver
- * must be used together with the kit display drivers (@ref Display).
+ * GLIB provides a DMD driver for the Sharp Memory LCD screens used
+ * on the Silicon Labs Starter Kits. This driver
+ * must be used together with the kit display drivers.
  *
  ******************************************************************************/
 
 #include <stdint.h>
 #include "em_types.h"
 /* TODO: remove this and replace with include types and ecodes */
+/** Base of DMD error codes */
 #define ECODE_DMD_BASE    0x00000000
 
 /* Error codes */
@@ -87,14 +86,16 @@
 /** Clipping test */
 #define DMD_TEST_CLIPPING            0x00000010
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #define DMD_MEMORY_TEST_WIDTH        4
 #define DMD_MEMORY_TEST_HEIGHT       3
+/** @endcond */
 
 /** Configuration parameter for DMD_init. This typedef is defined 'void' and
     may be defined differently in the future. */
 typedef void DMD_InitConfig;
 
-/** @struct __DMD_DisplayGeometry
+/** @struct DMD_DisplayGeometry
  *  @brief Dimensions of the display
  */
 typedef struct __DMD_DisplayGeometry{
@@ -112,7 +113,7 @@ typedef struct __DMD_DisplayGeometry{
   uint16_t clipHeight;
 } DMD_DisplayGeometry; /**< Typedef for display dimensions */
 
-/** @struct __DMD_MemoryError
+/** @struct DMD_MemoryError
  *  @brief Information about a memory error
  */
 typedef struct __DMD_MemoryError{
@@ -126,13 +127,84 @@ typedef struct __DMD_MemoryError{
   uint8_t  readColor[3];
 } DMD_MemoryError; /**< Typedef for memory error information */
 
-/* Module prototypes */
+/***************************************************************************//**
+ *  @brief
+ *    Initializes the DMD support for memory lcd display
+ *
+ *  @param initConfig
+ *    Not used in this DMD module.
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_init(DMD_InitConfig *initConfig);
+
+/***************************************************************************//**
+ *  @brief
+ *    Get the dimensions of the display and of the current clipping area
+ *
+ *  @param[out] geometry
+ *    Geometry structure
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_getDisplayGeometry(DMD_DisplayGeometry **geometry);
+
+/***************************************************************************//**
+ *  @brief
+ *    Sets the current clipping area.
+ *
+ *  @note
+ *    All coordinates given to writeData/writeColor/readData are relative to
+ *    this clipping area.
+ *
+ *  @param xStart
+ *    X coordinate of the upper left corner of the clipping area
+ *
+ *  @param yStart
+ *    Y coordinate of the upper left corner of the clipping area
+ *
+ *  @param width
+ *    Width of the clipping area
+ *
+ *  @param height
+ *    Height of the clipping area
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_setClippingArea(uint16_t xStart, uint16_t yStart,
                              uint16_t width, uint16_t height);
+
+/***************************************************************************//**
+ *  @brief
+ *    Draws pixels to the display
+ *
+ *  @param x
+ *    X coordinate of the first pixel to be written, relative to the clipping area
+ *
+ *  @param y
+ *    Y coordinate of the first pixel to be written, relative to the clipping area
+ *
+ *  @param data
+ *    Array containing the pixel data.
+ *    For monochrome displays, each 8-bit element contains 8 pixels values.
+ *    For RGB displays, each bit in the array are one color component of the pixel,
+ *    so that 3 bits represent one pixel. The pixels are ordered by increasing x
+ *    coordinate, after the last pixel of a row, the next pixel will be the first
+ *    pixel on the next row.
+ *
+ *  @param numPixels
+ *    Number of pixels to be written
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_writeData(uint16_t x, uint16_t y,
                        const uint8_t data[], uint32_t numPixels);
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 EMSTATUS DMD_writeDataRLE(uint16_t x, uint16_t y, uint16_t xlen, uint16_t ylen,
                           const uint8_t *data);
 EMSTATUS DMD_writeDataRLEFade(uint16_t x, uint16_t y, uint16_t xlen, uint16_t ylen,
@@ -140,14 +212,107 @@ EMSTATUS DMD_writeDataRLEFade(uint16_t x, uint16_t y, uint16_t xlen, uint16_t yl
                               int red, int green, int blue, int weight);
 EMSTATUS DMD_readData(uint16_t x, uint16_t y,
                       uint8_t data[], uint32_t numPixels);
+/** @endcond */
+
+/***************************************************************************//**
+ *  @brief
+ *    Draws a number of pixels of the same color to the display
+ *
+ *  @param x
+ *    X coordinate of the first pixel to be written, relative to the clipping area
+ *
+ *  @param y
+ *    Y coordinate of the first pixel to be written, relative to the clipping area
+ *
+ *  @param red
+ *    Red component of the color
+ *
+ *  @param green
+ *    Green component of the color
+ *
+ *  @param blue
+ *    Blue component of the color
+ *
+ *  @param numPixels
+ *    Number of pixels to be written
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_writeColor(uint16_t x, uint16_t y, uint8_t red,
                         uint8_t green, uint8_t blue, uint32_t numPixels);
+
+/***************************************************************************//**
+ *  @brief
+ *    Turns off the display and puts it into sleep mode
+ *    Does not turn off backlight
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_sleep(void);
+
+/***************************************************************************//**
+ *  @brief
+ *    Wakes up the display from sleep mode
+ *
+ *  @return
+ *    DMD_OK on success, otherwise error code
+ ******************************************************************************/
 EMSTATUS DMD_wakeUp(void);
+
+/***************************************************************************//**
+ *  @brief
+ *    Set horizontal and vertical flip mode of display controller
+ *
+ *  @param horizontal
+ *    Set to flip display horizontally
+ *
+ *  @param vertical
+ *    Set to flip display vertically
+ *
+ *  @return
+ *    Returns DMD_OK if successful, error otherwise.
+ ******************************************************************************/
 EMSTATUS DMD_flipDisplay(int horizontal, int vertical);
 
+/***************************************************************************//**
+ *  @brief
+ *    Select the active framebuffer DMD functions will draw in.
+ *
+ *  @param framebuffer
+ *    Pointer to the framebuffer to be selected as active framebuffer.
+ *
+ *  @return
+ *    Returns DMD_OK if successful, error otherwise.
+ ******************************************************************************/
 EMSTATUS DMD_selectFramebuffer (void *framebuffer);
+
+/***************************************************************************//**
+ * @brief
+ *    Get current framebuffer used by DMD for drawing (backbuffer).
+ *
+ * @param framebuffer
+ *    Pointer to a framebuffer array.
+ *    Gets set to DMD's current buffer.
+ *
+ * @return
+ *    DMD_OK on success
+ ******************************************************************************/
 EMSTATUS DMD_getFrameBuffer (void **framebuffer);
+
+/***************************************************************************//**
+ *  @brief
+ *    Update the display device with contents of active framebuffer.
+ *
+ *  @details
+ *    Only the dirty rows/lines are updated on the display device. Dirty rows/lines
+ *    are those that have been written to since the last display update. When a
+ *    new active framebuffer is selected, all lines/rows will be marked as dirty.
+ *
+ *  @return
+ *    Returns DMD_OK if successful, error otherwise.
+ ******************************************************************************/
 EMSTATUS DMD_updateDisplay (void);
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -164,8 +329,7 @@ EMSTATUS DMD_testClipping(void);
 EMSTATUS DMD_runTests(uint32_t tests, uint32_t *result);
 /** @endcond */
 
-/**
- * @} (end addtogroup DMD)
- * @} (end addtogroup glib) */
+/** @} (end addtogroup dmd) */
+/** @} (end addtogroup glib) */
 
 #endif /* __DISPLAY_DMD_H__ */

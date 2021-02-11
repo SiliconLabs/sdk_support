@@ -36,7 +36,7 @@ __EQU__(CRASH_STACK_SIZE, 64)
         __THUMB__
         __EXPORT__ halNmiIsr
 halNmiIsr:
-        b.n fault
+        b.w fault
 #endif
 
 
@@ -45,38 +45,43 @@ halNmiIsr:
         __THUMB__
         __EXPORT__ halHardFaultIsr
 halHardFaultIsr:
-        b.n fault
+        b.w fault
 
         __CODE__
         __THUMB__
         __EXPORT__ halBusFaultIsr
 halBusFaultIsr:
-        b.n fault
+        b.w fault
 
+// The Simple MPU integration test takes over this function, so rename the
+// default handler in that case
+#if defined(REGRESSION_TEST) && defined(INCLUDE_MPU_TEST)
+  #define halMemoryFaultIsr mpu_fault_handler_default
+#endif
         __CODE__
         __THUMB__
         __EXPORT__ halMemoryFaultIsr
 halMemoryFaultIsr:
-        b.n fault
+        b.w fault
 
         __CODE__
         __THUMB__
         __EXPORT__ halUsageFaultIsr
 halUsageFaultIsr:
-        b.n fault
+        b.w fault
 #endif
 
         __CODE__
         __THUMB__
         __EXPORT__ halDebugMonitorIsr
 halDebugMonitorIsr:
-        b.n fault
+        b.w fault
 
         __CODE__
         __THUMB__
         __EXPORT__ uninitializedIsr
 uninitializedIsr:
-        b.n fault
+        b.w fault
 
 
 //------------------------------------------------------------------------------

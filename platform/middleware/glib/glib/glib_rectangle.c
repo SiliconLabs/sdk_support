@@ -61,9 +61,6 @@ bool GLIB_rectContainsPoint(const GLIB_Rectangle_t *pRect, int32_t x, int32_t y)
 *
 *  @param pRect
 *  Pointer to a rectangle structure
-*
-*  @return
-*  None.
 ******************************************************************************/
 void GLIB_normalizeRect(GLIB_Rectangle_t *pRect)
 {

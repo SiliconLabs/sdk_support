@@ -30,8 +30,42 @@
 
 #ifndef NVM3_DEFAULT_H
 #define NVM3_DEFAULT_H
+#include "nvm3.h"
 
-extern nvm3_Handle_t *nvm3_defaultHandle;
-extern nvm3_Init_t   *nvm3_defaultInit;
+/***************************************************************************//**
+ * @addtogroup nvm3
+ * @{
+ ******************************************************************************/
+/***************************************************************************//**
+ * @addtogroup nvm3default NVM3 Default Instance
+ * @brief NVM3 default instance functions and handles
+ * @{
+ ******************************************************************************/
+
+extern nvm3_Handle_t *nvm3_defaultHandle;       ///< The default handle.
+extern nvm3_Init_t   *nvm3_defaultInit;         ///< Default initialization data.
+
+/***************************************************************************//**
+ * @brief
+ *  Initialize the default NVM3 instance.
+ *  Once initialized the instance can be accessed through the NVM3 API using
+ *  nvm3_defaultHandle as the nvm3_Handle_t handle.
+ *
+ * @return
+ *   @ref ECODE_NVM3_OK on success and a NVM3 @ref Ecode_t on failure.
+ ******************************************************************************/
+Ecode_t nvm3_initDefault(void);
+
+/***************************************************************************//**
+ * @brief
+ *  Deinit the default NVM3 instance.
+ *
+ * @return
+ *   @ref ECODE_NVM3_OK on success and a NVM3 @ref Ecode_t on failure.
+ ******************************************************************************/
+Ecode_t nvm3_deinitDefault(void);
+
+/** @} (end addtogroup nvm3default) */
+/** @} (end addtogroup nvm3) */
 
 #endif /* NVM3_DEFAULT_H */

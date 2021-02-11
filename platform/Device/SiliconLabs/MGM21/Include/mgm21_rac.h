@@ -5038,4 +5038,5 @@ typedef struct {
 /** @} End of group MGM21_RAC_BitFields */
 /** @} End of group MGM21_RAC */
 /** @} End of group Parts */
+
 #endif /* MGM21_RAC_H */

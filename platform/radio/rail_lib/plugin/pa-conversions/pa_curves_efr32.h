@@ -6,7 +6,7 @@
  *   dBm powers.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,19 +31,30 @@
  *
  ******************************************************************************/
 
-#ifndef __PA_CURVES_EFR32_H_
-#define __PA_CURVES_EFR32_H_
+#ifndef PA_CURVES_EFR32_H
+#define PA_CURVES_EFR32_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #ifdef _SILICON_LABS_32B_SERIES_1
-#include "pa_curves_efr32xg1x.h"
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
-#include "pa_curves_efr32xg22.h"
+#include "efr32xg1x/sl_rail_util_pa_curves.h"
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#include "efr32xg22/sl_rail_util_pa_curves.h"
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+
+#define EFR32_PA_TYPE_SUBGIG_20DBM_PRESENT 1 //temporarily default to 20dBM PA, this eventually should be moved to/define in ADM
+#warning "todo_ocelot: move EFR32_PA_TYPE_SUBGIG_20DBM_PRESENT to ADM and add #include for it"
+
+#if EFR32_PA_TYPE_SUBGIG_20DBM_PRESENT
+#include "efr32xg23/sl_rail_util_pa_curves_20dbm.h"
+#else
+#include "efr32xg23/sl_rail_util_pa_curves_14dbm.h"
+#endif
+
 #elif defined (_SILICON_LABS_32B_SERIES_2)
-#include "pa_curves_efr32xg21.h"
+#include "efr32xg21/sl_rail_util_pa_curves.h"
 #else
 
 #error "Unsupported platform!"
@@ -53,4 +64,4 @@ extern "C" {
 }
 #endif
 
-#endif
+#endif // PA_CURVES_EFR32_H

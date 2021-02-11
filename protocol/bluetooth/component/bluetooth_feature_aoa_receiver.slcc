@@ -1,0 +1,21 @@
+id: "bluetooth_feature_aoa_receiver"
+label: "AoA Receiver"
+package: "Bluetooth"
+description: >
+  Bluetooth AoA CTE receiving feature
+category: "Bluetooth|Stack|Direction Finding"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: bluetooth_stack
+  - name: device_supports_bluetooth_cte
+  - name: device_supports_bluetooth_iq_sampling
+  - name: device_supports_bluetooth_antenna_switching
+  - name: rail_util_aox
+provides:
+  - name: "bluetooth_feature_aoa_receiver"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_cte_receiver_init"
+    priority: 10

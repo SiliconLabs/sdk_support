@@ -1,0 +1,20 @@
+!!omap
+- id: brd4001a
+- label: BRD4001A
+- package: platform
+- description: Board support for BRD4001A.
+- category: Platform|Board|Mainboard
+- quality: production
+- requires: []
+- provides:
+  - name: brd4001a
+  - name: hardware_board_mainboard_wstk
+  - name: hardware_board_mainboard
+  - name: hardware_board_from_wmb
+  - name: hardware_board_from_slwmb4001a
+- recommends: []
+- template_contribution: []
+- tag:
+  - board:pn:BRD4001
+  - board:variant:A
+  - board:revision:A02

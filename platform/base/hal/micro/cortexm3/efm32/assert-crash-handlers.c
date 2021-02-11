@@ -44,7 +44,11 @@
 //------------------------------------------------------------------------------
 // Forward Declarations
 
+#ifdef EMBER_NO_STACK
 extern void emRadioSleep(void);
+#else
+extern void sl_mac_lower_mac_radio_sleep(void);
+#endif
 
 //------------------------------------------------------------------------------
 // Functions
@@ -74,7 +78,11 @@ void halInternalAssertFailed(PGM_P filename, int linenumber)
 {
  #ifndef PHY_PRO2PLUS
 #if !defined (_SILICON_LABS_32B_SERIES_2) // emRadioSleep
+#ifdef EMBER_NO_STACK
   emRadioSleep();
+#else
+  sl_mac_lower_mac_radio_sleep();
+#endif
 #endif // !defined (_SILICON_LABS_32B_SERIES_2) // emRadioSleep
  #endif//PHY_PRO2PLUS
   halResetWatchdog();              // In case we're close to running out.

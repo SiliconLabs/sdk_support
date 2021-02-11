@@ -171,12 +171,12 @@ __STATIC_INLINE void ARM_MPU_SetMemAttrEx(MPU_Type* mpu, uint8_t idx, uint8_t at
   const uint8_t reg = idx / 4U;
   const uint32_t pos = ((idx % 4U) * 8U);
   const uint32_t mask = 0xFFU << pos;
-  
-  if (reg >= (sizeof(mpu->MAIR) / sizeof(mpu->MAIR[0]))) {
+
+  if (reg >= (sizeof(mpu->u_mair.MAIR) / sizeof(mpu->u_mair.MAIR[0]))) {
     return; // invalid index
   }
-  
-  mpu->MAIR[reg] = ((mpu->MAIR[reg] & ~mask) | ((attr << pos) & mask));
+
+  mpu->u_mair.MAIR[reg] = ((mpu->u_mair.MAIR[reg] & ~mask) | ((attr << pos) & mask));
 }
 
 /** Set the memory attribute encoding.

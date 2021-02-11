@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the address filtering commands in RAIL test apps.
+ * @brief This file implements the address filtering commands in RAILtest apps.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,12 +31,10 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "app_common.h"
-#include "app_ci.h"
 
 // Define for the maximum number of filter fields
 #define ADDRFILT_FIELD_COUNT (2)
@@ -56,118 +54,192 @@ static RAIL_AddrConfig_t config = { { 0, 0 }, { 0, 0 }, 0 };
 /// Buffer to help print address values to the screen
 static char addressPrintBuffer[(ADDRFILT_ENTRY_SIZE * 5) + 8];
 
-void setAddressFilterConfig(int argc, char **argv)
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+/// This holds the address masks used by this application. We get 1 address mask per
+/// field of up to 8 bytes in length.
+static uint8_t addressMasks[ADDRFILT_FIELD_COUNT][ADDRFILT_ENTRY_SIZE] = { { 0xFF }, { 0xFF } };
+
+/// Buffer to help print address mask values to the screen
+static char addressMaskPrintBuffer[(ADDRFILT_ENTRY_SIZE * 5) + 8];
+#endif
+
+void setAddressFilterConfig(sl_cli_command_arg_t *args)
 {
   int i = 0, count = ADDRFILT_FIELD_COUNT * 2;
 
   // Reset the config struct to zero as the default for everything
   memset(addresses, 0, sizeof(addresses));
   memset(addressEnabled, 0, sizeof(addressEnabled));
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+  memset(addressMasks, 0xFF, sizeof(addressMasks));
+#endif
 
   // Set the match table in the config struct
-  config.matchTable = ciGetUnsigned(argv[1]);
+  config.matchTable = sl_cli_get_argument_uint32(args, 0);
 
   // Set count to the maximum allowed size or the maximum provided parameters
-  if ((argc - 2) < count) {
-    count = argc - 2;
+  if ((sl_cli_get_argument_count(args) - 1) < count) {
+    count = sl_cli_get_argument_count(args) - 1;
   }
 
   // Set as many offset and sizes as we can
   for (i = 0; i < count; i++) {
     if ((i % 2) == 0) {
-      config.offsets[i / 2] = ciGetUnsigned(argv[i + 2]);
+      config.offsets[i / 2] = sl_cli_get_argument_uint8(args, i + 1);
     } else {
-      config.sizes[i / 2] = ciGetUnsigned(argv[i + 2]);
+      config.sizes[i / 2] = sl_cli_get_argument_uint8(args, i + 1);
     }
   }
 
   if (RAIL_ConfigAddressFilter(railHandle, &config)
       == RAIL_STATUS_NO_ERROR) {
-    printAddresses(1, argv);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    printAddresses(args);
   } else {
-    responsePrintError(argv[0], 0x30, "Invalid address filtering configuration.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x30, "Invalid address filtering configuration.");
   }
 }
 
-void setAddressFilter(int argc, char **argv)
+void setAddressFilter(sl_cli_command_arg_t *args)
 {
-  uint32_t enable = ciGetUnsigned(argv[1]);
+  uint32_t enable = sl_cli_get_argument_uint32(args, 0);
 
   RAIL_EnableAddressFilter(railHandle, !!enable);
 
-  getAddressFilter(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getAddressFilter(args);
 }
 
-void getAddressFilter(int argc, char **argv)
+void getAddressFilter(sl_cli_command_arg_t *args)
 {
   bool filteringEnabled = RAIL_IsAddressFilterEnabled(railHandle);
 
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "AddressFiltering:%s",
                 filteringEnabled ? "Enabled" : "Disabled");
 }
 
-void printAddresses(int argc, char **argv)
+static void printByteBuffer(char *printBuf, uint8_t *dataBuf, uint8_t size)
 {
-  int i, j, k;
+  if (size > 0) {
+    for (int i = 0; i < size; i++) {
+      printBuf += sprintf(printBuf, "0x%.2x ", dataBuf[i]);
+    }
+    *(printBuf - 1) = '\0'; // Get rid of the last space
+  } else {
+    *printBuf = '\0';
+  }
+}
 
-  responsePrintHeader(argv[0],
+void printAddresses(sl_cli_command_arg_t *args)
+{
+  int i, j;
+
+  responsePrintHeader(sl_cli_get_command_string(args, 0),
                       "Field:%u,Index:%u,Offset:%u,"
-                      "Size:%u,Address:%s,Status:%s");
-  for (i = 0; i < ADDRFILT_FIELD_COUNT; i++) {
-    for (j = 0; j < ADDRFILT_ENTRY_COUNT; j++) {
-      int offset = 0;
+                      "Size:%u,Address:%s,"
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+                      "Mask:%s,"
+#endif
+                      "Status:%s");
 
-      if (config.sizes[i] > 0) {
-        // offset = sprintf(addressPrintBuffer, "0x");
-        for (k = 0; k < config.sizes[i]; k++) {
-          offset += sprintf(addressPrintBuffer + offset,
-                            "0x%.2x ",
-                            addresses[(i * ADDRFILT_ENTRY_COUNT) + j][k]);
-        }
-        if (offset > 0) {
-          addressPrintBuffer[offset - 1] = '\0'; // Get rid of the last space
-        }
-      } else {
-        addressPrintBuffer[0] = '\0';
-      }
+  for (i = 0; i < ADDRFILT_FIELD_COUNT; i++) {
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+    printByteBuffer(addressMaskPrintBuffer, addressMasks[i], config.sizes[i]);
+#endif
+
+    for (j = 0; j < ADDRFILT_ENTRY_COUNT; j++) {
+      printByteBuffer(addressPrintBuffer,
+                      addresses[(i * ADDRFILT_ENTRY_COUNT) + j],
+                      config.sizes[i]);
+
       responsePrintMulti("Field:%u,Index:%u,Offset:%u,"
-                         "Size:%u,Address:%s,Status:%s",
+                         "Size:%u,Address:%s,"
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+                         "Mask:%s,"
+#endif
+                         "Status:%s",
                          i,
                          j,
                          config.offsets[i],
                          config.sizes[i],
                          addressPrintBuffer,
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+                         addressMaskPrintBuffer,
+#endif
                          addressEnabled[i][j] ? "Enabled" : "Disabled");
     }
   }
 }
 
-void setAddress(int argc, char **argv)
+void setAddressMask(sl_cli_command_arg_t *args)
+{
+#if RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK
+  int i;
+  RAIL_Status_t result;
+  uint8_t field = sl_cli_get_argument_uint8(args, 0);
+  uint8_t addressMask[ADDRFILT_ENTRY_SIZE];
+
+  // Make sure the field and index parameters are in range
+  if (field >= ADDRFILT_FIELD_COUNT) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "Address field out of range!");
+    return;
+  }
+
+  // Make sure this isn't too large of an entry
+  if (sl_cli_get_argument_count(args) >= (ADDRFILT_ENTRY_SIZE + 2)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x32, "Too many address bytes given!");
+    return;
+  }
+
+  // Read out all the bytes given into the address mask cache
+  memset(addressMask, 0xFF, sizeof(addressMask));
+  for (i = 0; i < sl_cli_get_argument_count(args) - 1; i++) {
+    addressMask[i] = sl_cli_get_argument_uint8(args, i + 1);
+  }
+
+  result = RAIL_SetAddressFilterAddressMask(railHandle,
+                                            field,
+                                            addressMask);
+  if (result != RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x33, "Could not configure address!");
+    return;
+  }
+  // Copy this into our local structure for tracking
+  memcpy(addressMasks[field], addressMask, sizeof(addressMask));
+
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  printAddresses(args);
+#else
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x34, "Masked address filtering not supported!");
+#endif
+}
+
+void setAddress(sl_cli_command_arg_t *args)
 {
   int i;
   RAIL_Status_t result;
-  uint8_t field = ciGetUnsigned(argv[1]);
-  uint8_t index = ciGetUnsigned(argv[2]);
+  uint8_t field = sl_cli_get_argument_uint8(args, 0);
+  uint8_t index = sl_cli_get_argument_uint8(args, 1);
   uint8_t address[ADDRFILT_ENTRY_SIZE];
   int location = field * ADDRFILT_ENTRY_COUNT + index;
 
   // Make sure the field and index parameters are in range
   if (field >= ADDRFILT_FIELD_COUNT || index >= ADDRFILT_ENTRY_COUNT) {
-    responsePrintError(argv[0], 0x31, "Address field or index out of range!");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x31, "Address field or index out of range!");
     return;
   }
 
   // Make sure this isn't too large of an entry
-  if (argc > (ADDRFILT_ENTRY_SIZE + 3)) {
-    responsePrintError(argv[0], 0x32, "Too many address bytes given!");
+  if (sl_cli_get_argument_count(args) >= (ADDRFILT_ENTRY_SIZE + 3)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x32, "Too many address bytes given!");
     return;
   }
 
   // Read out all the bytes given into the address cache
   memset(address, 0, sizeof(address));
-  for (i = 3; i < argc; i++) {
-    address[(i - 3)] = ciGetUnsigned(argv[i]);
+  for (i = 0; i < sl_cli_get_argument_count(args) - 2; i++) {
+    address[i] = sl_cli_get_argument_uint8(args, i + 2);
   }
 
   result = RAIL_SetAddressFilterAddress(railHandle,
@@ -176,30 +248,31 @@ void setAddress(int argc, char **argv)
                                         address,
                                         addressEnabled[field][index]);
   if (result != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x33, "Could not configure address!");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x33, "Could not configure address!");
     return;
   }
   // Copy this into our local structure for tracking
   memcpy(addresses[location], address, sizeof(address));
 
-  printAddresses(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  printAddresses(args);
 }
 
-void enableAddress(int argc, char **argv)
+void enableAddress(sl_cli_command_arg_t *args)
 {
-  uint8_t field = ciGetUnsigned(argv[1]);
-  uint8_t index = ciGetUnsigned(argv[2]);
-  uint8_t enable = ciGetUnsigned(argv[3]);
+  uint8_t field = sl_cli_get_argument_uint8(args, 0);
+  uint8_t index = sl_cli_get_argument_uint8(args, 1);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 2);
   RAIL_Status_t result;
 
   result = RAIL_EnableAddressFilterAddress(railHandle, !!enable, field, index);
 
   if (result != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x34, "Could not enable/disable address!");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x34, "Could not enable/disable address!");
     return;
   } else {
     addressEnabled[field][index] = (enable != 0);
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "Field:%u,Index:%u,Offset:%u,"
                   "Size:%u,Address:%s,Status:%s",
                   field,

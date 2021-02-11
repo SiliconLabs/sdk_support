@@ -1,0 +1,37 @@
+id: emlib_letimer
+label: LETIMER
+package: platform
+description: >
+  Low Energy Timer (LETIMER) peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_letimer.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_letimer.h"
+provides:
+  - name: emlib_letimer
+requires:
+  - name: device
+  - name: device_has_letimer
+  - name: emlib_cmu
+  - name: emlib_common
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-letimer
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-letimer
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-letimer
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-letimer
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-letimer
+      condition: [device_sdid_200]
+    - page: emlib/api/efr32xg22/group-letimer
+      condition: [device_sdid_205]

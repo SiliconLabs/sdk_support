@@ -32,12 +32,7 @@
 #if defined(BURTC_PRESENT)
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup BURTC
+ * @addtogroup burtc BURTC - Backup RTC
  * @brief Backup Real Time Counter (BURTC) Peripheral API
  * @details
  *  This module contains functions to control the BURTC peripheral of Silicon
@@ -199,7 +194,14 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit)
     BURTC_SyncWait();
   }
   BURTC->EN_CLR = BURTC_EN_EN;
+#if defined(_BURTC_SYNCBUSY_EN_MASK)
   regSync(BURTC_SYNCBUSY_EN);
+#elif defined(_BURTC_EN_DISABLING_MASK)
+  while (BURTC->EN & _BURTC_EN_DISABLING_MASK) {
+    /* Wait for disabling to finish */
+  }
+#endif
+
   BURTC->CFG = (presc << _BURTC_CFG_CNTPRESC_SHIFT)
                | ((burtcInit->compare0Top ? 1U : 0U) << _BURTC_CFG_COMPTOP_SHIFT)
                | ((burtcInit->debugRun ? 1U : 0U) << _BURTC_CFG_DEBUGRUN_SHIFT);
@@ -222,7 +224,9 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit)
  ******************************************************************************/
 void BURTC_Enable(bool enable)
 {
+#if defined(_BURTC_SYNCBUSY_EN_MASK)
   regSync(BURTC_SYNCBUSY_EN);
+#endif
 
   if ((BURTC->EN == 0U) && !enable) {
     /* Trying to disable BURTC when it's already disabled */
@@ -240,6 +244,11 @@ void BURTC_Enable(bool enable)
     BURTC_Stop();
     BURTC_SyncWait(); /* Wait for the stop to synchronize */
     BURTC->EN_CLR = BURTC_EN_EN;
+#if defined(_BURTC_EN_DISABLING_MASK)
+    while (BURTC->EN & _BURTC_EN_DISABLING_MASK) {
+      /* Wait for disabling to finish */
+    }
+#endif
   }
 }
 #elif defined(_SILICON_LABS_32B_SERIES_0)
@@ -358,9 +367,15 @@ void BURTC_Reset(void)
    * do this before the enable bit is cleared. */
   BURTC_SyncWait();
   BURTC->EN_CLR  = BURTC_EN_EN;
+#if defined(_BURTC_SYNCBUSY_EN_MASK)
   while (BURTC->SYNCBUSY != 0U) {
     // Wait for the EN=0 to synchronize
   }
+#elif defined(_BURTC_EN_DISABLING_MASK)
+  while (BURTC->EN & _BURTC_EN_DISABLING_MASK) {
+    /* Wait for disabling to finish */
+  }
+#endif
   BURTC->CFG = _BURTC_CFG_RESETVALUE;
 #endif
 }
@@ -411,7 +426,6 @@ uint32_t BURTC_ClockFreqGet(void)
 }
 #endif
 
-/** @} (end addtogroup BURTC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup burtc) */
 
 #endif /* BURTC_PRESENT */

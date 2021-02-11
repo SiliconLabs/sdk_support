@@ -269,6 +269,14 @@ int32_t storage_writeRaw(uint32_t address,
                          size_t   numBytes);
 
 /***************************************************************************//**
+ * Get allocated DMA channel for MSC write
+ *
+ * @return A positive number channel. -1 if DMA-based MSC write
+ *         is not enabled.
+ ******************************************************************************/
+int32_t storage_getDMAchannel(void);
+
+/***************************************************************************//**
  * Erase the raw storage.
  *
  * @param address Start address of the region to erase

@@ -36,12 +36,7 @@
 #include "em_assert.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LEUART
+ * @addtogroup leuart LEUART - Low Energy UART
  * @brief Low Energy Universal Asynchronous Receiver/Transmitter (LEUART)
  *        Peripheral API
  * @details
@@ -719,6 +714,5 @@ void LEUART_RxDmaInEM2Enable(LEUART_TypeDef *leuart, bool enable)
 #endif
 }
 
-/** @} (end addtogroup LEUART) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup leuart) */
 #endif /* defined(LEUART_COUNT) && (LEUART_COUNT > 0) */

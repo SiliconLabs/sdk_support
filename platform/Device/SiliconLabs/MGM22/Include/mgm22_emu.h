@@ -734,4 +734,5 @@ typedef struct {
 /** @} End of group MGM22_EMU_BitFields */
 /** @} End of group MGM22_EMU */
 /** @} End of group Parts */
+
 #endif /* MGM22_EMU_H */

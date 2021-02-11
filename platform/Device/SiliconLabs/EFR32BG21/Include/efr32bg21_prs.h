@@ -1329,4 +1329,5 @@ typedef struct {
 /** @} End of group EFR32BG21_PRS_BitFields */
 /** @} End of group EFR32BG21_PRS */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_PRS_H */

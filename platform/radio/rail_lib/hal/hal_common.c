@@ -3,7 +3,7 @@
  * @brief Source file for RAIL HAL common functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,17 +33,6 @@
 
 #include "em_common.h"
 #include "em_cmu.h"
-
-SL_WEAK void halInitChipSpecific(void)
-{
-  // Do nothing, but allow each chip to override this if necessary
-}
-
-void halInit(void)
-{
-  // Call the chip specific hal init
-  halInitChipSpecific();
-}
 
 void halCommonMemMove(void *dest, const void *src, uint16_t bytes)
 {

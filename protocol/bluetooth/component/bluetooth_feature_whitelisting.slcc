@@ -1,0 +1,19 @@
+id: "bluetooth_feature_whitelisting"
+label:  "Whitelisting"
+package: "Bluetooth"
+description: >
+  Bluetooth whitelisting
+
+  Only scanning is supported by this feature.
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_whitelisting"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_init_whitelisting"
+    priority: 10

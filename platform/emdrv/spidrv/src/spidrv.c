@@ -28,17 +28,28 @@
  *
  ******************************************************************************/
 
-#include <string.h>
+#define CURRENT_MODULE_NAME    "SPIDRV"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #include "em_device.h"
 #include "em_gpio.h"
 #include "em_core.h"
 #include "em_usart.h"
-
+#if defined(EUSART_PRESENT)
+#include "em_eusart.h"
+#endif
 #include "dmadrv.h"
 #include "spidrv.h"
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+#include <string.h>
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+
+//****************************************************************************
 
 #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
 #define SPI_DMA_IRQ   DMA_IRQn
@@ -49,6 +60,11 @@
 #else
 #error "No valid SPIDRV DMA engine defined."
 #endif
+
+#define EMDRV_SPIDRV_USART_FRAMELENGTH_REGVALUE_OFFSET  (3U)
+#define EMDRV_SPIDRV_EUSART_FRAMELENGTH_REGVALUE_OFFSET (6U)
+
+//****************************************************************************
 
 /**
  * @brief SPI Pins structure used when mapping from location to gpio port+pin.
@@ -65,6 +81,12 @@ typedef struct {
 } SPI_Pins_t;
 
 static bool     spidrvIsInitialized = false;
+
+static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData);
+
+#if defined(EUSART_PRESENT)
+static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData);
+#endif
 
 static void     BlockingComplete(SPIDRV_Handle_t handle,
                                  Ecode_t transferStatus,
@@ -113,6 +135,55 @@ static Ecode_t  WaitForIdleLine(SPIDRV_Handle_t handle);
 /// @endcond
 
 /***************************************************************************//**
+ * @brief Power management functions.
+ ******************************************************************************/
+static void em1RequestAdd(SPIDRV_Handle_t handle)
+{
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+  if (handle->em1RequestCount == 0) {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+  handle->em1RequestCount++;
+  CORE_EXIT_ATOMIC();
+#else
+  handle->em1RequestCount++;
+#endif
+}
+
+static void em1RequestRemove(SPIDRV_Handle_t handle)
+{
+  EFM_ASSERT(handle->em1RequestCount > 0);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+  handle->em1RequestCount--;
+  if (handle->em1RequestCount == 0) {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+  }
+  CORE_EXIT_ATOMIC();
+#else
+  handle->em1RequestCount--;
+#endif
+}
+
+static void emRequestInit(SPIDRV_Handle_t handle)
+{
+  handle->em1RequestCount = 0;
+}
+
+static void emRequestDeinit(SPIDRV_Handle_t handle)
+{
+  if (handle->em1RequestCount > 0) {
+    handle->em1RequestCount = 1;
+    em1RequestRemove(handle);
+  }
+}
+
+/***************************************************************************//**
  * @brief
  *    Initialize an SPI driver instance.
  *
@@ -128,6 +199,31 @@ static Ecode_t  WaitForIdleLine(SPIDRV_Handle_t handle);
  ******************************************************************************/
 Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 {
+#if defined (EUSART_PRESENT)
+  if (EUSART_NUM((EUSART_TypeDef*)initData->port) != -1) {
+    return SPIDRV_InitEusart(handle, initData);
+  }
+#endif
+
+  return SPIDRV_InitUsart(handle, initData);
+}
+
+/***************************************************************************//**
+ * @brief
+ *    Initialize an SPI driver usart instance.
+ *
+ * @param[out] handle  Pointer to an SPI driver handle; refer to @ref
+ *                     SPIDRV_Handle_t.
+ *
+ * @param[in] initData Pointer to an initialization data structure;
+ *                     refer to @ref SPIDRV_Init_t.
+ *
+ * @return
+ *    @ref ECODE_EMDRV_SPIDRV_OK on success. On failure, an appropriate
+ *    SPIDRV @ref Ecode_t is returned.
+ ******************************************************************************/
+static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
+{
   Ecode_t retVal;
   CORE_DECLARE_IRQ_STATE;
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
@@ -135,19 +231,20 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   int8_t spiPortNum = -1;
 #endif
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ( initData == NULL ) {
+  if (initData == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
   memset(handle, 0, sizeof(SPIDRV_HandleData_t));
+  emRequestInit(handle);
 
-  if ( 0 ) {
+  if (0) {
 #if defined(USART0)
-  } else if ( initData->port == USART0 ) {
+  } else if ((USART_TypeDef*)initData->port == USART0) {
     handle->usartClock  = cmuClock_USART0;
     handle->txDMASignal = dmadrvPeripheralSignal_USART0_TXBL;
   #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -158,7 +255,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USART1)
-  } else if ( initData->port == USART1 ) {
+  } else if ((USART_TypeDef*)initData->port == USART1) {
     handle->usartClock  = cmuClock_USART1;
     handle->txDMASignal = dmadrvPeripheralSignal_USART1_TXBL;
   #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -169,7 +266,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USART2)
-  } else if ( initData->port == USART2 ) {
+  } else if ((USART_TypeDef*)initData->port == USART2) {
     handle->usartClock  = cmuClock_USART2;
     handle->txDMASignal = dmadrvPeripheralSignal_USART2_TXBL;
   #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -180,7 +277,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USART3)
-  } else if ( initData->port == USART3 ) {
+  } else if ((USART_TypeDef*)initData->port == USART3) {
     handle->usartClock  = cmuClock_USART3;
     handle->txDMASignal = dmadrvPeripheralSignal_USART3_TXBL;
     handle->rxDMASignal = dmadrvPeripheralSignal_USART3_RXDATAV;
@@ -189,7 +286,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USART4)
-  } else if ( initData->port == USART4 ) {
+  } else if ((USART_TypeDef*)initData->port == USART4) {
     handle->usartClock  = cmuClock_USART4;
     handle->txDMASignal = dmadrvPeripheralSignal_USART4_TXBL;
     handle->rxDMASignal = dmadrvPeripheralSignal_USART4_RXDATAV;
@@ -198,7 +295,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USART5)
-  } else if ( initData->port == USART5 ) {
+  } else if ((USART_TypeDef*)initData->port == USART5) {
     handle->usartClock  = cmuClock_USART5;
     handle->txDMASignal = dmadrvPeripheralSignal_USART5_TXBL;
     handle->rxDMASignal = dmadrvPeripheralSignal_USART5_RXDATAV;
@@ -207,13 +304,13 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   #endif
 #endif
 #if defined(USARTRF0)
-  } else if ( initData->port == USARTRF0 ) {
+  } else if ((USART_TypeDef*)initData->port == USARTRF0) {
     handle->usartClock  = cmuClock_USARTRF0;
     handle->txDMASignal = dmadrvPeripheralSignal_USARTRF0_TXBL;
     handle->rxDMASignal = dmadrvPeripheralSignal_USARTRF0_RXDATAV;
 #endif
 #if defined(USARTRF1)
-  } else if ( initData->port == USARTRF1 ) {
+  } else if ((USART_TypeDef*)initData->port == USARTRF1) {
     handle->usartClock  = cmuClock_USARTRF1;
     handle->txDMASignal = dmadrvPeripheralSignal_USARTRF1_TXBL;
     handle->rxDMASignal = dmadrvPeripheralSignal_USARTRF1_RXDATAV;
@@ -222,31 +319,27 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  if ( spiPortNum == -1) {
-    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
-  }
-#endif
+  handle->peripheral.usartPort  = initData->port;
+  handle->peripheralType        = spidrvPeripheralTypeUsart;
+  handle->initData              = *initData;
 
-  handle->initData = *initData;
-
-  if ( initData->bitOrder == spidrvBitOrderMsbFirst ) {
+  if (initData->bitOrder == spidrvBitOrderMsbFirst) {
     usartInit.msbf = true;
   }
 
-  if ( initData->clockMode == spidrvClockMode0 ) {
+  if (initData->clockMode == spidrvClockMode0) {
     usartInit.clockMode = usartClockMode0;
-  } else if ( initData->clockMode == spidrvClockMode1 ) {
+  } else if (initData->clockMode == spidrvClockMode1) {
     usartInit.clockMode = usartClockMode1;
-  } else if ( initData->clockMode == spidrvClockMode2 ) {
+  } else if (initData->clockMode == spidrvClockMode2) {
     usartInit.clockMode = usartClockMode2;
-  } else if ( initData->clockMode == spidrvClockMode3 ) {
+  } else if (initData->clockMode == spidrvClockMode3) {
     usartInit.clockMode = usartClockMode3;
   } else {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-  if ( initData->type == spidrvSlave ) {
+  if (initData->type == spidrvSlave) {
     usartInit.master = false;
     usartInit.baudrate = 1000;      // Dummy value needed by USART_InitSync()
   } else {
@@ -259,7 +352,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   CMU_ClockEnable(cmuClock_GPIO, true);
   CMU_ClockEnable(handle->usartClock, true);
 
-  if ((initData->frameLength < 4U) || (initData->frameLength > 16U) ) {
+  if ((initData->frameLength < 4U) || (initData->frameLength > 16U)) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
   uint32_t databits = initData->frameLength - 4U + _USART_FRAME_DATABITS_FOUR;
@@ -267,28 +360,28 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 
   USART_InitSync(initData->port, &usartInit);
 
-  if ( (initData->type == spidrvMaster)
-       && (initData->csControl == spidrvCsControlAuto) ) {
-    initData->port->CTRL |= USART_CTRL_AUTOCS;
+  if ((initData->type == spidrvMaster)
+      && (initData->csControl == spidrvCsControlAuto)) {
+    handle->peripheral.usartPort->CTRL |= USART_CTRL_AUTOCS;
   }
 
-  if ( initData->csControl == spidrvCsControlAuto ) {
+  if (initData->csControl == spidrvCsControlAuto) {
     // SPI 4 wire mode
 #if defined(USART_ROUTEPEN_TXPEN)
-    initData->port->ROUTELOC0 = (initData->port->ROUTELOC0
-                                 & ~(_USART_ROUTELOC0_TXLOC_MASK
-                                     | _USART_ROUTELOC0_RXLOC_MASK
-                                     | _USART_ROUTELOC0_CLKLOC_MASK
-                                     | _USART_ROUTELOC0_CSLOC_MASK))
-                                | (initData->portLocationTx  << _USART_ROUTELOC0_TXLOC_SHIFT)
-                                | (initData->portLocationRx  << _USART_ROUTELOC0_RXLOC_SHIFT)
-                                | (initData->portLocationClk << _USART_ROUTELOC0_CLKLOC_SHIFT)
-                                | (initData->portLocationCs  << _USART_ROUTELOC0_CSLOC_SHIFT);
+    handle->peripheral.usartPort->ROUTELOC0 = (handle->peripheral.usartPort->ROUTELOC0
+                                               & ~(_USART_ROUTELOC0_TXLOC_MASK
+                                                   | _USART_ROUTELOC0_RXLOC_MASK
+                                                   | _USART_ROUTELOC0_CLKLOC_MASK
+                                                   | _USART_ROUTELOC0_CSLOC_MASK))
+                                              | (initData->portLocationTx  << _USART_ROUTELOC0_TXLOC_SHIFT)
+                                              | (initData->portLocationRx  << _USART_ROUTELOC0_RXLOC_SHIFT)
+                                              | (initData->portLocationClk << _USART_ROUTELOC0_CLKLOC_SHIFT)
+                                              | (initData->portLocationCs  << _USART_ROUTELOC0_CSLOC_SHIFT);
 
-    initData->port->ROUTEPEN = USART_ROUTEPEN_TXPEN
-                               | USART_ROUTEPEN_RXPEN
-                               | USART_ROUTEPEN_CLKPEN
-                               | USART_ROUTEPEN_CSPEN;
+    handle->peripheral.usartPort->ROUTEPEN = USART_ROUTEPEN_TXPEN
+                                             | USART_ROUTEPEN_RXPEN
+                                             | USART_ROUTEPEN_CLKPEN
+                                             | USART_ROUTEPEN_CSPEN;
 #elif defined (_GPIO_USART_ROUTEEN_MASK)
     GPIO->USARTROUTE[spiPortNum].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
                                            | GPIO_USART_ROUTEEN_RXPEN
@@ -315,27 +408,27 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
                                            | ((uint32_t)initData->pinCs
                                               << _GPIO_USART_CSROUTE_PIN_SHIFT);
 #else
-    initData->port->ROUTE = USART_ROUTE_TXPEN
-                            | USART_ROUTE_RXPEN
-                            | USART_ROUTE_CLKPEN
-                            | USART_ROUTE_CSPEN
-                            | (initData->portLocation
-                               << _USART_ROUTE_LOCATION_SHIFT);
+    handle->peripheral.usartPort->ROUTE = USART_ROUTE_TXPEN
+                                          | USART_ROUTE_RXPEN
+                                          | USART_ROUTE_CLKPEN
+                                          | USART_ROUTE_CSPEN
+                                          | (initData->portLocation
+                                             << _USART_ROUTE_LOCATION_SHIFT);
 #endif
   } else {
     // SPI 3 wire mode
 #if defined(USART_ROUTEPEN_TXPEN)
-    initData->port->ROUTELOC0 = (initData->port->ROUTELOC0
-                                 & ~(_USART_ROUTELOC0_TXLOC_MASK
-                                     | _USART_ROUTELOC0_RXLOC_MASK
-                                     | _USART_ROUTELOC0_CLKLOC_MASK))
-                                | (initData->portLocationTx  << _USART_ROUTELOC0_TXLOC_SHIFT)
-                                | (initData->portLocationRx  << _USART_ROUTELOC0_RXLOC_SHIFT)
-                                | (initData->portLocationClk << _USART_ROUTELOC0_CLKLOC_SHIFT);
+    handle->peripheral.usartPort->ROUTELOC0 = (handle->peripheral.usartPort->ROUTELOC0
+                                               & ~(_USART_ROUTELOC0_TXLOC_MASK
+                                                   | _USART_ROUTELOC0_RXLOC_MASK
+                                                   | _USART_ROUTELOC0_CLKLOC_MASK))
+                                              | (initData->portLocationTx  << _USART_ROUTELOC0_TXLOC_SHIFT)
+                                              | (initData->portLocationRx  << _USART_ROUTELOC0_RXLOC_SHIFT)
+                                              | (initData->portLocationClk << _USART_ROUTELOC0_CLKLOC_SHIFT);
 
-    initData->port->ROUTEPEN = USART_ROUTEPEN_TXPEN
-                               | USART_ROUTEPEN_RXPEN
-                               | USART_ROUTEPEN_CLKPEN;
+    handle->peripheral.usartPort->ROUTEPEN = USART_ROUTEPEN_TXPEN
+                                             | USART_ROUTEPEN_RXPEN
+                                             | USART_ROUTEPEN_CLKPEN;
 #elif defined (GPIO_USART_ROUTEEN_TXPEN)
     GPIO->USARTROUTE[spiPortNum].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
                                            | GPIO_USART_ROUTEEN_RXPEN
@@ -351,25 +444,25 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
                                            | ((uint32_t)initData->pinRx
                                               << _GPIO_USART_RXROUTE_PIN_SHIFT);
 
-    GPIO->USARTROUTE[spiPortNum].CLKROUTE = ((uint32_t)initData->pinClk
+    GPIO->USARTROUTE[spiPortNum].CLKROUTE = ((uint32_t)initData->portClk
                                              << _GPIO_USART_CLKROUTE_PORT_SHIFT)
                                             | ((uint32_t)initData->pinClk
                                                << _GPIO_USART_CLKROUTE_PIN_SHIFT);
 #else
-    initData->port->ROUTE = USART_ROUTE_TXPEN
-                            | USART_ROUTE_RXPEN
-                            | USART_ROUTE_CLKPEN
-                            | (initData->portLocation
-                               << _USART_ROUTE_LOCATION_SHIFT);
+    handle->peripheral.usartPort->ROUTE = USART_ROUTE_TXPEN
+                                          | USART_ROUTE_RXPEN
+                                          | USART_ROUTE_CLKPEN
+                                          | (initData->portLocation
+                                             << _USART_ROUTE_LOCATION_SHIFT);
 #endif
   }
 
-  if ( (retVal = ConfigGPIO(handle, true)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = ConfigGPIO(handle, true)) != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
   CORE_ENTER_ATOMIC();
-  if ( !spidrvIsInitialized ) {
+  if (!spidrvIsInitialized) {
     spidrvIsInitialized = true;
     CORE_EXIT_ATOMIC();
 
@@ -383,16 +476,186 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
   // Initialize DMA.
   DMADRV_Init();
 
-  if ( DMADRV_AllocateChannel(&handle->txDMACh, NULL) != ECODE_EMDRV_DMADRV_OK ) {
+  if (DMADRV_AllocateChannel(&handle->txDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
-  if ( DMADRV_AllocateChannel(&handle->rxDMACh, NULL) != ECODE_EMDRV_DMADRV_OK ) {
+  if (DMADRV_AllocateChannel(&handle->rxDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
     return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
   }
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
+
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *    Initialize an SPI driver eusart instance.
+ *
+ * @param[out] handle  Pointer to an SPI driver handle; refer to @ref
+ *                     SPIDRV_Handle_t.
+ *
+ * @param[in] initData Pointer to an initialization data structure;
+ *                     refer to @ref SPIDRV_Init_t.
+ *
+ * @return
+ *    @ref ECODE_EMDRV_SPIDRV_OK on success. On failure, an appropriate
+ *    SPIDRV @ref Ecode_t is returned.
+ ******************************************************************************/
+static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
+{
+  Ecode_t retVal;
+  CORE_DECLARE_IRQ_STATE;
+  EUSART_SpiAdvancedInit_TypeDef eusartAdvancedSpiInit = EUSART_SPI_ADVANCED_INIT_DEFAULT;
+  EUSART_SpiInit_TypeDef eusartSpiInit = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
+  int8_t spiPortNum = -1;
+
+  eusartSpiInit.advancedSettings = &eusartAdvancedSpiInit;
+
+  if (handle == NULL) {
+    return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
+  }
+
+  if (initData == NULL) {
+    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+  }
+
+  memset(handle, 0, sizeof(SPIDRV_HandleData_t));
+  emRequestInit(handle);
+
+  if (0) {
+#if defined(EUSART0)
+  } else if (initData->port == EUSART0) {
+    handle->usartClock  = cmuClock_EUSART0;
+    handle->txDMASignal = dmadrvPeripheralSignal_EUSART0_TXBL;
+    handle->rxDMASignal = dmadrvPeripheralSignal_EUSART0_RXDATAV;
+    spiPortNum = 0;
+#endif
+#if defined(EUSART1)
+  } else if (initData->port == EUSART1) {
+    handle->usartClock  = cmuClock_EUSART1;
+    handle->txDMASignal = dmadrvPeripheralSignal_EUSART1_TXBL;
+    handle->rxDMASignal = dmadrvPeripheralSignal_EUSART1_RXDATAV;
+    spiPortNum = 1;
+#endif
+#if defined(EUSART2)
+  } else if (initData->port == EUSART2) {
+    handle->usartClock  = cmuClock_EUSART2;
+    handle->txDMASignal = dmadrvPeripheralSignal_EUSART2_TXBL;
+    handle->rxDMASignal = dmadrvPeripheralSignal_EUSART2_RXDATAV;
+    spiPortNum = 2;
+#endif
+  } else {
+    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+  }
+
+  handle->peripheral.eusartPort = initData->port;
+  handle->peripheralType        = spidrvPeripheralTypeEusart;
+  handle->initData              = *initData;
+
+  if (initData->bitOrder == spidrvBitOrderMsbFirst) {
+    eusartAdvancedSpiInit.msbFirst = true;
+  }
+
+  if (initData->clockMode == spidrvClockMode0) {
+    eusartSpiInit.clockMode = eusartClockMode0;
+  } else if (initData->clockMode == spidrvClockMode1) {
+    eusartSpiInit.clockMode = eusartClockMode1;
+  } else if (initData->clockMode == spidrvClockMode2) {
+    eusartSpiInit.clockMode = eusartClockMode2;
+  } else if (initData->clockMode == spidrvClockMode3) {
+    eusartSpiInit.clockMode = eusartClockMode3;
+  } else {
+    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+  }
+
+  if (initData->type == spidrvSlave) {
+    eusartSpiInit.master  = false;
+    eusartSpiInit.bitRate = 1000;
+  } else {
+    eusartSpiInit.bitRate = initData->bitRate;
+  }
+
+  CMU_ClockEnable(cmuClock_GPIO, true);
+  CMU_ClockEnable(handle->usartClock, true);
+
+  if ((initData->frameLength < 7U) || (initData->frameLength > 16U)) {
+    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+  }
+
+  uint32_t databits = initData->frameLength - 7U + EUSART_FRAMECFG_DATABITS_SEVEN;
+  eusartSpiInit.databits = (EUSART_Databits_TypeDef)databits;
+
+  if ((initData->type == spidrvMaster)
+      && (initData->csControl == spidrvCsControlAuto)) {
+    eusartAdvancedSpiInit.autoCsEnable = true;
+  }
+
+  EUSART_SpiInit(initData->port, &eusartSpiInit);
+
+  // SPI 4 wire mode
+  if (initData->csControl == spidrvCsControlAuto) {
+    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                            | GPIO_EUSART_ROUTEEN_RXPEN
+                                            | GPIO_EUSART_ROUTEEN_SCLKPEN
+                                            | GPIO_EUSART_ROUTEEN_CSPEN;
+  } else {
+    GPIO->EUSARTROUTE[spiPortNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                            | GPIO_EUSART_ROUTEEN_RXPEN
+                                            | GPIO_EUSART_ROUTEEN_SCLKPEN;
+  }
+
+  GPIO->EUSARTROUTE[spiPortNum].TXROUTE = ((uint32_t)initData->portTx
+                                           << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                          | ((uint32_t)initData->pinTx
+                                             << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[spiPortNum].RXROUTE = ((uint32_t)initData->portRx
+                                           << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                          | ((uint32_t)initData->pinRx
+                                             << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[spiPortNum].SCLKROUTE = ((uint32_t)initData->portClk
+                                             << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
+                                            | ((uint32_t)initData->pinClk
+                                               << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT);
+
+  if (initData->csControl == spidrvCsControlAuto) {
+    // SPI 4 wire mode, Chip Select controled by the peripheral
+    GPIO->EUSARTROUTE[spiPortNum].CSROUTE = ((uint32_t)initData->portCs
+                                             << _GPIO_EUSART_CSROUTE_PORT_SHIFT)
+                                            | ((uint32_t)initData->pinCs
+                                               << _GPIO_EUSART_CSROUTE_PIN_SHIFT);
+  }
+
+  if ((retVal = ConfigGPIO(handle, true)) != ECODE_EMDRV_SPIDRV_OK) {
+    return retVal;
+  }
+
+  CORE_ENTER_ATOMIC();
+  if (!spidrvIsInitialized) {
+    spidrvIsInitialized = true;
+    CORE_EXIT_ATOMIC();
+
+#if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
+    sl_sleeptimer_init();
+#endif
+  } else {
+    CORE_EXIT_ATOMIC();
+  }
+
+  // Initialize DMA.
+  DMADRV_Init();
+
+  if (DMADRV_AllocateChannel(&handle->txDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+    return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
+  }
+
+  if (DMADRV_AllocateChannel(&handle->rxDMACh, NULL) != ECODE_EMDRV_DMADRV_OK) {
+    return ECODE_EMDRV_SPIDRV_DMA_ALLOC_ERROR;
+  }
+
+  return ECODE_EMDRV_SPIDRV_OK;
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -406,7 +669,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
  ******************************************************************************/
 Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
 {
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -417,18 +680,26 @@ Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
   ConfigGPIO(handle, false);
 
 #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     sl_sleeptimer_stop_timer(&handle->timer);
   }
 #endif
 
-  USART_Reset(handle->initData.port);
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    USART_Reset(handle->peripheral.usartPort);
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    EUSART_Reset(handle->peripheral.eusartPort);
+  }
+#endif
 
   CMU_ClockEnable(handle->usartClock, false);
 
   DMADRV_FreeChannel(handle->txDMACh);
   DMADRV_FreeChannel(handle->rxDMACh);
   DMADRV_DeInit();
+  emRequestDeinit(handle);
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
@@ -447,18 +718,18 @@ Ecode_t SPIDRV_AbortTransfer(SPIDRV_Handle_t handle)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state == spidrvStateIdle ) {
+  if (handle->state == spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_IDLE;
   }
 
 #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     sl_sleeptimer_stop_timer(&handle->timer);
   }
 #endif
@@ -472,7 +743,7 @@ Ecode_t SPIDRV_AbortTransfer(SPIDRV_Handle_t handle)
   handle->transferStatus    = ECODE_EMDRV_SPIDRV_ABORTED;
   handle->blockingCompleted = true;
 
-  if ( handle->userCallback != NULL ) {
+  if (handle->userCallback != NULL) {
     handle->userCallback(handle,
                          ECODE_EMDRV_SPIDRV_ABORTED,
                          handle->transferCount - handle->remaining);
@@ -496,15 +767,22 @@ Ecode_t SPIDRV_AbortTransfer(SPIDRV_Handle_t handle)
  ******************************************************************************/
 Ecode_t SPIDRV_GetBitrate(SPIDRV_Handle_t handle, uint32_t *bitRate)
 {
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ( bitRate == NULL ) {
+  if (bitRate == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-  *bitRate = USART_BaudrateGet(handle->initData.port);
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    *bitRate = USART_BaudrateGet(handle->peripheral.usartPort);
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    *bitRate = EUSART_BaudrateGet(handle->peripheral.eusartPort);
+  }
+#endif
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
@@ -523,11 +801,11 @@ Ecode_t SPIDRV_GetBitrate(SPIDRV_Handle_t handle, uint32_t *bitRate)
  ******************************************************************************/
 Ecode_t SPIDRV_GetFramelength(SPIDRV_Handle_t handle, uint32_t *frameLength)
 {
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ( frameLength == NULL ) {
+  if (frameLength == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -560,24 +838,24 @@ Ecode_t SPIDRV_GetTransferStatus(SPIDRV_Handle_t handle,
 {
   int remaining;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ( (itemsTransferred == NULL) || (itemsRemaining == NULL) ) {
+  if ((itemsTransferred == NULL) || (itemsRemaining == NULL)) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
   CORE_ATOMIC_SECTION(
-    if ( handle->state == spidrvStateIdle ) {
+    if (handle->state == spidrvStateIdle) {
     remaining = handle->remaining;
   } else {
     DMADRV_TransferRemainingCount(handle->rxDMACh, &remaining);
   }
     )
 
-  * itemsTransferred = handle->transferCount - remaining;
-  *itemsRemaining   = remaining;
+  * itemsTransferred = (handle->transferCount - remaining);
+  *itemsRemaining = remaining;
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
@@ -587,7 +865,7 @@ Ecode_t SPIDRV_GetTransferStatus(SPIDRV_Handle_t handle,
  *    Start an SPI master receive transfer.
  *
  * @note
- *    The MOSI wire will transmit @ref SPIDRV_Init_t.dummyTxValue.
+ *    The MOSI wire will transmit @ref SPIDRV_Init.dummyTxValue.
  *
  * @param[in]  handle Pointer to an SPI driver handle.
  *
@@ -608,12 +886,12 @@ Ecode_t SPIDRV_MReceive(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
@@ -627,7 +905,7 @@ Ecode_t SPIDRV_MReceive(SPIDRV_Handle_t handle,
  *    Start an SPI master blocking receive transfer.
  *
  * @note
- *    The MOSI wire will transmit @ref SPIDRV_Init_t.dummyTxValue.
+ *    The MOSI wire will transmit @ref SPIDRV_Init.dummyTxValue.
  *    @n This function is blocking and returns when the transfer is complete
  *    or when @ref SPIDRV_AbortTransfer() is called.
  *
@@ -648,12 +926,12 @@ Ecode_t SPIDRV_MReceiveB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
@@ -690,16 +968,16 @@ Ecode_t SPIDRV_MTransfer(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( rxBuffer == NULL ) {
+  if (rxBuffer == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -736,16 +1014,16 @@ Ecode_t SPIDRV_MTransferB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( rxBuffer == NULL ) {
+  if (rxBuffer == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
@@ -783,23 +1061,23 @@ Ecode_t SPIDRV_MTransferSingleItemB(SPIDRV_Handle_t handle,
   CORE_DECLARE_IRQ_STATE;
   uint32_t rxBuffer;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state != spidrvStateIdle ) {
+  if (handle->state != spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
   handle->state = spidrvStateTransferring;
   CORE_EXIT_ATOMIC();
 
-  if ( (pRx = rxValue) == NULL ) {
+  if ((pRx = rxValue) == NULL) {
     pRx = &rxBuffer;
   }
 
@@ -836,12 +1114,12 @@ Ecode_t SPIDRV_MTransmit(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, (void*)buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, (void*)buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
@@ -875,12 +1153,12 @@ Ecode_t SPIDRV_MTransmitB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
@@ -907,18 +1185,26 @@ Ecode_t SPIDRV_SetBitrate(SPIDRV_Handle_t handle, uint32_t bitRate)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state != spidrvStateIdle ) {
+  if (handle->state != spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
 
   handle->initData.bitRate = bitRate;
-  USART_BaudrateSyncSet(handle->initData.port, 0, bitRate);
+
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    USART_BaudrateSyncSet(handle->peripheral.usartPort, 0, bitRate);
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    EUSART_BaudrateSet(handle->peripheral.eusartPort, 0, bitRate);
+  }
+#endif
   CORE_EXIT_ATOMIC();
 
   return ECODE_EMDRV_SPIDRV_OK;
@@ -940,27 +1226,53 @@ Ecode_t SPIDRV_SetFramelength(SPIDRV_Handle_t handle, uint32_t frameLength)
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  frameLength -= 3;
-  if ( (frameLength < _USART_FRAME_DATABITS_FOUR)
-       || (frameLength > _USART_FRAME_DATABITS_SIXTEEN) ) {
-    return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    frameLength -= EMDRV_SPIDRV_USART_FRAMELENGTH_REGVALUE_OFFSET;
+
+    if ((frameLength < _USART_FRAME_DATABITS_FOUR) || (frameLength > _USART_FRAME_DATABITS_SIXTEEN)) {
+      return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+    }
   }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    frameLength -= EMDRV_SPIDRV_EUSART_FRAMELENGTH_REGVALUE_OFFSET;
+
+    if ((frameLength < _EUSART_FRAMECFG_DATABITS_SEVEN) || (frameLength > _EUSART_FRAMECFG_DATABITS_SIXTEEN)) {
+      return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+    }
+  }
+#endif
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state != spidrvStateIdle ) {
+  if (handle->state != spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
 
-  handle->initData.frameLength = frameLength + 3;
-  handle->initData.port->FRAME = (handle->initData.port->FRAME
-                                  & ~_USART_FRAME_DATABITS_MASK)
-                                 | (frameLength
-                                    << _USART_FRAME_DATABITS_SHIFT);
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    handle->initData.frameLength = frameLength + EMDRV_SPIDRV_USART_FRAMELENGTH_REGVALUE_OFFSET;
+
+    handle->peripheral.usartPort->FRAME = (handle->peripheral.usartPort->FRAME
+                                           & ~_USART_FRAME_DATABITS_MASK)
+                                          | (frameLength
+                                             << _USART_FRAME_DATABITS_SHIFT);
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    handle->initData.frameLength = frameLength + EMDRV_SPIDRV_EUSART_FRAMELENGTH_REGVALUE_OFFSET;
+
+    EUSART_Enable(handle->peripheral.eusartPort, eusartDisable);
+    handle->peripheral.eusartPort->FRAMECFG = (handle->peripheral.eusartPort->FRAMECFG
+                                               & ~_EUSART_FRAMECFG_DATABITS_MASK)
+                                              | (frameLength
+                                                 << _EUSART_FRAMECFG_DATABITS_SHIFT);
+    EUSART_Enable(handle->peripheral.eusartPort, eusartEnable);
+  }
+#endif
   CORE_EXIT_ATOMIC();
 
   return ECODE_EMDRV_SPIDRV_OK;
@@ -972,7 +1284,7 @@ Ecode_t SPIDRV_SetFramelength(SPIDRV_Handle_t handle, uint32_t frameLength)
  *    Start an SPI slave receive transfer.
  *
  * @note
- *    The MISO wire will transmit @ref SPIDRV_Init_t.dummyTxValue.
+ *    The MISO wire will transmit @ref SPIDRV_Init.dummyTxValue.
  *
  * @param[in]  handle Pointer to an SPI driver handle.
  *
@@ -996,21 +1308,21 @@ Ecode_t SPIDRV_SReceive(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1025,7 +1337,7 @@ Ecode_t SPIDRV_SReceive(SPIDRV_Handle_t handle,
  *    Start an SPI slave blocking receive transfer.
  *
  * @note
- *    The MISO wire will transmit @ref SPIDRV_Init_t.dummyTxValue.
+ *    The MISO wire will transmit @ref SPIDRV_Init.dummyTxValue.
  *    @n This function is blocking and returns when the transfer is complete,
  *    on timeout, or when @ref SPIDRV_AbortTransfer() is called.
  *
@@ -1050,21 +1362,21 @@ Ecode_t SPIDRV_SReceiveB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1105,25 +1417,25 @@ Ecode_t SPIDRV_STransfer(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, (void*)txBuffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( rxBuffer == NULL ) {
+  if (rxBuffer == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1165,25 +1477,25 @@ Ecode_t SPIDRV_STransferB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, (void*)txBuffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( rxBuffer == NULL ) {
+  if (rxBuffer == NULL) {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1224,21 +1536,21 @@ Ecode_t SPIDRV_STransmit(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiPrologue(handle, (void*)buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiPrologue(handle, (void*)buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1278,21 +1590,21 @@ Ecode_t SPIDRV_STransmitB(SPIDRV_Handle_t handle,
 {
   Ecode_t retVal;
 
-  if ( handle->initData.type == spidrvMaster ) {
+  if (handle->initData.type == spidrvMaster) {
     return ECODE_EMDRV_SPIDRV_MODE_ERROR;
   }
 
-  if ( (retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
-       != ECODE_EMDRV_SPIDRV_OK ) {
+  if ((retVal = TransferApiBlockingPrologue(handle, (void*)buffer, count))
+      != ECODE_EMDRV_SPIDRV_OK) {
     return retVal;
   }
 
-  if ( timeoutMs ) {
+  if (timeoutMs) {
     sl_sleeptimer_start_timer_ms(&handle->timer, timeoutMs, SlaveTimeout, handle, 0, 0);
   }
 
-  if ( handle->initData.slaveStartMode == spidrvSlaveStartDelayed ) {
-    if ( (retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK ) {
+  if (handle->initData.slaveStartMode == spidrvSlaveStartDelayed) {
+    if ((retVal = WaitForIdleLine(handle)) != ECODE_EMDRV_SPIDRV_OK) {
       return retVal;
     }
   }
@@ -1333,9 +1645,9 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
 
   location = handle->initData.portLocation;
 
-  if ( 0 ) {
+  if (0) {
 #if defined(USART0)
-  } else if ( handle->initData.port == USART0 ) {
+  } else if (handle->peripheral.usartPort == USART0) {
     pins->mosiPort = AF_USART0_TX_PORT(location);
     pins->misoPort = AF_USART0_RX_PORT(location);
     pins->clkPort  = AF_USART0_CLK_PORT(location);
@@ -1346,7 +1658,7 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
     pins->csPin    = AF_USART0_CS_PIN(location);
 #endif
 #if defined(USART1)
-  } else if ( handle->initData.port == USART1 ) {
+  } else if (handle->peripheral.usartPort == USART1) {
     pins->mosiPort = AF_USART1_TX_PORT(location);
     pins->misoPort = AF_USART1_RX_PORT(location);
     pins->clkPort  = AF_USART1_CLK_PORT(location);
@@ -1357,7 +1669,7 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
     pins->csPin    = AF_USART1_CS_PIN(location);
 #endif
 #if defined(USART2)
-  } else if ( handle->initData.port == USART2 ) {
+  } else if (handle->peripheral.usartPort == USART2) {
     pins->mosiPort = AF_USART2_TX_PORT(location);
     pins->misoPort = AF_USART2_RX_PORT(location);
     pins->clkPort  = AF_USART2_CLK_PORT(location);
@@ -1368,7 +1680,7 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
     pins->csPin    = AF_USART2_CS_PIN(location);
 #endif
 #if defined(USARTRF0)
-  } else if ( handle->initData.port == USARTRF0 ) {
+  } else if (handle->peripheral.usartPort == USARTRF0) {
     pins->mosiPort = AF_USARTRF0_TX_PORT(location);
     pins->misoPort = AF_USARTRF0_RX_PORT(location);
     pins->clkPort  = AF_USARTRF0_CLK_PORT(location);
@@ -1379,7 +1691,7 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
     pins->csPin    = AF_USARTRF0_CS_PIN(location);
 #endif
 #if defined(USARTRF1)
-  } else if ( handle->initData.port == USARTRF1 ) {
+  } else if (handle->peripheral.usartPort == USARTRF1) {
     pins->mosiPort = AF_USARTRF1_TX_PORT(location);
     pins->misoPort = AF_USARTRF1_RX_PORT(location);
     pins->clkPort  = AF_USARTRF1_CLK_PORT(location);
@@ -1402,97 +1714,94 @@ static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
  ******************************************************************************/
 static Ecode_t GetSpiPins(SPIDRV_Handle_t handle, SPI_Pins_t * pins)
 {
-  SPIDRV_Init_t *initData;
-  initData = &handle->initData;
-
-  if ( 0 ) {
+  if (0) {
 #if defined(USART0)
-  } else if ( handle->initData.port == USART0 ) {
-    pins->mosiPort = AF_USART0_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART0_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART0_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART0_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART0_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART0_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART0_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART0_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART0) {
+    pins->mosiPort = AF_USART0_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART0_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART0_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART0_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART0_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART0_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART0_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART0_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USART1)
-  } else if ( handle->initData.port == USART1 ) {
-    pins->mosiPort = AF_USART1_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART1_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART1_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART1_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART1_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART1_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART1_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART1_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART1) {
+    pins->mosiPort = AF_USART1_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART1_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART1_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART1_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART1_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART1_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART1_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART1_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USART2)
-  } else if ( handle->initData.port == USART2 ) {
-    pins->mosiPort = AF_USART2_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART2_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART2_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART2_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART2_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART2_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART2_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART2_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART2) {
+    pins->mosiPort = AF_USART2_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART2_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART2_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART2_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART2_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART2_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART2_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART2_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USART3)
-  } else if ( handle->initData.port == USART3 ) {
-    pins->mosiPort = AF_USART3_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART3_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART3_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART3_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART3_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART3_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART3_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART3_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART3) {
+    pins->mosiPort = AF_USART3_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART3_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART3_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART3_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART3_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART3_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART3_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART3_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USART4)
-  } else if ( handle->initData.port == USART4 ) {
-    pins->mosiPort = AF_USART4_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART4_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART4_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART4_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART4_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART4_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART4_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART4_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART4) {
+    pins->mosiPort = AF_USART4_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART4_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART4_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART4_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART4_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART4_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART4_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART4_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USART5)
-  } else if ( handle->initData.port == USART5 ) {
-    pins->mosiPort = AF_USART5_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USART5_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USART5_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USART5_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USART5_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USART5_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USART5_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USART5_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USART5) {
+    pins->mosiPort = AF_USART5_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USART5_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USART5_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USART5_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USART5_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USART5_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USART5_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USART5_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USARTRF0)
-  } else if ( handle->initData.port == USARTRF0 ) {
-    pins->mosiPort = AF_USARTRF0_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USARTRF0_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USARTRF0_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USARTRF0_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USARTRF0_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USARTRF0_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USARTRF0_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USARTRF0_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USARTRF0) {
+    pins->mosiPort = AF_USARTRF0_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USARTRF0_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USARTRF0_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USARTRF0_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USARTRF0_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USARTRF0_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USARTRF0_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USARTRF0_CS_PIN(handle->initData.portLocationCs);
 #endif
 #if defined(USARTRF1)
-  } else if ( handle->initData.port == USARTRF1 ) {
-    pins->mosiPort = AF_USARTRF1_TX_PORT(initData->portLocationTx);
-    pins->misoPort = AF_USARTRF1_RX_PORT(initData->portLocationRx);
-    pins->clkPort  = AF_USARTRF1_CLK_PORT(initData->portLocationClk);
-    pins->csPort   = AF_USARTRF1_CS_PORT(initData->portLocationCs);
-    pins->mosiPin  = AF_USARTRF1_TX_PIN(initData->portLocationTx);
-    pins->misoPin  = AF_USARTRF1_RX_PIN(initData->portLocationRx);
-    pins->clkPin   = AF_USARTRF1_CLK_PIN(initData->portLocationClk);
-    pins->csPin    = AF_USARTRF1_CS_PIN(initData->portLocationCs);
+  } else if (handle->peripheral.usartPort == USARTRF1) {
+    pins->mosiPort = AF_USARTRF1_TX_PORT(handle->initData.portLocationTx);
+    pins->misoPort = AF_USARTRF1_RX_PORT(handle->initData.portLocationRx);
+    pins->clkPort  = AF_USARTRF1_CLK_PORT(handle->initData.portLocationClk);
+    pins->csPort   = AF_USARTRF1_CS_PORT(handle->initData.portLocationCs);
+    pins->mosiPin  = AF_USARTRF1_TX_PIN(handle->initData.portLocationTx);
+    pins->misoPin  = AF_USARTRF1_RX_PIN(handle->initData.portLocationRx);
+    pins->clkPin   = AF_USARTRF1_CLK_PIN(handle->initData.portLocationClk);
+    pins->csPin    = AF_USARTRF1_CS_PIN(handle->initData.portLocationCs);
 #endif
   } else {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
@@ -1532,18 +1841,18 @@ static Ecode_t ConfigGPIO(SPIDRV_Handle_t handle, bool enable)
   if (ret != ECODE_EMDRV_SPIDRV_OK) {
     return ret;
   }
-  handle->csPort = pins.csPort;
-  handle->csPin  = pins.csPin;
+  handle->portCs = (GPIO_Port_TypeDef)pins.csPort;
+  handle->pinCs  = pins.csPin;
 
-  if ( enable ) {
-    if ( handle->initData.type == spidrvMaster ) {
+  if (enable) {
+    if (handle->initData.type == spidrvMaster) {
       GPIO_PinModeSet((GPIO_Port_TypeDef)pins.mosiPort, pins.mosiPin,
                       gpioModePushPull, 0);
       GPIO_PinModeSet((GPIO_Port_TypeDef)pins.misoPort, pins.misoPin,
                       gpioModeInput, 0);
 
-      if (    (handle->initData.clockMode == spidrvClockMode0)
-              || (handle->initData.clockMode == spidrvClockMode1) ) {
+      if ((handle->initData.clockMode == spidrvClockMode0)
+          || (handle->initData.clockMode == spidrvClockMode1)) {
         GPIO_PinModeSet((GPIO_Port_TypeDef)pins.clkPort, pins.clkPin,
                         gpioModePushPull, 0);
       } else {
@@ -1551,8 +1860,8 @@ static Ecode_t ConfigGPIO(SPIDRV_Handle_t handle, bool enable)
                         gpioModePushPull, 1);
       }
 
-      if ( handle->initData.csControl == spidrvCsControlAuto ) {
-        GPIO_PinModeSet((GPIO_Port_TypeDef)handle->csPort, handle->csPin,
+      if (handle->initData.csControl == spidrvCsControlAuto) {
+        GPIO_PinModeSet((GPIO_Port_TypeDef)handle->portCs, handle->pinCs,
                         gpioModePushPull, 1);
       }
     } else {
@@ -1561,8 +1870,8 @@ static Ecode_t ConfigGPIO(SPIDRV_Handle_t handle, bool enable)
       GPIO_PinModeSet((GPIO_Port_TypeDef)pins.misoPort, pins.misoPin,
                       gpioModePushPull, 0);
 
-      if (    (handle->initData.clockMode == spidrvClockMode0)
-              || (handle->initData.clockMode == spidrvClockMode1) ) {
+      if ((handle->initData.clockMode == spidrvClockMode0)
+          || (handle->initData.clockMode == spidrvClockMode1)) {
         GPIO_PinModeSet((GPIO_Port_TypeDef)pins.clkPort, pins.clkPin,
                         gpioModeInputPull, 0);
       } else {
@@ -1570,8 +1879,8 @@ static Ecode_t ConfigGPIO(SPIDRV_Handle_t handle, bool enable)
                         gpioModeInputPull, 1);
       }
 
-      if ( handle->initData.csControl == spidrvCsControlAuto ) {
-        GPIO_PinModeSet((GPIO_Port_TypeDef)handle->csPort, handle->csPin,
+      if (handle->initData.csControl == spidrvCsControlAuto) {
+        GPIO_PinModeSet((GPIO_Port_TypeDef)handle->portCs, handle->pinCs,
                         gpioModeInputPull, 1);
       }
     }
@@ -1579,15 +1888,15 @@ static Ecode_t ConfigGPIO(SPIDRV_Handle_t handle, bool enable)
     GPIO_PinModeSet((GPIO_Port_TypeDef)pins.mosiPort, pins.mosiPin, gpioModeInputPull, 0);
     GPIO_PinModeSet((GPIO_Port_TypeDef)pins.misoPort, pins.misoPin, gpioModeInputPull, 0);
 
-    if (    (handle->initData.clockMode == spidrvClockMode0)
-            || (handle->initData.clockMode == spidrvClockMode1) ) {
+    if ((handle->initData.clockMode == spidrvClockMode0)
+        || (handle->initData.clockMode == spidrvClockMode1)) {
       GPIO_PinModeSet((GPIO_Port_TypeDef)pins.clkPort, pins.clkPin, gpioModeInputPull, 0);
     } else {
       GPIO_PinModeSet((GPIO_Port_TypeDef)pins.clkPort, pins.clkPin, gpioModeInputPull, 1);
     }
 
-    if ( handle->initData.csControl == spidrvCsControlAuto ) {
-      GPIO_PinModeSet((GPIO_Port_TypeDef)handle->csPort, handle->csPin,
+    if (handle->initData.csControl == spidrvCsControlAuto) {
+      GPIO_PinModeSet((GPIO_Port_TypeDef)handle->portCs, handle->pinCs,
                       gpioModeDisabled, 0);
     }
   }
@@ -1616,16 +1925,18 @@ static bool RxDMAComplete(unsigned int channel,
   handle->remaining      = 0;
 
 #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
-  if ( handle->initData.type == spidrvSlave ) {
+  if (handle->initData.type == spidrvSlave) {
     sl_sleeptimer_stop_timer(&handle->timer);
   }
 #endif
 
-  if ( handle->userCallback != NULL ) {
+  if (handle->userCallback != NULL) {
     handle->userCallback(handle, ECODE_EMDRV_SPIDRV_OK, handle->transferCount);
   }
 
   CORE_EXIT_ATOMIC();
+  em1RequestRemove(handle);
+
   return true;
 }
 
@@ -1641,9 +1952,9 @@ static void SlaveTimeout(sl_sleeptimer_timer_handle_t *sleepdriver_handle, void 
 
   handle = (SPIDRV_Handle_t)user;
 
-  if ( handle->state == spidrvStateTransferring ) {
+  if (handle->state == spidrvStateTransferring) {
     DMADRV_TransferActive(handle->rxDMACh, &active);
-    if ( active ) {
+    if (active) {
       // Stop running DMAs
       DMADRV_StopTransfer(handle->rxDMACh);
       DMADRV_StopTransfer(handle->txDMACh);
@@ -1651,7 +1962,7 @@ static void SlaveTimeout(sl_sleeptimer_timer_handle_t *sleepdriver_handle, void 
     } else {
       // DMA is either completed or not yet started
       DMADRV_TransferCompletePending(handle->txDMACh, &pending);
-      if ( pending ) {
+      if (pending) {
         // A DMA interrupt is pending; let the DMA handler do the rest
         return;
       }
@@ -1660,12 +1971,33 @@ static void SlaveTimeout(sl_sleeptimer_timer_handle_t *sleepdriver_handle, void 
     handle->transferStatus = ECODE_EMDRV_SPIDRV_TIMEOUT;
     handle->state          = spidrvStateIdle;
 
-    if ( handle->userCallback != NULL ) {
+    if (handle->userCallback != NULL) {
       handle->userCallback(handle,
                            ECODE_EMDRV_SPIDRV_TIMEOUT,
                            handle->transferCount - handle->remaining);
     }
   }
+}
+#endif
+
+#if defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * @brief Manually clear eusart Tx fifo.
+ ******************************************************************************/
+static void clearEusartFifos(EUSART_TypeDef *eusart)
+{
+  eusart->CMD = EUSART_CMD_CLEARTX;
+
+  while ((eusart->STATUS & EUSART_STATUS_CLEARTXBUSY) != 0U) {
+  }
+
+  // Read data until FIFO is emptied
+  // but taking care not to underflow the receiver
+  while (eusart->STATUS & EUSART_STATUS_RXFL) {
+    eusart->RXDATA;
+  }
+
+  return;
 }
 #endif
 
@@ -1682,25 +2014,41 @@ static void StartReceiveDMA(SPIDRV_Handle_t handle,
 
   handle->blockingCompleted  = false;
   handle->transferCount      = count;
-  handle->initData.port->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   handle->userCallback       = callback;
 
-  if ( handle->initData.frameLength > 8 ) {
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
+    if (handle->initData.frameLength > 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDOUBLE);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDOUBLE);
+    } else if (handle->initData.frameLength == 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATAX);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATAX);
+    } else {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATA);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
+    }
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    clearEusartFifos(handle->peripheral.eusartPort);
+
+    rxPort = (void *)&(handle->peripheral.eusartPort->RXDATA);
+    txPort = (void *)&(handle->peripheral.eusartPort->TXDATA);
+  }
+#endif
+  else {
+    return;
+  }
+
+  if (handle->initData.frameLength > 8) {
     size = dmadrvDataSize2;
   } else {
     size = dmadrvDataSize1;
   }
 
-  if ( handle->initData.frameLength > 9 ) {
-    rxPort = (void *)&(handle->initData.port->RXDOUBLE);
-    txPort = (void *)&(handle->initData.port->TXDOUBLE);
-  } else if (handle->initData.frameLength == 9) {
-    rxPort = (void *)&(handle->initData.port->RXDATAX);
-    txPort = (void *)&(handle->initData.port->TXDATAX);
-  } else {
-    rxPort = (void *)&(handle->initData.port->RXDATA);
-    txPort = (void *)&(handle->initData.port->TXDATA);
-  }
+  em1RequestAdd(handle);
 
   // Start receive DMA.
   DMADRV_PeripheralMemory(handle->rxDMACh,
@@ -1739,25 +2087,41 @@ static void StartTransferDMA(SPIDRV_Handle_t handle,
 
   handle->blockingCompleted  = false;
   handle->transferCount      = count;
-  handle->initData.port->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   handle->userCallback       = callback;
 
-  if ( handle->initData.frameLength > 8 ) {
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
+    if (handle->initData.frameLength > 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDOUBLE);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDOUBLE);
+    } else if (handle->initData.frameLength == 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATAX);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATAX);
+    } else {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATA);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
+    }
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    clearEusartFifos(handle->peripheral.eusartPort);
+
+    rxPort = (void *)&(handle->peripheral.eusartPort->RXDATA);
+    txPort = (void *)&(handle->peripheral.eusartPort->TXDATA);
+  }
+#endif
+  else {
+    return;
+  }
+
+  if (handle->initData.frameLength > 8) {
     size = dmadrvDataSize2;
   } else {
     size = dmadrvDataSize1;
   }
 
-  if ( handle->initData.frameLength > 9 ) {
-    rxPort = (void *)&(handle->initData.port->RXDOUBLE);
-    txPort = (void *)&(handle->initData.port->TXDOUBLE);
-  } else if (handle->initData.frameLength == 9) {
-    rxPort = (void *)&(handle->initData.port->RXDATAX);
-    txPort = (void *)&(handle->initData.port->TXDATAX);
-  } else {
-    rxPort = (void *)&(handle->initData.port->RXDATA);
-    txPort = (void *)&(handle->initData.port->TXDATA);
-  }
+  em1RequestAdd(handle);
 
   // Start receive DMA.
   DMADRV_PeripheralMemory(handle->rxDMACh,
@@ -1795,25 +2159,41 @@ static void StartTransmitDMA(SPIDRV_Handle_t handle,
 
   handle->blockingCompleted  = false;
   handle->transferCount      = count;
-  handle->initData.port->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   handle->userCallback       = callback;
 
-  if ( handle->initData.frameLength > 8 ) {
+  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+    handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
+
+    if (handle->initData.frameLength > 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDOUBLE);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDOUBLE);
+    } else if (handle->initData.frameLength == 9) {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATAX);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATAX);
+    } else {
+      rxPort = (void *)&(handle->peripheral.usartPort->RXDATA);
+      txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
+    }
+  }
+#if defined(EUSART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
+    clearEusartFifos(handle->peripheral.eusartPort);
+
+    rxPort = (void *)&(handle->peripheral.eusartPort->RXDATA);
+    txPort = (void *)&(handle->peripheral.eusartPort->TXDATA);
+  }
+#endif
+  else {
+    return;
+  }
+
+  if (handle->initData.frameLength > 8) {
     size = dmadrvDataSize2;
   } else {
     size = dmadrvDataSize1;
   }
 
-  if ( handle->initData.frameLength > 9 ) {
-    rxPort = (void *)&(handle->initData.port->RXDOUBLE);
-    txPort = (void *)&(handle->initData.port->TXDOUBLE);
-  } else if (handle->initData.frameLength == 9) {
-    rxPort = (void *)&(handle->initData.port->RXDATAX);
-    txPort = (void *)&(handle->initData.port->TXDATAX);
-  } else {
-    rxPort = (void *)&(handle->initData.port->RXDATA);
-    txPort = (void *)&(handle->initData.port->TXDATA);
-  }
+  em1RequestAdd(handle);
 
   // Receive DMA runs only to get precise numbers for SPIDRV_GetTransferStatus()
   // Start receive DMA.
@@ -1848,7 +2228,7 @@ static Ecode_t TransferApiBlockingPrologue(SPIDRV_Handle_t handle,
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -1857,7 +2237,7 @@ static Ecode_t TransferApiBlockingPrologue(SPIDRV_Handle_t handle,
   }
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state != spidrvStateIdle ) {
+  if (handle->state != spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
@@ -1876,7 +2256,7 @@ static Ecode_t TransferApiPrologue(SPIDRV_Handle_t handle,
 {
   CORE_DECLARE_IRQ_STATE;
 
-  if ( handle == NULL ) {
+  if (handle == NULL) {
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
@@ -1885,7 +2265,7 @@ static Ecode_t TransferApiPrologue(SPIDRV_Handle_t handle,
   }
 
   CORE_ENTER_ATOMIC();
-  if ( handle->state != spidrvStateIdle ) {
+  if (handle->state != spidrvStateIdle) {
     CORE_EXIT_ATOMIC();
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
@@ -1902,7 +2282,7 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
 {
   if (CORE_IrqIsBlocked(SPI_DMA_IRQ)) {
     // Poll for completion by calling IRQ handler.
-    while ( handle->blockingCompleted == false ) {
+    while (handle->blockingCompleted == false) {
 #if defined(DMA_PRESENT) && (DMA_COUNT == 1)
       DMA_IRQHandler();
 #elif defined(LDMA_PRESENT) && (LDMA_COUNT == 1)
@@ -1912,7 +2292,7 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
 #endif
     }
   } else {
-    while ( handle->blockingCompleted == false ) ;
+    while (handle->blockingCompleted == false) ;
   }
 }
 
@@ -1922,10 +2302,10 @@ static void WaitForTransferCompletion(SPIDRV_Handle_t handle)
  ******************************************************************************/
 static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
 {
-  while ( !GPIO_PinInGet((GPIO_Port_TypeDef)handle->csPort, handle->csPin)
-          && (handle->state != spidrvStateIdle) ) ;
+  while (!GPIO_PinInGet((GPIO_Port_TypeDef)handle->portCs, handle->pinCs)
+         && (handle->state != spidrvStateIdle)) ;
 
-  if ( handle->state == spidrvStateIdle ) {
+  if (handle->state == spidrvStateIdle) {
     return handle->transferStatus;
   }
 
@@ -1937,10 +2317,8 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
 
 /* *INDENT-OFF* */
 /******** THE REST OF THE FILE IS DOCUMENTATION ONLY !**********************//**
- * @addtogroup emdrv
- * @{
- * @addtogroup SPIDRV
- * @brief SPIDRV Serial Peripheral Interface Driver
+ * @addtogroup spidrv SPIDRV - SPI Driver
+ * @brief Serial Peripheral Interface Driver
  * @{
 
    @details
@@ -1968,13 +2346,13 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
    @n @section spidrv_conf Configuration Options
 
    Some properties of the SPIDRV driver are compile-time configurable. These
-   properties are stored in a file named @ref spidrv_config.h. A template for
+   properties are stored in a file named spidrv_config.h. A template for
    this file, containing default values, is in the emdrv/config folder.
    Currently the configuration options are as follows:
    @li Inclusion of slave API transfer functions.
 
    To configure SPIDRV, provide a custom configuration file. This is a
-   sample @ref spidrv_config.h file:
+   sample spidrv_config.h file:
    @verbatim
 #ifndef __SILICON_LABS_SPIDRV_CONFIG_H__
 #define __SILICON_LABS_SPIDRV_CONFIG_H__
@@ -1987,7 +2365,7 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
    @endverbatim
 
    The properties of each SPI driver instance are set at run-time using the
-   @ref SPIDRV_Init_t data structure input parameter to the @ref SPIDRV_Init()
+   @ref SPIDRV_Init data structure input parameter to the @ref SPIDRV_Init()
    function.
 
    @n @section spidrv_api The API
@@ -1996,7 +2374,7 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
    detailed information on input and output parameters and return values,
    click on the hyperlinked function names. Most functions return an error
    code, @ref ECODE_EMDRV_SPIDRV_OK is returned on success,
-   see @ref ecode.h and @ref spidrv.h for other error codes.
+   see ecode.h and spidrv.h for other error codes.
 
    The application code must include @em spidrv.h.
 
@@ -2032,7 +2410,7 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
 
     @em Transmit functions discard received data, @em receive functions transmit
     a fixed data pattern set when the driver is initialized
-    (@ref SPIDRV_Init_t.dummyTxValue). @em Transfer functions both receive and
+    (@ref SPIDRV_Init.dummyTxValue). @em Transfer functions both receive and
     transmit data.
 
     All slave transfer functions have a millisecond timeout parameter. Use 0
@@ -2070,5 +2448,4 @@ int main(void)
 }
    @endverbatim
 
- * @} end group SPIDRV ********************************************************
- * @} end group emdrv ****************************************************/
+ * @} end group spidrv ****************************************************/

@@ -39,6 +39,16 @@
 #include "em_core.h"
 #endif
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_MPU_PRESENT)
+#include "sl_mpu.h"
+#endif
+
+//****************************************************************************
+
 #ifdef NVM3_HOST_BUILD
 #define SL_WEAK
 #endif
@@ -52,12 +62,7 @@ CORE_DECLARE_IRQ_STATE;
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup NVM3
+ * @addtogroup nvm3
  * @{
  ******************************************************************************/
 
@@ -69,20 +74,16 @@ nvm3_Obj_t nvm3_internalObjectHandleD;
 const uint8_t nvm3_maxFragmentCount = NVM3_FRAGMENT_COUNT;
 const size_t  nvm3_objHandleSize = sizeof(nvm3_Obj_t);
 
-#ifdef NVM3_SUPPORT_ENCRYPTION
-// These variables are only required if the nvm3 library supports encryption
-uint8_t nvm3_ccmBuf[NVM3_MAX_OBJECT_SIZE + 8];
-#endif
 /// @endcond
 
 /***************************************************************************//**
- * @addtogroup NVM3Lock
+ * @addtogroup nvm3lock
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
  * @details
- * The default implementation is using @ref CORE_ENTER_CRITICAL().
+ * The default lock-begin implementation.
  ******************************************************************************/
 SL_WEAK void nvm3_lockBegin(void)
 {
@@ -97,7 +98,7 @@ SL_WEAK void nvm3_lockBegin(void)
 
 /***************************************************************************//**
  * @details
- * The default implementation is using @ref CORE_EXIT_CRITICAL().
+ * The default lock-end implementation.
  ******************************************************************************/
 SL_WEAK void nvm3_lockEnd(void)
 {
@@ -111,6 +112,21 @@ SL_WEAK void nvm3_lockEnd(void)
 #endif
 }
 
-/** @} (end addtogroup NVM3Lock) */
-/** @} (end addtogroup NVM3) */
-/** @} (end addtogroup emdrv) */
+/***************************************************************************//**
+ * @details
+ *  Disable execution from data area.
+ ******************************************************************************/
+void nvm3_lockDisableExecute(void *address, size_t size)
+{
+#if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U) && defined(SL_CATALOG_MPU_PRESENT)
+  // The memory range used by nvm3 may not be compatible with the mpu.
+  // Just ignore errors.
+  sl_mpu_disable_execute((uint32_t)address, (uint32_t)address + size - 1, size);
+#else
+  (void)address;
+  (void)size;
+#endif
+}
+
+/** @} (end addtogroup nvm3lock) */
+/** @} (end addtogroup nvm3) */

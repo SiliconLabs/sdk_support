@@ -5,7 +5,7 @@
  *   it need not be included even if rail_assert libraries are included.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -106,6 +106,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_SEQUENCER_FAULT = 58,
   RAIL_ASSERT_BUS_ERROR = 59,
   RAIL_ASSERT_INVALID_FILTERING_CONFIG = 60,
+  RAIL_ASSERT_RETIMING_CONFIG = 61,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -170,6 +171,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_SEQUENCER_FAULT                            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQUENCER_FAULT)
 #define RAIL_ASSERT_BUS_ERROR                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_BUS_ERROR)
 #define RAIL_ASSERT_INVALID_FILTERING_CONFIG                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_FILTERING_CONFIG)
+#define RAIL_ASSERT_RETIMING_CONFIG                            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_RETIMING_CONFIG)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -198,7 +200,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 ///
 #define RAIL_ASSERT_ERROR_MESSAGES {                                                   \
     /* 0*/ "Appended info missing from Rx packet",                                     \
-    /* 1*/ "Payload bytes missing from Rx packet",                                     \
+    /* 1*/ "Receive FIFO too small for IR calibration",                                \
     /* 2*/ "Error reading back packet payload",                                        \
     /* 3*/ "Receive fifo entry has invalid status",                                    \
     /* 4*/ "Receive fifo entry bad packet length",                                     \
@@ -258,6 +260,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*58*/ "Radio sequencer hit a fault condition",                                    \
     /*59*/ "Bus fault",                                                                \
     /*60*/ "The current radio config cannot be used with packet filtering",            \
+    /*61*/ "Retiming configuration error",                                             \
 }
 
 /**

@@ -16,12 +16,11 @@
  ******************************************************************************/
 
 /**************************************************************************//**
- * @cond DOXYDOC_USB_PRESENT
  * @addtogroup usbxpress USBXpress
  * @{
  *
  * @brief
- *   USBXpress interface library.
+ *   USBXpress interface library
  *
  * ## Introduction
  *
@@ -47,7 +46,6 @@
  *  # Additional Resources
  *
  *   * [USBXpress AppNote - AN169](http://www.silabs.com/Support%20Documents/TechnicalDocs/AN169.pdf)
- *   * [Development drivers](http://www.silabs.com/products/mcu/Pages/USBXpress.aspx)
  *   * [Driver Customization - AN220](http://www.silabs.com/Support%20Documents/TechnicalDocs/AN200.pdf)
  *
  *   This driver sits on top of the EFM32 USB Library.
@@ -57,7 +55,6 @@
  *   This library handles USB interrupts and will enable USB interrupts at
  *   its  discretion. It will NOT enable global interrupts and the user is
  *   responsible for enabling global interrupts.
- * @endcond
  *****************************************************************************/
 
 #ifndef  EM_USBXPRESS_H
@@ -81,7 +78,7 @@ extern "C" {
  *
  * USBX_apiCallbackEnable(my_callback);
  *
- * @warn
+ * @warning
  *   The call-back routine is called by the USBXpress library from
  *   within the USB interrupt. It should run as quickly as possible.
  *
@@ -97,8 +94,8 @@ extern "C" {
 typedef void (*USBX_apiCallback_t)(void);
 
 /***************************************************************************//**
- *  @cond DOXYDOC_USB_PRESENT
- *  @addtogroup usbx_callback_status USBXpress Callback Status Flags
+ *  @addtogroup usbx_callback_status Callback Status Flags
+ *  @brief Callback Status Flags
  *  @{
  *
  *  These constant values are returned by USBX_getCallbackSource(). The return
@@ -117,12 +114,11 @@ typedef void (*USBX_apiCallback_t)(void);
 #define USBX_DEV_CONFIGURED      0x00000040     //!< Device has entered configured state
 #define USBX_DEV_SUSPEND         0x00000080     //!< USB suspend signaling present on bus
 #define USBX_RX_OVERRUN          0x00000100     //!< Data received with no place to put it
-/**  @} (end usbx_callback_status Status Flags) */
-/**  @endcond */
+/**  @} (end usbx_callback_status) */
 
 /***************************************************************************//**
- *  @cond DOXYDOC_USB_PRESENT
- *  @addtogroup usbx_status USB Status Flags
+ *  @addtogroup usbx_status Status Flags
+ *  *brief Status Flags
  *  @{
  *
  *  These constant values are returned by USBX_blockRead() and
@@ -134,8 +130,7 @@ typedef void (*USBX_apiCallback_t)(void);
 #define USBX_STATUS_ILLEGAL             USB_STATUS_ILLEGAL              //!< Failed due to an illegal parameter
 #define USBX_STATUS_EP_STALLED          USB_STATUS_EP_STALLED           //!< Failed because the endpoint is stalled
 #define USBX_STATUS_DEVICE_UNCONFIGURED USB_STATUS_DEVICE_UNCONFIGURED  //!< Failed because the device is not configured
-/**  @} (end usbx_status Status Flags) */
-/**  @endcond */
+/**  @} (end usbx_status) */
 
 //! @cond DOXYGEN_SKIP
 #ifdef char16_t
@@ -157,8 +152,8 @@ typedef unsigned short char16_t;
 //! @endcond
 
 /***************************************************************************//**
- *  @cond DOXYDOC_USB_PRESENT
  *  @addtogroup usbx_macros Macros
+ *  @brief Macros
  *  @{
  ******************************************************************************/
 
@@ -220,8 +215,7 @@ typedef unsigned short char16_t;
  ******************************************************************************/
 #define STATIC_USBX_BUF(x, y) SL_ALIGN(4) \
   static uint8_t x[((y) + 3) & ~3] SL_ATTRIBUTE_ALIGN(4)
-/**  @} (end usbx_macros Macros) */
-/**  @endcond */
+/**  @} (end usbx_macros) */
 
 /***************************************************************************//**
  *  @brief
@@ -290,8 +284,8 @@ typedef struct {
 SL_PACK_END()
 
 /***************************************************************************//**
- *  @cond DOXYDOC_USB_PRESENT
  *  @addtogroup usbx_func Functions
+ *  @brief Functions
  *  @{
  ******************************************************************************/
 
@@ -440,10 +434,9 @@ void USBX_disable(void);
  *****************************************************************************/
 uint_least16_t USBX_getLibraryVersion(void);
 
-/**  @} (end usbx_func Functions) */
+/**  @} (end usbx_func) */
 
-/**  @} (end addtogroup usbxpress USBXpress) */
-/**  @endcond */
+/**  @} (end addtogroup usbxpress) */
 
 #ifdef __cplusplus
 }

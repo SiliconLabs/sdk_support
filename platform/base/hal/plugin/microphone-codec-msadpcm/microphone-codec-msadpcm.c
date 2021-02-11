@@ -60,7 +60,7 @@
 //-----------------------------------------------------------------------------
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include "hal/hal.h"
 #include "hal/plugin/i2c-driver/i2c-driver.h"
 #include "hal/plugin/microphone-codec-msadpcm/microphone-codec-msadpcm.h"

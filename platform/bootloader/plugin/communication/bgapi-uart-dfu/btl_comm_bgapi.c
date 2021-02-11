@@ -161,9 +161,9 @@ int32_t communication_main(void)
 #endif
   };
 
-  ParserContext_t parserContext;
-  DecryptContext_t decryptContext;
-  AuthContext_t authContext;
+  ParserContext_t parserContext = { 0 };
+  DecryptContext_t decryptContext = { 0 };
+  AuthContext_t authContext = { 0 };
 
   parser_init(&parserContext,
               &decryptContext,

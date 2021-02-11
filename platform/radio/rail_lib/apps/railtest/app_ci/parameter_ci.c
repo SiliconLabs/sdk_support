@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the parameter commands for RAIL test applications.
+ * @brief This file implements the parameter commands for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,31 +31,32 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "rail_types.h"
 #include "app_common.h"
 #include "em_core.h"
+#include "pa_conversions_efr32.h"
 
 static const char *powerModes[] = RAIL_TX_POWER_MODE_NAMES;
 
-void getChannel(int argc, char **argv)
+void getChannel(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (RAIL_GetDebugMode(railHandle) & RAIL_DEBUG_MODE_FREQ_OVERRIDE) {
-    responsePrintError(argv[0], 0x12, "Channels are not valid in Debug Mode");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12, "Channels are not valid in Debug Mode");
   } else {
-    responsePrint(argv[0], "channel:%d", channel);
+    responsePrint(sl_cli_get_command_string(args, 0), "channel:%d", channel);
   }
 }
 
-void setChannel(int argc, char **argv)
+void setChannel(sl_cli_command_arg_t *args)
 {
-  uint16_t proposedChannel = ciGetUnsigned(argv[1]);
+  uint16_t proposedChannel = sl_cli_get_argument_uint16(args, 0);
   bool success = false;
 
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   // Make sure this is a valid channel
   if (RAIL_IsValidChannel(railHandle, proposedChannel)
       == RAIL_STATUS_NO_ERROR) {
@@ -64,22 +65,23 @@ void setChannel(int argc, char **argv)
   }
 
   if (!success) {
-    responsePrintError(argv[0], 0x11, "Invalid channel '%d'", proposedChannel);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Invalid channel '%d'", proposedChannel);
     return;
   }
 
-  getChannel(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getChannel(args);
 }
 
-void setFreqOffset(int argc, char **argv)
+void setFreqOffset(sl_cli_command_arg_t *args)
 {
   static RAIL_FrequencyOffset_t currentFreqOffset = 0;
-  if (argc > 1) {
-    RAIL_FrequencyOffset_t freqOffset = ciGetSigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    RAIL_FrequencyOffset_t freqOffset = sl_cli_get_argument_int32(args, 0);
 
     if ((freqOffset < RAIL_FREQUENCY_OFFSET_MIN)
         || (freqOffset > RAIL_FREQUENCY_OFFSET_MAX)) {
-      responsePrintError(argv[0], RAIL_STATUS_INVALID_PARAMETER,
+      responsePrintError(sl_cli_get_command_string(args, 0), RAIL_STATUS_INVALID_PARAMETER,
                          "Offset %d outside range of [%d, %d]",
                          freqOffset,
                          RAIL_FREQUENCY_OFFSET_MIN,
@@ -88,117 +90,149 @@ void setFreqOffset(int argc, char **argv)
     }
     RAIL_Status_t status = RAIL_SetFreqOffset(railHandle, freqOffset);
     if (status != RAIL_STATUS_NO_ERROR) {
-      responsePrintError(argv[0], status, "Could not set frequency offset");
+      responsePrintError(sl_cli_get_command_string(args, 0), status, "Could not set frequency offset");
       return;
     }
     currentFreqOffset = freqOffset;
   }
-  responsePrint(argv[0], "freqOffset:%d", currentFreqOffset);
+  responsePrint(sl_cli_get_command_string(args, 0), "freqOffset:%d", currentFreqOffset);
 }
 
-void getPowerConfig(int argc, char **argv)
+void getPowerConfig(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_TxPowerConfig_t config;
   RAIL_Status_t status = RAIL_GetTxPowerConfig(railHandle, &config);
 
-  responsePrint(argv[0], "success:%s,mode:%s,voltage:%d,rampTime:%d",
+  responsePrint(sl_cli_get_command_string(args, 0), "success:%s,mode:%s,voltage:%d,rampTime:%d",
                 status == RAIL_STATUS_NO_ERROR ? "true" : "false",
                 powerModes[config.mode], config.voltage, config.rampTime);
 }
 
-void setPowerConfig(int argc, char **argv)
+void getPowerLimits(sl_cli_command_arg_t *args)
 {
-  RAIL_TxPowerMode_t mode = ciGetUnsigned(argv[1]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+
+  RAIL_TxPowerMode_t powerMode = RAIL_TX_POWER_MODE_NONE;
+  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
+  if (sl_cli_get_argument_count(args) >= 1) {
+    powerMode = sl_cli_get_argument_uint8(args, 0);
+  } else {
+    RAIL_TxPowerConfig_t config;
+    status = RAIL_GetTxPowerConfig(railHandle, &config);
+    powerMode = config.mode;
+  }
+  if (powerMode >= RAIL_TX_POWER_MODE_NONE || status != RAIL_STATUS_NO_ERROR ) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x13,
+                       "Invalid PA enum value selected: %d", powerMode);
+    return;
+  }
+  RAIL_TxPowerLevel_t maxPowerlevel = RAIL_TX_POWER_LEVEL_INVALID;
+  RAIL_TxPowerLevel_t minPowerlevel = RAIL_TX_POWER_LEVEL_INVALID;
+  bool success = RAIL_SupportsTxPowerModeAlt(railHandle, &powerMode,
+                                             &maxPowerlevel, &minPowerlevel);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "success:%s,powerMode:%s,minPowerLevel:%d,maxPowerLevel:%d",
+                success ? "Success" : "Failure",
+                powerModes[powerMode], minPowerlevel, maxPowerlevel);
+  return;
+}
+
+void setPowerConfig(sl_cli_command_arg_t *args)
+{
+  RAIL_TxPowerConfig_t *txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
+  // Make a backup of the TX Power Config before it's changed.
+  RAIL_TxPowerConfig_t txPowerConfigBackup = {
+    .mode = txPowerConfigPtr->mode,
+    .voltage = txPowerConfigPtr->voltage,
+    .rampTime = txPowerConfigPtr->rampTime
+  };
+  RAIL_TxPowerMode_t mode = sl_cli_get_argument_uint8(args, 0);
   if (mode >= RAIL_TX_POWER_MODE_NONE) {
-    responsePrintError(argv[0], 0x13, "Invalid PA enum value selected: %d", mode);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x13, "Invalid PA enum value selected: %d", mode);
     return;
   }
 
-  uint16_t voltage = ciGetUnsigned(argv[2]);
-  uint16_t rampTime = ciGetUnsigned(argv[3]);
+  uint16_t voltage = sl_cli_get_argument_uint16(args, 1);
+  uint16_t rampTime = sl_cli_get_argument_uint16(args, 2);
 
-  txPowerConfig.mode = mode;
-  txPowerConfig.voltage = voltage;
-  txPowerConfig.rampTime = rampTime;
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  txPowerConfigPtr->mode = mode;
+  txPowerConfigPtr->voltage = voltage;
+  txPowerConfigPtr->rampTime = rampTime;
+  CORE_EXIT_CRITICAL();
 
-  CHECK_RAIL_HANDLE(argv[0]);
-  RAIL_Status_t status = RAIL_ConfigTxPower(railHandle, &txPowerConfig);
-
-  if ((status == RAIL_STATUS_NO_ERROR)
-#ifdef _SILICON_LABS_32B_SERIES_1
-      && mode != RAIL_TX_POWER_MODE_SUBGIG
-#endif
-      ) {
-    default2p4Pa = mode;
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  RAIL_Status_t status = RAIL_ConfigTxPower(railHandle, txPowerConfigPtr);
+  // Restore the backup TX Power Config on error.
+  if (status != RAIL_STATUS_NO_ERROR) {
+    CORE_DECLARE_IRQ_STATE;
+    CORE_ENTER_CRITICAL();
+    txPowerConfigPtr->mode = txPowerConfigBackup.mode;
+    txPowerConfigPtr->voltage = txPowerConfigBackup.voltage;
+    txPowerConfigPtr->rampTime = txPowerConfigBackup.rampTime;
+    CORE_EXIT_CRITICAL();
   }
 
   if (status == RAIL_STATUS_NO_ERROR) {
-    getPowerConfig(1, argv);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    getPowerConfig(args);
   } else {
-    responsePrintError(argv[0], 0x26, "Could not set power config");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x26, "Could not set power config");
   }
 }
 
-void getPower(int argc, char **argv)
+void getPower(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  responsePrint(argv[0],
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "powerLevel:%d,power:%d",
                 RAIL_GetTxPower(railHandle),
                 RAIL_GetTxPowerDbm(railHandle));
 }
 
-void setPower(int argc, char **argv)
+void setPower(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  RAIL_TxPowerLevel_t powerLevel;
-  RAIL_TxPower_t power;
   bool setPowerError = false;
 
-  if (argc >= 3 && strcmp(argv[2], "raw") == 0) {
-    RAIL_TxPowerLevel_t rawLevel = ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 2 && strcmp(sl_cli_get_argument_string(args, 1), "raw") == 0) {
+    RAIL_TxPowerLevel_t rawLevel = sl_cli_get_argument_uint8(args, 0);
 
     // Set the power and update the RAW level global
-    if (RAIL_SetTxPower(railHandle, rawLevel) == RAIL_STATUS_NO_ERROR) {
-      lastSetTxPowerLevel = rawLevel;
-    } else {
+    if (RAIL_SetTxPower(railHandle, rawLevel) != RAIL_STATUS_NO_ERROR) {
       setPowerError = true;
     }
   } else {
     RAIL_TxPowerConfig_t tempCfg;
-    RAIL_TxPower_t powerDbm = ciGetSigned(argv[1]);
+    RAIL_TxPower_t powerDbm = sl_cli_get_argument_int16(args, 0);
 
     // Set the power in dBm and figure out what RAW level to store based on what
     // was requested NOT what is actually applied to the hardware after limits.
     if ((RAIL_SetTxPowerDbm(railHandle, powerDbm)
-         == RAIL_STATUS_NO_ERROR)
-        && (RAIL_GetTxPowerConfig(railHandle, &tempCfg)
-            == RAIL_STATUS_NO_ERROR)) {
-      lastSetTxPowerLevel = RAIL_ConvertDbmToRaw(railHandle,
-                                                 tempCfg.mode,
-                                                 powerDbm);
-    } else {
+         != RAIL_STATUS_NO_ERROR)
+        || (RAIL_GetTxPowerConfig(railHandle, &tempCfg)
+            != RAIL_STATUS_NO_ERROR)) {
       setPowerError = true;
     }
   }
 
   if (setPowerError) {
-    responsePrintError(argv[0], 0x23, "Could not set power.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x23, "Could not set power.");
   } else {
     // Get and print out the actual applied power and power level
-    powerLevel = RAIL_GetTxPower(railHandle);
-    power = RAIL_GetTxPowerDbm(railHandle);
-    responsePrint(argv[0], "powerLevel:%d,power:%d", powerLevel, power);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    getPower(args);
   }
 }
 
-void sweepTxPower(int argc, char **argv)
+void sweepTxPower(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "Sweeping:Started,Instructions:'q' to quit or 'enter' to continue.");
+  responsePrint(sl_cli_get_command_string(args, 0), "Sweeping:Started,Instructions:'q' to quit or 'enter' to continue.");
   RAIL_TxPowerConfig_t txPowerConfig;
 
   RAIL_GetTxPowerConfig(railHandle, &txPowerConfig);
@@ -207,24 +241,38 @@ void sweepTxPower(int argc, char **argv)
   RAIL_TxPowerLevel_t end = 255;
 
   switch (txPowerConfig.mode) {
+#ifdef RAIL_TX_POWER_MODE_2P4_HP
     case RAIL_TX_POWER_MODE_2P4_HP:
-      end = RAIL_TX_POWER_LEVEL_HP_MAX;
+      end = RAIL_TX_POWER_LEVEL_2P4_HP_MAX;
       break;
-    #if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
+#endif
+#ifdef RAIL_TX_POWER_MODE_2P4_MP
     case RAIL_TX_POWER_MODE_2P4_MP:
-      end = RAIL_TX_POWER_LEVEL_MP_MAX;
+      end = RAIL_TX_POWER_LEVEL_2P4_MP_MAX;
       break;
-    #endif
+#endif
+#ifdef RAIL_TX_POWER_MODE_2P4_LP
     case RAIL_TX_POWER_MODE_2P4_LP:
-      end = RAIL_TX_POWER_LEVEL_LP_MAX;
+      end = RAIL_TX_POWER_LEVEL_2P4_LP_MAX;
       break;
-    #ifdef RAIL_TX_POWER_MODE_SUBGIG
-    case RAIL_TX_POWER_MODE_SUBGIG:
-      end = RAIL_TX_POWER_LEVEL_SUBGIG_MAX;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_HP
+    case RAIL_TX_POWER_MODE_SUBGIG_HP:
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX;
       break;
-    #endif
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_MP
+    case RAIL_TX_POWER_MODE_SUBGIG_MP:
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_MP_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_LP
+    case RAIL_TX_POWER_MODE_SUBGIG_LP:
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_LP_MAX;
+      break;
+#endif
     default:
-      responsePrintError(argv[0], 0x21, "PA not configured.");
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x21, "PA not configured.");
       return;
   }
 
@@ -232,7 +280,7 @@ void sweepTxPower(int argc, char **argv)
   RAIL_TxPowerLevel_t i;
 
   for (i = start; i <= end; i++) {
-    responsePrint(argv[0], "PowerLevel:%u", i);
+    responsePrint(sl_cli_get_command_string(args, 0), "PowerLevel:%u", i);
     RAIL_Idle(railHandle, RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
     RAIL_SetTxPower(railHandle, i);
     RAIL_StartTxStream(railHandle, channel, RAIL_STREAM_CARRIER_WAVE);
@@ -244,7 +292,7 @@ void sweepTxPower(int argc, char **argv)
         break;
       }
       if (input == 'q') {
-        responsePrintError(argv[0], 0x20, "Sweep Aborted.");
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x20, "Sweep Aborted.");
         return;
       }
       input = getchar();
@@ -253,79 +301,97 @@ void sweepTxPower(int argc, char **argv)
     RAIL_Idle(railHandle, RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, true);
   }
 
-  responsePrint(argv[0], "Sweeping:Complete");
+  responsePrint(sl_cli_get_command_string(args, 0), "Sweeping:Complete");
 }
 
-void getCtune(int argc, char **argv)
+void getCtune(sl_cli_command_arg_t *args)
 {
   uint32_t ctune = RAIL_GetTune(railHandle);
-
-  responsePrint(argv[0], "CTUNE:0x%.3x", ctune);
+#ifdef _SILICON_LABS_32B_SERIES_1
+  responsePrint(sl_cli_get_command_string(args, 0), "CTUNE:0x%.3x", ctune);
+#else
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "CTUNEXIANA:0x%.3x,CTUNEXOANA:0x%.3x",
+                ctune,
+                (ctune + RAIL_GetTuneDelta(railHandle)));
+#endif
 }
 
-void setCtune(int argc, char **argv)
+void setCtune(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  RAIL_SetTune(railHandle, ciGetUnsigned(argv[1]));
+  RAIL_SetTune(railHandle, sl_cli_get_argument_uint32(args, 0));
 
   // Read out and print the current CTUNE value
-  getCtune(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getCtune(args);
 }
 
-void setPaCtune(int argc, char **argv)
+void getCtuneDelta(sl_cli_command_arg_t *args)
+{
+  int32_t delta = RAIL_GetTuneDelta(railHandle);
+
+  responsePrint(sl_cli_get_command_string(args, 0), "CTuneDelta:%d", delta);
+}
+
+void setCtuneDelta(sl_cli_command_arg_t *args)
+{
+  RAIL_SetTuneDelta(railHandle, sl_cli_get_argument_uint32(args, 0));
+
+  // Read out and print the current CTUNE delta value
+  getCtuneDelta(args);
+}
+
+void setPaCtune(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status;
-  uint8_t txVal = ciGetUnsigned(argv[1]);
-  uint8_t rxVal = ciGetUnsigned(argv[2]);
+  uint8_t txVal = sl_cli_get_argument_uint8(args, 0);
+  uint8_t rxVal = sl_cli_get_argument_uint8(args, 1);
 
   status = RAIL_SetPaCTune(railHandle, txVal, rxVal);
 
   if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[0], "PACTUNETX:%d,PACTUNERX:%d", txVal, rxVal);
+    responsePrint(sl_cli_get_command_string(args, 0), "PACTUNETX:%d,PACTUNERX:%d", txVal, rxVal);
   } else {
-    responsePrintError(argv[0], status, "Error");
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "Error");
   }
 }
 
-void enablePaCal(int argc, char **argv)
+void enablePaCal(sl_cli_command_arg_t *args)
 {
-  uint8_t enable = ciGetUnsigned(argv[1]);
+  uint8_t enable = sl_cli_get_argument_uint8(args, 0);
   RAIL_EnablePaCal(enable);
-  responsePrint(argv[0], "paCal:%s", (enable ? "Enabled" : "Disabled"));
+  responsePrint(sl_cli_get_command_string(args, 0), "paCal:%s", (enable ? "Enabled" : "Disabled"));
 }
 
-// Helper to convert two strings to two RAIL RadioStates
-static int8_t stringsToStates(char **strings, RAIL_RadioState_t *states)
+// Helper to convert a string to a RAIL RadioState
+static int8_t stringToState(char *string, RAIL_RadioState_t *state)
 {
-  for (int i = 0; i < 2; i++) {
-    switch (strings[i][0]) {
-      case 'i': case 'I':
-        states[i] =  RAIL_RF_STATE_IDLE;
-        break;
-
-      case 'r': case 'R':
-        states[i] =  RAIL_RF_STATE_RX;
-        break;
-
-      case 't': case 'T':
-        states[i] =  RAIL_RF_STATE_TX;
-        break;
-
-      default:
-        return 1;
-    }
+  switch (string[0]) {
+    case 'i': case 'I':
+      *state =  RAIL_RF_STATE_IDLE;
+      break;
+    case 'r': case 'R':
+      *state =  RAIL_RF_STATE_RX;
+      break;
+    case 't': case 'T':
+      *state =  RAIL_RF_STATE_TX;
+      break;
+    default:
+      return 1;
   }
   return 0;
 }
 
-void setTxTransitions(int argc, char **argv)
+void setTxTransitions(sl_cli_command_arg_t *args)
 {
   RAIL_RadioState_t states[2];
-  if (stringsToStates(&argv[1], &states[0])) {
-    responsePrintError(argv[0], 0x16, "Invalid states");
+  if (stringToState(sl_cli_get_argument_string(args, 0), &states[0])
+      || stringToState(sl_cli_get_argument_string(args, 1), &states[1])) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x16, "Invalid states");
     return;
   }
 
@@ -335,17 +401,18 @@ void setTxTransitions(int argc, char **argv)
   };
 
   RAIL_Status_t ret = RAIL_SetTxTransitions(railHandle, &transitions);
-  responsePrint(argv[0], "TxTransitions:%s", (ret ? "Error" : "Set"));
+  responsePrint(sl_cli_get_command_string(args, 0), "TxTransitions:%s", (ret ? "Error" : "Set"));
 }
 
-void setRxTransitions(int argc, char **argv)
+void setRxTransitions(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
   RAIL_RadioState_t states[2];
-  if (stringsToStates(&argv[1], &states[0])) {
-    responsePrintError(argv[0], 0x16, "Invalid states");
+  if (stringToState(sl_cli_get_argument_string(args, 0), &states[0])
+      || stringToState(sl_cli_get_argument_string(args, 1), &states[1])) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x16, "Invalid states");
     return;
   }
   RAIL_StateTransitions_t transitions = {
@@ -356,10 +423,10 @@ void setRxTransitions(int argc, char **argv)
   if (ret == RAIL_STATUS_NO_ERROR) {
     rxSuccessTransition = states[0];
   }
-  responsePrint(argv[0], "RxTransitions:%s", (ret ? "Error" : "Set"));
+  responsePrint(sl_cli_get_command_string(args, 0), "RxTransitions:%s", (ret ? "Error" : "Set"));
 }
 
-void getRxTransitions(int argc, char **argv)
+void getRxTransitions(sl_cli_command_arg_t *args)
 {
   RAIL_StateTransitions_t transitions;
   RAIL_Status_t ret = RAIL_GetRxTransitions(railHandle, &transitions);
@@ -367,13 +434,13 @@ void getRxTransitions(int argc, char **argv)
   if (ret == RAIL_STATUS_NO_ERROR) {
     const char *success = getRfStateName(transitions.success);
     const char *error = getRfStateName(transitions.error);
-    responsePrint(argv[0], "Success:%s,Error:%s", success, error);
+    responsePrint(sl_cli_get_command_string(args, 0), "Success:%s,Error:%s", success, error);
   } else {
-    responsePrintError(argv[0], 0x28, "Get rx transitions failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x28, "Get rx transitions failed");
   }
 }
 
-void getTxTransitions(int argc, char **argv)
+void getTxTransitions(sl_cli_command_arg_t *args)
 {
   RAIL_StateTransitions_t transitions;
   RAIL_Status_t ret = RAIL_GetTxTransitions(railHandle, &transitions);
@@ -381,79 +448,79 @@ void getTxTransitions(int argc, char **argv)
   if (ret == RAIL_STATUS_NO_ERROR) {
     const char *success = getRfStateName(transitions.success);
     const char *error = getRfStateName(transitions.error);
-    responsePrint(argv[0], "Success:%s,Error:%s", success, error);
+    responsePrint(sl_cli_get_command_string(args, 0), "Success:%s,Error:%s", success, error);
   } else {
-    responsePrintError(argv[0], 0x27, "Get tx transitions failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x27, "Get tx transitions failed");
   }
 }
 
-void setTimings(int argc, char **argv)
+void setTimings(sl_cli_command_arg_t *args)
 {
   uint16_t timing[6] = { 0 };
-  for (int i = 1; i < argc; i++) {
-    timing[i - 1] = ciGetUnsigned(argv[i]);
+  for (int i = 0; i < sl_cli_get_argument_count(args); i++) {
+    timing[i] = sl_cli_get_argument_uint16(args, i);
   }
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_StateTiming_t timings =
   { timing[0], timing[1], timing[2], timing[3], timing[4], timing[5] };
   if (!RAIL_SetStateTiming(railHandle, &timings)) {
-    responsePrint(argv[0], "IdleToRx:%u,RxToTx:%u,IdleToTx:%u,TxToRx:%u,"
-                           "RxSearch:%u,Tx2RxSearch:%u",
+    responsePrint(sl_cli_get_command_string(args, 0), "IdleToRx:%u,RxToTx:%u,IdleToTx:%u,TxToRx:%u,"
+                                                      "RxSearch:%u,Tx2RxSearch:%u",
                   timings.idleToRx, timings.rxToTx, timings.idleToTx,
                   timings.txToRx, timings.rxSearchTimeout, timings.txToRxSearchTimeout);
   } else {
-    responsePrintError(argv[0], 0x18, "Setting timings failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x18, "Setting timings failed");
   }
 }
 
-void setTxFifoThreshold(int argc, char **argv)
+void setTxFifoThreshold(sl_cli_command_arg_t *args)
 {
   if (railDataConfig.txMethod != FIFO_MODE) {
-    responsePrintError(argv[0], 0x19, "Tx is not in FIFO mode");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x19, "Tx is not in FIFO mode");
     return;
   }
 
-  uint16_t txFifoThreshold = ciGetUnsigned(argv[1]);
+  uint16_t txFifoThreshold = sl_cli_get_argument_uint16(args, 0);
   txFifoThreshold = RAIL_SetTxFifoThreshold(railHandle, txFifoThreshold);
-  responsePrint(argv[0], "TxFifoThreshold:%d", txFifoThreshold);
+  responsePrint(sl_cli_get_command_string(args, 0), "TxFifoThreshold:%d", txFifoThreshold);
 }
 
-void setRxFifoThreshold(int argc, char **argv)
+void setRxFifoThreshold(sl_cli_command_arg_t *args)
 {
-  uint16_t rxFifoThreshold = ciGetUnsigned(argv[1]);
+  uint16_t rxFifoThreshold = sl_cli_get_argument_uint16(args, 0);
   rxFifoThreshold = RAIL_SetRxFifoThreshold(railHandle, rxFifoThreshold);
-  responsePrint(argv[0], "RxFifoThreshold:%d", rxFifoThreshold);
+  responsePrint(sl_cli_get_command_string(args, 0), "RxFifoThreshold:%d", rxFifoThreshold);
 }
 
-void setEventConfig(int argc, char **argv)
+void setEventConfig(sl_cli_command_arg_t *args)
 {
-  RAIL_Events_t eventMask = ciGetUnsigned(argv[1]);
-  RAIL_Events_t eventConfig = ciGetUnsigned(argv[2]);
+  RAIL_Events_t eventMask = sl_cli_get_argument_uint32(args, 0);
+  RAIL_Events_t eventConfig = sl_cli_get_argument_uint32(args, 1);
 
-  if (argc >= 5) {
-    eventMask |= (((RAIL_Events_t)ciGetUnsigned(argv[3])) << 32U);
-    eventConfig |= (((RAIL_Events_t)ciGetUnsigned(argv[4])) << 32U);
+  if (sl_cli_get_argument_count(args) >= 4) {
+    eventMask |= (((RAIL_Events_t)sl_cli_get_argument_uint32(args, 2)) << 32U);
+    eventConfig |= (((RAIL_Events_t)sl_cli_get_argument_uint32(args, 3)) << 32U);
   }
 
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_ConfigEvents(railHandle, eventMask, eventConfig);
   // Avoid use of %ll long-long formats due to iffy printf library support
-  if (argc >= 5) {
-    responsePrint(argv[0], "Mask:0x%x%08x,Values:0x%x%08x",
+  if (sl_cli_get_argument_count(args) >= 4) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Mask:0x%x%08x,Values:0x%x%08x",
                   (uint32_t)(eventMask >> 32),
                   (uint32_t)eventMask,
                   (uint32_t)(eventConfig >> 32),
                   (uint32_t)eventConfig);
   } else {
-    responsePrint(argv[0], "Mask:0x%x,Values:0x%x",
+    responsePrint(sl_cli_get_command_string(args, 0), "Mask:0x%x,Values:0x%x",
                   (uint32_t)eventMask,
                   (uint32_t)eventConfig);
   }
 }
 
-void delayUs(int argc, char **argv)
+void delayUs(sl_cli_command_arg_t *args)
 {
-  uint32_t delayUs = ciGetUnsigned(argv[1]);
+  uint32_t delayUs = sl_cli_get_argument_uint32(args, 0);
 
   // Do not measure any interrupt processing overhead during the delay.
   CORE_DECLARE_IRQ_STATE;
@@ -465,24 +532,24 @@ void delayUs(int argc, char **argv)
   uint32_t actualDelay = RAIL_GetTime() - startTime;
 
   CORE_EXIT_CRITICAL();
-  responsePrint(argv[0], "Success:%s,ActualDelay:%d",
+  responsePrint(sl_cli_get_command_string(args, 0), "Success:%s,ActualDelay:%d",
                 status == RAIL_STATUS_NO_ERROR ? "True" : "False",
                 actualDelay);
 }
 
 #ifdef RAIL_PA_AUTO_MODE
 #include "pa_auto_mode.h"
-void configPaAutoMode(int argc, char **argv)
+void configPaAutoMode(sl_cli_command_arg_t *args)
 {
-  uint8_t index = ciGetUnsigned(argv[1]);
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
 
-  int16_t min = ciGetSigned(argv[2]);
-  int16_t max = ciGetSigned(argv[3]);
-  uint8_t mode = ciGetUnsigned(argv[4]);
+  int16_t min = sl_cli_get_argument_int16(args, 1);
+  int16_t max = sl_cli_get_argument_int16(args, 2);
+  uint8_t mode = sl_cli_get_argument_uint8(args, 3);
 
   // Make sure the mode is valid
   if (mode > RAIL_TX_POWER_MODE_NONE) {
-    responsePrintError(argv[0], 0x01, "Invalid mode (%d) specified", mode);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "Invalid mode (%d) specified", mode);
     return;
   }
 
@@ -490,24 +557,53 @@ void configPaAutoMode(int argc, char **argv)
   RAIL_PaAutoModeConfig[index].max = max;
   RAIL_PaAutoModeConfig[index].mode = mode;
 
-  responsePrint(argv[0], "Min:%d,Max:%d,Mode:%s", min, max, powerModes[mode]);
+  responsePrint(sl_cli_get_command_string(args, 0), "Min:%d,Max:%d,Mode:%s", min, max, powerModes[mode]);
 }
 
-void enablePaAutoMode(int argc, char **argv)
+void enablePaAutoMode(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_EnablePaAutoMode(railHandle, enable);
 
-  responsePrint(argv[0], "enable:%s", enable ? "True" : "False");
+  responsePrint(sl_cli_get_command_string(args, 0), "enable:%s", enable ? "True" : "False");
 }
 #else
-void configPaAutoMode(int argc, char **argv)
+void configPaAutoMode(sl_cli_command_arg_t *args)
 {
-  responsePrintError(argv[0], 0x01, "PA Auto Mode plugin must be enabled to use this feature!");
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "PA Auto Mode plugin must be enabled to use this feature!");
 }
 
-void enablePaAutoMode(int argc, char **argv)
+void enablePaAutoMode(sl_cli_command_arg_t *args)
 {
-  responsePrintError(argv[0], 0x01, "PA Auto Mode plugin must be enabled to use this feature!");
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x01, "PA Auto Mode plugin must be enabled to use this feature!");
 }
 #endif
+
+void setRetimeOption(sl_cli_command_arg_t *args)
+{
+  uint32_t option = sl_cli_get_argument_uint8(args, 0);
+  RAIL_RetimeOptions_t finalRetimeOption;
+  RAIL_Status_t status;
+
+  status = RAIL_ConfigRetimeOptions(railHandle,
+                                    RAIL_RETIME_OPTIONS_ALL,
+                                    option);
+
+  // Report the current enabled status
+  if (status == RAIL_STATUS_NO_ERROR) {
+    RAIL_GetRetimeOptions(railHandle,
+                          &finalRetimeOption);
+    responsePrint(sl_cli_get_command_string(args, 0),
+#ifdef _SILICON_LABS_32B_SERIES_2
+                  "LCD: %s, HFXO: %s, HFRCO: %s, DCDC: %s",
+                  ((finalRetimeOption & RAIL_RETIME_OPTION_LCD) != 0U) ? "Enabled" : "Disabled",
+#else
+                  "HFXO: %s, HFRCO: %s, DCDC: %s",
+#endif
+                  ((finalRetimeOption & RAIL_RETIME_OPTION_HFXO) != 0U) ? "Enabled" : "Disabled",
+                  ((finalRetimeOption & RAIL_RETIME_OPTION_HFRCO) != 0U) ? "Enabled" : "Disabled",
+                  ((finalRetimeOption & RAIL_RETIME_OPTION_DCDC) != 0U) ? "Enabled" : "Disabled");
+  } else {
+    responsePrint(sl_cli_get_command_string(args, 0), "Status:%d", status);
+  }
+}

@@ -134,6 +134,64 @@ int32_t bootloader_parseBuffer(BootloaderParserContext_t   *context,
   return mainBootloaderTable->parseBuffer(context, callbacks, data, numBytes);
 }
 
+int32_t bootloader_parseImageInfo(BootloaderParserContext_t *context,
+                                  uint8_t                   data[],
+                                  size_t                    numBytes,
+                                  ApplicationData_t         *appInfo,
+                                  uint32_t                  *bootloaderVersion)
+{
+  if (!bootloader_pointerValid(mainBootloaderTable)) {
+    return BOOTLOADER_ERROR_PARSE_FAILED;
+  }
+
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
+  bootloader_getInfo(&info);
+
+  uint32_t blMajorVersion = ((info.version & BOOTLOADER_VERSION_MAJOR_MASK)
+                             >> BOOTLOADER_VERSION_MAJOR_SHIFT);
+  uint32_t blMinorVersion = ((info.version & BOOTLOADER_VERSION_MINOR_MASK)
+                             >> BOOTLOADER_VERSION_MINOR_SHIFT);
+
+  if ((blMajorVersion < 1UL) || (blMajorVersion == 1UL && blMinorVersion < 11UL)) {
+    return BOOTLOADER_ERROR_PARSE_FAILED;
+  }
+
+  return mainBootloaderTable->parseImageInfo(context, data, numBytes, appInfo, bootloaderVersion);
+}
+
+uint32_t bootloader_parserContextSize(void)
+{
+  if (!bootloader_pointerValid(mainBootloaderTable)) {
+    return 0UL;
+  }
+
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
+  bootloader_getInfo(&info);
+
+  uint32_t blMajorVersion = ((info.version & BOOTLOADER_VERSION_MAJOR_MASK)
+                             >> BOOTLOADER_VERSION_MAJOR_SHIFT);
+  uint32_t blMinorVersion = ((info.version & BOOTLOADER_VERSION_MINOR_MASK)
+                             >> BOOTLOADER_VERSION_MINOR_SHIFT);
+
+  if (blMajorVersion < 1UL) {
+    return 384UL;
+  }
+
+  if (blMajorVersion == 1UL && blMinorVersion < 11UL) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    if (blMinorVersion == 10UL) {
+      return 524UL;
+    } else {
+      return 384UL;
+    }
+#else
+    return 384UL;
+#endif
+  }
+
+  return mainBootloaderTable->parserContextSize();
+}
+
 bool bootloader_verifyApplication(uint32_t startAddress)
 {
   if (!bootloader_pointerValid(mainBootloaderTable)) {
@@ -144,7 +202,7 @@ bool bootloader_verifyApplication(uint32_t startAddress)
 
 bool bootloader_secureBootEnforced(void)
 {
-  BootloaderInformation_t info;
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
   bootloader_getInfo(&info);
 
   if (info.capabilities & BOOTLOADER_CAPABILITY_ENFORCE_SECURE_BOOT) {
@@ -152,6 +210,29 @@ bool bootloader_secureBootEnforced(void)
   }
   return false;
 }
+
+#if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+uint32_t bootloader_remainingApplicationUpgrades(void)
+{
+  if (!bootloader_pointerValid(mainBootloaderTable)) {
+    return 0UL;
+  }
+
+  BootloaderInformation_t info = { .type = SL_BOOTLOADER, .version = 0U, .capabilities = 0U };
+  bootloader_getInfo(&info);
+
+  uint32_t blMajorVersion = ((info.version & BOOTLOADER_VERSION_MAJOR_MASK)
+                             >> BOOTLOADER_VERSION_MAJOR_SHIFT);
+  uint32_t blMinorVersion = ((info.version & BOOTLOADER_VERSION_MINOR_MASK)
+                             >> BOOTLOADER_VERSION_MINOR_SHIFT);
+
+  if ((blMajorVersion < 1UL) || (blMajorVersion == 1UL && blMinorVersion < 11UL)) {
+    return 0UL;
+  }
+
+  return mainBootloaderTable->remainingApplicationUpgrades();
+}
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 bool bootloader_getCertificateVersion(uint32_t *version)

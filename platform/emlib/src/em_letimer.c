@@ -34,12 +34,7 @@
 #include "em_assert.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LETIMER
+ * @addtogroup letimer LETIMER - Low Energy Timer
  * @brief Low Energy Timer (LETIMER) Peripheral API
  * @details
  *  This module contains functions to control the LETIMER peripheral of Silicon
@@ -560,6 +555,14 @@ void LETIMER_Reset(LETIMER_TypeDef *letimer)
   letimer->EN_SET = LETIMER_EN_EN;
 #endif
   LETIMER_SyncWait(letimer);
+
+#ifdef LETIMER_SWRST_SWRST
+
+  letimer->SWRST_SET = LETIMER_SWRST_SWRST;
+  while (letimer->SWRST & _LETIMER_SWRST_RESETTING_MASK) ;
+
+#else
+
 #if defined(_LETIMER_FREEZE_MASK)
   /* Freeze registers to avoid stalling for LF synchronization. */
   LETIMER_FreezeEnable(letimer, true);
@@ -585,6 +588,17 @@ void LETIMER_Reset(LETIMER_TypeDef *letimer)
 
 #if defined (LETIMER_EN_EN)
   letimer->EN_CLR = LETIMER_EN_EN;
+#if defined(_LETIMER_EN_DISABLING_MASK)
+  /*
+   * Currently, there are no chips without SWRST and with LETIMER_EN_DISABLING
+   * so this code should never be reached, but that way the same pattern of
+   * checking the disabling bit is spread across emlib, and code is slightly
+   * more resilient to feature addition/removal.
+   */
+  while (letimer->EN & _LETIMER_EN_DISABLING_MASK) {
+  }
+#endif
+#endif
 #endif
 }
 
@@ -592,6 +606,9 @@ void LETIMER_Reset(LETIMER_TypeDef *letimer)
  * @brief
  *   Wait for the LETIMER to complete all synchronization of register changes
  *   and commands.
+ *
+ * @param[in] letimer
+ *   A pointer to the LETIMER peripheral register block.
  ******************************************************************************/
 void LETIMER_SyncWait(LETIMER_TypeDef *letimer)
 {
@@ -672,6 +689,5 @@ uint32_t LETIMER_TopGet(LETIMER_TypeDef *letimer)
 #endif
 }
 
-/** @} (end addtogroup LETIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup letimer) */
 #endif /* defined(LETIMER_COUNT) && (LETIMER_COUNT > 0) */

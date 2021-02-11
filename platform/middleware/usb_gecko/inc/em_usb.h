@@ -40,27 +40,15 @@ extern "C" {
 #pragma anon_unions
 #endif
 
-#if defined(USB_HOST)
 /***************************************************************************//**
- * @addtogroup USB
+ * @addtogroup usb
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup USB_COMMON
+ * @addtogroup usb_common
  * @{
  ******************************************************************************/
-#else
-/***************************************************************************//**
- * @addtogroup USB
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup USB_COMMON
- * @{
- ******************************************************************************/
-#endif
 
 #define SILABS_USB_VID          0x10C4          /**< Silicon Labs Vendor ID, supplied by USB-IF.       */
 
@@ -340,11 +328,11 @@ typedef enum {
   USB_STATUS_DEVICE_MALFUNCTION = -15,          /**< Malfunctioning device attached.                   */
   USB_STATUS_PORT_OVERCURRENT = -16,            /**< VBUS shortcircuit/overcurrent failure.            */
 } USB_Status_TypeDef;
-/** @} (end addtogroup USB_COMMON) */
+/** @} (end addtogroup usb_common) */
 
 #if defined(USB_DEVICE)
 /***************************************************************************//**
- * @addtogroup USB_DEVICE
+ * @addtogroup usb_device
  * @{
  ******************************************************************************/
 
@@ -370,10 +358,10 @@ typedef enum {
   USBD_STATE_SUSPENDED  = 6,                    /**< Device state is SUSPENDED.                        */
   USBD_STATE_LASTMARKER = 7,                    /**< Device state enum end marker.                     */
 } USBD_State_TypeDef;
-/** @} (end addtogroup USB_DEVICE) */
-#endif /* defined(USB_DEVICE) */
+/** @} (end addtogroup usb_device) */
+#endif /* defined(usb_device) */
 
-/** @addtogroup USB_COMMON
+/** @addtogroup usb_common
  *  @{*/
 
 /** @brief USB Setup request package. */
@@ -508,12 +496,12 @@ typedef struct {
 } SL_ATTRIBUTE_PACKED USB_StringDescriptor_TypeDef;
 SL_PACK_END()
 
-/** @} (end addtogroup USB_COMMON) */
+/** @} (end addtogroup usb_common) */
 
 /*** -------------------- Serial port debug configuration ---------------- ***/
 
 #if defined(DOXY_DOC_ONLY)
-/** @addtogroup USB_COMMON
+/** @addtogroup usb_common
  *  @{*/
 
 /***************************************************************************//**
@@ -567,7 +555,7 @@ void USB_PUTS(const char *p);
  ******************************************************************************/
 int USB_PRINTF(const char *format, ...);
 
-/** @} (end addtogroup USB_COMMON) */
+/** @} (end addtogroup usb_common) */
 #endif /* defined(DOXY_DOC_ONLY) */
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -623,7 +611,7 @@ void USB_Puts(const char *p);
 #endif /* defined(USB_HOST) */
 /** @endcond */
 
-/** @addtogroup USB_COMMON
+/** @addtogroup usb_common
  *  @{*/
 
 /***************************************************************************//**
@@ -677,10 +665,10 @@ void  USBTIMER_Init(void);
 void  USBTIMER_Start(uint32_t id, uint32_t timeout, USBTIMER_Callback_TypeDef callback);
 void  USBTIMER_Stop(uint32_t id);
 #endif /* (NUM_QTIMERS > 0) */
-/** @} (end addtogroup USB_COMMON) */
+/** @} (end addtogroup usb_common) */
 
 #if defined(USB_DEVICE)
-/** @addtogroup USB_DEVICE
+/** @addtogroup usb_device
  *  @{*/
 /*** -------------------- DEVICE mode API definitions -------------------- ***/
 
@@ -812,12 +800,12 @@ void                USBD_Stop(void);
 int                 USBD_UnStallEp(int epAddr);
 int                 USBD_Write(int epAddr, void *data, int byteCount, USB_XferCompleteCb_TypeDef callback);
 
-/** @} (end addtogroup USB_DEVICE) */
+/** @} (end addtogroup usb_device) */
 #endif /* defined(USB_DEVICE) */
 
 #if defined(USB_HOST)
 /***************************************************************************//**
- * @addtogroup USB_HOST
+ * @addtogroup usb_host
  * @{
  ******************************************************************************/
 /*** -------------------- HOST mode API definitions ---------------------- ***/
@@ -945,9 +933,9 @@ int     USBH_WaitForDeviceConnectionB(uint8_t *buf, int timeoutInSeconds);
 int     USBH_Write(USBH_Ep_TypeDef *ep, void *data, int byteCount, int timeout, USB_XferCompleteCb_TypeDef callback);
 int     USBH_WriteB(USBH_Ep_TypeDef *ep, void *data, int byteCount, int timeout);
 
-/** @} (end addtogroup USB_HOST) */
+/** @} (end addtogroup usb_host) */
 #endif /* defined(USB_HOST) */
-/** @} (end addtogroup USB) */
+/** @} (end addtogroup usb) */
 
 #ifdef __cplusplus
 }

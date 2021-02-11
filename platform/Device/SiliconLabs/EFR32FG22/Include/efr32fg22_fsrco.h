@@ -71,4 +71,5 @@ typedef struct {
 /** @} End of group EFR32FG22_FSRCO_BitFields */
 /** @} End of group EFR32FG22_FSRCO */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_FSRCO_H */

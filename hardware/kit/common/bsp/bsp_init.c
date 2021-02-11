@@ -214,31 +214,45 @@ void BSP_initClocks(void)
   CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
 #endif
 
-#elif (HAL_CLK_HFCLK_SOURCE == HAL_CLK_HFCLK_SOURCE_HFRCO)
-#if defined(HAL_CLK_PLL_CONFIGURATION) && (HAL_CLK_PLL_CONFIGURATION != HAL_CLK_PLL_CONFIGURATION_NONE)
+#elif (HAL_CLK_HFCLK_SOURCE == HAL_CLK_HFCLK_SOURCE_HFRCODPLL)
+#if defined(HAL_CLK_PLL_CONFIGURATION)
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   #if HAL_CLK_PLL_CONFIGURATION == HAL_CLK_PLL_CONFIGURATION_40MHZ
-  #if !BSP_CLK_LFXO_PRESENT
-  #error "PLL reference set to LFXO, but no LFXO present"
-  #endif
+    #if !BSP_CLK_LFXO_PRESENT
+    #error "PLL reference set to LFXO, but no LFXO present"
+    #endif
   CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_LFXO_TO_40MHZ;
   #elif HAL_CLK_PLL_CONFIGURATION == HAL_CLK_PLL_CONFIGURATION_80MHZ
-  #if !BSP_CLK_HFXO_PRESENT
-  #error "PLL reference set to HFXO, but no HFXO present"
-  #endif
+    #if !BSP_CLK_HFXO_PRESENT
+    #error "PLL reference set to HFXO, but no HFXO present"
+    #endif
   CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_HFXO_TO_80MHZ;
   #else
-  #error "Invalid DPLL configuration"
+    #error "Invalid DPLL configuration"
   #endif
+
+  #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+  #if HAL_CLK_PLL_CONFIGURATION == HAL_CLK_PLL_CONFIGURATION_76_8MHZ
+    #if !BSP_CLK_HFXO_PRESENT
+    #error "PLL reference set to HFXO, but no HFXO present"
+    #endif
+  CMU_DPLLInit_TypeDef dpllInit = CMU_DPLL_HFXO_TO_76_8MHZ;
+  #else
+    #error "Invalid DPLL configuration"
+  #endif
+  #endif // CONFIG_2
+
   bool dpllLock = false;
   while (!dpllLock) {
     dpllLock = CMU_DPLLLock(&dpllInit);
   }
 #endif // HAL_CLK_PLL_CONFIGURATION
-#if defined(CMU_HF_CLK_BRANCH)
-  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
-#else
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
-#endif // CMU_HF_CLK_BRANCH
+
+#elif (HAL_CLK_HFCLK_SOURCE == HAL_CLK_HFCLK_SOURCE_HFRCO)
+  #if defined(CMU_HF_CLK_BRANCH)
+  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+  #endif // CMU_HF_CLK_BRANCH
 #else
   #error "Must define HAL_CLK_HFCLK_SOURCE"
 #endif // HAL_CLK_HFCLK_SOURCE

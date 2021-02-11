@@ -927,4 +927,5 @@ typedef struct {
 /** @} End of group EFR32MG21_AGC_BitFields */
 /** @} End of group EFR32MG21_AGC */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_AGC_H */

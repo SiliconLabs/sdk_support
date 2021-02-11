@@ -492,4 +492,5 @@ typedef struct {
 /** @} End of group EFR32FG22_LETIMER_BitFields */
 /** @} End of group EFR32FG22_LETIMER */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_LETIMER_H */

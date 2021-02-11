@@ -925,4 +925,5 @@ typedef struct {
 /** @} End of group MGM21_DEVINFO_BitFields */
 /** @} End of group MGM21_DEVINFO */
 /** @} End of group Parts */
+
 #endif /* MGM21_DEVINFO_H */

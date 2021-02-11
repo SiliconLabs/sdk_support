@@ -56,26 +56,14 @@
 #elif defined(MGM210P022JIA)
 #include "mgm210p022jia.h"
 
-#elif defined(MGM210P022JNA)
-#include "mgm210p022jna.h"
-
 #elif defined(MGM210P032JIA)
 #include "mgm210p032jia.h"
-
-#elif defined(MGM210P032JNA)
-#include "mgm210p032jna.h"
 
 #elif defined(MGM210PA22JIA)
 #include "mgm210pa22jia.h"
 
-#elif defined(MGM210PA22JNA)
-#include "mgm210pa22jna.h"
-
 #elif defined(MGM210PA32JIA)
 #include "mgm210pa32jia.h"
-
-#elif defined(MGM210PA32JNA)
-#include "mgm210pa32jna.h"
 
 #elif defined(MGM210PB22JIA)
 #include "mgm210pb22jia.h"

@@ -35,12 +35,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup DAC
+ * @addtogroup dac DAC - Digital to Analog Converter
  * @brief Digital to Analog Converter (DAC) Peripheral API
  * @details
  *  This module contains functions to control the DAC peripheral of Silicon
@@ -315,6 +310,5 @@ void DAC_Reset(DAC_TypeDef *dac)
   /* Do not reset route register, setting should be done independently */
 }
 
-/** @} (end addtogroup DAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup dac) */
 #endif /* defined(DAC_COUNT) && (DAC_COUNT > 0) */

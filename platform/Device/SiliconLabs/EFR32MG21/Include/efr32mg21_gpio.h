@@ -312,15 +312,11 @@ typedef struct {
 #define _GPIO_ABUSALLOC_AEVEN0_ADC0                  0x00000001UL                           /**< Mode ADC0 for GPIO_ABUSALLOC                */
 #define _GPIO_ABUSALLOC_AEVEN0_ACMP0                 0x00000002UL                           /**< Mode ACMP0 for GPIO_ABUSALLOC               */
 #define _GPIO_ABUSALLOC_AEVEN0_ACMP1                 0x00000003UL                           /**< Mode ACMP1 for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AEVEN0_DIAGA                 0x0000000EUL                           /**< Mode DIAGA for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AEVEN0_DEBUG                 0x0000000FUL                           /**< Mode DEBUG for GPIO_ABUSALLOC               */
 #define GPIO_ABUSALLOC_AEVEN0_DEFAULT                (_GPIO_ABUSALLOC_AEVEN0_DEFAULT << 0)  /**< Shifted mode DEFAULT for GPIO_ABUSALLOC     */
 #define GPIO_ABUSALLOC_AEVEN0_TRISTATE               (_GPIO_ABUSALLOC_AEVEN0_TRISTATE << 0) /**< Shifted mode TRISTATE for GPIO_ABUSALLOC    */
 #define GPIO_ABUSALLOC_AEVEN0_ADC0                   (_GPIO_ABUSALLOC_AEVEN0_ADC0 << 0)     /**< Shifted mode ADC0 for GPIO_ABUSALLOC        */
 #define GPIO_ABUSALLOC_AEVEN0_ACMP0                  (_GPIO_ABUSALLOC_AEVEN0_ACMP0 << 0)    /**< Shifted mode ACMP0 for GPIO_ABUSALLOC       */
 #define GPIO_ABUSALLOC_AEVEN0_ACMP1                  (_GPIO_ABUSALLOC_AEVEN0_ACMP1 << 0)    /**< Shifted mode ACMP1 for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AEVEN0_DIAGA                  (_GPIO_ABUSALLOC_AEVEN0_DIAGA << 0)    /**< Shifted mode DIAGA for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AEVEN0_DEBUG                  (_GPIO_ABUSALLOC_AEVEN0_DEBUG << 0)    /**< Shifted mode DEBUG for GPIO_ABUSALLOC       */
 #define _GPIO_ABUSALLOC_AEVEN1_SHIFT                 8                                      /**< Shift value for GPIO_AEVEN1                 */
 #define _GPIO_ABUSALLOC_AEVEN1_MASK                  0xF00UL                                /**< Bit mask for GPIO_AEVEN1                    */
 #define _GPIO_ABUSALLOC_AEVEN1_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for GPIO_ABUSALLOC             */
@@ -328,13 +324,11 @@ typedef struct {
 #define _GPIO_ABUSALLOC_AEVEN1_ADC0                  0x00000001UL                           /**< Mode ADC0 for GPIO_ABUSALLOC                */
 #define _GPIO_ABUSALLOC_AEVEN1_ACMP0                 0x00000002UL                           /**< Mode ACMP0 for GPIO_ABUSALLOC               */
 #define _GPIO_ABUSALLOC_AEVEN1_ACMP1                 0x00000003UL                           /**< Mode ACMP1 for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AEVEN1_DEBUG                 0x0000000FUL                           /**< Mode DEBUG for GPIO_ABUSALLOC               */
 #define GPIO_ABUSALLOC_AEVEN1_DEFAULT                (_GPIO_ABUSALLOC_AEVEN1_DEFAULT << 8)  /**< Shifted mode DEFAULT for GPIO_ABUSALLOC     */
 #define GPIO_ABUSALLOC_AEVEN1_TRISTATE               (_GPIO_ABUSALLOC_AEVEN1_TRISTATE << 8) /**< Shifted mode TRISTATE for GPIO_ABUSALLOC    */
 #define GPIO_ABUSALLOC_AEVEN1_ADC0                   (_GPIO_ABUSALLOC_AEVEN1_ADC0 << 8)     /**< Shifted mode ADC0 for GPIO_ABUSALLOC        */
 #define GPIO_ABUSALLOC_AEVEN1_ACMP0                  (_GPIO_ABUSALLOC_AEVEN1_ACMP0 << 8)    /**< Shifted mode ACMP0 for GPIO_ABUSALLOC       */
 #define GPIO_ABUSALLOC_AEVEN1_ACMP1                  (_GPIO_ABUSALLOC_AEVEN1_ACMP1 << 8)    /**< Shifted mode ACMP1 for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AEVEN1_DEBUG                  (_GPIO_ABUSALLOC_AEVEN1_DEBUG << 8)    /**< Shifted mode DEBUG for GPIO_ABUSALLOC       */
 #define _GPIO_ABUSALLOC_AODD0_SHIFT                  16                                     /**< Shift value for GPIO_AODD0                  */
 #define _GPIO_ABUSALLOC_AODD0_MASK                   0xF0000UL                              /**< Bit mask for GPIO_AODD0                     */
 #define _GPIO_ABUSALLOC_AODD0_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for GPIO_ABUSALLOC             */
@@ -342,15 +336,11 @@ typedef struct {
 #define _GPIO_ABUSALLOC_AODD0_ADC0                   0x00000001UL                           /**< Mode ADC0 for GPIO_ABUSALLOC                */
 #define _GPIO_ABUSALLOC_AODD0_ACMP0                  0x00000002UL                           /**< Mode ACMP0 for GPIO_ABUSALLOC               */
 #define _GPIO_ABUSALLOC_AODD0_ACMP1                  0x00000003UL                           /**< Mode ACMP1 for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AODD0_DIAGA                  0x0000000EUL                           /**< Mode DIAGA for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AODD0_DEBUG                  0x0000000FUL                           /**< Mode DEBUG for GPIO_ABUSALLOC               */
 #define GPIO_ABUSALLOC_AODD0_DEFAULT                 (_GPIO_ABUSALLOC_AODD0_DEFAULT << 16)  /**< Shifted mode DEFAULT for GPIO_ABUSALLOC     */
 #define GPIO_ABUSALLOC_AODD0_TRISTATE                (_GPIO_ABUSALLOC_AODD0_TRISTATE << 16) /**< Shifted mode TRISTATE for GPIO_ABUSALLOC    */
 #define GPIO_ABUSALLOC_AODD0_ADC0                    (_GPIO_ABUSALLOC_AODD0_ADC0 << 16)     /**< Shifted mode ADC0 for GPIO_ABUSALLOC        */
 #define GPIO_ABUSALLOC_AODD0_ACMP0                   (_GPIO_ABUSALLOC_AODD0_ACMP0 << 16)    /**< Shifted mode ACMP0 for GPIO_ABUSALLOC       */
 #define GPIO_ABUSALLOC_AODD0_ACMP1                   (_GPIO_ABUSALLOC_AODD0_ACMP1 << 16)    /**< Shifted mode ACMP1 for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AODD0_DIAGA                   (_GPIO_ABUSALLOC_AODD0_DIAGA << 16)    /**< Shifted mode DIAGA for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AODD0_DEBUG                   (_GPIO_ABUSALLOC_AODD0_DEBUG << 16)    /**< Shifted mode DEBUG for GPIO_ABUSALLOC       */
 #define _GPIO_ABUSALLOC_AODD1_SHIFT                  24                                     /**< Shift value for GPIO_AODD1                  */
 #define _GPIO_ABUSALLOC_AODD1_MASK                   0xF000000UL                            /**< Bit mask for GPIO_AODD1                     */
 #define _GPIO_ABUSALLOC_AODD1_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for GPIO_ABUSALLOC             */
@@ -358,13 +348,11 @@ typedef struct {
 #define _GPIO_ABUSALLOC_AODD1_ADC0                   0x00000001UL                           /**< Mode ADC0 for GPIO_ABUSALLOC                */
 #define _GPIO_ABUSALLOC_AODD1_ACMP0                  0x00000002UL                           /**< Mode ACMP0 for GPIO_ABUSALLOC               */
 #define _GPIO_ABUSALLOC_AODD1_ACMP1                  0x00000003UL                           /**< Mode ACMP1 for GPIO_ABUSALLOC               */
-#define _GPIO_ABUSALLOC_AODD1_DEBUG                  0x0000000FUL                           /**< Mode DEBUG for GPIO_ABUSALLOC               */
 #define GPIO_ABUSALLOC_AODD1_DEFAULT                 (_GPIO_ABUSALLOC_AODD1_DEFAULT << 24)  /**< Shifted mode DEFAULT for GPIO_ABUSALLOC     */
 #define GPIO_ABUSALLOC_AODD1_TRISTATE                (_GPIO_ABUSALLOC_AODD1_TRISTATE << 24) /**< Shifted mode TRISTATE for GPIO_ABUSALLOC    */
 #define GPIO_ABUSALLOC_AODD1_ADC0                    (_GPIO_ABUSALLOC_AODD1_ADC0 << 24)     /**< Shifted mode ADC0 for GPIO_ABUSALLOC        */
 #define GPIO_ABUSALLOC_AODD1_ACMP0                   (_GPIO_ABUSALLOC_AODD1_ACMP0 << 24)    /**< Shifted mode ACMP0 for GPIO_ABUSALLOC       */
 #define GPIO_ABUSALLOC_AODD1_ACMP1                   (_GPIO_ABUSALLOC_AODD1_ACMP1 << 24)    /**< Shifted mode ACMP1 for GPIO_ABUSALLOC       */
-#define GPIO_ABUSALLOC_AODD1_DEBUG                   (_GPIO_ABUSALLOC_AODD1_DEBUG << 24)    /**< Shifted mode DEBUG for GPIO_ABUSALLOC       */
 
 /* Bit fields for GPIO BBUSALLOC */
 #define _GPIO_BBUSALLOC_RESETVALUE                   0x00000000UL                           /**< Default value for GPIO_BBUSALLOC            */
@@ -376,13 +364,11 @@ typedef struct {
 #define _GPIO_BBUSALLOC_BEVEN0_ADC0                  0x00000001UL                           /**< Mode ADC0 for GPIO_BBUSALLOC                */
 #define _GPIO_BBUSALLOC_BEVEN0_ACMP0                 0x00000002UL                           /**< Mode ACMP0 for GPIO_BBUSALLOC               */
 #define _GPIO_BBUSALLOC_BEVEN0_ACMP1                 0x00000003UL                           /**< Mode ACMP1 for GPIO_BBUSALLOC               */
-#define _GPIO_BBUSALLOC_BEVEN0_DEBUG                 0x0000000FUL                           /**< Mode DEBUG for GPIO_BBUSALLOC               */
 #define GPIO_BBUSALLOC_BEVEN0_DEFAULT                (_GPIO_BBUSALLOC_BEVEN0_DEFAULT << 0)  /**< Shifted mode DEFAULT for GPIO_BBUSALLOC     */
 #define GPIO_BBUSALLOC_BEVEN0_TRISTATE               (_GPIO_BBUSALLOC_BEVEN0_TRISTATE << 0) /**< Shifted mode TRISTATE for GPIO_BBUSALLOC    */
 #define GPIO_BBUSALLOC_BEVEN0_ADC0                   (_GPIO_BBUSALLOC_BEVEN0_ADC0 << 0)     /**< Shifted mode ADC0 for GPIO_BBUSALLOC        */
 #define GPIO_BBUSALLOC_BEVEN0_ACMP0                  (_GPIO_BBUSALLOC_BEVEN0_ACMP0 << 0)    /**< Shifted mode ACMP0 for GPIO_BBUSALLOC       */
 #define GPIO_BBUSALLOC_BEVEN0_ACMP1                  (_GPIO_BBUSALLOC_BEVEN0_ACMP1 << 0)    /**< Shifted mode ACMP1 for GPIO_BBUSALLOC       */
-#define GPIO_BBUSALLOC_BEVEN0_DEBUG                  (_GPIO_BBUSALLOC_BEVEN0_DEBUG << 0)    /**< Shifted mode DEBUG for GPIO_BBUSALLOC       */
 #define _GPIO_BBUSALLOC_BEVEN1_SHIFT                 8                                      /**< Shift value for GPIO_BEVEN1                 */
 #define _GPIO_BBUSALLOC_BEVEN1_MASK                  0xF00UL                                /**< Bit mask for GPIO_BEVEN1                    */
 #define _GPIO_BBUSALLOC_BEVEN1_DEFAULT               0x00000000UL                           /**< Mode DEFAULT for GPIO_BBUSALLOC             */
@@ -390,13 +376,11 @@ typedef struct {
 #define _GPIO_BBUSALLOC_BEVEN1_ADC0                  0x00000001UL                           /**< Mode ADC0 for GPIO_BBUSALLOC                */
 #define _GPIO_BBUSALLOC_BEVEN1_ACMP0                 0x00000002UL                           /**< Mode ACMP0 for GPIO_BBUSALLOC               */
 #define _GPIO_BBUSALLOC_BEVEN1_ACMP1                 0x00000003UL                           /**< Mode ACMP1 for GPIO_BBUSALLOC               */
-#define _GPIO_BBUSALLOC_BEVEN1_DEBUG                 0x0000000FUL                           /**< Mode DEBUG for GPIO_BBUSALLOC               */
 #define GPIO_BBUSALLOC_BEVEN1_DEFAULT                (_GPIO_BBUSALLOC_BEVEN1_DEFAULT << 8)  /**< Shifted mode DEFAULT for GPIO_BBUSALLOC     */
 #define GPIO_BBUSALLOC_BEVEN1_TRISTATE               (_GPIO_BBUSALLOC_BEVEN1_TRISTATE << 8) /**< Shifted mode TRISTATE for GPIO_BBUSALLOC    */
 #define GPIO_BBUSALLOC_BEVEN1_ADC0                   (_GPIO_BBUSALLOC_BEVEN1_ADC0 << 8)     /**< Shifted mode ADC0 for GPIO_BBUSALLOC        */
 #define GPIO_BBUSALLOC_BEVEN1_ACMP0                  (_GPIO_BBUSALLOC_BEVEN1_ACMP0 << 8)    /**< Shifted mode ACMP0 for GPIO_BBUSALLOC       */
 #define GPIO_BBUSALLOC_BEVEN1_ACMP1                  (_GPIO_BBUSALLOC_BEVEN1_ACMP1 << 8)    /**< Shifted mode ACMP1 for GPIO_BBUSALLOC       */
-#define GPIO_BBUSALLOC_BEVEN1_DEBUG                  (_GPIO_BBUSALLOC_BEVEN1_DEBUG << 8)    /**< Shifted mode DEBUG for GPIO_BBUSALLOC       */
 #define _GPIO_BBUSALLOC_BODD0_SHIFT                  16                                     /**< Shift value for GPIO_BODD0                  */
 #define _GPIO_BBUSALLOC_BODD0_MASK                   0xF0000UL                              /**< Bit mask for GPIO_BODD0                     */
 #define _GPIO_BBUSALLOC_BODD0_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for GPIO_BBUSALLOC             */
@@ -404,13 +388,11 @@ typedef struct {
 #define _GPIO_BBUSALLOC_BODD0_ADC0                   0x00000001UL                           /**< Mode ADC0 for GPIO_BBUSALLOC                */
 #define _GPIO_BBUSALLOC_BODD0_ACMP0                  0x00000002UL                           /**< Mode ACMP0 for GPIO_BBUSALLOC               */
 #define _GPIO_BBUSALLOC_BODD0_ACMP1                  0x00000003UL                           /**< Mode ACMP1 for GPIO_BBUSALLOC               */
-#define _GPIO_BBUSALLOC_BODD0_DEBUG                  0x0000000FUL                           /**< Mode DEBUG for GPIO_BBUSALLOC               */
 #define GPIO_BBUSALLOC_BODD0_DEFAULT                 (_GPIO_BBUSALLOC_BODD0_DEFAULT << 16)  /**< Shifted mode DEFAULT for GPIO_BBUSALLOC     */
 #define GPIO_BBUSALLOC_BODD0_TRISTATE                (_GPIO_BBUSALLOC_BODD0_TRISTATE << 16) /**< Shifted mode TRISTATE for GPIO_BBUSALLOC    */
 #define GPIO_BBUSALLOC_BODD0_ADC0                    (_GPIO_BBUSALLOC_BODD0_ADC0 << 16)     /**< Shifted mode ADC0 for GPIO_BBUSALLOC        */
 #define GPIO_BBUSALLOC_BODD0_ACMP0                   (_GPIO_BBUSALLOC_BODD0_ACMP0 << 16)    /**< Shifted mode ACMP0 for GPIO_BBUSALLOC       */
 #define GPIO_BBUSALLOC_BODD0_ACMP1                   (_GPIO_BBUSALLOC_BODD0_ACMP1 << 16)    /**< Shifted mode ACMP1 for GPIO_BBUSALLOC       */
-#define GPIO_BBUSALLOC_BODD0_DEBUG                   (_GPIO_BBUSALLOC_BODD0_DEBUG << 16)    /**< Shifted mode DEBUG for GPIO_BBUSALLOC       */
 #define _GPIO_BBUSALLOC_BODD1_SHIFT                  24                                     /**< Shift value for GPIO_BODD1                  */
 #define _GPIO_BBUSALLOC_BODD1_MASK                   0xF000000UL                            /**< Bit mask for GPIO_BODD1                     */
 #define _GPIO_BBUSALLOC_BODD1_DEFAULT                0x00000000UL                           /**< Mode DEFAULT for GPIO_BBUSALLOC             */
@@ -418,13 +400,11 @@ typedef struct {
 #define _GPIO_BBUSALLOC_BODD1_ADC0                   0x00000001UL                           /**< Mode ADC0 for GPIO_BBUSALLOC                */
 #define _GPIO_BBUSALLOC_BODD1_ACMP0                  0x00000002UL                           /**< Mode ACMP0 for GPIO_BBUSALLOC               */
 #define _GPIO_BBUSALLOC_BODD1_ACMP1                  0x00000003UL                           /**< Mode ACMP1 for GPIO_BBUSALLOC               */
-#define _GPIO_BBUSALLOC_BODD1_DEBUG                  0x0000000FUL                           /**< Mode DEBUG for GPIO_BBUSALLOC               */
 #define GPIO_BBUSALLOC_BODD1_DEFAULT                 (_GPIO_BBUSALLOC_BODD1_DEFAULT << 24)  /**< Shifted mode DEFAULT for GPIO_BBUSALLOC     */
 #define GPIO_BBUSALLOC_BODD1_TRISTATE                (_GPIO_BBUSALLOC_BODD1_TRISTATE << 24) /**< Shifted mode TRISTATE for GPIO_BBUSALLOC    */
 #define GPIO_BBUSALLOC_BODD1_ADC0                    (_GPIO_BBUSALLOC_BODD1_ADC0 << 24)     /**< Shifted mode ADC0 for GPIO_BBUSALLOC        */
 #define GPIO_BBUSALLOC_BODD1_ACMP0                   (_GPIO_BBUSALLOC_BODD1_ACMP0 << 24)    /**< Shifted mode ACMP0 for GPIO_BBUSALLOC       */
 #define GPIO_BBUSALLOC_BODD1_ACMP1                   (_GPIO_BBUSALLOC_BODD1_ACMP1 << 24)    /**< Shifted mode ACMP1 for GPIO_BBUSALLOC       */
-#define GPIO_BBUSALLOC_BODD1_DEBUG                   (_GPIO_BBUSALLOC_BODD1_DEBUG << 24)    /**< Shifted mode DEBUG for GPIO_BBUSALLOC       */
 
 /* Bit fields for GPIO CDBUSALLOC */
 #define _GPIO_CDBUSALLOC_RESETVALUE                  0x00000000UL                             /**< Default value for GPIO_CDBUSALLOC           */
@@ -436,17 +416,11 @@ typedef struct {
 #define _GPIO_CDBUSALLOC_CDEVEN0_ADC0                0x00000001UL                             /**< Mode ADC0 for GPIO_CDBUSALLOC               */
 #define _GPIO_CDBUSALLOC_CDEVEN0_ACMP0               0x00000002UL                             /**< Mode ACMP0 for GPIO_CDBUSALLOC              */
 #define _GPIO_CDBUSALLOC_CDEVEN0_ACMP1               0x00000003UL                             /**< Mode ACMP1 for GPIO_CDBUSALLOC              */
-#define _GPIO_CDBUSALLOC_CDEVEN0_PMON                0x0000000CUL                             /**< Mode PMON for GPIO_CDBUSALLOC               */
-#define _GPIO_CDBUSALLOC_CDEVEN0_EFUSE               0x0000000DUL                             /**< Mode EFUSE for GPIO_CDBUSALLOC              */
-#define _GPIO_CDBUSALLOC_CDEVEN0_DEBUG               0x0000000FUL                             /**< Mode DEBUG for GPIO_CDBUSALLOC              */
 #define GPIO_CDBUSALLOC_CDEVEN0_DEFAULT              (_GPIO_CDBUSALLOC_CDEVEN0_DEFAULT << 0)  /**< Shifted mode DEFAULT for GPIO_CDBUSALLOC    */
 #define GPIO_CDBUSALLOC_CDEVEN0_TRISTATE             (_GPIO_CDBUSALLOC_CDEVEN0_TRISTATE << 0) /**< Shifted mode TRISTATE for GPIO_CDBUSALLOC   */
 #define GPIO_CDBUSALLOC_CDEVEN0_ADC0                 (_GPIO_CDBUSALLOC_CDEVEN0_ADC0 << 0)     /**< Shifted mode ADC0 for GPIO_CDBUSALLOC       */
 #define GPIO_CDBUSALLOC_CDEVEN0_ACMP0                (_GPIO_CDBUSALLOC_CDEVEN0_ACMP0 << 0)    /**< Shifted mode ACMP0 for GPIO_CDBUSALLOC      */
 #define GPIO_CDBUSALLOC_CDEVEN0_ACMP1                (_GPIO_CDBUSALLOC_CDEVEN0_ACMP1 << 0)    /**< Shifted mode ACMP1 for GPIO_CDBUSALLOC      */
-#define GPIO_CDBUSALLOC_CDEVEN0_PMON                 (_GPIO_CDBUSALLOC_CDEVEN0_PMON << 0)     /**< Shifted mode PMON for GPIO_CDBUSALLOC       */
-#define GPIO_CDBUSALLOC_CDEVEN0_EFUSE                (_GPIO_CDBUSALLOC_CDEVEN0_EFUSE << 0)    /**< Shifted mode EFUSE for GPIO_CDBUSALLOC      */
-#define GPIO_CDBUSALLOC_CDEVEN0_DEBUG                (_GPIO_CDBUSALLOC_CDEVEN0_DEBUG << 0)    /**< Shifted mode DEBUG for GPIO_CDBUSALLOC      */
 #define _GPIO_CDBUSALLOC_CDEVEN1_SHIFT               8                                        /**< Shift value for GPIO_CDEVEN1                */
 #define _GPIO_CDBUSALLOC_CDEVEN1_MASK                0xF00UL                                  /**< Bit mask for GPIO_CDEVEN1                   */
 #define _GPIO_CDBUSALLOC_CDEVEN1_DEFAULT             0x00000000UL                             /**< Mode DEFAULT for GPIO_CDBUSALLOC            */
@@ -454,13 +428,11 @@ typedef struct {
 #define _GPIO_CDBUSALLOC_CDEVEN1_ADC0                0x00000001UL                             /**< Mode ADC0 for GPIO_CDBUSALLOC               */
 #define _GPIO_CDBUSALLOC_CDEVEN1_ACMP0               0x00000002UL                             /**< Mode ACMP0 for GPIO_CDBUSALLOC              */
 #define _GPIO_CDBUSALLOC_CDEVEN1_ACMP1               0x00000003UL                             /**< Mode ACMP1 for GPIO_CDBUSALLOC              */
-#define _GPIO_CDBUSALLOC_CDEVEN1_DEBUG               0x0000000FUL                             /**< Mode DEBUG for GPIO_CDBUSALLOC              */
 #define GPIO_CDBUSALLOC_CDEVEN1_DEFAULT              (_GPIO_CDBUSALLOC_CDEVEN1_DEFAULT << 8)  /**< Shifted mode DEFAULT for GPIO_CDBUSALLOC    */
 #define GPIO_CDBUSALLOC_CDEVEN1_TRISTATE             (_GPIO_CDBUSALLOC_CDEVEN1_TRISTATE << 8) /**< Shifted mode TRISTATE for GPIO_CDBUSALLOC   */
 #define GPIO_CDBUSALLOC_CDEVEN1_ADC0                 (_GPIO_CDBUSALLOC_CDEVEN1_ADC0 << 8)     /**< Shifted mode ADC0 for GPIO_CDBUSALLOC       */
 #define GPIO_CDBUSALLOC_CDEVEN1_ACMP0                (_GPIO_CDBUSALLOC_CDEVEN1_ACMP0 << 8)    /**< Shifted mode ACMP0 for GPIO_CDBUSALLOC      */
 #define GPIO_CDBUSALLOC_CDEVEN1_ACMP1                (_GPIO_CDBUSALLOC_CDEVEN1_ACMP1 << 8)    /**< Shifted mode ACMP1 for GPIO_CDBUSALLOC      */
-#define GPIO_CDBUSALLOC_CDEVEN1_DEBUG                (_GPIO_CDBUSALLOC_CDEVEN1_DEBUG << 8)    /**< Shifted mode DEBUG for GPIO_CDBUSALLOC      */
 #define _GPIO_CDBUSALLOC_CDODD0_SHIFT                16                                       /**< Shift value for GPIO_CDODD0                 */
 #define _GPIO_CDBUSALLOC_CDODD0_MASK                 0xF0000UL                                /**< Bit mask for GPIO_CDODD0                    */
 #define _GPIO_CDBUSALLOC_CDODD0_DEFAULT              0x00000000UL                             /**< Mode DEFAULT for GPIO_CDBUSALLOC            */
@@ -468,15 +440,11 @@ typedef struct {
 #define _GPIO_CDBUSALLOC_CDODD0_ADC0                 0x00000001UL                             /**< Mode ADC0 for GPIO_CDBUSALLOC               */
 #define _GPIO_CDBUSALLOC_CDODD0_ACMP0                0x00000002UL                             /**< Mode ACMP0 for GPIO_CDBUSALLOC              */
 #define _GPIO_CDBUSALLOC_CDODD0_ACMP1                0x00000003UL                             /**< Mode ACMP1 for GPIO_CDBUSALLOC              */
-#define _GPIO_CDBUSALLOC_CDODD0_PMON                 0x0000000CUL                             /**< Mode PMON for GPIO_CDBUSALLOC               */
-#define _GPIO_CDBUSALLOC_CDODD0_DEBUG                0x0000000FUL                             /**< Mode DEBUG for GPIO_CDBUSALLOC              */
 #define GPIO_CDBUSALLOC_CDODD0_DEFAULT               (_GPIO_CDBUSALLOC_CDODD0_DEFAULT << 16)  /**< Shifted mode DEFAULT for GPIO_CDBUSALLOC    */
 #define GPIO_CDBUSALLOC_CDODD0_TRISTATE              (_GPIO_CDBUSALLOC_CDODD0_TRISTATE << 16) /**< Shifted mode TRISTATE for GPIO_CDBUSALLOC   */
 #define GPIO_CDBUSALLOC_CDODD0_ADC0                  (_GPIO_CDBUSALLOC_CDODD0_ADC0 << 16)     /**< Shifted mode ADC0 for GPIO_CDBUSALLOC       */
 #define GPIO_CDBUSALLOC_CDODD0_ACMP0                 (_GPIO_CDBUSALLOC_CDODD0_ACMP0 << 16)    /**< Shifted mode ACMP0 for GPIO_CDBUSALLOC      */
 #define GPIO_CDBUSALLOC_CDODD0_ACMP1                 (_GPIO_CDBUSALLOC_CDODD0_ACMP1 << 16)    /**< Shifted mode ACMP1 for GPIO_CDBUSALLOC      */
-#define GPIO_CDBUSALLOC_CDODD0_PMON                  (_GPIO_CDBUSALLOC_CDODD0_PMON << 16)     /**< Shifted mode PMON for GPIO_CDBUSALLOC       */
-#define GPIO_CDBUSALLOC_CDODD0_DEBUG                 (_GPIO_CDBUSALLOC_CDODD0_DEBUG << 16)    /**< Shifted mode DEBUG for GPIO_CDBUSALLOC      */
 #define _GPIO_CDBUSALLOC_CDODD1_SHIFT                24                                       /**< Shift value for GPIO_CDODD1                 */
 #define _GPIO_CDBUSALLOC_CDODD1_MASK                 0xF000000UL                              /**< Bit mask for GPIO_CDODD1                    */
 #define _GPIO_CDBUSALLOC_CDODD1_DEFAULT              0x00000000UL                             /**< Mode DEFAULT for GPIO_CDBUSALLOC            */
@@ -484,13 +452,11 @@ typedef struct {
 #define _GPIO_CDBUSALLOC_CDODD1_ADC0                 0x00000001UL                             /**< Mode ADC0 for GPIO_CDBUSALLOC               */
 #define _GPIO_CDBUSALLOC_CDODD1_ACMP0                0x00000002UL                             /**< Mode ACMP0 for GPIO_CDBUSALLOC              */
 #define _GPIO_CDBUSALLOC_CDODD1_ACMP1                0x00000003UL                             /**< Mode ACMP1 for GPIO_CDBUSALLOC              */
-#define _GPIO_CDBUSALLOC_CDODD1_DEBUG                0x0000000FUL                             /**< Mode DEBUG for GPIO_CDBUSALLOC              */
 #define GPIO_CDBUSALLOC_CDODD1_DEFAULT               (_GPIO_CDBUSALLOC_CDODD1_DEFAULT << 24)  /**< Shifted mode DEFAULT for GPIO_CDBUSALLOC    */
 #define GPIO_CDBUSALLOC_CDODD1_TRISTATE              (_GPIO_CDBUSALLOC_CDODD1_TRISTATE << 24) /**< Shifted mode TRISTATE for GPIO_CDBUSALLOC   */
 #define GPIO_CDBUSALLOC_CDODD1_ADC0                  (_GPIO_CDBUSALLOC_CDODD1_ADC0 << 24)     /**< Shifted mode ADC0 for GPIO_CDBUSALLOC       */
 #define GPIO_CDBUSALLOC_CDODD1_ACMP0                 (_GPIO_CDBUSALLOC_CDODD1_ACMP0 << 24)    /**< Shifted mode ACMP0 for GPIO_CDBUSALLOC      */
 #define GPIO_CDBUSALLOC_CDODD1_ACMP1                 (_GPIO_CDBUSALLOC_CDODD1_ACMP1 << 24)    /**< Shifted mode ACMP1 for GPIO_CDBUSALLOC      */
-#define GPIO_CDBUSALLOC_CDODD1_DEBUG                 (_GPIO_CDBUSALLOC_CDODD1_DEBUG << 24)    /**< Shifted mode DEBUG for GPIO_CDBUSALLOC      */
 
 /* Bit fields for GPIO EXTIPSELL */
 #define _GPIO_EXTIPSELL_RESETVALUE                   0x00000000UL                              /**< Default value for GPIO_EXTIPSELL            */
@@ -1577,4 +1543,5 @@ typedef struct {
 #define _GPIO_USART_TXROUTE_PIN_DEFAULT              0x00000000UL                            /**< Mode DEFAULT for GPIO_USART_TXROUTE         */
 #define GPIO_USART_TXROUTE_PIN_DEFAULT               (_GPIO_USART_TXROUTE_PIN_DEFAULT << 16) /**< Shifted mode DEFAULT for GPIO_USART_TXROUTE */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_GPIO_H */

@@ -118,7 +118,16 @@ int main(void)
 #endif
 
   btl_init();
+
+#ifdef BOOTLOADER_SUPPORT_STORAGE
+  if (!reset_resetCounterEnabled()) {
+    // Storage bootloaders might use part of the reason signature as a counter,
+    // so only invalidate the signature when the counter is not in use.
+    reset_invalidateResetReason();
+  }
+#else
   reset_invalidateResetReason();
+#endif
 
 #ifdef BOOTLOADER_SUPPORT_STORAGE
   // If the bootloader supports storage, first attempt to apply an existing
@@ -126,13 +135,33 @@ int main(void)
   ret = storage_main();
 
   if (ret == BOOTLOADER_OK) {
-    // Firmware ugprade from storage successful, return to application
+    // Firmware upgrade from storage successful. Disable the reset counter
+    // and return to application
+    if (reset_resetCounterEnabled()) {
+      reset_disableResetCounter();
+    }
     reset_resetWithReason(BOOTLOADER_RESET_REASON_GO);
   } else {
+    if (!reset_resetCounterEnabled()) {
+      // Start counting the number of consecutive resets after the first reset
+      reset_enableResetCounter();
+    }
+
+    // Stop after three consecutive resets (the first one counts as 0)
+    if (reset_getResetCounter() >= 2) {
+      // If the system is not able to recover from a fault like BADAPP or
+      // BADIMAGE, wait in a busy loop to ease reflashing and debugging.
+      BTL_DEBUG_PRINTLN("Reset loop detected. Stopping...");
+      reset_disableResetCounter();
+      while (1) {
+        // Wait...
+      }
+    } else {
+      reset_incrementResetCounter();
+    }
+
     // Wait a short while (approx. 500 ms) before continuing.
-    // This prevents the reset loop from being so tight that a debugger is
-    // unable to reattach to flash a new app when neither the app nor the
-    // contents of storage are valid.
+    // This allows other operations to complete before the reset.
     for (volatile int i = 800000; i > 0; i--) {
       // Do nothing
     }
@@ -204,6 +233,12 @@ const MainBootloaderTable_t mainStageTable = {
 #ifdef BOOTLOADER_ENFORCE_SECURE_BOOT
                    | BOOTLOADER_CAPABILITY_ENFORCE_SECURE_BOOT
 #endif
+#ifdef BOOTLOADER_SUPPORT_CERTIFICATES
+                   | BOOTLOADER_CAPABILITY_ENFORCE_CERTIFICATE_SECURE_BOOT
+#endif
+#ifdef BOOTLOADER_ROLLBACK_PROTECTION
+                   | BOOTLOADER_CAPABILITY_ROLLBACK_PROTECTION
+#endif
                    | BOOTLOADER_CAPABILITY_BOOTLOADER_UPGRADE
                    | BOOTLOADER_CAPABILITY_EBL
                    | BOOTLOADER_CAPABILITY_EBL_SIGNATURE
@@ -223,9 +258,16 @@ const MainBootloaderTable_t mainStageTable = {
   .initParser = &core_initParser,
   .parseBuffer = &core_parseBuffer,
 #ifdef BOOTLOADER_SUPPORT_STORAGE
-  .storage = &storageFunctions
+  .storage = &storageFunctions,
 #else
-  .storage = NULL
+  .storage = NULL,
+#endif
+  .parseImageInfo = core_parseImageInfo,
+  .parserContextSize = core_parserContextSize,
+#ifdef BOOTLOADER_ROLLBACK_PROTECTION
+  .remainingApplicationUpgrades = &bootload_remainingApplicationUpgrades
+#else
+  .remainingApplicationUpgrades = NULL
 #endif
 };
 
@@ -252,7 +294,7 @@ const ApplicationProperties_t sl_app_properties = {
   },
 #if defined(BOOTLOADER_SUPPORT_CERTIFICATES)
   // If certificate based boot chain is enabled, the bootloader binary will be provided with
-  // an certificate that does not contain any key.
+  // a certificate that does not contain any key.
   // A valid certificate needs to be injected to the bootloader images using Simplicity Commander.
   // Simplicity Commander will replace this certificate.
   .cert = (ApplicationCertificate_t *)&sl_app_certificate,
@@ -272,9 +314,9 @@ void SystemInit2(void)
   BTL_DEBUG_INIT();
 
   // Assumption: We should enter the app
-  bool enterApp = true;
+  volatile bool enterApp = true;
   // Assumption: The app should be verified
-  bool verifyApp = true;
+  volatile bool verifyApp = true;
 
   // Check if we came from EM4. If any other bit than the EM4 bit it set, we
   // can't know whether this was really an EM4 reset, and we need to do further
@@ -315,9 +357,27 @@ void SystemInit2(void)
     }
   }
 
+#if defined(BOOTLOADER_ROLLBACK_PROTECTION)
+  // Clean the stored application versions if requested with a magic.
+  // The magic is only written when a bootloader upgrade is triggered.
+  bootload_removeStoredApplicationVersions();
+
+  if (enterApp) {
+    enterApp = bootload_storeApplicationVersion(startOfAppSpace);
+  }
+#endif
+
   if (enterApp) {
     BTL_DEBUG_PRINTLN("Enter app");
     BTL_DEBUG_PRINT_LF();
+
+#if defined(BOOTLOADER_SUPPORT_STORAGE)
+    // Disable the reset counter if we're booting (back) into the application
+    if (reset_resetCounterEnabled()) {
+      reset_disableResetCounter();
+    }
+#endif
+
 #if defined(BOOTLOADER_WRITE_DISABLE)
     lockBootloaderArea();
 #endif

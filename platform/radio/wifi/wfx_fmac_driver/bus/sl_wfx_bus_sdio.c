@@ -17,13 +17,9 @@
 #include "sl_wfx_bus.h"
 #include "sl_wfx_host_api.h"
 #include "firmware/sl_wfx_registers.h"
-#include "sl_wfx_configuration.h"
+#include "sl_wfx_configuration_defaults.h"
 #include <stddef.h>
 #include <string.h>
-
-#ifndef SL_WFX_SDIO_BLOCK_SIZE
-#define SL_WFX_SDIO_BLOCK_SIZE           0x40
-#endif
 
 #ifndef SL_WFX_SDIO_BLOCK_MODE_THRESHOLD
 #define SL_WFX_SDIO_BLOCK_MODE_THRESHOLD 0x200

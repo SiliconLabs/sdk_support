@@ -24,13 +24,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
+// -----------------------------------------------------------------------------
+// Configuration Macros
+// -----------------------------------------------------------------------------
+// Pull in correct config file:
+#ifdef CIRCULAR_QUEUE_USE_LOCAL_CONFIG_HEADER
+  #include "circular_queue_config.h" // component-level config file (new method)
+#else // !defined(CIRCULAR_QUEUE_USE_LOCAL_CONFIG_HEADER)
+  #ifdef CONFIGURATION_HEADER
+    #include CONFIGURATION_HEADER // application-level config file (old method)
+  #endif
 
-#ifndef MAX_QUEUE_LENGTH
-#define MAX_QUEUE_LENGTH 10
-#endif
+  #ifdef MAX_QUEUE_LENGTH
+    #define CIRCULAR_QUEUE_LEN_MAX MAX_QUEUE_LENGTH
+  #else
+    #define CIRCULAR_QUEUE_LEN_MAX 10U
+  #endif
+#endif // defined(CIRCULAR_QUEUE_USE_LOCAL_CONFIG_HEADER)
 
 // -----------------------------------------------------------------------------
 // Structures and Types
@@ -40,7 +50,7 @@ typedef struct Queue {
   uint16_t count;
   uint16_t size;
   bool (*callback)(const struct Queue *queue, void *data);
-  void *data[MAX_QUEUE_LENGTH];
+  void* data[CIRCULAR_QUEUE_LEN_MAX];
 } Queue_t;
 
 /**
@@ -58,7 +68,7 @@ typedef bool (*QueueOverflowCallback_t)(const Queue_t *queue, void *data);
 // -----------------------------------------------------------------------------
 /**
  * Function to initialize a queue structure with the given size. Note that this
- * size must be less than the MAX_QUEUE_LENGTH define.
+ * size must be less than the CIRCULAR_QUEUE_LEN_MAX define.
  * @param queue A pointer to the queue structure to initialize
  * @param size The number of entries we want to allow you to store in this queue
  * @return Returns true if we were able to initialize the queue and false
@@ -86,6 +96,15 @@ bool queueAdd(Queue_t *queue, void *data);
  * false otherwise.
  */
 bool queueOverflow(Queue_t *queue, QueueOverflowCallback_t callback);
+
+/**
+ * Return a pointer to the head of the queue without removing that item.
+ * @param queue The queue to peek at the item from.
+ * @return Returns a pointer to the data that is at the head of the queue. If
+ * the queue is empty this value will be NULL. It's worth noting that NULL can
+ * be a valid queued value.
+ */
+void *queuePeek(Queue_t *queue);
 
 /**
  * Remove an item from the head of the queue and return its pointer.

@@ -649,4 +649,5 @@ typedef struct {
 /** @} End of group MGM21_CMU_BitFields */
 /** @} End of group MGM21_CMU */
 /** @} End of group Parts */
+
 #endif /* MGM21_CMU_H */

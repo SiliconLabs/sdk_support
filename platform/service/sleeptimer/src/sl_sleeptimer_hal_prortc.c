@@ -29,10 +29,18 @@
  ******************************************************************************/
 
 #include "sl_sleeptimer.h"
-#include "sl_sleeptimer_hal.h"
+#include "sli_sleeptimer_hal.h"
 #include "em_core.h"
 #include "em_cmu.h"
 #include "em_bus.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include  <sl_component_catalog.h>
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
+#include "sli_power_manager.h"
+#endif
 
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_PRORTC
 
@@ -61,9 +69,9 @@
 #warning A value other than 1 for SL_SLEEPTIMER_FREQ_DIVIDER is not supported on Radio Internal RTC (PRORTC)
 #endif
 
-static bool cc_disabled = true;
-
 static uint32_t get_time_diff(uint32_t a, uint32_t b);
+
+static bool cc_disabled = true;
 
 /******************************************************************************
  * Initializes PRORTC sleep timer.
@@ -92,7 +100,12 @@ void sleeptimer_hal_init_timer(void)
   CMU->LFRCLKEN0 |= 1 << _CMU_LFRCLKEN0_PRORTC_SHIFT;
 
   PRORTC->IFC = _PRORTC_IF_MASK;
+
+#if (SL_SLEEPTIMER_DEBUGRUN == 1)
+  PRORTC->CTRL = _PRORTC_CTRL_EN_MASK | _PRORTC_CTRL_DEBUGRUN_MASK;
+#else
   PRORTC->CTRL = _PRORTC_CTRL_EN_MASK;
+#endif
 #else
   bool use_clk_lfxo  = true;
 #if _SILICON_LABS_32B_SERIES_2_CONFIG > 1
@@ -136,6 +149,10 @@ void sleeptimer_hal_init_timer(void)
   } else {
     CMU->PRORTCCLKCTRL = CMU_PRORTCCLKCTRL_CLKSEL_LFRCO;
   }
+
+#if (SL_SLEEPTIMER_DEBUGRUN == 1)
+  PRORTC->CFG |= _RTCC_CFG_DEBUGRUN_MASK;
+#endif
 
   PRORTC->EN_SET = RTCC_EN_EN;
 
@@ -212,10 +229,12 @@ void sleeptimer_hal_set_compare(uint32_t value)
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
   }
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
   if (cc_disabled) {
     PRORTC->CC[TIMER_COMP_REQ].CTRL |= RTCC_CC_CTRL_MODE_OUTPUTCOMPARE;
     cc_disabled = false;
   }
+#endif
 }
 
 /******************************************************************************
@@ -230,6 +249,18 @@ void sleeptimer_hal_enable_int(uint8_t local_flag)
   }
 
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
+#if defined(_SILICON_LABS_32B_SERIES_1)
+    if (cc_disabled == true) {
+#if defined (RTCC_HAS_SET_CLEAR)
+      PRORTC->IF_CLR = PRORTC_IF_COMP_BIT;
+#else
+      PRORTC->IFC = PRORTC_IF_COMP_BIT;
+#endif
+
+      cc_disabled = false;
+    }
+#endif
+
     prortc_ien |= PRORTC_IF_COMP_BIT;
   }
 
@@ -249,9 +280,11 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
 
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
     prortc_int_dis |= PRORTC_IF_COMP_BIT;
-
     cc_disabled = true;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
     PRORTC->CC[TIMER_COMP_REQ].CTRL &= ~_RTCC_CC_CTRL_MODE_MASK;
+#endif
   }
 
   BUS_RegMaskedClear(&PRORTC->IEN, prortc_int_dis);
@@ -262,7 +295,7 @@ void sleeptimer_hal_disable_int(uint8_t local_flag)
  *
  * Note: This function must be called with interrupts disabled.
  *****************************************************************************/
-bool sleeptimer_hal_is_int_status_set(uint8_t local_flag)
+bool sli_sleeptimer_hal_is_int_status_set(uint8_t local_flag)
 {
   bool int_is_set = false;
   uint32_t irq_flag = PRORTC->IF;;

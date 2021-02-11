@@ -64,6 +64,10 @@ void halInit(void)
     *dataDestination-- = STACK_FILL_VALUE;
   }
 
+  // Enable the MPU and guard region protection
+  halInternalInitCStackRegion();
+  halInternalEnableMPU();
+
   // Zero out the EMHEAP segment.
   {
     // IAR warns about "integer conversion resulted in truncation" if

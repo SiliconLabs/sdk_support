@@ -3,7 +3,7 @@
  * @brief This file contains EFR32 specific HAL code to handle chip startup.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -35,184 +35,13 @@
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_emu.h"
-#include "em_ldma.h"
-#include "dmadrv.h"
-#include "bsp.h"
-#include "bsp_init.h"
 #include "em_chip.h"
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_prs.h"
 #endif
 
 #include "rail.h"
-#include "rail_chip_specific.h"
 #include "hal_common.h"
-#include "hal-config.h"
-
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
-
-#ifdef BSP_EXTFLASH_USART
-#include "mx25flash_spi.h"
-#endif
-
-#if HAL_FEM_ENABLE
-#include "util/plugin/plugin-common/fem-control/fem-control.h"
-#endif
-
-static void boardDisableSpiFlash(void);
-static void boardLowPowerInit(void);
-
-#ifdef RAIL_PA_CONVERSIONS
-#include RAIL_PA_CONVERSIONS
-
-#ifndef BSP_PA_VOLTAGE // Work with older Gecko SDK
-#define BSP_PA_VOLTAGE HAL_PA_VOLTAGE
-#endif//BSP_PA_VOLTAGE
-#endif
-
-RAIL_AntennaConfig_t halAntennaConfig;
-
-// The EFR32XG2 series doesn't use locations so the HAL configurator doesn't
-// provide any, but it has RfPath selection so use BSP_ANTDIV_SEL_LOC for that.
-// Provide defaults to sate the API, using RfPath 1.
-#ifdef  _SILICON_LABS_32B_SERIES_2
- #if (!defined(BSP_ANTDIV_SEL_LOC))
-  #define BSP_ANTDIV_SEL_LOC 1 // Choose RfPath 1
- #endif
- #if (!defined(BSP_ANTDIV_NSEL_LOC) && defined(BSP_ANTDIV_NSEL_PORT))
-  #define BSP_ANTDIV_NSEL_LOC 1 // Dummy selection
- #endif
-#endif
-
-static void initAntenna(void)
-{
- #if (HAL_ANTDIV_ENABLE               \
-      && defined(BSP_ANTDIV_SEL_PORT) \
-  && defined(BSP_ANTDIV_SEL_PIN)      \
-  && defined(BSP_ANTDIV_SEL_LOC))
-  halAntennaConfig.ant0PinEn = true;
-  halAntennaConfig.ant0Port = (uint8_t)BSP_ANTDIV_SEL_PORT;
-  halAntennaConfig.ant0Pin  = BSP_ANTDIV_SEL_PIN;
-  halAntennaConfig.ant0Loc  = BSP_ANTDIV_SEL_LOC;
- #endif
- #ifdef _SILICON_LABS_32B_SERIES_2
-  halAntennaConfig.defaultPath = BSP_ANTDIV_SEL_LOC;
- #endif
- #if (HAL_ANTDIV_ENABLE                \
-      && defined(BSP_ANTDIV_NSEL_PORT) \
-  && defined(BSP_ANTDIV_NSEL_PIN)      \
-  && defined(BSP_ANTDIV_NSEL_LOC))
-  halAntennaConfig.ant1PinEn = true;
-  halAntennaConfig.ant1Port = (uint8_t)BSP_ANTDIV_NSEL_PORT;
-  halAntennaConfig.ant1Pin  = BSP_ANTDIV_NSEL_PIN;
-  halAntennaConfig.ant1Loc  = BSP_ANTDIV_NSEL_LOC;
- #endif
- #if (HAL_ANTDIV_ENABLE || defined(_SILICON_LABS_32B_SERIES_2))
-  (void) RAIL_ConfigAntenna(RAIL_EFR32_HANDLE, &halAntennaConfig);
- #endif
-}
-
-void halInitChipSpecific(void)
-{
-#if defined(BSP_DK) && !defined(RAIL_IC_SIM_BUILD)
-  BSP_Init(BSP_INIT_DK_SPI);
-#endif
-  BSP_initDevice();
-
-#if !defined(RAIL_IC_SIM_BUILD)
-  BSP_initBoard();
-#endif
-
-#if HAL_PTI_ENABLE
-  RAIL_PtiConfig_t railPtiConfig = {
-#if HAL_PTI_MODE == HAL_PTI_MODE_SPI
-    .mode = RAIL_PTI_MODE_SPI,
-#elif HAL_PTI_MODE == HAL_PTI_MODE_UART
-    .mode = RAIL_PTI_MODE_UART,
-#elif HAL_PTI_MODE == HAL_PTI_MODE_UART_ONEWIRE
-    .mode = RAIL_PTI_MODE_UART_ONEWIRE,
-#else
-    .mode = RAIL_PTI_MODE_DISABLED,
-#endif
-    .baud = HAL_PTI_BAUD_RATE,
-#ifdef BSP_PTI_DOUT_LOC
-    .doutLoc = BSP_PTI_DOUT_LOC,
-#endif
-    .doutPort = (uint8_t)BSP_PTI_DOUT_PORT,
-    .doutPin = BSP_PTI_DOUT_PIN,
-#if HAL_PTI_MODE == HAL_PTI_MODE_SPI
-#ifdef BSP_PTI_DCLK_LOC
-    .dclkLoc = BSP_PTI_DCLK_LOC,
-#endif
-    .dclkPort = (uint8_t)BSP_PTI_DCLK_PORT,
-    .dclkPin = BSP_PTI_DCLK_PIN,
-#endif
-#if HAL_PTI_MODE != HAL_PTI_MODE_UART_ONEWIRE
-#ifdef BSP_PTI_DFRAME_LOC
-    .dframeLoc = BSP_PTI_DFRAME_LOC,
-#endif
-    .dframePort = (uint8_t)BSP_PTI_DFRAME_PORT,
-    .dframePin = BSP_PTI_DFRAME_PIN
-#endif
-  };
-
-  RAIL_ConfigPti(RAIL_EFR32_HANDLE, &railPtiConfig);
-#endif // HAL_PTI_ENABLE
-
-  // Only create and save the curves if the customer wants them
-  #ifdef RAIL_PA_CONVERSIONS
-  #if BSP_PA_VOLTAGE > 1800
-  RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
-  #else
-  RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesDcdc);
-  #endif
-  #endif
-
-#if (HAL_FEM_ENABLE)
-  initFem();
-#endif
-
-#if !defined(RAIL_IC_SIM_BUILD)
-  initAntenna();
-
-  // Disable any unused peripherals to ensure we enter a low power mode
-  boardLowPowerInit();
-#endif
-
-#if RAIL_DMA_CHANNEL == DMA_CHANNEL_DMADRV
-  Ecode_t dmaError = DMADRV_Init();
-  if ((dmaError == ECODE_EMDRV_DMADRV_ALREADY_INITIALIZED)
-      || (dmaError == ECODE_EMDRV_DMADRV_OK)) {
-    unsigned int channel;
-    dmaError = DMADRV_AllocateChannel(&channel, NULL);
-    if (dmaError == ECODE_EMDRV_DMADRV_OK) {
-      RAIL_UseDma(channel);
-    }
-  }
-#elif defined(RAIL_DMA_CHANNEL) && (RAIL_DMA_CHANNEL != DMA_CHANNEL_INVALID)
-  LDMA_Init_t ldmaInit = LDMA_INIT_DEFAULT;
-  LDMA_Init(&ldmaInit);
-  RAIL_UseDma(RAIL_DMA_CHANNEL);
-#endif
-}
-
-static void boardLowPowerInit(void)
-{
-  boardDisableSpiFlash();
-}
-
-#define CMD_POWER_DOWN                      (0xB9)
-#define CMD_POWER_UP                        (0xAB)
-
-static void boardDisableSpiFlash(void)
-{
-#if defined(BSP_EXTFLASH_USART) && !defined(HAL_DISABLE_EXTFLASH)
-  MX25_init();
-  MX25_DP();
-#endif
-}
 
 // Create defines for the different PRS signal sources as they vary per chip
 #if _SILICON_LABS_32B_SERIES_1_CONFIG == 1
@@ -234,7 +63,7 @@ static void boardDisableSpiFlash(void)
 #define PRS_PROTIMER_CC1                ((84 << 8) + 1)
 #endif
 /**
- * Define the signals that are supported for debug in railtest. These are chip
+ * Define the signals that are supported for debug in RAILtest. These are chip
  * specific because on some chips these are supported by the PRS while on others
  * the debugging must come from the library directly.
  */
@@ -373,7 +202,7 @@ static const debugSignal_t debugSignals[] =
 };
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 /**
- * Define the signals that are supported for debug in railtest. These are chip
+ * Define the signals that are supported for debug in RAILtest. These are chip
  * specific because on some chips these are supported by the PRS while on others
  * the debugging must come from the library directly.
  */
@@ -750,6 +579,8 @@ void halEnablePrs(uint8_t channel,
                   uint8_t signal)
 {
 #if defined(_SILICON_LABS_32B_SERIES_1)
+  (void)port;
+  (void)pin;
   volatile uint32_t *routeLocPtr;
 
   // Make sure the PRS is on and clocked
@@ -773,7 +604,12 @@ void halEnablePrs(uint8_t channel,
   BUS_RegBitWrite(&PRS->ROUTEPEN,
                   _PRS_ROUTEPEN_CH0PEN_SHIFT + channel,
                   1);
+
+  // Configure this GPIO as an output low to finish enabling this signal
+  GPIO_PinModeSet(port, pin, gpioModePushPull, 0);
+
 #elif defined(_SILICON_LABS_32B_SERIES_2)
+  (void)loc;
   // Make sure the PRS is on and clocked
   CMU_ClockEnable(cmuClock_PRS, true);
 
@@ -781,6 +617,9 @@ void halEnablePrs(uint8_t channel,
                            ( ( uint32_t ) source << _PRS_ASYNC_CH_CTRL_SOURCESEL_SHIFT),
                            ( ( uint32_t ) signal << _PRS_ASYNC_CH_CTRL_SIGSEL_SHIFT) );
   PRS_PinOutput(channel, prsTypeAsync, port, pin);
+
+  // Configure this GPIO as an output low to finish enabling this signal
+  GPIO_PinModeSet(port, pin, gpioModePushPull, 0);
 #else
   #error "Unsupported platform!"
 #endif

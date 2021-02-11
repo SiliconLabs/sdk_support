@@ -2,9 +2,9 @@ bootloader-uart-xmodem {
   name=UART XMODEM Bootloader
   dir=bootloader-uart-xmodem/template/
   isc=bootloader-uart-xmodem/template/bootloader-uart-xmodem.isc
-  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1],efm32~series[2]
 
-  Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu, where an XMODEM transfer can be started by sending ASCII '1', or the application can be started by sending ASCII '2'. This is the recommended UART bootloader for the EmberZNet, Thread and Flex protocol stacks.
+  Standalone Bootloader using XMODEM-CRC over UART. The bootloader shows a menu, where an XMODEM transfer can be started by sending ASCII '1', or the application can be started by sending ASCII '2'. This is the recommended UART bootloader for the EmberZNet and Connect protocol stacks.
 }
 bootloader-uart-bgapi {
   name=BGAPI UART DFU Bootloader
@@ -20,13 +20,13 @@ bootloader-spi-ezsp {
   isc=bootloader-spi-ezsp/template/bootloader-spi-ezsp.isc
   architecture=efr32~series[1],efr32~series[2]
 
-  Standalone Bootloader using the EZSP protocol over SPI. This is the recommended SPI bootloader for the EmberZNet, Thread and Flex protocol stacks.
+  Standalone Bootloader using the EZSP protocol over SPI. This is the recommended SPI bootloader for the EmberZNet and Connect protocol stacks.
 }
 bootloader-storage-spiflash {
   name=SPI Flash Storage Bootloader (multiple images)
   dir=bootloader-storage-spiflash/template/
   isc=bootloader-storage-spiflash/template/bootloader-storage-spiflash.isc
-  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1],efm32~series[2]
 
   Application Bootloader for all EFR32 and EFM32 devices with external flash, using an external SPI flash to store upgrade images received by the application over the air in an application specific way. This sample configuration supports storing multiple firmware update images simultaneously by configuring multiple storage slots.
 }
@@ -34,7 +34,7 @@ bootloader-storage-spiflash-single {
   name=SPI Flash Storage Bootloader (single image)
   dir=bootloader-storage-spiflash-single/template/
   isc=bootloader-storage-spiflash-single/template/bootloader-storage-spiflash-single.isc
-  architecture=efr32~series[1],efr32~series[2],efm32~series[1]
+  architecture=efr32~series[1],efr32~series[2],efm32~series[1],efm32~series[2]
 
   Application Bootloader for all EFR32 and EFM32 devices with external flash, using an external SPI flash to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the default configuration of the OTA Client in Zigbee sample applications.
 }
@@ -60,21 +60,21 @@ bootloader-storage-internal-single {
   isc=bootloader-storage-internal-single/template/bootloader-storage-internal-single.isc
   architecture=efr32~series[1]~device_configuration[2],efr32~series[2]~device_configuration[1],efm32~family[GI]~series[1]
 
-  Application Bootloader for all EFR32 and EFM32 devices with 1MB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of EmberZNet, Silicon Labs Thread and Flex sample applications on 1024 kB EFR32xG12 devices. The layout of the storage should be modified before being run on other devices.
+  Application Bootloader for all EFR32 and EFM32 devices with 1MB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of Silicon Labs EmberZNet, Bluetooth and Connect sample applications on 1024 kB EFR32xG12 devices. The layout of the storage should be modified before being run on other devices.
 }
 bootloader-storage-internal-single-512k {
   name=Internal Storage Bootloader (single image on 512kB device)
   dir=bootloader-storage-internal-single-512k/template/
   isc=bootloader-storage-internal-single-512k/template/bootloader-storage-internal-single-512k.isc
-  architecture=efr32~series[1],efr32~series[2]~device_configuration[1],efm32~series[1],efr32~series[2]~device_configuration[2]~flash[512K]
+  architecture=efr32~series[1],efr32~series[2]~device_configuration[1],efm32~series[1],efr32~series[2]~device_configuration[2]~flash[512K],efm32~series[2]~device_configuration[2]~flash[512K]
 
-  Application Bootloader for all EFR32 and EFM32 devices with 512kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of EmberZNet, Silicon Labs Thread and Flex sample applications on 512 kB EFR32xG13 devices. The layout of the storage should be modified before being run on other devices.
+  Application Bootloader for all EFR32 and EFM32 devices with 512kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of Silicon Labs EmberZNet, Bluetooth and Connect sample applications on 512 kB EFR32xG13 devices. The layout of the storage should be modified before being run on other devices.
 }
 bootloader-storage-internal-single-352k {
   name=Internal Storage Bootloader (single image on 352kB device)
   dir=bootloader-storage-internal-single-352k/template/
   isc=bootloader-storage-internal-single-352k/template/bootloader-storage-internal-single-352k.isc
-  architecture=efr32~series[2]~device_configuration[2]~flash[352K]
+  architecture=efr32~series[2]~device_configuration[2]~flash[352K],efm32~series[2]~device_configuration[2]~flash[352K]
 
   Application Bootloader for all EFR32 and EFM32 devices with 352kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. The layout of the storage should be modified before being run on other devices.
 }
@@ -84,13 +84,13 @@ bootloader-storage-internal-single-lzma {
   isc=bootloader-storage-internal-single-lzma/template/bootloader-storage-internal-single-lzma.isc
   architecture=efr32~series[1]~device_configuration[2],efr32~series[2]~device_configuration[1],efm32~family[GI]~series[1]
 
-  Application Bootloader for all EFR32 and EFM32 devices with 1MB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of EmberZNet, Silicon Labs Thread and Flex sample applications on 1024 kB EFR32xG12 devices. The layout of the storage should be modified before being run on other devices.
+  Application Bootloader for all EFR32 and EFM32 devices with 1MB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of Silicon Labs EmberZNet, Bluetooth and Connect sample applications on 1024 kB EFR32xG12 devices. The layout of the storage should be modified before being run on other devices.
 }
 bootloader-storage-internal-ble {
   name=Bluetooth in-place OTA DFU Bootloader
   dir=bootloader-storage-internal-ble/template/
   isc=bootloader-storage-internal-ble/template/bootloader-storage-internal-ble.isc
-  architecture=efr32~series[1]~family[B]~flash[256K],efr32~series[1]~family[M]~flash[256K]
+  architecture=efr32~series[1]~family[B]~flash[256K],efr32~series[1]~family[M]~flash[256K],efm32~series[2]~device_configuration[2]~flash[256K]
 
   Application Bootloader for in-place OTA DFU with the Bluetooth stack on EFR32 devices with 256kB flash parts. Thie sample application is using internal flash to store stack and app upgrade images received OTA in a two-stage process.
 }

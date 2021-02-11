@@ -1,0 +1,42 @@
+id: "simple_rgbw_pwm_led_core"
+label: Simple RGBW PWM LED Core
+package: "platform"
+description: >
+  The Simple RGBW PWM LED Driver provides an implementation of the Generic LED 
+  API. This driver supports controlling Red/Green/Blue/White LED sets and uses 
+  Pulse Width Modulation (PWM) to set the intensity of each LED.
+
+
+  This component includes only the Simple RGBW PWM LED driver core. To configure and create
+  instances of this driver, the Simple RGBW PWM LED component should be included in the 
+  project.
+category: "Platform|Driver"
+quality: "production"
+source:
+  - path: "platform/driver/leddrv/src/sl_simple_rgbw_pwm_led.c"
+include:
+  - path: "platform/driver/leddrv/inc"
+    file_list:
+      - path: sl_simple_rgbw_pwm_led.h
+provides:
+  - name: "simple_rgbw_pwm_led_core"
+requires:
+  - name: "status"
+  - name: "emlib_timer"
+  - name: "emlib_gpio"
+  - name: "emlib_cmu"
+  - name: "emlib_common"
+  - name: "led"
+template_file:
+  - path: "platform/driver/leddrv/inst/sl_simple_rgbw_pwm_led_instances.c.jinja"
+  - path: "platform/driver/leddrv/inst/sl_simple_rgbw_pwm_led_instances.h.jinja"
+template_contribution:
+  - name: event_handler
+    condition: [simple_rgbw_pwm_led]
+    value:
+      event: driver_init
+      include: "sl_simple_rgbw_pwm_led_instances.h"
+      handler: sl_simple_rgbw_pwm_led_init_instances
+documentation:
+    docset: gecko-platform
+    document: driver/api/group-simple-rgbw-pwm-led

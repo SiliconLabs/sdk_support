@@ -38,18 +38,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup nvm3
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup NVM3
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup NVM3Hal
- * @brief NVM3 HAL module
+ * @addtogroup nvm3hal
  * @{
  * @details
  * This module provides the NVM3 interface to the EFM and EFR Flash NVM.
@@ -62,11 +56,10 @@ extern "C" {
  ***************************   GLOBAL VARIABLES   ******************************
  ******************************************************************************/
 
-extern const nvm3_HalHandle_t nvm3_halFlashHandle;
+extern const nvm3_HalHandle_t nvm3_halFlashHandle;      ///< The HAL flash handle.
 
-/** @} (end addtogroup NVM3Hal) */
-/** @} (end addtogroup NVM3) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup nvm3hal) */
+/** @} (end addtogroup nvm3) */
 
 #ifdef __cplusplus
 }

@@ -391,135 +391,135 @@ typedef struct {
 #define _SMU_PPUPATD0_TIMER3_MASK                 0x80000UL                                  /**< Bit mask for SMU_TIMER3                     */
 #define _SMU_PPUPATD0_TIMER3_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
 #define SMU_PPUPATD0_TIMER3_DEFAULT               (_SMU_PPUPATD0_TIMER3_DEFAULT << 19)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_USART0                       (0x1UL << 20)                              /**< USART0 Privileged Access                    */
-#define _SMU_PPUPATD0_USART0_SHIFT                20                                         /**< Shift value for SMU_USART0                  */
-#define _SMU_PPUPATD0_USART0_MASK                 0x100000UL                                 /**< Bit mask for SMU_USART0                     */
+#define SMU_PPUPATD0_TIMER4                       (0x1UL << 20)                              /**< TIMER4 Privileged Access                    */
+#define _SMU_PPUPATD0_TIMER4_SHIFT                20                                         /**< Shift value for SMU_TIMER4                  */
+#define _SMU_PPUPATD0_TIMER4_MASK                 0x100000UL                                 /**< Bit mask for SMU_TIMER4                     */
+#define _SMU_PPUPATD0_TIMER4_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
+#define SMU_PPUPATD0_TIMER4_DEFAULT               (_SMU_PPUPATD0_TIMER4_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_USART0                       (0x1UL << 21)                              /**< USART0 Privileged Access                    */
+#define _SMU_PPUPATD0_USART0_SHIFT                21                                         /**< Shift value for SMU_USART0                  */
+#define _SMU_PPUPATD0_USART0_MASK                 0x200000UL                                 /**< Bit mask for SMU_USART0                     */
 #define _SMU_PPUPATD0_USART0_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_USART0_DEFAULT               (_SMU_PPUPATD0_USART0_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_USART1                       (0x1UL << 21)                              /**< USART1 Privileged Access                    */
-#define _SMU_PPUPATD0_USART1_SHIFT                21                                         /**< Shift value for SMU_USART1                  */
-#define _SMU_PPUPATD0_USART1_MASK                 0x200000UL                                 /**< Bit mask for SMU_USART1                     */
+#define SMU_PPUPATD0_USART0_DEFAULT               (_SMU_PPUPATD0_USART0_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_USART1                       (0x1UL << 22)                              /**< USART1 Privileged Access                    */
+#define _SMU_PPUPATD0_USART1_SHIFT                22                                         /**< Shift value for SMU_USART1                  */
+#define _SMU_PPUPATD0_USART1_MASK                 0x400000UL                                 /**< Bit mask for SMU_USART1                     */
 #define _SMU_PPUPATD0_USART1_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_USART1_DEFAULT               (_SMU_PPUPATD0_USART1_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_BURTC                        (0x1UL << 22)                              /**< BURTC Privileged Access                     */
-#define _SMU_PPUPATD0_BURTC_SHIFT                 22                                         /**< Shift value for SMU_BURTC                   */
-#define _SMU_PPUPATD0_BURTC_MASK                  0x400000UL                                 /**< Bit mask for SMU_BURTC                      */
+#define SMU_PPUPATD0_USART1_DEFAULT               (_SMU_PPUPATD0_USART1_DEFAULT << 22)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_BURTC                        (0x1UL << 23)                              /**< BURTC Privileged Access                     */
+#define _SMU_PPUPATD0_BURTC_SHIFT                 23                                         /**< Shift value for SMU_BURTC                   */
+#define _SMU_PPUPATD0_BURTC_MASK                  0x800000UL                                 /**< Bit mask for SMU_BURTC                      */
 #define _SMU_PPUPATD0_BURTC_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_BURTC_DEFAULT                (_SMU_PPUPATD0_BURTC_DEFAULT << 22)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_I2C1                         (0x1UL << 23)                              /**< I2C1 Privileged Access                      */
-#define _SMU_PPUPATD0_I2C1_SHIFT                  23                                         /**< Shift value for SMU_I2C1                    */
-#define _SMU_PPUPATD0_I2C1_MASK                   0x800000UL                                 /**< Bit mask for SMU_I2C1                       */
+#define SMU_PPUPATD0_BURTC_DEFAULT                (_SMU_PPUPATD0_BURTC_DEFAULT << 23)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_I2C1                         (0x1UL << 24)                              /**< I2C1 Privileged Access                      */
+#define _SMU_PPUPATD0_I2C1_SHIFT                  24                                         /**< Shift value for SMU_I2C1                    */
+#define _SMU_PPUPATD0_I2C1_MASK                   0x1000000UL                                /**< Bit mask for SMU_I2C1                       */
 #define _SMU_PPUPATD0_I2C1_DEFAULT                0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_I2C1_DEFAULT                 (_SMU_PPUPATD0_I2C1_DEFAULT << 23)         /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_CHIPTESTCTRL                 (0x1UL << 24)                              /**< CHIPTESTCTRL Privileged Access              */
-#define _SMU_PPUPATD0_CHIPTESTCTRL_SHIFT          24                                         /**< Shift value for SMU_CHIPTESTCTRL            */
-#define _SMU_PPUPATD0_CHIPTESTCTRL_MASK           0x1000000UL                                /**< Bit mask for SMU_CHIPTESTCTRL               */
+#define SMU_PPUPATD0_I2C1_DEFAULT                 (_SMU_PPUPATD0_I2C1_DEFAULT << 24)         /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_CHIPTESTCTRL                 (0x1UL << 25)                              /**< CHIPTESTCTRL Privileged Access              */
+#define _SMU_PPUPATD0_CHIPTESTCTRL_SHIFT          25                                         /**< Shift value for SMU_CHIPTESTCTRL            */
+#define _SMU_PPUPATD0_CHIPTESTCTRL_MASK           0x2000000UL                                /**< Bit mask for SMU_CHIPTESTCTRL               */
 #define _SMU_PPUPATD0_CHIPTESTCTRL_DEFAULT        0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUPATD0_CHIPTESTCTRL_DEFAULT << 24) /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_SYSCFGCFGNS                  (0x1UL << 25)                              /**< SYSCFGCFGNS Privileged Access               */
-#define _SMU_PPUPATD0_SYSCFGCFGNS_SHIFT           25                                         /**< Shift value for SMU_SYSCFGCFGNS             */
-#define _SMU_PPUPATD0_SYSCFGCFGNS_MASK            0x2000000UL                                /**< Bit mask for SMU_SYSCFGCFGNS                */
+#define SMU_PPUPATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUPATD0_CHIPTESTCTRL_DEFAULT << 25) /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_SYSCFGCFGNS                  (0x1UL << 26)                              /**< SYSCFGCFGNS Privileged Access               */
+#define _SMU_PPUPATD0_SYSCFGCFGNS_SHIFT           26                                         /**< Shift value for SMU_SYSCFGCFGNS             */
+#define _SMU_PPUPATD0_SYSCFGCFGNS_MASK            0x4000000UL                                /**< Bit mask for SMU_SYSCFGCFGNS                */
 #define _SMU_PPUPATD0_SYSCFGCFGNS_DEFAULT         0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUPATD0_SYSCFGCFGNS_DEFAULT << 25)  /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_SYSCFG                       (0x1UL << 26)                              /**< SYSCFG Privileged Access                    */
-#define _SMU_PPUPATD0_SYSCFG_SHIFT                26                                         /**< Shift value for SMU_SYSCFG                  */
-#define _SMU_PPUPATD0_SYSCFG_MASK                 0x4000000UL                                /**< Bit mask for SMU_SYSCFG                     */
+#define SMU_PPUPATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUPATD0_SYSCFGCFGNS_DEFAULT << 26)  /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_SYSCFG                       (0x1UL << 27)                              /**< SYSCFG Privileged Access                    */
+#define _SMU_PPUPATD0_SYSCFG_SHIFT                27                                         /**< Shift value for SMU_SYSCFG                  */
+#define _SMU_PPUPATD0_SYSCFG_MASK                 0x8000000UL                                /**< Bit mask for SMU_SYSCFG                     */
 #define _SMU_PPUPATD0_SYSCFG_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_SYSCFG_DEFAULT               (_SMU_PPUPATD0_SYSCFG_DEFAULT << 26)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_BURAM                        (0x1UL << 27)                              /**< BURAM Privileged Access                     */
-#define _SMU_PPUPATD0_BURAM_SHIFT                 27                                         /**< Shift value for SMU_BURAM                   */
-#define _SMU_PPUPATD0_BURAM_MASK                  0x8000000UL                                /**< Bit mask for SMU_BURAM                      */
+#define SMU_PPUPATD0_SYSCFG_DEFAULT               (_SMU_PPUPATD0_SYSCFG_DEFAULT << 27)       /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_BURAM                        (0x1UL << 28)                              /**< BURAM Privileged Access                     */
+#define _SMU_PPUPATD0_BURAM_SHIFT                 28                                         /**< Shift value for SMU_BURAM                   */
+#define _SMU_PPUPATD0_BURAM_MASK                  0x10000000UL                               /**< Bit mask for SMU_BURAM                      */
 #define _SMU_PPUPATD0_BURAM_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_BURAM_DEFAULT                (_SMU_PPUPATD0_BURAM_DEFAULT << 27)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_IFADCDEBUG                   (0x1UL << 28)                              /**< IFADCDEBUG Privileged Access                */
-#define _SMU_PPUPATD0_IFADCDEBUG_SHIFT            28                                         /**< Shift value for SMU_IFADCDEBUG              */
-#define _SMU_PPUPATD0_IFADCDEBUG_MASK             0x10000000UL                               /**< Bit mask for SMU_IFADCDEBUG                 */
+#define SMU_PPUPATD0_BURAM_DEFAULT                (_SMU_PPUPATD0_BURAM_DEFAULT << 28)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_IFADCDEBUG                   (0x1UL << 29)                              /**< IFADCDEBUG Privileged Access                */
+#define _SMU_PPUPATD0_IFADCDEBUG_SHIFT            29                                         /**< Shift value for SMU_IFADCDEBUG              */
+#define _SMU_PPUPATD0_IFADCDEBUG_MASK             0x20000000UL                               /**< Bit mask for SMU_IFADCDEBUG                 */
 #define _SMU_PPUPATD0_IFADCDEBUG_DEFAULT          0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUPATD0_IFADCDEBUG_DEFAULT << 28)   /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_GPCRC                        (0x1UL << 29)                              /**< GPCRC Privileged Access                     */
-#define _SMU_PPUPATD0_GPCRC_SHIFT                 29                                         /**< Shift value for SMU_GPCRC                   */
-#define _SMU_PPUPATD0_GPCRC_MASK                  0x20000000UL                               /**< Bit mask for SMU_GPCRC                      */
+#define SMU_PPUPATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUPATD0_IFADCDEBUG_DEFAULT << 29)   /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_GPCRC                        (0x1UL << 30)                              /**< GPCRC Privileged Access                     */
+#define _SMU_PPUPATD0_GPCRC_SHIFT                 30                                         /**< Shift value for SMU_GPCRC                   */
+#define _SMU_PPUPATD0_GPCRC_MASK                  0x40000000UL                               /**< Bit mask for SMU_GPCRC                      */
 #define _SMU_PPUPATD0_GPCRC_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_GPCRC_DEFAULT                (_SMU_PPUPATD0_GPCRC_DEFAULT << 29)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
-#define SMU_PPUPATD0_DCI                          (0x1UL << 30)                              /**< DCI Privileged Access                       */
-#define _SMU_PPUPATD0_DCI_SHIFT                   30                                         /**< Shift value for SMU_DCI                     */
-#define _SMU_PPUPATD0_DCI_MASK                    0x40000000UL                               /**< Bit mask for SMU_DCI                        */
+#define SMU_PPUPATD0_GPCRC_DEFAULT                (_SMU_PPUPATD0_GPCRC_DEFAULT << 30)        /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_DCI                          (0x1UL << 31)                              /**< DCI Privileged Access                       */
+#define _SMU_PPUPATD0_DCI_SHIFT                   31                                         /**< Shift value for SMU_DCI                     */
+#define _SMU_PPUPATD0_DCI_MASK                    0x80000000UL                               /**< Bit mask for SMU_DCI                        */
 #define _SMU_PPUPATD0_DCI_DEFAULT                 0x00000001UL                               /**< Mode DEFAULT for SMU_PPUPATD0               */
-#define SMU_PPUPATD0_DCI_DEFAULT                  (_SMU_PPUPATD0_DCI_DEFAULT << 30)          /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
+#define SMU_PPUPATD0_DCI_DEFAULT                  (_SMU_PPUPATD0_DCI_DEFAULT << 31)          /**< Shifted mode DEFAULT for SMU_PPUPATD0       */
 
 /* Bit fields for SMU PPUPATD1 */
 #define _SMU_PPUPATD1_RESETVALUE                  0x0000FFFFUL                            /**< Default value for SMU_PPUPATD1              */
 #define _SMU_PPUPATD1_MASK                        0x0000FFFFUL                            /**< Mask for SMU_PPUPATD1                       */
-#define SMU_PPUPATD1_DCDC                         (0x1UL << 0)                            /**< DCDC Privileged Access                      */
-#define _SMU_PPUPATD1_DCDC_SHIFT                  0                                       /**< Shift value for SMU_DCDC                    */
-#define _SMU_PPUPATD1_DCDC_MASK                   0x1UL                                   /**< Bit mask for SMU_DCDC                       */
+#define SMU_PPUPATD1_DCDC                         (0x1UL << 1)                            /**< DCDC Privileged Access                      */
+#define _SMU_PPUPATD1_DCDC_SHIFT                  1                                       /**< Shift value for SMU_DCDC                    */
+#define _SMU_PPUPATD1_DCDC_MASK                   0x2UL                                   /**< Bit mask for SMU_DCDC                       */
 #define _SMU_PPUPATD1_DCDC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_DCDC_DEFAULT                 (_SMU_PPUPATD1_DCDC_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_PDM                          (0x1UL << 1)                            /**< PDM Privileged Access                       */
-#define _SMU_PPUPATD1_PDM_SHIFT                   1                                       /**< Shift value for SMU_PDM                     */
-#define _SMU_PPUPATD1_PDM_MASK                    0x2UL                                   /**< Bit mask for SMU_PDM                        */
+#define SMU_PPUPATD1_DCDC_DEFAULT                 (_SMU_PPUPATD1_DCDC_DEFAULT << 1)       /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_PDM                          (0x1UL << 2)                            /**< PDM Privileged Access                       */
+#define _SMU_PPUPATD1_PDM_SHIFT                   2                                       /**< Shift value for SMU_PDM                     */
+#define _SMU_PPUPATD1_PDM_MASK                    0x4UL                                   /**< Bit mask for SMU_PDM                        */
 #define _SMU_PPUPATD1_PDM_DEFAULT                 0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_PDM_DEFAULT                  (_SMU_PPUPATD1_PDM_DEFAULT << 1)        /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_RFSENSE                      (0x1UL << 2)                            /**< RFSENSE Privileged Access                   */
-#define _SMU_PPUPATD1_RFSENSE_SHIFT               2                                       /**< Shift value for SMU_RFSENSE                 */
-#define _SMU_PPUPATD1_RFSENSE_MASK                0x4UL                                   /**< Bit mask for SMU_RFSENSE                    */
+#define SMU_PPUPATD1_PDM_DEFAULT                  (_SMU_PPUPATD1_PDM_DEFAULT << 2)        /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_RFSENSE                      (0x1UL << 3)                            /**< RFSENSE Privileged Access                   */
+#define _SMU_PPUPATD1_RFSENSE_SHIFT               3                                       /**< Shift value for SMU_RFSENSE                 */
+#define _SMU_PPUPATD1_RFSENSE_MASK                0x8UL                                   /**< Bit mask for SMU_RFSENSE                    */
 #define _SMU_PPUPATD1_RFSENSE_DEFAULT             0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_RFSENSE_DEFAULT              (_SMU_PPUPATD1_RFSENSE_DEFAULT << 2)    /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_RADIOAES                     (0x1UL << 3)                            /**< RADIOAES Privileged Access                  */
-#define _SMU_PPUPATD1_RADIOAES_SHIFT              3                                       /**< Shift value for SMU_RADIOAES                */
-#define _SMU_PPUPATD1_RADIOAES_MASK               0x8UL                                   /**< Bit mask for SMU_RADIOAES                   */
+#define SMU_PPUPATD1_RFSENSE_DEFAULT              (_SMU_PPUPATD1_RFSENSE_DEFAULT << 3)    /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_RADIOAES                     (0x1UL << 4)                            /**< RADIOAES Privileged Access                  */
+#define _SMU_PPUPATD1_RADIOAES_SHIFT              4                                       /**< Shift value for SMU_RADIOAES                */
+#define _SMU_PPUPATD1_RADIOAES_MASK               0x10UL                                  /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_PPUPATD1_RADIOAES_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_RADIOAES_DEFAULT             (_SMU_PPUPATD1_RADIOAES_DEFAULT << 3)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_SMU                          (0x1UL << 4)                            /**< SMU Privileged Access                       */
-#define _SMU_PPUPATD1_SMU_SHIFT                   4                                       /**< Shift value for SMU_SMU                     */
-#define _SMU_PPUPATD1_SMU_MASK                    0x10UL                                  /**< Bit mask for SMU_SMU                        */
+#define SMU_PPUPATD1_RADIOAES_DEFAULT             (_SMU_PPUPATD1_RADIOAES_DEFAULT << 4)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_SMU                          (0x1UL << 5)                            /**< SMU Privileged Access                       */
+#define _SMU_PPUPATD1_SMU_SHIFT                   5                                       /**< Shift value for SMU_SMU                     */
+#define _SMU_PPUPATD1_SMU_MASK                    0x20UL                                  /**< Bit mask for SMU_SMU                        */
 #define _SMU_PPUPATD1_SMU_DEFAULT                 0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_SMU_DEFAULT                  (_SMU_PPUPATD1_SMU_DEFAULT << 4)        /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_SMUCFGNS                     (0x1UL << 5)                            /**< SMUCFGNS Privileged Access                  */
-#define _SMU_PPUPATD1_SMUCFGNS_SHIFT              5                                       /**< Shift value for SMU_SMUCFGNS                */
-#define _SMU_PPUPATD1_SMUCFGNS_MASK               0x20UL                                  /**< Bit mask for SMU_SMUCFGNS                   */
+#define SMU_PPUPATD1_SMU_DEFAULT                  (_SMU_PPUPATD1_SMU_DEFAULT << 5)        /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_SMUCFGNS                     (0x1UL << 6)                            /**< SMUCFGNS Privileged Access                  */
+#define _SMU_PPUPATD1_SMUCFGNS_SHIFT              6                                       /**< Shift value for SMU_SMUCFGNS                */
+#define _SMU_PPUPATD1_SMUCFGNS_MASK               0x40UL                                  /**< Bit mask for SMU_SMUCFGNS                   */
 #define _SMU_PPUPATD1_SMUCFGNS_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_SMUCFGNS_DEFAULT             (_SMU_PPUPATD1_SMUCFGNS_DEFAULT << 5)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_RTCC                         (0x1UL << 6)                            /**< RTCC Privileged Access                      */
-#define _SMU_PPUPATD1_RTCC_SHIFT                  6                                       /**< Shift value for SMU_RTCC                    */
-#define _SMU_PPUPATD1_RTCC_MASK                   0x40UL                                  /**< Bit mask for SMU_RTCC                       */
+#define SMU_PPUPATD1_SMUCFGNS_DEFAULT             (_SMU_PPUPATD1_SMUCFGNS_DEFAULT << 6)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_RTCC                         (0x1UL << 7)                            /**< RTCC Privileged Access                      */
+#define _SMU_PPUPATD1_RTCC_SHIFT                  7                                       /**< Shift value for SMU_RTCC                    */
+#define _SMU_PPUPATD1_RTCC_MASK                   0x80UL                                  /**< Bit mask for SMU_RTCC                       */
 #define _SMU_PPUPATD1_RTCC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_RTCC_DEFAULT                 (_SMU_PPUPATD1_RTCC_DEFAULT << 6)       /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_LETIMER0                     (0x1UL << 7)                            /**< LETIMER0 Privileged Access                  */
-#define _SMU_PPUPATD1_LETIMER0_SHIFT              7                                       /**< Shift value for SMU_LETIMER0                */
-#define _SMU_PPUPATD1_LETIMER0_MASK               0x80UL                                  /**< Bit mask for SMU_LETIMER0                   */
+#define SMU_PPUPATD1_RTCC_DEFAULT                 (_SMU_PPUPATD1_RTCC_DEFAULT << 7)       /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_LETIMER0                     (0x1UL << 8)                            /**< LETIMER0 Privileged Access                  */
+#define _SMU_PPUPATD1_LETIMER0_SHIFT              8                                       /**< Shift value for SMU_LETIMER0                */
+#define _SMU_PPUPATD1_LETIMER0_MASK               0x100UL                                 /**< Bit mask for SMU_LETIMER0                   */
 #define _SMU_PPUPATD1_LETIMER0_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_LETIMER0_DEFAULT             (_SMU_PPUPATD1_LETIMER0_DEFAULT << 7)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_IADC0                        (0x1UL << 8)                            /**< IADC0 Privileged Access                     */
-#define _SMU_PPUPATD1_IADC0_SHIFT                 8                                       /**< Shift value for SMU_IADC0                   */
-#define _SMU_PPUPATD1_IADC0_MASK                  0x100UL                                 /**< Bit mask for SMU_IADC0                      */
+#define SMU_PPUPATD1_LETIMER0_DEFAULT             (_SMU_PPUPATD1_LETIMER0_DEFAULT << 8)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_IADC0                        (0x1UL << 9)                            /**< IADC0 Privileged Access                     */
+#define _SMU_PPUPATD1_IADC0_SHIFT                 9                                       /**< Shift value for SMU_IADC0                   */
+#define _SMU_PPUPATD1_IADC0_MASK                  0x200UL                                 /**< Bit mask for SMU_IADC0                      */
 #define _SMU_PPUPATD1_IADC0_DEFAULT               0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_IADC0_DEFAULT                (_SMU_PPUPATD1_IADC0_DEFAULT << 8)      /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_I2C0                         (0x1UL << 9)                            /**< I2C0 Privileged Access                      */
-#define _SMU_PPUPATD1_I2C0_SHIFT                  9                                       /**< Shift value for SMU_I2C0                    */
-#define _SMU_PPUPATD1_I2C0_MASK                   0x200UL                                 /**< Bit mask for SMU_I2C0                       */
+#define SMU_PPUPATD1_IADC0_DEFAULT                (_SMU_PPUPATD1_IADC0_DEFAULT << 9)      /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_I2C0                         (0x1UL << 10)                           /**< I2C0 Privileged Access                      */
+#define _SMU_PPUPATD1_I2C0_SHIFT                  10                                      /**< Shift value for SMU_I2C0                    */
+#define _SMU_PPUPATD1_I2C0_MASK                   0x400UL                                 /**< Bit mask for SMU_I2C0                       */
 #define _SMU_PPUPATD1_I2C0_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_I2C0_DEFAULT                 (_SMU_PPUPATD1_I2C0_DEFAULT << 9)       /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_WDOG0                        (0x1UL << 10)                           /**< WDOG0 Privileged Access                     */
-#define _SMU_PPUPATD1_WDOG0_SHIFT                 10                                      /**< Shift value for SMU_WDOG0                   */
-#define _SMU_PPUPATD1_WDOG0_MASK                  0x400UL                                 /**< Bit mask for SMU_WDOG0                      */
+#define SMU_PPUPATD1_I2C0_DEFAULT                 (_SMU_PPUPATD1_I2C0_DEFAULT << 10)      /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_WDOG0                        (0x1UL << 11)                           /**< WDOG0 Privileged Access                     */
+#define _SMU_PPUPATD1_WDOG0_SHIFT                 11                                      /**< Shift value for SMU_WDOG0                   */
+#define _SMU_PPUPATD1_WDOG0_MASK                  0x800UL                                 /**< Bit mask for SMU_WDOG0                      */
 #define _SMU_PPUPATD1_WDOG0_DEFAULT               0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_WDOG0_DEFAULT                (_SMU_PPUPATD1_WDOG0_DEFAULT << 10)     /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_AMUXCP0                      (0x1UL << 11)                           /**< AMUXCP0 Privileged Access                   */
-#define _SMU_PPUPATD1_AMUXCP0_SHIFT               11                                      /**< Shift value for SMU_AMUXCP0                 */
-#define _SMU_PPUPATD1_AMUXCP0_MASK                0x800UL                                 /**< Bit mask for SMU_AMUXCP0                    */
+#define SMU_PPUPATD1_WDOG0_DEFAULT                (_SMU_PPUPATD1_WDOG0_DEFAULT << 11)     /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_AMUXCP0                      (0x1UL << 12)                           /**< AMUXCP0 Privileged Access                   */
+#define _SMU_PPUPATD1_AMUXCP0_SHIFT               12                                      /**< Shift value for SMU_AMUXCP0                 */
+#define _SMU_PPUPATD1_AMUXCP0_MASK                0x1000UL                                /**< Bit mask for SMU_AMUXCP0                    */
 #define _SMU_PPUPATD1_AMUXCP0_DEFAULT             0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_AMUXCP0_DEFAULT              (_SMU_PPUPATD1_AMUXCP0_DEFAULT << 11)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_EUART0                       (0x1UL << 12)                           /**< EUART0 Privileged Access                    */
-#define _SMU_PPUPATD1_EUART0_SHIFT                12                                      /**< Shift value for SMU_EUART0                  */
-#define _SMU_PPUPATD1_EUART0_MASK                 0x1000UL                                /**< Bit mask for SMU_EUART0                     */
+#define SMU_PPUPATD1_AMUXCP0_DEFAULT              (_SMU_PPUPATD1_AMUXCP0_DEFAULT << 12)   /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_EUART0                       (0x1UL << 13)                           /**< EUART0 Privileged Access                    */
+#define _SMU_PPUPATD1_EUART0_SHIFT                13                                      /**< Shift value for SMU_EUART0                  */
+#define _SMU_PPUPATD1_EUART0_MASK                 0x2000UL                                /**< Bit mask for SMU_EUART0                     */
 #define _SMU_PPUPATD1_EUART0_DEFAULT              0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_EUART0_DEFAULT               (_SMU_PPUPATD1_EUART0_DEFAULT << 12)    /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
-#define SMU_PPUPATD1_BUFC                         (0x1UL << 13)                           /**< BUFC Privileged Access                      */
-#define _SMU_PPUPATD1_BUFC_SHIFT                  13                                      /**< Shift value for SMU_BUFC                    */
-#define _SMU_PPUPATD1_BUFC_MASK                   0x2000UL                                /**< Bit mask for SMU_BUFC                       */
-#define _SMU_PPUPATD1_BUFC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUPATD1               */
-#define SMU_PPUPATD1_BUFC_DEFAULT                 (_SMU_PPUPATD1_BUFC_DEFAULT << 13)      /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
+#define SMU_PPUPATD1_EUART0_DEFAULT               (_SMU_PPUPATD1_EUART0_DEFAULT << 13)    /**< Shifted mode DEFAULT for SMU_PPUPATD1       */
 #define SMU_PPUPATD1_CRYPTOACC                    (0x1UL << 14)                           /**< CRYPTOACC Privileged Access                 */
 #define _SMU_PPUPATD1_CRYPTOACC_SHIFT             14                                      /**< Shift value for SMU_CRYPTOACC               */
 #define _SMU_PPUPATD1_CRYPTOACC_MASK              0x4000UL                                /**< Bit mask for SMU_CRYPTOACC                  */
@@ -629,135 +629,135 @@ typedef struct {
 #define _SMU_PPUSATD0_TIMER3_MASK                 0x80000UL                                  /**< Bit mask for SMU_TIMER3                     */
 #define _SMU_PPUSATD0_TIMER3_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
 #define SMU_PPUSATD0_TIMER3_DEFAULT               (_SMU_PPUSATD0_TIMER3_DEFAULT << 19)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_USART0                       (0x1UL << 20)                              /**< USART0 Secure Access                        */
-#define _SMU_PPUSATD0_USART0_SHIFT                20                                         /**< Shift value for SMU_USART0                  */
-#define _SMU_PPUSATD0_USART0_MASK                 0x100000UL                                 /**< Bit mask for SMU_USART0                     */
+#define SMU_PPUSATD0_TIMER4                       (0x1UL << 20)                              /**< TIMER4 Secure Access                        */
+#define _SMU_PPUSATD0_TIMER4_SHIFT                20                                         /**< Shift value for SMU_TIMER4                  */
+#define _SMU_PPUSATD0_TIMER4_MASK                 0x100000UL                                 /**< Bit mask for SMU_TIMER4                     */
+#define _SMU_PPUSATD0_TIMER4_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
+#define SMU_PPUSATD0_TIMER4_DEFAULT               (_SMU_PPUSATD0_TIMER4_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_USART0                       (0x1UL << 21)                              /**< USART0 Secure Access                        */
+#define _SMU_PPUSATD0_USART0_SHIFT                21                                         /**< Shift value for SMU_USART0                  */
+#define _SMU_PPUSATD0_USART0_MASK                 0x200000UL                                 /**< Bit mask for SMU_USART0                     */
 #define _SMU_PPUSATD0_USART0_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_USART0_DEFAULT               (_SMU_PPUSATD0_USART0_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_USART1                       (0x1UL << 21)                              /**< USART1 Secure Access                        */
-#define _SMU_PPUSATD0_USART1_SHIFT                21                                         /**< Shift value for SMU_USART1                  */
-#define _SMU_PPUSATD0_USART1_MASK                 0x200000UL                                 /**< Bit mask for SMU_USART1                     */
+#define SMU_PPUSATD0_USART0_DEFAULT               (_SMU_PPUSATD0_USART0_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_USART1                       (0x1UL << 22)                              /**< USART1 Secure Access                        */
+#define _SMU_PPUSATD0_USART1_SHIFT                22                                         /**< Shift value for SMU_USART1                  */
+#define _SMU_PPUSATD0_USART1_MASK                 0x400000UL                                 /**< Bit mask for SMU_USART1                     */
 #define _SMU_PPUSATD0_USART1_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_USART1_DEFAULT               (_SMU_PPUSATD0_USART1_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_BURTC                        (0x1UL << 22)                              /**< BURTC Secure Access                         */
-#define _SMU_PPUSATD0_BURTC_SHIFT                 22                                         /**< Shift value for SMU_BURTC                   */
-#define _SMU_PPUSATD0_BURTC_MASK                  0x400000UL                                 /**< Bit mask for SMU_BURTC                      */
+#define SMU_PPUSATD0_USART1_DEFAULT               (_SMU_PPUSATD0_USART1_DEFAULT << 22)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_BURTC                        (0x1UL << 23)                              /**< BURTC Secure Access                         */
+#define _SMU_PPUSATD0_BURTC_SHIFT                 23                                         /**< Shift value for SMU_BURTC                   */
+#define _SMU_PPUSATD0_BURTC_MASK                  0x800000UL                                 /**< Bit mask for SMU_BURTC                      */
 #define _SMU_PPUSATD0_BURTC_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_BURTC_DEFAULT                (_SMU_PPUSATD0_BURTC_DEFAULT << 22)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_I2C1                         (0x1UL << 23)                              /**< I2C1 Secure Access                          */
-#define _SMU_PPUSATD0_I2C1_SHIFT                  23                                         /**< Shift value for SMU_I2C1                    */
-#define _SMU_PPUSATD0_I2C1_MASK                   0x800000UL                                 /**< Bit mask for SMU_I2C1                       */
+#define SMU_PPUSATD0_BURTC_DEFAULT                (_SMU_PPUSATD0_BURTC_DEFAULT << 23)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_I2C1                         (0x1UL << 24)                              /**< I2C1 Secure Access                          */
+#define _SMU_PPUSATD0_I2C1_SHIFT                  24                                         /**< Shift value for SMU_I2C1                    */
+#define _SMU_PPUSATD0_I2C1_MASK                   0x1000000UL                                /**< Bit mask for SMU_I2C1                       */
 #define _SMU_PPUSATD0_I2C1_DEFAULT                0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_I2C1_DEFAULT                 (_SMU_PPUSATD0_I2C1_DEFAULT << 23)         /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_CHIPTESTCTRL                 (0x1UL << 24)                              /**< CHIPTESTCTRL Secure Access                  */
-#define _SMU_PPUSATD0_CHIPTESTCTRL_SHIFT          24                                         /**< Shift value for SMU_CHIPTESTCTRL            */
-#define _SMU_PPUSATD0_CHIPTESTCTRL_MASK           0x1000000UL                                /**< Bit mask for SMU_CHIPTESTCTRL               */
+#define SMU_PPUSATD0_I2C1_DEFAULT                 (_SMU_PPUSATD0_I2C1_DEFAULT << 24)         /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_CHIPTESTCTRL                 (0x1UL << 25)                              /**< CHIPTESTCTRL Secure Access                  */
+#define _SMU_PPUSATD0_CHIPTESTCTRL_SHIFT          25                                         /**< Shift value for SMU_CHIPTESTCTRL            */
+#define _SMU_PPUSATD0_CHIPTESTCTRL_MASK           0x2000000UL                                /**< Bit mask for SMU_CHIPTESTCTRL               */
 #define _SMU_PPUSATD0_CHIPTESTCTRL_DEFAULT        0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUSATD0_CHIPTESTCTRL_DEFAULT << 24) /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_SYSCFGCFGNS                  (0x1UL << 25)                              /**< SYSCFGCFGNS Secure Access                   */
-#define _SMU_PPUSATD0_SYSCFGCFGNS_SHIFT           25                                         /**< Shift value for SMU_SYSCFGCFGNS             */
-#define _SMU_PPUSATD0_SYSCFGCFGNS_MASK            0x2000000UL                                /**< Bit mask for SMU_SYSCFGCFGNS                */
+#define SMU_PPUSATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUSATD0_CHIPTESTCTRL_DEFAULT << 25) /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_SYSCFGCFGNS                  (0x1UL << 26)                              /**< SYSCFGCFGNS Secure Access                   */
+#define _SMU_PPUSATD0_SYSCFGCFGNS_SHIFT           26                                         /**< Shift value for SMU_SYSCFGCFGNS             */
+#define _SMU_PPUSATD0_SYSCFGCFGNS_MASK            0x4000000UL                                /**< Bit mask for SMU_SYSCFGCFGNS                */
 #define _SMU_PPUSATD0_SYSCFGCFGNS_DEFAULT         0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUSATD0_SYSCFGCFGNS_DEFAULT << 25)  /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_SYSCFG                       (0x1UL << 26)                              /**< SYSCFG Secure Access                        */
-#define _SMU_PPUSATD0_SYSCFG_SHIFT                26                                         /**< Shift value for SMU_SYSCFG                  */
-#define _SMU_PPUSATD0_SYSCFG_MASK                 0x4000000UL                                /**< Bit mask for SMU_SYSCFG                     */
+#define SMU_PPUSATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUSATD0_SYSCFGCFGNS_DEFAULT << 26)  /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_SYSCFG                       (0x1UL << 27)                              /**< SYSCFG Secure Access                        */
+#define _SMU_PPUSATD0_SYSCFG_SHIFT                27                                         /**< Shift value for SMU_SYSCFG                  */
+#define _SMU_PPUSATD0_SYSCFG_MASK                 0x8000000UL                                /**< Bit mask for SMU_SYSCFG                     */
 #define _SMU_PPUSATD0_SYSCFG_DEFAULT              0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_SYSCFG_DEFAULT               (_SMU_PPUSATD0_SYSCFG_DEFAULT << 26)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_BURAM                        (0x1UL << 27)                              /**< BURAM Secure Access                         */
-#define _SMU_PPUSATD0_BURAM_SHIFT                 27                                         /**< Shift value for SMU_BURAM                   */
-#define _SMU_PPUSATD0_BURAM_MASK                  0x8000000UL                                /**< Bit mask for SMU_BURAM                      */
+#define SMU_PPUSATD0_SYSCFG_DEFAULT               (_SMU_PPUSATD0_SYSCFG_DEFAULT << 27)       /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_BURAM                        (0x1UL << 28)                              /**< BURAM Secure Access                         */
+#define _SMU_PPUSATD0_BURAM_SHIFT                 28                                         /**< Shift value for SMU_BURAM                   */
+#define _SMU_PPUSATD0_BURAM_MASK                  0x10000000UL                               /**< Bit mask for SMU_BURAM                      */
 #define _SMU_PPUSATD0_BURAM_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_BURAM_DEFAULT                (_SMU_PPUSATD0_BURAM_DEFAULT << 27)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_IFADCDEBUG                   (0x1UL << 28)                              /**< IFADCDEBUG Secure Access                    */
-#define _SMU_PPUSATD0_IFADCDEBUG_SHIFT            28                                         /**< Shift value for SMU_IFADCDEBUG              */
-#define _SMU_PPUSATD0_IFADCDEBUG_MASK             0x10000000UL                               /**< Bit mask for SMU_IFADCDEBUG                 */
+#define SMU_PPUSATD0_BURAM_DEFAULT                (_SMU_PPUSATD0_BURAM_DEFAULT << 28)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_IFADCDEBUG                   (0x1UL << 29)                              /**< IFADCDEBUG Secure Access                    */
+#define _SMU_PPUSATD0_IFADCDEBUG_SHIFT            29                                         /**< Shift value for SMU_IFADCDEBUG              */
+#define _SMU_PPUSATD0_IFADCDEBUG_MASK             0x20000000UL                               /**< Bit mask for SMU_IFADCDEBUG                 */
 #define _SMU_PPUSATD0_IFADCDEBUG_DEFAULT          0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUSATD0_IFADCDEBUG_DEFAULT << 28)   /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_GPCRC                        (0x1UL << 29)                              /**< GPCRC Secure Access                         */
-#define _SMU_PPUSATD0_GPCRC_SHIFT                 29                                         /**< Shift value for SMU_GPCRC                   */
-#define _SMU_PPUSATD0_GPCRC_MASK                  0x20000000UL                               /**< Bit mask for SMU_GPCRC                      */
+#define SMU_PPUSATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUSATD0_IFADCDEBUG_DEFAULT << 29)   /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_GPCRC                        (0x1UL << 30)                              /**< GPCRC Secure Access                         */
+#define _SMU_PPUSATD0_GPCRC_SHIFT                 30                                         /**< Shift value for SMU_GPCRC                   */
+#define _SMU_PPUSATD0_GPCRC_MASK                  0x40000000UL                               /**< Bit mask for SMU_GPCRC                      */
 #define _SMU_PPUSATD0_GPCRC_DEFAULT               0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_GPCRC_DEFAULT                (_SMU_PPUSATD0_GPCRC_DEFAULT << 29)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
-#define SMU_PPUSATD0_DCI                          (0x1UL << 30)                              /**< DCI Secure Access                           */
-#define _SMU_PPUSATD0_DCI_SHIFT                   30                                         /**< Shift value for SMU_DCI                     */
-#define _SMU_PPUSATD0_DCI_MASK                    0x40000000UL                               /**< Bit mask for SMU_DCI                        */
+#define SMU_PPUSATD0_GPCRC_DEFAULT                (_SMU_PPUSATD0_GPCRC_DEFAULT << 30)        /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_DCI                          (0x1UL << 31)                              /**< DCI Secure Access                           */
+#define _SMU_PPUSATD0_DCI_SHIFT                   31                                         /**< Shift value for SMU_DCI                     */
+#define _SMU_PPUSATD0_DCI_MASK                    0x80000000UL                               /**< Bit mask for SMU_DCI                        */
 #define _SMU_PPUSATD0_DCI_DEFAULT                 0x00000001UL                               /**< Mode DEFAULT for SMU_PPUSATD0               */
-#define SMU_PPUSATD0_DCI_DEFAULT                  (_SMU_PPUSATD0_DCI_DEFAULT << 30)          /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
+#define SMU_PPUSATD0_DCI_DEFAULT                  (_SMU_PPUSATD0_DCI_DEFAULT << 31)          /**< Shifted mode DEFAULT for SMU_PPUSATD0       */
 
 /* Bit fields for SMU PPUSATD1 */
 #define _SMU_PPUSATD1_RESETVALUE                  0x0000FFFFUL                            /**< Default value for SMU_PPUSATD1              */
 #define _SMU_PPUSATD1_MASK                        0x0000FFFFUL                            /**< Mask for SMU_PPUSATD1                       */
-#define SMU_PPUSATD1_DCDC                         (0x1UL << 0)                            /**< DCDC Secure Access                          */
-#define _SMU_PPUSATD1_DCDC_SHIFT                  0                                       /**< Shift value for SMU_DCDC                    */
-#define _SMU_PPUSATD1_DCDC_MASK                   0x1UL                                   /**< Bit mask for SMU_DCDC                       */
+#define SMU_PPUSATD1_DCDC                         (0x1UL << 1)                            /**< DCDC Secure Access                          */
+#define _SMU_PPUSATD1_DCDC_SHIFT                  1                                       /**< Shift value for SMU_DCDC                    */
+#define _SMU_PPUSATD1_DCDC_MASK                   0x2UL                                   /**< Bit mask for SMU_DCDC                       */
 #define _SMU_PPUSATD1_DCDC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_DCDC_DEFAULT                 (_SMU_PPUSATD1_DCDC_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_PDM                          (0x1UL << 1)                            /**< PDM Secure Access                           */
-#define _SMU_PPUSATD1_PDM_SHIFT                   1                                       /**< Shift value for SMU_PDM                     */
-#define _SMU_PPUSATD1_PDM_MASK                    0x2UL                                   /**< Bit mask for SMU_PDM                        */
+#define SMU_PPUSATD1_DCDC_DEFAULT                 (_SMU_PPUSATD1_DCDC_DEFAULT << 1)       /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_PDM                          (0x1UL << 2)                            /**< PDM Secure Access                           */
+#define _SMU_PPUSATD1_PDM_SHIFT                   2                                       /**< Shift value for SMU_PDM                     */
+#define _SMU_PPUSATD1_PDM_MASK                    0x4UL                                   /**< Bit mask for SMU_PDM                        */
 #define _SMU_PPUSATD1_PDM_DEFAULT                 0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_PDM_DEFAULT                  (_SMU_PPUSATD1_PDM_DEFAULT << 1)        /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_RFSENSE                      (0x1UL << 2)                            /**< RFSENSE Secure Access                       */
-#define _SMU_PPUSATD1_RFSENSE_SHIFT               2                                       /**< Shift value for SMU_RFSENSE                 */
-#define _SMU_PPUSATD1_RFSENSE_MASK                0x4UL                                   /**< Bit mask for SMU_RFSENSE                    */
+#define SMU_PPUSATD1_PDM_DEFAULT                  (_SMU_PPUSATD1_PDM_DEFAULT << 2)        /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_RFSENSE                      (0x1UL << 3)                            /**< RFSENSE Secure Access                       */
+#define _SMU_PPUSATD1_RFSENSE_SHIFT               3                                       /**< Shift value for SMU_RFSENSE                 */
+#define _SMU_PPUSATD1_RFSENSE_MASK                0x8UL                                   /**< Bit mask for SMU_RFSENSE                    */
 #define _SMU_PPUSATD1_RFSENSE_DEFAULT             0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_RFSENSE_DEFAULT              (_SMU_PPUSATD1_RFSENSE_DEFAULT << 2)    /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_RADIOAES                     (0x1UL << 3)                            /**< RADIOAES Secure Access                      */
-#define _SMU_PPUSATD1_RADIOAES_SHIFT              3                                       /**< Shift value for SMU_RADIOAES                */
-#define _SMU_PPUSATD1_RADIOAES_MASK               0x8UL                                   /**< Bit mask for SMU_RADIOAES                   */
+#define SMU_PPUSATD1_RFSENSE_DEFAULT              (_SMU_PPUSATD1_RFSENSE_DEFAULT << 3)    /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_RADIOAES                     (0x1UL << 4)                            /**< RADIOAES Secure Access                      */
+#define _SMU_PPUSATD1_RADIOAES_SHIFT              4                                       /**< Shift value for SMU_RADIOAES                */
+#define _SMU_PPUSATD1_RADIOAES_MASK               0x10UL                                  /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_PPUSATD1_RADIOAES_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_RADIOAES_DEFAULT             (_SMU_PPUSATD1_RADIOAES_DEFAULT << 3)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_SMU                          (0x1UL << 4)                            /**< SMU Secure Access                           */
-#define _SMU_PPUSATD1_SMU_SHIFT                   4                                       /**< Shift value for SMU_SMU                     */
-#define _SMU_PPUSATD1_SMU_MASK                    0x10UL                                  /**< Bit mask for SMU_SMU                        */
+#define SMU_PPUSATD1_RADIOAES_DEFAULT             (_SMU_PPUSATD1_RADIOAES_DEFAULT << 4)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_SMU                          (0x1UL << 5)                            /**< SMU Secure Access                           */
+#define _SMU_PPUSATD1_SMU_SHIFT                   5                                       /**< Shift value for SMU_SMU                     */
+#define _SMU_PPUSATD1_SMU_MASK                    0x20UL                                  /**< Bit mask for SMU_SMU                        */
 #define _SMU_PPUSATD1_SMU_DEFAULT                 0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_SMU_DEFAULT                  (_SMU_PPUSATD1_SMU_DEFAULT << 4)        /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_SMUCFGNS                     (0x1UL << 5)                            /**< SMUCFGNS Secure Access                      */
-#define _SMU_PPUSATD1_SMUCFGNS_SHIFT              5                                       /**< Shift value for SMU_SMUCFGNS                */
-#define _SMU_PPUSATD1_SMUCFGNS_MASK               0x20UL                                  /**< Bit mask for SMU_SMUCFGNS                   */
+#define SMU_PPUSATD1_SMU_DEFAULT                  (_SMU_PPUSATD1_SMU_DEFAULT << 5)        /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_SMUCFGNS                     (0x1UL << 6)                            /**< SMUCFGNS Secure Access                      */
+#define _SMU_PPUSATD1_SMUCFGNS_SHIFT              6                                       /**< Shift value for SMU_SMUCFGNS                */
+#define _SMU_PPUSATD1_SMUCFGNS_MASK               0x40UL                                  /**< Bit mask for SMU_SMUCFGNS                   */
 #define _SMU_PPUSATD1_SMUCFGNS_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_SMUCFGNS_DEFAULT             (_SMU_PPUSATD1_SMUCFGNS_DEFAULT << 5)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_RTCC                         (0x1UL << 6)                            /**< RTCC Secure Access                          */
-#define _SMU_PPUSATD1_RTCC_SHIFT                  6                                       /**< Shift value for SMU_RTCC                    */
-#define _SMU_PPUSATD1_RTCC_MASK                   0x40UL                                  /**< Bit mask for SMU_RTCC                       */
+#define SMU_PPUSATD1_SMUCFGNS_DEFAULT             (_SMU_PPUSATD1_SMUCFGNS_DEFAULT << 6)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_RTCC                         (0x1UL << 7)                            /**< RTCC Secure Access                          */
+#define _SMU_PPUSATD1_RTCC_SHIFT                  7                                       /**< Shift value for SMU_RTCC                    */
+#define _SMU_PPUSATD1_RTCC_MASK                   0x80UL                                  /**< Bit mask for SMU_RTCC                       */
 #define _SMU_PPUSATD1_RTCC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_RTCC_DEFAULT                 (_SMU_PPUSATD1_RTCC_DEFAULT << 6)       /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_LETIMER0                     (0x1UL << 7)                            /**< LETIMER0 Secure Access                      */
-#define _SMU_PPUSATD1_LETIMER0_SHIFT              7                                       /**< Shift value for SMU_LETIMER0                */
-#define _SMU_PPUSATD1_LETIMER0_MASK               0x80UL                                  /**< Bit mask for SMU_LETIMER0                   */
+#define SMU_PPUSATD1_RTCC_DEFAULT                 (_SMU_PPUSATD1_RTCC_DEFAULT << 7)       /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_LETIMER0                     (0x1UL << 8)                            /**< LETIMER0 Secure Access                      */
+#define _SMU_PPUSATD1_LETIMER0_SHIFT              8                                       /**< Shift value for SMU_LETIMER0                */
+#define _SMU_PPUSATD1_LETIMER0_MASK               0x100UL                                 /**< Bit mask for SMU_LETIMER0                   */
 #define _SMU_PPUSATD1_LETIMER0_DEFAULT            0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_LETIMER0_DEFAULT             (_SMU_PPUSATD1_LETIMER0_DEFAULT << 7)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_IADC0                        (0x1UL << 8)                            /**< IADC0 Secure Access                         */
-#define _SMU_PPUSATD1_IADC0_SHIFT                 8                                       /**< Shift value for SMU_IADC0                   */
-#define _SMU_PPUSATD1_IADC0_MASK                  0x100UL                                 /**< Bit mask for SMU_IADC0                      */
+#define SMU_PPUSATD1_LETIMER0_DEFAULT             (_SMU_PPUSATD1_LETIMER0_DEFAULT << 8)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_IADC0                        (0x1UL << 9)                            /**< IADC0 Secure Access                         */
+#define _SMU_PPUSATD1_IADC0_SHIFT                 9                                       /**< Shift value for SMU_IADC0                   */
+#define _SMU_PPUSATD1_IADC0_MASK                  0x200UL                                 /**< Bit mask for SMU_IADC0                      */
 #define _SMU_PPUSATD1_IADC0_DEFAULT               0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_IADC0_DEFAULT                (_SMU_PPUSATD1_IADC0_DEFAULT << 8)      /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_I2C0                         (0x1UL << 9)                            /**< I2C0 Secure Access                          */
-#define _SMU_PPUSATD1_I2C0_SHIFT                  9                                       /**< Shift value for SMU_I2C0                    */
-#define _SMU_PPUSATD1_I2C0_MASK                   0x200UL                                 /**< Bit mask for SMU_I2C0                       */
+#define SMU_PPUSATD1_IADC0_DEFAULT                (_SMU_PPUSATD1_IADC0_DEFAULT << 9)      /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_I2C0                         (0x1UL << 10)                           /**< I2C0 Secure Access                          */
+#define _SMU_PPUSATD1_I2C0_SHIFT                  10                                      /**< Shift value for SMU_I2C0                    */
+#define _SMU_PPUSATD1_I2C0_MASK                   0x400UL                                 /**< Bit mask for SMU_I2C0                       */
 #define _SMU_PPUSATD1_I2C0_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_I2C0_DEFAULT                 (_SMU_PPUSATD1_I2C0_DEFAULT << 9)       /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_WDOG0                        (0x1UL << 10)                           /**< WDOG0 Secure Access                         */
-#define _SMU_PPUSATD1_WDOG0_SHIFT                 10                                      /**< Shift value for SMU_WDOG0                   */
-#define _SMU_PPUSATD1_WDOG0_MASK                  0x400UL                                 /**< Bit mask for SMU_WDOG0                      */
+#define SMU_PPUSATD1_I2C0_DEFAULT                 (_SMU_PPUSATD1_I2C0_DEFAULT << 10)      /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_WDOG0                        (0x1UL << 11)                           /**< WDOG0 Secure Access                         */
+#define _SMU_PPUSATD1_WDOG0_SHIFT                 11                                      /**< Shift value for SMU_WDOG0                   */
+#define _SMU_PPUSATD1_WDOG0_MASK                  0x800UL                                 /**< Bit mask for SMU_WDOG0                      */
 #define _SMU_PPUSATD1_WDOG0_DEFAULT               0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_WDOG0_DEFAULT                (_SMU_PPUSATD1_WDOG0_DEFAULT << 10)     /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_AMUXCP0                      (0x1UL << 11)                           /**< AMUXCP0 Secure Access                       */
-#define _SMU_PPUSATD1_AMUXCP0_SHIFT               11                                      /**< Shift value for SMU_AMUXCP0                 */
-#define _SMU_PPUSATD1_AMUXCP0_MASK                0x800UL                                 /**< Bit mask for SMU_AMUXCP0                    */
+#define SMU_PPUSATD1_WDOG0_DEFAULT                (_SMU_PPUSATD1_WDOG0_DEFAULT << 11)     /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_AMUXCP0                      (0x1UL << 12)                           /**< AMUXCP0 Secure Access                       */
+#define _SMU_PPUSATD1_AMUXCP0_SHIFT               12                                      /**< Shift value for SMU_AMUXCP0                 */
+#define _SMU_PPUSATD1_AMUXCP0_MASK                0x1000UL                                /**< Bit mask for SMU_AMUXCP0                    */
 #define _SMU_PPUSATD1_AMUXCP0_DEFAULT             0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_AMUXCP0_DEFAULT              (_SMU_PPUSATD1_AMUXCP0_DEFAULT << 11)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_EUART0                       (0x1UL << 12)                           /**< EUART0 Secure Access                        */
-#define _SMU_PPUSATD1_EUART0_SHIFT                12                                      /**< Shift value for SMU_EUART0                  */
-#define _SMU_PPUSATD1_EUART0_MASK                 0x1000UL                                /**< Bit mask for SMU_EUART0                     */
+#define SMU_PPUSATD1_AMUXCP0_DEFAULT              (_SMU_PPUSATD1_AMUXCP0_DEFAULT << 12)   /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_EUART0                       (0x1UL << 13)                           /**< EUART0 Secure Access                        */
+#define _SMU_PPUSATD1_EUART0_SHIFT                13                                      /**< Shift value for SMU_EUART0                  */
+#define _SMU_PPUSATD1_EUART0_MASK                 0x2000UL                                /**< Bit mask for SMU_EUART0                     */
 #define _SMU_PPUSATD1_EUART0_DEFAULT              0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_EUART0_DEFAULT               (_SMU_PPUSATD1_EUART0_DEFAULT << 12)    /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
-#define SMU_PPUSATD1_BUFC                         (0x1UL << 13)                           /**< BUFC Secure Access                          */
-#define _SMU_PPUSATD1_BUFC_SHIFT                  13                                      /**< Shift value for SMU_BUFC                    */
-#define _SMU_PPUSATD1_BUFC_MASK                   0x2000UL                                /**< Bit mask for SMU_BUFC                       */
-#define _SMU_PPUSATD1_BUFC_DEFAULT                0x00000001UL                            /**< Mode DEFAULT for SMU_PPUSATD1               */
-#define SMU_PPUSATD1_BUFC_DEFAULT                 (_SMU_PPUSATD1_BUFC_DEFAULT << 13)      /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
+#define SMU_PPUSATD1_EUART0_DEFAULT               (_SMU_PPUSATD1_EUART0_DEFAULT << 13)    /**< Shifted mode DEFAULT for SMU_PPUSATD1       */
 #define SMU_PPUSATD1_CRYPTOACC                    (0x1UL << 14)                           /**< CRYPTOACC Secure Access                     */
 #define _SMU_PPUSATD1_CRYPTOACC_SHIFT             14                                      /**< Shift value for SMU_CRYPTOACC               */
 #define _SMU_PPUSATD1_CRYPTOACC_MASK              0x4000UL                                /**< Bit mask for SMU_CRYPTOACC                  */
@@ -778,8 +778,8 @@ typedef struct {
 #define SMU_PPUFS_PPUFSPERIPHID_DEFAULT           (_SMU_PPUFS_PPUFSPERIPHID_DEFAULT << 0) /**< Shifted mode DEFAULT for SMU_PPUFS          */
 
 /* Bit fields for SMU BMPUPATD0 */
-#define _SMU_BMPUPATD0_RESETVALUE                 0x0000003FUL                                  /**< Default value for SMU_BMPUPATD0             */
-#define _SMU_BMPUPATD0_MASK                       0x0000003FUL                                  /**< Mask for SMU_BMPUPATD0                      */
+#define _SMU_BMPUPATD0_RESETVALUE                 0x0000001FUL                                  /**< Default value for SMU_BMPUPATD0             */
+#define _SMU_BMPUPATD0_MASK                       0x0000001FUL                                  /**< Mask for SMU_BMPUPATD0                      */
 #define SMU_BMPUPATD0_RADIOAES                    (0x1UL << 0)                                  /**< RADIO AES DMA privileged mode               */
 #define _SMU_BMPUPATD0_RADIOAES_SHIFT             0                                             /**< Shift value for SMU_RADIOAES                */
 #define _SMU_BMPUPATD0_RADIOAES_MASK              0x1UL                                         /**< Bit mask for SMU_RADIOAES                   */
@@ -795,25 +795,20 @@ typedef struct {
 #define _SMU_BMPUPATD0_RADIOSUBSYSTEM_MASK        0x4UL                                         /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUPATD0_RADIOSUBSYSTEM_DEFAULT     0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUPATD0              */
 #define SMU_BMPUPATD0_RADIOSUBSYSTEM_DEFAULT      (_SMU_BMPUPATD0_RADIOSUBSYSTEM_DEFAULT << 2)  /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
-#define SMU_BMPUPATD0_BUFC                        (0x1UL << 3)                                  /**< RADIO BUFFER controller privileged mode     */
-#define _SMU_BMPUPATD0_BUFC_SHIFT                 3                                             /**< Shift value for SMU_BUFC                    */
-#define _SMU_BMPUPATD0_BUFC_MASK                  0x8UL                                         /**< Bit mask for SMU_BUFC                       */
-#define _SMU_BMPUPATD0_BUFC_DEFAULT               0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUPATD0              */
-#define SMU_BMPUPATD0_BUFC_DEFAULT                (_SMU_BMPUPATD0_BUFC_DEFAULT << 3)            /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
-#define SMU_BMPUPATD0_RADIOIFADCDEBUG             (0x1UL << 4)                                  /**< RADIO IFADC debug privileged mode           */
-#define _SMU_BMPUPATD0_RADIOIFADCDEBUG_SHIFT      4                                             /**< Shift value for SMU_RADIOIFADCDEBUG         */
-#define _SMU_BMPUPATD0_RADIOIFADCDEBUG_MASK       0x10UL                                        /**< Bit mask for SMU_RADIOIFADCDEBUG            */
+#define SMU_BMPUPATD0_RADIOIFADCDEBUG             (0x1UL << 3)                                  /**< RADIO IFADC debug privileged mode           */
+#define _SMU_BMPUPATD0_RADIOIFADCDEBUG_SHIFT      3                                             /**< Shift value for SMU_RADIOIFADCDEBUG         */
+#define _SMU_BMPUPATD0_RADIOIFADCDEBUG_MASK       0x8UL                                         /**< Bit mask for SMU_RADIOIFADCDEBUG            */
 #define _SMU_BMPUPATD0_RADIOIFADCDEBUG_DEFAULT    0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUPATD0              */
-#define SMU_BMPUPATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUPATD0_RADIOIFADCDEBUG_DEFAULT << 4) /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
-#define SMU_BMPUPATD0_LDMA                        (0x1UL << 5)                                  /**< MCU LDMA privileged mode                    */
-#define _SMU_BMPUPATD0_LDMA_SHIFT                 5                                             /**< Shift value for SMU_LDMA                    */
-#define _SMU_BMPUPATD0_LDMA_MASK                  0x20UL                                        /**< Bit mask for SMU_LDMA                       */
+#define SMU_BMPUPATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUPATD0_RADIOIFADCDEBUG_DEFAULT << 3) /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
+#define SMU_BMPUPATD0_LDMA                        (0x1UL << 4)                                  /**< MCU LDMA privileged mode                    */
+#define _SMU_BMPUPATD0_LDMA_SHIFT                 4                                             /**< Shift value for SMU_LDMA                    */
+#define _SMU_BMPUPATD0_LDMA_MASK                  0x10UL                                        /**< Bit mask for SMU_LDMA                       */
 #define _SMU_BMPUPATD0_LDMA_DEFAULT               0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUPATD0              */
-#define SMU_BMPUPATD0_LDMA_DEFAULT                (_SMU_BMPUPATD0_LDMA_DEFAULT << 5)            /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
+#define SMU_BMPUPATD0_LDMA_DEFAULT                (_SMU_BMPUPATD0_LDMA_DEFAULT << 4)            /**< Shifted mode DEFAULT for SMU_BMPUPATD0      */
 
 /* Bit fields for SMU BMPUSATD0 */
-#define _SMU_BMPUSATD0_RESETVALUE                 0x0000003FUL                                  /**< Default value for SMU_BMPUSATD0             */
-#define _SMU_BMPUSATD0_MASK                       0x0000003FUL                                  /**< Mask for SMU_BMPUSATD0                      */
+#define _SMU_BMPUSATD0_RESETVALUE                 0x0000001FUL                                  /**< Default value for SMU_BMPUSATD0             */
+#define _SMU_BMPUSATD0_MASK                       0x0000001FUL                                  /**< Mask for SMU_BMPUSATD0                      */
 #define SMU_BMPUSATD0_RADIOAES                    (0x1UL << 0)                                  /**< RADIOAES DMA secure mode                    */
 #define _SMU_BMPUSATD0_RADIOAES_SHIFT             0                                             /**< Shift value for SMU_RADIOAES                */
 #define _SMU_BMPUSATD0_RADIOAES_MASK              0x1UL                                         /**< Bit mask for SMU_RADIOAES                   */
@@ -829,21 +824,16 @@ typedef struct {
 #define _SMU_BMPUSATD0_RADIOSUBSYSTEM_MASK        0x4UL                                         /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUSATD0_RADIOSUBSYSTEM_DEFAULT     0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUSATD0              */
 #define SMU_BMPUSATD0_RADIOSUBSYSTEM_DEFAULT      (_SMU_BMPUSATD0_RADIOSUBSYSTEM_DEFAULT << 2)  /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
-#define SMU_BMPUSATD0_BUFC                        (0x1UL << 3)                                  /**< RADIO BUFFER controller secure mode         */
-#define _SMU_BMPUSATD0_BUFC_SHIFT                 3                                             /**< Shift value for SMU_BUFC                    */
-#define _SMU_BMPUSATD0_BUFC_MASK                  0x8UL                                         /**< Bit mask for SMU_BUFC                       */
-#define _SMU_BMPUSATD0_BUFC_DEFAULT               0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUSATD0              */
-#define SMU_BMPUSATD0_BUFC_DEFAULT                (_SMU_BMPUSATD0_BUFC_DEFAULT << 3)            /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
-#define SMU_BMPUSATD0_RADIOIFADCDEBUG             (0x1UL << 4)                                  /**< RADIO IFADC debug secure mode               */
-#define _SMU_BMPUSATD0_RADIOIFADCDEBUG_SHIFT      4                                             /**< Shift value for SMU_RADIOIFADCDEBUG         */
-#define _SMU_BMPUSATD0_RADIOIFADCDEBUG_MASK       0x10UL                                        /**< Bit mask for SMU_RADIOIFADCDEBUG            */
+#define SMU_BMPUSATD0_RADIOIFADCDEBUG             (0x1UL << 3)                                  /**< RADIO IFADC debug secure mode               */
+#define _SMU_BMPUSATD0_RADIOIFADCDEBUG_SHIFT      3                                             /**< Shift value for SMU_RADIOIFADCDEBUG         */
+#define _SMU_BMPUSATD0_RADIOIFADCDEBUG_MASK       0x8UL                                         /**< Bit mask for SMU_RADIOIFADCDEBUG            */
 #define _SMU_BMPUSATD0_RADIOIFADCDEBUG_DEFAULT    0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUSATD0              */
-#define SMU_BMPUSATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUSATD0_RADIOIFADCDEBUG_DEFAULT << 4) /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
-#define SMU_BMPUSATD0_LDMA                        (0x1UL << 5)                                  /**< MCU LDMA secure mode                        */
-#define _SMU_BMPUSATD0_LDMA_SHIFT                 5                                             /**< Shift value for SMU_LDMA                    */
-#define _SMU_BMPUSATD0_LDMA_MASK                  0x20UL                                        /**< Bit mask for SMU_LDMA                       */
+#define SMU_BMPUSATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUSATD0_RADIOIFADCDEBUG_DEFAULT << 3) /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
+#define SMU_BMPUSATD0_LDMA                        (0x1UL << 4)                                  /**< MCU LDMA secure mode                        */
+#define _SMU_BMPUSATD0_LDMA_SHIFT                 4                                             /**< Shift value for SMU_LDMA                    */
+#define _SMU_BMPUSATD0_LDMA_MASK                  0x10UL                                        /**< Bit mask for SMU_LDMA                       */
 #define _SMU_BMPUSATD0_LDMA_DEFAULT               0x00000001UL                                  /**< Mode DEFAULT for SMU_BMPUSATD0              */
-#define SMU_BMPUSATD0_LDMA_DEFAULT                (_SMU_BMPUSATD0_LDMA_DEFAULT << 5)            /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
+#define SMU_BMPUSATD0_LDMA_DEFAULT                (_SMU_BMPUSATD0_LDMA_DEFAULT << 4)            /**< Shifted mode DEFAULT for SMU_BMPUSATD0      */
 
 /* Bit fields for SMU BMPUFS */
 #define _SMU_BMPUFS_RESETVALUE                    0x00000000UL                              /**< Default value for SMU_BMPUFS                */
@@ -1044,11 +1034,6 @@ typedef struct {
 /* Bit fields for SMU PPUNSPATD0 */
 #define _SMU_PPUNSPATD0_RESETVALUE                  0x00000000UL                                 /**< Default value for SMU_PPUNSPATD0            */
 #define _SMU_PPUNSPATD0_MASK                        0xFFFFFFFFUL                                 /**< Mask for SMU_PPUNSPATD0                     */
-#define SMU_PPUNSPATD0_SCRATCHPAD                   (0x1UL << 0)                                 /**< SCRATCHPAD Privileged Access                */
-#define _SMU_PPUNSPATD0_SCRATCHPAD_SHIFT            0                                            /**< Shift value for SMU_SCRATCHPAD              */
-#define _SMU_PPUNSPATD0_SCRATCHPAD_MASK             0x1UL                                        /**< Bit mask for SMU_SCRATCHPAD                 */
-#define _SMU_PPUNSPATD0_SCRATCHPAD_DEFAULT          0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_SCRATCHPAD_DEFAULT           (_SMU_PPUNSPATD0_SCRATCHPAD_DEFAULT << 0)    /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
 #define SMU_PPUNSPATD0_EMU                          (0x1UL << 1)                                 /**< EMU Privileged Access                       */
 #define _SMU_PPUNSPATD0_EMU_SHIFT                   1                                            /**< Shift value for SMU_EMU                     */
 #define _SMU_PPUNSPATD0_EMU_MASK                    0x2UL                                        /**< Bit mask for SMU_EMU                        */
@@ -1144,140 +1129,135 @@ typedef struct {
 #define _SMU_PPUNSPATD0_TIMER3_MASK                 0x80000UL                                    /**< Bit mask for SMU_TIMER3                     */
 #define _SMU_PPUNSPATD0_TIMER3_DEFAULT              0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
 #define SMU_PPUNSPATD0_TIMER3_DEFAULT               (_SMU_PPUNSPATD0_TIMER3_DEFAULT << 19)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_USART0                       (0x1UL << 20)                                /**< USART0 Privileged Access                    */
-#define _SMU_PPUNSPATD0_USART0_SHIFT                20                                           /**< Shift value for SMU_USART0                  */
-#define _SMU_PPUNSPATD0_USART0_MASK                 0x100000UL                                   /**< Bit mask for SMU_USART0                     */
+#define SMU_PPUNSPATD0_TIMER4                       (0x1UL << 20)                                /**< TIMER4 Privileged Access                    */
+#define _SMU_PPUNSPATD0_TIMER4_SHIFT                20                                           /**< Shift value for SMU_TIMER4                  */
+#define _SMU_PPUNSPATD0_TIMER4_MASK                 0x100000UL                                   /**< Bit mask for SMU_TIMER4                     */
+#define _SMU_PPUNSPATD0_TIMER4_DEFAULT              0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
+#define SMU_PPUNSPATD0_TIMER4_DEFAULT               (_SMU_PPUNSPATD0_TIMER4_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_USART0                       (0x1UL << 21)                                /**< USART0 Privileged Access                    */
+#define _SMU_PPUNSPATD0_USART0_SHIFT                21                                           /**< Shift value for SMU_USART0                  */
+#define _SMU_PPUNSPATD0_USART0_MASK                 0x200000UL                                   /**< Bit mask for SMU_USART0                     */
 #define _SMU_PPUNSPATD0_USART0_DEFAULT              0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_USART0_DEFAULT               (_SMU_PPUNSPATD0_USART0_DEFAULT << 20)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_USART1                       (0x1UL << 21)                                /**< USART1 Privileged Access                    */
-#define _SMU_PPUNSPATD0_USART1_SHIFT                21                                           /**< Shift value for SMU_USART1                  */
-#define _SMU_PPUNSPATD0_USART1_MASK                 0x200000UL                                   /**< Bit mask for SMU_USART1                     */
+#define SMU_PPUNSPATD0_USART0_DEFAULT               (_SMU_PPUNSPATD0_USART0_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_USART1                       (0x1UL << 22)                                /**< USART1 Privileged Access                    */
+#define _SMU_PPUNSPATD0_USART1_SHIFT                22                                           /**< Shift value for SMU_USART1                  */
+#define _SMU_PPUNSPATD0_USART1_MASK                 0x400000UL                                   /**< Bit mask for SMU_USART1                     */
 #define _SMU_PPUNSPATD0_USART1_DEFAULT              0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_USART1_DEFAULT               (_SMU_PPUNSPATD0_USART1_DEFAULT << 21)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_BURTC                        (0x1UL << 22)                                /**< BURTC Privileged Access                     */
-#define _SMU_PPUNSPATD0_BURTC_SHIFT                 22                                           /**< Shift value for SMU_BURTC                   */
-#define _SMU_PPUNSPATD0_BURTC_MASK                  0x400000UL                                   /**< Bit mask for SMU_BURTC                      */
+#define SMU_PPUNSPATD0_USART1_DEFAULT               (_SMU_PPUNSPATD0_USART1_DEFAULT << 22)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_BURTC                        (0x1UL << 23)                                /**< BURTC Privileged Access                     */
+#define _SMU_PPUNSPATD0_BURTC_SHIFT                 23                                           /**< Shift value for SMU_BURTC                   */
+#define _SMU_PPUNSPATD0_BURTC_MASK                  0x800000UL                                   /**< Bit mask for SMU_BURTC                      */
 #define _SMU_PPUNSPATD0_BURTC_DEFAULT               0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_BURTC_DEFAULT                (_SMU_PPUNSPATD0_BURTC_DEFAULT << 22)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_I2C1                         (0x1UL << 23)                                /**< I2C1 Privileged Access                      */
-#define _SMU_PPUNSPATD0_I2C1_SHIFT                  23                                           /**< Shift value for SMU_I2C1                    */
-#define _SMU_PPUNSPATD0_I2C1_MASK                   0x800000UL                                   /**< Bit mask for SMU_I2C1                       */
+#define SMU_PPUNSPATD0_BURTC_DEFAULT                (_SMU_PPUNSPATD0_BURTC_DEFAULT << 23)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_I2C1                         (0x1UL << 24)                                /**< I2C1 Privileged Access                      */
+#define _SMU_PPUNSPATD0_I2C1_SHIFT                  24                                           /**< Shift value for SMU_I2C1                    */
+#define _SMU_PPUNSPATD0_I2C1_MASK                   0x1000000UL                                  /**< Bit mask for SMU_I2C1                       */
 #define _SMU_PPUNSPATD0_I2C1_DEFAULT                0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_I2C1_DEFAULT                 (_SMU_PPUNSPATD0_I2C1_DEFAULT << 23)         /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_CHIPTESTCTRL                 (0x1UL << 24)                                /**< CHIPTESTCTRL Privileged Access              */
-#define _SMU_PPUNSPATD0_CHIPTESTCTRL_SHIFT          24                                           /**< Shift value for SMU_CHIPTESTCTRL            */
-#define _SMU_PPUNSPATD0_CHIPTESTCTRL_MASK           0x1000000UL                                  /**< Bit mask for SMU_CHIPTESTCTRL               */
+#define SMU_PPUNSPATD0_I2C1_DEFAULT                 (_SMU_PPUNSPATD0_I2C1_DEFAULT << 24)         /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_CHIPTESTCTRL                 (0x1UL << 25)                                /**< CHIPTESTCTRL Privileged Access              */
+#define _SMU_PPUNSPATD0_CHIPTESTCTRL_SHIFT          25                                           /**< Shift value for SMU_CHIPTESTCTRL            */
+#define _SMU_PPUNSPATD0_CHIPTESTCTRL_MASK           0x2000000UL                                  /**< Bit mask for SMU_CHIPTESTCTRL               */
 #define _SMU_PPUNSPATD0_CHIPTESTCTRL_DEFAULT        0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUNSPATD0_CHIPTESTCTRL_DEFAULT << 24) /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_SYSCFGCFGNS                  (0x1UL << 25)                                /**< SYSCFGCFGNS Privileged Access               */
-#define _SMU_PPUNSPATD0_SYSCFGCFGNS_SHIFT           25                                           /**< Shift value for SMU_SYSCFGCFGNS             */
-#define _SMU_PPUNSPATD0_SYSCFGCFGNS_MASK            0x2000000UL                                  /**< Bit mask for SMU_SYSCFGCFGNS                */
+#define SMU_PPUNSPATD0_CHIPTESTCTRL_DEFAULT         (_SMU_PPUNSPATD0_CHIPTESTCTRL_DEFAULT << 25) /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_SYSCFGCFGNS                  (0x1UL << 26)                                /**< SYSCFGCFGNS Privileged Access               */
+#define _SMU_PPUNSPATD0_SYSCFGCFGNS_SHIFT           26                                           /**< Shift value for SMU_SYSCFGCFGNS             */
+#define _SMU_PPUNSPATD0_SYSCFGCFGNS_MASK            0x4000000UL                                  /**< Bit mask for SMU_SYSCFGCFGNS                */
 #define _SMU_PPUNSPATD0_SYSCFGCFGNS_DEFAULT         0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUNSPATD0_SYSCFGCFGNS_DEFAULT << 25)  /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_SYSCFG                       (0x1UL << 26)                                /**< SYSCFG Privileged Access                    */
-#define _SMU_PPUNSPATD0_SYSCFG_SHIFT                26                                           /**< Shift value for SMU_SYSCFG                  */
-#define _SMU_PPUNSPATD0_SYSCFG_MASK                 0x4000000UL                                  /**< Bit mask for SMU_SYSCFG                     */
+#define SMU_PPUNSPATD0_SYSCFGCFGNS_DEFAULT          (_SMU_PPUNSPATD0_SYSCFGCFGNS_DEFAULT << 26)  /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_SYSCFG                       (0x1UL << 27)                                /**< SYSCFG Privileged Access                    */
+#define _SMU_PPUNSPATD0_SYSCFG_SHIFT                27                                           /**< Shift value for SMU_SYSCFG                  */
+#define _SMU_PPUNSPATD0_SYSCFG_MASK                 0x8000000UL                                  /**< Bit mask for SMU_SYSCFG                     */
 #define _SMU_PPUNSPATD0_SYSCFG_DEFAULT              0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_SYSCFG_DEFAULT               (_SMU_PPUNSPATD0_SYSCFG_DEFAULT << 26)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_BURAM                        (0x1UL << 27)                                /**< BURAM Privileged Access                     */
-#define _SMU_PPUNSPATD0_BURAM_SHIFT                 27                                           /**< Shift value for SMU_BURAM                   */
-#define _SMU_PPUNSPATD0_BURAM_MASK                  0x8000000UL                                  /**< Bit mask for SMU_BURAM                      */
+#define SMU_PPUNSPATD0_SYSCFG_DEFAULT               (_SMU_PPUNSPATD0_SYSCFG_DEFAULT << 27)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_BURAM                        (0x1UL << 28)                                /**< BURAM Privileged Access                     */
+#define _SMU_PPUNSPATD0_BURAM_SHIFT                 28                                           /**< Shift value for SMU_BURAM                   */
+#define _SMU_PPUNSPATD0_BURAM_MASK                  0x10000000UL                                 /**< Bit mask for SMU_BURAM                      */
 #define _SMU_PPUNSPATD0_BURAM_DEFAULT               0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_BURAM_DEFAULT                (_SMU_PPUNSPATD0_BURAM_DEFAULT << 27)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_IFADCDEBUG                   (0x1UL << 28)                                /**< IFADCDEBUG Privileged Access                */
-#define _SMU_PPUNSPATD0_IFADCDEBUG_SHIFT            28                                           /**< Shift value for SMU_IFADCDEBUG              */
-#define _SMU_PPUNSPATD0_IFADCDEBUG_MASK             0x10000000UL                                 /**< Bit mask for SMU_IFADCDEBUG                 */
+#define SMU_PPUNSPATD0_BURAM_DEFAULT                (_SMU_PPUNSPATD0_BURAM_DEFAULT << 28)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_IFADCDEBUG                   (0x1UL << 29)                                /**< IFADCDEBUG Privileged Access                */
+#define _SMU_PPUNSPATD0_IFADCDEBUG_SHIFT            29                                           /**< Shift value for SMU_IFADCDEBUG              */
+#define _SMU_PPUNSPATD0_IFADCDEBUG_MASK             0x20000000UL                                 /**< Bit mask for SMU_IFADCDEBUG                 */
 #define _SMU_PPUNSPATD0_IFADCDEBUG_DEFAULT          0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUNSPATD0_IFADCDEBUG_DEFAULT << 28)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_GPCRC                        (0x1UL << 29)                                /**< GPCRC Privileged Access                     */
-#define _SMU_PPUNSPATD0_GPCRC_SHIFT                 29                                           /**< Shift value for SMU_GPCRC                   */
-#define _SMU_PPUNSPATD0_GPCRC_MASK                  0x20000000UL                                 /**< Bit mask for SMU_GPCRC                      */
+#define SMU_PPUNSPATD0_IFADCDEBUG_DEFAULT           (_SMU_PPUNSPATD0_IFADCDEBUG_DEFAULT << 29)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_GPCRC                        (0x1UL << 30)                                /**< GPCRC Privileged Access                     */
+#define _SMU_PPUNSPATD0_GPCRC_SHIFT                 30                                           /**< Shift value for SMU_GPCRC                   */
+#define _SMU_PPUNSPATD0_GPCRC_MASK                  0x40000000UL                                 /**< Bit mask for SMU_GPCRC                      */
 #define _SMU_PPUNSPATD0_GPCRC_DEFAULT               0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_GPCRC_DEFAULT                (_SMU_PPUNSPATD0_GPCRC_DEFAULT << 29)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_DCI                          (0x1UL << 30)                                /**< DCI Privileged Access                       */
-#define _SMU_PPUNSPATD0_DCI_SHIFT                   30                                           /**< Shift value for SMU_DCI                     */
-#define _SMU_PPUNSPATD0_DCI_MASK                    0x40000000UL                                 /**< Bit mask for SMU_DCI                        */
+#define SMU_PPUNSPATD0_GPCRC_DEFAULT                (_SMU_PPUNSPATD0_GPCRC_DEFAULT << 30)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_DCI                          (0x1UL << 31)                                /**< DCI Privileged Access                       */
+#define _SMU_PPUNSPATD0_DCI_SHIFT                   31                                           /**< Shift value for SMU_DCI                     */
+#define _SMU_PPUNSPATD0_DCI_MASK                    0x80000000UL                                 /**< Bit mask for SMU_DCI                        */
 #define _SMU_PPUNSPATD0_DCI_DEFAULT                 0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_DCI_DEFAULT                  (_SMU_PPUNSPATD0_DCI_DEFAULT << 30)          /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
-#define SMU_PPUNSPATD0_ROOTCFG                      (0x1UL << 31)                                /**< ROOTCFG Privileged Access                   */
-#define _SMU_PPUNSPATD0_ROOTCFG_SHIFT               31                                           /**< Shift value for SMU_ROOTCFG                 */
-#define _SMU_PPUNSPATD0_ROOTCFG_MASK                0x80000000UL                                 /**< Bit mask for SMU_ROOTCFG                    */
-#define _SMU_PPUNSPATD0_ROOTCFG_DEFAULT             0x00000000UL                                 /**< Mode DEFAULT for SMU_PPUNSPATD0             */
-#define SMU_PPUNSPATD0_ROOTCFG_DEFAULT              (_SMU_PPUNSPATD0_ROOTCFG_DEFAULT << 31)      /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
+#define SMU_PPUNSPATD0_DCI_DEFAULT                  (_SMU_PPUNSPATD0_DCI_DEFAULT << 31)          /**< Shifted mode DEFAULT for SMU_PPUNSPATD0     */
 
 /* Bit fields for SMU PPUNSPATD1 */
 #define _SMU_PPUNSPATD1_RESETVALUE                  0x00000000UL                              /**< Default value for SMU_PPUNSPATD1            */
 #define _SMU_PPUNSPATD1_MASK                        0x0000FFFFUL                              /**< Mask for SMU_PPUNSPATD1                     */
-#define SMU_PPUNSPATD1_DCDC                         (0x1UL << 0)                              /**< DCDC Privileged Access                      */
-#define _SMU_PPUNSPATD1_DCDC_SHIFT                  0                                         /**< Shift value for SMU_DCDC                    */
-#define _SMU_PPUNSPATD1_DCDC_MASK                   0x1UL                                     /**< Bit mask for SMU_DCDC                       */
+#define SMU_PPUNSPATD1_DCDC                         (0x1UL << 1)                              /**< DCDC Privileged Access                      */
+#define _SMU_PPUNSPATD1_DCDC_SHIFT                  1                                         /**< Shift value for SMU_DCDC                    */
+#define _SMU_PPUNSPATD1_DCDC_MASK                   0x2UL                                     /**< Bit mask for SMU_DCDC                       */
 #define _SMU_PPUNSPATD1_DCDC_DEFAULT                0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_DCDC_DEFAULT                 (_SMU_PPUNSPATD1_DCDC_DEFAULT << 0)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_PDM                          (0x1UL << 1)                              /**< PDM Privileged Access                       */
-#define _SMU_PPUNSPATD1_PDM_SHIFT                   1                                         /**< Shift value for SMU_PDM                     */
-#define _SMU_PPUNSPATD1_PDM_MASK                    0x2UL                                     /**< Bit mask for SMU_PDM                        */
+#define SMU_PPUNSPATD1_DCDC_DEFAULT                 (_SMU_PPUNSPATD1_DCDC_DEFAULT << 1)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_PDM                          (0x1UL << 2)                              /**< PDM Privileged Access                       */
+#define _SMU_PPUNSPATD1_PDM_SHIFT                   2                                         /**< Shift value for SMU_PDM                     */
+#define _SMU_PPUNSPATD1_PDM_MASK                    0x4UL                                     /**< Bit mask for SMU_PDM                        */
 #define _SMU_PPUNSPATD1_PDM_DEFAULT                 0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_PDM_DEFAULT                  (_SMU_PPUNSPATD1_PDM_DEFAULT << 1)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_RFSENSE                      (0x1UL << 2)                              /**< RFSENSE Privileged Access                   */
-#define _SMU_PPUNSPATD1_RFSENSE_SHIFT               2                                         /**< Shift value for SMU_RFSENSE                 */
-#define _SMU_PPUNSPATD1_RFSENSE_MASK                0x4UL                                     /**< Bit mask for SMU_RFSENSE                    */
+#define SMU_PPUNSPATD1_PDM_DEFAULT                  (_SMU_PPUNSPATD1_PDM_DEFAULT << 2)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_RFSENSE                      (0x1UL << 3)                              /**< RFSENSE Privileged Access                   */
+#define _SMU_PPUNSPATD1_RFSENSE_SHIFT               3                                         /**< Shift value for SMU_RFSENSE                 */
+#define _SMU_PPUNSPATD1_RFSENSE_MASK                0x8UL                                     /**< Bit mask for SMU_RFSENSE                    */
 #define _SMU_PPUNSPATD1_RFSENSE_DEFAULT             0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_RFSENSE_DEFAULT              (_SMU_PPUNSPATD1_RFSENSE_DEFAULT << 2)    /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_RADIOAES                     (0x1UL << 3)                              /**< RADIOAES Privileged Access                  */
-#define _SMU_PPUNSPATD1_RADIOAES_SHIFT              3                                         /**< Shift value for SMU_RADIOAES                */
-#define _SMU_PPUNSPATD1_RADIOAES_MASK               0x8UL                                     /**< Bit mask for SMU_RADIOAES                   */
+#define SMU_PPUNSPATD1_RFSENSE_DEFAULT              (_SMU_PPUNSPATD1_RFSENSE_DEFAULT << 3)    /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_RADIOAES                     (0x1UL << 4)                              /**< RADIOAES Privileged Access                  */
+#define _SMU_PPUNSPATD1_RADIOAES_SHIFT              4                                         /**< Shift value for SMU_RADIOAES                */
+#define _SMU_PPUNSPATD1_RADIOAES_MASK               0x10UL                                    /**< Bit mask for SMU_RADIOAES                   */
 #define _SMU_PPUNSPATD1_RADIOAES_DEFAULT            0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_RADIOAES_DEFAULT             (_SMU_PPUNSPATD1_RADIOAES_DEFAULT << 3)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_SMU                          (0x1UL << 4)                              /**< SMU Privileged Access                       */
-#define _SMU_PPUNSPATD1_SMU_SHIFT                   4                                         /**< Shift value for SMU_SMU                     */
-#define _SMU_PPUNSPATD1_SMU_MASK                    0x10UL                                    /**< Bit mask for SMU_SMU                        */
+#define SMU_PPUNSPATD1_RADIOAES_DEFAULT             (_SMU_PPUNSPATD1_RADIOAES_DEFAULT << 4)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_SMU                          (0x1UL << 5)                              /**< SMU Privileged Access                       */
+#define _SMU_PPUNSPATD1_SMU_SHIFT                   5                                         /**< Shift value for SMU_SMU                     */
+#define _SMU_PPUNSPATD1_SMU_MASK                    0x20UL                                    /**< Bit mask for SMU_SMU                        */
 #define _SMU_PPUNSPATD1_SMU_DEFAULT                 0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_SMU_DEFAULT                  (_SMU_PPUNSPATD1_SMU_DEFAULT << 4)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_SMUCFGNS                     (0x1UL << 5)                              /**< SMUCFGNS Privileged Access                  */
-#define _SMU_PPUNSPATD1_SMUCFGNS_SHIFT              5                                         /**< Shift value for SMU_SMUCFGNS                */
-#define _SMU_PPUNSPATD1_SMUCFGNS_MASK               0x20UL                                    /**< Bit mask for SMU_SMUCFGNS                   */
+#define SMU_PPUNSPATD1_SMU_DEFAULT                  (_SMU_PPUNSPATD1_SMU_DEFAULT << 5)        /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_SMUCFGNS                     (0x1UL << 6)                              /**< SMUCFGNS Privileged Access                  */
+#define _SMU_PPUNSPATD1_SMUCFGNS_SHIFT              6                                         /**< Shift value for SMU_SMUCFGNS                */
+#define _SMU_PPUNSPATD1_SMUCFGNS_MASK               0x40UL                                    /**< Bit mask for SMU_SMUCFGNS                   */
 #define _SMU_PPUNSPATD1_SMUCFGNS_DEFAULT            0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_SMUCFGNS_DEFAULT             (_SMU_PPUNSPATD1_SMUCFGNS_DEFAULT << 5)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_RTCC                         (0x1UL << 6)                              /**< RTCC Privileged Access                      */
-#define _SMU_PPUNSPATD1_RTCC_SHIFT                  6                                         /**< Shift value for SMU_RTCC                    */
-#define _SMU_PPUNSPATD1_RTCC_MASK                   0x40UL                                    /**< Bit mask for SMU_RTCC                       */
+#define SMU_PPUNSPATD1_SMUCFGNS_DEFAULT             (_SMU_PPUNSPATD1_SMUCFGNS_DEFAULT << 6)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_RTCC                         (0x1UL << 7)                              /**< RTCC Privileged Access                      */
+#define _SMU_PPUNSPATD1_RTCC_SHIFT                  7                                         /**< Shift value for SMU_RTCC                    */
+#define _SMU_PPUNSPATD1_RTCC_MASK                   0x80UL                                    /**< Bit mask for SMU_RTCC                       */
 #define _SMU_PPUNSPATD1_RTCC_DEFAULT                0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_RTCC_DEFAULT                 (_SMU_PPUNSPATD1_RTCC_DEFAULT << 6)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_LETIMER0                     (0x1UL << 7)                              /**< LETIMER0 Privileged Access                  */
-#define _SMU_PPUNSPATD1_LETIMER0_SHIFT              7                                         /**< Shift value for SMU_LETIMER0                */
-#define _SMU_PPUNSPATD1_LETIMER0_MASK               0x80UL                                    /**< Bit mask for SMU_LETIMER0                   */
+#define SMU_PPUNSPATD1_RTCC_DEFAULT                 (_SMU_PPUNSPATD1_RTCC_DEFAULT << 7)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_LETIMER0                     (0x1UL << 8)                              /**< LETIMER0 Privileged Access                  */
+#define _SMU_PPUNSPATD1_LETIMER0_SHIFT              8                                         /**< Shift value for SMU_LETIMER0                */
+#define _SMU_PPUNSPATD1_LETIMER0_MASK               0x100UL                                   /**< Bit mask for SMU_LETIMER0                   */
 #define _SMU_PPUNSPATD1_LETIMER0_DEFAULT            0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_LETIMER0_DEFAULT             (_SMU_PPUNSPATD1_LETIMER0_DEFAULT << 7)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_IADC0                        (0x1UL << 8)                              /**< IADC0 Privileged Access                     */
-#define _SMU_PPUNSPATD1_IADC0_SHIFT                 8                                         /**< Shift value for SMU_IADC0                   */
-#define _SMU_PPUNSPATD1_IADC0_MASK                  0x100UL                                   /**< Bit mask for SMU_IADC0                      */
+#define SMU_PPUNSPATD1_LETIMER0_DEFAULT             (_SMU_PPUNSPATD1_LETIMER0_DEFAULT << 8)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_IADC0                        (0x1UL << 9)                              /**< IADC0 Privileged Access                     */
+#define _SMU_PPUNSPATD1_IADC0_SHIFT                 9                                         /**< Shift value for SMU_IADC0                   */
+#define _SMU_PPUNSPATD1_IADC0_MASK                  0x200UL                                   /**< Bit mask for SMU_IADC0                      */
 #define _SMU_PPUNSPATD1_IADC0_DEFAULT               0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_IADC0_DEFAULT                (_SMU_PPUNSPATD1_IADC0_DEFAULT << 8)      /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_I2C0                         (0x1UL << 9)                              /**< I2C0 Privileged Access                      */
-#define _SMU_PPUNSPATD1_I2C0_SHIFT                  9                                         /**< Shift value for SMU_I2C0                    */
-#define _SMU_PPUNSPATD1_I2C0_MASK                   0x200UL                                   /**< Bit mask for SMU_I2C0                       */
+#define SMU_PPUNSPATD1_IADC0_DEFAULT                (_SMU_PPUNSPATD1_IADC0_DEFAULT << 9)      /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_I2C0                         (0x1UL << 10)                             /**< I2C0 Privileged Access                      */
+#define _SMU_PPUNSPATD1_I2C0_SHIFT                  10                                        /**< Shift value for SMU_I2C0                    */
+#define _SMU_PPUNSPATD1_I2C0_MASK                   0x400UL                                   /**< Bit mask for SMU_I2C0                       */
 #define _SMU_PPUNSPATD1_I2C0_DEFAULT                0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_I2C0_DEFAULT                 (_SMU_PPUNSPATD1_I2C0_DEFAULT << 9)       /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_WDOG0                        (0x1UL << 10)                             /**< WDOG0 Privileged Access                     */
-#define _SMU_PPUNSPATD1_WDOG0_SHIFT                 10                                        /**< Shift value for SMU_WDOG0                   */
-#define _SMU_PPUNSPATD1_WDOG0_MASK                  0x400UL                                   /**< Bit mask for SMU_WDOG0                      */
+#define SMU_PPUNSPATD1_I2C0_DEFAULT                 (_SMU_PPUNSPATD1_I2C0_DEFAULT << 10)      /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_WDOG0                        (0x1UL << 11)                             /**< WDOG0 Privileged Access                     */
+#define _SMU_PPUNSPATD1_WDOG0_SHIFT                 11                                        /**< Shift value for SMU_WDOG0                   */
+#define _SMU_PPUNSPATD1_WDOG0_MASK                  0x800UL                                   /**< Bit mask for SMU_WDOG0                      */
 #define _SMU_PPUNSPATD1_WDOG0_DEFAULT               0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_WDOG0_DEFAULT                (_SMU_PPUNSPATD1_WDOG0_DEFAULT << 10)     /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_AMUXCP0                      (0x1UL << 11)                             /**< AMUXCP0 Privileged Access                   */
-#define _SMU_PPUNSPATD1_AMUXCP0_SHIFT               11                                        /**< Shift value for SMU_AMUXCP0                 */
-#define _SMU_PPUNSPATD1_AMUXCP0_MASK                0x800UL                                   /**< Bit mask for SMU_AMUXCP0                    */
+#define SMU_PPUNSPATD1_WDOG0_DEFAULT                (_SMU_PPUNSPATD1_WDOG0_DEFAULT << 11)     /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_AMUXCP0                      (0x1UL << 12)                             /**< AMUXCP0 Privileged Access                   */
+#define _SMU_PPUNSPATD1_AMUXCP0_SHIFT               12                                        /**< Shift value for SMU_AMUXCP0                 */
+#define _SMU_PPUNSPATD1_AMUXCP0_MASK                0x1000UL                                  /**< Bit mask for SMU_AMUXCP0                    */
 #define _SMU_PPUNSPATD1_AMUXCP0_DEFAULT             0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_AMUXCP0_DEFAULT              (_SMU_PPUNSPATD1_AMUXCP0_DEFAULT << 11)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_EUART0                       (0x1UL << 12)                             /**< EUART0 Privileged Access                    */
-#define _SMU_PPUNSPATD1_EUART0_SHIFT                12                                        /**< Shift value for SMU_EUART0                  */
-#define _SMU_PPUNSPATD1_EUART0_MASK                 0x1000UL                                  /**< Bit mask for SMU_EUART0                     */
+#define SMU_PPUNSPATD1_AMUXCP0_DEFAULT              (_SMU_PPUNSPATD1_AMUXCP0_DEFAULT << 12)   /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_EUART0                       (0x1UL << 13)                             /**< EUART0 Privileged Access                    */
+#define _SMU_PPUNSPATD1_EUART0_SHIFT                13                                        /**< Shift value for SMU_EUART0                  */
+#define _SMU_PPUNSPATD1_EUART0_MASK                 0x2000UL                                  /**< Bit mask for SMU_EUART0                     */
 #define _SMU_PPUNSPATD1_EUART0_DEFAULT              0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_EUART0_DEFAULT               (_SMU_PPUNSPATD1_EUART0_DEFAULT << 12)    /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
-#define SMU_PPUNSPATD1_BUFC                         (0x1UL << 13)                             /**< BUFC Privileged Access                      */
-#define _SMU_PPUNSPATD1_BUFC_SHIFT                  13                                        /**< Shift value for SMU_BUFC                    */
-#define _SMU_PPUNSPATD1_BUFC_MASK                   0x2000UL                                  /**< Bit mask for SMU_BUFC                       */
-#define _SMU_PPUNSPATD1_BUFC_DEFAULT                0x00000000UL                              /**< Mode DEFAULT for SMU_PPUNSPATD1             */
-#define SMU_PPUNSPATD1_BUFC_DEFAULT                 (_SMU_PPUNSPATD1_BUFC_DEFAULT << 13)      /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
+#define SMU_PPUNSPATD1_EUART0_DEFAULT               (_SMU_PPUNSPATD1_EUART0_DEFAULT << 13)    /**< Shifted mode DEFAULT for SMU_PPUNSPATD1     */
 #define SMU_PPUNSPATD1_CRYPTOACC                    (0x1UL << 14)                             /**< CRYPTOACC Privileged Access                 */
 #define _SMU_PPUNSPATD1_CRYPTOACC_SHIFT             14                                        /**< Shift value for SMU_CRYPTOACC               */
 #define _SMU_PPUNSPATD1_CRYPTOACC_MASK              0x4000UL                                  /**< Bit mask for SMU_CRYPTOACC                  */
@@ -1299,7 +1279,7 @@ typedef struct {
 
 /* Bit fields for SMU BMPUNSPATD0 */
 #define _SMU_BMPUNSPATD0_RESETVALUE                 0x00000000UL                                    /**< Default value for SMU_BMPUNSPATD0           */
-#define _SMU_BMPUNSPATD0_MASK                       0x0000003FUL                                    /**< Mask for SMU_BMPUNSPATD0                    */
+#define _SMU_BMPUNSPATD0_MASK                       0x0000001FUL                                    /**< Mask for SMU_BMPUNSPATD0                    */
 #define SMU_BMPUNSPATD0_RADIOAES                    (0x1UL << 0)                                    /**< RADIO AES DMA privileged mode               */
 #define _SMU_BMPUNSPATD0_RADIOAES_SHIFT             0                                               /**< Shift value for SMU_RADIOAES                */
 #define _SMU_BMPUNSPATD0_RADIOAES_MASK              0x1UL                                           /**< Bit mask for SMU_RADIOAES                   */
@@ -1315,23 +1295,19 @@ typedef struct {
 #define _SMU_BMPUNSPATD0_RADIOSUBSYSTEM_MASK        0x4UL                                           /**< Bit mask for SMU_RADIOSUBSYSTEM             */
 #define _SMU_BMPUNSPATD0_RADIOSUBSYSTEM_DEFAULT     0x00000000UL                                    /**< Mode DEFAULT for SMU_BMPUNSPATD0            */
 #define SMU_BMPUNSPATD0_RADIOSUBSYSTEM_DEFAULT      (_SMU_BMPUNSPATD0_RADIOSUBSYSTEM_DEFAULT << 2)  /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
-#define SMU_BMPUNSPATD0_BUFC                        (0x1UL << 3)                                    /**< RADIO BUFFER controller privileged mode     */
-#define _SMU_BMPUNSPATD0_BUFC_SHIFT                 3                                               /**< Shift value for SMU_BUFC                    */
-#define _SMU_BMPUNSPATD0_BUFC_MASK                  0x8UL                                           /**< Bit mask for SMU_BUFC                       */
-#define _SMU_BMPUNSPATD0_BUFC_DEFAULT               0x00000000UL                                    /**< Mode DEFAULT for SMU_BMPUNSPATD0            */
-#define SMU_BMPUNSPATD0_BUFC_DEFAULT                (_SMU_BMPUNSPATD0_BUFC_DEFAULT << 3)            /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
-#define SMU_BMPUNSPATD0_RADIOIFADCDEBUG             (0x1UL << 4)                                    /**< RADIO IFADC debug privileged mode           */
-#define _SMU_BMPUNSPATD0_RADIOIFADCDEBUG_SHIFT      4                                               /**< Shift value for SMU_RADIOIFADCDEBUG         */
-#define _SMU_BMPUNSPATD0_RADIOIFADCDEBUG_MASK       0x10UL                                          /**< Bit mask for SMU_RADIOIFADCDEBUG            */
+#define SMU_BMPUNSPATD0_RADIOIFADCDEBUG             (0x1UL << 3)                                    /**< RADIO IFADC debug privileged mode           */
+#define _SMU_BMPUNSPATD0_RADIOIFADCDEBUG_SHIFT      3                                               /**< Shift value for SMU_RADIOIFADCDEBUG         */
+#define _SMU_BMPUNSPATD0_RADIOIFADCDEBUG_MASK       0x8UL                                           /**< Bit mask for SMU_RADIOIFADCDEBUG            */
 #define _SMU_BMPUNSPATD0_RADIOIFADCDEBUG_DEFAULT    0x00000000UL                                    /**< Mode DEFAULT for SMU_BMPUNSPATD0            */
-#define SMU_BMPUNSPATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUNSPATD0_RADIOIFADCDEBUG_DEFAULT << 4) /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
-#define SMU_BMPUNSPATD0_LDMA                        (0x1UL << 5)                                    /**< MCU LDMA privileged mode                    */
-#define _SMU_BMPUNSPATD0_LDMA_SHIFT                 5                                               /**< Shift value for SMU_LDMA                    */
-#define _SMU_BMPUNSPATD0_LDMA_MASK                  0x20UL                                          /**< Bit mask for SMU_LDMA                       */
+#define SMU_BMPUNSPATD0_RADIOIFADCDEBUG_DEFAULT     (_SMU_BMPUNSPATD0_RADIOIFADCDEBUG_DEFAULT << 3) /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
+#define SMU_BMPUNSPATD0_LDMA                        (0x1UL << 4)                                    /**< MCU LDMA privileged mode                    */
+#define _SMU_BMPUNSPATD0_LDMA_SHIFT                 4                                               /**< Shift value for SMU_LDMA                    */
+#define _SMU_BMPUNSPATD0_LDMA_MASK                  0x10UL                                          /**< Bit mask for SMU_LDMA                       */
 #define _SMU_BMPUNSPATD0_LDMA_DEFAULT               0x00000000UL                                    /**< Mode DEFAULT for SMU_BMPUNSPATD0            */
-#define SMU_BMPUNSPATD0_LDMA_DEFAULT                (_SMU_BMPUNSPATD0_LDMA_DEFAULT << 5)            /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
+#define SMU_BMPUNSPATD0_LDMA_DEFAULT                (_SMU_BMPUNSPATD0_LDMA_DEFAULT << 4)            /**< Shifted mode DEFAULT for SMU_BMPUNSPATD0    */
 
 /** @} End of group EFR32MG22_SMU_CFGNS_BitFields */
 /** @} End of group EFR32MG22_SMU_CFGNS */
 /** @} End of group Parts */
+
 #endif /* EFR32MG22_SMU_H */

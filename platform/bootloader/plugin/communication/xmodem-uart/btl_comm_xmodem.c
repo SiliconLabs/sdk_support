@@ -157,15 +157,17 @@ int32_t communication_start(void)
 {
   int32_t ret = BOOTLOADER_OK;
   uint32_t version = mainBootloaderTable->header.version;
-  char str[] = "\r\nGecko Bootloader vX.Y.A\r\n"
+  char str[] = "\r\nGecko Bootloader vX.YY.ZZ\r\n"
                "1. upload gbl\r\n"
                "2. run\r\n"
                "3. ebl info\r\n"
                "BL > ";
 
   str[20] = nibbleToHex((version >> 24) & 0x0F);
-  str[22] = nibbleToHex((version >> 16) & 0x0F);
-  str[24] = nibbleToHex(version & 0x0F);
+  str[22] = (((version >> 16) & 0x0F) / 10 + '0');
+  str[23] = (((version >> 16) & 0x0F) % 10 + '0');
+  str[25] = ((version & 0x0F) / 10 + '0');
+  str[26] = ((version & 0x0F) % 10 + '0');
 
   uart_sendBuffer((uint8_t *)str, sizeof(str), true);
 
@@ -190,9 +192,9 @@ int32_t communication_main(void)
   int idleTimeout = BTL_XMODEM_IDLE_TIMEOUT;
 #endif
 
-  ParserContext_t parserContext;
-  DecryptContext_t decryptContext;
-  AuthContext_t authContext;
+  ParserContext_t parserContext = { 0 };
+  DecryptContext_t decryptContext = { 0 };
+  AuthContext_t authContext = { 0 };
 
   delay_init();
 

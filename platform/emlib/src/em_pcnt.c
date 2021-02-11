@@ -36,12 +36,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup PCNT
+ * @addtogroup pcnt PCNT - Pulse Counter
  * @brief Pulse Counter (PCNT) Peripheral API
  * @details
  *  This module contains functions to control the PCNT peripheral of Silicon
@@ -72,11 +67,20 @@
 /** @endcond */
 
 /*******************************************************************************
+ **************************   LOCAL VARIABLES   ********************************
+ ******************************************************************************/
+#if defined(_SILICON_LABS_32B_SERIES_2)
+static PCNT_CntEvent_TypeDef initCntEvent;
+static PCNT_CntEvent_TypeDef initAuxCntEvent;
+#endif
+
+/*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   Map PCNT structure into an instance number.
@@ -91,32 +95,7 @@ __STATIC_INLINE unsigned int PCNT_Map(PCNT_TypeDef *pcnt)
 {
   return ((uint32_t)pcnt - PCNT0_BASE) / 0x400;
 }
-
-/***************************************************************************//**
- * @brief
- *   Wait for an ongoing sync of register(s) to low-frequency domain to complete.
- *
- * @param[in] pcnt
- *   A pointer to the PCNT peripheral register block.
- *
- * @param[in] mask
- *   A bitmask corresponding to SYNCBUSY register defined bits indicating
- *   registers that must complete any ongoing synchronization.
- ******************************************************************************/
-__STATIC_INLINE void PCNT_Sync(PCNT_TypeDef *pcnt, uint32_t mask)
-{
-  /* Avoid deadlock if modifying the same register twice when freeze mode is
-   * activated. */
-  if (pcnt->FREEZE & PCNT_FREEZE_REGFREEZE) {
-    return;
-  }
-
-  /* Wait for any pending previous write operation to have been completed in
-   * low-frequency domain. */
-  while (pcnt->SYNCBUSY & mask)
-    ;
-}
-
+#endif
 /** @endcond */
 
 /*******************************************************************************
@@ -141,11 +120,114 @@ void PCNT_CounterReset(PCNT_TypeDef *pcnt)
 {
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Enable reset of the CNT and TOP register. */
   BUS_RegBitWrite(&(pcnt->CTRL), _PCNT_CTRL_RSTEN_SHIFT, 1);
 
   /* Disable reset of the CNT and TOP register. */
   BUS_RegBitWrite(&(pcnt->CTRL), _PCNT_CTRL_RSTEN_SHIFT, 0);
+#else
+  /* Reset of the CNT and TOP register. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD_SET = PCNT_CMD_CNTRST | PCNT_CMD_AUXCNTRST;
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOP);
+  pcnt->TOP = _PCNT_TOP_RESETVALUE;
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Set PCNT operational mode.
+ *
+ * @details
+ *   Notice that this function does not do any configuration. Setting operational
+ *   mode is normally only required after initialization is done, and if not
+ *   done as part of initialization or if requiring to disable/reenable pulse
+ *   counter.
+ *
+ * @note
+ *   This function may stall until synchronization to low-frequency domain is
+ *   completed. For that reason, it should normally not be used when
+ *   an external clock is used for the PCNT module, since stall time may be
+ *   undefined.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
+ *
+ * @param[in] mode
+ *   An operational mode to use for PCNT.
+ ******************************************************************************/
+void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
+{
+  uint32_t tmp;
+
+  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+
+  /* Set as specified. */
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
+  tmp  = pcnt->CTRL & ~_PCNT_CTRL_MODE_MASK;
+  tmp |= (uint32_t)mode << _PCNT_CTRL_MODE_SHIFT;
+
+  /* LF register about to be modified requires sync; busy check. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CTRL);
+  pcnt->CTRL = tmp;
+#else
+  /* Disable module if disable mode is passed. */
+  if (mode == pcntModeDisable) {
+    PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+    pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+    while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+    }
+#endif
+    return;
+  }
+  /* Check if given mode is same as already configured. */
+  tmp = (pcnt->CFG & _PCNT_CFG_MODE_MASK) >> _PCNT_CFG_MODE_SHIFT;
+  if (tmp != mode) {
+    PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+    pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+    while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+    }
+#endif
+    pcnt->CFG_SET = (uint32_t)mode << _PCNT_CFG_MODE_SHIFT;
+  }
+  /* Enable module */
+  pcnt->EN_SET = PCNT_EN_EN;
+  /* Start Counters*/
+  if (initCntEvent != pcntCntEventNone) {
+    PCNT_StartMainCnt(pcnt);
+  }
+  if (initAuxCntEvent != pcntCntEventNone) {
+    PCNT_StartAuxCnt(pcnt);
+  }
+
+#endif
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Returns if the PCNT module is enabled or not.
+ *
+ * @details
+ *   Notice that this function does not do any configuration.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
+ *
+ * @param[out] isEnabled
+ *   Returns TRUE if the module is enabled.
+ ******************************************************************************/
+bool PCNT_IsEnabled(PCNT_TypeDef *pcnt)
+{
+  EFM_ASSERT(PCNT_REF_VALID(pcnt));
+
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
+  return ((pcnt->CTRL & _PCNT_CTRL_MODE_MASK) != PCNT_CTRL_MODE_DISABLE);
+#else
+  return (pcnt->EN & _PCNT_EN_EN_MASK);
+#endif
 }
 
 /***************************************************************************//**
@@ -174,7 +256,9 @@ void PCNT_CounterReset(PCNT_TypeDef *pcnt)
  ******************************************************************************/
 void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top)
 {
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   uint32_t ctrl;
+#endif
 
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
@@ -199,6 +283,7 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top)
   }
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Keep the current control setting, must be restored. */
   ctrl = pcnt->CTRL;
 
@@ -239,50 +324,31 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top)
   }
 
   /* Reenable if it was enabled. */
+  PCNT_Enable(pcnt, (PCNT_Mode_TypeDef)(ctrl & _PCNT_CTRL_MODE_MASK));
   if ((ctrl & _PCNT_CTRL_MODE_MASK) != PCNT_CTRL_MODE_DISABLE) {
     PCNT_Sync(pcnt, PCNT_SYNCBUSY_CTRL | PCNT_SYNCBUSY_CMD);
     pcnt->CTRL = ctrl;
   }
+#else
+  /* Load into TOP. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOP);
+  pcnt->TOP = count;
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOP);
+
+  /* Load TOP into CNT. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+  pcnt->CMD = PCNT_CMD_LCNTIM;
+
+  if (top != count) {
+    /* Wait for the command to sync LCNTIM before setting TOPB. */
+    PCNT_Sync(pcnt, PCNT_SYNCBUSY_CMD);
+
+    pcnt->TOP = top;
+  }
+#endif
 }
 
-/***************************************************************************//**
- * @brief
- *   Set PCNT operational mode.
- *
- * @details
- *   Notice that this function does not do any configuration. Setting operational
- *   mode is normally only required after initialization is done, and if not
- *   done as part of initialization or if requiring to disable/reenable pulse
- *   counter.
- *
- * @note
- *   This function may stall until synchronization to low-frequency domain is
- *   completed. For that reason, it should normally not be used when
- *   an external clock is used for the PCNT module, since stall time may be
- *   undefined.
- *
- * @param[in] pcnt
- *   A pointer to the PCNT peripheral register block.
- *
- * @param[in] mode
- *   An operational mode to use for PCNT.
- ******************************************************************************/
-void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
-{
-  uint32_t tmp;
-
-  EFM_ASSERT(PCNT_REF_VALID(pcnt));
-
-  /* Set as specified. */
-  tmp  = pcnt->CTRL & ~_PCNT_CTRL_MODE_MASK;
-  tmp |= (uint32_t)mode << _PCNT_CTRL_MODE_SHIFT;
-
-  /* LF register about to be modified requires sync; busy check. */
-  PCNT_Sync(pcnt, PCNT_SYNCBUSY_CTRL);
-  pcnt->CTRL = tmp;
-}
-
-#if defined(_PCNT_INPUT_MASK)
+#if defined(_PCNT_INPUT_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
  *   Enable/disable the selected PRS input of PCNT.
@@ -305,16 +371,39 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
 {
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool module_enable = PCNT_IsEnabled(pcnt);
+
+  /* Disable module before writing to CFG register. */
+  if (module_enable == true) {
+    PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+  }
+
+  pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+  }
+#endif
+#endif
+
   /* Enable/disable the selected PRS input on the selected PCNT module. */
   switch (prsInput) {
     /* Enable/disable PRS input S0. */
     case pcntPRSInputS0:
+#if defined(_PCNT_INPUT_MASK)
       BUS_RegBitWrite(&(pcnt->INPUT), _PCNT_INPUT_S0PRSEN_SHIFT, enable);
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+      BUS_RegBitWrite(&(pcnt->CFG), _PCNT_CFG_S0PRSEN_SHIFT, enable);
+#endif
       break;
 
     /* Enable/disable PRS input S1. */
     case pcntPRSInputS1:
+#if defined(_PCNT_INPUT_MASK)
       BUS_RegBitWrite(&(pcnt->INPUT), _PCNT_INPUT_S1PRSEN_SHIFT, enable);
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+      BUS_RegBitWrite(&(pcnt->CFG), _PCNT_CFG_S1PRSEN_SHIFT, enable);
+#endif
       break;
 
     /* An invalid parameter, asserted. */
@@ -322,9 +411,17 @@ void PCNT_PRSInputEnable(PCNT_TypeDef *pcnt,
       EFM_ASSERT(0);
       break;
   }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Re-Enable if necessary the PCNT module after change. */
+  if (module_enable == true) {
+    pcnt->EN_SET = PCNT_EN_EN;
+  }
+#endif
 }
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   PCNT register synchronization freeze control.
@@ -372,6 +469,7 @@ void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable)
     pcnt->FREEZE = 0;
   }
 }
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -414,8 +512,10 @@ void PCNT_FreezeEnable(PCNT_TypeDef *pcnt, bool enable)
  ******************************************************************************/
 void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 {
-  unsigned int inst;
+  unsigned int inst = 0;
   uint32_t     tmp;
+
+  (void)&tmp;
 
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
@@ -440,8 +540,10 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
   }
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Map the pointer to an instance. */
   inst = PCNT_Map(pcnt);
+#endif
 
 #if defined(_PCNT_INPUT_MASK)
   /* Selecting the PRS channels for the PRS input sources of the PCNT. These are
@@ -453,6 +555,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
   pcnt->INPUT = tmp;
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* Build the CTRL setting, except for mode. */
   tmp = 0;
   if (init->negEdge) {
@@ -463,9 +566,11 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
     tmp |= PCNT_CTRL_CNTDIR_DOWN;
   }
 
+#if defined(PCNT_CTRL_FILT)
   if (init->filter) {
     tmp |= PCNT_CTRL_FILT;
   }
+#endif
 
 #if defined(PCNT_CTRL_HYST)
   if (init->hyst) {
@@ -481,7 +586,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
   /* Configure counter events for regular and auxiliary counters. */
 #if defined(_PCNT_CTRL_CNTEV_SHIFT)
-  tmp |= init->cntEvent << _PCNT_CTRL_CNTEV_SHIFT;
+  tmp |= ((uint32_t)init->cntEvent) << _PCNT_CTRL_CNTEV_SHIFT;
 #endif
 
 #if defined(_PCNT_CTRL_AUXCNTEV_SHIFT)
@@ -496,13 +601,18 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
       case pcntCntEventBoth:
         auxCntEventField = pcntCntEventNone;
         break;
+
+#if defined(_PCNT_CTRL_CNTEV_NONE)
       case pcntCntEventNone:
         auxCntEventField = pcntCntEventBoth;
         break;
+#endif
+
       case pcntCntEventUp:
       case pcntCntEventDown:
         auxCntEventField = init->auxCntEvent;
         break;
+
       default:
         /* An invalid parameter, asserted. */
         EFM_ASSERT(0);
@@ -523,7 +633,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
   switch (init->mode) {
     case pcntModeExtSingle:
     case pcntModeExtQuad:
-      tmp |= init->mode << _PCNT_CTRL_MODE_SHIFT;
+      tmp |= ((uint32_t)init->mode) << _PCNT_CTRL_MODE_SHIFT;
 
       /* In most cases, the SYNCBUSY bit is set due to the reset bit set and waiting
        * for asynchronous reset bit is strictly not necessary.
@@ -564,6 +674,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
     /* pcntModeDisable */
     /* pcntModeOvsSingle */
+    /* pcntModeOvsQuadx */
     default:
       /* No need to set disabled mode if already disabled. */
       if ((pcnt->CTRL & _PCNT_CTRL_MODE_MASK) != PCNT_CTRL_MODE_DISABLE) {
@@ -584,12 +695,95 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
       PCNT_CounterTopSet(pcnt, init->counter, init->top);
 
       /* Enter oversampling mode if selected. */
-      if (init->mode == pcntModeOvsSingle) {
+      if (init->mode != pcntModeDisable) {
         PCNT_Sync(pcnt, PCNT_SYNCBUSY_CTRL);
         pcnt->CTRL = tmp | (init->mode << _PCNT_CTRL_MODE_SHIFT);
       }
       break;
   }
+
+#else
+  /* If PCNT is enabled wait for all SYNCBUSY signals to complete. */
+  if (pcnt->EN == 1U) {
+    PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+  }
+
+  /* Disable PCNT. */
+  pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+  }
+#endif
+  /* Build the CFG setting. */
+  pcnt->CFG &= ~(_PCNT_CFG_DEBUGHALT_MASK | _PCNT_CFG_FILTEN_MASK | _PCNT_CFG_HYST_MASK);
+  pcnt->CFG |= (((uint32_t)init->filter) << _PCNT_CFG_FILTEN_SHIFT)
+               | (((uint32_t)init->hyst) << _PCNT_CFG_HYST_SHIFT)
+               | (((uint32_t)init->debugHalt) << _PCNT_CFG_DEBUGHALT_SHIFT);
+
+  /* Set Mode setting. */
+  /* Write the CFG register with the configurations. */
+  if (init->mode != pcntModeDisable) {
+    pcnt->CFG = ((pcnt->CFG & (~_PCNT_CFG_MODE_MASK)) | (((uint32_t)init->mode) << _PCNT_CFG_MODE_SHIFT));
+  }
+
+  pcnt->EN_SET = PCNT_EN_EN;
+  PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+
+  /* Build the CTRL setting */
+  tmp = (((uint32_t)init->negEdge) << _PCNT_CTRL_EDGE_SHIFT)
+        | (((uint32_t)init->countDown) << _PCNT_CTRL_CNTDIR_SHIFT)
+        | (((uint32_t)init->s1CntDir) << _PCNT_CTRL_S1CDIR_SHIFT);
+
+  /* Configure counter events for regular and auxiliary counters. */
+  if (init->cntEvent != PCNT_CNT_EVEN_NONE) {
+    tmp |= ((uint32_t)init->cntEvent) << _PCNT_CTRL_CNTEV_SHIFT;
+  }
+  if (init->auxCntEvent != PCNT_CNT_EVEN_NONE) {
+    tmp |= ((uint32_t)init->auxCntEvent) << _PCNT_CTRL_AUXCNTEV_SHIFT;
+  }
+
+  pcnt->CTRL = tmp;
+
+  /* Set PRS inputs */
+  EFM_ASSERT(init->s0PRS < PRS_ASYNC_CH_NUM);
+  EFM_ASSERT(init->s1PRS < PRS_ASYNC_CH_NUM);
+  PRS->CONSUMER_PCNT0_S0IN = init->s0PRS;
+  PRS->CONSUMER_PCNT0_S1IN = init->s1PRS;
+
+  if (init->mode == pcntModeExtSingle || init->mode == pcntModeExtQuad) {
+    /* Enable PCNT Clock Domain Reset. The PCNT must be in reset before changing
+       the clock source to an external clock. */
+    pcnt->CMD_SET = PCNT_CMD_CORERST;
+    /* Change to the external clock. */
+    CMU_PCNTClockExternalSet(inst, true);
+  } else {
+    /* Change to the internal clock. */
+    CMU_PCNTClockExternalSet(inst, false);
+  }
+
+  /* Start counter(s) */
+  if (init->cntEvent != pcntCntEventNone) {
+    PCNT_StartMainCnt(pcnt);
+  }
+  if (init->auxCntEvent != pcntCntEventNone) {
+    PCNT_StartAuxCnt(pcnt);
+  }
+
+  PCNT_CounterTopSet(pcnt, init->counter, init->top);
+  PCNT_TopBufferSet(pcnt, init->top);
+  /* Save values of primary and auxiliary counter event. */
+  initCntEvent = init->cntEvent;
+  initAuxCntEvent = init->auxCntEvent;
+
+  if (init->mode == pcntModeDisable) {
+    /* Disable PCNT. */
+    pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+    while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+    }
+#endif
+  }
+#endif
 }
 
 /***************************************************************************//**
@@ -610,13 +804,12 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
  ******************************************************************************/
 void PCNT_Reset(PCNT_TypeDef *pcnt)
 {
-  unsigned int inst;
-
+  unsigned int inst = 0;
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* A map pointer to the instance and clock information. */
   inst = PCNT_Map(pcnt);
-
   pcnt->IEN = _PCNT_IEN_RESETVALUE;
 
   /* Notice that special SYNCBUSY handling is not applicable for the RSTEN
@@ -642,9 +835,26 @@ void PCNT_Reset(PCNT_TypeDef *pcnt)
   pcnt->IFC = _PCNT_IFC_MASK;
 
   /* Do not reset route register, setting should be done independently. */
+#else
+  /* Disable PCNT module. */
+  PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+  pcnt->EN_CLR = PCNT_EN_EN;
+
+  /* Select LFACLK as default. */
+  /* Recommended to switch to internal clock before reset. */
+  CMU_PCNTClockExternalSet(inst, false);
+
+  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) ;
+
+  /* Clear registers. */
+  pcnt->SWRST_SET = PCNT_SWRST_SWRST;
+
+  while (pcnt->SWRST & PCNT_SWRST_RESETTING) ;
+
+#endif
 }
 
-#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
+#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT) || defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
  *   Set the filter configuration.
@@ -665,9 +875,13 @@ void PCNT_Reset(PCNT_TypeDef *pcnt)
 void PCNT_FilterConfiguration(PCNT_TypeDef *pcnt, const PCNT_Filter_TypeDef *config, bool enable)
 {
   uint32_t ovscfg = 0;
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  bool module_enable = false;
+#endif
 
   EFM_ASSERT(PCNT_REF_VALID(pcnt));
 
+#if defined(PCNT_OVSCFG_FILTLEN_DEFAULT)
   /* Construct the new filter setting value. */
   ovscfg  = ((config->filtLen & _PCNT_OVSCFG_FILTLEN_MASK) << _PCNT_OVSCFG_FILTLEN_SHIFT)
             | ((config->flutterrm & 0x1) << _PCNT_OVSCFG_FLUTTERRM_SHIFT);
@@ -683,6 +897,38 @@ void PCNT_FilterConfiguration(PCNT_TypeDef *pcnt, const PCNT_Filter_TypeDef *con
   } else {
     pcnt->CTRL &= ~PCNT_CTRL_FILT;
   }
+
+#elif  defined(_SILICON_LABS_32B_SERIES_2)
+  /* Disable module before changing CFG register. */
+  module_enable = PCNT_IsEnabled(pcnt);
+  if (module_enable == true) {
+    PCNT_Sync(pcnt, _PCNT_SYNCBUSY_MASK);
+  }
+  pcnt->EN_CLR = PCNT_EN_EN;
+#if defined(_PCNT_EN_DISABLING_MASK)
+  while (pcnt->EN & _PCNT_EN_DISABLING_MASK) {
+  }
+#endif
+  /* Construct the new filter setting value. */
+  ovscfg  = ((config->filtLen & _PCNT_OVSCTRL_FILTLEN_MASK) << _PCNT_OVSCTRL_FILTLEN_SHIFT)
+            | ((config->flutterrm & 0x1) << _PCNT_OVSCTRL_FLUTTERRM_SHIFT);
+
+  /* Set the new configuration. LF register requires sync check before writing. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_OVSCTRL);
+  pcnt->OVSCTRL = ovscfg;
+
+  /* Set new state of the filter. */
+  if (enable) {
+    pcnt->CFG |= PCNT_CFG_FILTEN;
+  } else {
+    pcnt->CFG &= ~PCNT_CFG_FILTEN;
+  }
+
+  /* Re-Enable module if necessary after change. */
+  if (module_enable == true) {
+    pcnt->EN_SET = PCNT_EN_EN;
+  }
+#endif
 }
 #endif
 
@@ -797,6 +1043,7 @@ void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val)
   }
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   /* LF register about to be modified requires sync; busy check. */
 
   /* Load into TOPB. */
@@ -806,8 +1053,13 @@ void PCNT_TopSet(PCNT_TypeDef *pcnt, uint32_t val)
   /* Load TOPB value into TOP. */
   PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOPB | PCNT_SYNCBUSY_CMD);
   pcnt->CMD = PCNT_CMD_LTOPBIM;
+#else
+  /* LF register about to be modified requires sync; busy check. */
+  PCNT_Sync(pcnt, PCNT_SYNCBUSY_TOP);
+  /* Load into TOP. */
+  pcnt->TOP = val;
+#endif
 }
 
-/** @} (end addtogroup PCNT) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup pcnt) */
 #endif /* defined(PCNT_COUNT) && (PCNT_COUNT > 0) */

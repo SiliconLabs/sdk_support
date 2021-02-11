@@ -223,4 +223,5 @@ typedef struct {
 /** @} End of group MGM21_DPLL_BitFields */
 /** @} End of group MGM21_DPLL */
 /** @} End of group Parts */
+
 #endif /* MGM21_DPLL_H */

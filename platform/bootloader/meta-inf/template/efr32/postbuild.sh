@@ -6,12 +6,6 @@
 
 # Post Build processing for bootloader
 
-DEVICE_SERIES_1=$--combineBootloader--$
-if [ "${DEVICE_SERIES_1}" -eq 0 ]; then
-  echo "Nothing to do in postbuild script"
-  exit
-fi
-
 # use PATH_SCMD env var to override default path for Simplicity Commander
 if [ -z "${PATH_SCMD}" ]; then
   COMMANDER="$--commanderPath--$"
@@ -27,15 +21,19 @@ if [ ! -f "${COMMANDER}" ]; then
 fi
 
 FILENAME=$1
-
+SDK_PATH=$2
 
 echo " "
 echo "Add checksum to image (${FILENAME}-crc.s37)"
 echo " "
 "${COMMANDER}" convert "${FILENAME}.s37" --crc -o "${FILENAME}-crc.s37"
 
-
-echo " "
-echo "Add first stage bootloader to image (${FILENAME}-combined.s37)"
-echo " "
-"${COMMANDER}" convert "$--firstStageS37File--$" "${FILENAME}-crc.s37" -o "${FILENAME}-combined.s37"
+DEVICE_SERIES_1=$--combineBootloader--$
+if [ "${DEVICE_SERIES_1}" -eq 0 ]; then
+  exit
+else
+  echo " "
+  echo "Add first stage bootloader to image (${FILENAME}-combined.s37)"
+  echo " "
+  "${COMMANDER}" convert "$--firstStageS37File--$" "${FILENAME}-crc.s37" -o "${FILENAME}-combined.s37"
+fi

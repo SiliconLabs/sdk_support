@@ -904,4 +904,5 @@ typedef struct {
 /** @} End of group EFR32BG21_SMU_BitFields */
 /** @} End of group EFR32BG21_SMU */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_SMU_H */

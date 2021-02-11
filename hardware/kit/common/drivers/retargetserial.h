@@ -69,6 +69,8 @@ void RETARGET_SerialInit(void);
 bool RETARGET_SerialEnableFlowControl(void);
 void RETARGET_SerialFlush(void);
 
+void RETARGET_RequireEm1(bool requireEm1);
+
 #ifdef __cplusplus
 }
 #endif

@@ -62,9 +62,7 @@ static char rtt_buffer[DEBUG_VUART_BUFFER_DOWN_SIZE];
 #define DEBUG_POWERING_DOWN 3
 
 //debugChannelState is a variable only used by Zip and Connect.
-#if defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT)
 static uint8_t debugChannelState = DEBUG_OFF;
-#endif //defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT))
 
 // Fallback BSP_TRACE definitions match EFR32 WSTK routing
 #ifndef BSP_TRACE_SWO_LOC
@@ -111,10 +109,7 @@ EmberStatus emDebugInit(void)
 #endif
 #endif
 
-//debugChannelState is a variable only used by Zip and Connect.
-#if defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT)
   debugChannelState = DEBUG_INITIALIZED;
-#endif //defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT))
 
   // Initialize RTT for debugger -> target input (down-channel)
   SEGGER_RTT_Init();
@@ -180,8 +175,6 @@ void emDebugPowerUp(void)
   //ITM->TER  |= (1UL<<0);   // enable stimulus channel 0 // Raw VUART/port 0
 #endif
 }
-
-#if defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT)
 
 //NOTE:  If emDebugPowerDown is ever called, emDebugPowerUp must be called
 //       in order to restore configuration.
@@ -362,172 +355,5 @@ void emDebugReceiveData(void)
     emDebugProcessIncoming(EM_DEBUG_VIRTUAL_UART_RX, buf, len);
   }
 }
-
-#else //defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT))
-#include "stack/include/packet-buffer.h"
-
-//NOTE:  If emDebugPowerDown is ever called, emDebugPowerUp must be called
-//       in order to restore configuration.
-
-void emDebugPowerDown(void)
-{
-#if defined(ITM)
-  if (ITM->TCR & ITM_TCR_ITMENA_Msk) {
-    DWT->CTRL = (DWT->CTRL & (~DWT_CTRL_SYNCTAP_Msk));
-
-    ITM->TCR &= ~ITM_TCR_ITMENA_Msk;
-
-    while ((ITM->TCR & ITM_TCR_BUSY_Msk) != 0U) {
-      // do nothing
-    }
-
-    halCommonDelayMicroseconds(100);
-  }
-  // disable debug oscillator
-#if !defined(_SILICON_LABS_32B_SERIES_2)
-  CMU_OscillatorEnable(cmuOsc_AUXHFRCO, false, false);
-#endif
-
-  TPI->SPPR = 0;
-  TPI->FFCR = 0;
-  CoreDebug->DHCSR = 0;
-#endif
-}
-
-bool halStackDebugActive(void)
-{
-#if defined(CoreDebug)
-  return ((CoreDebug->DHCSR && CoreDebug_DHCSR_C_DEBUGEN_Msk) != 0);
-#else
-  return false;
-#endif
-}
-
-uint8_t emDebugAddInitialFraming(uint8_t *buff, uint16_t debugType)
-{
-#if defined(ITM)
-  buff[OUT_VERSION_INDEX]  = OUT_VERSION;
-  buff[OUT_TYPE_INDEX]     = LOW_BYTE(debugType);
-  buff[OUT_TYPE_INDEX + 1] = HIGH_BYTE(debugType);
-  buff[OUT_SEQUENCE_INDEX] = sequenceNumber++;
-  return OUT_DATA_INDEX;
-#else
-  return 0;
-#endif
-}
-
-///Left the following code around in case it might be used in the future.
-//__STATIC_INLINE uint8_t itmSendByteChannel0( uint8_t byte )
-//{
-//   if( (ITM->TCR & ITM_TCR_ITMENA_Msk) && (ITM->TER & (1UL << 0) ) )
-//   {
-//      while (ITM->PORT[0].u32 == 0);
-//      ITM->PORT[0].u8 = byte;
-//   }
-//   return byte;
-//}
-
-__STATIC_INLINE uint8_t itmSendByteChannel8(uint8_t byte)
-{
-#if defined(ITM)
-  if ((ITM->TCR & ITM_TCR_ITMENA_Msk)) {
-    do {
-      // Some versions of JLink (erroneously) disable SWO when debug connections
-      // are closed. Setting the following again here fixes that problem.
-      // Testing indicates that it's not actually necessary to set ITM->TER even
-      // if it's cleared. This doesn't match the documentation, however, so it's
-      // safer to leave it in place unless we can find something to support
-      // making the change.
-      CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-      ITM->TER |= (1UL << 8);
-    } while (ITM->PORT[8].u32 == 0);
-    ITM->PORT[8].u8 = byte;
-  }
-#endif
-  return byte;
-}
-
-// Byte format used by swoOutput() over ITM Stimulus Port 8:
-//
-// byte 0 = '['
-// byte 1 = length
-// byte 2 = buffer[0] (the payload)
-// byte x = buffer[...] (the payload)
-// byte y = crc of payload, high byte
-// byte y+1 = crc of payload, low byte
-// byte z = ']'
-
-static EmberStatus swoOutput(EmberMessageBuffer buffer)
-{
-  uint8_t length = emberMessageBufferLength(buffer) + 5;
-  uint8_t index = 0;
-  uint16_t startTime = halCommonGetInt16uMillisecondTick();
-  uint16_t crc = 0xFFFF;
-  uint8_t outputByte = 0;
-
-  while ((halStackDebugActive()) && (index < length)) {
-    uint16_t now = halCommonGetInt16uMillisecondTick();
-    if (elapsedTimeInt16u(startTime, now) > TIMEOUT_MS) {
-      break;
-    }
-
-    if (index == 0) {
-      outputByte = '[';
-      index++;
-    } else if (index == 1) {
-      outputByte = emberMessageBufferLength(buffer);
-      index++;
-    } else if (index == length - 3) {
-      outputByte = LOW_BYTE(crc);
-      index++;
-    } else if (index == length - 2) {
-      outputByte = HIGH_BYTE(crc);
-      index++;
-    } else if (index == length - 1) {
-      outputByte = ']';
-      index++;
-    } else if (index == length) {
-      outputByte = 0;
-    } else {
-      outputByte = emberGetLinkedBuffersByte(buffer, index - 2);
-      crc = halCommonCrc16(outputByte, crc);
-      index++;
-    }
-
-    itmSendByteChannel8(outputByte);
-//Left the following code around in case it might be used in the future.
-//      itmSendByteChannel0(outputByte);
-  }
-
-  if (index == length) {
-    return EMBER_SUCCESS;
-  } else {
-    return EMBER_ERR_FATAL;
-  }
-}
-
-EmberStatus halStackDebugPutBuffer(EmberMessageBuffer buffer)
-{
-  if (emberMessageBufferLength(buffer) < OUT_DATA_INDEX) {
-    return EMBER_ERR_FATAL;
-  }
-  return swoOutput(buffer);
-}
-
-void emDebugReceiveData(void)
-{
-  uint8_t buf[DEBUG_VUART_BUFFER_DOWN_SIZE];
-  int len = 0;
-
-  len = SEGGER_RTT_Read(rtt_buffer_index, buf, DEBUG_VUART_BUFFER_DOWN_SIZE);
-
-  if (len) {
-    EmberMessageBuffer message = emberFillLinkedBuffers(buf, len);
-    emDebugProcessIncoming(EM_DEBUG_VIRTUAL_UART_RX, message);
-    emberReleaseMessageBuffer(message);
-  }
-}
-
-#endif //defined(EMBER_STACK_IP) || defined(EMBER_STACK_CONNECT))
 
 #endif // DEBUG_LEVEL >= BASIC_DEBUG

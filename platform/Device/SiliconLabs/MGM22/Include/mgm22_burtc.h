@@ -328,4 +328,5 @@ typedef struct {
 /** @} End of group MGM22_BURTC_BitFields */
 /** @} End of group MGM22_BURTC */
 /** @} End of group Parts */
+
 #endif /* MGM22_BURTC_H */

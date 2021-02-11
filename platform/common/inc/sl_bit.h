@@ -32,12 +32,8 @@
 #define SL_BIT_H
 
 /***************************************************************************//**
- * @addtogroup platform_common
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup BIT
+ * @addtogroup bit Bit Manipulation
+ * @brief Bitwise operations
  * @{
  ******************************************************************************/
 
@@ -78,7 +74,7 @@
 /****************************************************************************************************//**
  *                                               SL_IS_BIT_SET()
  *
- * @brief    Determine if specified bit(s) in a value are set.
+ * @brief    Determine whether the specified bit(s) in a value are set.
  *
  * @param    val     Value to check for specified bit(s) set.
  *
@@ -98,7 +94,7 @@
 /****************************************************************************************************//**
  *                                               SL_IS_BIT_CLEAR()
  *
- * @brief    Determine if specified bit(s) in a value are clear.
+ * @brief    Determine whether the specified bit(s) in a value are clear.
  *
  * @param    val     Value to check for specified bit(s) clear.
  *
@@ -117,7 +113,7 @@
 /****************************************************************************************************//**
  *                                           SL_IS_ANY_BIT_SET()
  *
- * @brief    Determine if any specified bit(s) in a value are set.
+ * @brief    Determine whether any specified bit(s) in a value are set.
  *
  * @param    val     Value to check for specified bit(s) set.
  *
@@ -137,7 +133,7 @@
 /****************************************************************************************************//**
  *                                           SL_IS_ANY_BIT_CLEAR()
  *
- * @brief    Determine if any specified bit(s) in a value are clear.
+ * @brief    Determine whether any specified bit(s) in a value are clear.
  *
  * @param    val     Value to check for specified bit(s) clear.
  *
@@ -158,7 +154,6 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-/** @} (end addtogroup BIT) */
-/** @} (end addtogroup platform_common) */
+/** @} (end addtogroup bit) */
 
 #endif /* SL_BIT_H */

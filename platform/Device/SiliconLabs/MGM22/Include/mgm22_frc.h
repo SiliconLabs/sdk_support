@@ -2484,4 +2484,5 @@ typedef struct {
 /** @} End of group MGM22_FRC_BitFields */
 /** @} End of group MGM22_FRC */
 /** @} End of group Parts */
+
 #endif /* MGM22_FRC_H */

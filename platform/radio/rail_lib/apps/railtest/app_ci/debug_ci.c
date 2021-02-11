@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the debug commands for RAIL test applications.
+ * @brief This file implements the debug commands for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,8 +36,6 @@
 #include <strings.h>
 #endif
 
-#include "bsp.h"
-#include "command_interpreter.h"
 #include "response_print.h"
 #include "rail_types.h"
 
@@ -49,8 +47,17 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "rail_features.h"
+#include "sl_rail_util_init.h"
+
+#if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
+  #include "rail_config.h"
+#endif // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
 
 uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
+
+#define MAX_DEBUG_BYTES (128)
+static char debugPrintBuffer[MAX_DEBUG_BYTES];
+static uint8_t debugDataBuffer[MAX_DEBUG_BYTES];
 
 /*
  * setFrequency
@@ -58,24 +65,24 @@ uint32_t rxOverflowDelay = 10 * 1000000; // 10 seconds
  * Allows the user to set an arbitrary frequency if
  * the frequency override debug mode is enabled.
  */
-void setFrequency(int argc, char **argv)
+void setFrequency(sl_cli_command_arg_t *args)
 {
-  uint32_t newFrequency = ciGetUnsigned(argv[1]);
+  uint32_t newFrequency = sl_cli_get_argument_uint32(args, 0);
 
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
   if ((RAIL_GetDebugMode(railHandle) & RAIL_DEBUG_MODE_FREQ_OVERRIDE) == RAIL_DEBUG_MODE_FREQ_OVERRIDE) {
     if (!RAIL_OverrideDebugFrequency(railHandle, newFrequency)) {
-      responsePrint(argv[0], "NewFrequency:%u", newFrequency);
+      responsePrint(sl_cli_get_command_string(args, 0), "NewFrequency:%u", newFrequency);
     } else {
       // This won't take effect until we parse divider ranges.
-      responsePrintError(argv[0], 0x14, "%u Hz is out of range and cannot be "
-                                        "set as the frequency", newFrequency);
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x14, "%u Hz is out of range and cannot be "
+                                                                   "set as the frequency", newFrequency);
     }
   } else {
-    responsePrintError(argv[0], 0x13, "Not currently in frequency override debug mode.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x13, "Not currently in frequency override debug mode.");
   }
 }
 
@@ -99,148 +106,151 @@ char * lookupDebugModeString(uint32_t debugMode)
  * RAIL_DEBUG_MODE_FREQ_OVERRIDE - Disable RAIL's channel scheme and
  * uses a specific frequency defined by the user.
  */
-void setDebugMode(int argc, char **argv)
+void setDebugMode(sl_cli_command_arg_t *args)
 {
   uint32_t debugMode;
 
-  debugMode = ciGetUnsigned(argv[1]);
+  debugMode = sl_cli_get_argument_uint32(args, 0);
   if (!RAIL_SetDebugMode(railHandle, debugMode)) {
-    responsePrint(argv[0], "DebugMode:%s", lookupDebugModeString(debugMode));
+    responsePrint(sl_cli_get_command_string(args, 0), "DebugMode:%s", lookupDebugModeString(debugMode));
   } else {
-    responsePrintError(argv[0], 0x15, "%d is an invalid debug mode!", debugMode);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x15, "%d is an invalid debug mode!", debugMode);
   }
 }
 
-void getMemWord(int argc, char **argv)
+void getMemWord(sl_cli_command_arg_t *args)
 {
-  uint32_t *address = (uint32_t*)ciGetUnsigned(argv[1]);
+  uint32_t *address = (uint32_t*)sl_cli_get_argument_uint32(args, 0);
   uint32_t count = 1;
   uint32_t value;
 
   // If there was a length given then read it out
-  if (argc > 2) {
-    count = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    count = sl_cli_get_argument_uint32(args, 1);
   }
 
   // Check for alignment
   if (((uint32_t)address % 4) != 0) {
-    responsePrintError(argv[0], 0xFF, "Address 0x%.8X is not 32bit aligned", address);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Address 0x%.8X is not 32bit aligned", address);
     return;
   }
 
-  responsePrintHeader(argv[0], "address:0x%.8x,value:0x%.8x");
+  responsePrintHeader(sl_cli_get_command_string(args, 0), "address:0x%.8x,value:0x%.8x");
   for (uint32_t i = 0; i < count; i++) {
     value = address[i];
     responsePrintMulti("address:0x%.8x,value:0x%.8x", address + i, value);
   }
 }
 
-void setMemWord(int argc, char **argv)
+void setMemWord(sl_cli_command_arg_t *args)
 {
-  uint32_t *address = (uint32_t*)ciGetUnsigned(argv[1]);
+  uint32_t *address = (uint32_t*)sl_cli_get_argument_uint32(args, 0);
   int count = 0;
   char lengthStr[12];
 
   // Check for alignment
   if (((uint32_t)address % 4) != 0) {
-    responsePrintError(argv[0], 0xFF, "Address 0x%.8X is not 32bit aligned", address);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Address 0x%.8X is not 32bit aligned", address);
     return;
   }
 
   // Write each word given sequentially
-  for (int i = 2; i < argc; i++) {
-    address[count] = ciGetUnsigned(argv[i]);
+  for (int i = 2; i < (sl_cli_get_argument_count(args) + 1); i++) {
+    address[count] = sl_cli_get_argument_uint32(args, i - 1);
     count++;
   }
 
   // Make getMemWord print out everything we just wrote to
   sprintf(lengthStr, "%d", count);
-  argv[2] = lengthStr;
-  getMemWord(3, argv);
+  args->argc = 3;
+  args->argv[2] = lengthStr;
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getMemWord(args);
 }
 
-void setTxUnderflow(int argc, char **argv)
+void setTxUnderflow(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
-  enableAppMode(TX_UNDERFLOW, enable, argv[0]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
+  enableAppMode(TX_UNDERFLOW, enable, sl_cli_get_command_string(args, 0));
 }
 
-void setRxOverflow(int argc, char **argv)
+void setRxOverflow(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
-  if (argc > 2) {
-    rxOverflowDelay = ciGetUnsigned(argv[2]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    rxOverflowDelay = sl_cli_get_argument_uint32(args, 1);
   } else {
     // 10 seconds should be enough to trigger an overflow
     rxOverflowDelay = 10 * 1000000;
   }
-  enableAppMode(RX_OVERFLOW, enable, argv[0]);
+  enableAppMode(RX_OVERFLOW, enable, sl_cli_get_command_string(args, 0));
 }
 
-void setCalibrations(int argc, char **argv)
+void setCalibrations(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   skipCalibrations = !enable;
-  responsePrint(argv[0], "Calibrations:%s", enable ? "Enabled" : "Disabled");
+  responsePrint(sl_cli_get_command_string(args, 0), "Calibrations:%s", enable ? "Enabled" : "Disabled");
 }
 
-void txCancel(int argc, char **argv)
+void txCancel(sl_cli_command_arg_t *args)
 {
-  int32_t delay = ciGetSigned(argv[1]);
+  int32_t delay = sl_cli_get_argument_uint32(args, 0);
   txCancelDelay = delay;
   txCancelMode = RAIL_STOP_MODES_NONE; // Default to using RAIL_Idle()
-  if (argc > 2) {
-    txCancelMode = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    txCancelMode = sl_cli_get_argument_uint8(args, 1);
   }
 
-  enableAppMode(TX_CANCEL, delay >= 0, argv[0]); // Pends transmit to cancel
+  enableAppMode(TX_CANCEL, delay >= 0, sl_cli_get_command_string(args, 0)); // Pends transmit to cancel
 }
 
-void startThermistorMeasurement(int argc, char **argv)
+void startThermistorMeasurement(sl_cli_command_arg_t *args)
 {
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
   RAIL_Status_t status = RAIL_StartThermistorMeasurement(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[0], "Thermistor measurement:Started.");
+    responsePrint(sl_cli_get_command_string(args, 0), "Thermistor measurement:Started.");
   } else {
-    responsePrintError(argv[0], 0xFF, "Ongoing thermistor measurement or unconfigured modem.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Ongoing thermistor measurement or unconfigured modem.");
   }
 #else
-  responsePrintError(argv[0], 0xFF, "Feature not supported in this target.");
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
   return;
 }
 
-void getThermistorImpedance(int argc, char **argv)
+void getThermistorImpedance(sl_cli_command_arg_t *args)
 {
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
   RAIL_Status_t status;
   uint32_t thermistorResistance;
   status = RAIL_GetThermistorImpedance(railHandle, &thermistorResistance);
   if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[0], "Thermistor Measurement: %u Ohms", thermistorResistance);
+    responsePrint(sl_cli_get_command_string(args, 0), "Thermistor Measurement: %u Ohms", thermistorResistance);
   } else {
-    responsePrintError(argv[0], 0xFF, "Thermistor mesurement not done yet.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Thermistor mesurement not done yet.");
   }
 #else
-  responsePrintError(argv[0], 0xFF, "Feature not supported in this target.");
+  responsePrintError(sl_cli_get_command_string(args, 0), 0xFF, "Feature not supported in this target.");
 #endif
   return;
 }
 
-void getLogLevels(int argc, char **argv)
+void getLogLevels(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "Peripherals:%s,Notifications:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "Peripherals:%s,Notifications:%s",
                 ((logLevel & PERIPHERAL_ENABLE) ? "Enabled" : "Disabled"),
                 ((logLevel & ASYNC_RESPONSE) ? "Enabled" : "Disabled"));
 }
 
-void setPeripheralEnable(int argc, char **argv)
+void setPeripheralEnable(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   logLevel = enable ? (logLevel | PERIPHERAL_ENABLE)
              : (logLevel & ~(PERIPHERAL_ENABLE));
-  getLogLevels(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getLogLevels(args);
 
   // Actually turn on/off the peripherals as requested to save power
   if (enable) {
@@ -250,16 +260,18 @@ void setPeripheralEnable(int argc, char **argv)
   }
 }
 
-void setNotifications(int argc, char **argv)
+void setNotifications(sl_cli_command_arg_t *args)
 {
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   logLevel = enable ? (logLevel | ASYNC_RESPONSE)
              : (logLevel & ~(ASYNC_RESPONSE));
-  getLogLevels(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getLogLevels(args);
 }
 
-void resetChip(int argc, char **argv)
+void resetChip(sl_cli_command_arg_t *args)
 {
+  (void)args;
   // Wait for any serial traffic to be done before resetting so we don't
   // output garbage characters
   serialWaitForTxIdle();
@@ -268,69 +280,64 @@ void resetChip(int argc, char **argv)
   NVIC_SystemReset();
 }
 
-void printDataRates(int argc, char **argv)
+void printDataRates(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  responsePrint(argv[0],
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "Symbolrate:%d,Bitrate:%d",
                 RAIL_GetSymbolRate(railHandle),
                 RAIL_GetBitRate(railHandle));
 }
 
-#define MAX_RANDOM_BYTES (1024)
-#define MAX_PRINTABLE_RANDOM_BYTES (200)
-static char randomPrintBuffer[2 * MAX_PRINTABLE_RANDOM_BYTES + 2];
-static uint8_t randomDataBuffer[MAX_RANDOM_BYTES];
-
-void getRandom(int argc, char **argv)
+void getRandom(sl_cli_command_arg_t *args)
 {
-  uint16_t length = ciGetUnsigned(argv[1]);
+  uint16_t length = sl_cli_get_argument_uint16(args, 0);
   bool hidden = false;
   uint16_t result, offset = 0;
   int i;
 
   // Read out the hidden option if specified
-  if (argc > 2) {
-    hidden = !!ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    hidden = !!sl_cli_get_argument_uint8(args, 1);
   }
 
-  if (length > MAX_RANDOM_BYTES) {
-    responsePrintError(argv[0], 0x10,
+  if (length > MAX_DEBUG_BYTES) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10,
                        "Cannot collect more than %d random bytes.",
-                       MAX_RANDOM_BYTES);
+                       MAX_DEBUG_BYTES);
     return;
   }
 
   // Collect the random data
-  result = RAIL_GetRadioEntropy(railHandle, randomDataBuffer, length);
+  result = RAIL_GetRadioEntropy(railHandle, debugDataBuffer, length);
   if (result != length) {
-    responsePrintError(argv[0], 0x11, "Error collecting random data.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x11, "Error collecting random data.");
   }
 
   if (!hidden) {
     for (i = 0; i < length; i++) {
-      int n = snprintf(randomPrintBuffer + offset,
-                       sizeof(randomPrintBuffer) - offset,
+      int n = snprintf(debugPrintBuffer + offset,
+                       sizeof(debugPrintBuffer) - offset,
                        "%.2x",
-                       randomDataBuffer[i]);
+                       debugDataBuffer[i]);
       if (n < 0) {
-        responsePrintError(argv[0], 0x12, "Error printing random data.");
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x12, "Error printing random data.");
         return;
       }
       offset += n;
 
       // Make sure we don't try to print too much data
-      if (offset >= sizeof(randomPrintBuffer)) {
+      if (offset >= sizeof(debugPrintBuffer)) {
         break;
       }
     }
 
-    responsePrint(argv[0], "Length:%u,Data:%s", result, randomPrintBuffer);
+    responsePrint(sl_cli_get_command_string(args, 0), "Length:%u,Data:%s", result, debugPrintBuffer);
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "Length:%u,DataPtr:0x%.8x",
                   result,
-                  &randomDataBuffer);
+                  &debugDataBuffer);
   }
 }
 
@@ -359,7 +366,7 @@ static void printDebugSignalHelp(char *cmdName,
   }
 }
 
-void setDebugSignal(int argc, char **argv)
+void setDebugSignal(sl_cli_command_arg_t *args)
 {
   const debugPin_t *pin = NULL, *pinList;
   const debugSignal_t *signal = NULL, *signalList;
@@ -375,61 +382,61 @@ void setDebugSignal(int argc, char **argv)
   // Provide information about the pins and signals supported by this chip if
   // the help command is given. @TODO: It would be nice if this ignored the next
   // parameter somehow...
-  if ((argc < 2) || (strcasecmp(argv[1], "help") == 0)) {
-    printDebugSignalHelp(argv[0], pinList, signalList, numPins, numSignals);
+  if (strcasecmp(sl_cli_get_argument_string(args, 0), "help") == 0) {
+    printDebugSignalHelp(sl_cli_get_command_string(args, 0), pinList, signalList, numPins, numSignals);
     return;
   }
 
   // Make sure the pin they're trying to use is valid for this chip
   for (i = 0; i < numPins; i++) {
-    if (strcasecmp(pinList[i].name, argv[1]) == 0) {
+    if (strcasecmp(pinList[i].name, sl_cli_get_argument_string(args, 0)) == 0) {
       pin = &pinList[i];
     }
   }
   if (pin == NULL) {
-    responsePrintError(argv[0], 0x50, "%s is not a valid pin name", argv[1]);
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "%s is not a valid pin name", sl_cli_get_argument_string(args, 0));
     return;
   }
 
   // Make sure the signal they're trying to use is valid for this chip
-  if (strcasecmp("CUSTOM_LIB", argv[2]) == 0) {
+  if (strcasecmp("CUSTOM_LIB", sl_cli_get_argument_string(args, 1)) == 0) {
     // Make sure the correct parameters were given for this command
-    if (!((argc == 4) && ciValidateInteger(argv[3], 'w'))) {
-      responsePrintError(argv[0],
+    if (!(sl_cli_get_argument_count(args) == 3)) {
+      responsePrintError(sl_cli_get_command_string(args, 0),
                          0x51,
                          "Invalid parameters passed to CUSTOM_LIB");
       return;
     }
     customSignal.name = "CUSTOM_LIB";
     customSignal.isPrs = false;
-    customSignal.loc.debugEventNum = ciGetUnsigned(argv[3]);
+    customSignal.loc.debugEventNum = sl_cli_get_argument_uint16(args, 2);
     signal = &customSignal;
-  } else if (strcasecmp("CUSTOM_PRS", argv[2]) == 0) {
+  } else if (strcasecmp("CUSTOM_PRS", sl_cli_get_argument_string(args, 1)) == 0) {
     // Make sure that the right arguments were given for this command
-    if (!((argc == 5)
-          && ciValidateInteger(argv[3], 'u')
-          && ciValidateInteger(argv[4], 'u'))) {
-      responsePrintError(argv[0],
+    if ((!(sl_cli_get_argument_count(args) == 4))
+        || (sl_cli_get_argument_uint16(args, 2) > 0xFF)
+        || (sl_cli_get_argument_uint16(args, 3) > 0xFF)) {
+      responsePrintError(sl_cli_get_command_string(args, 0),
                          0x53,
                          "Invalid parameters passed to CUSTOM_PRS");
       return;
     }
     customSignal.name = "CUSTOM_PRS";
     customSignal.isPrs = true;
-    customSignal.loc.prs.source = ciGetUnsigned(argv[3]);
-    customSignal.loc.prs.signal = ciGetUnsigned(argv[4]);
+    customSignal.loc.prs.source = (uint8_t)sl_cli_get_argument_uint16(args, 2);
+    customSignal.loc.prs.signal = (uint8_t)sl_cli_get_argument_uint16(args, 3);
     signal = &customSignal;
-  } else if (strcasecmp("OFF", argv[2]) == 0) {
+  } else if (strcasecmp("OFF", sl_cli_get_argument_string(args, 1)) == 0) {
     disablePin = true;
   } else {
     // Search through the list of known signals for the requested one
     for (i = 0; i < numSignals; i++) {
-      if (strcasecmp(signalList[i].name, argv[2]) == 0) {
+      if (strcasecmp(signalList[i].name, sl_cli_get_argument_string(args, 1)) == 0) {
         signal = &signalList[i];
       }
     }
     if (signal == NULL) {
-      responsePrintError(argv[0], 0x54, "%s is not a valid signal name", argv[2]);
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x54, "%s is not a valid signal name", sl_cli_get_argument_string(args, 1));
       return;
     }
   }
@@ -446,7 +453,7 @@ void setDebugSignal(int argc, char **argv)
     // Turn off the PRS output on this pin's channel
     halDisablePrs(pin->prsChannel);
     // @TODO: Turn off the RAIL debug event for this pin
-    responsePrint(argv[0], "Pin:%s,Signal:OFF", pin->name);
+    responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:OFF", pin->name);
     return;
   }
 
@@ -466,24 +473,21 @@ void setDebugSignal(int argc, char **argv)
     // Turn on the RAIL debug event for this signal
   }
 
-  // Configure this GPIO as an output low to finish enabling this signal
-  GPIO_PinModeSet(pin->gpioPort, pin->gpioPin, gpioModePushPull, 0);
-
-  responsePrint(argv[0], "Pin:%s,Signal:%s", pin->name, signal->name);
+  responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:%s", pin->name, signal->name);
 }
 
-void forceAssert(int argc, char**argv)
+void forceAssert(sl_cli_command_arg_t *args)
 {
-  uint32_t errorCode = ciGetUnsigned(argv[1]);
+  uint32_t errorCode = sl_cli_get_argument_uint32(args, 0);
 
-  responsePrint(argv[0], "code:%d", errorCode);
+  responsePrint(sl_cli_get_command_string(args, 0), "code:%d", errorCode);
   RAILCb_AssertFailed(railHandle, errorCode);
 }
 
-void configPrintEvents(int argc, char**argv)
+void configPrintEvents(sl_cli_command_arg_t *args)
 {
-  if (argc == 1) {
-    responsePrintHeader(argv[0], "name:%s,shift:%u,mask:%x%08x,printEnabled:%s");
+  if (sl_cli_get_argument_count(args) == 0) {
+    responsePrintHeader(sl_cli_get_command_string(args, 0), "name:%s,shift:%u,mask:%x%08x,printEnabled:%s");
     for (uint32_t i = 0; i < numRailEvents; i++) {
       uint64_t mask = 1ULL << i;
       responsePrintMulti("name:RAIL_EVENT_%s,shift:%u,mask:0x%x%08x,printEnabled:%s",
@@ -496,61 +500,79 @@ void configPrintEvents(int argc, char**argv)
     return;
   }
 
-  RAIL_Events_t printEvents = ciGetUnsigned(argv[1]);
+  RAIL_Events_t printEvents = sl_cli_get_argument_uint32(args, 0);
   RAIL_Events_t printEventsMask = RAIL_EVENTS_ALL;
 
-  if (argc > 2) {
-    printEvents |= (((RAIL_Events_t)ciGetUnsigned(argv[2])) << 32);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    printEvents |= (((RAIL_Events_t)sl_cli_get_argument_uint32(args, 1)) << 32);
   }
   // Read out the optional mask bits
-  if (argc == 4) {
-    printEventsMask = 0xFFFFFFFF00000000ULL | ciGetUnsigned(argv[3]);
-  } else if (argc > 4) {
-    printEventsMask = ((RAIL_Events_t)ciGetUnsigned(argv[4])) << 32;
-    printEventsMask |= (RAIL_Events_t)ciGetUnsigned(argv[3]);
+  if (sl_cli_get_argument_count(args) == 3) {
+    printEventsMask = 0xFFFFFFFF00000000ULL | sl_cli_get_argument_uint32(args, 2);
+  } else if (sl_cli_get_argument_count(args) >= 4) {
+    printEventsMask = ((RAIL_Events_t)sl_cli_get_argument_uint32(args, 3)) << 32;
+    printEventsMask |= (RAIL_Events_t)sl_cli_get_argument_uint32(args, 2);
   }
   // Modify only the requested events
   enablePrintEvents = (enablePrintEvents & ~printEventsMask)
                       | (printEvents & printEventsMask);
 
-  responsePrint(argv[0], "enablePrintEvents:0x%x%08x",
+  responsePrint(sl_cli_get_command_string(args, 0), "enablePrintEvents:0x%x%08x",
                 (uint32_t)(enablePrintEvents >> 32),
                 (uint32_t)(enablePrintEvents));
 }
 
-void printTxAcks(int argc, char **argv)
+void printTxAcks(sl_cli_command_arg_t *args)
 {
-  printTxAck = !!ciGetUnsigned(argv[1]);
+  printTxAck = !!sl_cli_get_argument_uint8(args, 0);
 
-  responsePrint(argv[0], "printTxAcks:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "printTxAcks:%s",
                 printTxAck ? "True" : "False");
 }
 
-void printRxErrors(int argc, char **argv)
+void printRxErrors(sl_cli_command_arg_t *args)
 {
-  printRxErrorPackets = !!ciGetUnsigned(argv[1]);
+  printRxErrorPackets = !!sl_cli_get_argument_uint8(args, 0);
 
-  responsePrint(argv[0], "printRxErrors:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "printRxErrors:%s",
                 printRxErrorPackets ? "True" : "False");
 }
 
-void setPrintingEnable(int argc, char**argv)
+void printRxFreqOffsets(sl_cli_command_arg_t *args)
 {
-  printingEnabled = !!ciGetUnsigned(argv[1]);
+  printRxFreqOffsetData = !!sl_cli_get_argument_uint8(args, 0);
+
+  if (printRxFreqOffsetData) {
+    // Enable the first sync word and second sync word events
+    RAIL_ConfigEvents(railHandle,
+                      (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT),
+                      (RAIL_EVENT_RX_SYNC1_DETECT | RAIL_EVENT_RX_SYNC2_DETECT));
+  } else {
+    rxFreqOffset = RAIL_FREQUENCY_OFFSET_INVALID;
+  }
+
+  responsePrint(sl_cli_get_command_string(args, 0), "printRxFreqOffsets:%s",
+                printRxFreqOffsetData ? "True" : "False");
+}
+
+void setPrintingEnable(sl_cli_command_arg_t *args)
+{
+  printingEnabled = !!sl_cli_get_argument_uint8(args, 0);
   responsePrintEnable(printingEnabled);
-  responsePrint(argv[0], "printingEnabled:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "printingEnabled:%s",
                 printingEnabled ? "True" : "False");
 }
 
-void getAppMode(int argc, char**argv)
+void getAppMode(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "appMode:%s", appModeNames(currentAppMode()));
+  responsePrint(sl_cli_get_command_string(args, 0), "appMode:%s", appModeNames(currentAppMode()));
 }
 
-void getRadioState(int argc, char**argv)
+void getRadioState(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "radioState:%s",
-                getRfStateName(RAIL_GetRadioState(railHandle)));
+  responsePrint(sl_cli_get_command_string(args, 0), "radioState:%s,radioStateDetail:%s",
+                getRfStateName(RAIL_GetRadioState(railHandle)),
+                getRfStateDetailName(RAIL_GetRadioStateDetail(railHandle), debugPrintBuffer));
 }
 
 static bool verifyFirstTime = true;
@@ -581,13 +603,13 @@ static bool RAILCb_VerificationApproval(uint32_t address,
   return approveDifference;
 }
 
-void verifyRadio(int argc, char**argv)
+void verifyRadio(sl_cli_command_arg_t *args)
 {
   char *answer;
-  uint32_t durationUs = ciGetUnsigned(argv[1]);
-  bool restart = !!ciGetUnsigned(argv[2]);
-  bool useOverride = !!ciGetUnsigned(argv[3]);
-  bool useCallback = !!ciGetUnsigned(argv[4]);
+  uint32_t durationUs = sl_cli_get_argument_uint32(args, 0);
+  bool restart = !!sl_cli_get_argument_uint8(args, 1);
+  bool useOverride = !!sl_cli_get_argument_uint8(args, 2);
+  bool useCallback = !!sl_cli_get_argument_uint8(args, 3);
   uint32_t *radioConfig;
   RAIL_VerifyCallbackPtr_t cb;
   uint32_t timeBefore;
@@ -603,15 +625,15 @@ void verifyRadio(int argc, char**argv)
     verifyUseCallback = useCallback;
 
     if (useOverride) {
-#if RADIO_CONFIG_EXTERNAL_SUPPORT_ENABLED
+#if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
       // Provide a custom radio config.
       radioConfig = (uint32_t *)(channelConfigs[configIndex]->phyConfigBase);
-#else
+#else // !SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
       // Restore variable to default value so this error always occurs.
       verifyFirstTime = true;
-      responsePrintError(argv[0], 0x22, "External radio config support not enabled");
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x22, "External radio config support not enabled");
       return;
-#endif
+#endif // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
     } else {
       radioConfig = NULL;
     }
@@ -656,13 +678,13 @@ void verifyRadio(int argc, char**argv)
     }
   }
   if (useCallback) {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "verification:%s,testDurationUs:%d,callbackCounter:%d",
                   answer,
                   timeAfter - timeBefore,
                   verifyCbCounter);
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "verification:%s,testDurationUs:%d",
                   answer,
                   timeAfter - timeBefore);
@@ -673,18 +695,18 @@ void verifyRadio(int argc, char**argv)
   }
 }
 
-void setVerifyConfig(int argc, char **argv)
+void setVerifyConfig(sl_cli_command_arg_t *args)
 {
-  verifyConfigEnabled = !!ciGetUnsigned(argv[1]);
-  responsePrint(argv[0],
+  verifyConfigEnabled = !!sl_cli_get_argument_uint8(args, 0);
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "verify config enabled:%d,"
                 "Status:Success",
                 verifyConfigEnabled);
 }
 
-void getVerifyConfig(int argc, char **argv)
+void getVerifyConfig(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "verify config enabled:%d",
                 verifyConfigEnabled);
 }

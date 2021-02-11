@@ -1017,4 +1017,5 @@ typedef struct {
 /** @} End of group EFR32MG21_SYNTH_BitFields */
 /** @} End of group EFR32MG21_SYNTH */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_SYNTH_H */

@@ -32,6 +32,9 @@ BTL_SIZE = DEFINED(NULL_BTL) ? 0 : BTL_SIZE;
 ======================================================================
 " )
 
+/* Default EMBER_MALLOC_HEAP_SIZE to 0 unless it's used */
+EMBER_MALLOC_HEAP_SIZE = DEFINED(EMBER_MALLOC_HEAP_SIZE) ? EMBER_MALLOC_HEAP_SIZE : 0;
+
 /* LOCKBITS occupy the top flash page on Series2 family which         */
 /* have an 8kB FLASH_PAGE_SIZE. The linker should set                 */
 /* LOCKBITS_IN_MAINFLASH_SIZE to 8kB if compiling/linking             */
@@ -361,7 +364,7 @@ SECTIONS {
     KEEP(*(.fini_array))
     PROVIDE_HIDDEN (__fini_array_end = .);
 
-    * (.data .data.*);
+    *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.data*)));
     . = ALIGN(2);  /* Align each segment to a Flash word boundary */
     PROVIDE(__data_end__ = .);
     PROVIDE(__DATA__end = .);
@@ -380,9 +383,9 @@ SECTIONS {
   {
     PROVIDE(__BSS__begin = .);
     PROVIDE(__bss_start__ = .);
-    * (.bss .bss.*);
-    * (COMMON);
-    * (.platform .platform.*);
+    *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.bss*)));
+    *(SORT_BY_ALIGNMENT(COMMON));
+    *(SORT_BY_ALIGNMENT(SORT_BY_NAME(.platform*)));
     PROVIDE(__bss_end__ = .);
     PROVIDE(__BSS__end = .);
   }>ram
@@ -405,6 +408,7 @@ SECTIONS {
     end = __end__;
     _end = __end__;
     KEEP(*(.heap*))
+    . += EMBER_MALLOC_HEAP_SIZE;
     __HeapLimit = .;
   }>ram
 

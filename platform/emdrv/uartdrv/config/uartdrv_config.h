@@ -31,15 +31,9 @@
 #define __SILICON_LABS_UARTDRV_CONFIG_H__
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup uartdrv
  * @{
  ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup UARTDRV
- * @{
- ******************************************************************************/
-
 /// Size of the receive operation queue.
 /// @details
 ///   The maximum number of receive operations that can be queued up for one
@@ -66,29 +60,55 @@
 #define EMDRV_UARTDRV_MAX_CONCURRENT_TX_BUFS    6
 #endif
 
+// <<< Use Configuration Wizard in Context Menu >>>
+// <h> UARTDRV Settings
+
 /// Set to 1 to include flow control support
 #if !defined(EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
+// <o EMDRV_UARTDRV_FLOW_CONTROL_ENABLE>  Flow control support
+// <1=> Enable
+// <0=> Disable
+// <i> Default: 1
 #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
 #endif
 
 /// Maximum number of driver instances.
-/// @note
-///   This maximum applies only when @ref EMDRV_UARTDRV_FLOW_CONTROL_ENABLE = 1.
 #if !defined(EMDRV_UARTDRV_MAX_DRIVER_INSTANCES)
+// <o EMDRV_UARTDRV_MAX_DRIVER_INSTANCES> Maximum number of driver instances
+// <i> This maximum only applies when UARTDRV_FLOW_CONTROL_ENABLE = 1
+// <i> Default: 4
 #define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
 #endif
 
 /// UART software flow control code: request peer to start TX
 #if !defined(UARTDRV_FC_SW_XON)
+// <o UARTDRV_FC_SW_XON> UART software flow control code: request peer to start TX
+// <i> Default: 0x11
 #define UARTDRV_FC_SW_XON                       0x11
 #endif
 
 /// UART software flow control code: request peer to stop TX
 #if !defined(UARTDRV_FC_SW_XOFF)
+// <o UARTDRV_FC_SW_XOFF> UART software flow control code: request peer to stop TX
+// <i> Default: 0x13
 #define UARTDRV_FC_SW_XOFF                      0x13
 #endif
 
-/** @} (end addtogroup UARTDRV) */
-/** @} (end addtogroup emdrv) */
+/// UART enable reception when sleeping.
+#if !defined(UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION)
+// <o UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION>  Enable reception when sleeping
+// <i> Enable reception when sleeping will use the power manager and add EM1
+// <i> requirement during receive operations that use DMA.
+// <1=> Enable
+// <0=> Disable
+// <i> Default: 1
+#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         1
+#endif
+
+//</h>
+
+// <<< end of configuration section >>>
+
+/** @} (end addtogroup uartdrv) */
 
 #endif /* __SILICON_LABS_UARTDRV_CONFIG_H__ */

@@ -49,12 +49,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup OPAMP
+ * @addtogroup opamp
  * @{
  ******************************************************************************/
 
@@ -383,6 +378,7 @@ typedef enum {
 } OPAMP_ResInMux_TypeDef;
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
+/** OPAMP PRS Mode. */
 typedef enum {
   opaPrsModeDefault = VDAC_OPA_CTRL_PRSMODE_DEFAULT,  /**< Default value when PRS is not the trigger.       */
   opaPrsModePulsed  = VDAC_OPA_CTRL_PRSMODE_PULSED,   /**< PRS trigger is a pulse that starts the OPAMP
@@ -393,6 +389,7 @@ typedef enum {
                                                            sequence is controlled by the edge of the pulse. */
 } OPAMP_PrsMode_TypeDef;
 
+/** OPAMP PRS Selection. */
 typedef enum {
   opaPrsSelDefault = VDAC_OPA_CTRL_PRSSEL_DEFAULT,  /**< Default value when PRS is not the trigger. */
   opaPrsSelCh0     = VDAC_OPA_CTRL_PRSSEL_PRSCH0,   /**< PRS channel 0 triggers OPAMP.              */
@@ -411,18 +408,21 @@ typedef enum {
 #endif
 } OPAMP_PrsSel_TypeDef;
 
+/** OPAMP PRS Output. */
 typedef enum {
   opaPrsOutDefault  = VDAC_OPA_CTRL_PRSOUTMODE_DEFAULT,   /**< Default value.                    */
   opaPrsOutWarm     = VDAC_OPA_CTRL_PRSOUTMODE_WARM,      /**< Warm status available on PRS.     */
   opaPrsOutOutValid = VDAC_OPA_CTRL_PRSOUTMODE_OUTVALID,  /**< Outvalid status available on PRS. */
 } OPAMP_PrsOut_TypeDef;
 
+/** OPAMP Output Scaling. */
 typedef enum {
   opaOutScaleDefault = VDAC_OPA_CTRL_OUTSCALE_DEFAULT,  /**< Default OPAM output drive strength.    */
   opaOutScaleFull    = VDAC_OPA_CTRL_OUTSCALE_FULL,     /**< OPAMP uses full output drive strength. */
   opaOutSacleHalf    = VDAC_OPA_CTRL_OUTSCALE_HALF,     /**< OPAMP uses half output drive strength. */
 } OPAMP_OutScale_Typedef;
 
+/** OPAMP Drive Strength. */
 typedef enum {
   opaDrvStrDefault          = VDAC_OPA_CTRL_DRIVESTRENGTH_DEFAULT,        /**< Default value.                            */
   opaDrvStrLowerAccLowStr   = (0 << _VDAC_OPA_CTRL_DRIVESTRENGTH_SHIFT),  /**< Lower accuracy with low drive strength.   */
@@ -517,11 +517,11 @@ typedef struct {
   bool                   defaultOffsetN;      /**< Use factory calibrated opamp inverting input
                                                    offset value.                                 */
   uint32_t               offsetN;             /**< Opamp inverting input offset value when
-                                                   @ref defaultOffsetInv is false.               */
+                                                   @ref defaultOffsetN is false.               */
   bool                   defaultOffsetP;      /**< Use factory calibrated opamp non-inverting
                                                    input offset value.                           */
   uint32_t               offsetP;             /**< Opamp non-inverting input offset value when
-                                                   @ref defaultOffsetNon is false.               */
+                                                   @ref defaultOffsetP is false.               */
 #endif /* defined(_SILICON_LABS_32B_SERIES_1) */
 } OPAMP_Init_TypeDef;
 
@@ -1448,8 +1448,7 @@ void      OPAMP_Disable(VDAC_TypeDef *dac, OPAMP_TypeDef opa);
 void      OPAMP_Enable(VDAC_TypeDef *dac, OPAMP_TypeDef opa, const OPAMP_Init_TypeDef *init);
 #endif /* defined(_SILICON_LABS_32B_SERIES_0) */
 
-/** @} (end addtogroup OPAMP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup opamp) */
 
 #ifdef __cplusplus
 }

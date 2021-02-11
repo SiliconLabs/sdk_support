@@ -83,8 +83,10 @@
 // FAMILY values are used in EBL headers and bootloaders as well
 // FAMILY 1 is the BGM13
 // FAMILY 1 is the MGM1
+// FAMILY 1 is the MGM22
 // FAMILY 1 is the MGM21
 // FAMILY 1 is the BGM21
+// FAMILY 1 is the BGM22
 // FAMILY 1 is the MGM13
 // FAMILY 1 is the MGM12
 // FAMILY 1 is the BGM1
@@ -104,7 +106,6 @@
 // FAMILY 46 is the EFR32ZG13P
 // FAMILY 49 is the EFR32FG13P
 // FAMILY 52 is the EFR32MG14P
-// FAMILY 55 is the EFR32BG14P
 // FAMILY 58 is the EFR32ZG14P
 // FAMILY 61 is the EFR32FG14P
 // FAMILY 63 is the EFR32FG14V
@@ -298,8 +299,10 @@ enum {
   EMBER_FAMILY_UNKNOWN    = 0,
   EMBER_FAMILY_BGM13      = 1,
   EMBER_FAMILY_MGM1       = 1,
+  EMBER_FAMILY_MGM22      = 1,
   EMBER_FAMILY_MGM21      = 1,
   EMBER_FAMILY_BGM21      = 1,
+  EMBER_FAMILY_BGM22      = 1,
   EMBER_FAMILY_MGM13      = 1,
   EMBER_FAMILY_MGM12      = 1,
   EMBER_FAMILY_BGM1       = 1,
@@ -319,7 +322,6 @@ enum {
   EMBER_FAMILY_EFR32ZG13P = 46,
   EMBER_FAMILY_EFR32FG13P = 49,
   EMBER_FAMILY_EFR32MG14P = 52,
-  EMBER_FAMILY_EFR32BG14P = 55,
   EMBER_FAMILY_EFR32ZG14P = 58,
   EMBER_FAMILY_EFR32FG14P = 61,
   EMBER_FAMILY_EFR32FG14V = 63,
@@ -335,8 +337,10 @@ typedef uint16_t EmberFamilyEnum;
   "Unknown",                 \
   "BGM13",                   \
   "MGM1",                    \
+  "MGM22",                   \
   "MGM21",                   \
   "BGM21",                   \
+  "BGM22",                   \
   "MGM13",                   \
   "MGM12",                   \
   "BGM1",                    \
@@ -356,7 +360,6 @@ typedef uint16_t EmberFamilyEnum;
   "EFR32ZG13P",              \
   "EFR32FG13P",              \
   "EFR32MG14P",              \
-  "EFR32BG14P",              \
   "EFR32ZG14P",              \
   "EFR32FG14P",              \
   "EFR32FG14V",              \
@@ -489,10 +492,14 @@ typedef uint16_t EmberMicroEnum;
   #define FAMILY EMBER_FAMILY_BGM13
 #elif defined(MGM1)
   #define FAMILY EMBER_FAMILY_MGM1
+#elif defined(MGM22)
+  #define FAMILY EMBER_FAMILY_MGM22
 #elif defined(MGM21)
   #define FAMILY EMBER_FAMILY_MGM21
 #elif defined(BGM21)
   #define FAMILY EMBER_FAMILY_BGM21
+#elif defined(BGM22)
+  #define FAMILY EMBER_FAMILY_BGM22
 #elif defined(MGM13)
   #define FAMILY EMBER_FAMILY_MGM13
 #elif defined(MGM12)
@@ -531,8 +538,6 @@ typedef uint16_t EmberMicroEnum;
   #define FAMILY EMBER_FAMILY_EFR32FG13P
 #elif defined(EFR32MG14P)
   #define FAMILY EMBER_FAMILY_EFR32MG14P
-#elif defined(EFR32BG14P)
-  #define FAMILY EMBER_FAMILY_EFR32BG14P
 #elif defined(EFR32ZG14P)
   #define FAMILY EMBER_FAMILY_EFR32ZG14P
 #elif defined(EFR32FG14P)
@@ -572,6 +577,9 @@ typedef uint16_t EmberMicroEnum;
 // PHY 18 is railgb
 // PHY 19 is railgb_mp
 // PHY 20 is dualrail
+// PHY 21 is rail_legacy_phy
+// PHY 22 is simulation
+// PHY 23 is simulation_legacy
 
 enum {
   EMBER_PHY_NULL            = 0,
@@ -595,6 +603,9 @@ enum {
   EMBER_PHY_RAILGB          = 18,
   EMBER_PHY_RAILGB_MP       = 19,
   EMBER_PHY_DUALRAIL        = 20,
+  EMBER_PHY_RAIL_LEGACY_PHY = 21,
+  EMBER_PHY_SIMULATION      = 22,
+  EMBER_PHY_SIMULATION_LEGACY = 23,
   EMBER_PHY_MAX_VALUE
 };
 
@@ -622,6 +633,9 @@ typedef uint16_t EmberPhyEnum;
   "railgb",               \
   "railgb_mp",            \
   "dualrail",             \
+  "rail_legacy_phy",      \
+  "simulation",           \
+  "simulation_legacy",    \
   NULL,
 
 #if defined(PHY_NULL)
@@ -666,6 +680,12 @@ typedef uint16_t EmberPhyEnum;
   #define PHY EMBER_PHY_RAILGB_MP
 #elif defined(PHY_DUALRAIL)
   #define PHY EMBER_PHY_DUALRAIL
+#elif defined(PHY_RAIL_LEGACY_PHY)
+  #define PHY EMBER_PHY_RAIL_LEGACY_PHY
+#elif defined(PHY_SIMULATION)
+  #define PHY EMBER_PHY_SIMULATION
+#elif defined(PHY_SIMULATION_LEGACY)
+  #define PHY EMBER_PHY_SIMULATION_LEGACY
 #endif
 
 typedef struct {

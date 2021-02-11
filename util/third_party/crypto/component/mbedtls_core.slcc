@@ -1,0 +1,65 @@
+id: mbedtls_core
+package: platform
+label: Mbed TLS Common Functionality
+description: >
+  This is the component for Mbed TLS that contains the core files needed for
+  any project using Mbed TLS as well as common header and source files. This
+  component is also responsible for generating the Mbed TLS configuration which
+  is copied over to the project.
+category: Platform|Security
+quality: production
+template_file:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/inc/configs/template/mbedtls_config_autogen.h.jinja
+config_file:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/inc/configs/template/mbedtls_config.h
+    file_id: mbedtls_config
+source:
+  - path: util/third_party/crypto/mbedtls/library/error.c
+  - path: util/third_party/crypto/mbedtls/library/threading.c
+  - path: util/third_party/crypto/mbedtls/library/platform.c
+  - path: util/third_party/crypto/mbedtls/library/platform_util.c
+include:
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/inc/configs
+    file_list:
+      - path: config-device-acceleration.h
+      - path: config-sl-crypto-all-acceleration.h
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/config.h
+      - path: mbedtls/check_config.h
+      - path: mbedtls/error.h
+      - path: mbedtls/padlock.h
+      - path: mbedtls/platform.h
+      - path: mbedtls/platform_util.h
+      - path: mbedtls/psa_util.h
+      - path: mbedtls/threading.h
+      - path: mbedtls/version.h
+      - path: mbedtls/xtea.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: common.h
+requires:
+  - name: silabs_core_sl_malloc
+  - name: device
+  - name: mbedtls_slcrypto
+    condition: [device_series_0]
+  - name: mbedtls_slcrypto
+    condition: [device_series_1]
+  - name: mbedtls_slcrypto
+    condition: [device_sdid_200]
+  - name: mbedtls_slcrypto
+    condition: [device_sdid_205]
+    # xg23 (device_sdid_210) currently only has SW crypto
+define:
+  - name: MBEDTLS_CONFIG_FILE
+    value: "<mbedtls_config.h>"
+  # xg23 currently only has SW crypto
+  - name: NO_CRYPTO_ACCELERATION
+    value: 1
+    condition: [device_sdid_210]
+provides:
+  - name: mbedtls_core
+  - name: mbedtls_config
+documentation:
+  docset: mbed-tls
+  document: index

@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup IADC
+ * @addtogroup iadc
  * @{
  ******************************************************************************/
 
@@ -99,8 +94,10 @@ typedef enum {
   iadcNegInputGnd     = (_IADC_SCAN_PORTNEG_GND << (_IADC_SCAN_PORTNEG_SHIFT - _IADC_SCAN_PINNEG_SHIFT))
                         | 1,
 
+#if defined(_IADC_SCAN_PORTNEG_PADREFNEG)
   /** Negative reference pin 0  */
   iadcNegInputNegRef  = (_IADC_SCAN_PORTNEG_PADREFNEG << (_IADC_SCAN_PORTNEG_SHIFT - _IADC_SCAN_PINNEG_SHIFT)),
+#endif
 
   /** GPIO port A pin 0 */
   iadcNegInputPortAPin0  = (_IADC_SCAN_PORTNEG_PORTA << (_IADC_SCAN_PORTNEG_SHIFT - _IADC_SCAN_PINNEG_SHIFT)),
@@ -312,23 +309,25 @@ typedef enum {
   iadcPosInputVss     = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                         | 2,
 
+  /** Vss  */
+  iadcPosInputVssaux  = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                        | 3,
+
   /** Dvdd  */
   iadcPosInputDvdd    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
                         | 4,
 
-  /** Vddx  */
-  iadcPosInputVddx    = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
-                        | 5,
+  /** Decouple  */
+  iadcPosInputDecouple = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
+                         | 7,
 
-  /** Vddlv  */
-  iadcPosInputVddlv   = (_IADC_SCAN_PORTPOS_SUPPLY << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT))
-                        | 7,
-
+#if defined(_IADC_SCAN_PORTPOS_PADREFPOS)
   /** Positive reference pin 0  */
-  iadcPosInputPosRef  = (_IADC_SCAN_PORTPOS_PADREFPOS << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
+  iadcPosInputPosRef = (_IADC_SCAN_PORTPOS_PADREFPOS << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
+#endif
 
   /** GPIO port A pin 0 */
-  iadcPosInputPortAPin0  = (_IADC_SCAN_PORTPOS_PORTA << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
+  iadcPosInputPortAPin0 = (_IADC_SCAN_PORTPOS_PORTA << (_IADC_SCAN_PORTPOS_SHIFT - _IADC_SCAN_PINPOS_SHIFT)),
 
   /** GPIO port A pin 1 */
   iadcPosInputPortAPin1,
@@ -544,7 +543,14 @@ typedef enum {
 /** IADC Configuration. */
 typedef enum {
   /** Normal mode  */
-  iadcCfgModeNormal       = _IADC_CFG_ADCMODE_NORMAL
+  iadcCfgModeNormal        = _IADC_CFG_ADCMODE_NORMAL,
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  /** High Speed mode  */
+  iadcCfgModeHighSpeed     = _IADC_CFG_ADCMODE_HIGHSPEED,
+
+  /** High Accuracy mode  */
+  iadcCfgModeHighAccuracy  = _IADC_CFG_ADCMODE_HIGHACCURACY
+#endif
 } IADC_CfgAdcMode_t;
 
 /** IADC Over sampling rate for high speed. */
@@ -562,11 +568,41 @@ typedef enum {
   iadcCfgOsrHighSpeed16x  = _IADC_CFG_OSRHS_HISPD16,
 
   /** High speed oversampling of 32x */
-  iadcCfgOsrHighSpeed32x  = _IADC_CFG_OSRHS_HISPD32
+  iadcCfgOsrHighSpeed32x  = _IADC_CFG_OSRHS_HISPD32,
+
+  /** High speed oversampling of 64x */
+  iadcCfgOsrHighSpeed64x  = _IADC_CFG_OSRHS_HISPD64
 } IADC_CfgOsrHighSpeed_t;
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+/** IADC Over sampling rate for high accuracy. */
+typedef enum {
+  /** High accuracy oversampling of 16x */
+  iadcCfgOsrHighAccuracy16x  = _IADC_CFG_OSRHA_HIACC16,
+
+  /** High accuracy oversampling of 32x */
+  iadcCfgOsrHighAccuracy32x  = _IADC_CFG_OSRHA_HIACC32,
+
+  /** High accuracy oversampling of 64x */
+  iadcCfgOsrHighAccuracy64x  = _IADC_CFG_OSRHA_HIACC64,
+
+  /** High accuracy oversampling of 92x */
+  iadcCfgOsrHighAccuracy92x  = _IADC_CFG_OSRHA_HIACC92,
+
+  /** High accuracy oversampling of 128x */
+  iadcCfgOsrHighAccuracy128x  = _IADC_CFG_OSRHA_HIACC128,
+
+  /** High accuracy oversampling of 256x */
+  iadcCfgOsrHighAccuracy256x  = _IADC_CFG_OSRHA_HIACC256
+} IADC_CfgOsrHighAccuracy_t;
+#endif
 
 /** IADC Analog Gain. */
 typedef enum {
+#if defined(_IADC_CFG_ANALOGGAIN_ANAGAIN0P25)
+  /** Analog gain of 0.25x */
+  iadcCfgAnalogGain0P25x  = _IADC_CFG_ANALOGGAIN_ANAGAIN0P25,
+#endif
   /** Analog gain of 0.5x */
   iadcCfgAnalogGain0P5x  = _IADC_CFG_ANALOGGAIN_ANAGAIN0P5,
 
@@ -591,11 +627,26 @@ typedef enum {
   /** External reference (unbuffered) VREFP to VREFN. Up to 1.25V. */
   iadcCfgReferenceExt1V25    = _IADC_CFG_REFSEL_VREF,
 
+#if defined(_IADC_CFG_REFSEL_VREF2P5)
+  /** External reference (unbuffered) VREFP to VREFN. Up to 1.25V. */
+  iadcCfgReferenceExt2V5     = _IADC_CFG_REFSEL_VREF2P5,
+#endif
+
   /** VDDX (unbuffered) to ground. */
   iadcCfgReferenceVddx       = _IADC_CFG_REFSEL_VDDX,
 
   /** 0.8 * VDDX (buffered) to ground. */
   iadcCfgReferenceVddX0P8Buf = _IADC_CFG_REFSEL_VDDX0P8BUF,
+
+#if defined(_IADC_CFG_REFSEL_VREFBUF)
+  /** pad_vrefp (buffered) to pad_vrefn (pad_refp < vddx - 0.3) */
+  iadcCfgReferenceBuf        = _IADC_CFG_REFSEL_VREFBUF,
+#endif
+
+#if defined(_IADC_CFG_REFSEL_VREF0P8BUF)
+  /** pad_vref (buffered) * 0.8 to pad_vrefn (LPF pad_refp noise) */
+  iadcCfgReference0P8Buf     = _IADC_CFG_REFSEL_VREF0P8BUF,
+#endif
 } IADC_CfgReference_t;
 
 /** IADC Two's complement results */
@@ -626,6 +677,11 @@ typedef enum {
 
   /** PRS0 negative edge starts single/scan queue  */
   iadcTriggerSelPrs0NegEdge  = _IADC_TRIGGER_SCANTRIGSEL_PRSNEG,
+
+#if defined(_IADC_TRIGGER_SCANTRIGSEL_LESENSE)
+  /** LESENSE starts scan queue  */
+  iadcTriggerSelLesense  = _IADC_TRIGGER_SCANTRIGSEL_LESENSE
+#endif
 } IADC_TriggerSel_t;
 
 /** IADC trigger action */
@@ -636,6 +692,37 @@ typedef enum {
   /** Convert single/scan queue continuously  */
   iadcTriggerActionContinuous  = _IADC_TRIGGER_SCANTRIGACTION_CONTINUOUS,
 } IADC_TriggerAction_t;
+
+/** IADC data valid level before requesting DMA transfer */
+typedef enum {
+  /** Data valid level is 1 before requesting DMA transfer */
+  iadcFifoCfgDvl1  = _IADC_SCANFIFOCFG_DVL_VALID1,
+
+  /** Data valid level is 2 before requesting DMA transfer */
+  iadcFifoCfgDvl2  = _IADC_SCANFIFOCFG_DVL_VALID2,
+
+  /** Data valid level is 3 before requesting DMA transfer */
+  iadcFifoCfgDvl3  = _IADC_SCANFIFOCFG_DVL_VALID3,
+
+  /** Data valid level is 4 before requesting DMA transfer */
+  iadcFifoCfgDvl4  = _IADC_SCANFIFOCFG_DVL_VALID4,
+
+#if _SILICON_LABS_32B_SERIES_2_CONFIG > 2
+  /** Data valid level is 5 before requesting DMA transfer */
+  iadcFifoCfgDvl5  = _IADC_SCANFIFOCFG_DVL_VALID5,
+
+  /** Data valid level is 6 before requesting DMA transfer */
+  iadcFifoCfgDvl6  = _IADC_SCANFIFOCFG_DVL_VALID6,
+
+  /** Data valid level is 7 before requesting DMA transfer */
+  iadcFifoCfgDvl7  = _IADC_SCANFIFOCFG_DVL_VALID7,
+#endif
+
+#if _SILICON_LABS_32B_SERIES_2_CONFIG > 3
+  /** Data valid level is 8 before requesting DMA transfer */
+  iadcFifoCfgDvl8  = _IADC_SCANFIFOCFG_DVL_VALID8
+#endif
+} IADC_FifoCfgDvl_t;
 
 #if defined(_IADC_CFG_DIGAVG_MASK)
 /** IADC digital averaging function. */
@@ -654,7 +741,6 @@ typedef enum {
 
   /** Average over 16 samples. */
   iadcDigitalAverage16 = _IADC_CFG_DIGAVG_AVG16
-
 } IADC_DigitalAveraging_t;
 #endif
 
@@ -698,10 +784,13 @@ typedef struct {
 typedef struct {
   IADC_CfgAdcMode_t          adcMode;         /**< IADC mode; Normal, High speed or High Accuracy. */
   IADC_CfgOsrHighSpeed_t     osrHighSpeed;    /**< Over sampling ratio for High Speed and Normal modes. */
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  IADC_CfgOsrHighAccuracy_t  osrHighAccuracy; /**< Over sampling ratio for High Accuracy mode. */
+#endif
   IADC_CfgAnalogGain_t       analogGain;      /**< Analog gain. */
   IADC_CfgReference_t        reference;       /**< Reference selection. */
   IADC_CfgTwosComp_t         twosComplement;  /**< Two's complement reporting. */
-  uint8_t                    adcClkPrescale;  /**< ADC_CLK divider (prescale+1). */
+  uint32_t                   adcClkPrescale;  /**< ADC_CLK divider (prescale+1). */
   uint32_t                   vRef;            /**< Vref magnitude expressed in millivolts. */
 #if defined(_IADC_CFG_DIGAVG_MASK)
   IADC_DigitalAveraging_t    digAvg;          /**< Digital average mode. */
@@ -709,11 +798,13 @@ typedef struct {
 } IADC_Config_t;
 
 #if defined(_IADC_CFG_DIGAVG_MASK)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 /** Default IADC config structure. */
 #define IADC_CONFIG_DEFAULT                                               \
   {                                                                       \
     iadcCfgModeNormal,            /* Normal mode for IADC. */             \
     iadcCfgOsrHighSpeed2x,        /* 2x high speed over sampling. */      \
+    iadcCfgOsrHighAccuracy92x,    /* 92x high accuracy over sampling. */  \
     iadcCfgAnalogGain1x,          /* 1x analog gain. */                   \
     iadcCfgReferenceInt1V2,       /* Internal 1.2V band gap reference. */ \
     iadcCfgTwosCompAuto,          /* Automatic Two's Complement. */       \
@@ -731,8 +822,37 @@ typedef struct {
     iadcCfgReferenceInt1V2,       /* Internal 1.2V band gap reference. */ \
     iadcCfgTwosCompAuto,          /* Automatic Two's Complement. */       \
     0,                            /* Max IADC analog clock rate. */       \
+    1210,                         /* Vref expressed in millivolts. */     \
+    iadcDigitalAverage1           /* No averaging. */                     \
+  }
+#endif
+#else
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+/** Default IADC config structure. */
+#define IADC_CONFIG_DEFAULT                                               \
+  {                                                                       \
+    iadcCfgModeNormal,            /* Normal mode for IADC. */             \
+    iadcCfgOsrHighSpeed2x,        /* 2x high speed over sampling. */      \
+    iadcCfgOsrHighAccuracy92x,    /* 92x high speed over sampling. */     \
+    iadcCfgAnalogGain1x,          /* 1x analog gain. */                   \
+    iadcCfgReferenceInt1V2,       /* Internal 1.2V band gap reference. */ \
+    iadcCfgTwosCompAuto,          /* Automatic Two's Complement. */       \
+    0,                            /* Max IADC analog clock rate. */       \
     1210                          /* Vref expressed in millivolts. */     \
   }
+#else
+/** Default IADC config structure. */
+#define IADC_CONFIG_DEFAULT                                               \
+  {                                                                       \
+    iadcCfgModeNormal,            /* Normal mode for IADC. */             \
+    iadcCfgOsrHighSpeed2x,        /* 2x high speed over sampling. */      \
+    iadcCfgAnalogGain1x,          /* 1x analog gain. */                   \
+    iadcCfgReferenceInt1V2,       /* Internal 1.2V band gap reference. */ \
+    iadcCfgTwosCompAuto,          /* Automatic Two's Complement. */       \
+    0,                            /* Max IADC analog clock rate. */       \
+    1210                          /* Vref expressed in millivolts. */     \
+  }
+#endif
 #endif
 
 /** Structure for all IADC configs. */
@@ -754,7 +874,7 @@ typedef struct {
 typedef struct {
   IADC_Alignment_t            alignment;      /**< Alignment of data in FIFO. */
   bool                        showId;         /**< Tag FIFO entry with scan table entry id. */
-  uint8_t                     dataValidLevel; /**< Data valid level before requesting DMA transfer. */
+  IADC_FifoCfgDvl_t           dataValidLevel; /**< Data valid level before requesting DMA transfer. */
   bool                        fifoDmaWakeup;  /**< Wake-up DMA when FIFO reaches data valid level. */
   IADC_TriggerSel_t           triggerSelect;  /**< Trigger selection. */
   IADC_TriggerAction_t        triggerAction;  /**< Trigger action. */
@@ -766,7 +886,7 @@ typedef struct {
   {                                                                          \
     iadcAlignRight12,              /* Results 12-bit right aligned */        \
     false,                         /* Do not show ID in result */            \
-    _IADC_SCANFIFOCFG_DVL_DEFAULT, /* Use HW default value. */               \
+    iadcFifoCfgDvl4,               /* Use HW default value. */               \
     false,                         /* Do not wake up DMA on scan FIFO DVL */ \
     iadcTriggerSelImmediate,       /* Start scan immediately on trigger */   \
     iadcTriggerActionOnce,         /* Convert once on scan trigger */        \
@@ -777,7 +897,7 @@ typedef struct {
 typedef struct {
   IADC_Alignment_t              alignment;      /**< Alignment of data in FIFO. */
   bool                          showId;         /**< Tag FIFO entry with single indicator (0x20). */
-  uint8_t                       dataValidLevel; /**< Data valid level before requesting DMA transfer. */
+  IADC_FifoCfgDvl_t             dataValidLevel; /**< Data valid level before requesting DMA transfer. */
   bool                          fifoDmaWakeup;  /**< Wake-up DMA when FIFO reaches data valid level. */
   IADC_TriggerSel_t             triggerSelect;  /**< Trigger selection. */
   IADC_TriggerAction_t          triggerAction;  /**< Trigger action. */
@@ -791,7 +911,7 @@ typedef struct {
   {                                                                              \
     iadcAlignRight12,                /* Results 12-bit right aligned */          \
     false,                           /* Do not show ID in result */              \
-    _IADC_SINGLEFIFOCFG_DVL_DEFAULT, /* Use HW default value. */                 \
+    iadcFifoCfgDvl4,                 /* Use HW default value. */                 \
     false,                           /* Do not wake up DMA on single FIFO DVL */ \
     iadcTriggerSelImmediate,         /* Start single immediately on trigger */   \
     iadcTriggerActionOnce,           /* Convert once on single trigger */        \
@@ -892,11 +1012,11 @@ void IADC_updateSingleInput(IADC_TypeDef *iadc,
 uint8_t IADC_calcSrcClkPrescale(IADC_TypeDef *iadc,
                                 uint32_t srcClkFreq,
                                 uint32_t cmuClkFreq);
-uint8_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
-                                uint32_t adcClkFreq,
-                                uint32_t cmuClkFreq,
-                                IADC_CfgAdcMode_t adcMode,
-                                uint8_t srcClkPrescaler);
+uint32_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
+                                 uint32_t adcClkFreq,
+                                 uint32_t cmuClkFreq,
+                                 IADC_CfgAdcMode_t adcMode,
+                                 uint8_t srcClkPrescaler);
 uint8_t IADC_calcTimebase(IADC_TypeDef *iadc, uint32_t cmuClkFreq);
 IADC_Result_t IADC_readSingleResult(IADC_TypeDef *iadc);
 IADC_Result_t IADC_pullSingleFifoResult(IADC_TypeDef *iadc);
@@ -1223,8 +1343,7 @@ __STATIC_INLINE IADC_PosInput_t IADC_portPinToPosInput(GPIO_Port_TypeDef port,
   return (IADC_PosInput_t) input;
 }
 
-/** @} (end addtogroup IADC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup iadc) */
 
 #ifdef __cplusplus
 }

@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup WDOG
+ * @addtogroup wdog
  * @{
  ******************************************************************************/
 
@@ -373,6 +368,9 @@ __STATIC_INLINE void WDOGn_IntSet(WDOG_TypeDef *wdog, uint32_t flags)
  *
  * @param[in] wdog
  *   Pointer to WDOG peripheral register block.
+ *
+ * @return
+ *   True if watchdog is enabled.
  ******************************************************************************/
 __STATIC_INLINE bool WDOGn_IsEnabled(WDOG_TypeDef *wdog)
 {
@@ -389,6 +387,9 @@ __STATIC_INLINE bool WDOGn_IsEnabled(WDOG_TypeDef *wdog)
  *
  * @param[in] wdog
  *   Pointer to WDOG peripheral register block.
+ *
+ * @return
+ *   True if watchdog is locked.
  ******************************************************************************/
 __STATIC_INLINE bool WDOGn_IsLocked(WDOG_TypeDef *wdog)
 {
@@ -467,6 +468,9 @@ __STATIC_INLINE void WDOG_Lock(void)
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_IsEnabled().
  *   This function uses @ref DEFAULT_WDOG.
+ *
+ * @return
+ *   True if watchdog is enabled.
  ******************************************************************************/
 __STATIC_INLINE bool WDOG_IsEnabled(void)
 {
@@ -480,14 +484,16 @@ __STATIC_INLINE bool WDOG_IsEnabled(void)
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_IsLocked().
  *   This function uses @ref DEFAULT_WDOG.
+ *
+ * @return
+ *   True if watchdog is locked.
  ******************************************************************************/
 __STATIC_INLINE bool WDOG_IsLocked(void)
 {
   return WDOGn_IsLocked(DEFAULT_WDOG);
 }
 
-/** @} (end addtogroup WDOG) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup wdog) */
 
 #ifdef __cplusplus
 }

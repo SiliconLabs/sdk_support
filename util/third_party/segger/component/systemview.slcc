@@ -1,9 +1,9 @@
-id: "systemview"
-version: 1
+id: "segger_systemview"
+label: "SEGGER SystemView"
 package: "platform"
 description: "SEGGER SystemView"
-category: "Platform|Util"
-quality: "internal"
+category: "Platform|Utilities|SystemView"
+quality: "production"
 config_file:
   - path: "util/third_party/segger/systemview/Config/SEGGER_SYSVIEW_Conf.h"
 source:
@@ -16,9 +16,15 @@ include:
       - path: "SEGGER_SYSVIEW_ConfDefaults.h"
       - path: "SEGGER_SYSVIEW_Int.h"
 provides:
-  - name: "systemview"
+  - name: "segger_systemview"
 requires:
-  - name: "rtt"
+  - name: "segger_rtt"
   - name: "systemview_micriumos"
     condition:
       - "micriumos"
+template_contribution:
+  - name: event_handler
+    value:
+      event: platform_init
+      include: "SEGGER_SYSVIEW.h"
+      handler: "SEGGER_SYSVIEW_Conf"

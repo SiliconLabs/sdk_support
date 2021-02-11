@@ -1,0 +1,17 @@
+id: "bluetooth_feature_scanner"
+label: "Scanner"
+package: "Bluetooth"
+description: >
+  Bluetooth Low Energy scanning feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_scanner"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_scanner_init"
+    priority: 3

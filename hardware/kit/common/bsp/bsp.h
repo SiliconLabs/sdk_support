@@ -226,11 +226,13 @@ int             BSP_RegisterWrite           (volatile uint16_t *addr, uint16_t d
  * @addtogroup BSP_STK
  * @{
  ******************************************************************************/
+#if defined(BSP_BCC_USART) || defined(BSP_BCC_LEUART)
 int             BSP_BccDeInit               (void);
 int             BSP_BccInit                 (void);
 bool            BSP_BccPacketReceive        (BCP_Packet *pkt);
 int             BSP_BccPacketSend           (BCP_Packet *pkt);
 void            BSP_BccPinsEnable           (bool enable);
+#endif
 float           BSP_CurrentGet              (void);
 int             BSP_EbiDeInit               (void);
 int             BSP_EbiInit                 (void);

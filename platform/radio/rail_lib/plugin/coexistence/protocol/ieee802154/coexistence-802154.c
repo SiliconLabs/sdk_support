@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief 802.15.4 Specific Radio Coexistence callbacks
+ * @brief 802.15.4 Specific Radio Coexistence callbacks.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -32,89 +32,89 @@
   #include "rtos/rtos.h"
 #endif
 
-#if defined(DEBUG_PTA) || defined(RHO_GPIO) || defined(BSP_COEX_RHO_PORT)
+#if defined(DEBUG_PTA) || defined(RHO_GPIO) || defined(SL_RAIL_UTIL_COEX_RHO_PORT)
 #define COEX_RHO_SUPPORT 1
-#endif //defined(DEBUG_PTA) || defined(RHO_GPIO) || defined(BSP_COEX_RHO_PORT)
+#endif //defined(DEBUG_PTA) || defined(RHO_GPIO) || defined(SL_RAIL_UTIL_COEX_RHO_PORT)
 
-#if defined(DEBUG_PTA) || defined(PTA_REQ_GPIO) || defined(BSP_COEX_REQ_PORT) \
-  || defined(PTA_GNT_GPIO) || defined(BSP_COEX_GNT_PORT) || defined(HAL_COEX_RUNTIME_PHY_SELECT)
+#if defined(DEBUG_PTA) || defined(PTA_REQ_GPIO) || defined(SL_RAIL_UTIL_COEX_REQ_PORT) \
+  || defined(PTA_GNT_GPIO) || defined(SL_RAIL_UTIL_COEX_GNT_PORT) || defined(SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT)
 #define COEX_SUPPORT 1
-#endif //defined(DEBUG_PTA) || defined(PTA_REQ_GPIO) || defined(BSP_COEX_REQ_PORT)
-//|| defined(PTA_GNT_GPIO) || defined(BSP_COEX_GNT_PORT) || defined(HAL_COEX_RUNTIME_PHY_SELECT)
+#endif //defined(DEBUG_PTA) || defined(PTA_REQ_GPIO) || defined(SL_RAIL_UTIL_COEX_REQ_PORT)
+//|| defined(PTA_GNT_GPIO) || defined(SL_RAIL_UTIL_COEX_GNT_PORT) || defined(SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT)
 
-#if HAL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
+#if SL_RAIL_UTIL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
   #define DEFAULT_PTA_OPT_ACK_HOLDOFF PTA_OPT_ACK_HOLDOFF
-#else //!(HAL_COEX_ACKHOLDOFF || defined(RHO_GPIO))
+#else //!(SL_RAIL_UTIL_COEX_ACKHOLDOFF || defined(RHO_GPIO))
   #define DEFAULT_PTA_OPT_ACK_HOLDOFF PTA_OPT_DISABLED
-#endif //HAL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
+#endif //SL_RAIL_UTIL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
 
-#if HAL_COEX_TX_ABORT
+#if SL_RAIL_UTIL_COEX_TX_ABORT
   #define DEFAULT_PTA_OPT_ABORT_TX PTA_OPT_ABORT_TX
-#else //!HAL_COEX_TX_ABORT
+#else //!SL_RAIL_UTIL_COEX_TX_ABORT
   #define DEFAULT_PTA_OPT_ABORT_TX PTA_OPT_DISABLED
-#endif //HAL_COEX_TX_ABORT
+#endif //SL_RAIL_UTIL_COEX_TX_ABORT
 
-#if HAL_COEX_TX_HIPRI
+#if SL_RAIL_UTIL_COEX_TX_HIPRI
   #define DEFAULT_PTA_OPT_TX_HIPRI PTA_OPT_TX_HIPRI
-#else //!HAL_COEX_TX_HIPRI
+#else //!SL_RAIL_UTIL_COEX_TX_HIPRI
   #define DEFAULT_PTA_OPT_TX_HIPRI PTA_OPT_DISABLED
-#endif //HAL_COEX_TX_HIPRI
+#endif //SL_RAIL_UTIL_COEX_TX_HIPRI
 
-#if HAL_COEX_RX_HIPRI
+#if SL_RAIL_UTIL_COEX_RX_HIPRI
   #define DEFAULT_PTA_OPT_RX_HIPRI PTA_OPT_RX_HIPRI
-#else //!HAL_COEX_RX_HIPRI
+#else //!SL_RAIL_UTIL_COEX_RX_HIPRI
   #define DEFAULT_PTA_OPT_RX_HIPRI PTA_OPT_DISABLED
-#endif //HAL_COEX_RX_HIPRI
+#endif //SL_RAIL_UTIL_COEX_RX_HIPRI
 
-#if HAL_COEX_RETRYRX_HIPRI
+#if SL_RAIL_UTIL_COEX_RETRYRX_HIPRI
   #define DEFAULT_PTA_OPT_RX_RETRY_HIPRI PTA_OPT_RX_RETRY_HIPRI
-#else //!HAL_COEX_RETRYRX_HIPRI
+#else //!SL_RAIL_UTIL_COEX_RETRYRX_HIPRI
   #define DEFAULT_PTA_OPT_RX_RETRY_HIPRI PTA_OPT_DISABLED
-#endif //HAL_COEX_RETRYRX_HIPRI
+#endif //SL_RAIL_UTIL_COEX_RETRYRX_HIPRI
 
-#if HAL_COEX_LONG_REQ
+#if SL_RAIL_UTIL_COEX_LONG_REQ
   #define DEFAULT_PTA_OPT_LONG_REQ PTA_OPT_LONG_REQ
-#else //!HAL_COEX_LONG_REQ
+#else //!SL_RAIL_UTIL_COEX_LONG_REQ
   #define DEFAULT_PTA_OPT_LONG_REQ PTA_OPT_DISABLED
-#endif //HAL_COEX_LONG_REQ
+#endif //SL_RAIL_UTIL_COEX_LONG_REQ
 
-#if HAL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
+#if SL_RAIL_UTIL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
   #define DEFAULT_PTA_OPT_TOGGLE_REQ_ON_MACRETRANSMIT PTA_OPT_TOGGLE_REQ_ON_MACRETRANSMIT
-#else //!HAL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
+#else //!SL_RAIL_UTIL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
   #define DEFAULT_PTA_OPT_TOGGLE_REQ_ON_MACRETRANSMIT PTA_OPT_DISABLED
-#endif //HAL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
+#endif //SL_RAIL_UTIL_COEX_TOGGLE_REQ_ON_MACRETRANSMIT
 
-#if defined(BSP_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO))
+#if defined(SL_RAIL_UTIL_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO))
   #define DEFAULT_PTA_OPT_RHO_ENABLED PTA_OPT_RHO_ENABLED
-#else //(!defined(BSP_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO)))
+#else //(!defined(SL_RAIL_UTIL_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO)))
   #define DEFAULT_PTA_OPT_RHO_ENABLED PTA_OPT_DISABLED
-#endif //defined(BSP_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO))
+#endif //defined(SL_RAIL_UTIL_COEX_RHO_PORT) || (defined(RADIO_HOLDOFF) && defined(RHO_GPIO))
 
-#if HAL_COEX_RETRYRX_TIMEOUT
-  #define DEFAULT_PTA_OPT_RX_RETRY_TIMEOUT_MS HAL_COEX_RETRYRX_TIMEOUT
-#else //!HAL_COEX_RETRYRX_TIMEOUT
+#if SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
+  #define DEFAULT_PTA_OPT_RX_RETRY_TIMEOUT_MS SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
+#else //!SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
   #define DEFAULT_PTA_OPT_RX_RETRY_TIMEOUT_MS PTA_OPT_DISABLED
-#endif //HAL_COEX_RETRYRX_TIMEOUT
+#endif //SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
 
-#if HAL_COEX_RETRYRX_ENABLE
+#if SL_RAIL_UTIL_COEX_RETRYRX_ENABLE
   #define DEFAULT_PTA_OPT_RX_RETRY_REQ PTA_OPT_RX_RETRY_REQ
-#else //!HAL_COEX_RETRYRX_ENABLE
+#else //!SL_RAIL_UTIL_COEX_RETRYRX_ENABLE
   #define DEFAULT_PTA_OPT_RX_RETRY_REQ PTA_OPT_DISABLED
-#endif //HAL_COEX_RETRYRX_TIMEOUT
+#endif //SL_RAIL_UTIL_COEX_RETRYRX_TIMEOUT
 
-#if HAL_COEX_CCA_THRESHOLD
+#if SL_RAIL_UTIL_COEX_CCA_THRESHOLD
   #define DEFAULT_PTA_OPT_CCA_THRESHOLD \
-  ((HAL_COEX_CCA_THRESHOLD << 20) & PTA_OPT_CCA_THRESHOLD)
-#else //!HAL_COEX_CCA_THRESHOLD
+  ((SL_RAIL_UTIL_COEX_CCA_THRESHOLD << 20) & PTA_OPT_CCA_THRESHOLD)
+#else //!SL_RAIL_UTIL_COEX_CCA_THRESHOLD
   #define DEFAULT_PTA_OPT_CCA_THRESHOLD PTA_OPT_DISABLED
-#endif  //HAL_COEX_CCA_THRESHOLD
+#endif  //SL_RAIL_UTIL_COEX_CCA_THRESHOLD
 
-#if HAL_COEX_MAC_FAIL_THRESHOLD
+#if SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
   #define DEFAULT_PTA_OPT_MAC_FAIL_THRESHOLD \
-  ((HAL_COEX_MAC_FAIL_THRESHOLD << 25) & PTA_OPT_MAC_FAIL_THRESHOLD)
-#else //!HAL_COEX_MAC_FAIL_THRESHOLD
+  ((SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD << 25) & PTA_OPT_MAC_FAIL_THRESHOLD)
+#else //!SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
   #define DEFAULT_PTA_OPT_MAC_FAIL_THRESHOLD PTA_OPT_DISABLED
-#endif  //HAL_COEX_MAC_FAIL_THRESHOLD
+#endif  //SL_RAIL_UTIL_COEX_MAC_FAIL_THRESHOLD
 
 #define DEFAULT_PTA_OPT_FORCE_HOLDOFF PTA_OPT_DISABLED
 #define DEFAULT_PTA_OPT_MAC_HOLDOFF   PTA_OPT_DISABLED
@@ -136,7 +136,7 @@
                              | DEFAULT_PTA_OPT_LONG_REQ                    \
                              )
 
-#if defined(BSP_COEX_REQ_PORT) || defined(PTA_REQ_GPIO)
+#if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(PTA_REQ_GPIO)
   #define PUBLIC_PTA_OPT_RX_RETRY_TIMEOUT_MS \
   PTA_OPT_RX_RETRY_TIMEOUT_MS
   #define PUBLIC_PTA_OPT_RX_RETRY_REQ \
@@ -146,7 +146,7 @@
   #define PUBLIC_PTA_OPT_FORCE_HOLDOFF PTA_OPT_FORCE_HOLDOFF
   #define PUBLIC_PTA_OPT_MAC_HOLDOFF PTA_OPT_MAC_HOLDOFF
   #define PUBLIC_PTA_OPT_REQ_FILTER_PASS PTA_OPT_REQ_FILTER_PASS
-#else //!defined(BSP_COEX_REQ_PORT) && !defined(PTA_REQ_GPIO)
+#else //!defined(SL_RAIL_UTIL_COEX_REQ_PORT) && !defined(PTA_REQ_GPIO)
   #define PUBLIC_PTA_OPT_RX_RETRY_TIMEOUT_MS \
   PTA_OPT_DISABLED
   #define PUBLIC_PTA_OPT_RX_RETRY_REQ \
@@ -158,36 +158,36 @@
   #define PUBLIC_PTA_OPT_REQ_FILTER_PASS PTA_OPT_DISABLED
 #endif
 
-#if defined(BSP_COEX_PRI_PORT) || defined(PTA_PRI_GPIO) || defined(BSP_COEX_DP_PORT)
+#if defined(SL_RAIL_UTIL_COEX_PRI_PORT) || defined(PTA_PRI_GPIO) || defined(SL_RAIL_UTIL_COEX_DP_PORT)
   #define PUBLIC_PTA_OPT_TX_HIPRI          PTA_OPT_TX_HIPRI
   #define PUBLIC_PTA_OPT_RX_HIPRI          PTA_OPT_RX_HIPRI
   #define PUBLIC_PTA_OPT_RX_RETRY_HIPRI    PTA_OPT_RX_RETRY_HIPRI
   #define PUBLIC_PTA_OPT_HIPRI_FILTER_PASS PTA_OPT_HIPRI_FILTER_PASS
-#else //!defined(BSP_COEX_PRI_PORT) && !defined(PTA_PRI_GPIO) && !defined(BSP_COEX_DP_PORT)
+#else //!defined(SL_RAIL_UTIL_COEX_PRI_PORT) && !defined(PTA_PRI_GPIO) && !defined(SL_RAIL_UTIL_COEX_DP_PORT)
   #define PUBLIC_PTA_OPT_TX_HIPRI          PTA_OPT_DISABLED
   #define PUBLIC_PTA_OPT_RX_HIPRI          PTA_OPT_DISABLED
   #define PUBLIC_PTA_OPT_RX_RETRY_HIPRI    PTA_OPT_DISABLED
   #define PUBLIC_PTA_OPT_HIPRI_FILTER_PASS PTA_OPT_DISABLED
 #endif
 
-#if defined(BSP_COEX_RHO_PORT) || defined(RHO_GPIO)
+#if defined(SL_RAIL_UTIL_COEX_RHO_PORT) || defined(RHO_GPIO)
   #define PUBLIC_PTA_OPT_RHO_ENABLED PTA_OPT_RHO_ENABLED
-#else //!(defined(BSP_COEX_RHO_PORT) || defined(RHO_GPIO))
+#else //!(defined(SL_RAIL_UTIL_COEX_RHO_PORT) || defined(RHO_GPIO))
   #define PUBLIC_PTA_OPT_RHO_ENABLED PTA_OPT_DISABLED
-#endif //defined(BSP_COEX_RHO_PORT) || defined(RHO_GPIO)
+#endif //defined(SL_RAIL_UTIL_COEX_RHO_PORT) || defined(RHO_GPIO)
 
 #define PUBLIC_PTA_OPT_ACK_HOLDOFF PTA_OPT_ACK_HOLDOFF
 #define PUBLIC_PTA_OPT_ABORT_TX    PTA_OPT_ABORT_TX
 
-#if HAL_COEX_PRIORITY_ESCALATION_ENABLE
+#if SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE
 #define PUBLIC_PTA_OPT_CCA_THRESHOLD PTA_OPT_CCA_THRESHOLD
 #define PUBLIC_PTA_OPT_MAC_RETRY_THRESHOLD PTA_OPT_MAC_RETRY_THRESHOLD
 #define PUBLIC_PTA_OPT_MAC_FAIL_THRESHOLD PTA_OPT_MAC_FAIL_THRESHOLD
-#else //!HAL_COEX_PRIORITY_ESCALATION_ENABLE
+#else //!SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE
 #define PUBLIC_PTA_OPT_CCA_THRESHOLD PTA_OPT_DISABLED
 #define PUBLIC_PTA_OPT_MAC_RETRY_THRESHOLD PTA_OPT_DISABLED
 #define PUBLIC_PTA_OPT_MAC_FAIL_THRESHOLD PTA_OPT_DISABLED
-#endif //HAL_COEX_PRIORITY_ESCALATION_ENABLE
+#endif //SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE
 
 // Public PTA options can be modified using public PTA APIs
 #define PUBLIC_PTA_OPTIONS (0U                                           \
@@ -218,10 +218,10 @@
   #define CONST_PTA_OPTIONS (~PTA_OPT_DISABLED)
 #endif
 
-#if !defined(BSP_COEX_PHY_SELECT_PORT)         \
-  && (HAL_COEX_DEFAULT_PHY_SELECT_TIMEOUT > 0) \
-  && (HAL_COEX_DEFAULT_PHY_SELECT_TIMEOUT < 255)
-#error "Select BSP_COEX_PHY_SELECT GPIO before enabling COEX PHY select timeout!"
+#if !defined(SL_RAIL_UTIL_COEX_PHY_SELECT_PORT)         \
+  && (SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT > 0) \
+  && (SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT < 255)
+#error "Select SL_RAIL_UTIL_COEX_PHY_SELECT GPIO before enabling COEX PHY select timeout!"
 #endif
 
 extern void emPhyCancelTransmit(void);
@@ -240,20 +240,27 @@ extern bool halAntDivRxPhyChanged(void);
 #define halAntDivRxPhyChanged() (false)
 #endif //HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
 
-#define RUNTIME_PHY_SELECT          \
-  (HAL_ANTDIV_RX_RUNTIME_PHY_SELECT \
-   || HAL_COEX_RUNTIME_PHY_SELECT)  \
+#if HAL_FEM_RUNTIME_PHY_SELECT
+extern bool halFemPhyChanged(void);
+#else //!HAL_FEM_RUNTIME_PHY_SELECT
+#define halFemPhyChanged() (false)
+#endif //HAL_FEM_RUNTIME_PHY_SELECT
+
+#define RUNTIME_PHY_SELECT                 \
+  (HAL_ANTDIV_RX_RUNTIME_PHY_SELECT        \
+   || SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT \
+   || HAL_FEM_RUNTIME_PHY_SELECT)          \
 
 #define COEX_STACK_EVENT_SUPPORT \
   (COEX_SUPPORT                  \
    || COEX_RHO_SUPPORT           \
    || RUNTIME_PHY_SELECT)        \
 
-#if HAL_COEX_PHY_ENABLED
+#if SL_RAIL_UTIL_COEX_PHY_ENABLED
 static uint8_t phySelectTimeoutMs = PTA_PHY_SELECT_TIMEOUT_MAX;
-#else //!HAL_COEX_PHY_ENABLED
+#else //!SL_RAIL_UTIL_COEX_PHY_ENABLED
 static uint8_t phySelectTimeoutMs = 0U;
-#endif //HAL_COEX_PHY_ENABLED
+#endif //SL_RAIL_UTIL_COEX_PHY_ENABLED
 
 #if COEX_STACK_EVENT_SUPPORT
 static bool coexInitialized = false;
@@ -269,14 +276,14 @@ enum {
   EMBER_RADIO_POWER_MODE_OFF
 };
 typedef uint8_t RadioPowerMode;
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 extern bool halCoexPhySelectedCoex;
 #define halCoexPhyChanged() (halCoexNewPhySelectedCoex != halCoexPhySelectedCoex)
 #define halCoexUpdateSelectedPhy() (halCoexPhySelectedCoex = halCoexNewPhySelectedCoex)
-#else //!HAL_COEX_RUNTIME_PHY_SELECT
+#else //!SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 #define halCoexPhyChanged() (false)
 #define halCoexUpdateSelectedPhy() /*no-op*/
-#endif //HAL_COEX_RUNTIME_PHY_SELECT
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
 extern RAIL_Handle_t emPhyRailHandle;
 #if     PHY_DUAL
@@ -286,15 +293,15 @@ extern RAIL_Handle_t emPhyRailHandle;
 #define emRadioSetIdleMode       emPhy0_emRadioSetIdleMode
 #endif//PHY_DUAL
 extern uint8_t emPhyGetChannelPageInUse(void);
-extern RadioPowerMode emRadioGetIdleMode(void);
-extern EmberStatus emRadioSetIdleMode(RadioPowerMode mode);
+extern RadioPowerMode sl_mac_get_radio_idle_mode(uint8_t mac_index);
+extern sl_status_t sl_mac_lower_mac_set_radio_idle_mode(uint8_t mac_index, RadioPowerMode mode);
 extern RAIL_Status_t halPluginConfig2p4GHzRadio(RAIL_Handle_t railHandle);
 
-#if     HAL_COEX_PHY_ENABLED
+#if     SL_RAIL_UTIL_COEX_PHY_ENABLED
 static volatile bool halCoexNewPhySelectedCoex = true;
-#else//!HAL_COEX_PHY_ENABLED
+#else//!SL_RAIL_UTIL_COEX_PHY_ENABLED
 static volatile bool halCoexNewPhySelectedCoex = false;
-#endif//HAL_COEX_PHY_ENABLED
+#endif//SL_RAIL_UTIL_COEX_PHY_ENABLED
 static uint8_t blockPhySwitch = 0U;
 #define BLOCK_SWITCH_RX 0x01u
 #define BLOCK_SWITCH_TX 0x02u
@@ -307,32 +314,32 @@ static uint8_t blockPhySwitch = 0U;
     }                                     \
   } while (false)
 
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 static bool phySelectInitialized = false;
 static void phySelectTick(void);
-#endif //HAL_COEX_RUNTIME_PHY_SELECT
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
 static bool checkPhySwitch(void)
 {
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   if (phySelectInitialized) {
     phySelectTick();
   } else if (emPhyRailHandle != NULL) {
-    halPtaSetPhySelectTimeout(HAL_COEX_DEFAULT_PHY_SELECT_TIMEOUT);
+    halPtaSetPhySelectTimeout(SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT);
     phySelectInitialized = true;
   }
-#endif //HAL_COEX_RUNTIME_PHY_SELECT
-  if ((halAntDivRxPhyChanged() || halCoexPhyChanged())
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+  if ((halAntDivRxPhyChanged() || halCoexPhyChanged() || halFemPhyChanged())
       && (blockPhySwitch == 0U)
       && coexInitialized
       && (emPhyRailHandle != NULL)) {
     //@TODO: Ascertain radio is OFF, RXWARM, or RXSEARCH only.
     halCoexUpdateSelectedPhy();
     if (emPhyGetChannelPageInUse() == 0) { // Using 2.4GHz band
-      RadioPowerMode currentMode = emRadioGetIdleMode();
-      (void) emRadioSetIdleMode(EMBER_RADIO_POWER_MODE_OFF);
+      RadioPowerMode currentMode = sl_mac_get_radio_idle_mode(0U);
+      (void) sl_mac_lower_mac_set_radio_idle_mode(0U, EMBER_RADIO_POWER_MODE_OFF);
       (void) halPluginConfig2p4GHzRadio(emPhyRailHandle);
-      (void) emRadioSetIdleMode(currentMode);
+      (void) sl_mac_lower_mac_set_radio_idle_mode(0U, currentMode);
     } else {
       // Defer proper PHY selection to when the 2.4GHz band is next used
     }
@@ -352,20 +359,20 @@ static bool checkPhySwitch(void)
 static HalPtaOptions halPtaOptions = DEFAULT_PTA_OPTIONS;
 static void configRandomDelay(void);
 static void coexEventsCb(COEX_Events_t events);
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 static void phySelectIsr(void);
-#endif//HAL_COEX_RUNTIME_PHY_SELECT
+#endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
 static void eventsCb(COEX_Events_t events)
 {
   if ((events & COEX_EVENT_HOLDOFF_CHANGED) != 0U) {
     emRadioHoldOffIsr((COEX_GetOptions() & COEX_OPTION_HOLDOFF_ACTIVE) != 0U);
   }
- #if     HAL_COEX_RUNTIME_PHY_SELECT
+ #if     SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   if ((events & COEX_EVENT_PHY_SELECT_CHANGED) != 0U) {
     phySelectIsr();
   }
- #endif//HAL_COEX_RUNTIME_PHY_SELECT
+ #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   coexEventsCb(events);
 }
 
@@ -456,7 +463,7 @@ EmberStatus halPtaSetOptions(HalPtaOptions options)
 }
 #endif //COEX_STACK_EVENT_SUPPORT
 
-#ifdef HAL_COEX_DP_ENABLED
+#ifdef SL_RAIL_UTIL_COEX_DP_ENABLED
 EmberStatus halPtaSetDirectionalPriorityPulseWidth(uint8_t pulseWidthUs)
 {
   return COEX_HAL_SetDpPulseWidth(pulseWidthUs)
@@ -467,7 +474,7 @@ uint8_t halPtaGetDirectionalPriorityPulseWidth(void)
 {
   return COEX_HAL_GetDpPulseWidth();
 }
-#else //HAL_COEX_DP_ENABLED
+#else //SL_RAIL_UTIL_COEX_DP_ENABLED
 EmberStatus halPtaSetDirectionalPriorityPulseWidth(uint8_t pulseWidthUs)
 {
   UNUSED_VAR(pulseWidthUs);
@@ -478,7 +485,7 @@ uint8_t halPtaGetDirectionalPriorityPulseWidth(void)
 {
   return 0;
 }
-#endif //HAL_COEX_DP_ENABLED
+#endif //SL_RAIL_UTIL_COEX_DP_ENABLED
 
 #if     COEX_SUPPORT
 static void emCoexCounter(COEX_Events_t events);
@@ -555,7 +562,7 @@ WEAK(void emPhyCancelTransmit(void))
 {
 }
 
-#if HAL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
+#if SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
 
 static uint8_t ptaCcaFailEscalate = 0U;
 static uint8_t ptaMacFailEscalate = 0U;
@@ -581,12 +588,12 @@ static void deescalatePriority(void)
   }
 }
 
-#else //!(HAL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA))
+#else //!(SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA))
 
 #define escalatePriority(counter, threshold)  /* no-op */
 #define deescalatePriority()                  /* no-op */
 
-#endif //HAL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
+#endif //SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
 
 // PTA MAC/PHY Event Handling
 
@@ -617,7 +624,7 @@ static void cancelTimer(RAIL_MultiTimer_t * timer)
 static RAIL_MultiTimer_t ptaRxTimer;
 static RAIL_MultiTimer_t ptaRxRetryTimer;
 
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 static RAIL_MultiTimer_t ptaPhySelectTimer;
 static void ptaPhySelectTimerCb(RAIL_MultiTimer_t * tmr,
                                 RAIL_Time_t expectedTimeOfEvent,
@@ -645,7 +652,7 @@ static void phySelectIsr(void)
     setTimer(&ptaPhySelectTimer, phySelectTimeoutMs * MICROSECONDS_PER_MILLISECOND, &ptaPhySelectTimerCb);
   }
 }
-#endif //HAL_COEX_RUNTIME_PHY_SELECT
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
 static void ptaRxTimerCb(RAIL_MultiTimer_t * tmr,
                          RAIL_Time_t expectedTimeOfEvent,
@@ -703,23 +710,23 @@ static void checkTimers(void)
 
 #endif//USE_MULTITIMER
 
-#if USE_MULTITIMER && HAL_COEX_PWM_DEFAULT_ENABLED
+#if USE_MULTITIMER && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED
 static bool pwmRequestInitialized = false;
 static void initPwmRequest(void)
 {
   extern RAIL_Handle_t emPhyRailHandle;
   if (!pwmRequestInitialized && emPhyRailHandle != NULL) {
     halPtaSetRequestPwm(COEX_REQ_PWM
-                        | (HAL_COEX_PWM_PRIORITY << COEX_REQ_HIPRI_SHIFT),
+                        | (SL_RAIL_UTIL_COEX_PWM_PRIORITY << COEX_REQ_HIPRI_SHIFT),
                         NULL,
-                        HAL_COEX_PWM_REQ_DUTYCYCLE,
-                        HAL_COEX_PWM_REQ_PERIOD);
+                        SL_RAIL_UTIL_COEX_PWM_REQ_DUTYCYCLE,
+                        SL_RAIL_UTIL_COEX_PWM_REQ_PERIOD);
     pwmRequestInitialized = true;
   }
 }
-#else //!(USE_MULTITIMER && HAL_COEX_PWM_DEFAULT_ENABLED)
+#else //!(USE_MULTITIMER && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED)
 #define initPwmRequest() //no-op
-#endif // USE_MULTITIMER && HAL_COEX_PWM_DEFAULT_ENABLED
+#endif // USE_MULTITIMER && SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED
 
 halPtaStackStatus_t halPtaStackEvent(halPtaStackEvent_t ptaStackEvent,
                                      uint32_t supplement)
@@ -957,11 +964,11 @@ halPtaReq_t halPtaFilterPassReq(void)
 
 EmberStatus halPtaSetTxRequest(COEX_Req_t coexReq, COEX_ReqCb_t coexCb)
 {
-#if HAL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
+#if SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
   if (((coexReq & COEX_REQ_ON) != 0U) && priorityEscalated) {
     coexReq |= COEX_REQ_HIPRI;
   }
-#endif // HAL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
+#endif // SL_RAIL_UTIL_COEX_PRIORITY_ESCALATION_ENABLE || defined(DEBUG_PTA)
   return halInternalPtaSetRequest(&txReq, coexReq, coexCb);
 }
 
@@ -1187,7 +1194,7 @@ void halStackRadioHoldOffPowerUp(void)
 
 EmberStatus halPtaSetPhySelectTimeout(uint8_t timeoutMs)
 {
-#if HAL_COEX_RUNTIME_PHY_SELECT
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
   if (phySelectTimeoutMs != timeoutMs) {
     phySelectTimeoutMs = timeoutMs;
     if (timeoutMs == 0U) {
@@ -1197,21 +1204,21 @@ EmberStatus halPtaSetPhySelectTimeout(uint8_t timeoutMs)
       RAIL_CancelMultiTimer(&ptaPhySelectTimer);
       halCoexNewPhySelectedCoex = true;
     } else {
-#ifdef BSP_COEX_PHY_SELECT_PORT
+#ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
       COEX_EnablePhySelectIsr(true);
       return EMBER_SUCCESS;
-#else //!BSP_COEX_PHY_SELECT_PORT
+#else //!SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
       return EMBER_BAD_ARGUMENT;
-#endif //BSP_COEX_PHY_SELECT_PORT
+#endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
     }
-#ifdef BSP_COEX_PHY_SELECT_PORT
+#ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
     COEX_EnablePhySelectIsr(false);
-#endif //BSP_COEX_PHY_SELECT_PORT
+#endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
   }
   return EMBER_SUCCESS;
-#else //HAL_COEX_PHY_ENABLED
+#else //SL_RAIL_UTIL_COEX_PHY_ENABLED
   return (timeoutMs == phySelectTimeoutMs) ? EMBER_SUCCESS : EMBER_BAD_ARGUMENT;
-#endif //HAL_COEX_RUNTIME_PHY_SELECT
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 }
 
 uint8_t halPtaGetPhySelectTimeout(void)
@@ -1219,7 +1226,7 @@ uint8_t halPtaGetPhySelectTimeout(void)
   return phySelectTimeoutMs;
 }
 
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 bool halPtaGetGpioInputOverride(halPtaGpioIndex_t gpioIndex)
 {
   return COEX_GetGpioInputOverride((COEX_GpioIndex_t)(gpioIndex + 1));
@@ -1231,7 +1238,7 @@ EmberStatus halPtaSetGpioInputOverride(halPtaGpioIndex_t gpioIndex,
   return COEX_SetGpioInputOverride((COEX_GpioIndex_t)(gpioIndex + 1), enabled)
          ? EMBER_SUCCESS : EMBER_BAD_ARGUMENT;
 }
-#else //!HAL_COEX_OVERRIDE_GPIO_INPUT
+#else //!SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
 bool halPtaGetGpioInputOverride(halPtaGpioIndex_t gpioIndex)
 {
   UNUSED_VAR(gpioIndex);
@@ -1245,4 +1252,4 @@ EmberStatus halPtaSetGpioInputOverride(halPtaGpioIndex_t gpioIndex,
   UNUSED_VAR(enabled);
   return EMBER_ERR_FATAL;
 }
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT

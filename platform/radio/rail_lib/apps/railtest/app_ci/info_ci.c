@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements informational commands for RAIL test applications.
+ * @brief This file implements informational commands for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -29,7 +29,6 @@
  ******************************************************************************/
 
 #include <string.h>
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
@@ -79,9 +78,9 @@ const char *getStatusMessage(RAIL_Status_t status)
   }
 }
 
-void getStatus(int argc, char **argv)
+void getStatus(sl_cli_command_arg_t *args)
 {
-  responsePrintStart(argv[0]);
+  responsePrintStart(sl_cli_get_command_string(args, 0));
   responsePrintContinue("UserTxCount:%u,"
                         "AckTxCount:%u,"
                         "UserTxAborted:%u,"
@@ -143,7 +142,8 @@ void getStatus(int argc, char **argv)
                    "TxClear:%u,"
                    "TxCca:%u,"
                    "TxRetry:%u,"
-                   "UserTxStarted:%u",
+                   "UserTxStarted:%u,"
+                   "PaProtect:%u",
                    counters.rxBeams,
                    counters.dataRequests,
                    counters.calibrations,
@@ -151,15 +151,16 @@ void getStatus(int argc, char **argv)
                    counters.lbtSuccess,
                    counters.lbtStartCca,
                    counters.lbtRetry,
-                   counters.userTxStarted
+                   counters.userTxStarted,
+                   counters.paProtect
                    );
 }
 
-void fifoStatus(int argc, char**argv)
+void fifoStatus(sl_cli_command_arg_t *args)
 {
   uint16_t spaceCount =  RAIL_GetTxFifoSpaceAvailable(railHandle);
   uint16_t byteCount = RAIL_GetRxFifoBytesAvailable(railHandle);
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "TxSpaceCount:%u,"
                 "RxByteCount:%u,"
                 "TxFifoThreshold:%d,"
@@ -183,124 +184,142 @@ void fifoStatus(int argc, char**argv)
                 );
 }
 
-void getVersion(int argc, char **argv)
+void getVersion(sl_cli_command_arg_t *args)
 {
   RAIL_Version_t rail_ver;
   RAIL_GetVersion(&rail_ver, false);
-  responsePrint(argv[0], "App:%d.%d.%d,RAIL:%d.%d.%d,Multiprotocol:%s,"
-                         "Built:%s",
+  responsePrint(sl_cli_get_command_string(args, 0), "App:%d.%d.%d,RAIL:%d.%d.%d,Multiprotocol:%s,"
+                                                    "Built:%s",
                 rail_ver.major, rail_ver.minor, rail_ver.rev,
                 rail_ver.major, rail_ver.minor, rail_ver.rev,
                 rail_ver.multiprotocol ? "True" : "False",
                 buildDateTime);
 }
 
-void setPtiProtocol(int argc, char **argv)
+void setPtiProtocol(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status = RAIL_SetPtiProtocol(railHandle,
-                                             (RAIL_PtiProtocol_t) ciGetUnsigned(argv[1]));
-  responsePrint(argv[0], "Pti:%s", status ? "Error" : "Set");
+                                             (RAIL_PtiProtocol_t) sl_cli_get_argument_uint8(args, 0));
+  responsePrint(sl_cli_get_command_string(args, 0), "Pti:%s", status ? "Error" : "Set");
 }
 
-void getVersionVerbose(int argc, char **argv)
+void getVersionVerbose(sl_cli_command_arg_t *args)
 {
   RAIL_Version_t rail_ver;
   RAIL_GetVersion(&rail_ver, true);
-  responsePrint(argv[0], "App:%d.%d.%d,RAIL:%d.%d.%d.%d",
+  responsePrint(sl_cli_get_command_string(args, 0), "App:%d.%d.%d,RAIL:%d.%d.%d.%d",
                 rail_ver.major, rail_ver.minor, rail_ver.rev,
                 rail_ver.major, rail_ver.minor, rail_ver.rev, rail_ver.build);
-  responsePrint(argv[0], "hash:0x%.8X,flags:0x%.2X",
+  responsePrint(sl_cli_get_command_string(args, 0), "hash:0x%.8X,flags:0x%.2X",
                 rail_ver.hash, rail_ver.flags);
 }
 
-void offsetLqi(int argc, char **argv)
+void offsetLqi(sl_cli_command_arg_t *args)
 {
-  int32_t offset = ciGetSigned(argv[1]);
+  int32_t offset = sl_cli_get_argument_int32(args, 0);
   if ((offset > 0xFF) || (offset < -0xFF)) {
-    responsePrintError(argv[0], 0x08,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08,
                        "Invalid value. Must be between -255 and 255.");
     return;
   }
   lqiOffset = (int16_t)offset;
-  responsePrint(argv[0], "lqiOffset:%d", lqiOffset);
+  responsePrint(sl_cli_get_command_string(args, 0), "lqiOffset:%d", lqiOffset);
 }
 
-void getRssi(int argc, char **argv)
+void getRssi(sl_cli_command_arg_t *args)
 {
   char bufRssi[10];
-  bool wait = false;
+  uint32_t waitTimeout = RAIL_GET_RSSI_NO_WAIT;
 
-  if (argc == 2) {
-    wait = !!ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) == 1) {
+    waitTimeout = sl_cli_get_argument_uint8(args, 0);
+    // For backwards compatability, map the value 1 to a no timeout wait
+    if (waitTimeout == 1) {
+      waitTimeout = RAIL_GET_RSSI_WAIT_WITHOUT_TIMEOUT;
+    }
   }
-  CHECK_RAIL_HANDLE(argv[0]);
-  int16_t rssi = RAIL_GetRssi(railHandle, wait);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  int16_t rssi = RAIL_GetRssiAlt(railHandle, waitTimeout);
 
   // The lowest negative value is used to indicate an error reading the RSSI
   if (rssi == RAIL_RSSI_INVALID) {
-    responsePrintError(argv[0], 0x08, "Could not read RSSI. Ensure Rx is enabled");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08, "Could not read RSSI. Ensure Rx is enabled");
     return;
   }
 
   sprintfFloat(bufRssi, sizeof(bufRssi), ((float) rssi / 4), 2);
   if (RAIL_IEEE802154_IsEnabled(railHandle)) {
     uint8_t energyDetect = RAIL_IEEE802154_ConvertRssiToEd(rssi / 4);
-    responsePrint(argv[0], "rssi:%s,ed154:%u", bufRssi, energyDetect);
+    responsePrint(sl_cli_get_command_string(args, 0), "rssi:%s,ed154:%u", bufRssi, energyDetect);
   } else {
-    responsePrint(argv[0], "rssi:%s", bufRssi);
+    responsePrint(sl_cli_get_command_string(args, 0), "rssi:%s", bufRssi);
   }
 }
 
-void startAvgRssi(int argc, char **argv)
+void startAvgRssi(sl_cli_command_arg_t *args)
 {
-  uint32_t averageTimeUs = ciGetUnsigned(argv[1]);
-  uint8_t avgChannel = channel;
-  if (argc == 3) {
-    avgChannel = ciGetUnsigned(argv[2]);
+  uint32_t averageTimeUs = sl_cli_get_argument_uint32(args, 0);
+  uint16_t avgChannel = channel;
+  if (sl_cli_get_argument_count(args) == 2) {
+    avgChannel = sl_cli_get_argument_uint16(args, 1);
   }
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, NULL)) {
-    responsePrintError(argv[0], 0x08, "Could not read RSSI. Ensure RX is disabled.");
-    return;
-  } else if (RAIL_StartAverageRssi(railHandle, avgChannel, averageTimeUs, NULL) != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x08, "Could not read RSSI.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08, "Could not read RSSI. Ensure RX is disabled.");
     return;
   }
+  RAIL_Time_t startTime = RAIL_GetTime();
+  if (RAIL_StartAverageRssi(railHandle, avgChannel, averageTimeUs, NULL) != RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08, "Could not read RSSI.");
+    return;
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "Time:%d", startTime);
 }
-void getAvgRssi(int argc, char **argv)
+void getAvgRssi(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   int16_t rssi = RAIL_GetAverageRssi(railHandle);
   char bufRssi[10];
   if (rssi == RAIL_RSSI_INVALID) {
-    responsePrintError(argv[0], 0x08, "Invalid RSSI. Make sure startAvgRssi ran successfully.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08, "Invalid RSSI. Make sure startAvgRssi ran successfully.");
     return;
   }
   sprintfFloat(bufRssi, sizeof(bufRssi), ((float) rssi / 4), 2);
-  responsePrint(argv[0], "rssi:%s", bufRssi);
+  responsePrint(sl_cli_get_command_string(args, 0), "rssi:%s", bufRssi);
 }
-void setRssiOffset(int argc, char **argv)
+void setRssiOffset(sl_cli_command_arg_t *args)
 {
-  int8_t rssiOffset = ciGetSigned(argv[1]);
-  CHECK_RAIL_HANDLE(argv[0]);
+  int8_t rssiOffset = sl_cli_get_argument_int8(args, 0);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (RAIL_STATUS_NO_ERROR != RAIL_SetRssiOffset(railHandle, rssiOffset)) {
-    responsePrint(argv[0], "Error setting the rssiOffset");
+    responsePrint(sl_cli_get_command_string(args, 0), "Error setting the rssiOffset");
   } else {
     rssiOffset = RAIL_GetRssiOffset(railHandle);
-    responsePrint(argv[0], "rssiOffset:%d", rssiOffset);
+    responsePrint(sl_cli_get_command_string(args, 0), "rssiOffset:%d", rssiOffset);
   }
 }
-void getRssiOffset(int argc, char **argv)
+void getRssiOffset(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  int8_t rssiOffset = RAIL_GetRssiOffset(railHandle);
-  responsePrint(argv[0], "rssiOffset:%d", rssiOffset);
+  // Radio specific RSSI offset
+  int8_t radioRssiOffset = RAIL_GetRssiOffset(RAIL_EFR32_HANDLE);
+  if ((sl_cli_get_argument_count(args) >= 1)
+      && !!sl_cli_get_argument_uint8(args, 0)) {
+    responsePrint(sl_cli_get_command_string(args, 0), "radioRssiOffset:%d", radioRssiOffset);
+  } else {
+    CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+    // Protocol specific RSSI offset
+    int8_t protocolRssiOffset = RAIL_GetRssiOffset(railHandle);
+    responsePrint(sl_cli_get_command_string(args, 0), "rssiOffset:%d,radioRssiOffset:%d,totalRssiOffset:%d", \
+                  protocolRssiOffset,
+                  radioRssiOffset,
+                  (protocolRssiOffset + radioRssiOffset));
+  }
 }
-void sweepPower(int argc, char **argv)
+void sweepPower(sl_cli_command_arg_t *args)
 {
-  int32_t lowPower = ciGetUnsigned(argv[1]);
-  int32_t hiPower = ciGetUnsigned(argv[2]);
-  int32_t period = ciGetUnsigned(argv[3]);
+  int32_t lowPower = sl_cli_get_argument_int32(args, 0);
+  int32_t hiPower = sl_cli_get_argument_int32(args, 1);
+  int32_t period = sl_cli_get_argument_int32(args, 2);
   int32_t halfPeriodStepUs = period / 2;
   uint32_t expired = RAIL_GetTime() + (uint32_t)5000000;
   while (expired > RAIL_GetTime()) {
@@ -318,41 +337,42 @@ void sweepPower(int argc, char **argv)
   RAIL_StopTxStream(railHandle);
 }
 
-void isRssiRdy(int argc, char **argv)
+void isRssiRdy(sl_cli_command_arg_t *args)
 {
   if (RAIL_IsAverageRssiReady(railHandle)) {
-    responsePrint(argv[0], "isReady:True");
+    responsePrint(sl_cli_get_command_string(args, 0), "isReady:True");
   } else {
-    responsePrint(argv[0], "isReady:False");
+    responsePrint(sl_cli_get_command_string(args, 0), "isReady:False");
   }
   return;
 }
 
-void resetCounters(int argc, char **argv)
+void resetCounters(sl_cli_command_arg_t *args)
 {
   memset(&counters, 0, sizeof(counters));
-  getStatus(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getStatus(args);
 }
 
-void getTime(int argc, char **argv)
+void getTime(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0], "Time:%u", RAIL_GetTime());
+  responsePrint(sl_cli_get_command_string(args, 0), "Time:%u", RAIL_GetTime());
 }
 
-void setTime(int argc, char **argv)
+void setTime(sl_cli_command_arg_t *args)
 {
-  uint32_t timeUs = ciGetUnsigned(argv[1]);
+  uint32_t timeUs = sl_cli_get_argument_uint32(args, 0);
   if (RAIL_STATUS_NO_ERROR == RAIL_SetTime(timeUs)) {
-    responsePrint(argv[0], "Status:Success,CurrentTime:%u", RAIL_GetTime());
+    responsePrint(sl_cli_get_command_string(args, 0), "Status:Success,CurrentTime:%u", RAIL_GetTime());
   } else {
-    responsePrint(argv[0], "Status:Error,CurrentTime:%u", RAIL_GetTime());
+    responsePrint(sl_cli_get_command_string(args, 0), "Status:Error,CurrentTime:%u", RAIL_GetTime());
   }
 }
 
-void printChipFeatures(int argc, char **argv)
+void printChipFeatures(sl_cli_command_arg_t *args)
 {
   RAIL_TxPowerLevel_t maxPowerLevel;
-  responsePrintHeader(argv[0], "Feature:%s,CompileTime:%s,RunTime:%s");
+  responsePrintHeader(sl_cli_get_command_string(args, 0), "Feature:%s,CompileTime:%s,RunTime:%s");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_DUAL_BAND",
                      RAIL_SUPPORTS_DUAL_BAND ? "Yes" : "No",
@@ -394,6 +414,10 @@ void printChipFeatures(int argc, char **argv)
                      RAIL_SUPPORTS_RADIO_ENTROPY ? "Yes" : "No",
                      RAIL_SupportsRadioEntropy(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION",
+                     RAIL_SUPPORTS_RFSENSE_ENERGY_DETECTION ? "Yes" : "No",
+                     RAIL_SupportsRfSenseEnergyDetection(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK",
                      RAIL_SUPPORTS_RFSENSE_SELECTIVE_OOK ? "Yes" : "No",
                      RAIL_SupportsRfSenseSelectiveOok(railHandle) ? "Yes" : "No");
@@ -413,6 +437,22 @@ void printChipFeatures(int argc, char **argv)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_2P4GIG_HIGHEST", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
+ #ifdef  RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_HIGHEST,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_HIGHEST", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
  #ifdef  RAIL_TX_POWER_MODE_2P4GIG_HP
   if (RAIL_SupportsTxPowerMode(railHandle,
                                RAIL_TX_POWER_MODE_2P4GIG_HP,
@@ -518,6 +558,10 @@ void printChipFeatures(int argc, char **argv)
                      RAIL_BLE_SUPPORTS_CTE ? "Yes" : "No",
                      RAIL_BLE_SupportsCte(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_BLE_SUPPORTS_QUUPPA",
+                     RAIL_BLE_SUPPORTS_QUUPPA ? "Yes" : "No",
+                     RAIL_BLE_SupportsQuuppa(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_BLE_SUPPORTS_IQ_SAMPLING",
                      RAIL_BLE_SUPPORTS_IQ_SAMPLING ? "Yes" : "No",
                      RAIL_BLE_SupportsIQSampling(railHandle) ? "Yes" : "No");
@@ -577,4 +621,33 @@ void printChipFeatures(int argc, char **argv)
                      "RAIL_ZWAVE_SUPPORTS_REGION_PTI",
                      RAIL_ZWAVE_SUPPORTS_REGION_PTI ? "Yes" : "No",
                      RAIL_ZWAVE_SupportsRegionPti(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_ZWAVE_SUPPORTS_ED_PHY",
+                     RAIL_ZWAVE_SUPPORTS_ED_PHY ? "Yes" : "No",
+                     RAIL_ZWAVE_SupportsEnergyDetectPhy(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_ZWAVE_SUPPORTS_CONC_PHY",
+                     RAIL_ZWAVE_SUPPORTS_CONC_PHY ? "Yes" : "No",
+                     RAIL_ZWAVE_SupportsConcPhy(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_SQ_PHY",
+                     RAIL_SUPPORTS_SQ_PHY ? "Yes" : "No",
+                     RAIL_SupportsSQPhy(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_DIRECT_MODE",
+                     RAIL_SUPPORTS_DIRECT_MODE ? "Yes" : "No",
+                     RAIL_SupportsDirectMode(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK",
+                     RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK ? "Yes" : "No",
+                     RAIL_SupportsAddrFilterAddressBitMask(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_PROTOCOL_MFM",
+                     RAIL_SUPPORTS_PROTOCOL_MFM ? "Yes" : "No",
+                     RAIL_SupportsProtocolMfm(railHandle) ? "Yes" : "No");
+}
+
+void cliSeparatorHack(sl_cli_command_arg_t *args)
+{
+  (void) args;
 }

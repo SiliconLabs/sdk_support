@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the autoack commands in RAIL test apps.
+ * @brief This file implements the autoack commands in RAILtest apps.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,87 +31,159 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
 #include "rail_features.h"
 #include "app_common.h"
-#include "app_ci.h"
+#include "rail_zwave.h"
 
 #if RAIL_FEAT_CHANNEL_HOPPING
 
-RAIL_RxChannelHoppingConfigEntry_t channelHoppingEntries[MAX_NUMBER_CHANNELS];
-RAIL_RxChannelHoppingConfig_t channelHoppingConfig = {
+static RAIL_RxChannelHoppingConfigEntry_t channelHoppingEntries[MAX_NUMBER_CHANNELS];
+static RAIL_RxChannelHoppingConfigMultiMode_t multiModeParams[MAX_NUMBER_CHANNELS];
+static RAIL_RxChannelHoppingConfig_t channelHoppingConfig = {
   .entries = channelHoppingEntries,
   .bufferLength = CHANNEL_HOPPING_BUFFER_SIZE,
   .numberOfChannels = 0
 };
+// Enable RX duty cycle with power manager schedule wakeup
+static bool enableRxDutyCycleWithSchedWakeup = false;
+// RX Duty cycle delay to schedule the periodic wakeup
+static RAIL_Time_t rxDutyCycleSchedWakeupDelayUs = 0U;
 
-void configRxChannelHopping(int argc, char **argv)
+void configRxChannelHopping(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
-
+  RAIL_Status_t status;
+  uint8_t i = 0U;
   channelHoppingConfig.buffer = channelHoppingBuffer;
-  uint8_t i;
-  for (i = 1; i * 4 < argc; i++) {
-    if (ciGetUnsigned(argv[(i * 4) - 3]) > (uint32_t)UINT16_MAX) {
-      responsePrintError(argv[0], 0x16, "Channel must be a 16 bit value.");
-      return;
-    }
-    channelHoppingEntries[i - 1].channel = ciGetUnsigned(argv[(i * 4) - 3]);
-    channelHoppingEntries[i - 1].mode = ciGetUnsigned(argv[(i * 4) - 2]);
-    channelHoppingEntries[i - 1].parameter = ciGetUnsigned(argv[i * 4 - 1]);
-    channelHoppingEntries[i - 1].delay = ciGetUnsigned(argv[i * 4]);
-    channelHoppingEntries[i - 1].delayMode = RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC;
-  }
-  channelHoppingConfig.numberOfChannels = i - 1;
 
-  RAIL_Status_t status = RAIL_ConfigRxChannelHopping(railHandle, &channelHoppingConfig);
-  responsePrint(argv[0], "numberOfChannels:%d,buffer:0x%x,Success:%s",
-                i - 1,
-                channelHoppingConfig.buffer,
-                status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+  if (sl_cli_get_argument_count(args) == 0) {
+#if RAIL_SUPPORTS_PROTOCOL_ZWAVE
+    // If no arguments are provided, use the Z-Wave timings set by the calculator
+    status = RAIL_ZWAVE_ConfigRxChannelHopping(railHandle, &channelHoppingConfig);
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "numberOfChannels:%d,paramCh0:%d,paramCh1:%d,paramCh2:%d,paramCh3:%d,buffer:0x%x,Success:%s",
+                  channelHoppingConfig.numberOfChannels,
+                  channelHoppingConfig.entries[0].parameter,
+                  channelHoppingConfig.entries[1].parameter,
+                  channelHoppingConfig.entries[2].parameter,
+                  channelHoppingConfig.entries[3].parameter,
+                  channelHoppingConfig.buffer,
+                  status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+#else
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Insufficient arguments. Must provide channel hopping sequence.");
+#endif
+    return;
+  } else {
+    for (i = 0U; (i + 1) * 4 < (sl_cli_get_argument_count(args) + 1); i++) {
+      if (sl_cli_get_argument_uint32(args, ((i + 1) * 4) - 4) > (uint32_t)UINT16_MAX) {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x16, "Channel must be a 16 bit value.");
+        return;
+      }
+      channelHoppingEntries[i].channel   = sl_cli_get_argument_uint32(args, ((i + 1) * 4) - 4);
+      channelHoppingEntries[i].mode      = sl_cli_get_argument_uint32(args, ((i + 1) * 4) - 3);
+      if ((channelHoppingEntries[i].mode & ~RAIL_RX_CHANNEL_HOPPING_MODES_WITH_OPTIONS_BASE)
+          == RAIL_RX_CHANNEL_HOPPING_MODE_MULTI_SENSE) {
+        channelHoppingEntries[i].parameter = (uint32_t)(void *)(&multiModeParams[i]);
+      } else {
+        channelHoppingEntries[i].parameter = sl_cli_get_argument_uint32(args, ((i + 1) * 4) - 2);
+      }
+      channelHoppingEntries[i].delay     = sl_cli_get_argument_uint32(args, ((i + 1) * 4) - 1);
+      channelHoppingEntries[i].delayMode = RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC;
+    }
+    channelHoppingConfig.numberOfChannels = i;
+    status = RAIL_ConfigRxChannelHopping(railHandle, &channelHoppingConfig);
+    responsePrint(sl_cli_get_command_string(args, 0), "numberOfChannels:%d,buffer:0x%x,Success:%s",
+                  i,
+                  channelHoppingConfig.buffer,
+                  status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+  }
 }
 
-void configChannelHoppingOptions(int argc, char **argv)
+void configChannelHoppingOptions(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  uint8_t index = ciGetUnsigned(argv[1]);
-  uint32_t options = ciGetUnsigned(argv[2]);
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
+  if (index >= COUNTOF(channelHoppingEntries)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x16,
+                       "Index must be < %u", COUNTOF(channelHoppingEntries));
+    return;
+  }
+
+  RAIL_RxChannelHoppingOptions_t options
+    = (RAIL_RxChannelHoppingOptions_t)sl_cli_get_argument_uint8(args, 1);
+  int8_t rssiThresholdDbm = channelHoppingEntries[index].rssiThresholdDbm;
 
   channelHoppingEntries[index].options = options;
 
-  responsePrint(argv[0], "index:%u,options:%u", index, options);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    rssiThresholdDbm = sl_cli_get_argument_int8(args, 2);
+    channelHoppingEntries[index].rssiThresholdDbm = rssiThresholdDbm;
+  }
+
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "index:%u,options:%u,rssiThreshold:%d",
+                index, options, rssiThresholdDbm);
 }
 
-void enableRxChannelHopping(int argc, char **argv)
+void configChannelHoppingMulti(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  bool enable = !!ciGetUnsigned(argv[1]);
+
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
+  if (index >= COUNTOF(channelHoppingEntries)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x17,
+                       "Index must be < %u", COUNTOF(channelHoppingEntries));
+    return;
+  }
+
+  multiModeParams[index].syncDetect    = sl_cli_get_argument_uint32(args, 1);
+  multiModeParams[index].preambleSense = sl_cli_get_argument_uint32(args, 2);
+  multiModeParams[index].timingSense   = sl_cli_get_argument_uint32(args, 3);
+  multiModeParams[index].timingReSense = sl_cli_get_argument_uint32(args, 4);
+  multiModeParams[index].status        = 0U;
+
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "index:%u,syncDetect:%u,preambleSense:%u,timingSense:%u,timingReSense:%u",
+                index,
+                multiModeParams[index].syncDetect,
+                multiModeParams[index].preambleSense,
+                multiModeParams[index].timingSense,
+                multiModeParams[index].timingReSense);
+}
+
+void enableRxChannelHopping(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
 
   bool reset = false;
-  if (argc > 2) {
-    reset = !!ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    reset = !!sl_cli_get_argument_uint8(args, 1);
   }
 
   RAIL_Status_t status = RAIL_EnableRxChannelHopping(railHandle, enable, reset);
-  responsePrint(argv[0], "Success:%s", status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+  responsePrint(sl_cli_get_command_string(args, 0), "Success:%s", status == RAIL_STATUS_NO_ERROR ? "True" : "False");
 }
 
-void getChannelHoppingRssi(int argc, char **argv)
+void getChannelHoppingRssi(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  uint8_t channelIndex = ciGetUnsigned(argv[1]);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  uint8_t channelIndex = sl_cli_get_argument_uint8(args, 0);
 
   int16_t result = RAIL_GetChannelHoppingRssi(railHandle, channelIndex);
 
@@ -119,67 +191,153 @@ void getChannelHoppingRssi(int argc, char **argv)
 
   // The lowest negative value is used to indicate an error reading the RSSI
   if (result == RAIL_RSSI_INVALID) {
-    responsePrintError(argv[0], 0x08, "Could not read RSSI. Ensure channel hopping was configured and enabled.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x08, "Could not read RSSI. Ensure channel hopping was configured and enabled.");
     return;
   }
 
   sprintfFloat(bufRssi, sizeof(bufRssi), ((float) result / 4), 2);
 
-  responsePrint(argv[0], "rssi:%s", bufRssi);
+  responsePrint(sl_cli_get_command_string(args, 0), "rssi:%s", bufRssi);
 }
 
-void configRxDutyCycle(int argc, char **argv)
+void configRxDutyCycle(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
+  RAIL_RxChannelHoppingMode_t mode;
+  int32_t parameters[4] = { 0, };
+  int32_t delay;
+  RAIL_RxChannelHoppingOptions_t options = RAIL_RX_CHANNEL_HOPPING_OPTIONS_NONE;
+  int8_t rssiThresholdDbm = RAIL_RSSI_INVALID_DBM;
+  uint32_t currentArg = 0U;
+  uint32_t argCount = sl_cli_get_argument_count(args);
+  uint32_t neededArgCount = 3U; // mode parameter delay minimally needed
+
+  mode = (RAIL_RxChannelHoppingMode_t) sl_cli_get_argument_uint32(args, currentArg++);
+  bool modeIsMulti = ((mode & ~RAIL_RX_CHANNEL_HOPPING_MODES_WITH_OPTIONS_BASE)
+                      == RAIL_RX_CHANNEL_HOPPING_MODE_MULTI_SENSE);
+  if (modeIsMulti) {
+    neededArgCount += 3U; // needs timingReSense preambleSense syncDetect params
+  }
+  if ((mode & RAIL_RX_CHANNEL_HOPPING_MODES_WITH_OPTIONS_BASE) != 0U) {
+    neededArgCount += 1U; // needs options
+  }
+  if (argCount < neededArgCount) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "Insufficient arguments for specified mode");
+    return;
+  }
+  parameters[0] = sl_cli_get_argument_int32(args, currentArg++);
+  if (modeIsMulti) {
+    parameters[1] = sl_cli_get_argument_int32(args, currentArg++);
+    parameters[2] = sl_cli_get_argument_int32(args, currentArg++);
+    parameters[3] = sl_cli_get_argument_int32(args, currentArg++);
+  }
+  delay = sl_cli_get_argument_int32(args, currentArg++);
+  if ((mode & RAIL_RX_CHANNEL_HOPPING_MODES_WITH_OPTIONS_BASE) != 0U) {
+    options = (RAIL_RxChannelHoppingOptions_t) sl_cli_get_argument_int32(args, currentArg++);
+    if ((options & RAIL_RX_CHANNEL_HOPPING_OPTION_RSSI_THRESHOLD)
+        != RAIL_RX_CHANNEL_HOPPING_OPTIONS_NONE) {
+      if (currentArg >= argCount) {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x13,
+                           "Missing rssiThreshold argument for specified option");
+        return;
+      }
+      rssiThresholdDbm = (int8_t) sl_cli_get_argument_int32(args, currentArg++);
+    }
+  }
+  if (currentArg != argCount) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x14,
+                       "Unexpected extra arguments for specified mode/options");
+    return;
+  }
+
+  multiModeParams[0].syncDetect    = (uint32_t)parameters[0];
+  multiModeParams[0].preambleSense = (uint32_t)parameters[1];
+  multiModeParams[0].timingSense   = (uint32_t)parameters[2];
+  multiModeParams[0].timingReSense = (uint32_t)parameters[3];
+  multiModeParams[0].status        = 0U;
   RAIL_RxDutyCycleConfig_t config = {
-    .mode = ciGetUnsigned(argv[1]),
-    .parameter = ciGetUnsigned(argv[2]),
-    .delay = ciGetUnsigned(argv[3]),
-    .delayMode = RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC
+    .mode = mode,
+    .parameter = (modeIsMulti
+                  ? ((uint32_t)(void *)&multiModeParams[0])
+                  : ((uint32_t)parameters[0])),
+    .delay = (uint32_t)delay,
+    .delayMode = RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC,
+    .options = options,
+    .rssiThresholdDbm = rssiThresholdDbm,
   };
+
+  rxDutyCycleSchedWakeupDelayUs = delay;
 
   RAIL_Status_t status = RAIL_ConfigRxDutyCycle(railHandle, &config);
 
-  responsePrint(argv[0], "Success:%s,Mode:%d,Parameter:%d,Delay:%d",
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "Success:%s,Mode:0x%x,Parameter:%u,Delay:%d,Options:%u,rssiThreshold:%d",
                 status == RAIL_STATUS_NO_ERROR ? "True" : "False",
                 config.mode,
                 config.parameter,
-                config.delay);
+                config.delay,
+                config.options,
+                config.rssiThresholdDbm);
 }
 
-void enableRxDutyCycle(int argc, char **argv)
+void enableRxDutyCycle(sl_cli_command_arg_t *args)
 {
-  CHECK_RAIL_HANDLE(argv[0]);
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
-  bool enable = !!ciGetUnsigned(argv[1]);
+
+  enableRxDutyCycleWithSchedWakeup = false;
+  serEvent = false;
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
+
+  if (sl_cli_get_argument_count(args) >= 2) {
+    enableRxDutyCycleWithSchedWakeup = !!(sl_cli_get_argument_uint8(args, 1));
+  }
 
   RAIL_Status_t status = RAIL_EnableRxDutyCycle(railHandle, enable);
-  responsePrint(argv[0], "Success:%s", status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+  responsePrint(sl_cli_get_command_string(args, 0), "Success:%s", status == RAIL_STATUS_NO_ERROR ? "True" : "False");
+}
+
+bool getRxDutyCycleSchedWakeupEnable(RAIL_Time_t *sleepInterval)
+{
+  bool schedWakeupEnable = false;
+
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+
+  if (sleepInterval != NULL) {
+    *sleepInterval = rxDutyCycleSchedWakeupDelayUs;
+    schedWakeupEnable = enableRxDutyCycleWithSchedWakeup;
+  }
+
+  CORE_EXIT_CRITICAL();
+
+  return schedWakeupEnable;
 }
 
 RAIL_ChannelMetadata_t channelMetadata[MAX_NUMBER_CHANNELS];
 #define TIME_PER_CHANNEL (10000UL)
-void spectrumAnalyzer(int argc, char **argv)
+void spectrumAnalyzer(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
   uint16_t channelMetadataLength = MAX_NUMBER_CHANNELS;
 
   uint16_t minChannel = 0U;
-  if (argc > 2) {
-    minChannel = ciGetUnsigned(argv[2]);
+  if (sl_cli_get_argument_count(args) >= 2) {
+    minChannel = sl_cli_get_argument_uint16(args, 1);
   }
 
   uint16_t maxChannel = UINT16_MAX;
-  if (argc > 3) {
-    maxChannel = ciGetUnsigned(argv[3]);
+  if (sl_cli_get_argument_count(args) >= 3) {
+    maxChannel = sl_cli_get_argument_uint16(args, 2);
   }
 
   RAIL_Status_t status = RAIL_GetChannelMetadata(railHandle,
@@ -189,16 +347,16 @@ void spectrumAnalyzer(int argc, char **argv)
                                                  maxChannel);
 
   if (channelMetadataLength == 0) {
-    responsePrintError(argv[0], 0x1, "No channels in range found");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x1, "No channels in range found");
     return;
   }
   bool graphics = false;
-  if (argc > 1) {
-    graphics = !!ciGetUnsigned(argv[1]);
+  if (sl_cli_get_argument_count(args) >= 1) {
+    graphics = !!sl_cli_get_argument_uint8(args, 0);
   }
 
   if (status == RAIL_STATUS_INVALID_STATE) {
-    responsePrintError(argv[0], 0x20, "Error in RAIL_GetChannelMetadata, channel config invalid.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x20, "Error in RAIL_GetChannelMetadata, channel config invalid.");
     return;
   }
 
@@ -223,7 +381,7 @@ void spectrumAnalyzer(int argc, char **argv)
   while (RAIL_GetRadioState(railHandle) != RAIL_RF_STATE_RX) ;
   RAIL_DelayUs(TIME_PER_CHANNEL * (channelMetadataLength + 5));
 
-  responsePrintHeader(argv[0], "channelIndex:%u,channel:%u,frequency:%u,rssi:%s");
+  responsePrintHeader(sl_cli_get_command_string(args, 0), "channelIndex:%u,channel:%u,frequency:%u,rssi:%s");
   int16_t min = INT16_MAX;
   int16_t max = INT16_MIN;
   int16_t result[MAX_NUMBER_CHANNELS];
@@ -278,44 +436,62 @@ void spectrumAnalyzer(int argc, char **argv)
 
 #else
 
-static void channelHoppingNotSupported(char **argv)
+static void channelHoppingNotSupported(sl_cli_command_arg_t *args)
 {
-  responsePrintError(argv[0], 0x17, "Channel hopping not suppported on this chip");
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x17, "Channel hopping not suppported on this chip");
 }
 
-void configRxChannelHopping(int argc, char **argv)
+void configRxChannelHopping(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void enableRxChannelHopping(int argc, char **argv)
+void enableRxChannelHopping(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void getChannelHoppingRssi(int argc, char **argv)
+void getChannelHoppingRssi(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void configRxDutyCycle(int argc, char **argv)
+void configRxDutyCycle(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void enableRxDutyCycle(int argc, char **argv)
+void enableRxDutyCycle(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void spectrumAnalyzer(int argc, char **argv)
+void spectrumAnalyzer(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
 }
 
-void configChannelHoppingOptions(int argc, char **argv)
+void configChannelHoppingOptions(sl_cli_command_arg_t *args)
 {
-  channelHoppingNotSupported(argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
+}
+
+void configChannelHoppingMulti(sl_cli_command_arg_t *args)
+{
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
+}
+bool getRxDutyCycleSchedWakeupEnable(RAIL_Time_t *sleepInterval)
+{
+  (void)sleepInterval;
+  return false;
 }
 
 #endif

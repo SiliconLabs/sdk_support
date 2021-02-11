@@ -31,10 +31,20 @@
 #ifndef UARTDRV_H
 #define UARTDRV_H
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
+
 #include "em_device.h"
 #include "em_usart.h"
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
 #include "em_leuart.h"
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
 #include "em_eusart.h"
+#endif
 #include "em_gpio.h"
 #include "em_cmu.h"
 #include "ecode.h"
@@ -46,15 +56,14 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup uartdrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup UARTDRV
+ * @addtogroup uartdrv_error_codes Error Codes
  * @{
  ******************************************************************************/
-
 #define ECODE_EMDRV_UARTDRV_OK                (ECODE_OK)                              ///< A successful return value.
 #define ECODE_EMDRV_UARTDRV_WAITING           (ECODE_EMDRV_UARTDRV_BASE | 0x00000001) ///< An operation is waiting in queue.
 #define ECODE_EMDRV_UARTDRV_ILLEGAL_HANDLE    (ECODE_EMDRV_UARTDRV_BASE | 0x00000002) ///< An illegal UART handle.
@@ -69,8 +78,12 @@ extern "C" {
 #define ECODE_EMDRV_UARTDRV_FRAME_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000D) ///< A UART frame error. Data is ignored.
 #define ECODE_EMDRV_UARTDRV_DMA_ALLOC_ERROR   (ECODE_EMDRV_UARTDRV_BASE | 0x0000000E) ///< Unable to allocate DMA channels.
 #define ECODE_EMDRV_UARTDRV_CLOCK_ERROR       (ECODE_EMDRV_UARTDRV_BASE | 0x0000000F) ///< Unable to set a desired baudrate.
+/** @} (end addtogroup error codes) */
 
-// UARTDRV status codes
+/***************************************************************************//**
+ * @addtogroup uartdrv_status_codes Status Codes
+ * @{
+ ******************************************************************************/
 #define UARTDRV_STATUS_RXEN     (1 << 0)  ///< The receiver is enabled.
 #define UARTDRV_STATUS_TXEN     (1 << 1)  ///< The transmitter is enabled.
 #define UARTDRV_STATUS_RXBLOCK  (1 << 3)  ///< The receiver is blocked; incoming frames will be discarded.
@@ -80,9 +93,10 @@ extern "C" {
 #define UARTDRV_STATUS_RXDATAV  (1 << 7)  ///< Data is available in the receive buffer.
 #define UARTDRV_STATUS_RXFULL   (1 << 8)  ///< The receive buffer is full.
 #define UARTDRV_STATUS_TXIDLE   (1 << 13) ///< The transmitter is idle.
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
 #define UARTDRV_STATUS_RXIDLE   (1 << 12) ///< The Receiver is idle.
 #endif
+/** @} (end addtogroup status codes) */
 
 typedef uint32_t UARTDRV_Count_t;     ///< A UART transfer count
 typedef uint32_t UARTDRV_Status_t;    ///< A UART status return type. Bitfield of UARTDRV_STATUS_* values.
@@ -115,7 +129,7 @@ typedef enum UARTDRV_UartType{
   uartdrvUartTypeUart = 0,         ///< USART/UART peripheral
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
   uartdrvUartTypeLeuart = 1         ///< LEUART peripheral
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
   uartdrvUartTypeEuart = 2         ///< EUART peripheral
 #endif
 } UARTDRV_UartType_t;
@@ -256,7 +270,7 @@ typedef struct {
 } UARTDRV_InitLeuart_t;
 #endif
 
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
 /// UART driver instance initialization structure.
 /// Contains a number of UARTDRV configuration options.
 /// It is required to initialize a driver instance.
@@ -295,7 +309,7 @@ typedef struct UARTDRV_HandleData{
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
     LEUART_TypeDef * leuart;
 #endif
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
     EUSART_TypeDef * euart;
 #endif
   } peripheral;
@@ -328,6 +342,9 @@ typedef struct UARTDRV_HandleData{
   UARTDRV_FlowControlType_t  fcType;            // A flow control mode
   UARTDRV_UartType_t         type;              // A type of UART
   int                        em1RequestCount;   // A EM1 request count for the handle
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+  sl_power_manager_on_isr_exit_t sleep;         // Sleep state on isr return
+#endif
   /// @endcond
 } UARTDRV_HandleData_t;
 
@@ -342,7 +359,7 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
                            const UARTDRV_InitLeuart_t * initData);
 #endif
 
-#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+#if (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
 Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
                           const UARTDRV_InitEuart_t * initData);
 #endif
@@ -440,8 +457,11 @@ __STATIC_INLINE Ecode_t UARTDRV_Init(UARTDRV_Handle_t handle, UARTDRV_InitUart_t
 #define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE EMDRV_UARTDRV_HW_FLOW_CONTROL_ENABLE
 #endif
 
-/** @} (end addtogroup UARTDRV) */
-/** @} (end addtogroup emdrv) */
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
+sl_power_manager_on_isr_exit_t sl_uartdrv_sleep_on_isr_exit(void);
+#endif
+
+/** @} (end addtogroup uartdrv) */
 
 #ifdef __cplusplus
 }

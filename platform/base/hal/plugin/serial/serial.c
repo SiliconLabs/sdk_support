@@ -20,7 +20,8 @@
 
 //Host processors do not use Ember Message Buffers.
 #ifndef EZSP_HOST
-  #include "stack/include/packet-buffer.h"
+  #include "buffer_manager/buffer-management.h"
+  #include "buffer_manager/legacy-packet-buffer.h"
 #endif
 
 #include "hal/hal.h"
@@ -288,21 +289,9 @@ EmberStatus emberSerialWriteBuffer(uint8_t port,
                                    uint8_t start,
                                    uint8_t length)
 {
-  for (; PACKET_BUFFER_SIZE <= start; start -= PACKET_BUFFER_SIZE) {
-    buffer = emberStackBufferLink(buffer);
-  }
-  while (0 < length) {
-    uint8_t remainingInBuffer = PACKET_BUFFER_SIZE - start;
-    uint8_t bytes = (length < remainingInBuffer
-                     ? length
-                     : remainingInBuffer);
-    emberSerialWriteData(port,
-                         emberMessageBufferContents(buffer) + start,
-                         bytes);
-    length -= bytes;
-    start = 0;
-    buffer = emberStackBufferLink(buffer);
-  }
+  emberSerialWriteData(port,
+                       emberMessageBufferContents(buffer) + start,
+                       length);
   return EMBER_SUCCESS;
 }
 
@@ -415,27 +404,9 @@ bool emberSerialUnused(uint8_t port)
     uint8_t fifo[qSize];                         \
   } qName;
 
-#define DEFINE_BUFFER_QUEUE(qSize, qName)        \
-  static struct {                                \
-    /*! Indexes of next message to send*/        \
-    uint8_t head;                                \
-    /*! Index of where to enqueue next message*/ \
-    uint8_t tail;                                \
-    /*! Number of messages queued*/              \
-    volatile uint8_t used;                       \
-    uint8_t dead;                                \
-    EmberMessageBuffer currentBuffer;            \
-    uint8_t *nextByte, *lastByte;                \
-    /*! FIFO of messages*/                       \
-    EmSerialBufferQueueEntry fifo[qSize];        \
-  } qName;
-
 // Allocate Appropriate TX Queue for port 0
 #if EMBER_SERIAL0_MODE == EMBER_SERIAL_FIFO
 DEFINE_FIFO_QUEUE(EMBER_SERIAL0_TX_QUEUE_SIZE, emSerial0TxQueue)
-  #define EM_SERIAL0_TX_QUEUE_ADDR (&emSerial0TxQueue)
-#elif EMBER_SERIAL0_MODE == EMBER_SERIAL_BUFFER
-DEFINE_BUFFER_QUEUE(EMBER_SERIAL0_TX_QUEUE_SIZE, emSerial0TxQueue)
   #define EM_SERIAL0_TX_QUEUE_ADDR (&emSerial0TxQueue)
 #elif EMBER_SERIAL0_MODE == EMBER_SERIAL_UNUSED \
   || EMBER_SERIAL0_MODE == EMBER_SERIAL_LOWLEVEL
@@ -448,9 +419,6 @@ DEFINE_BUFFER_QUEUE(EMBER_SERIAL0_TX_QUEUE_SIZE, emSerial0TxQueue)
 #if EMBER_SERIAL1_MODE == EMBER_SERIAL_FIFO
 DEFINE_FIFO_QUEUE(EMBER_SERIAL1_TX_QUEUE_SIZE, emSerial1TxQueue)
   #define EM_SERIAL1_TX_QUEUE_ADDR (&emSerial1TxQueue)
-#elif EMBER_SERIAL1_MODE == EMBER_SERIAL_BUFFER
-DEFINE_BUFFER_QUEUE(EMBER_SERIAL1_TX_QUEUE_SIZE, emSerial1TxQueue)
-  #define EM_SERIAL1_TX_QUEUE_ADDR (&emSerial1TxQueue)
 #elif EMBER_SERIAL1_MODE == EMBER_SERIAL_UNUSED \
   || EMBER_SERIAL1_MODE == EMBER_SERIAL_LOWLEVEL
   #define EM_SERIAL1_TX_QUEUE_ADDR (NULL)
@@ -461,9 +429,6 @@ DEFINE_BUFFER_QUEUE(EMBER_SERIAL1_TX_QUEUE_SIZE, emSerial1TxQueue)
 // Allocate Appropriate TX Queue for port 2
 #if EMBER_SERIAL2_MODE == EMBER_SERIAL_FIFO
 DEFINE_FIFO_QUEUE(EMBER_SERIAL2_TX_QUEUE_SIZE, emSerial2TxQueue)
-  #define EM_SERIAL2_TX_QUEUE_ADDR (&emSerial2TxQueue)
-#elif EMBER_SERIAL2_MODE == EMBER_SERIAL_BUFFER
-DEFINE_BUFFER_QUEUE(EMBER_SERIAL2_TX_QUEUE_SIZE, emSerial2TxQueue)
   #define EM_SERIAL2_TX_QUEUE_ADDR (&emSerial2TxQueue)
 #elif EMBER_SERIAL2_MODE == EMBER_SERIAL_UNUSED \
   || EMBER_SERIAL2_MODE == EMBER_SERIAL_LOWLEVEL
@@ -476,9 +441,6 @@ DEFINE_BUFFER_QUEUE(EMBER_SERIAL2_TX_QUEUE_SIZE, emSerial2TxQueue)
 #if EMBER_SERIAL3_MODE == EMBER_SERIAL_FIFO
 DEFINE_FIFO_QUEUE(EMBER_SERIAL3_TX_QUEUE_SIZE, emSerial3TxQueue)
   #define EM_SERIAL3_TX_QUEUE_ADDR (&emSerial3TxQueue)
-#elif EMBER_SERIAL3_MODE == EMBER_SERIAL_BUFFER
-DEFINE_BUFFER_QUEUE(EMBER_SERIAL3_TX_QUEUE_SIZE, emSerial3TxQueue)
-  #define EM_SERIAL3_TX_QUEUE_ADDR (&emSerial3TxQueue)
 #elif EMBER_SERIAL3_MODE == EMBER_SERIAL_UNUSED \
   || EMBER_SERIAL3_MODE == EMBER_SERIAL_LOWLEVEL
   #define EM_SERIAL3_TX_QUEUE_ADDR (NULL)
@@ -489,9 +451,6 @@ DEFINE_BUFFER_QUEUE(EMBER_SERIAL3_TX_QUEUE_SIZE, emSerial3TxQueue)
 // Allocate Appropriate TX Queue for port 4
 #if EMBER_SERIAL4_MODE == EMBER_SERIAL_FIFO
 DEFINE_FIFO_QUEUE(EMBER_SERIAL4_TX_QUEUE_SIZE, emSerial4TxQueue)
-  #define EM_SERIAL4_TX_QUEUE_ADDR (&emSerial4TxQueue)
-#elif EMBER_SERIAL4_MODE == EMBER_SERIAL_BUFFER
-DEFINE_BUFFER_QUEUE(EMBER_SERIAL4_TX_QUEUE_SIZE, emSerial4TxQueue)
   #define EM_SERIAL4_TX_QUEUE_ADDR (&emSerial4TxQueue)
 #elif EMBER_SERIAL4_MODE == EMBER_SERIAL_UNUSED \
   || EMBER_SERIAL4_MODE == EMBER_SERIAL_LOWLEVEL
@@ -597,66 +556,6 @@ uint16_t emSerialRxErrorIndex[EM_NUM_SERIAL_PORTS] = { 0, };
 #endif //EMBER_SERIAL_USE_STDIO
 
 //------------------------------------------------------
-// Buffered Serial utility APIs
-
-#ifdef EM_ENABLE_SERIAL_BUFFER
-// always executed in interrupt context
-void emSerialBufferNextMessageIsr(EmSerialBufferQueue *q)
-{
-  EmSerialBufferQueueEntry *e = &q->fifo[q->tail];
-
-  q->currentBuffer = e->buffer;
-  q->nextByte = emberLinkedBufferContents(q->currentBuffer) + e->startIndex;
-  if ((e->length + e->startIndex) > PACKET_BUFFER_SIZE) {
-    q->lastByte = q->nextByte + ((PACKET_BUFFER_SIZE - 1) - e->startIndex);
-    e->length -= PACKET_BUFFER_SIZE - e->startIndex;
-  } else {
-    q->lastByte = q->nextByte + e->length - 1;
-    e->length = 0;
-  }
-}
-
-#endif
-
-#ifdef EM_ENABLE_SERIAL_BUFFER
-// always executed in interrupt context
-void emSerialBufferNextBlockIsr(EmSerialBufferQueue *q, uint8_t port)
-{
-  EmSerialBufferQueueEntry *e = &q->fifo[q->tail];
-
-  if (e->length != 0) {
-    q->currentBuffer = emberStackBufferLink(q->currentBuffer);
-    q->nextByte = emberLinkedBufferContents(q->currentBuffer);
-    if (e->length > PACKET_BUFFER_SIZE) {
-      q->lastByte = q->nextByte + 31;
-      e->length -= PACKET_BUFFER_SIZE;
-    } else {
-      q->lastByte = q->nextByte + e->length - 1;
-      e->length = 0;
-    }
-  } else {
-    #ifdef AVR_ATMEGA
-    //If we are using an AVR host, non power-of-2 queue sizes are NOT
-    //supported and therefore we use a mask
-    q->tail = ((q->tail + 1) & emSerialTxQueueMasks[port]);
-    #else // AVR_ATMEGA
-    //If we are using the xap2b/cortexm3, non power-of-2 queue sizes are
-    //supported and therefore we use a mod with the queue size
-    q->tail = ((q->tail + 1) % emSerialTxQueueSizes[port]);
-    #endif // !AVR_ATMEGA
-    q->dead++;
-    q->used--;
-    if (q->used) {
-      emSerialBufferNextMessageIsr(q);
-    } else {
-      q->nextByte = NULL;
-    }
-  }
-}
-
-#endif
-
-//------------------------------------------------------
 // Serial initialization
 
 EmberStatus emberSerialInit(uint8_t port,
@@ -689,30 +588,12 @@ EmberStatus emberSerialInit(uint8_t port,
       break;
     }
 #endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER: {
-      EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-      {
-        DECLARE_INTERRUPT_STATE_LITE;
-        DISABLE_INTERRUPTS_LITE();
-        q->used = 0;
-        q->head = 0;
-        q->tail = 0;
-        q->dead = 0;
-        q->currentBuffer = EMBER_NULL_MESSAGE_BUFFER;
-        q->nextByte = NULL;
-        q->lastByte = NULL;
-        RESTORE_INTERRUPTS_LITE();
-      }
-      break;
-    }
-#endif
     default:
       return EMBER_SERIAL_INVALID_PORT;
       //break;  //statement is unreachable
   }
 
-#if     (defined(EM_ENABLE_SERIAL_FIFO) || defined(EM_ENABLE_SERIAL_BUFFER))
+#if     (defined(EM_ENABLE_SERIAL_FIFO))
   EmSerialFifoQueue *rq = emSerialRxQueues[port];
   {
     DECLARE_INTERRUPT_STATE_LITE;
@@ -725,7 +606,7 @@ EmberStatus emberSerialInit(uint8_t port,
   }
 
   return halInternalUartInit(port, rate, parity, stopBits);
-#endif//(defined(EM_ENABLE_SERIAL_FIFO) || defined(EM_ENABLE_SERIAL_BUFFER))
+#endif//(defined(EM_ENABLE_SERIAL_FIFO))
 #endif //EMBER_SERIAL_USE_STDIO
 }
 
@@ -991,21 +872,6 @@ uint16_t emberSerialWriteAvailable(uint8_t port)
       return emSerialTxQueueSizes[port]
              - ((EmSerialFifoQueue*)emSerialTxQueues[port])->used;
 #endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER: {
-      EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-      uint8_t elementsUsed;
-      uint8_t elementsDead;
-      {
-        DECLARE_INTERRUPT_STATE_LITE;
-        DISABLE_INTERRUPTS_LITE(); // To clarify the volatile access.
-        elementsUsed = q->used;
-        elementsDead = q->dead;
-        RESTORE_INTERRUPTS_LITE();
-      }
-      return emSerialTxQueueSizes[port] - (elementsUsed + elementsDead);
-    }
-#endif
     default: {
     }
   }
@@ -1088,28 +954,6 @@ EmberStatus emberSerialWriteString(uint8_t port, PGM_P string)
       return EMBER_SUCCESS;
     }
 #endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER:
-    {
-      EmberMessageBuffer buff = emberAllocateStackBuffer();
-      if (buff != EMBER_NULL_MESSAGE_BUFFER) {
-        EmberStatus stat;
-        if ((stat = emberAppendPgmStringToLinkedBuffers(buff, string))
-            == EMBER_SUCCESS) {
-          stat = emberSerialWriteBuffer(port, buff, 0, emberMessageBufferLength(buff));
-        }
-        // Refcounts may be manipulated in ISR if DMA used
-        {
-          DECLARE_INTERRUPT_STATE;
-          DISABLE_INTERRUPTS();
-          emberReleaseMessageBuffer(buff);
-          RESTORE_INTERRUPTS();
-        }
-        return stat;
-      }
-      return EMBER_NO_BUFFERS;
-    }
-#endif
     default:
       return EMBER_ERR_FATAL;
   }
@@ -1165,154 +1009,11 @@ EmberStatus emberSerialWriteData(uint8_t port, uint8_t *data, uint8_t length)
       return EMBER_SUCCESS;
     }
 #endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER:
-    {
-      // Note: We must always copy this, even in buffer mode
-      //  since it is ram based data and there are no reference counts
-      //  or indication of when it is actually written out the serial
-      //  we cannot trust that the data won't be changed after this call
-      //  but before it was actually written out.
-      EmberMessageBuffer buff = emberFillLinkedBuffers(data, length);
-      if (buff != EMBER_NULL_MESSAGE_BUFFER) {
-        EmberStatus stat = emberSerialWriteBuffer(port, buff, 0, emberMessageBufferLength(buff));
-        // Refcounts may be manipulated in ISR if DMA used
-        {
-          DECLARE_INTERRUPT_STATE;
-          DISABLE_INTERRUPTS();
-          emberReleaseMessageBuffer(buff);
-          RESTORE_INTERRUPTS();
-        }
-        return stat;
-      } else {
-        return EMBER_NO_BUFFERS;
-      }
-    }
-#endif
     default:
       return EMBER_ERR_FATAL;
   }
 #endif //EMBER_SERIAL_USE_STDIO
 }
-
-#ifdef EM_ENABLE_SERIAL_BUFFER
-EmberStatus emberSerialWriteBuffer(uint8_t port,
-                                   EmberMessageBuffer buffer,
-                                   uint8_t start,
-                                   uint8_t length)
-{
-//Host processors do not use Ember Message Buffers.
-#if defined(EZSP_HOST) || defined(EMBER_SERIAL_USE_STDIO)
-  return EMBER_ERR_FATAL;  //This function is invalid.
-#else// !EZSP_HOST && !EMBER_SERIAL_USE_STDIO
-
-  if (buffer == EMBER_NULL_MESSAGE_BUFFER) {
-    return EMBER_ERR_FATAL;
-  }
-  if (length == 0) {
-    return EMBER_SUCCESS;
-  }
-
-  switch (emSerialPortModes[port]) {
-#ifdef   EM_ENABLE_SERIAL_FIFO
-    case EMBER_SERIAL_FIFO:
-    {
-      for (; PACKET_BUFFER_SIZE <= start; start -= PACKET_BUFFER_SIZE) {
-        buffer = emberStackBufferLink(buffer);
-      }
-
-      while (0 < length) {
-        uint8_t remainingInBuffer = PACKET_BUFFER_SIZE - start;
-        uint8_t bytes = (length < remainingInBuffer
-                         ? length
-                         : remainingInBuffer);
-        emberSerialWriteData(port,
-                             emberMessageBufferContents(buffer) + start,
-                             bytes);
-        length -= bytes;
-        start = 0;
-        buffer = emberStackBufferLink(buffer);
-      }
-      // make sure the interrupt is enabled so it will be sent
-      halInternalStartUartTx(port);
-      break;
-    }
-#endif// EM_ENABLE_SERIAL_FIFO
-#ifdef   EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER:
-    {
-      EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-      EmSerialBufferQueueEntry *e;
-      uint8_t elementsUsed;
-      uint8_t elementsDead;
-
-      {
-        DECLARE_INTERRUPT_STATE_LITE;
-        DISABLE_INTERRUPTS_LITE(); // To clarify volatile access.
-        elementsUsed = q->used;
-        elementsDead = q->dead;
-        RESTORE_INTERRUPTS_LITE();
-      }
-
-      #ifdef   EM_ENABLE_SERIAL_BLOCKING
-      if (emSerialBlocking[port]) {
-        while ((elementsUsed + elementsDead) >= emSerialTxQueueSizes[port]) {
-          emberSerialBufferTick();
-          //re-read the element counters after clocking the serial buffers
-          {
-            DECLARE_INTERRUPT_STATE_LITE;
-            DISABLE_INTERRUPTS_LITE(); // To clarify volatile access.
-            elementsUsed = q->used;
-            elementsDead = q->dead;
-            RESTORE_INTERRUPTS_LITE();
-          }
-        }
-      } else
-      #endif// EM_ENABLE_SERIAL_BLOCKING
-      if ((elementsUsed + elementsDead) >= emSerialTxQueueSizes[port]) {
-        if (elementsDead) {
-          emberSerialBufferTick();
-        } else {
-          return EMBER_SERIAL_TX_OVERFLOW;
-        }
-      }
-
-      for (; PACKET_BUFFER_SIZE <= start; start -= PACKET_BUFFER_SIZE) {
-        buffer = emberStackBufferLink(buffer);
-      }
-      emberHoldMessageBuffer(buffer);
-
-      e = &q->fifo[q->head];
-      e->length = length;
-      e->buffer = buffer;
-      e->startIndex = start;
-      #ifdef AVR_ATMEGA
-      //If we are using an AVR host, non power-of-2 queue sizes are NOT
-      //supported and therefore we use a mask
-      q->head = ((q->head + 1) & emSerialTxQueueMasks[port]);
-      #else // AVR_ATMEGA
-      //If we are using the xap2b/cortexm3, non power-of-2 queue sizes are
-      //supported and therefore we use a mod with the queue size
-      q->head = ((q->head + 1) % emSerialTxQueueSizes[port]);
-      #endif // !AVR_ATMEGA
-      {
-        DECLARE_INTERRUPT_STATE_LITE;
-        DISABLE_INTERRUPTS_LITE();
-        q->used++;
-        RESTORE_INTERRUPTS_LITE();
-      }
-      halInternalStartUartTx(port);
-      break;
-    }
-#endif// EM_ENABLE_SERIAL_BUFFER
-    default:
-      return EMBER_ERR_FATAL;
-  }
-  return EMBER_SUCCESS;
-#endif// !EZSP_HOST && !EMBER_SERIAL_USE_STDIO
-}
-
-#endif// EM_ENABLE_SERIAL_BUFFER
 
 EmberStatus emberSerialWaitSend(uint8_t port)  // waits for all byte to be written out of a port
 {
@@ -1324,15 +1025,6 @@ EmberStatus emberSerialWaitSend(uint8_t port)  // waits for all byte to be writt
     case EMBER_SERIAL_FIFO: {
       EmSerialFifoQueue *q = (EmSerialFifoQueue *)emSerialTxQueues[port];
       while (q->used != 0U) {
-        simulatedSerialTimePasses();
-      }
-      break;
-    }
-#endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER: {
-      EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-      while (q->used) {
         simulatedSerialTimePasses();
       }
       break;
@@ -1388,15 +1080,6 @@ EmberStatus emberSerialGuaranteedPrintf(uint8_t port, PGM_P formatString, ...)
       break;
     }
 #endif
-#ifdef EM_ENABLE_SERIAL_BUFFER
-    case EMBER_SERIAL_BUFFER: {
-      EmSerialBufferQueue *q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-      if (q->used != 0U) {
-        halInternalStartUartTx(port);
-      }
-      break;
-    }
-#endif
     default: {
     }
   } //close switch.
@@ -1438,82 +1121,6 @@ void emberSerialFlushRx(uint8_t port)
 
 //------------------------------------------------------
 // Serial Buffer Cleanup Tick
-
-#ifdef EM_ENABLE_SERIAL_BUFFER
-//Helper function to calculate deadIndex since ifdefs cannot exist in the
-//ATOMIC_LITE block
-uint8_t calculateDeadIndex(uint8_t port, uint8_t tail, uint8_t numDead)
-{
-  uint8_t deadIndex;
-
-  #ifdef AVR_ATMEGA
-  //If we are using an AVR host, non power-of-2 queue sizes are NOT
-  //supported and therefore we use a mask
-  deadIndex = (tail - numDead) & emSerialTxQueueMasks[port];
-  #else // AVR_ATMEGA
-  //If we are using the xap2b/cortexm3, non power-of-2 queue sizes are
-  //supported and therefore we need to use a conditional to figure
-  //out the deadIndex
-  if (numDead > tail) {
-    //Since subtracting numDead from tail would cause deadIndex to
-    //wrap, we add the tail to the queue size and then subtract
-    //numDead
-    deadIndex = (emSerialTxQueueSizes[port] + tail) - numDead;
-  } else {
-    deadIndex = tail - numDead;
-  }
-  #endif // !AVR_ATMEGA
-
-  return deadIndex;
-}
-
-#endif //EM_ENABLE_SERIAL_BUFFER
-
-void emberSerialBufferTick(void)
-{
-#ifdef EM_ENABLE_SERIAL_BUFFER
-  uint8_t port;
-  EmSerialBufferQueue *q;
-  uint8_t numDead, deadIndex;
-
-  for (port = 0; port < EM_NUM_SERIAL_PORTS; port++) {
-    if (emSerialPortModes[port] == EMBER_SERIAL_BUFFER) {
-      q = (EmSerialBufferQueue *)emSerialTxQueues[port];
-
-      if (q->dead) {
-        {
-          DECLARE_INTERRUPT_STATE_LITE;
-          DISABLE_INTERRUPTS_LITE();
-          numDead = q->dead;
-          q->dead = 0;
-          deadIndex = calculateDeadIndex(port, q->tail, numDead);
-          RESTORE_INTERRUPTS_LITE();
-        }
-        for (; numDead; numDead--) {
-          // Refcounts may be manipulated in ISR if DMA used
-          {
-            DECLARE_INTERRUPT_STATE;
-            DISABLE_INTERRUPTS();
-            emberReleaseMessageBuffer(q->fifo[deadIndex].buffer);
-            RESTORE_INTERRUPTS();
-          }
-          #ifdef AVR_ATMEGA
-          //If we are using an AVR host, non power-of-2 queue sizes are NOT
-          //supported and therefore we use a mask
-          deadIndex = (deadIndex + 1) & emSerialTxQueueMasks[port];
-          #else // AVR_ATMEGA
-          //If we are using the xap2b/cortexm3, non power-of-2 queue sizes are
-          //supported and therefore we use a mod with the queue size
-          deadIndex = (deadIndex + 1) % emSerialTxQueueSizes[port];
-          #endif // !AVR_ATMEGA
-        }
-      }
-    }
-  }
-
-  simulatedSerialTimePasses();
-#endif
-}
 
 bool emberSerialUnused(uint8_t port)
 {

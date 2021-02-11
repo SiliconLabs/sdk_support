@@ -472,7 +472,7 @@ int abs(int I);
 //@}  // end of Miscellaneous Macros
 ////////////////////////////////////////////////////////////////////////////////
 
-#define _HAL_USE_COMMON_MEMUTILS_
+//#define _HAL_USE_COMMON_MEMUTILS_
 
 // Include platform-common last to pick up defaults and common definitions
 #define PLATCOMMONOKTOINCLUDE

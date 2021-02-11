@@ -70,4 +70,31 @@ int32_t core_parseBuffer(BootloaderParserContext_t         *context,
                          uint8_t                           data[],
                          size_t                            numBytes);
 
+/***************************************************************************//**
+ * Parse a buffer and get application and bootloader upgrade metadata
+ * from the buffer.
+ *
+ * @param[in]  context           Pointer to the parser context struct.
+ * @param[in]  data              Data to be parsed.
+ * @param[in]  numBytes          Size of the data buffer.
+ * @param[out] appInfo           Pointer to @ref ApplicationData_t struct
+ * @param[out] bootloaderVersion Pointer to an integer representing bootloader
+ *                               version
+ *
+ * @return @ref BOOTLOADER_OK if metadata was filled successfully
+ ******************************************************************************/
+int32_t core_parseImageInfo(BootloaderParserContext_t *context,
+                            uint8_t                    data[],
+                            size_t                     numBytes,
+                            ApplicationData_t          *appInfo,
+                            uint32_t                   *bootloaderVersion);
+
+/***************************************************************************//**
+ * Find size of context struct BootloaderParserContext used by bootloader
+ * image parser to store parser state
+ *
+ * @return size of BootloaderParserContext.
+ ******************************************************************************/
+uint32_t core_parserContextSize(void);
+
 #endif // BTL_PARSE_H

@@ -6,7 +6,7 @@
  *   levels to dBm powers.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,27 +31,30 @@
  *
  ******************************************************************************/
 
-#ifndef __PA_CONVERSIONS_EFR32_H_
-#define __PA_CONVERSIONS_EFR32_H_
+#ifndef PA_CONVERSIONS_EFR32_H
+#define PA_CONVERSIONS_EFR32_H
 
 #include "rail_types.h"
-#include "rail_chip_specific.h"
 
 // This macro is defined when Silicon Labs builds curves into the library as WEAK
 // to ensure it can be overriden by customer versions of these functions. It
 // should *not* be defined in a customer build.
-#if !defined(RAIL_PA_CONVERSIONS_WEAK) && defined(HAL_CONFIG)
-#include "hal-config.h"
+#if !defined(RAIL_PA_CONVERSIONS_WEAK)
+#ifdef SL_RAIL_UTIL_PA_CONFIG_HEADER
+#include SL_RAIL_UTIL_PA_CONFIG_HEADER
+#else
+#include "sl_rail_util_pa_conversions_efr32_config.h"
+#endif
 #endif
 
-#ifdef HAL_PA_CURVE_HEADER
-#include HAL_PA_CURVE_HEADER
+#ifdef SL_RAIL_UTIL_PA_CURVE_HEADER
+#include SL_RAIL_UTIL_PA_CURVE_HEADER
 #else
 #include "pa_curves_efr32.h"
 #endif
 
-#ifdef RAIL_PA_CURVE_TYPES
-#include RAIL_PA_CURVE_TYPES
+#ifdef SL_RAIL_UTIL_PA_CURVE_TYPES
+#include SL_RAIL_UTIL_PA_CURVE_TYPES
 #else
 #include "pa_curve_types_efr32.h"
 #endif
@@ -96,11 +99,76 @@ RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *con
  * @param[in] mode PA mode whose curves are needed.
  * @return RAIL_TxPowerCurves_t that should be used for conversion functions.
  *
+ * @note: The chip specific input values of
+ * \ref RAIL_TX_POWER_MODE_2P4GIG_HIGHEST and
+ * \ref RAIL_TX_POWER_MODE_SUBGIG_HIGHEST don't correlate to a specific PA in
+ * this function and will therefore result in a return value of NULL.
  */
 RAIL_TxPowerCurves_t const * RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode);
+
+/**
+ * Gets the maximum power in deci-dBm that should be used for calculating
+ * the segments and to find right curve segment to convert Dbm to raw power
+ * level for a specific PA.
+ * For the PAs with \ref RAIL_PaConversionAlgorithm_t
+ * \ref RAIL_PA_ALGORITHM_PIECEWISE_LINEAR , if the curves are generated with
+ * maxPower and increment other than \ref RAIL_TX_POWER_CURVE_DEFAULT_MAX and
+ * \ref RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT respectively, then the first
+ * \ref RAIL_TxPowerCurveSegment_t has its maxPowerLevel equal to
+ * \ref RAIL_TX_POWER_LEVEL_INVALID and its slope and intercept stores the
+ * maxPower and increment in deci-dBm respectively.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] mode PA mode whose curves are needed.
+ * @param[in] maxpower A pointer to memory allocated to hold the maxpower in
+ * deci-dBm used in calculation of curve segments .
+ * A NULL configuration will produce undefined behavior.
+ * @param[in] increment A pointer to memory allocated to hold the increment in
+ * deci-dBm used in calculation of curve segments.
+ * A NULL configuration will produce undefined behavior.
+ * @return RAIL_Status_t indicating success or an error.
+ *
+ */
+RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
+                                         RAIL_TxPowerMode_t mode,
+                                         RAIL_TxPower_t *maxpower,
+                                         RAIL_TxPower_t *increment);
+
+/**
+ * Initialize PA TX Curves
+ *
+ */
+void sl_rail_util_pa_init(void);
+
+/**
+ * Get a pointer to the TX Power Config 2.4 GHz structure.
+ *
+ * @return a pointer to the TX Power Config stucture.
+ *
+ */
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void);
+
+/**
+ * Get a pointer to the TX Power Config Sub-GHz structure.
+ *
+ * @return a pointer to the TX Power Config stucture.
+ *
+ */
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void);
+
+/**
+ * Provide a channel config change callback capable of configuring the PA
+ * correctly.
+ *
+ * @param[in] rail_handle The RAIL handle being passed into this callback.
+ * @param[in] entry The channel config entry being switched to by hardware.
+ *
+ */
+void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
+                                              const RAIL_ChannelConfigEntry_t *entry);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // PA_CONVERSIONS_EFR32_H

@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LEUART
+ * @addtogroup leuart
  * @{
  ******************************************************************************/
 
@@ -350,8 +345,7 @@ __STATIC_INLINE uint16_t LEUART_RxDataXGet(LEUART_TypeDef *leuart)
   return (uint16_t)leuart->RXDATAX;
 }
 
-/** @} (end addtogroup LEUART) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup leuart) */
 
 #ifdef __cplusplus
 }

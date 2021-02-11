@@ -37,12 +37,7 @@
 #include "em_gpio.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup ACMP
+ * @addtogroup acmp ACMP - Analog Comparator
  * @brief Analog comparator (ACMP) Peripheral API
  *
  * @details
@@ -292,6 +287,13 @@ void ACMP_Disable(ACMP_TypeDef *acmp)
     /* Wait for synchronization to finish */
   }
   acmp->EN_CLR = ACMP_EN_EN;
+
+#if defined(_ACMP_EN_DISABLING_MASK)
+  while (acmp->EN & _ACMP_EN_DISABLING_MASK) {
+    // Wait for disabling to finish
+  }
+#endif
+
 #else
   acmp->CTRL &= ~ACMP_CTRL_EN;
 #endif
@@ -337,8 +339,8 @@ void ACMP_ExternalInputSelect(ACMP_TypeDef *acmp, ACMP_ExternalInput_Typedef apo
 {
   acmp->EXTIFCTRL = (aport << _ACMP_EXTIFCTRL_APORTSEL_SHIFT)
                     | ACMP_EXTIFCTRL_EN;
-  while (!(acmp->STATUS & ACMP_STATUS_EXTIFACT))
-    ;
+  while (!(acmp->STATUS & ACMP_STATUS_EXTIFACT)) {
+  }
 }
 #endif
 
@@ -362,6 +364,11 @@ void ACMP_Reset(ACMP_TypeDef *acmp)
   EFM_ASSERT(ACMP_REF_VALID(acmp));
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(ACMP_SWRST_SWRST)
+  acmp->SWRST_SET = ACMP_SWRST_SWRST;
+  while (acmp->SWRST & _ACMP_SWRST_RESETTING_MASK) {
+  }
+#else
   acmp->IEN         = _ACMP_IEN_RESETVALUE;
   ACMP_Enable(acmp);
   acmp->INPUTCTRL   = _ACMP_INPUTCTRL_RESETVALUE;
@@ -369,6 +376,7 @@ void ACMP_Reset(ACMP_TypeDef *acmp)
   acmp->CFG         = _ACMP_CFG_RESETVALUE;
   acmp->CTRL        = _ACMP_CTRL_RESETVALUE;
   acmp->IF_CLR      = _ACMP_IF_MASK;
+#endif
 #else // Series 0 and Series 1 devices
   acmp->IEN         = _ACMP_IEN_RESETVALUE;
   acmp->CTRL        = _ACMP_CTRL_RESETVALUE;
@@ -670,6 +678,5 @@ void ACMP_VBSetup(ACMP_TypeDef *acmp, const ACMP_VBConfig_TypeDef *vbconfig)
 }
 #endif
 
-/** @} (end addtogroup ACMP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup acmp) */
 #endif /* defined(ACMP_COUNT) && (ACMP_COUNT > 0) */

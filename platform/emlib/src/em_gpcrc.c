@@ -35,12 +35,7 @@
 #if defined(GPCRC_PRESENT) && (GPCRC_COUNT > 0)
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup GPCRC
+ * @addtogroup gpcrc
  * @{
  ******************************************************************************/
 
@@ -138,7 +133,6 @@ void GPCRC_Reset(GPCRC_TypeDef * gpcrc)
   gpcrc->INIT = _GPCRC_INIT_RESETVALUE;
 }
 
-/** @} (end addtogroup GPCRC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup gpcrc) */
 
 #endif /* defined(GPCRC_COUNT) && (GPCRC_COUNT > 0) */

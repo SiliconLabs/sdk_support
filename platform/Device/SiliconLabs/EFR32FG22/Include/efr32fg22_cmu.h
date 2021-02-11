@@ -294,30 +294,30 @@ typedef struct {
 /* Bit fields for CMU IF */
 #define _CMU_IF_RESETVALUE                         0x00000000UL                         /**< Default value for CMU_IF                    */
 #define _CMU_IF_MASK                               0x00000003UL                         /**< Mask for CMU_IF                             */
-#define CMU_IF_CALRDYIF                            (0x1UL << 0)                         /**< Calibration Ready Interrupt Flag            */
-#define _CMU_IF_CALRDYIF_SHIFT                     0                                    /**< Shift value for CMU_CALRDYIF                */
-#define _CMU_IF_CALRDYIF_MASK                      0x1UL                                /**< Bit mask for CMU_CALRDYIF                   */
-#define _CMU_IF_CALRDYIF_DEFAULT                   0x00000000UL                         /**< Mode DEFAULT for CMU_IF                     */
-#define CMU_IF_CALRDYIF_DEFAULT                    (_CMU_IF_CALRDYIF_DEFAULT << 0)      /**< Shifted mode DEFAULT for CMU_IF             */
-#define CMU_IF_CALOFIF                             (0x1UL << 1)                         /**< Calibration Overflow Interrupt Flag         */
-#define _CMU_IF_CALOFIF_SHIFT                      1                                    /**< Shift value for CMU_CALOFIF                 */
-#define _CMU_IF_CALOFIF_MASK                       0x2UL                                /**< Bit mask for CMU_CALOFIF                    */
-#define _CMU_IF_CALOFIF_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for CMU_IF                     */
-#define CMU_IF_CALOFIF_DEFAULT                     (_CMU_IF_CALOFIF_DEFAULT << 1)       /**< Shifted mode DEFAULT for CMU_IF             */
+#define CMU_IF_CALRDY                              (0x1UL << 0)                         /**< Calibration Ready Interrupt Flag            */
+#define _CMU_IF_CALRDY_SHIFT                       0                                    /**< Shift value for CMU_CALRDY                  */
+#define _CMU_IF_CALRDY_MASK                        0x1UL                                /**< Bit mask for CMU_CALRDY                     */
+#define _CMU_IF_CALRDY_DEFAULT                     0x00000000UL                         /**< Mode DEFAULT for CMU_IF                     */
+#define CMU_IF_CALRDY_DEFAULT                      (_CMU_IF_CALRDY_DEFAULT << 0)        /**< Shifted mode DEFAULT for CMU_IF             */
+#define CMU_IF_CALOF                               (0x1UL << 1)                         /**< Calibration Overflow Interrupt Flag         */
+#define _CMU_IF_CALOF_SHIFT                        1                                    /**< Shift value for CMU_CALOF                   */
+#define _CMU_IF_CALOF_MASK                         0x2UL                                /**< Bit mask for CMU_CALOF                      */
+#define _CMU_IF_CALOF_DEFAULT                      0x00000000UL                         /**< Mode DEFAULT for CMU_IF                     */
+#define CMU_IF_CALOF_DEFAULT                       (_CMU_IF_CALOF_DEFAULT << 1)         /**< Shifted mode DEFAULT for CMU_IF             */
 
 /* Bit fields for CMU IEN */
 #define _CMU_IEN_RESETVALUE                        0x00000000UL                         /**< Default value for CMU_IEN                   */
 #define _CMU_IEN_MASK                              0x00000003UL                         /**< Mask for CMU_IEN                            */
-#define CMU_IEN_CALRDYIEN                          (0x1UL << 0)                         /**< Calibration Ready Interrupt Enable          */
-#define _CMU_IEN_CALRDYIEN_SHIFT                   0                                    /**< Shift value for CMU_CALRDYIEN               */
-#define _CMU_IEN_CALRDYIEN_MASK                    0x1UL                                /**< Bit mask for CMU_CALRDYIEN                  */
-#define _CMU_IEN_CALRDYIEN_DEFAULT                 0x00000000UL                         /**< Mode DEFAULT for CMU_IEN                    */
-#define CMU_IEN_CALRDYIEN_DEFAULT                  (_CMU_IEN_CALRDYIEN_DEFAULT << 0)    /**< Shifted mode DEFAULT for CMU_IEN            */
-#define CMU_IEN_CALOFIEN                           (0x1UL << 1)                         /**< Calibration Overflow Interrupt Enable       */
-#define _CMU_IEN_CALOFIEN_SHIFT                    1                                    /**< Shift value for CMU_CALOFIEN                */
-#define _CMU_IEN_CALOFIEN_MASK                     0x2UL                                /**< Bit mask for CMU_CALOFIEN                   */
-#define _CMU_IEN_CALOFIEN_DEFAULT                  0x00000000UL                         /**< Mode DEFAULT for CMU_IEN                    */
-#define CMU_IEN_CALOFIEN_DEFAULT                   (_CMU_IEN_CALOFIEN_DEFAULT << 1)     /**< Shifted mode DEFAULT for CMU_IEN            */
+#define CMU_IEN_CALRDY                             (0x1UL << 0)                         /**< Calibration Ready Interrupt Enable          */
+#define _CMU_IEN_CALRDY_SHIFT                      0                                    /**< Shift value for CMU_CALRDY                  */
+#define _CMU_IEN_CALRDY_MASK                       0x1UL                                /**< Bit mask for CMU_CALRDY                     */
+#define _CMU_IEN_CALRDY_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for CMU_IEN                    */
+#define CMU_IEN_CALRDY_DEFAULT                     (_CMU_IEN_CALRDY_DEFAULT << 0)       /**< Shifted mode DEFAULT for CMU_IEN            */
+#define CMU_IEN_CALOF                              (0x1UL << 1)                         /**< Calibration Overflow Interrupt Enable       */
+#define _CMU_IEN_CALOF_SHIFT                       1                                    /**< Shift value for CMU_CALOF                   */
+#define _CMU_IEN_CALOF_MASK                        0x2UL                                /**< Bit mask for CMU_CALOF                      */
+#define _CMU_IEN_CALOF_DEFAULT                     0x00000000UL                         /**< Mode DEFAULT for CMU_IEN                    */
+#define CMU_IEN_CALOF_DEFAULT                      (_CMU_IEN_CALOF_DEFAULT << 1)        /**< Shifted mode DEFAULT for CMU_IEN            */
 
 /* Bit fields for CMU CALCMD */
 #define _CMU_CALCMD_RESETVALUE                     0x00000000UL                         /**< Default value for CMU_CALCMD                */
@@ -974,4 +974,5 @@ typedef struct {
 /** @} End of group EFR32FG22_CMU_BitFields */
 /** @} End of group EFR32FG22_CMU */
 /** @} End of group Parts */
+
 #endif /* EFR32FG22_CMU_H */

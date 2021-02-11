@@ -23,16 +23,24 @@
 
 #include "response_print.h"
 
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
+// -----------------------------------------------------------------------------
+// Configuration Macros
+// -----------------------------------------------------------------------------
+// Pull in correct config file:
+#ifdef RESPONSE_PRINT_USE_LOCAL_CONFIG_HEADER
+  #include "response_print_config.h" // component-level config file (new method)
+#else // !defined(RESPONSE_PRINT_USE_LOCAL_CONFIG_HEADER)
+  #ifdef CONFIGURATION_HEADER
+    #include CONFIGURATION_HEADER // application-level config file (old method)
+  #endif
 
-// -----------------------------------------------------------------------------
-// Macros
-// -----------------------------------------------------------------------------
-#ifndef MAX_FORMAT_STRING_SIZE
-#define MAX_FORMAT_STRING_SIZE 256
-#endif
+  #ifdef MAX_FORMAT_STRING_SIZE
+    #define RESPONSE_PRINT_FORMAT_STR_SIZE_MAX MAX_FORMAT_STRING_SIZE
+  #else
+    #define RESPONSE_PRINT_FORMAT_STR_SIZE_MAX 256U
+  #endif
+#endif // defined(RESPONSE_PRINT_USE_LOCAL_CONFIG_HEADER)
+
 #define TAG_VALUE_OVERHEAD 3  // '{', '}', and '\0'
 
 #define RESPONSE_PRINT_RETURN_IF_DISABLED \
@@ -165,7 +173,7 @@ static int32_t appendToFormatString(char *dest,
  * @return
  */
 
-static char buffer[MAX_FORMAT_STRING_SIZE];
+static char buffer[RESPONSE_PRINT_FORMAT_STR_SIZE_MAX];
 
 static int responsePrintInternal(StripMode_t stripMode,
                                  char *formatString,
@@ -194,7 +202,7 @@ static int responsePrintInternal(StripMode_t stripMode,
     rval = appendToFormatString(buffer + offset,
                                 start,
                                 size,
-                                (MAX_FORMAT_STRING_SIZE - offset),
+                                (RESPONSE_PRINT_FORMAT_STR_SIZE_MAX - offset),
                                 stripMode);
     if (rval < 0) {
       break;

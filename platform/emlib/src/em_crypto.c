@@ -37,12 +37,7 @@
 #include <string.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CRYPTO
+ * @addtogroup crypto
  * @{
  ******************************************************************************/
 
@@ -140,15 +135,6 @@ static void CRYPTO_AES_OFBx(CRYPTO_TypeDef *crypto,
                             const uint8_t * iv,
                             CRYPTO_KeyWidth_TypeDef keyWidth);
 
-__STATIC_INLINE void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
-                                              uint8_t * val);
-__STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
-                                               const uint8_t * val);
-__STATIC_INLINE
-void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
-                                 const uint8_t *          val,
-                                 CRYPTO_KeyWidth_TypeDef  keyWidth);
-
 #ifdef USE_VARIABLE_SIZED_DATA_LOADS
 /***************************************************************************//**
  * @brief
@@ -188,21 +174,6 @@ void CRYPTO_DataWriteVariableSize(CRYPTO_DataReg_TypeDef    dataReg,
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
- ******************************************************************************/
-
-/***************************************************************************//**
- * @brief
- *   Set the modulus used for wide modular operations.
- *
- * @details
- *   This function sets the modulus to be used by the modular instructions
- *   of the CRYPTO module.
- *
- * @param[in]  crypto
- *   A pointer to the CRYPTO peripheral register block.
- *
- * @param[in]  modulusId
- *   A modulus identifier.
  ******************************************************************************/
 void CRYPTO_ModulusSet(CRYPTO_TypeDef *          crypto,
                        CRYPTO_ModulusId_TypeDef  modulusId)
@@ -267,6 +238,46 @@ void CRYPTO_KeyRead(CRYPTO_TypeDef *         crypto,
   CRYPTO_BurstFromCrypto(&crypto->KEY, &val[0]);
   if (keyWidth == cryptoKey256Bits) {
     CRYPTO_BurstFromCrypto(&crypto->KEY, &val[4]);
+  }
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Read the key value currently used by the CRYPTO module.
+ *
+ * @details
+ *   Read 128 bits or 256 bits from the KEY register in the CRYPTO module.
+ *   The destination pointer does not have to be word-aligned, but an unaligned
+ *   pointer might incur a performance penalty.
+ *
+ * @param[in]  crypto
+ *   A pointer to the CRYPTO peripheral register block.
+ *
+ * @param[in]  val
+ *   A pointer to a buffer which the key will be written to.
+ *   Can be unaligned.
+ *
+ * @param[in]  keyWidth
+ *   Key width - 128 or 256 bits
+ ******************************************************************************/
+void CRYPTO_KeyReadUnaligned(CRYPTO_TypeDef *         crypto,
+                             uint8_t *                val,
+                             CRYPTO_KeyWidth_TypeDef  keyWidth)
+{
+  if ((uint32_t)val & 0x3) {
+    CRYPTO_KeyBuf_TypeDef temp;
+    CRYPTO_KeyRead(crypto, temp, keyWidth);
+    if (keyWidth == cryptoKey128Bits) {
+      memcpy(val, temp, 16);
+    } else {
+      memcpy(val, temp, 32);
+    }
+  } else {
+    // Avoid casting val directly to uint32_t pointer as this can lead to the
+    // compiler making incorrect assumptions in the case where val is un-
+    // aligned.
+    uint8_t * volatile tmp_val_ptr = val;
+    CRYPTO_KeyRead(crypto, (uint32_t*)tmp_val_ptr, keyWidth);
   }
 }
 
@@ -586,6 +597,7 @@ __STATIC_INLINE void cryptoBigintIncrement(uint32_t * words32bits,
  *   may be any multiple of 32 bits. If USE_VARIABLE_SIZED_DATA_LOADS is _not_
  *   defined, the sizes of the operands must be a multiple of 128 bits.
  *
+ * @param[in]  crypto   CRYPTO module
  * @param[in]  A        An operand A
  * @param[in]  aSize    The size of the operand A in bits
  * @param[in]  B        An operand B
@@ -1583,84 +1595,6 @@ void CRYPTO_AES_OFB256(CRYPTO_TypeDef *  crypto,
 
 /***************************************************************************//**
  * @brief
- *   Read 128 bits of data from a DATAX register in the CRYPTO module.
- *
- * @param[in]  dataReg   The 128 bit DATA register.
- * @param[out] val       Location where to store the value in memory.
- ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
-                                              uint8_t * val)
-{
-  /* Check data is 32bit aligned, if not, read into temporary buffer and
-     then move to user buffer. */
-  if ((uintptr_t)val & 0x3) {
-    uint32_t temp[4];
-    CRYPTO_DataRead(reg, temp);
-    memcpy(val, temp, 16);
-  } else {
-    CRYPTO_DataRead(reg, (uint32_t *)val);
-  }
-}
-
-/***************************************************************************//**
- * @brief
- *   Write 128 bits of data to a DATAX register in the CRYPTO module.
- *
- * @param[in]  dataReg    The 128 bit DATA register.
- * @param[in]  val        Pointer to value to write to the DATA register.
- ******************************************************************************/
-__STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
-                                               const uint8_t * val)
-{
-  /* Check data is 32bit aligned, if not move to temporary buffer before
-     writing.*/
-  if ((uintptr_t)val & 0x3) {
-    uint32_t temp[4];
-    memcpy(temp, val, 16);
-    CRYPTO_DataWrite(reg, temp);
-  } else {
-    CRYPTO_DataWrite(reg, (const uint32_t *)val);
-  }
-}
-
-/***************************************************************************//**
- * @brief
- *   Set the key value to be used by the CRYPTO module.
- *
- * @details
- *   Write 128 or 256 bit key to the KEYBUF register in the crypto module.
- *
- * @param[in]  crypto
- *   A pointer to the CRYPTO peripheral register block.
- *
- * @param[in]  val
- *   Pointer to value to write to the KEYBUF register.
- *
- * @param[in]  keyWidth
- *   Key width - 128 or 256 bits.
- ******************************************************************************/
-__STATIC_INLINE
-void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
-                                 const uint8_t *          val,
-                                 CRYPTO_KeyWidth_TypeDef  keyWidth)
-{
-  /* Check if key val buffer is 32bit aligned, if not move to temporary
-     aligned buffer before writing.*/
-  if ((uintptr_t)val & 0x3) {
-    CRYPTO_KeyBuf_TypeDef temp;
-    if (keyWidth == cryptoKey128Bits) {
-      memcpy(temp, val, 16);
-    } else {
-      memcpy(temp, val, 32);
-    }
-    CRYPTO_KeyBufWrite(crypto, temp, keyWidth);
-  } else {
-    CRYPTO_KeyBufWrite(crypto, (uint32_t*)val, keyWidth);
-  }
-}
-
-/***************************************************************************//**
- * @brief
  *   Cipher-block chaining (CBC) cipher mode encryption/decryption, 128/256 bit key.
  *
  * @details
@@ -2162,7 +2096,6 @@ __STATIC_INLINE void CRYPTO_AES_ProcessLoop(CRYPTO_TypeDef *        crypto,
   }
 }
 
-/** @} (end addtogroup CRYPTO) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup crypto) */
 
 #endif /* defined(CRYPTO_COUNT) && (CRYPTO_COUNT > 0) */

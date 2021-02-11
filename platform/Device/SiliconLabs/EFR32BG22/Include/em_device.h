@@ -44,6 +44,9 @@
 #if defined(EFR32BG22C112F352GM32)
 #include "efr32bg22c112f352gm32.h"
 
+#elif defined(EFR32BG22C112F352GM40)
+#include "efr32bg22c112f352gm40.h"
+
 #elif defined(EFR32BG22C222F352GM32)
 #include "efr32bg22c222f352gm32.h"
 

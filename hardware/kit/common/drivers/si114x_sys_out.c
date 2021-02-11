@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include "i2cspm.h"
 #include "em_i2c.h"
+#include "em_common.h"
 #include "em_gpio.h"
 #include "string.h"
 #include "em_usb.h"
@@ -40,13 +41,12 @@
 #include "si114xhrm.h"
 
 #ifdef USB_DEBUG
+    #include "em_usb.h"
     #include "usb_debug.h"
 #endif
 
 /*  I2C port configuration */
 static Si114xPortConfig_t _handle;
-/*  Flag to indicate USB debug is enabled  */
-static bool     usbDebugEnable;
 /*  interrupt sequence counter  */
 static uint16_t irqSequence = 0;
 /*  interrupt queue size in bytes  */
@@ -57,6 +57,13 @@ static u8 IrqQueue[IRQ_QUEUE_SIZE];
 static u16 irqQueueGetIndex = 0;
 /*  interrupt queue current put index  */
 static u16 irqQueuePutIndex = 0;
+
+#ifdef USB_DEBUG
+/*  Flag to indicate USB debug is enabled  */
+static bool     usbDebugEnable;
+/*  Message buffer for USB debug messages */
+static uint8_t message_buffer[((99) + 3) & ~3] SL_ATTRIBUTE_ALIGN(4);
+#endif
 
 /*  Non-exported Function Prototypes  */
 static s16 Si114x_i2c_smbus_write_byte_data(HANDLE si114x_handle, u8 address, u8 data, bool block);
@@ -70,14 +77,17 @@ static s16 Si114xIrqQueue_Put(SI114X_IRQ_SAMPLE *samples);
  *****************************************************************************/
 int si114xSetupDebug(HANDLE si114x_handle, void *si114x_debug)
 {
-  int *enable_usb_debug = (int *)si114x_debug;
   (void) si114x_handle;
+#ifdef USB_DEBUG
+  int *enable_usb_debug = (int *)si114x_debug;
   if (*enable_usb_debug == 1) {
     usbDebugEnable = true;
   } else if (*enable_usb_debug == 0) {
     usbDebugEnable = false;
   }
-
+#else
+  (void) si114x_debug;
+#endif
   return SI114xHRM_SUCCESS;
 }
 
@@ -86,8 +96,8 @@ int si114xSetupDebug(HANDLE si114x_handle, void *si114x_debug)
  *****************************************************************************/
 int si114xOutputDebugMessage(HANDLE si114x_handle, char *message)
 {
+#ifdef USB_DEBUG
   uint16_t i;
-  uint8_t message_buffer[((99) + 3) & ~3] SL_ATTRIBUTE_ALIGN(4);
   uint8_t *Message_Buffer[1] = { message_buffer };
   (void) si114x_handle;
   message_buffer[0] = 0x10;
@@ -96,8 +106,10 @@ int si114xOutputDebugMessage(HANDLE si114x_handle, char *message)
   }
   message_buffer[strlen(message) + 1] = 0x10;
   message_buffer[strlen(message) + 2] = 0x0D;
-#ifdef USB_DEBUG
   USBD_Write(CDC_EP_DATA_IN, (void*) Message_Buffer[0], strlen(message) + 3, NULL);
+#else
+  (void)si114x_handle;
+  (void)message;
 #endif
   return SI114xHRM_SUCCESS;
 }

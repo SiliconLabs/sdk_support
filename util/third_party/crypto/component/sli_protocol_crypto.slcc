@@ -1,0 +1,33 @@
+id: sli_protocol_crypto
+label: Accelerated Crypto Primitives (CRYPTO and RADIOAES)
+package: platform
+description: |-
+  Accelerated cryptographic primitives using the CRYPTO (series-1) and
+  RADIOAES (series-2) peripherals. Primarily intended for low-level operation
+  in wireless stacks.
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src/sli_protocol_crypto_crypto.c
+    condition: [device_has_crypto]
+  - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src/sli_protocol_crypto_radioaes.c
+    condition: [device_has_radioaes]
+  - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src/sli_radioaes_management.c
+    condition: [device_has_radioaes]
+include:
+  - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src
+    file_list:
+      - path: sli_protocol_crypto.h
+      - path: sli_radioaes_management.h
+        condition: [device_has_radioaes]
+provides:
+  - name: sli_protocol_crypto
+requires:
+  - name: device
+  - name: emlib_core
+  - name: emlib_crypto
+    condition: [device_has_crypto]
+  - name: psa_driver
+    condition: [device_has_crypto]
+  - name: se_manager
+    condition: [device_has_radioaes]

@@ -63,4 +63,5 @@ typedef struct {
 /** @} End of group MGM21_LVGD_BitFields */
 /** @} End of group MGM21_LVGD */
 /** @} End of group Parts */
+
 #endif /* MGM21_LVGD_H */

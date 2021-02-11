@@ -71,4 +71,5 @@ typedef struct {
 /** @} End of group MGM21_FSRCO_BitFields */
 /** @} End of group MGM21_FSRCO */
 /** @} End of group Parts */
+
 #endif /* MGM21_FSRCO_H */

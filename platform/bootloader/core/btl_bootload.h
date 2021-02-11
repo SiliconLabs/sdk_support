@@ -33,6 +33,25 @@
  ******************************************************************************/
 
 /***************************************************************************//**
+ * Check application properties magic.
+ *
+ * @param appProperties   Pointer to ::ApplicationProperties_t
+ *
+ * @return True if the application properties magic is valid.
+******************************************************************************/
+bool bootload_checkApplicationPropertiesMagic(void *appProperties);
+
+/***************************************************************************//**
+ * Check application properties struct version.
+ *
+ * @param appProperties   Pointer to ::ApplicationProperties_t
+ *
+ * @return True if the application properties struct version is compatible
+ *         with the bootloader.
+******************************************************************************/
+bool bootload_checkApplicationPropertiesVersion(void *appProperties);
+
+/***************************************************************************//**
  * Verify the application image stored in the Flash memory starting at
  * the address startAddress.
  *
@@ -110,12 +129,113 @@ bool bootloader_enforceSecureBoot(void);
  ******************************************************************************/
 bool bootload_commitBootloaderUpgrade(uint32_t upgradeAddress, uint32_t size);
 
+/***************************************************************************//**
+ * Verify the application version for rollback protection.
+ *
+ * @param[in] appVersion                  Application version to be checked.
+ * @param[in] checkRemainingAppUpgrades   Check remaining application upgrades.
+ *
+ * @return  True if the application version is higher or equal than
+ *          the application versions seen.
+ *          False if the application version is lower than
+ *          the application versions seen.
+ *          False if no remaining application upgrades are left when
+ *          \p checkRemainingAppUpgrades is true.
+ ******************************************************************************/
+bool bootload_verifyApplicationVersion(uint32_t appVersion,
+	                                   bool checkRemainingAppUpgrades);
+
+/***************************************************************************//**
+ * Store the application version.
+ *
+ * @note
+ *   Only the version of the verified application should be stored.
+ *
+ * @param startAddress    Start address of application.
+ *
+ * @return  True if application version is successfully stored.
+ ******************************************************************************/
+bool bootload_storeApplicationVersion(uint32_t startAddress);
+
+/***************************************************************************//**
+ * Count the total remaining number of application upgrades.
+ *
+ * @return remaining number of application upgrades.
+ ******************************************************************************/
+uint32_t bootload_remainingApplicationUpgrades(void);
+
+/***************************************************************************//**
+ * Store application version reset magic.
+ *
+ * @note Store application version reset magic to ensure that application
+ *       versions are cleaned after a bootloader upgrade.
+******************************************************************************/
+void bootload_storeApplicationVersionResetMagic(void);
+
+/***************************************************************************//**
+ * Clean the application versions seen.
+ *
+ * @note The application versions are cleaned only if this is requested with a
+ *       magic and the application version storage is not already empty.
+******************************************************************************/
+void bootload_removeStoredApplicationVersions(void);
+
+/***************************************************************************//**
+ * Get application version storage capacity.
+ *
+ * @return Application version storage capacity.
+ ******************************************************************************/
+uint32_t bootload_getApplicationVersionStorageCapacity(void);
+
+/***************************************************************************//**
+ * Get address of the application version storage buffer.
+ *
+ * @param index     Index of the application version storage buffer.
+ *
+ * @return Address of the application version storage buffer
+ *         with the given index.
+******************************************************************************/
+uint32_t* bootload_getApplicationVersionStoragePtr(uint32_t index);
+
+/***************************************************************************//**
+ * Check if application contains a certificate.
+ *
+ * @param appProp     Pointer to ::ApplicationProperties_t of application.
+ *
+ * @return True if application contains a certificate.
+******************************************************************************/
+bool bootload_gotCertificate(void *appProp);
+
+/***************************************************************************//**
+ * Verify a certificate with bootloader certificate.
+ *
+ * @param cert     Pointer to ::ApplicationCertificate_t.
+ *
+ * @return True if certificate is verified.
+******************************************************************************/
+bool bootload_verifyCertificate(void *cert);
+
+/***************************************************************************//**
+ * Verify application certificate.
+ *
+ * @note
+ *   This function will always return true if certificate support is
+ *   not enabled. Also true if \p appProp does not contain any certificate and
+ *   direct signed applications can be accepted.
+ *
+ * @param appProp     Pointer to ::ApplicationProperties_t of application.
+ * @param gotCert     Boolean to store application certificate presence.
+ *
+ * @return True if application certificate is verified.
+******************************************************************************/
+bool bootload_verifyApplicationCertificate(void *appProp, void *gotCert);
+
 #if defined(_MSC_PAGELOCK0_MASK)
 /***************************************************************************//**
  * Lock the application area in Flash.
  *
  * @note
- *   Lock applied on the application area in Flash is irreversible until
+ *   Lock applied on the application area in flash is irreversible until
  *   the next reboot.
  *
  * @param startAddress    Start address of application to be locked.

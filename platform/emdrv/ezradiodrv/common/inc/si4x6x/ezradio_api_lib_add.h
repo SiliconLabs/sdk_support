@@ -38,17 +38,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup API_Layer
+ * @addtogroup ezradiodrv_api
  * @{
  ******************************************************************************/
 
@@ -71,9 +66,8 @@ void ezradio_rx_hop(uint8_t inte, uint8_t frac2, uint8_t frac1, uint8_t frac0, u
 #endif /* EZRADIO_DRIVER_FULL_SUPPORT */
 #endif /* EZRADIO_DRIVER_EXTENDED_SUPPORT */
 
-/** @} (end addtogroup API_Layer) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_api) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

@@ -242,4 +242,5 @@ typedef struct {
 /** @} End of group MGM22_GPCRC_BitFields */
 /** @} End of group MGM22_GPCRC */
 /** @} End of group Parts */
+
 #endif /* MGM22_GPCRC_H */

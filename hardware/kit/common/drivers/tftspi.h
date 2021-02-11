@@ -31,6 +31,10 @@
 #ifndef __SPI_TFT_H
 #define __SPI_TFT_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The SSD119 SPI driver is deprecated and marked for removal in a later release."
+#endif
+
 #include <stdint.h>
 
 /***************************************************************************//**

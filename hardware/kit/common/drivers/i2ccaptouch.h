@@ -31,6 +31,10 @@
 #ifndef I2CCAPTOUCH_H
 #define I2CCAPTOUCH_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The I2C touch driver is deprecated and marked for removal in a later release."
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 

@@ -14,7 +14,7 @@
 #  quality=sample
 #  root=$HAL/my-plugin
 #
-#  architecture=efr32,em357,simulation
+#  architecture=efr32,simulation
 #
 #  providedApis=my-provided-api1,my-provided-api2
 #  api.my-provided-api1.header=my-provided-api1.h
@@ -24,7 +24,6 @@
 #
 #  my-file-common.c
 #  my-file-efr32.c      (efr32)
-#  my-file-em357.c      (em357)
 #  my-file-simulation.c (simulation)
 #
 #  callbacks=my-callback.info
@@ -61,12 +60,12 @@ pluginDirectory=./plugin-common
 
 plugin(battery-monitor) {
   name=Battery Monitor
-  description=This plugin will monitor the value of the battery during the middle of radio transmissions, and use that data to calculate the voltage level of the battery.  For an em35x chip, this requires the board.h to be modified so that the TX Active pin (PC5 for an em35x) is set as a wake on interrupt pin, and configured as an alternate output with a push/pull drive.  No port and pin need to be set in the board.h for this plugin, but an IRQ must be selected by defining the BATTERY_MONITOR_IRQ macro to something like HAL_GIC_IRQ_NUMD.  Also, the PHY_CONFIG token should be set to one of the external PA drive options.  For an EFR32 design, the HAL_BATTERY_MONITOR_TX_ACTIVE_PORT and HAL_BATTERY_MONITOR_TX_ACTIVE_PIN macros must be set in the board.h.
+  description=This plugin will monitor the value of the battery during the middle of radio transmissions, and use that data to calculate the voltage level of the battery. For an EFR32 design, the HAL_BATTERY_MONITOR_TX_ACTIVE_PORT and HAL_BATTERY_MONITOR_TX_ACTIVE_PIN macros must be set in the board.h.
   category=HAL
   quality=productionReady
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32, simulation
 
   providedApis=battery-monitor
   api.battery-monitor.header=./plugin-common/battery-monitor/battery-monitor.h
@@ -76,7 +75,6 @@ plugin(battery-monitor) {
   #HAL API is required in order to get access to ADC functions
   requiredApis=hal
 
-  plugin-common/battery-monitor/battery-monitor-em3xx.c (em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
   plugin-common/battery-monitor/battery-monitor-efr32.c (efr32)
   plugin-common/battery-monitor-stub/battery-monitor-stub.c (simulation)
 
@@ -116,17 +114,16 @@ plugin(bulb-pwm-driver) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
   providedApis=bulb-pwm-driver
   api.bulb-pwm-driver.header=./plugin-common/bulb-pwm-driver/bulb-pwm-driver.h
 
   callbacks=plugin-common/bulb-pwm-driver/bulb-pwm-driver-callback.info
 
-  plugin-common/bulb-pwm-driver/bulb-pwm-driver-em3xx.c         (em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
   plugin-common/bulb-pwm-driver/bulb-pwm-driver-efr32.c   (efr32)
   plugin-common/bulb-pwm-driver-stub/bulb-pwm-driver-stub.c          (simulation)
-  plugin-common/bulb-pwm-driver/bulb-pwm-driver-blink.c    (simulation, efr32, em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/bulb-pwm-driver/bulb-pwm-driver-blink.c    (simulation, efr32)
 
   setup(bookkeeping) {
     init=halBulbPwmDriverInitialize
@@ -153,10 +150,10 @@ plugin(button-interface) {
   providedApis=button-interface
   api.button-interface.header=./plugin-common/button-interface/button-interface.h
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
-  plugin-common/button-interface/button-interface.c   (simulation,efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
-  plugin-afv6/button-interface/button-interface-afv6.c   (simulation,efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/button-interface/button-interface.c   (simulation,efr32)
+  plugin-afv6/button-interface/button-interface-afv6.c   (simulation,efr32)
 
   callbacks=plugin-common/button-interface/callback.info
   implementedCallbacks=halButtonIsr
@@ -241,9 +238,8 @@ plugin(generic-interrupt-control) {
   providedApis=generic-interrupt-control
   api.generic-interrupt-control.header=./plugin-common/generic-interrupt-control/generic-interrupt-control.h
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
-  plugin-common/generic-interrupt-control/generic-interrupt-control-em3xx.c     (em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
   plugin-common/generic-interrupt-control/generic-interrupt-control-efr32.c (efr32)
   plugin-common/generic-interrupt-control-stub/generic-interrupt-control-stub.c (simulation)
 }
@@ -254,14 +250,14 @@ plugin(gpio-sensor) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
   providedApis=gpio-sensor
   api.gpio-sensor.header=./plugin-common/gpio-sensor/gpio-sensor.h
 
-  description=This is an interface for a generic binary GPIO sensor.  It provides very simple debouncing and a callback for when the state of the sensor changes.  For this plugin to function properly, the user must select a GPIO port and pin and define them in the applicaton's board.h via the GPIO_SENSOR_PORT and GPIO_SENSOR_PIN macros.  Additionally, for an em35x design, an IRQ number must be set with the GPIO_SENSOR_IRQ macro.  For EFR32, no IRQ needs to be selected, but the user can set the GPIO_SENSOR_EM4WUPIN macro to true or false to enable or disable EM4 wake up functionality for the pin.
+  description=This is an interface for a generic binary GPIO sensor.  It provides very simple debouncing and a callback for when the state of the sensor changes.  For this plugin to function properly, the user must select a GPIO port and pin and define them in the applicaton's board.h via the GPIO_SENSOR_PORT and GPIO_SENSOR_PIN macros. For EFR32, no IRQ needs to be selected, but the user can set the GPIO_SENSOR_EM4WUPIN macro to true or false to enable or disable EM4 wake up functionality for the pin.
 
-  plugin-common/gpio-sensor/gpio-sensor.c     (efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/gpio-sensor/gpio-sensor.c     (efr32)
   plugin-common/gpio-sensor-stub/gpio-sensor-stub.c (simulation)
 
   requiredPlugins=generic-interrupt-control
@@ -308,9 +304,9 @@ plugin(led-blink) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
-  plugin-common/led-blink/led-blink.c     (efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/led-blink/led-blink.c     (efr32)
   plugin-common/led-blink-stub/led-blink-stub.c (simulation)
 
   providedApis=led-blink
@@ -365,7 +361,7 @@ plugin(occupancy-pyd1698) {
 
   quality=production
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
   description=This plugin will provide an interface for the PYD-1698 occupancy sensor.  The PYD-1698 communicates using a proprietary serial interface, so direct register access to GPIO registers and 4-10 cycle processor waits will be used to bit bang the interface.  In order to use this plugin, the following macros must be defined, preferably in the project's board.h, based on the hardware design of the application: OCCUPANCY_PYD1698_SERIN_PORT, OCCUPANCY_PYD1698_SERIN_PIN, OCCUPANCY_PYD1698_DLINK_PORT, OCCUPANCY_PYD1698_DLINK_PIN, OCCUPANCY_PYD1698_INSTALLATION_JP_PORT, OCCUPANCY_PYD1698_INSTALLATION_JP_PIN.
 
@@ -373,7 +369,6 @@ plugin(occupancy-pyd1698) {
   api.occupancy.header=$PLUGIN/plugin-common/occupancy-pyd1698/occupancy.h
   api.occupancy-pyd1698.header=$PLUGIN/plugin-common/occupancy-pyd1698/occupancy-pyd1698.h
 
-  plugin-common/occupancy-pyd1698/occupancy-pyd1698-em3xx.c   (em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
   plugin-common/occupancy-pyd1698-stub/occupancy-pyd1698-stub.c               (simulation)
   plugin-common/occupancy-pyd1698/occupancy-pyd1698-efr32.c   (efr32)
 
@@ -465,13 +460,13 @@ plugin(power-meter-cs5463) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation,simulation-ezsp
+  architecture=efr32,simulation,simulation-ezsp
 
   providedApis=power-meter,power-meter-cs5463
   api.power-meter.header=plugin-afv2/power-meter-cs5463/power-meter.h
   api.power-meter-cs5463.header=plugin-afv2/power-meter-cs5463/power-meter-cs5463.h
 
-  plugin-afv2/power-meter-cs5463/power-meter-cs5463.c           (efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-afv2/power-meter-cs5463/power-meter-cs5463.c           (efr32)
   plugin-afv2/power-meter-cs5463-stub/power-meter-cs5463-stub.c (simulation,simulation-ezsp)
 
   setup(eventConfiguration) {
@@ -495,11 +490,11 @@ plugin(sb1-gesture-sensor) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
   requiredPlugins=i2c-driver, generic-interrupt-control
 
-  plugin-common/sb1-gesture-sensor/sb1-gesture-sensor.c (efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/sb1-gesture-sensor/sb1-gesture-sensor.c (efr32)
   plugin-common/sb1-gesture-sensor-stub/sb1-gesture-sensor-stub.c (simulation)
 
   callbacks=plugin-common/sb1-gesture-sensor/callback.info
@@ -557,11 +552,11 @@ plugin(tamper-switch) {
   quality=production
   root=./
 
-  architecture=efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598,simulation
+  architecture=efr32,simulation
 
   description=This is a tamper switch interface.  It is intended to be used as a switch that is closed when a device is placed inside an enclosure, which will generate an alarm if the enclosure is opened.  It requires that the tamper switch is defined as BUTTON0.
 
-  plugin-common/tamper-switch/tamper-switch.c     (efr32,em341,em342,em346,em351,em355,em3555,em356,em357,em3581,em3582,em3585,em3586,em3587,em3588,em3591,em3592,em3595,em3596,em3597,em3598)
+  plugin-common/tamper-switch/tamper-switch.c     (efr32)
   plugin-common/tamper-switch-stub/tamper-switch-stub.c (simulation)
 
   callbacks=plugin-common/tamper-switch/callback.info

@@ -79,9 +79,6 @@ Revision: $Rev: 7766 $
 #include  <common/include/rtos_err.h>
 #include  <common/include/rtos_utils.h>
 #include  <cpu/include/cpu.h>
-
-#if (defined(OS_CFG_TRACE_EN) && (OS_CFG_TRACE_EN > 0u))
-
 #include  <os_trace_events.h>
 #include  <em_cmu.h>
 
@@ -137,7 +134,5 @@ void SEGGER_SYSVIEW_Conf(void) {
 
   SEGGER_SYSVIEW_SetRAMBase(SYSVIEW_RAM_BASE);
 }
-
-#endif
 
 /*************************** End of file ****************************/

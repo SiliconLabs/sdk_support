@@ -80,4 +80,5 @@ typedef struct {
 /** @} End of group MGM21_LDMAXBAR_BitFields */
 /** @} End of group MGM21_LDMAXBAR */
 /** @} End of group Parts */
+
 #endif /* MGM21_LDMAXBAR_H */

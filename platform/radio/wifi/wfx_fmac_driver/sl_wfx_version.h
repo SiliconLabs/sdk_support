@@ -18,11 +18,11 @@
 #define SL_WFX_VERSION_H
 
 /** X.x.x: Major version of the driver */
-#define FMAC_DRIVER_VERSION_MAJOR      2
+#define FMAC_DRIVER_VERSION_MAJOR      3
 /** x.X.x: Minor version of the driver */
-#define FMAC_DRIVER_VERSION_MINOR      4
+#define FMAC_DRIVER_VERSION_MINOR      2
 /** x.x.X: Revision of the driver */
-#define FMAC_DRIVER_VERSION_REVISION   0
+#define FMAC_DRIVER_VERSION_REVISION   2
 /** For release candidates, this is set to 1..254
  * For official releases, this is set to 255 (FMAC_DRIVER_RC_RELEASE)
  * For development versions, this is set to 0 (FMAC_DRIVER_RC_DEVELOPMENT) */

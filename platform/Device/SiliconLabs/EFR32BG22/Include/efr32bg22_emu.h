@@ -734,4 +734,5 @@ typedef struct {
 /** @} End of group EFR32BG22_EMU_BitFields */
 /** @} End of group EFR32BG22_EMU */
 /** @} End of group Parts */
+
 #endif /* EFR32BG22_EMU_H */

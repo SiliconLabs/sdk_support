@@ -5038,4 +5038,5 @@ typedef struct {
 /** @} End of group EFR32MG21_RAC_BitFields */
 /** @} End of group EFR32MG21_RAC */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_RAC_H */

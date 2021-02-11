@@ -31,12 +31,7 @@
 #define __SILICON_LABS_EZRADIODRV_CONFIG_H__
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup EZRADIODRV
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
@@ -78,7 +73,6 @@
 //#define RF_GPIO1_PIN            14    /**< RF GPIO1 GPIO pin number.         */
 #endif
 
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv) */
 
 #endif /* __SILICON_LABS_EZRADIODRV_CONFIG_H__ */

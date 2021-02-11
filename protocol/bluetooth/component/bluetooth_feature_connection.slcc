@@ -1,0 +1,17 @@
+id: "bluetooth_feature_connection"
+label:  "Connection"
+package: "Bluetooth"
+description: >
+  Bluetooth connection feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_connection"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_connection_init"
+    priority: 4

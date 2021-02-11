@@ -31,6 +31,10 @@
 #ifndef __TFTAMAPPED_H
 #define __TFTAMAPPED_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The SSD119 TFT mapped mode init is deprecated and marked for removal in a later release."
+#endif
+
 #include <stdbool.h>
 
 /***************************************************************************//**

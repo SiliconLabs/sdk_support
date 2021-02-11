@@ -2,7 +2,7 @@
 //
 #include PLATFORM_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #if defined(CORTEXM3_EFR32)
 #include "spidrv.h"
 #else

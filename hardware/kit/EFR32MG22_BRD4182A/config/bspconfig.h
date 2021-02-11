@@ -83,7 +83,7 @@
  * (37+1) * 0.25 pF = 9.5 pF
  */
 #define BSP_LFXO_CTUNE          37U
-#define BSP_HFXO_CTUNE          120U
+#define BSP_HFXO_CTUNE          124U
 
 #if !defined(CMU_HFXOINIT_WSTK_DEFAULT)
 /* HFXO initialization values for XTAL mode. */

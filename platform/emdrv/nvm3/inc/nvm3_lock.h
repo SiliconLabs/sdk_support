@@ -32,26 +32,20 @@
 #define NVM3_LOCK_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup nvm3
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup NVM3
- * @{
- ******************************************************************************/
-
-extern uint8_t nvm3_ccmBuf[];
-
-/***************************************************************************//**
- * @addtogroup NVM3Lock
- * @brief NVM3 lock module
+ * @addtogroup nvm3lock NVM3 Lock
+ * @brief NVM3 lock functions
  * @{
  * @details
  * This module provides data protection tools for NVM3.
@@ -77,9 +71,14 @@ void nvm3_lockBegin(void);
  ******************************************************************************/
 void nvm3_lockEnd(void);
 
-/** @} (end addtogroup NVM3Lock) */
-/** @} (end addtogroup NVM3) */
-/** @} (end addtogroup emdrv) */
+/***************************************************************************//**
+ * @brief
+ *  Disable execution from data area.
+ ******************************************************************************/
+void nvm3_lockDisableExecute(void* address, size_t size);
+
+/** @} (end addtogroup nvm3lock) */
+/** @} (end addtogroup nvm3) */
 
 #ifdef __cplusplus
 }

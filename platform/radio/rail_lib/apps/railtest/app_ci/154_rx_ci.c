@@ -4,7 +4,7 @@
  *   relevant to receiving packets
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -33,7 +33,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
@@ -43,12 +42,12 @@
 
 bool ieee802154EnhAckEnabled = false;
 uint8_t ieee802154PhrLen = 1U; // Default is 1-byte PHY Header (length byte)
-
+bool setFpByDefault = false;
 uint32_t dataReqLatencyUs = 0U;
 
-void ieee802154Enable(int argc, char **argv)
+void ieee802154Enable(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
@@ -80,99 +79,121 @@ void ieee802154Enable(int argc, char **argv)
     .timings = timings,
     .framesMask = RAIL_IEEE802154_ACCEPT_STANDARD_FRAMES,
     .promiscuousMode = false,
-    .isPanCoordinator = false
+    .isPanCoordinator = false,
+    .defaultFramePendingInOutgoingAcks = false
   };
 
-  if (memcmp(argv[1], "idle", 4) == 0) {
+  if (memcmp(sl_cli_get_argument_string(args, 0), "idle", 4) == 0) {
     config.ackConfig.rxTransitions.success = RAIL_RF_STATE_IDLE;
     config.ackConfig.txTransitions.success = RAIL_RF_STATE_IDLE;
-  } else if (memcmp(argv[1], "rx", 2) == 0) {
+  } else if (memcmp(sl_cli_get_argument_string(args, 0), "rx", 2) == 0) {
     config.ackConfig.rxTransitions.success = RAIL_RF_STATE_RX;
     config.ackConfig.txTransitions.success = RAIL_RF_STATE_RX;
   } else {
-    responsePrintError(argv[0], 0x20, "Unknown auto ack default state.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x20, "Unknown auto ack default state.");
     return;
   }
 
-  uint16_t timing = ciGetUnsigned(argv[2]);
+  uint16_t timing = sl_cli_get_argument_uint16(args, 1);
   if (timing > 13000) {
-    responsePrintError(argv[0], 0x21, "Invalid idle timing.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x21, "Invalid idle timing.");
     return;
   } else {
     config.timings.idleToTx = timing;
     config.timings.idleToRx = timing;
   }
 
-  timing = ciGetUnsigned(argv[3]);
+  timing = sl_cli_get_argument_uint16(args, 2);
   if (timing > 13000) {
-    responsePrintError(argv[0], 0x22, "Invalid turnaround timing");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x22, "Invalid turnaround timing");
     return;
   } else {
     config.timings.rxToTx = timing;
     config.timings.txToRx = timing - 10;
   }
 
-  timing = ciGetUnsigned(argv[4]);
+  timing = sl_cli_get_argument_uint16(args, 3);
   config.ackConfig.ackTimeout = timing;
 
+  if (sl_cli_get_argument_count(args) >= 5) {
+    setFpByDefault = !!(sl_cli_get_argument_uint8(args, 4));
+    config.defaultFramePendingInOutgoingAcks  = setFpByDefault;
+  }
   disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
   RAIL_Status_t status = RAIL_IEEE802154_Init(railHandle, &config);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], status, "Call to RAIL_IEEE802154_Init returned an error");
+    responsePrintError(sl_cli_get_command_string(args, 0), status, "Call to RAIL_IEEE802154_Init returned an error");
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "802.15.4:%s,"
                   "rxDefaultState:%s,"
                   "txDefaultState:%s,"
                   "idleTiming:%d,"
                   "turnaroundTime:%d,"
-                  "ackTimeout:%d",
+                  "ackTimeout:%d,"
+                  "defaultFramePending:%s",
                   status ? "Disabled" : "Enabled",
                   getRfStateName(config.ackConfig.txTransitions.success),
                   getRfStateName(config.ackConfig.rxTransitions.success),
                   config.timings.idleToTx,
                   config.timings.rxToTx,
-                  config.ackConfig.ackTimeout);
+                  config.ackConfig.ackTimeout,
+                  config.defaultFramePendingInOutgoingAcks ? "True" : "False");
   }
 }
 
-void config2p4Ghz802154(int argc, char **argv)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT (0U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT   (1U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT    (2U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV       (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM          (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT)
+
+typedef RAIL_Status_t (*RAIL_IEEE802154_2p4GHzRadioConfig_t)(RAIL_Handle_t railHandle);
+static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
+  &RAIL_IEEE802154_Config2p4GHzRadio,
+  &RAIL_IEEE802154_Config2p4GHzRadioAntDiv,
+  &RAIL_IEEE802154_Config2p4GHzRadioCoex,
+  &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex,
+  &RAIL_IEEE802154_Config2p4GHzRadioFem,
+  &RAIL_IEEE802154_Config2p4GHzRadioAntDivFem,
+  &RAIL_IEEE802154_Config2p4GHzRadioCoexFem,
+  &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem,
+};
+
+void config2p4Ghz802154(sl_cli_command_arg_t *args)
 {
   RAIL_Status_t status;
-  bool antDivConfig = false;
-  bool coexConfig = false;
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  uint8_t ieee802154Config = 0U;
+
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
   disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
 
-  if (argc > 1) {
-    antDivConfig = ciGetUnsigned(argv[1]);
+  if ((sl_cli_get_argument_count(args) >= 1)
+      && (sl_cli_get_argument_uint8(args, 0) != 0U)) {
+    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV;
   }
-  if (argc > 2) {
-    coexConfig = ciGetUnsigned(argv[2]);
+  if ((sl_cli_get_argument_count(args) >= 2)
+      && (sl_cli_get_argument_uint8(args, 1) != 0U)) {
+    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX;
   }
-  if (antDivConfig) {
-    if (coexConfig) {
-      status = RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(railHandle);
-    } else {
-      status = RAIL_IEEE802154_Config2p4GHzRadioAntDiv(railHandle);
-    }
-  } else if (coexConfig) {
-    status = RAIL_IEEE802154_Config2p4GHzRadioCoex(railHandle);
-  } else {
-    status = RAIL_IEEE802154_Config2p4GHzRadio(railHandle);
+  if ((sl_cli_get_argument_count(args) >= 3)
+      && (sl_cli_get_argument_uint8(args, 2) != 0U)) {
+    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM;
   }
+  status = (*ieee802154Configs[ieee802154Config])(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;
     changeChannel(11);
   }
-  responsePrint(argv[0], "802.15.4:%s", status ? "Disabled" : "Enabled");
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
 }
 
-void config863Mhz802154(int argc, char **argv)
+void config863Mhz802154(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
   disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
@@ -181,13 +202,16 @@ void config863Mhz802154(int argc, char **argv)
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 2U;
     changeChannel(0x80);
+
+    txData[0] = 0x10; // enable whitening, 4-byte CRC
+    txData[1] = 0x70; // length indicator = 14, bit-reversed
   }
-  responsePrint(argv[0], "802.15.4:%s", status ? "Disabled" : "Enabled");
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
 }
 
-void config915Mhz802154(int argc, char **argv)
+void config915Mhz802154(sl_cli_command_arg_t *args)
 {
-  if (!inRadioState(RAIL_RF_STATE_IDLE, argv[0])) {
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
   disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
@@ -196,21 +220,24 @@ void config915Mhz802154(int argc, char **argv)
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 2U;
     changeChannel(0xE0);
+
+    txData[0] = 0x10; // enable whitening, 4-byte CRC
+    txData[1] = 0x70; // length indicator = 14, bit-reversed
   }
-  responsePrint(argv[0], "802.15.4:%s", status ? "Disabled" : "Enabled");
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
 }
 
-void ieee802154AcceptFrames(int argc, char **argv)
+void ieee802154AcceptFrames(sl_cli_command_arg_t *args)
 {
   uint8_t framesEnable = 0;
-  bool commandFrame = ciGetUnsigned(argv[1]);
-  bool ackFrame = ciGetUnsigned(argv[2]);
-  bool dataFrame = ciGetUnsigned(argv[3]);
-  bool beaconFrame = ciGetUnsigned(argv[4]);
+  bool commandFrame = !!sl_cli_get_argument_uint8(args, 0);
+  bool ackFrame = !!sl_cli_get_argument_uint8(args, 1);
+  bool dataFrame = !!sl_cli_get_argument_uint8(args, 2);
+  bool beaconFrame = !!sl_cli_get_argument_uint8(args, 3);
   bool multipurposeFrame = false;
 
-  if (argc > 5) {
-    multipurposeFrame = ciGetUnsigned(argv[5]);
+  if (sl_cli_get_argument_count(args) >= 5) {
+    multipurposeFrame = !!sl_cli_get_argument_uint8(args, 4);
   }
 
   // Command
@@ -232,9 +259,9 @@ void ieee802154AcceptFrames(int argc, char **argv)
 
   RAIL_Status_t status = RAIL_IEEE802154_AcceptFrames(railHandle, framesEnable);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x23, "Failed to set which frames to accept.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x23, "Failed to set which frames to accept.");
   } else {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "CommandFrame:%s,"
                   "AckFrame:%s,"
                   "DataFrame:%s,"
@@ -248,63 +275,69 @@ void ieee802154AcceptFrames(int argc, char **argv)
   }
 }
 
-void ieee802154SetPromiscuousMode(int argc, char **argv)
+void ieee802154SetPromiscuousMode(sl_cli_command_arg_t *args)
 {
-  bool promiscuous = ciGetUnsigned(argv[1]);
+  bool promiscuous = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_SetPromiscuousMode(railHandle, promiscuous);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x24, "Failed to (un)set promiscuous mode.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x24, "Failed to (un)set promiscuous mode.");
   } else {
-    responsePrint(argv[0], "PromiscuousMode:%s",
+    responsePrint(sl_cli_get_command_string(args, 0), "PromiscuousMode:%s",
                   promiscuous ? "Enabled" : "Disabled");
   }
 }
 
-void ieee802154SetPanCoordinator(int argc, char **argv)
+void ieee802154SetPanCoordinator(sl_cli_command_arg_t *args)
 {
-  bool panCoord = ciGetUnsigned(argv[1]);
+  bool panCoord = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_SetPanCoordinator(railHandle, panCoord);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x24, "Failed to (un)set PAN Coordinator.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x24, "Failed to (un)set PAN Coordinator.");
   } else {
-    responsePrint(argv[0], "PanCoordinator:%s",
+    responsePrint(sl_cli_get_command_string(args, 0), "PanCoordinator:%s",
                   panCoord ? "Enabled" : "Disabled");
   }
 }
 
-void ieee802154SetPanId(int argc, char **argv)
+void ieee802154SetPanId(sl_cli_command_arg_t *args)
 {
-  uint16_t panId = ciGetUnsigned(argv[1]);
-  uint8_t index = (argc > 2) ? ciGetUnsigned(argv[2]) : 0;
+  uint16_t panId = sl_cli_get_argument_uint16(args, 0);
+  uint8_t index = (sl_cli_get_argument_count(args) >= 2) ? sl_cli_get_argument_uint8(args, 1) : 0;
   RAIL_Status_t status = RAIL_IEEE802154_SetPanId(railHandle, panId, index);
-  responsePrint(argv[0], "802.15.4PanId:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4PanId:%s", getStatusMessage(status));
 }
 
-void ieee802154SetShortAddress(int argc, char **argv)
+void ieee802154SetShortAddress(sl_cli_command_arg_t *args)
 {
-  uint16_t shortAddr = ciGetUnsigned(argv[1]);
-  uint8_t index = (argc > 2) ? ciGetUnsigned(argv[2]) : 0;
+  uint16_t shortAddr = sl_cli_get_argument_uint16(args, 0);
+  uint8_t index = (sl_cli_get_argument_count(args) >= 2) ? sl_cli_get_argument_uint8(args, 1) : 0;
   RAIL_Status_t status = RAIL_IEEE802154_SetShortAddress(railHandle,
                                                          shortAddr,
                                                          index);
-  responsePrint(argv[0], "802.15.4ShortAddress:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4ShortAddress:%s", getStatusMessage(status));
 }
 
-void ieee802154SetLongAddress(int argc, char **argv)
+void ieee802154SetLongAddress(sl_cli_command_arg_t *args)
 {
   uint8_t longAddr[8];
   for (int i = 0; i < 8; i++) {
-    longAddr[i] = ciGetUnsigned(argv[i + 1]);
+    longAddr[i] = sl_cli_get_argument_uint8(args, i);
   }
-  uint8_t index = (argc > 9) ? ciGetUnsigned(argv[9]) : 0;
+  uint8_t index = (sl_cli_get_argument_count(args) >= 9) ? sl_cli_get_argument_uint8(args, 8) : 0;
   RAIL_Status_t status = RAIL_IEEE802154_SetLongAddress(railHandle,
                                                         longAddr,
                                                         index);
-  responsePrint(argv[0], "802.15.4LongAddress:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4LongAddress:%s", getStatusMessage(status));
 }
 
-void ieee802154SetAddresses(int argc, char **argv)
+void ieee802154SetAddresses(sl_cli_command_arg_t *args)
 {
+  // Any subsequent optional inputs after the 1st set of panID, shortAddr and LongAddr
+  // will be input as string hence need to be handled differently.
+  #define GET_ARG(args, argCount) (argCount >= 2)                 \
+  ? strtoull(sl_cli_get_argument_string(args, argCount), NULL, 0) \
+  : sl_cli_get_argument_uint16(args, argCount);
+
   RAIL_IEEE802154_AddrConfig_t addresses = {
     { 0xFFFF, 0xFFFF, 0xFFFF },
     { 0xFFFF, 0xFFFF, 0xFFFF },
@@ -313,51 +346,51 @@ void ieee802154SetAddresses(int argc, char **argv)
       { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } }
   };
 
-  uint8_t argIndex = 1; // Skip the command argument
+  uint8_t argCount = 0;
   for (uint8_t i = 0; i < RAIL_IEEE802154_MAX_ADDRESSES; i++) {
-    if (argIndex >= argc) {
+    if (argCount >= sl_cli_get_argument_count(args)) {
       break;
     }
-    addresses.panId[i] = ciGetUnsigned(argv[argIndex]);
-    argIndex++;
+    addresses.panId[i] = GET_ARG(args, argCount);
+    argCount++;
 
-    if (argIndex >= argc) {
+    if (argCount >= sl_cli_get_argument_count(args)) {
       break;
     }
-    addresses.shortAddr[i] = ciGetUnsigned(argv[argIndex]);
-    argIndex++;
+    addresses.shortAddr[i] = GET_ARG(args, argCount);
+    argCount++;
 
-    if (argIndex >= argc) {
+    if (argCount >= sl_cli_get_argument_count(args)) {
       break;
     }
-    uint64_t longAddr = strtoull(argv[argIndex], NULL, 0);
+    uint64_t longAddr = GET_ARG(args, argCount);
     for (int j = 0; j < 8; j++) {
       addresses.longAddr[i][j] = (longAddr >> (i * 8)) & 0xFF;
     }
-    argIndex++;
+    argCount++;
   }
   RAIL_Status_t status = RAIL_IEEE802154_SetAddresses(railHandle, &addresses);
-  responsePrint(argv[0], "802.15.4Addresses:%s", getStatusMessage(status));
+  responsePrint(sl_cli_get_command_string(args, 0), "802.15.4Addresses:%s", getStatusMessage(status));
 }
 
-void ieee802154SetDataReqLatency(int argc, char **argv)
+void ieee802154SetDataReqLatency(sl_cli_command_arg_t *args)
 {
-  dataReqLatencyUs = ciGetUnsigned(argv[1]);
-  responsePrint(argv[0], "DataReqLatency:%u", dataReqLatencyUs);
+  dataReqLatencyUs = sl_cli_get_argument_uint32(args, 0);
+  responsePrint(sl_cli_get_command_string(args, 0), "DataReqLatency:%u", dataReqLatencyUs);
 }
 
-void ieee802154SetE(int argc, char **argv)
+void ieee802154SetE(sl_cli_command_arg_t *args)
 {
-  RAIL_IEEE802154_EOptions_t options = (RAIL_IEEE802154_EOptions_t) ciGetUnsigned(argv[1]);
+  RAIL_IEEE802154_EOptions_t options = (RAIL_IEEE802154_EOptions_t) sl_cli_get_argument_uint32(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_ConfigEOptions(railHandle,
                                                         RAIL_IEEE802154_E_OPTIONS_ALL,
                                                         options);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 31, "802.15.4E:Failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 31, "802.15.4E:Failed");
     return;
   }
   ieee802154EnhAckEnabled = ((options & RAIL_IEEE802154_E_OPTION_ENH_ACK) != 0U);
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "15.4E_GB868:%s,"
                 "15.4E_EnhAck:%s,"
                 "15.4E_ImplicitBroadcast:%s",
@@ -366,28 +399,28 @@ void ieee802154SetE(int argc, char **argv)
                 (options & RAIL_IEEE802154_E_OPTION_IMPLICIT_BROADCAST) ? "True" : "False");
 }
 
-void ieee802154SetG(int argc, char **argv)
+void ieee802154SetG(sl_cli_command_arg_t *args)
 {
-  RAIL_IEEE802154_GOptions_t options = (RAIL_IEEE802154_GOptions_t) ciGetUnsigned(argv[1]);
+  RAIL_IEEE802154_GOptions_t options = (RAIL_IEEE802154_GOptions_t) sl_cli_get_argument_uint32(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_ConfigGOptions(railHandle,
                                                         RAIL_IEEE802154_G_OPTIONS_ALL,
                                                         options);
   if (status != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 31, "802.15.4G:Failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 31, "802.15.4G:Failed");
     return;
   } else {
     ieee802154PhrLen = (((options & RAIL_IEEE802154_G_OPTION_GB868) != 0U)
                         ? 2U : 1U);
   }
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "15.4G_GB868:%s",
                 (options & RAIL_IEEE802154_G_OPTION_GB868) ? "True" : "False");
 }
 
-void ieee802154SetFpMode(int argc, char **argv)
+void ieee802154SetFpMode(sl_cli_command_arg_t *args)
 {
-  bool earlyFp = ciGetUnsigned(argv[1]);
-  bool dataFp = ciGetUnsigned(argv[2]);
+  bool earlyFp = !!sl_cli_get_argument_uint8(args, 0);
+  bool dataFp = !!sl_cli_get_argument_uint8(args, 1);
 
   RAIL_Status_t earlyStatus = RAIL_IEEE802154_EnableEarlyFramePending(railHandle, earlyFp);
   const char *earlyDisplay;
@@ -405,7 +438,7 @@ void ieee802154SetFpMode(int argc, char **argv)
     dataDisplay = (dataFp) ? "Enabled" : "Disabled";
   }
 
-  responsePrint(argv[0], "EarlyFp:%s,DataFp:%s", earlyDisplay, dataDisplay);
+  responsePrint(sl_cli_get_command_string(args, 0), "EarlyFp:%s,DataFp:%s", earlyDisplay, dataDisplay);
 }
 
 // 802.15.4-2015 Frame Control Field definitions for Beacon, Ack, Data, Command
@@ -746,8 +779,8 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
                         && (address.longAddress[0] == 0xAA))
                        || ((address.shortAddress & 0xFF) == 0xAA));
   }
-  if (setFramePending) {
-    if (RAIL_IEEE802154_SetFramePending(railHandle) == RAIL_STATUS_NO_ERROR) {
+  if (setFramePending != setFpByDefault) {
+    if (RAIL_IEEE802154_ToggleFramePending(railHandle) == RAIL_STATUS_NO_ERROR) {
       counters.ackTxFpSet++;
     } else {
       counters.ackTxFpFail++;

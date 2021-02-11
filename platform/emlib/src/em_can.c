@@ -57,12 +57,7 @@
 /** @endcond */
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CAN
+ * @addtogroup can CAN - Controller Area Network
  * @brief Controller Area Network API
  *
  * @details The Controller Area Network Interface Bus (CAN) implements a
@@ -941,7 +936,6 @@ void CAN_SendRequest(CAN_TypeDef *can,
   }
 }
 
-/** @} (end addtogroup CAN) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup can) */
 
 #endif /* defined(CAN_COUNT) && (CAN_COUNT > 0) */

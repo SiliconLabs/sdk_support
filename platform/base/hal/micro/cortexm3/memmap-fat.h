@@ -22,8 +22,6 @@
 typedef void HalBootloaderAddressTableType;
 #endif
 
-#include "hal/micro/cortexm3/bootloader/fib-bootloader.h"
-
 // ****************************************************************************
 // If any of these address table definitions ever need to change, it is highly
 // desirable to only add new entries, and only add them on to the end of an
@@ -38,10 +36,7 @@ typedef struct {
   void *CustomerInformationBlock;
   HalBootloaderAddressTableType *bootloaderAddressTable;
   void *startOfUnusedRam;
-  // ** pointers to shared functions **
-  FibStatus (* fibFlashWrite)(uint32_t address, uint8_t *data,
-                              uint32_t writeLength, uint32_t verifyLength);
-  FibStatus (* fibFlashErase)(FibEraseType eraseType, uint32_t address);
+  void *reserved[2];
 } HalFixedAddressTableType;
 
 extern const HalFixedAddressTableType halFixedAddressTable;

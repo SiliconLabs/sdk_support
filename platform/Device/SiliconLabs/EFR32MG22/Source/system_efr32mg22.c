@@ -117,6 +117,7 @@ static uint32_t SystemHFRCODPLLClock = HFRCODPLL_STARTUP_FREQ;
  *   Required CMSIS global variable that must be kept up-to-date.
  */
 uint32_t SystemCoreClock = HFRCODPLL_STARTUP_FREQ;
+
 #endif
 
 /*******************************************************************************
@@ -148,6 +149,118 @@ void SystemInit(void)
 #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
   SCB->CPACR |= ((3U << 10U * 2U)           /* set CP10 Full Access */
                  | (3U << 11U * 2U));       /* set CP11 Full Access */
+#endif
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Get current HFRCODPLL frequency.
+ *
+ * @note
+ *   This is a EFR32MG22 specific function, not part of the
+ *   CMSIS definition.
+ *
+ * @return
+ *   HFRCODPLL frequency in Hz.
+ *****************************************************************************/
+uint32_t SystemHFRCODPLLClockGet(void)
+{
+#if !defined(SYSTEM_NO_STATIC_MEMORY)
+  return SystemHFRCODPLLClock;
+#else
+  uint32_t ret = 0UL;
+
+  /* Get oscillator frequency band */
+  switch ((HFRCO0->CAL & _HFRCO_CAL_FREQRANGE_MASK)
+          >> _HFRCO_CAL_FREQRANGE_SHIFT) {
+    case 0:
+      switch (HFRCO0->CAL & _HFRCO_CAL_CLKDIV_MASK) {
+        case HFRCO_CAL_CLKDIV_DIV1:
+          ret = 4000000UL;
+          break;
+
+        case HFRCO_CAL_CLKDIV_DIV2:
+          ret = 2000000UL;
+          break;
+
+        case HFRCO_CAL_CLKDIV_DIV4:
+          ret = 1000000UL;
+          break;
+
+        default:
+          ret = 0UL;
+          break;
+      }
+      break;
+
+    case 3:
+      ret = 7000000UL;
+      break;
+
+    case 6:
+      ret = 13000000UL;
+      break;
+
+    case 7:
+      ret = 16000000UL;
+      break;
+
+    case 8:
+      ret = 19000000UL;
+      break;
+
+    case 10:
+      ret = 26000000UL;
+      break;
+
+    case 11:
+      ret = 32000000UL;
+      break;
+
+    case 12:
+      ret = 38000000UL;
+      break;
+
+    case 13:
+      ret = 48000000UL;
+      break;
+
+    case 14:
+      ret = 56000000UL;
+      break;
+
+    case 15:
+      ret = 64000000UL;
+      break;
+
+    case 16:
+      ret = 80000000UL;
+      break;
+
+    default:
+      break;
+  }
+  return ret;
+#endif
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Set HFRCODPLL frequency value.
+ *
+ * @note
+ *   This is a EFR32MG22 specific function, not part of the
+ *   CMSIS definition.
+ *
+ * @param[in] freq
+ *   HFRCODPLL frequency in Hz.
+ *****************************************************************************/
+void SystemHFRCODPLLClockSet(uint32_t freq)
+{
+#if !defined(SYSTEM_NO_STATIC_MEMORY)
+  SystemHFRCODPLLClock = freq;
+#else
+  (void) freq; /* Unused parameter */
 #endif
 }
 
@@ -311,118 +424,6 @@ void SystemHFXOClockSet(uint32_t freq)
     /* This function will update the global variable */
     SystemHCLKGet();
   }
-#else
-  (void) freq; /* Unused parameter */
-#endif
-}
-
-/**************************************************************************//**
- * @brief
- *   Get current HFRCODPLL frequency.
- *
- * @note
- *   This is a EFR32MG22 specific function, not part of the
- *   CMSIS definition.
- *
- * @return
- *   HFRCODPLL frequency in Hz.
- *****************************************************************************/
-uint32_t SystemHFRCODPLLClockGet(void)
-{
-#if !defined(SYSTEM_NO_STATIC_MEMORY)
-  return SystemHFRCODPLLClock;
-#else
-  uint32_t ret = 0UL;
-
-  /* Get oscillator frequency band */
-  switch ((HFRCO0->CAL & _HFRCO_CAL_FREQRANGE_MASK)
-          >> _HFRCO_CAL_FREQRANGE_SHIFT) {
-    case 0:
-      switch (HFRCO0->CAL & _HFRCO_CAL_CLKDIV_MASK) {
-        case HFRCO_CAL_CLKDIV_DIV1:
-          ret = 4000000UL;
-          break;
-
-        case HFRCO_CAL_CLKDIV_DIV2:
-          ret = 2000000UL;
-          break;
-
-        case HFRCO_CAL_CLKDIV_DIV4:
-          ret = 1000000UL;
-          break;
-
-        default:
-          ret = 0UL;
-          break;
-      }
-      break;
-
-    case 3:
-      ret = 7000000UL;
-      break;
-
-    case 6:
-      ret = 13000000UL;
-      break;
-
-    case 7:
-      ret = 16000000UL;
-      break;
-
-    case 8:
-      ret = 19000000UL;
-      break;
-
-    case 10:
-      ret = 26000000UL;
-      break;
-
-    case 11:
-      ret = 32000000UL;
-      break;
-
-    case 12:
-      ret = 38000000UL;
-      break;
-
-    case 13:
-      ret = 48000000UL;
-      break;
-
-    case 14:
-      ret = 56000000UL;
-      break;
-
-    case 15:
-      ret = 64000000UL;
-      break;
-
-    case 16:
-      ret = 80000000UL;
-      break;
-
-    default:
-      break;
-  }
-  return ret;
-#endif
-}
-
-/**************************************************************************//**
- * @brief
- *   Set HFRCODPLL frequency value.
- *
- * @note
- *   This is a EFR32MG22 specific function, not part of the
- *   CMSIS definition.
- *
- * @param[in] freq
- *   HFRCODPLL frequency in Hz.
- *****************************************************************************/
-void SystemHFRCODPLLClockSet(uint32_t freq)
-{
-#if !defined(SYSTEM_NO_STATIC_MEMORY)
-  SystemHFRCODPLLClock = freq;
 #else
   (void) freq; /* Unused parameter */
 #endif

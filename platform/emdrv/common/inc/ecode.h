@@ -33,27 +33,8 @@
 #include <stdint.h>
 
 /***************************************************************************//**
- * @defgroup emdrv EMDRV
- * @brief Gecko Platform driver library
- * @details
- *
- *  EMDRV is a set of function specific high performance drivers for EFM32, EZR32
- *  and EFR32 on-chip peripherals. Drivers are typically DMA based and are using
- *  all available low-energy features. For most drivers, the API offers both
- *  synchronous and asynchronous functions. The APIs are fully reentrant and
- *  callback based.
- *
- *  Most drivers are compile-time configurable to allow the highest possible
- *  code size optimization for the application. Compile-time configuration is
- *  defined in *_config.h files. Templates for the configuration files can be
- *  found in emdrv\\<driver>\\config.
- *
- * @note
- *	EMDRV APIs use @ref Ecode_t to return status.
- * @n @n
- *  With the exception of ezradiodrv, EMDRV does not implement RF support.
- *  Please refer to stack documentation for more information.
- *
+ * @addtogroup ecode ECODE - Error Codes
+ * @brief Error and Status Codes
  * @{
  ******************************************************************************/
 
@@ -61,8 +42,8 @@
  * @brief Typedef for API function error code return values.
  *
  * @details
- *        Bit 24-31:  Component, for example @ref emdrv @n
- *        Bit 16-23:  Module, for example @ref UARTDRV or @ref RTCDRV @n
+ *        Bit 24-31:  Component, for example emdrv @n
+ *        Bit 16-23:  Module, for example @ref uartdrv or @ref spidrv @n
  *        Bit 0-15:   Error code
  ******************************************************************************/
 typedef uint32_t Ecode_t;
@@ -81,6 +62,6 @@ typedef uint32_t Ecode_t;
 #define ECODE_EMDRV_TEMPDRV_BASE     (ECODE_EMDRV_BASE | 0x0000D000U)   ///< Base value for TEMPDRV error codes.
 #define ECODE_EMDRV_NVM3_BASE        (ECODE_EMDRV_BASE | 0x0000E000U)   ///< Base value for NVM3 error codes.
 
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ecode) */
 
 #endif // __SILICON_LABS_ECODE_H__

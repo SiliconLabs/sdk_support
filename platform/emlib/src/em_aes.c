@@ -32,13 +32,10 @@
 #if defined(AES_COUNT) && (AES_COUNT > 0)
 
 #include "em_assert.h"
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
+#include <string.h>
 
 /***************************************************************************//**
- * @addtogroup AES
+ * @addtogroup aes
  * @details
  *  This module contains functions to control the AES peripheral of Silicon
  *  Labs 32-bit MCUs and SoCs.
@@ -472,9 +469,7 @@ void AES_CFB128(uint8_t *out,
       data = _out;
     } else {
       /* Copy the current ciphertext block since it may be overwritten. */
-      for (i = 0; i < 4; i++) {
-        tmp[i] = _in[i];
-      }
+      memcpy(tmp, (uint8_t*)_in, sizeof(tmp));
       data = tmp;
     }
 
@@ -558,9 +553,7 @@ void AES_CFB256(uint8_t *out,
       data = _out;
     } else {
       /* Copy the current ciphertext block since it may be overwritten. */
-      for (i = 0; i < 4; i++) {
-        tmp[i] = _in[i];
-      }
+      memcpy(tmp, (uint8_t*)_in, sizeof(tmp));
       data = tmp;
     }
 
@@ -1258,6 +1251,5 @@ void AES_OFB256(uint8_t *out,
 }
 #endif
 
-/** @} (end addtogroup AES) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup aes) */
 #endif /* defined(AES_COUNT) && (AES_COUNT > 0) */

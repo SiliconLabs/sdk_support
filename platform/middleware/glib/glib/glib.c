@@ -329,9 +329,6 @@ EMSTATUS GLIB_applyClippingRegion(const GLIB_Context_t *pContext)
 *  Pointer to a uint8_t holding the green component
 *  @param blue
 *  Pointer to a uint8_t holding the blue component
-*
-*  @return
-*  None.
 ******************************************************************************/
 void GLIB_colorTranslate24bpp(uint32_t color, uint8_t *red, uint8_t *green, uint8_t *blue)
 {

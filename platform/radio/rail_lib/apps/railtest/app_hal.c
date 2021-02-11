@@ -3,7 +3,7 @@
  * @brief This file handles the hardware interactions for RAILtest
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -36,72 +36,71 @@
 #include "em_gpio.h"
 #include "em_usart.h"
 
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
-
-#include "hal-config.h"
-#include "bsp.h"
-#include "retargetserial.h"
 #include "gpiointerrupt.h"
-#ifdef EMBER_AF_PLUGIN_LCD_GRAPHICS
-#include "graphics.h"
-#endif
 #include "hal_common.h"
 
 #include "app_common.h"
+#include "sl_rail_test_config.h"
 
-#ifdef BSP_GPIO_BUTTONS
-// App Structures
-static const ButtonArray_t buttonArray[BSP_NO_OF_BUTTONS] = BSP_GPIO_BUTTONARRAY_INIT;
-// Configuration defines
-#ifndef BUTTON_HOLD_MS
-#define BUTTON_HOLD_MS (1000UL)
-#endif
+#include "sl_component_catalog.h"
+
+#if defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
+#include "sl_rail_test_graphics.h"
 #endif
 
-#ifndef APP_DISPLAY_BUFFER_SIZE
-#define APP_DISPLAY_BUFFER_SIZE 64
+#if defined(SL_CATALOG_LED0_PRESENT) || defined(SL_CATALOG_LED1_PRESENT)
+#include "sl_simple_led_instances.h"
+#endif
+
+#if defined(SL_CATALOG_LED0_PRESENT) && defined(SL_CATALOG_LED1_PRESENT)
+#define LED_NUM 2
+#elif defined(SL_CATALOG_LED0_PRESENT) || defined(SL_CATALOG_LED1_PRESENT)
+#define LED_NUM 1
+#else
+#define LED_NUM 0
+#endif
+
+#if defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT)
+#include "sl_simple_button_instances.h"
+#endif
+
+#if defined(SL_CATALOG_BTN0_PRESENT) && defined(SL_CATALOG_BTN1_PRESENT)
+#define BUTTON_NUM 2
+#elif defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT)
+#define BUTTON_NUM 1
+#else
+#define BUTTON_NUM 0
+#endif
+
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#include "sl_iostream_usart_vcom_config.h"
 #endif
 
 volatile bool serEvent = false;
-bool redrawDisplay = true;
-// Holds Enable/Disable status of the buttons on the board
-static bool initButtonStatus = false;
+// Used for wakeup from sleep
+volatile bool buttonWakeEvent = false;
 
-static void initAntennaDiversity(void);
-
-/******************************************************************************
- * GPIO Callback Declaration
- *****************************************************************************/
-
-void gpioCallback(uint8_t pin);
+static void gpioSerialWakeupCallback(uint8_t pin)
+{
+  if (pin == SL_IOSTREAM_USART_VCOM_RX_PIN) {
+    serEvent = true;
+  }
+}
 
 /******************************************************************************
  * Application HAL Initialization
  *****************************************************************************/
 void appHalInit(void)
 {
-  // Initialize the system clocks and other HAL components
-  halInit();
-
-#if !defined(RAIL_IC_SIM_BUILD)
-  // Initialize the LCD display
-  initGraphics();
-
-  // Initialize the USART and map LF to CRLF
-  RETARGET_SerialCrLf(1);
-
+#if !defined(SL_RAIL_UTIL_IC_SIMULATION_BUILD)
+#if defined (SL_RAIL_TEST_PER_PORT) && defined(SL_RAIL_TEST_PER_PIN)
   // For PER test
-  GPIO_PinModeSet(PER_PORT, PER_PIN, gpioModePushPull, 1);
+  GPIO_PinModeSet(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN, gpioModePushPull, 1);
+#endif // SL_RAIL_TEST_PER_PORT && SL_RAIL_TEST_PER_PIN
 
+  // For 'sleep'
   GPIOINT_Init();
-  GPIOINT_CallbackRegister(RETARGET_RXPIN, gpioCallback); // for 'sleep'
-
-  // Enable the buttons on the board
-  initButtons();
-
-  initAntennaDiversity();
+  GPIOINT_CallbackRegister(SL_IOSTREAM_USART_VCOM_RX_PIN, gpioSerialWakeupCallback);
 #endif
 }
 
@@ -116,7 +115,7 @@ void PeripheralDisable(void)
 void PeripheralEnable(void)
 {
   enableGraphics();
-  redrawDisplay = true;
+  updateGraphics();
   // Enable the buttons on the board
   initButtons();
 }
@@ -134,11 +133,10 @@ void usDelay(uint32_t microseconds)
 
 void serialWaitForTxIdle(void)
 {
-  // This is grody and not very serial-independent... but we need to
-  // wait for the serial output to have completely cleared the UART
-  // before sleeping, and this beats a wishful-thinking worst-case
-  // timed delay.
-  while ((USART_StatusGet(RETARGET_UART) & USART_STATUS_TXIDLE) == 0) {
+  // Wait for the serial output to have completely cleared the UART
+  // before sleeping.
+  while ((USART_StatusGet(SL_IOSTREAM_USART_VCOM_PERIPHERAL)
+          & USART_STATUS_TXIDLE) == 0) {
   }
 }
 
@@ -147,13 +145,12 @@ void serialWaitForTxIdle(void)
  *****************************************************************************/
 
 // Graphics
-#ifdef EMBER_AF_PLUGIN_LCD_GRAPHICS
+#if defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
 
 void disableGraphics(void)
 {
-  GRAPHICS_Clear();
-  GRAPHICS_Update();
-  GRAPHICS_Sleep();
+  sl_rail_test_graphics_clear();
+  sl_rail_test_graphics_sleep();
 
 #if defined(HAL_VCOM_ENABLE) && defined(BSP_VCOM_ENABLE_PORT)
   // Some boards use the same pin for VCOM and the display so re-init that pin
@@ -164,51 +161,21 @@ void disableGraphics(void)
 
 void enableGraphics(void)
 {
-  GRAPHICS_Wakeup();
+  sl_rail_test_graphics_wakeup();
 }
 
 // Update any LCD text that should be changed
-void updateDisplay(void)
+void updateGraphics(void)
 {
-  if (redrawDisplay && (logLevel & PERIPHERAL_ENABLE)) {
-    redrawDisplay = false;
-    char textBuf[APP_DISPLAY_BUFFER_SIZE];
-
-    // Clear what's currently on screen
-    GRAPHICS_Clear();
-
-    // Add the demo output strings
-    GRAPHICS_AppendString("\n"APP_DEMO_STRING_INIT "\n");
-    GRAPHICS_AppendString("");
-    snprintf(textBuf, APP_DISPLAY_BUFFER_SIZE, "Rx Count: %05lu",
-             counters.receive % 100000);
-    GRAPHICS_AppendString(textBuf);
-    snprintf(textBuf, APP_DISPLAY_BUFFER_SIZE, "Tx Count: %05lu",
-             (counters.userTx + counters.ackTx) % 100000);
-    GRAPHICS_AppendString(textBuf);
-    snprintf(textBuf, APP_DISPLAY_BUFFER_SIZE, "Channel: %d", channel);
-    GRAPHICS_AppendString(textBuf);
-    GRAPHICS_AppendString("");
-    GRAPHICS_AppendString("   Tx     Rx");
-
-    // Draw Tx/Rx triangles if the timeout hasn't occurred
-    GRAPHICS_InsertTriangle(20, 80, 32, true,
-                            ((int8_t)((counters.userTx + counters.ackTx) % 10)) * -10);
-    GRAPHICS_InsertTriangle(76, 80, 32, false, (counters.receive % 10) * 10);
-
+  if (logLevel & PERIPHERAL_ENABLE) {
     // Force a redraw
-    GRAPHICS_Update();
+    sl_rail_test_graphics_update();
   }
-}
-
-void initGraphics(void)
-{
-  GRAPHICS_Init();
 }
 
 #else
 
-void updateDisplay(void)
+void updateGraphics(void)
 {
 }
 void disableGraphics(void)
@@ -217,112 +184,134 @@ void disableGraphics(void)
 void enableGraphics(void)
 {
 }
-void initGraphics(void)
-{
-}
 
-#endif //EMBER_AF_PLUGIN_LCD_GRAPHICS
+#endif // defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
 
 // LED's
-#if defined(BSP_GPIO_LEDS)
+#if (LED_NUM > 0)
 
-void LedSet(int led)
-{
-  if (logLevel & PERIPHERAL_ENABLE) {
-    BSP_LedSet(led);
-  }
-}
-
-void LedToggle(int led)
-{
-  if (logLevel & PERIPHERAL_ENABLE) {
-    BSP_LedToggle(led);
-  }
-}
-
-void LedsDisable(void)
-{
-  BSP_LedClear(0);
-  BSP_LedClear(1);
-}
-
-#else
-
-void LedSet(int led)
-{
-}
-void LedToggle(int led)
-{
-}
-void LedsDisable(void)
-{
-}
-
+static sl_led_t const * const sl_leds[] = {
+#if defined(SL_CATALOG_LED0_PRESENT)
+  &sl_led_led0,
 #endif
+#if defined(SL_CATALOG_LED1_PRESENT)
+  &sl_led_led1
+#endif
+};
+
+void LedSet(int led)
+{
+  // check passed argument
+  if ((led < 0) || (led > 1)) {
+    return;
+  }
+
+  if (logLevel & PERIPHERAL_ENABLE) {
+#if (LED_NUM == 1)
+#if defined(SL_CATALOG_LED0_PRESENT)
+    if (led == 0) {
+      sl_led_turn_on(sl_leds[0]);
+    }
+#endif // SL_CATALOG_LED0_PRESENT
+#if defined(SL_CATALOG_LED1_PRESENT)
+    if (led == 1) {
+      sl_led_turn_on(sl_leds[0]);
+    }
+#endif // SL_CATALOG_LED1_PRESENT
+#else // !(LED_NUM == 1)
+    sl_led_turn_on(sl_leds[led]);
+#endif // (LED_NUM == 1)
+  }
+}
+
+void LedToggle(int led)
+{
+  // check passed argument
+  if ((led < 0) || (led > 1)) {
+    return;
+  }
+
+  if (logLevel & PERIPHERAL_ENABLE) {
+#if (LED_NUM == 1)
+#if defined(SL_CATALOG_LED0_PRESENT)
+    if (led == 0) {
+      sl_led_toggle(sl_leds[0]);
+    }
+#endif // SL_CATALOG_LED0_PRESENT
+#if defined(SL_CATALOG_LED1_PRESENT)
+    if (led == 1) {
+      sl_led_toggle(sl_leds[0]);
+    }
+#endif // SL_CATALOG_LED1_PRESENT
+#else // !(LED_NUM == 1)
+    sl_led_toggle(sl_leds[led]);
+#endif // (LED_NUM == 1)
+  }
+}
+
+void LedsDisable(void)
+{
+#if defined(SL_CATALOG_LED0_PRESENT)
+  sl_led_turn_off(&sl_led_led0);
+#endif
+#if defined(SL_CATALOG_LED1_PRESENT)
+  sl_led_turn_off(&sl_led_led1);
+#endif
+}
+
+#else // !(LED_NUM > 0)
+
+void LedSet(int led)
+{
+  (void)led;
+}
+void LedToggle(int led)
+{
+  (void)led;
+}
+void LedsDisable(void)
+{
+}
+
+#endif // (LED_NUM > 0)
 
 // Buttons
-#ifdef BSP_GPIO_BUTTONS
+#if (BUTTON_NUM > 0)
 
-#if (BSP_NO_OF_BUTTONS >= 2)
-#define APP_BUTTONS (2U)
-#else
-#define APP_BUTTONS ((uint8_t)BSP_NO_OF_BUTTONS)
-#endif
+extern const sl_button_t *simple_button_array[];
+extern const uint8_t simple_button_count;
+
+// Holds Enable/Disable status of the buttons on the board
+static bool initButtonStatus = true;
 
 void deinitButtons(void)
 {
-  // Only deinitialize the buttons if not already deinitialized
-  if (initButtonStatus) {
-    initButtonStatus = false;
-    for (uint8_t i = 0; i < APP_BUTTONS; i++) {
-      // Just turn off the callbacks.  That should be enough so we can repurpose this pin.
-      GPIO_IntDisable(1 << buttonArray[i].pin);
-      GPIO_ExtIntConfig(buttonArray[i].port,
-                        buttonArray[i].pin,
-                        buttonArray[i].pin,
-                        false,
-                        false,
-                        false);
-    }
-  }
+  initButtonStatus = false;
 }
 
 void initButtons(void)
 {
-  // Only initialize the buttons if not already initialized
-  if (!initButtonStatus) {
-    initButtonStatus = true;
-    for (uint8_t i = 0; i < (uint8_t)BSP_NO_OF_BUTTONS; i++) {
-      GPIO_PinModeSet(buttonArray[i].port, buttonArray[i].pin, gpioModeInputPull, 1);
-      if (i < APP_BUTTONS) {
-        // Button Interrupt Config
-        GPIOINT_CallbackRegister(buttonArray[i].pin, gpioCallback);
-        GPIO_ExtIntConfig(buttonArray[i].port,
-                          buttonArray[i].pin,
-                          buttonArray[i].pin,
-                          true,
-                          true,
-                          true);
-      }
-    }
-  }
+  initButtonStatus = true;
 }
 
-void gpio0LongPress(void)
+#if defined(SL_CATALOG_BTN0_PRESENT)
+static void gpio0LongPress(void)
 {
   radioTransmit(0, NULL);
 }
 
-void gpio0ShortPress(void)
+static void gpio0ShortPress(void)
 {
   radioTransmit(1, NULL);
 }
+#endif // SL_CATALOG_BTN0_PRESENT
 
-void gpio1LongPress(void)
+#if defined(SL_CATALOG_BTN1_PRESENT)
+static void gpio1LongPress(void)
 {
 }
 
-void gpio1ShortPress(void)
+static void gpio1ShortPress(void)
 {
   if (!inAppMode(NONE, NULL) || inRadioState(RAIL_RF_STATE_TX, NULL)) {
     return;
@@ -347,44 +336,61 @@ void gpio1ShortPress(void)
 
   changeChannel(channel);
 }
+#endif // SL_CATALOG_BTN1_PRESENT
 
-void gpioCallback(uint8_t pin)
+// This is the reimplementation of a WEAK function in button.c.
+void sl_button_on_change(const sl_button_t *handle)
 {
-  #define GET_TIME_IN_MS() (RAIL_GetTime() / 1000)
+  if (initButtonStatus) {
+    #define GET_TIME_IN_MS() (RAIL_GetTime() / 1000)
 
-  static uint32_t gpioTimeCapture[APP_BUTTONS];
-  // Hold true if a Negative Edge is encountered for the button press
-  static bool gpioNegEdge[APP_BUTTONS];
+    static uint32_t gpioTimeCapture[BUTTON_NUM];
+    // Hold true if a Negative Edge is encountered for the button press
+    static bool gpioNegEdge[BUTTON_NUM];
 
-  void(*gpioLongPress_arr[])(void) = { gpio0LongPress, gpio1LongPress };
-  void(*gpioShortPress_arr[])(void) = { gpio0ShortPress, gpio1ShortPress };
+    void(*gpioLongPress_arr[])(void) = {
+    #if defined(SL_CATALOG_BTN0_PRESENT)
+      gpio0LongPress,
+    #endif // SL_CATALOG_BTN0_PRESENT
+    #if defined(SL_CATALOG_BTN1_PRESENT)
+      gpio1LongPress
+    #endif // SL_CATALOG_BTN1_PRESENT
+    };
+    void(*gpioShortPress_arr[])(void) = {
+    #if defined(SL_CATALOG_BTN0_PRESENT)
+      gpio0ShortPress,
+    #endif // SL_CATALOG_BTN0_PRESENT
+    #if defined(SL_CATALOG_BTN1_PRESENT)
+      gpio1ShortPress
+    #endif // SL_CATALOG_BTN1_PRESENT
+    };
 
-  if (pin == RETARGET_RXPIN) {
-    serEvent = true;
-  }
-  for (uint8_t i = 0; i < APP_BUTTONS; i++) {
-    if (pin == buttonArray[i].pin) {
-      if (GPIO_PinInGet(buttonArray[i].port, buttonArray[i].pin) == 0) {
-        // Negative Edge
-        gpioTimeCapture[i] = GET_TIME_IN_MS();
-        gpioNegEdge[i] = true;
-      } else {
-        // Positive Edge with a preceeding Negative Edge
-        if (gpioNegEdge[i]) {
-          gpioNegEdge[i] = false;
-          if ((elapsedTimeInt32u(gpioTimeCapture[i], GET_TIME_IN_MS())
-               > BUTTON_HOLD_MS)) {
-            (*gpioLongPress_arr[i])();
-          } else {
-            (*gpioShortPress_arr[i])();
+    for (uint8_t i = 0; i < simple_button_count; i++) {
+      if (simple_button_array[i] == handle) {
+        if (sl_button_get_state(handle) == SL_SIMPLE_BUTTON_PRESSED) {
+          // Negative Edge
+          gpioTimeCapture[i] = GET_TIME_IN_MS();
+          gpioNegEdge[i] = true;
+        } else {
+          // Positive Edge with a preceeding Negative Edge
+          if (gpioNegEdge[i]) {
+            gpioNegEdge[i] = false;
+            if ((elapsedTimeInt32u(gpioTimeCapture[i], GET_TIME_IN_MS())
+                 > SL_RAIL_TEST_BUTTON_LONG_HOLD_DURATION_MS)) {
+              (*gpioLongPress_arr[i])();
+            } else {
+              (*gpioShortPress_arr[i])();
+            }
           }
         }
       }
     }
-  }
+  } else {
+    buttonWakeEvent = true;
+  } // initButtonStatus
 }
 
-#else
+#else // !(BUTTON_NUM > 0)
 
 void deinitButtons(void)
 {
@@ -392,68 +398,5 @@ void deinitButtons(void)
 void initButtons(void)
 {
 }
-void gpio0LongPress(void)
-{
-}
-void gpio0ShortPress(void)
-{
-}
-void gpio1LongPress(void)
-{
-}
-void gpio1ShortPress(void)
-{
-}
 
-void gpioCallback(uint8_t pin)
-{
-  if (pin == RETARGET_RXPIN) {
-    serEvent = true;
-  }
-}
-
-#endif //BSP_GPIO_BUTTONS
-
-#if     HAL_ANTDIV_ENABLE
-
-// From base hal/plugin/antenna/antenna.h since they're not in hal-config
-#define HAL_ANTENNA_MODE_DISABLED  0 /**< Don't alter antenna selection */
-#define HAL_ANTENNA_MODE_ENABLE1   1 /**< Use antenna 1 */
-#define HAL_ANTENNA_MODE_ENABLE2   2 /**< Use antenna 2 */
-#define HAL_ANTENNA_MODE_DIVERSITY 3 /**< Choose antenna 1 or 2 dynamically */
-
-// Establish Tx default mode
-#ifdef  HAL_ANTDIV_TX_MODE
-  #define ANTENNA_TX_DEFAULT_MODE HAL_ANTDIV_TX_MODE
-#else//!HAL_ANTDIV_TX_MODE
-  #define ANTENNA_TX_DEFAULT_MODE HAL_ANTENNA_MODE_DIVERSITY
-#endif//HAL_ANTDIV_TX_MODE
-
-// Establish Rx default mode
-#ifdef  HAL_ANTDIV_RX_MODE
-  #define ANTENNA_RX_DEFAULT_MODE HAL_ANTDIV_RX_MODE
-#else//!HAL_ANTDIV_RX_MODE
-  #define ANTENNA_RX_DEFAULT_MODE HAL_ANTENNA_MODE_DISABLED
-#endif//HAL_ANTDIV_RX_MODE
-
-static void initAntennaDiversity(void)
-{
- #if (HAL_ANTDIV_TX_MODE != HAL_ANTENNA_MODE_DISABLED)
-  txOptions = ((((RAIL_TxOptions_t)HAL_ANTDIV_TX_MODE)
-                << RAIL_TX_OPTION_ANTENNA0_SHIFT)
-               & (RAIL_TX_OPTION_ANTENNA0 | RAIL_TX_OPTION_ANTENNA1));
- #endif
- #if (HAL_ANTDIV_RX_MODE != HAL_ANTENNA_MODE_DISABLED)
-  rxOptions = ((((RAIL_RxOptions_t)HAL_ANTDIV_RX_MODE)
-                << RAIL_RX_OPTION_ANTENNA0_SHIFT)
-               & (RAIL_RX_OPTION_ANTENNA0 | RAIL_RX_OPTION_ANTENNA1));
- #endif
-}
-
-#else//!HAL_ANTDIV_ENABLE
-
-static void initAntennaDiversity(void)
-{
-}
-
-#endif//HAL_ANTDIV_ENABLE
+#endif // (BUTTON_NUM > 0)

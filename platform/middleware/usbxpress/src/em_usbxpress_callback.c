@@ -242,8 +242,8 @@ int USBX_SetupCmdCb(const USB_Setup_TypeDef *setup)
  *
  *****************************************************************************/
 int USBX_inXferCompleteCb(USB_Status_TypeDef status,
-                          uint16_t xferred,
-                          uint16_t remaining)
+                          uint32_t xferred,
+                          uint32_t remaining)
 {
   (void) remaining;   // Suppress compiler warning: unused parameter
 
@@ -282,8 +282,8 @@ int USBX_inXferCompleteCb(USB_Status_TypeDef status,
  *
  *****************************************************************************/
 int USBX_outXferCompleteCb(USB_Status_TypeDef status,
-                           uint16_t xferred,
-                           uint16_t remaining)
+                           uint32_t xferred,
+                           uint32_t remaining)
 {
   (void) remaining;   // Suppress compiler warning: unused parameter
 

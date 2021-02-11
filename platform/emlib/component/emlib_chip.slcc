@@ -1,0 +1,35 @@
+id: emlib_chip
+label: CHIP
+package: platform
+description: >
+  Chip Initialization API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_chip.h"
+provides:
+  - name: emlib_chip
+requires:
+  - name: device
+  - name: emlib_common
+  - name: emlib_system
+  - name: cmsis_core
+  - name: emlib_gpio
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-chip
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-chip
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-chip
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-chip
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-chip
+      condition: [device_sdid_200]
+    - page: emlib/api/efr32xg22/group-chip
+      condition: [device_sdid_205]

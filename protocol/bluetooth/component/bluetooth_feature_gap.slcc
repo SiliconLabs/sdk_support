@@ -1,0 +1,17 @@
+id: "bluetooth_feature_gap"
+label: "GAP"
+package: "Bluetooth"
+description: >
+  Bluetooth Generic Access Profile (GAP) related feature
+category: "Bluetooth|Stack"
+quality: "production"
+root_path: "protocol/bluetooth"
+requires:
+  - name: "bluetooth_stack"
+provides:
+  - name: "bluetooth_feature_gap"
+template_contribution:
+  - name: bluetooth_stack_init
+    value:
+      function: "sl_bt_class_gap_init"
+    priority: 3

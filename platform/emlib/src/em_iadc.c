@@ -37,12 +37,7 @@
 #include <stddef.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup IADC
+ * @addtogroup iadc IADC - Incremental ADC
  * @brief Incremental Analog to Digital Converter (IADC) Peripheral API
  * @details
  *  This module contains functions to control the IADC peripheral of Silicon
@@ -74,7 +69,8 @@
     : IADC_ANA_CLK_HIGH_ACCURACY_MAX_FREQ                         \
     )
 
-// TODO these should be defined in device headers somewhere
+#define IADC_ROUND_D2I(n) (int)((n) < 0.0f ? ((n) - 0.5f) : ((n) + 0.5f))
+
 #define IADC0_SCANENTRIES IADC0_ENTRIES
 #define IADC0_FIFOENTRIES 0x4UL
 
@@ -110,6 +106,10 @@ static void IADC_disable(IADC_TypeDef *iadc)
   }
 #endif
   iadc->EN_CLR = IADC_EN_EN;
+#if defined(_IADC_EN_DISABLING_MASK)
+  while (IADC0->EN & _IADC_EN_DISABLING_MASK) {
+  }
+#endif
 }
 
 static void IADC_enable(IADC_TypeDef *iadc)
@@ -188,9 +188,25 @@ void IADC_init(IADC_TypeDef *iadc,
   uint32_t config;
   uint8_t wantedPrescale;
   uint8_t srcClkPrescale;
-  uint8_t adcClkPrescale;
+  uint32_t adcClkPrescale;
   uint8_t timebase;
+  unsigned uiAnaGain;
+  uint16_t uiGainCAna;
   IADC_CfgAdcMode_t adcMode;
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  float anaGain;
+  int anaGainRound;
+  float offsetAna;
+  float offset2;
+  int offsetLong;
+  int offsetAna1HiAccInt;
+  uint8_t osrValue;
+  float offsetAnaBase;
+  float gainSysHiAcc;
+  float refVoltage = 0;
+  // Over sampling ratio for high accuracy conversions
+  const float osrHiAcc[6] = { 16.0, 32.0, 64.0, 92.0, 128.0, 256.0 };
+#endif
 
   EFM_ASSERT(IADC_REF_VALID(iadc));
 
@@ -256,11 +272,19 @@ void IADC_init(IADC_TypeDef *iadc,
 #if defined(_IADC_CFG_DIGAVG_MASK)
                                     | _IADC_CFG_DIGAVG_MASK
 #endif
-                                    | _IADC_CFG_TWOSCOMPL_MASK);
+                                    | _IADC_CFG_TWOSCOMPL_MASK
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+                                    | _IADC_CFG_OSRHA_MASK
+#endif
+                                    );
     iadc->CFG[config].CFG = tmp
                             | (((uint32_t)(adcMode) << _IADC_CFG_ADCMODE_SHIFT) & _IADC_CFG_ADCMODE_MASK)
                             | (((uint32_t)(allConfigs->configs[config].osrHighSpeed) << _IADC_CFG_OSRHS_SHIFT)
                                & _IADC_CFG_OSRHS_MASK)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+                            | (((uint32_t)(allConfigs->configs[config].osrHighAccuracy) << _IADC_CFG_OSRHA_SHIFT)
+                               & _IADC_CFG_OSRHA_MASK)
+#endif
                             | (((uint32_t)(allConfigs->configs[config].analogGain) << _IADC_CFG_ANALOGGAIN_SHIFT)
                                & _IADC_CFG_ANALOGGAIN_MASK)
                             | (((uint32_t)(allConfigs->configs[config].reference) << _IADC_CFG_REFSEL_SHIFT)
@@ -272,41 +296,63 @@ void IADC_init(IADC_TypeDef *iadc,
                             | (((uint32_t)(allConfigs->configs[config].twosComplement) << _IADC_CFG_TWOSCOMPL_SHIFT)
                                & _IADC_CFG_TWOSCOMPL_MASK);
 
+    uiAnaGain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK) >> _IADC_CFG_ANALOGGAIN_SHIFT;
+    switch (uiAnaGain) {
+#if defined(_IADC_CFG_ANALOGGAIN_ANAGAIN0P25)
+      case iadcCfgAnalogGain0P25x: // 0.25x
+#endif
+      case iadcCfgAnalogGain0P5x: // 0.5x
+      case iadcCfgAnalogGain1x: // 1x
+        uiGainCAna = (uint16_t)((DEVINFO->IADC0GAIN0 & _DEVINFO_IADC0GAIN0_GAINCANA1_MASK) >> _DEVINFO_IADC0GAIN0_GAINCANA1_SHIFT);
+        break;
+      case iadcCfgAnalogGain2x: // 2x
+        uiGainCAna = (uint16_t)((DEVINFO->IADC0GAIN0 & _DEVINFO_IADC0GAIN0_GAINCANA2_MASK) >> _DEVINFO_IADC0GAIN0_GAINCANA2_SHIFT);
+        break;
+      case iadcCfgAnalogGain3x: // 3x
+        uiGainCAna = (uint16_t)((DEVINFO->IADC0GAIN1 & _DEVINFO_IADC0GAIN1_GAINCANA3_MASK) >> _DEVINFO_IADC0GAIN1_GAINCANA3_SHIFT);
+        break;
+      case iadcCfgAnalogGain4x: // 4x
+        uiGainCAna = (uint16_t)((DEVINFO->IADC0GAIN1 & _DEVINFO_IADC0GAIN1_GAINCANA4_MASK) >> _DEVINFO_IADC0GAIN1_GAINCANA4_SHIFT);
+        break;
+      default: // 1x
+        uiGainCAna = (uint16_t)((DEVINFO->IADC0GAIN0 & _DEVINFO_IADC0GAIN0_GAINCANA1_MASK) >> _DEVINFO_IADC0GAIN0_GAINCANA1_SHIFT);
+        break;
+    }
+
     // Gain and offset correction is applied according to adcMode and oversampling rate.
     switch (adcMode) {
       float offset;
       uint32_t scale;
       int iOffset, iOsr;
-      unsigned uiAnaGain;
-      uint16_t uiGainCAna;
-
       case iadcCfgModeNormal:
-        // Calculate gain and offset correction values.
-
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+      case iadcCfgModeHighSpeed:
+#endif
         offset = 0.0f;
-        uiAnaGain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK)
-                    >> _IADC_CFG_ANALOGGAIN_SHIFT;
-        if ((uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN0P5)
-            || (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN1)) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0
-                                  & _DEVINFO_IADC0GAIN0_GAINCANA1_MASK);
+        uiAnaGain = (iadc->CFG[config].CFG & _IADC_CFG_ANALOGGAIN_MASK) >> _IADC_CFG_ANALOGGAIN_SHIFT;
+        if ((uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN0P5) || (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN1)) {
+          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0 & _DEVINFO_IADC0GAIN0_GAINCANA1_MASK);
         } else if (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN2) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0
-                                  >> _DEVINFO_IADC0GAIN0_GAINCANA2_SHIFT);
-          offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0
-                             >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT);
+          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN0 >> _DEVINFO_IADC0GAIN0_GAINCANA2_SHIFT);
+          if (adcMode == iadcCfgModeNormal) {
+            offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT);
+          } else {
+            offset = (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 >> _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA2HISPD_SHIFT);
+          }
         } else if (uiAnaGain == _IADC_CFG_ANALOGGAIN_ANAGAIN3) {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1
-                                  & _DEVINFO_IADC0GAIN1_GAINCANA3_MASK);
-          offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0
-                             >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT)
-                   * 2;
+          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1 & _DEVINFO_IADC0GAIN1_GAINCANA3_MASK);
+          if (adcMode == iadcCfgModeNormal) {
+            offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT) * 2;
+          } else {
+            offset = (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 >> _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA2HISPD_SHIFT) * 2;
+          }
         } else {
-          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1
-                                  >> _DEVINFO_IADC0GAIN1_GAINCANA4_SHIFT);
-          offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0
-                             >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT)
-                   * 3;
+          uiGainCAna = (uint16_t)(DEVINFO->IADC0GAIN1 >> _DEVINFO_IADC0GAIN1_GAINCANA4_SHIFT);
+          if (adcMode == iadcCfgModeNormal) {
+            offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 >> _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA2NORM_SHIFT) * 3;
+          } else {
+            offset = (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 >> _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA2HISPD_SHIFT) * 3;
+          }
         }
 
         // Set correct gain correction bitfields in scale variable.
@@ -317,18 +363,21 @@ void IADC_init(IADC_TypeDef *iadc,
         }
 
         // Adjust offset according to selected OSR.
-        iOsr = 1U << (((iadc->CFG[config].CFG & _IADC_CFG_OSRHS_MASK)
-                       >> _IADC_CFG_OSRHS_SHIFT) + 1U);
+        iOsr = 1U << (((iadc->CFG[config].CFG & _IADC_CFG_OSRHS_MASK) >> _IADC_CFG_OSRHS_SHIFT) + 1U);
         if (iOsr == 2) {
-          offset += (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0
-                              & _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA1NORM_MASK);
+          if (adcMode == iadcCfgModeNormal) {
+            offset += (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL0 & _DEVINFO_IADC0NORMALOFFSETCAL0_OFFSETANA1NORM_MASK);
+          } else {
+            offset += (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL0 & _DEVINFO_IADC0HISPDOFFSETCAL0_OFFSETANA1HISPD_MASK);
+          }
         } else {
-          offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL1
-                             & _DEVINFO_IADC0NORMALOFFSETCAL1_OFFSETANA3NORM_MASK)
-                   - offset;
+          if (adcMode == iadcCfgModeNormal) {
+            offset = (int16_t)(DEVINFO->IADC0NORMALOFFSETCAL1 & _DEVINFO_IADC0NORMALOFFSETCAL1_OFFSETANA3NORM_MASK) - offset;
+          } else {
+            offset += (int16_t)(DEVINFO->IADC0HISPDOFFSETCAL1 & _DEVINFO_IADC0HISPDOFFSETCAL1_OFFSETANA3HISPD_MASK) - offset;
+          }
           offset /= iOsr / 2.0f;
-          offset += (int16_t)(DEVINFO->IADC0OFFSETCAL0
-                              & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK);
+          offset += (int16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK);
         }
 
         // Compensate offset according to selected reference voltage.
@@ -342,9 +391,7 @@ void IADC_init(IADC_TypeDef *iadc,
           offset = (uiGainCAna / 32768.0f) * (offset + 524288.0f) - 524288.0f;
         }
 
-        // Final step.
-        #define ROUND_D2I(n) (int)((n) < 0.0f ? ((n) - 0.5f) : ((n) + 0.5f))
-        iOffset = ROUND_D2I(-offset);
+        iOffset = IADC_ROUND_D2I(-offset);
         // We only have 18 bits available for OFFSET in SCALE register.
         // OFFSET is a 2nd complement number.
         if (iOffset > 131071) {         // Positive overflow at 0x0001FFFF ?
@@ -357,12 +404,93 @@ void IADC_init(IADC_TypeDef *iadc,
         iadc->CFG[config].SCALE = scale;
         break;
 
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+      case iadcCfgModeHighAccuracy:
+        switch (allConfigs->configs[config].reference) {
+          case iadcCfgReferenceInt1V2:
+            refVoltage = 1.21;
+            break;
+          case iadcCfgReferenceExt1V25:
+            refVoltage = 1.25;
+            break;
+#if defined(_IADC_CFG_REFSEL_VREF2P5)
+          case iadcCfgReferenceExt2V5:
+            refVoltage = 2.5;
+            break;
+#endif
+          case iadcCfgReferenceVddx:
+            refVoltage = 3.0;
+            break;
+          case iadcCfgReferenceVddX0P8Buf:
+            refVoltage = 2.4;
+            break;
+#if defined(_IADC_CFG_REFSEL_VREFBUF)
+          case iadcCfgReferenceBuf:
+            refVoltage = 1.25;
+            break;
+#endif
+#if defined(_IADC_CFG_REFSEL_VREF0P8BUF)
+          case iadcCfgReference0P8Buf:
+            refVoltage = 1.0;
+            break;
+#endif
+          default:
+            EFM_ASSERT(false);
+            break;
+        }
+
+        // Get OSR from config register
+        osrValue = (iadc->CFG[config].CFG & _IADC_CFG_OSRHA_MASK) >> _IADC_CFG_OSRHA_SHIFT;
+
+        // 1. Calculate gain correction
+        if (osrHiAcc[osrValue] == 92.0) {
+          // for OSR = 92, gainSysHiAcc = 0.957457
+          gainSysHiAcc = 0.957457;
+        } else {
+          // for OSR != 92, gainSysHiAcc = OSR/(OSR + 1)
+          gainSysHiAcc = osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1);
+        }
+        anaGain = (float) uiGainCAna / 32768.0f * gainSysHiAcc;
+        anaGainRound =  IADC_ROUND_D2I(32768.0f * anaGain);
+        IADC0->CFG[config].SCALE &= ~_IADC_SCALE_MASK;
+
+        // Write GAIN3MSB
+        if ((uint32_t)anaGainRound & 0x8000) {
+          IADC0->CFG[config].SCALE |= IADC_SCALE_GAIN3MSB_GAIN100;
+        } else {
+          IADC0->CFG[config].SCALE |= IADC_SCALE_GAIN3MSB_GAIN011;
+        }
+        // Write GAIN13LSB
+        IADC0->CFG[config].SCALE |= ((uint32_t)anaGainRound & 0x1FFF) << _IADC_SCALE_GAIN13LSB_SHIFT;
+
+        // Get offset value for high accuracy mode from DEVINFO
+        offsetAna1HiAccInt = (uint16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_MASK)
+                             >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANA1HIACC_SHIFT;
+
+        // 2. OSR adjustment
+        // Get offset from DEVINFO
+        offsetAnaBase = (int16_t)(DEVINFO->IADC0OFFSETCAL0 & _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_MASK)
+                        >> _DEVINFO_IADC0OFFSETCAL0_OFFSETANABASE_SHIFT;
+        offsetAna = offsetAnaBase + (offsetAna1HiAccInt) / (2 ^ osrValue);
+
+        // 3. Reference voltage adjustment
+        offsetAna = (offsetAna) * (1.25f / refVoltage);
+
+        // 4. Calculate final offset
+        offset2 = 262144.0f / osrHiAcc[osrValue] / (osrHiAcc[osrValue] + 1) + offsetAna * 4.0f + 524288.0f;
+        offset2 = (uiGainCAna / 32768.0f * (-1.0)) * offset2 + 524288.0f;
+        offsetLong = IADC_ROUND_D2I(offset2);
+
+        // 5. Write offset to scale register
+        IADC0->CFG[config].SCALE |= (uint32_t)(offsetLong & _IADC_SCALE_OFFSET_MASK);
+        break;
+#endif
       default:
-        // Only normal mode is supported.
+        // Mode not supported.
         EFM_ASSERT(false);
         break;
     }
-    iadc->CFG[config].SCHED = (((uint32_t)(adcClkPrescale) << _IADC_SCHED_PRESCALE_SHIFT)
+    iadc->CFG[config].SCHED = ((adcClkPrescale << _IADC_SCHED_PRESCALE_SHIFT)
                                & _IADC_SCHED_PRESCALE_MASK);
   }
   IADC_enable(iadc);
@@ -398,6 +526,10 @@ void IADC_initScan(IADC_TypeDef *iadc,
   uint32_t i;
   uint32_t tmp;
   EFM_ASSERT(IADC_REF_VALID(iadc));
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
+  EFM_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
+#endif
 
   IADC_disable(iadc);
 
@@ -463,7 +595,7 @@ void IADC_initScan(IADC_TypeDef *iadc,
  * @param[in] init
  *   Pointer to IADC single initialization structure.
  *
- * @param[in] singleInput
+ * @param[in] input
  *   Pointer to IADC single input selection initialization structure.
  ******************************************************************************/
 void IADC_initSingle(IADC_TypeDef *iadc,
@@ -471,7 +603,10 @@ void IADC_initSingle(IADC_TypeDef *iadc,
                      const IADC_SingleInput_t *input)
 {
   EFM_ASSERT(IADC_REF_VALID(iadc));
-
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  // Errata IADC_E305. Makes sure that DVL is equal or less than 7 entries.
+  EFM_ASSERT(init->dataValidLevel <= iadcFifoCfgDvl7);
+#endif
   IADC_disable(iadc);
 
   iadc->SINGLEFIFOCFG = (((uint32_t) (init->alignment) << _IADC_SINGLEFIFOCFG_ALIGNMENT_SHIFT)
@@ -482,9 +617,9 @@ void IADC_initSingle(IADC_TypeDef *iadc,
                         | (init->fifoDmaWakeup ? IADC_SINGLEFIFOCFG_DMAWUFIFOSINGLE : 0UL);
 
   // Clear bitfields for single conversion in IADCn->TRIGGER and set new values
-  iadc->TRIGGER = (iadc->TRIGGER & (_IADC_TRIGGER_SINGLETRIGSEL_MASK
-                                    | _IADC_TRIGGER_SINGLETRIGACTION_MASK
-                                    | _IADC_TRIGGER_SINGLETAILGATE_MASK))
+  iadc->TRIGGER = (iadc->TRIGGER & ~(_IADC_TRIGGER_SINGLETRIGSEL_MASK
+                                     | _IADC_TRIGGER_SINGLETRIGACTION_MASK
+                                     | _IADC_TRIGGER_SINGLETAILGATE_MASK))
                   | (((uint32_t) (init->triggerSelect) << _IADC_TRIGGER_SINGLETRIGSEL_SHIFT)
                      & _IADC_TRIGGER_SINGLETRIGSEL_MASK)
                   | (((uint32_t) (init->triggerAction) << _IADC_TRIGGER_SINGLETRIGACTION_SHIFT)
@@ -675,11 +810,16 @@ void IADC_reset(IADC_TypeDef *iadc)
   }
 
   // Pull from FIFOs until they are empty
-  while ((iadc->STATUS & IADC_STATUS_SINGLEFIFODV) != 0UL) {
+
+  // Errata IADC_E305: Check SINGLEFIFOSTAT to make sure that SINGLEFIFO is getting emptied in case
+  // where STATUS register is incorrect.
+  while (((iadc->STATUS & IADC_STATUS_SINGLEFIFODV) != 0UL) || (iadc->SINGLEFIFOSTAT > 0)) {
     (void) IADC_pullSingleFifoData(iadc);
   }
 
-  while ((iadc->STATUS & IADC_STATUS_SCANFIFODV) != 0UL) {
+  // Errata IADC_E305: check SCANFIFOSTAT to make sure that SCANFIFO is getting emptied in case
+  // where STATUS register is incorrect.
+  while (((iadc->STATUS & IADC_STATUS_SCANFIFODV) != 0UL) || (iadc->SCANFIFOSTAT > 0)) {
     (void) IADC_pullScanFifoData(iadc);
   }
 
@@ -817,7 +957,7 @@ uint8_t IADC_calcSrcClkPrescale(IADC_TypeDef *iadc,
  *   automatically be adjusted to be within valid range according to reference
  *   manual.
  *
- * @param[in] CmuClkFreq Frequency in Hz of CLK_CMU_ADC Set to 0 to
+ * @param[in] cmuClkFreq Frequency in Hz of CLK_CMU_ADC Set to 0 to
  *   use currently defined IADC clock setting (in CMU).
  *
  * @param[in] adcMode Mode for IADC config.
@@ -828,11 +968,11 @@ uint8_t IADC_calcSrcClkPrescale(IADC_TypeDef *iadc,
  *   Divider value to use for IADC in order to achieve a ADC_CLK frequency
  *   <= @p adcClkFreq.
  ******************************************************************************/
-uint8_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
-                                uint32_t adcClkFreq,
-                                uint32_t cmuClkFreq,
-                                IADC_CfgAdcMode_t adcMode,
-                                uint8_t srcClkPrescaler)
+uint32_t IADC_calcAdcClkPrescale(IADC_TypeDef *iadc,
+                                 uint32_t adcClkFreq,
+                                 uint32_t cmuClkFreq,
+                                 IADC_CfgAdcMode_t adcMode,
+                                 uint8_t srcClkPrescaler)
 {
   uint32_t ret;
   uint32_t resFreq;
@@ -956,6 +1096,5 @@ IADC_Result_t IADC_readScanResult(IADC_TypeDef *iadc)
                                      (IADC_Alignment_t) alignment);
 }
 
-/** @} (end addtogroup IADC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup iadc) */
 #endif /* defined(IADC_COUNT) && (IADC_COUNT > 0) */

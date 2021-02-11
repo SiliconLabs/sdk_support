@@ -31,7 +31,7 @@
 #ifndef __SILICON_LABS_RTCDRV_H__
 #define __SILICON_LABS_RTCDRV_H__
 
-#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_2_7
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
 #warning "The RTC driver is deprecated and marked for removal in a later release. Please use the sleeptimer service instead."
 #endif
 
@@ -46,12 +46,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RTCDRV
+ * @addtogroup rtcdrv
  * @{
  ******************************************************************************/
 
@@ -114,8 +109,7 @@ uint64_t  RTCDRV_TicksToMsec64(uint64_t ticks);
 uint32_t  RTCDRV_TicksToSec(uint64_t ticks);
 #endif
 
-/** @} (end addtogroup RTCDRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup rtcdrv) */
 
 #ifdef __cplusplus
 }

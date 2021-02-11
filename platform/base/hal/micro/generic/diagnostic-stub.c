@@ -18,14 +18,17 @@
 
 void halPrintCrashData(uint8_t port)
 {
+  (void)port;
 }
 
 void halPrintCrashDetails(uint8_t port)
 {
+  (void)port;
 }
 
 void halPrintCrashSummary(uint8_t port)
 {
+  (void)port;
 }
 
 void halStartPCDiagnostics(void)

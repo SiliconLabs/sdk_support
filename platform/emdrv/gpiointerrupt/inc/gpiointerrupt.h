@@ -38,12 +38,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup GPIOINT
+ * @addtogroup gpioint
  * @{
  ******************************************************************************/
 
@@ -65,7 +60,7 @@ typedef void (*GPIOINT_IrqCallbackPtr_t)(uint8_t intNo);
  ******************************************************************************/
 void GPIOINT_Init(void);
 void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPtr);
-static __INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
+__STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
 
 /***************************************************************************//**
  * @brief
@@ -78,13 +73,12 @@ static __INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
  *   Pin interrupt number for the callback.
  *
  ******************************************************************************/
-static __INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo)
+__STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo)
 {
   GPIOINT_CallbackRegister(intNo, 0);
 }
 
-/** @} (end addtogroup GPIOINT */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup gpioint) */
 #ifdef __cplusplus
 }
 #endif

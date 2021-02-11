@@ -1,0 +1,35 @@
+id: emlib_acmp
+label: ACMP
+package: platform
+description: >
+  Analog comparator (ACMP) Peripheral API
+category: Platform|Peripheral
+quality: production
+component_root_path: "platform/emlib"
+source:
+  - path: "src/em_acmp.c"
+include:
+  - path: "inc"
+    file_list:
+    - path: "em_acmp.h"
+provides:
+  - name: emlib_acmp
+requires:
+  - name: device
+  - name: device_has_acmp
+  - name: emlib_common
+  - name: emlib_gpio
+  - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg1/group-acmp
+      condition: [device_sdid_80]
+    - page: emlib/api/efr32xg12/group-acmp
+      condition: [device_sdid_84]
+    - page: emlib/api/efr32xg13/group-acmp
+      condition: [device_sdid_89]
+    - page: emlib/api/efr32xg14/group-acmp
+      condition: [device_sdid_95]
+    - page: emlib/api/efr32xg21/group-acmp
+      condition: [device_sdid_200]

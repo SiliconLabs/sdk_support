@@ -115,7 +115,6 @@ typedef struct {
  **************************     STATIC DATA      *******************************
  ******************************************************************************/
 
-#ifdef INCLUDE_ECC_P256
 static const ECC_Curve_Params_t ECC_Curve_Params =
 {  // "secp256r1",
    /* field size in octets */
@@ -149,9 +148,6 @@ static const ECC_Curve_Params_t ECC_Curve_Params =
       0x7C0F9E16, 0x8EE7EB4A, 0xFE1A7F9B, 0x4FE342E2 }
   }
 };
-#else
-#error "Support for the P256 curve is not added"
-#endif
 
 /*******************************************************************************
  ***********************   FORWARD DECLARATIONS    *****************************

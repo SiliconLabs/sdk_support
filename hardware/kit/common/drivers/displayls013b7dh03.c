@@ -124,7 +124,7 @@ static EMSTATUS DisplayEnable(DISPLAY_Device_t*     device,
                               bool enable);
 static EMSTATUS DisplayClear(void);
 #ifndef POLARITY_INVERSION_EXTCOMIN_PAL_AUTO_TOGGLE
-static EMSTATUS DisplayPolarityInverse (void);
+static void DisplayPolarityInverse(void *arg);
 #endif
 
 #ifdef PIXEL_MATRIX_ALLOC_SUPPORT
@@ -169,8 +169,8 @@ EMSTATUS DISPLAY_Ls013b7dh03Init(void)
 
   /* Initialize the Platform Abstraction Layer (PAL) interface.  */
   PAL_TimerInit();
-  PAL_SpiInit();
   PAL_GpioInit();
+  PAL_SpiInit();
 
   /* Setup GPIOs */
   PAL_GpioPinModeSet(LCD_PORT_SCLK, LCD_PIN_SCLK, palGpioModePushPull, 0);
@@ -196,7 +196,7 @@ EMSTATUS DISPLAY_Ls013b7dh03Init(void)
      order to toggle the EXTCOMIN pin at 1Hz.
    */
   status =
-    PAL_TimerRepeat((void(*)(void*))DisplayPolarityInverse, 0,
+    PAL_TimerRepeat(DisplayPolarityInverse, 0,
                     LS013B7DH03_POLARITY_INVERSION_FREQUENCY);
 #elif defined POLARITY_INVERSION_EXTCOMIN_MANUAL
   /* Manually do the toggling of the EXTCOMIN pin in the application. */
@@ -352,11 +352,10 @@ static EMSTATUS DisplayClear(void)
  *
  * @detail  This function inverses the polarity across the Liquid Crystal cells
  *          in the LCD. Must be called at least every second.
- *
- * @return  EMSTATUS code of the operation.
  *****************************************************************************/
-static EMSTATUS DisplayPolarityInverse(void)
+static void DisplayPolarityInverse(void *arg)
 {
+  (void) arg; // unused
 #ifdef POLARITY_INVERSION_EXTCOMIN
 
 #if defined(LCD_PORT_EXTCOMIN)
@@ -387,8 +386,6 @@ static EMSTATUS DisplayPolarityInverse(void)
   }
 
 #endif /* POLARITY_INVERSION_EXTCOMIN */
-
-  return DISPLAY_EMSTATUS_OK;
 }
 
 #endif /* POLARITY_INVERSION_EXTCOMIN_PAL_AUTO_TOGGLE */

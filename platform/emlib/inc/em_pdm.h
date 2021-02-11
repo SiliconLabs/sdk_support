@@ -42,14 +42,9 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
 /* *INDENT-OFF* */
 /***************************************************************************//**
- * @addtogroup PDM
+ * @addtogroup pdm PDM - Pulse Density Modulation
  * @brief Pulse Density Modulation (PDM) peripheral API
  *
  * @details
@@ -291,8 +286,8 @@ __STATIC_INLINE void PDM_FifoFlush(PDM_TypeDef *pdm)
  *
  * @param[in] flags
  *   Pending PDM interrupt sources to clear. Use one or more valid
- *   interrupt flags for the PDM module. The flags are @ref @ref PDM_IFC_DV,
- *   @ref PDM_IFC_DVL, @ref PDM_IFC_OF and @ref PDM_IFC_UF.
+ *   interrupt flags for the PDM module. The flags are PDM_IFC_DV,
+ *   PDM_IFC_DVL, PDM_IFC_OF and PDM_IFC_UF.
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntClear(PDM_TypeDef *pdm, uint32_t flags)
 {
@@ -312,8 +307,8 @@ __STATIC_INLINE void PDM_IntClear(PDM_TypeDef *pdm, uint32_t flags)
  *
  * @param[in] flags
  *   PDM interrupt sources to disable. Use one or more valid
- *   interrupt flags for the PDM module. The flags are @ref @ref PDM_IEN_DV,
- *   @ref PDM_IEN_DVL, @ref PDM_IEN_OF and @ref PDM_IEN_UF.
+ *   interrupt flags for the PDM module. The flags are PDM_IEN_DV,
+ *   PDM_IEN_DVL, PDM_IEN_OF and PDM_IEN_UF.
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntDisable(PDM_TypeDef *pdm, uint32_t flags)
 {
@@ -334,8 +329,8 @@ __STATIC_INLINE void PDM_IntDisable(PDM_TypeDef *pdm, uint32_t flags)
  *
  * @param[in] flags
  *   PDM interrupt sources to enable. Use one or more valid
- *   interrupt flags for the PDM module. The flags are @ref @ref PDM_IEN_DV,
- *   @ref PDM_IEN_DVL, @ref PDM_IEN_OF and @ref PDM_IEN_UF.
+ *   interrupt flags for the PDM module. The flags are PDM_IEN_DV,
+ *   PDM_IEN_DVL, PDM_IEN_OF and PDM_IEN_UF.
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntEnable(PDM_TypeDef *pdm, uint32_t flags)
 {
@@ -354,8 +349,8 @@ __STATIC_INLINE void PDM_IntEnable(PDM_TypeDef *pdm, uint32_t flags)
  *
  * @return
  *   PDM interrupt sources pending. Returns one or more valid
- *   interrupt flags for PDM module. The flags are @ref PDM_IF_DV,
- *   @ref PDM_IF_DVL, @ref PDM_IF_OF and @ref PDM_IF_UF.
+ *   interrupt flags for PDM module. The flags are PDM_IF_DV,
+ *   PDM_IF_DVL, PDM_IF_OF and PDM_IF_UF.
  ******************************************************************************/
 __STATIC_INLINE uint32_t PDM_IntGet(PDM_TypeDef *pdm)
 {
@@ -396,8 +391,8 @@ __STATIC_INLINE uint32_t PDM_IntGetEnabled(PDM_TypeDef *pdm)
  *
  * @param[in] flags
  *   PDM interrupt sources to set to pending. Use one or more valid
- *   interrupt flags for the PDM module. The flags are @ref PDM_IFS_DV,
- *   @ref PDM_IFS_DVL, @ref PDM_IFS_OF and @ref PDM_IFS_UF.
+ *   interrupt flags for the PDM module. The flags are PDM_IFS_DV,
+ *   PDM_IFS_DVL, PDM_IFS_OF and PDM_IFS_UF.
  ******************************************************************************/
 __STATIC_INLINE void PDM_IntSet(PDM_TypeDef *pdm, uint32_t flags)
 {
@@ -476,8 +471,7 @@ __STATIC_INLINE void PDM_Stop(PDM_TypeDef *pdm)
   pdm->CMD = PDM_CMD_STOP;
 }
 
-/** @} (end addtogroup PDM) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup pdm) */
 
 #ifdef __cplusplus
 }

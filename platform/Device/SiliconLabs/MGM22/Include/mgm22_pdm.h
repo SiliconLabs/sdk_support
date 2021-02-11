@@ -359,4 +359,5 @@ typedef struct {
 /** @} End of group MGM22_PDM_BitFields */
 /** @} End of group MGM22_PDM */
 /** @} End of group Parts */
+
 #endif /* MGM22_PDM_H */

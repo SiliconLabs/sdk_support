@@ -3,7 +3,7 @@
  * @brief Source file for RAIL Ram Modem Reconfiguration functionality
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -32,18 +32,15 @@
 #include <stdint.h>
 
 #include "rail.h"
+#include "em_common.h"
 #include "em_core.h"
 #include "em_device.h"
+#include "sli_rail_util_callbacks.h"
 
 #include "railapp_rmr.h"
 #include "railapp_malloc.h"
 #include "app_common.h"
-#include "command_interpreter.h"
 #include "response_print.h"
-
-#ifdef CONFIGURATION_HEADER
-#include CONFIGURATION_HEADER
-#endif
 
 typedef struct RMR_State{
   uint32_t phyInfo[RMR_PHY_INFO_LEN];
@@ -56,6 +53,12 @@ typedef struct RMR_State{
   RAIL_ChannelConfigEntry_t generatedChannels[1];
   __ALIGNED(4) uint8_t convDecodeBuffer[RMR_CONV_DECODE_BUFFER_LEN];
   RAIL_ChannelConfig_t channelConfig;
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+  uint8_t dcdcRetimingConfig[RMR_DCDC_RETIMING_LEN];
+#endif
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+  uint8_t hfxoRetimingConfig[RMR_HFXO_RETIMING_LEN];
+#endif
 } RMR_State_t;
 
 static RMR_State_t *rmrState = NULL;
@@ -101,6 +104,18 @@ RAIL_Status_t Rmr_updateConfigurationPointer(uint8_t structToModify, uint16_t of
       structPointer = 0u; // NULL
       break;
     }
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    case (RMR_STRUCT_DCDC_RETIMING_CONFIG): {
+      structPointer = (uint32_t)&(rmrState->dcdcRetimingConfig);
+      break;
+    }
+#endif
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+    case (RMR_STRUCT_HFXO_RETIMING_CONFIG): {
+      structPointer = (uint32_t)&(rmrState->hfxoRetimingConfig);
+      break;
+    }
+#endif
     default: {
       // Error, unrecognized structure
       return RAIL_STATUS_INVALID_PARAMETER;
@@ -149,7 +164,7 @@ RAIL_Status_t Rmr_reconfigureModem(RAIL_Handle_t railHandle)
   RAIL_IncludeFrameTypeLength(railHandle);
 
   // Configure with the downloaded channel configuration.
-  RAIL_ConfigChannels(railHandle, &rmrState->channelConfig, &RAILCb_RadioConfigChanged);
+  RAIL_ConfigChannels(railHandle, &rmrState->channelConfig, &sli_rail_util_on_channel_config_change);
 
   // Make sure that we stay in idle after the reconfiguration.
   RAIL_Idle(railHandle, RAIL_IDLE_FORCE_SHUTDOWN_CLEAR_FLAGS, false);
@@ -177,7 +192,7 @@ RAIL_Status_t Rmr_writeRmrStructure(RAIL_RMR_StructureIndex_t structure, uint16_
     }
     case (RMR_STRUCT_MODEM_CONFIG): {
       size = sizeof(rmrState->modemConfigEntry);
-      targetStruct = (uint8_t *)&(rmrState->modemConfigEntry);
+      targetStruct = (uint8_t *) &(rmrState->modemConfigEntry);
       break;
     }
     case (RMR_STRUCT_FRAME_TYPE_CONFIG): {
@@ -205,6 +220,20 @@ RAIL_Status_t Rmr_writeRmrStructure(RAIL_RMR_StructureIndex_t structure, uint16_
       targetStruct = (uint8_t *) &(rmrState->generatedChannels);
       break;
     }
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    case (RMR_STRUCT_DCDC_RETIMING_CONFIG): {
+      size = sizeof(rmrState->dcdcRetimingConfig);
+      targetStruct = (uint8_t *) &(rmrState->dcdcRetimingConfig);
+      break;
+    }
+#endif
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG >= 2)
+    case (RMR_STRUCT_HFXO_RETIMING_CONFIG): {
+      size = sizeof(rmrState->hfxoRetimingConfig);
+      targetStruct = (uint8_t *) &(rmrState->hfxoRetimingConfig);
+      break;
+    }
+#endif
     default: {
       return RAIL_STATUS_INVALID_PARAMETER;
       break;
@@ -223,12 +252,12 @@ RAIL_Status_t Rmr_writeRmrStructure(RAIL_RMR_StructureIndex_t structure, uint16_
   return RAIL_STATUS_NO_ERROR;
 }
 
-static bool rmrInit(char **argv)
+static bool rmrInit(sl_cli_command_arg_t *args)
 {
   if (rmrState == NULL) {
     rmrState = RAILAPP_Malloc(sizeof(RMR_State_t));
     if (rmrState == NULL) {
-      responsePrintError(argv[RMR_CI_RESPONSE], 0x86, "Error allocating RMR memory.");
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x86, "Error allocating RMR memory.");
       return false;
     }
     rmrState->channelConfig.phyConfigBase = &(rmrState->modemConfigEntry[0]);
@@ -242,62 +271,61 @@ static bool rmrInit(char **argv)
   return true;
 }
 
-void CI_writeRmrStructure(int argc, char **argv)
+void CI_writeRmrStructure(sl_cli_command_arg_t *args)
 {
-  uint8_t count = ciGetUnsigned(argv[RMR_CI_COUNT]);
+  uint8_t count = sl_cli_get_argument_uint8(args, RMR_CI_COUNT);
   uint8_t bufferedData[RMR_ARGUMENT_BUFFER_SIZE];
-  if (!rmrInit(argv)) {
+  if (!rmrInit(args)) {
     return;
   }
-  if (argc != (count + RMR_CI_DATA_START)) {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x80, "Argument count does not match number of arguments.");
+  if (sl_cli_get_argument_count(args) != (count + RMR_CI_DATA_START)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x80, "Argument count does not match number of arguments.");
     return;
   }
   if (count > RMR_ARGUMENT_BUFFER_SIZE) {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x81, "Number of arguments greater than local buffer.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x81, "Number of arguments greater than local buffer.");
     return;
   }
-  RAIL_RMR_StructureIndex_t structure = ciGetUnsigned(argv[RMR_CI_RMR_STRUCTURE]);
-  uint16_t offset = ciGetUnsigned(argv[RMR_CI_OFFSET]);
-  uint8_t i;
-  for (i = 0u; i < count; i++) {
-    bufferedData[i] = ciGetUnsigned(argv[RMR_CI_DATA_START + i]);
+  RAIL_RMR_StructureIndex_t structure = sl_cli_get_argument_uint8(args, RMR_CI_RMR_STRUCTURE);
+  uint16_t offset = sl_cli_get_argument_uint16(args, RMR_CI_OFFSET);
+  for (uint8_t i = 0; i < count; i++) {
+    bufferedData[i] = sl_cli_get_argument_uint8(args, RMR_CI_DATA_START + i);
   }
   if (Rmr_writeRmrStructure(structure, offset, count, bufferedData) != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x82, "Error writing to structure.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x82, "Error writing to structure.");
     return;
   }
-  responsePrint(argv[RMR_CI_RESPONSE], "CommandStatus:Success");
+  responsePrint(sl_cli_get_command_string(args, 0), "CommandStatus:Success");
   return;
 }
 
-void CI_updateConfigurationPointer(int argc, char **argv)
+void CI_updateConfigurationPointer(sl_cli_command_arg_t *args)
 {
-  if (!rmrInit(argv)) {
+  if (!rmrInit(args)) {
     return;
   }
-  if (argc != 4) {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x83, "Incorrect number of arguments");
+  if (sl_cli_get_argument_count(args) != 3) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x83, "Incorrect number of arguments");
     return;
   }
-  uint8_t structure = ciGetUnsigned(argv[1]);
-  uint16_t location = ciGetUnsigned(argv[2]);
-  uint8_t pointer = ciGetUnsigned(argv[3]);
+  uint8_t structure = sl_cli_get_argument_uint8(args, 0);
+  uint16_t location = sl_cli_get_argument_uint16(args, 1);
+  uint8_t pointer = sl_cli_get_argument_uint8(args, 2);
   if (Rmr_updateConfigurationPointer(structure, location, pointer) != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x84, "Error updating structure");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x84, "Error updating structure");
     return;
   }
-  responsePrint(argv[RMR_CI_RESPONSE], "CommandStatus:Success");
+  responsePrint(sl_cli_get_command_string(args, 0), "CommandStatus:Success");
 }
 
-void CI_reconfigureModem(int argc, char **argv)
+void CI_reconfigureModem(sl_cli_command_arg_t *args)
 {
-  if (!rmrInit(argv)) {
+  if (!rmrInit(args)) {
     return;
   }
   if (Rmr_reconfigureModem(railHandle) == RAIL_STATUS_NO_ERROR) {
-    responsePrint(argv[RMR_CI_RESPONSE], "CommandStatus:Success");
+    responsePrint(sl_cli_get_command_string(args, 0), "CommandStatus:Success");
   } else {
-    responsePrintError(argv[RMR_CI_RESPONSE], 0x85, "Need to be in Idle radio state for this command");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x85, "Need to be in Idle radio state for this command");
   }
 }

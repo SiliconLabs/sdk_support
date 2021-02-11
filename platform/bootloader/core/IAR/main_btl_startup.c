@@ -746,6 +746,637 @@ __weak void TRNG0_IRQHandler(void)
   while (1) ;
 }
 
+#elif defined(_EFR_DEVICE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+// EFR32xG21
+__weak void SETAMPERHOST_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SEMBRX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SEMBTX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SMU_SECURE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SMU_PRIVILEGED_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMU_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER2_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER3_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RTCC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART0_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART0_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART1_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART1_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART2_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART2_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ICACHE0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void BURTC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LETIMER0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SYSCFG_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LDMA_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LFXO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LFRCO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ULFRCO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void GPIO_ODD_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void GPIO_EVEN_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void I2C0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void I2C1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMUDG_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMUSE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void AGC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void BUFC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void FRC_PRI_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void FRC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void MODEM_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PROTIMER_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RAC_RSM_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RAC_SEQ_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PRORTC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SYNTH_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ACMP0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ACMP1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void WDOG0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void WDOG1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void HFXO00_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void HFRCO0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void HFRCOEM23_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void CMU_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void AES_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void IADC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void MSC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void DPLL0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW2_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW3_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void KERNEL0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void KERNEL1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void M33CTI0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void M33CTI1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+
+#elif defined(_EFR_DEVICE) && defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+// EFR32xG22
+__weak void CRYPTOACC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TRNG_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PKE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SMU_SECURE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SMU_PRIVILEGED_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SMU_NS_PRIVILEGED_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMU_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER2_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER3_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void TIMER4_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RTCC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART0_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART0_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART1_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void USART1_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ICACHE0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void BURTC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LETIMER0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SYSCFG_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LDMA_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LFXO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void LFRCO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void ULFRCO_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void GPIO_ODD_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void GPIO_EVEN_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void I2C0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void I2C1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMUDG_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMUSE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void AGC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void BUFC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void FRC_PRI_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void FRC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void MODEM_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PROTIMER_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RAC_RSM_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RAC_SEQ_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RDMAILBOX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void RFSENSE_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PRORTC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SYNTH_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void WDOG0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void HFXO0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void HFRCO0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void CMU_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void AES_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void IADC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void MSC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void DPLL0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void PDM_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW2_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void SW3_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void KERNEL0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void KERNEL1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void M33CTI0_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void M33CTI1_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EMUEFP_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void DCDC_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EUART0_RX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+__weak void EUART0_TX_IRQHandler(void)
+{
+  while (true) {
+  }
+}
+
 #else
 #error "Bootloader needs interrupts, but no ISRs are defined."
 #endif

@@ -38,17 +38,12 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emdrv
+ * @addtogroup ezradiodrv
  * @{
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup EZRADIODRV
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup API_Layer
+ * @addtogroup ezradiodrv_api
  * @{
  ******************************************************************************/
 
@@ -68,9 +63,8 @@ void ezradio_get_adc_reading(uint8_t adc_en, uint8_t adc_cfg, ezradio_cmd_reply_
 #endif /* EZRADIO_DRIVER_FULL_SUPPORT */
 #endif /* EZRADIO_DRIVER_EXTENDED_SUPPORT */
 
-/** @} (end addtogroup API_Layer) */
-/** @} (end addtogroup EZRADIODRV) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup ezradiodrv_api) */
+/** @} (end addtogroup ezradiodrv) */
 
 #ifdef __cplusplus
 }

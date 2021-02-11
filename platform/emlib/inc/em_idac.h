@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup IDAC
+ * @addtogroup idac IDAC - Current DAC
  * @brief
  *  Current Digital-to-Analog Converter (IDAC) Peripheral API.
  *
@@ -340,8 +335,7 @@ __STATIC_INLINE void IDAC_IntSet(IDAC_TypeDef *idac, uint32_t flags)
 }
 #endif
 
-/** @} (end addtogroup IDAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup idac) */
 
 #ifdef __cplusplus
 }

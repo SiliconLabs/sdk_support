@@ -17,11 +17,18 @@
 #ifndef BTL_SECURITY_TYPES_H
 #define BTL_SECURITY_TYPES_H
 
+#include "config/btl_config.h"
 #include "core/btl_util.h"
+#include "em_device.h"
 
 MISRAC_DISABLE
+#if defined(SEMAILBOX_PRESENT)
+#include "sl_se_manager.h"
+#include "sl_se_manager_cipher.h"
+#endif
+
 #include "mbedtls/aes.h"
-#include "mbedtls/sha256.h"
+#include "plugin/security/sha/btl_sha256.h"
 MISRAC_ENABLE
 
 /***************************************************************************//**
@@ -43,11 +50,16 @@ typedef struct AesContext {
 
 /// Context variable type for AES-CTR (and AES-CCM)
 typedef struct AesCtrContext {
-  mbedtls_aes_context   aesContext;       ///< mbedTLS AES context
-  size_t                offsetInBlock;    ///< @brief Position in block of last
-                                          ///< byte en/decrypted
-  uint8_t               streamBlock[16];  ///< Current CTR encrypted block
-  uint8_t               counter[16];      ///< Current counter/CCM value
+#if defined(SEMAILBOX_PRESENT)
+  sl_se_key_descriptor_t  aesKeyDesc;       ///< SE Manager Key descriptor
+  mbedtls_aes_context     aesContext;       ///< mbedTLS AES context
+#else
+  mbedtls_aes_context     aesContext;       ///< mbedTLS AES context
+#endif
+  size_t                  offsetInBlock;    ///< @brief Position in block of last
+                                            ///< byte en/decrypted
+  uint8_t                 streamBlock[16];  ///< Current CTR encrypted block
+  uint8_t                 counter[16];      ///< Current counter/CCM value
 } AesCtrContext_t;
 
 /** @} addtogroup AES */
@@ -59,8 +71,8 @@ typedef struct AesCtrContext {
 
 /// Context type for SHA algorithm
 typedef union Sha256Context {
-  mbedtls_sha256_context  shaContext;       ///< mbedTLS SHA256 context struct
-  uint8_t                 sha[32];          ///< resulting SHA hash
+  btl_sha256_context       shaContext;      ///< mbedTLS SHA256 context struct
+  uint8_t                  sha[32];         ///< resulting SHA hash
 } Sha256Context_t;
 
 /** @} addtogroup SHA_256 */

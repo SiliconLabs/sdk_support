@@ -44,12 +44,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup ACMP
+ * @addtogroup acmp
  * @{
  ******************************************************************************/
 
@@ -289,6 +284,10 @@ typedef enum {
   acmpInputVSENSE11DIV4   = _ACMP_INPUTCTRL_POSSEL_VSENSE11DIV4,
   acmpInputVSENSE11DIV4LP = _ACMP_INPUTCTRL_POSSEL_VSENSE11DIV4LP,
   acmpInputCAPSENSE       = _ACMP_INPUTCTRL_NEGSEL_CAPSENSE,
+#if defined(_ACMP_INPUTCTRL_POSSEL_VDACOUT0)
+  acmpInputVDACOUT0       = _ACMP_INPUTCTRL_POSSEL_VDACOUT0,
+  acmpInputVDACOUT1       = _ACMP_INPUTCTRL_POSSEL_VDACOUT1,
+#endif
   acmpInputPA0            = _ACMP_INPUTCTRL_POSSEL_PA0,
   acmpInputPA1            = _ACMP_INPUTCTRL_POSSEL_PA1,
   acmpInputPA2            = _ACMP_INPUTCTRL_POSSEL_PA2,
@@ -683,7 +682,7 @@ typedef struct {
 #if defined(_ACMP_CFG_MASK)
 #define ACMP_CAPSENSE_INIT_DEFAULT                                          \
   {                                                                         \
-    0x2,                    /* Using biasProg value of 0x2. */              \
+    _ACMP_CFG_BIAS_DEFAULT, /* Using biasProg default value. */             \
     acmpHysteresisDisabled, /* Disable hysteresis. */                       \
     acmpResistor5,          /* Use internal resistor value 5. */            \
     0x3F,                   /* Set VREFDIV to maximum to disable divide. */ \
@@ -826,7 +825,7 @@ typedef struct {
 #if defined(_ACMP_CFG_MASK)
 #define ACMP_INIT_DEFAULT                                                     \
   {                                                                           \
-    0x2,                      /* Using biasProg value of 0x2. */              \
+    _ACMP_CFG_BIAS_DEFAULT,   /* Using biasProg default value. */             \
     acmpInputRangeFull,       /* Input range from 0 to Vdd. */                \
     acmpAccuracyLow,          /* Low accuracy, less current usage. */         \
     acmpHysteresisDisabled,   /* Disable hysteresis. */                       \
@@ -892,6 +891,7 @@ typedef struct {
   uint32_t             div1;
 } ACMP_VAConfig_TypeDef;
 
+/** VA default configuration. */
 #define ACMP_VACONFIG_DEFAULT                                               \
   {                                                                         \
     acmpVAInputVDD, /* Use VDD as VA voltage input source. */               \
@@ -925,6 +925,7 @@ typedef struct {
   uint32_t             div1;
 } ACMP_VBConfig_TypeDef;
 
+/** VB default configuration. */
 #define ACMP_VBCONFIG_DEFAULT                                                \
   {                                                                          \
     acmpVBInput1V25, /* Use 1.25 V as VB voltage input source. */            \
@@ -969,7 +970,7 @@ void ACMP_VBSetup(ACMP_TypeDef *acmp, const ACMP_VBConfig_TypeDef *vbconfig);
  * @param[in] flags
  *   Pending ACMP interrupt source to clear. Use a bitwise logic OR combination
  *   of valid interrupt flags for the ACMP module. The flags can be, for instance,
- *   @ref ACMP_IFC_EDGE or @ref ACMP_IFC_WARMUP.
+ *   ACMP_IFC_EDGE or ACMP_IFC_WARMUP.
  ******************************************************************************/
 __STATIC_INLINE void ACMP_IntClear(ACMP_TypeDef *acmp, uint32_t flags)
 {
@@ -990,7 +991,7 @@ __STATIC_INLINE void ACMP_IntClear(ACMP_TypeDef *acmp, uint32_t flags)
  * @param[in] flags
  *   ACMP interrupt sources to disable. Use a bitwise logic OR combination of
  *   valid interrupt flags for the ACMP module. The flags can be, for instance,
- *   @ref ACMP_IEN_EDGE or @ref ACMP_IEN_WARMUP.
+ *   ACMP_IEN_EDGE or ACMP_IEN_WARMUP.
  ******************************************************************************/
 __STATIC_INLINE void ACMP_IntDisable(ACMP_TypeDef *acmp, uint32_t flags)
 {
@@ -1012,7 +1013,7 @@ __STATIC_INLINE void ACMP_IntDisable(ACMP_TypeDef *acmp, uint32_t flags)
  * @param[in] flags
  *   ACMP interrupt sources to enable. Use a bitwise logic OR combination of
  *   valid interrupt flags for the ACMP module. The flags can be, for instance,
- *   @ref ACMP_IEN_EDGE or @ref ACMP_IEN_WARMUP.
+ *   ACMP_IEN_EDGE or ACMP_IEN_WARMUP.
  ******************************************************************************/
 __STATIC_INLINE void ACMP_IntEnable(ACMP_TypeDef *acmp, uint32_t flags)
 {
@@ -1036,7 +1037,7 @@ __STATIC_INLINE void ACMP_IntEnable(ACMP_TypeDef *acmp, uint32_t flags)
  * @return
  *   Pending ACMP interrupt sources. A bitwise logic OR combination of valid
  *   interrupt flags for the ACMP module. The pending interrupt sources can be,
- *   for instance, @ref ACMP_IF_EDGE or @ref ACMP_IF_WARMUP.
+ *   for instance, ACMP_IF_EDGE or ACMP_IF_WARMUP.
  ******************************************************************************/
 __STATIC_INLINE uint32_t ACMP_IntGet(ACMP_TypeDef *acmp)
 {
@@ -1084,7 +1085,7 @@ __STATIC_INLINE uint32_t ACMP_IntGetEnabled(ACMP_TypeDef *acmp)
  * @param[in] flags
  *   ACMP interrupt sources to set as pending. Use a bitwise logic OR
  *   combination of valid interrupt flags for the ACMP module. The flags can be,
- *   for instance, @ref ACMP_IFS_EDGE or @ref ACMP_IFS_WARMUP.
+ *   for instance, ACMP_IFS_EDGE or ACMP_IFS_WARMUP.
  ******************************************************************************/
 __STATIC_INLINE void ACMP_IntSet(ACMP_TypeDef *acmp, uint32_t flags)
 {
@@ -1117,8 +1118,7 @@ __STATIC_INLINE ACMP_Channel_TypeDef ACMP_PortPinToInput(GPIO_Port_TypeDef port,
 }
 #endif
 
-/** @} (end addtogroup ACMP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup acmp) */
 
 #ifdef __cplusplus
 }

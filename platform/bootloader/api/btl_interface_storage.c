@@ -367,6 +367,28 @@ int32_t bootloader_writeRawStorage(uint32_t address,
   return mainBootloaderTable->storage->writeRaw(address, buffer, length);
 }
 
+int32_t bootloader_getAllocatedDMAChannel(void)
+{
+  if (!bootloader_pointerValid(mainBootloaderTable)
+      || !bootloader_pointerValid(mainBootloaderTable->storage)) {
+    return BOOTLOADER_ERROR_INIT_STORAGE;
+  }
+
+  BootloaderInformation_t info;
+  bootloader_getInfo(&info);
+
+  uint32_t blMajorVersion = ((info.version & BOOTLOADER_VERSION_MAJOR_MASK)
+                              >> BOOTLOADER_VERSION_MAJOR_SHIFT);
+  uint32_t blMinorVersion = ((info.version & BOOTLOADER_VERSION_MINOR_MASK)
+                              >> BOOTLOADER_VERSION_MINOR_SHIFT);
+
+  if ((blMajorVersion < 1UL) || (blMajorVersion == 1UL && blMinorVersion < 11UL)) {
+    return BOOTLOADER_ERROR_INIT_STORAGE;
+  }
+
+  return mainBootloaderTable->storage->getDMAchannel();
+}
+
 int32_t bootloader_eraseRawStorage(uint32_t address,
                                    size_t   length)
 {

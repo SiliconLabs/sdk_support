@@ -4,7 +4,7 @@
  *   transmit, receive, and various debug modes.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -39,13 +39,13 @@
 
 // At any given time, at least one of (currAppMode, prevAppMode)
 // should be NONE, due to the way that setAppModeInternal works
-char nextCommandBuf[16];
-char *nextCommand;
-bool enableMode = true;
-AppMode_t nextAppMode = NONE;
-AppMode_t currAppMode = NONE;
-AppMode_t prevAppMode = NONE;
-bool transitionPend = false;
+volatile char nextCommandBuf[16];
+volatile char *nextCommand;
+volatile bool enableMode = true;
+volatile AppMode_t nextAppMode = NONE;
+volatile AppMode_t currAppMode = NONE;
+volatile AppMode_t prevAppMode = NONE;
+volatile bool transitionPend = false;
 RAIL_TxOptions_t antOptions = RAIL_TX_OPTIONS_DEFAULT;
 RAIL_StreamMode_t streamMode = RAIL_STREAM_PN9_STREAM;
 
@@ -69,7 +69,7 @@ void enableAppMode(AppMode_t next, bool enable, char *command)
     if (command == NULL) {
       nextCommand = (logLevel & ASYNC_RESPONSE) ? "appMode" : NULL;
     } else {
-      memcpy(&nextCommandBuf[0], command, sizeof(nextCommandBuf));
+      memcpy((char *)&nextCommandBuf[0], command, sizeof(nextCommandBuf));
       nextCommand = &nextCommandBuf[0];
     }
   }
@@ -94,7 +94,7 @@ const char *appModeNames(AppMode_t appMode)
 //  due to the way we handling AppMode changing
 static void transitionAppMode(AppMode_t nextAppMode)
 {
-  if (currAppMode == NONE) {
+  if (currAppMode == NONE && nextAppMode != TX_SCHEDULED) {
     RAIL_CancelTimer(railHandle);
   } else if (currAppMode == TX_STREAM) {
     RAIL_StopTxStream(railHandle);
@@ -136,46 +136,51 @@ static void transitionAppMode(AppMode_t nextAppMode)
 static void setAppModeInternal(void)
 {
   AppMode_t next = enableMode ? nextAppMode : NONE;
+  char *paramNextCommand = (char *)nextCommand;
+  AppMode_t paramNextAppMode = nextAppMode;
+  AppMode_t paramCurrAppMode = currAppMode;
+  bool paramEnableMode = enableMode;
   // TX_STREAM is special-cased to let one switch from one stream mode to
   // another (or the same) without having to first disable the mode.
-  if (currAppMode == nextAppMode && enableMode
-      && (nextAppMode != TX_STREAM)) {
-    if (nextCommand) {
-      responsePrint(nextCommand, "%s:Enabled", appModeNames(next));
+  if ((paramCurrAppMode == paramNextAppMode)
+      && paramEnableMode
+      && (paramNextAppMode != TX_STREAM)) {
+    if (paramNextCommand) {
+      responsePrint(paramNextCommand, "%s:Enabled", appModeNames(next));
     }
-  } else if ((currAppMode == nextAppMode && (!enableMode
-                                             || (nextAppMode == TX_STREAM)))
-             || (currAppMode == NONE && enableMode)) {
-    if (nextCommand) {
+  } else if (((paramCurrAppMode == paramNextAppMode)
+              && (!paramEnableMode || (paramNextAppMode == TX_STREAM)))
+             || ((paramCurrAppMode == NONE) && paramEnableMode)) {
+    if (paramNextCommand) {
       if (next == TX_STREAM) {
-        if (currAppMode == TX_STREAM) {
-          responsePrint(nextCommand,
+        if (paramCurrAppMode == TX_STREAM) {
+          responsePrint(paramNextCommand,
                         "%s:Enabled,StreamMode:%s,Time:%u",
                         appModeNames(next),
                         streamModeNames(streamMode),
                         RAIL_GetTime());
         } else {
-          responsePrint(nextCommand,
+          responsePrint(paramNextCommand,
                         "%s:Enabled,%s:Disabled,StreamMode:%s,Time:%u",
                         appModeNames(next),
-                        appModeNames(currAppMode),
+                        appModeNames(paramCurrAppMode),
                         streamModeNames(streamMode),
                         RAIL_GetTime());
         }
       } else {
-        responsePrint(nextCommand,
+        responsePrint(paramNextCommand,
                       "%s:Enabled,%s:Disabled,Time:%u",
                       appModeNames(next),
-                      appModeNames(currAppMode),
+                      appModeNames(paramCurrAppMode),
                       RAIL_GetTime());
       }
     }
     transitionAppMode(next);
   } else { // Ignore mode change request
-    if (nextCommand) {
-      responsePrintError(nextCommand, 1, "Can't %s %s during %s",
-                         enableMode ? "enable" : "disable",
-                         appModeNames(nextAppMode), appModeNames(currAppMode));
+    if (paramNextCommand) {
+      responsePrintError(paramNextCommand, 1, "Can't %s %s during %s",
+                         paramEnableMode ? "enable" : "disable",
+                         appModeNames(paramNextAppMode), appModeNames(paramCurrAppMode));
     }
   }
 }

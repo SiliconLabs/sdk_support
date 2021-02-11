@@ -38,13 +38,8 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup VERSION
- * @brief Version API.
+ * @addtogroup version VERSION - Version Defines
+ * @brief Version API
  * @details
  *  Macros specifying the EMLIB and CMSIS version.
  * @{
@@ -52,20 +47,20 @@ extern "C" {
 
 /* *INDENT-OFF* */
 /** @deprecated Version number of EMLIB peripheral API. */
-#define _EMLIB_VERSION 5.9.4
+#define _EMLIB_VERSION 6.0.0
 /* *INDENT-ON* */
 
 /** @deprecated Major version of EMLIB. This is the 32-bit MCU SDK version.
     A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_MAJOR 5
+#define _EMLIB_VERSION_MAJOR 6
 
 /** @deprecated Minor version of EMLIB. This is the 32-bit MCU SDK version.
     A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_MINOR 9
+#define _EMLIB_VERSION_MINOR 0
 
 /** @deprecated Patch revision of EMLIB. This is the 32-bit MCU SDK version.
     A new version system for EMLIB will be provided in a later release. */
-#define _EMLIB_VERSION_PATCH 5
+#define _EMLIB_VERSION_PATCH 0
 
 /* *INDENT-OFF* */
 /** Version number of targeted CMSIS package. */
@@ -81,12 +76,10 @@ extern "C" {
 /** Patch revision of CMSIS. */
 #define _CMSIS_VERSION_PATCH 0
 
-/** @} (end addtogroup Version) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup version) */
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* EM_VERSION_H */
-

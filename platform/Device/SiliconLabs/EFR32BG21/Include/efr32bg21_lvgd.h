@@ -63,4 +63,5 @@ typedef struct {
 /** @} End of group EFR32BG21_LVGD_BitFields */
 /** @} End of group EFR32BG21_LVGD */
 /** @} End of group Parts */
+
 #endif /* EFR32BG21_LVGD_H */

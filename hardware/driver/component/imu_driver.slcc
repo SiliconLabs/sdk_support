@@ -1,0 +1,26 @@
+id: imu_driver
+package: platform
+label: IMU - Inertial Measurement Unit
+description: >
+  Intertial Measurement Unit driver
+category: Platform|Board Drivers
+quality: production
+root_path: hardware/driver/imu
+provides:
+  - name: imu_driver
+requires:
+  - name: icm20648_driver
+  - name: sleeptimer
+  - name: status
+include:
+  - path: inc
+    file_list:
+      - path: sl_imu.h
+source:
+  - path: src/sl_imu.c
+  - path: src/sl_imu_dcm.c
+  - path: src/sl_imu_fuse.c
+  - path: src/sl_imu_math.c
+documentation:
+    docset: gecko-platform
+    document: hardware-driver/api/group-imu

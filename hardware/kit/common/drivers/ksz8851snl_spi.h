@@ -30,6 +30,11 @@
 
 #ifndef KSZ8851SNL_SPI_H__
 #define KSZ8851SNL_SPI_H__
+
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The KSZ8851SNL SPI driver is deprecated and marked for removal in a later release."
+#endif
+
 #include <stdint.h>
 
 /**************************************************************************//**

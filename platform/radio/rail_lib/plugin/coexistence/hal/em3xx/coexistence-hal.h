@@ -3,7 +3,7 @@
  * @brief This file contains the EM3XX radio coexistence interface.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -33,6 +33,8 @@
 
 #ifdef RHO_GPIO
 #define COEX_HAL_SMALL_RHO 1
+#else //!RHO_GPIO
+#define COEX_HAL_DISABLED 1
 #endif //RHO_GPIO
 
 typedef void (*HalGpioIsr_t)(void);

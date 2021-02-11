@@ -1559,8 +1559,8 @@ typedef struct
   struct {
   __IOM uint32_t MAIR0;                  /*!< Offset: 0x030 (R/W)  MPU Memory Attribute Indirection Register 0 */
   __IOM uint32_t MAIR1;                  /*!< Offset: 0x034 (R/W)  MPU Memory Attribute Indirection Register 1 */
-  };
-  };
+  } s_mair;
+  } u_mair;
 } MPU_Type;
 
 #define MPU_TYPE_RALIASES                  4U

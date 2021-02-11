@@ -236,6 +236,11 @@ static void handleOverflow(void);
 /// @endcond
 
 /***************************************************************************//**
+ * @addtogroup rtcdrv
+ * @{
+ ******************************************************************************/
+
+/***************************************************************************//**
  * @brief
  *    Allocate timer.
  *
@@ -838,7 +843,7 @@ uint32_t RTCDRV_GetWallClock(void)
  *    Get wallclock tick count as a 32bit value. At 4 ticks per millisecond,
  *    overflow occurs after approximately 12.5 days.
  *
- * @detail
+ * @details
  *    The return value of this function is in counter ticks. Use
  *    @ref RTCDRV_TicksToMsec() or @ref RTCDRV_TicksToSec() to convert ticks
  *    to the desired time unit.
@@ -873,7 +878,7 @@ uint32_t RTCDRV_GetWallClockTicks32(void)
  * @brief
  *    Get a wallclock tick count as a 64 bit value.
  *
- * @detail
+ * @details
  *    The return value of this function is in counter ticks. Use
  *    @ref RTCDRV_TicksToMsec64() or @ref RTCDRV_TicksToSec() to convert ticks
  *    to the desired time unit.
@@ -994,6 +999,8 @@ uint32_t  RTCDRV_TicksToSec(uint64_t ticks)
 }
 #endif
 
+/** @} (end addtogroup rtcdrv) */
+
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
 #if defined(RTCDRV_USE_RTC)
@@ -1057,6 +1064,8 @@ void RTCC_IRQHandler(void)
 
   CORE_EXIT_ATOMIC();
 }
+
+/// @endcond
 
 static void checkAllTimers(uint32_t timeElapsed)
 {
@@ -1209,15 +1218,14 @@ static void handleOverflow(void)
 }
 #endif
 
-/// @endcond
-
 /* *INDENT-OFF* */
 // ******* THE REST OF THE FILE IS DOCUMENTATION ONLY !************************
-/// @addtogroup emdrv
+/// @addtogroup rtcdrv RTCDRV - RTC Driver
+/// @brief Real-time Clock Driver (DEPRECATED)
 /// @{
-/// @addtogroup RTCDRV
-/// @brief Real-time Clock Driver
-/// @{
+///
+///   @warning The RTC Driver is marked as deprecated and will be removed in a
+///   later release. Please use the sleep timer service instead.
 ///
 ///   @details
 ///   The rtcdriver.c and rtcdriver.h source files for the RTCDRV device driver library are in the
@@ -1252,7 +1260,7 @@ static void handleOverflow(void)
 ///   @n @section rtcdrv_conf Configuration Options
 ///
 ///   Some properties of the RTCDRV driver are compile-time configurable. These
-///   properties are stored in the @ref rtcdrv_config.h file. A template for this
+///   properties are stored in the rtcdrv_config.h file. A template for this
 ///   file, containing default values, is in the emdrv/config folder.
 ///   Currently the configuration options are as follows:
 ///   @li The number of timers that RTCDRV provides.
@@ -1264,7 +1272,7 @@ static void handleOverflow(void)
 ///   safely used.
 ///
 ///   To configure RTCDRV, provide a custom configuration file. This is an
-///   example @ref rtcdrv_config.h file:
+///   example rtcdrv_config.h file:
 ///   @code{.c}
 ///#ifndef SILICON_LABS_RTCDRV_CONFIG_H
 ///#define SILICON_LABS_RTCDRV_CONFIG_H
@@ -1292,7 +1300,7 @@ static void handleOverflow(void)
 ///   more information about input and output parameters and return values,
 ///   click on the hyperlinked function names. Most functions return an error
 ///   code, @ref ECODE_EMDRV_RTCDRV_OK is returned on success,
-///   see @ref ecode.h and @ref rtcdriver.h for other error codes.
+///   see ecode.h and rtcdriver.h for other error codes.
 ///
 ///   The application code must include the @em rtcdriver.h header file.
 ///
@@ -1384,5 +1392,4 @@ static void handleOverflow(void)
 ///}
 ///   @endcode
 ///
-/// @} end group RTCDRV ********************************************************
-/// @} end group emdrv *****************************************************
+/// @} end group rtcdrv ********************************************************

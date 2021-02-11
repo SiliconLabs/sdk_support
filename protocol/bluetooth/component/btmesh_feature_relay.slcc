@@ -1,0 +1,18 @@
+id: "btmesh_feature_relay"
+label: "Relay"
+package: "Btmesh"
+description: "Enables Bluetooth Mesh Relay operation."
+category: "Bluetooth Mesh|Features"
+quality: "production"
+root_path: "protocol/bluetooth"
+
+requires:
+  - name: "btmesh_stack"
+  - name: "btmesh_core"
+  - name: component_catalog
+provides:
+  - name: "btmesh_feature_relay"
+template_contribution:
+  - name: btmesh_feature_bitmask
+    value:
+      count: 1

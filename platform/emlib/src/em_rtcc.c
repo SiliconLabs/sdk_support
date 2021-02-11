@@ -33,13 +33,8 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup RTCC
- * @brief Real Time Counter (RTCC) Peripheral API
+ * @addtogroup rtcc RTCC - Real Timer Counter/Calendar
+ * @brief Real Time Counter and Calendar (RTCC) Peripheral API
  * @details
  *  This module contains functions to control the RTCC peripheral of Silicon
  *  Labs 32-bit MCUs and SoCs. The RTCC ensures timekeeping in low energy modes.
@@ -250,7 +245,6 @@ void RTCC_StatusClear(void)
 #endif
 }
 
-/** @} (end addtogroup RTCC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup rtcc) */
 
 #endif /* defined( RTCC_COUNT ) && ( RTCC_COUNT == 1 ) */

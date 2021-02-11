@@ -232,7 +232,8 @@ static sl_status_t sl_wfx_bus_access(sl_wfx_host_bus_transfer_type_t type,
      the WFx back to sleep */
   if ((sl_wfx_context->state & SL_WFX_POWER_SAVE_ACTIVE)
       && (type == SL_WFX_BUS_READ)
-      && (address != SL_WFX_CONTROL_REG_ID)
+      && ((address != SL_WFX_CONTROL_REG_ID)
+          || ((address == SL_WFX_CONTROL_REG_ID) && ((*(uint16_t *)buffer & SL_WFX_CONT_NEXT_LEN_MASK) == 0)))
       && (sl_wfx_context->used_buffers <= 1)
       && ((*((uint16_t *)((uint8_t *)buffer + length - SL_WFX_CONT_REGISTER_SIZE)) & SL_WFX_CONT_NEXT_LEN_MASK) == 0)) {
     /* Ask the host opinion on whether the WFx should be put back to sleep or

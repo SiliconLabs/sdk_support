@@ -36,12 +36,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup DMA
+ * @addtogroup dma DMA - Direct Memory Access
  * @brief Direct Memory Access (DMA) Peripheral API
  * @details
  *  DMA access functions provide basic support for the following
@@ -1161,6 +1156,5 @@ void DMA_Reset(void)
   }
 }
 
-/** @} (end addtogroup DMA) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup dma) */
 #endif /* defined( DMA_PRESENT ) */

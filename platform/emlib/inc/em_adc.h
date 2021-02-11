@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup ADC
+ * @addtogroup adc
  * @{
  ******************************************************************************/
 
@@ -186,6 +181,7 @@ typedef enum {
 #if defined(_ADC_SCANCTRLX_VREFSEL_MASK)
 #define ADC_CTRLX_VREFSEL_REG     0x80UL
 #endif
+/** ADC Reference */
 typedef enum {
   /** Internal 1.25 V reference. */
   adcRef1V25      = _ADC_SINGLECTRL_REF_1V25,
@@ -509,10 +505,12 @@ typedef enum {
 } ADC_PosSel_TypeDef;
 
 /* Map legacy or incorrectly named select enums to correct enums. */
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #define adcPosSelIO0            adcPosSelIOVDD
 #define adcPosSelVREGOUTPA      adcPosSelPAVDD
 #define adcPosSelAREG           adcPosSelDVDD
 #define adcPosSelPDBU           adcPosSelDECOUPLE
+/** @endcond */
 #endif
 
 #if defined(_ADC_SINGLECTRL_NEGSEL_MASK)
@@ -685,7 +683,7 @@ typedef enum {
 #endif
 
 #if defined(_ADC_SCANINPUTSEL_MASK)
-/* ADC scan input groups. */
+/** ADC scan input groups. */
 typedef enum {
   adcScanInputGroup0 = 0,
   adcScanInputGroup1 = 1,
@@ -693,8 +691,9 @@ typedef enum {
   adcScanInputGroup3 = 3,
 } ADC_ScanInputGroup_TypeDef;
 
-/* Define none selected for ADC_SCANINPUTSEL. */
+/** Define none selected group for ADC_SCANINPUTSEL. */
 #define ADC_SCANINPUTSEL_GROUP_NONE     0xFFU
+/** Define none selected for ADC_SCANINPUTSEL. */
 #define ADC_SCANINPUTSEL_NONE           ((ADC_SCANINPUTSEL_GROUP_NONE                  \
                                           << _ADC_SCANINPUTSEL_INPUT0TO7SEL_SHIFT)     \
                                          | (ADC_SCANINPUTSEL_GROUP_NONE                \
@@ -704,7 +703,7 @@ typedef enum {
                                          | (ADC_SCANINPUTSEL_GROUP_NONE                \
                                             << _ADC_SCANINPUTSEL_INPUT24TO31SEL_SHIFT))
 
-/* ADC scan alternative negative inputs. */
+/** ADC scan alternative negative inputs. */
 typedef enum {
   adcScanNegInput1  = 1,
   adcScanNegInput3  = 3,
@@ -891,7 +890,7 @@ typedef struct {
 
 #if defined(_ADC_SCANINPUTSEL_MASK)
   /**
-   * Scan input configuration. @ref Use ADC_ScanInputClear(), @ref ADC_ScanSingleEndedInputAdd()
+   * Scan input configuration. Use @ref ADC_ScanInputClear(), @ref ADC_ScanSingleEndedInputAdd()
    * or @ref ADC_ScanDifferentialInputAdd() to update this structure.
    */
   ADC_InitScanInput_TypeDef scanInputConfig;
@@ -1287,8 +1286,7 @@ __STATIC_INLINE void ADC_Start(ADC_TypeDef *adc, ADC_Start_TypeDef cmd)
   adc->CMD = (uint32_t)cmd;
 }
 
-/** @} (end addtogroup ADC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup adc) */
 
 #ifdef __cplusplus
 }

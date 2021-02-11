@@ -35,19 +35,14 @@
 #include "em_assert.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
-
 #include "em_assert.h"
-#include "em_se.h"
-#if !defined(_SILICON_LABS_32B_SERIES_2)
 #include "em_msc.h"
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#include "em_se.h"
 #endif
-/***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup DBG
+ * @addtogroup dbg DBG - Debug
  * @brief Debug (DBG) Peripheral API
  * @details
  *  This module contains functions to control the DBG peripheral of Silicon
@@ -143,23 +138,27 @@ void DBG_SWOEnable(unsigned int location)
  * @brief
  *   Disable debug access.
  *
- * @if DOXYDOC_S2_DEVICE
+ * @cond DOXYDOC_S2_DEVICE
  * @details
  *   SE interface is used to disable debug access. By choosing
  *   @ref dbgLockModePermanent, debug access is blocked permanently. SE disables
  *   the device erase command and thereafter disables debug access.
- * @else
+ * @endcond
+ * @cond DOXYDOC_P2_DEVICE
+ * @
  * @details
  *   Debug access is blocked using debug lock word. On series 1 devices,
  *   if @ref dbgLockModePermanent is chosen, debug access is blocked
  *   permanently using AAP lock word.
- * @endif
+ * @endcond
  * @param[in] lockMode
  *   Debug lock mode to be used.
  *
+ * @cond !DOXYDOC_P1_DEVICE
  * @warning
  *   If @ref dbgLockModePermanent is chosen as the lock mode, the debug port
  *   will be closed permanently and is irreversible.
+ * @endcond
  ******************************************************************************/
 void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode)
 {
@@ -212,6 +211,5 @@ void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode)
 
 #endif /* defined(LOCKBITS_BASE) && !defined(_EFM32_GECKO_FAMILY) */
 
-/** @} (end addtogroup DBG) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup dbg) */
 #endif /* defined( CoreDebug_DHCSR_C_DEBUGEN_Msk ) */

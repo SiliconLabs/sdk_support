@@ -9,7 +9,7 @@ define symbol __ICFEDIT_crashinfo_size__ = 0x00000080;
 
 /*-Memory Regions-*/
 define symbol __ICFEDIT_region_ROM_start__ = 0x00000800;
-define symbol __ICFEDIT_region_ROM_end__   = (0x00000800+0x003800-1);
+define symbol __ICFEDIT_region_ROM_end__   = (0x00000800+0x00003800-0x4-0x20-1);
 define symbol __ICFEDIT_region_RAM_start__ = 0x20000000;
 define symbol __ICFEDIT_region_RAM_end__   = (0x20000000+0x00004000-1);
 

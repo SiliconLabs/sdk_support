@@ -47,7 +47,10 @@
 
 #ifdef INCLUDE_PAL_GPIO_PIN_AUTO_TOGGLE
 
-#if defined(RTCC_PRESENT) && (RTCC_COUNT > 0) && !defined(PAL_CLOCK_RTC)
+#if !defined(RTCC_PRESENT) && !defined(RTC_PRESENT) && defined(BURTC_PRESENT)
+#define PAL_CLOCK_BURTC
+#include "em_burtc.h"
+#elif defined(RTCC_PRESENT) && (RTCC_COUNT > 0) && !defined(PAL_CLOCK_RTC)
 #define PAL_CLOCK_RTCC
 #include "em_rtcc.h"
 #else
@@ -76,7 +79,9 @@ static unsigned int gpioPinNo;
 
 static void palClockSetup(CMU_Clock_TypeDef clock);
 
-#if defined(PAL_CLOCK_RTCC)
+#if defined(PAL_CLOCK_BURTC)
+static void burtcSetup(unsigned int frequency);
+#elif defined(PAL_CLOCK_RTCC)
 static void rtccSetup(unsigned int frequency);
 #else
 static void rtcSetup(unsigned int frequency);
@@ -441,7 +446,10 @@ EMSTATUS PAL_GpioPinAutoToggle(unsigned int gpioPort,
   /* Setup PRS to drive the GPIO pin which is connected to the
      display com inversion pin (EXTCOMIN) using the RTC COMP0 signal or
      RTCC CCV1 signal as source. */
-#if defined(PAL_CLOCK_RTCC)
+#if defined(PAL_CLOCK_BURTC)
+  uint32_t  source = PRS_ASYNC_CH_CTRL_SOURCESEL_BURTC;
+  uint32_t  signal = PRS_ASYNC_CH_CTRL_SIGSEL_BURTCCOMP;
+#elif defined(PAL_CLOCK_RTCC)
 #if defined(PRS_ASYNC_CH_CTRL_SIGSEL_DEFAULT)
   uint32_t  source  = PRS_ASYNC_CH_CTRL_SOURCESEL_RTCC;
   uint32_t  signal  = PRS_ASYNC_CH_CTRL_SIGSEL_RTCCCCV1;
@@ -453,6 +461,9 @@ EMSTATUS PAL_GpioPinAutoToggle(unsigned int gpioPort,
   uint32_t  source  = PRS_CH_CTRL_SOURCESEL_RTC;
   uint32_t  signal  = PRS_CH_CTRL_SIGSEL_RTCCOMP0;
 #endif
+
+  /* Make sure frequency is non-zero */
+  EFM_ASSERT(frequency);
 
   /* Enable PRS clock */
   CMU_ClockEnable(cmuClock_PRS, true);
@@ -481,11 +492,14 @@ EMSTATUS PAL_GpioPinAutoToggle(unsigned int gpioPort,
   /* Setup GPIO pin. */
   GPIO_PinModeSet((GPIO_Port_TypeDef)gpioPort, gpioPin, gpioModePushPull, 0);
 
-#if defined(PAL_CLOCK_RTCC)
-  /* Setup RTCC to to toggle PRS or generate interrupts at given frequency. */
+#if defined(PAL_CLOCK_BURTC)
+  /* Setup BURTC to toggle PRS or generate interrupts at given frequency */
+  burtcSetup(frequency);
+#elif defined(PAL_CLOCK_RTCC)
+  /* Setup RTCC to toggle PRS or generate interrupts at given frequency. */
   rtccSetup(frequency);
 #else
-  /* Setup RTC to to toggle PRS or generate interrupts at given frequency. */
+  /* Setup RTC to toggle PRS or generate interrupts at given frequency. */
   rtcSetup(frequency);
 #endif
 
@@ -524,6 +538,22 @@ void RTCC_IRQHandler(void)
   GPIO_PinOutToggle((GPIO_Port_TypeDef)gpioPortNo, gpioPinNo);
 }
 #endif /* PAL_CLOCK_RTCC */
+
+#if defined(PAL_CLOCK_BURTC)
+/**************************************************************************//**
+ * @brief   BURTC Interrupt handler which toggles GPIO pin.
+ *
+ * @return  N/A
+ *****************************************************************************/
+void BURTC_IRQHandler(void)
+{
+  /* Clear interrupt source */
+  BURTC_IntClear(BURTC_IF_COMPIF);
+
+  /* Toggle GPIO pin. */
+  GPIO_PinOutToggle((GPIO_Port_TypeDef)gpioPortNo, gpioPinNo);
+}
+#endif /* PAL_CLOCK_BURTC */
 #endif /* INCLUDE_PAL_GPIO_PIN_AUTO_TOGGLE_HW_ONLY */
 
 /**************************************************************************//**
@@ -538,15 +568,18 @@ static void palClockSetup(CMU_Clock_TypeDef clock)
   CMU_ClockEnable(cmuClock_CORELE, true);
 #endif
 
-#if (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_LFXO) ) \
-  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_LFXO) )
+#if (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_LFXO) )    \
+  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_LFXO) ) \
+  || (defined(PAL_CLOCK_BURTC) && defined(PAL_BURTC_CLOCK_LFXO) )
   CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
   CMU_ClockSelectSet(clock, cmuSelect_LFXO);
-#elif (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_LFRCO) ) \
-  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_LFRCO) )
+#elif (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_LFRCO) )  \
+  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_LFRCO) ) \
+  || (defined(PAL_CLOCK_BURTC) && defined(PAL_BURTC_CLOCK_LFRCO) )
   CMU_ClockSelectSet(clock, cmuSelect_LFRCO);
-#elif (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_ULFRCO) ) \
-  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_ULFRCO) )
+#elif (defined(PAL_CLOCK_RTC) && defined(PAL_RTC_CLOCK_ULFRCO) )  \
+  || (defined(PAL_CLOCK_RTCC) && defined(PAL_RTCC_CLOCK_ULFRCO) ) \
+  || (defined(PAL_CLOCK_BURTC) && defined(PAL_BURTC_CLOCK_ULFRCO) )
   CMU_ClockSelectSet(clock, cmuSelect_ULFRCO);
 #else
 #error No clock source for RTC defined.
@@ -632,6 +665,42 @@ static void rtccSetup(unsigned int frequency)
   RTCC_Enable(true);
 }
 #endif /* PAL_CLOCK_RTCC */
+
+#if defined(PAL_CLOCK_BURTC)
+/**************************************************************************//**
+ * @brief Enables LFECLK and selects clock source for BURTC
+ *        Sets up the BURTC to generate an interrupt every second.
+ *****************************************************************************/
+static void burtcSetup(unsigned int frequency)
+{
+  BURTC_Init_TypeDef burtcInit = BURTC_INIT_DEFAULT;
+
+  palClockSetup(cmuClock_EM4GRPACLK);
+
+  CMU_ClockEnable(cmuClock_BURTC, true);
+
+  /* Initialize BURTC */
+  burtcInit.start = false;          /* Do not start BURTC on initialization. */
+  burtcInit.compare0Top = true;     /* Wrap around on match. */
+  burtcInit.clkDiv = burtcClkDiv_1; /* set prescaler to 1 */
+  BURTC_Init(&burtcInit);
+
+  uint32_t freq = CMU_ClockFreqGet(cmuClock_EM4GRPACLK);
+  BURTC_CompareSet(0, (freq / frequency) - 1);
+
+#ifndef INCLUDE_PAL_GPIO_PIN_AUTO_TOGGLE_HW_ONLY
+  BURTC_IntClear(_BURTC_IF_MASK);
+  BURTC_IntEnable(BURTC_IF_COMPIF);
+
+  NVIC_ClearPendingIRQ(BURTC_IRQn);
+  NVIC_EnableIRQ(BURTC_IRQn);
+#endif
+
+  /* Reset Counter and start */
+  BURTC_CounterReset();
+  BURTC_Start();
+}
+#endif /* PAL_CLOCK_BURTC */
 #endif /* INCLUDE_PAL_GPIO_PIN_AUTO_TOGGLE */
 
 /** @endcond */

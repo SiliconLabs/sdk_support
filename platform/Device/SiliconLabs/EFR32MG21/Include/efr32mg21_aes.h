@@ -331,4 +331,5 @@ typedef struct {
 /** @} End of group EFR32MG21_AES_BitFields */
 /** @} End of group EFR32MG21_AES */
 /** @} End of group Parts */
+
 #endif /* EFR32MG21_AES_H */

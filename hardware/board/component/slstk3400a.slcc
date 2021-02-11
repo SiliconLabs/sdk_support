@@ -1,0 +1,17 @@
+!!omap
+- id: slstk3400a
+- label: SLSTK3400A
+- package: platform
+- description: Kit BSP support for the EFM32 Happy Gecko Starter Kit.
+- category: Platform|Board|Kit|Starter Kit
+- quality: production
+- requires:
+  - name: hardware_board_from_slstk3400a
+- provides:
+  - name: hardware_kit
+  - name: hardware_kit_stk
+- tag:
+  - kit:opn:SLSTK3400A
+  - kit:pn:STK3400
+  - kit:variant:A
+  - kit:revision:C01

@@ -13,7 +13,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include "hal/hal.h"
 #include "hal/plugin/i2c-driver/i2c-driver.h"
 #include "app/util/serial/command-interpreter2.h"

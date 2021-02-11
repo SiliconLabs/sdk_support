@@ -459,5 +459,6 @@ void halSc1Isr(void)
 
 uint16_t halInternalSc1Isr(uint16_t interrupt, uint16_t pcbContext)
 {
+  (void)pcbContext;
   return interrupt;
 }

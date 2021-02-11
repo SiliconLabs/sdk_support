@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup CHIP
+ * @addtogroup chip CHIP - Chip Initialization
  * @brief Chip errata workarounds initialization API
  * @details
  *  API to initialize chip for errata workarounds.
@@ -239,13 +234,11 @@ __STATIC_INLINE void CHIP_Init(void)
     *(volatile uint32_t *)(EMU_BASE + 0x164) |= 0x4;
   }
 
-#if defined(_EFR_DEVICE)
   /****************************
    * Fix for errata DCDC_E206.
    * Disable bypass limit enabled temporarily in SystemInit() errata
    * workaround. */
   BUS_RegBitWrite(&EMU->DCDCCLIMCTRL, _EMU_DCDCCLIMCTRL_BYPLIMEN_SHIFT, 0);
-#endif
 #endif
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_84)
@@ -286,17 +279,19 @@ __STATIC_INLINE void CHIP_Init(void)
   }
 #endif
 
-#if defined(_LCD_DISPCTRL_CHGRDST_MASK)
 /* Charge redist setup (fixed value): LCD->DBGCTRL.CHGRDSTSTR = 1 (reset: 0). */
+#if defined(_LCD_DISPCTRL_CHGRDST_MASK)
+#if defined(_SILICON_LABS_32B_SERIES_1)
   CMU->HFBUSCLKEN0 |= CMU_HFBUSCLKEN0_LE;
   CMU->LFACLKEN0   |= CMU_LFACLKEN0_LCD;
   *(volatile uint32_t *)(LCD_BASE + 0x034) |= (0x1UL << 12);
   CMU->LFACLKEN0   &= ~CMU_LFACLKEN0_LCD;
   CMU->HFBUSCLKEN0 &= ~CMU_HFBUSCLKEN0_LE;
 #endif
+#endif
 
-#if defined(_SILICON_LABS_32B_SERIES_1)              \
-  && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)  \
+#if defined(_SILICON_LABS_32B_SERIES_1)             \
+  && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) \
   && !defined(ERRATA_FIX_EMU_E220_DECBOD_IGNORE)
   /* First part of the EMU_E220 DECBOD Errata fix. DECBOD Reset can occur
    * during voltage scaling after EM2/3 wakeup. Second part is in em_emu.c */
@@ -346,10 +341,45 @@ __STATIC_INLINE void CHIP_Init(void)
     }
   }
 #endif
+
+/* PM-3503 */
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_210)
+  {
+    bool syscfgClkIsOff = ((CMU->CLKEN0 & CMU_CLKEN0_SYSCFG) == 0);
+    CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
+
+    bool dcdcClkIsOff = ((CMU->CLKEN0 & CMU_CLKEN0_DCDC) == 0);
+    CMU->CLKEN0_SET = CMU_CLKEN0_DCDC;
+
+    bool dcdcIsLock = ((DCDC->LOCKSTATUS & DCDC_LOCKSTATUS_LOCK_LOCKED) != 0);
+    DCDC->LOCK = DCDC_LOCK_LOCKKEY_UNLOCKKEY;
+
+    while (DCDC->SYNCBUSY & DCDC_SYNCBUSY_CTRL) {
+      /* Wait for previous synchronization to finish */
+    }
+    DCDC->CTRL_CLR = DCDC_CTRL_MODE;
+    while ((DCDC->STATUS & DCDC_STATUS_BYPSW) == 0U) {
+      /* Wait for BYPASS switch enable. */
+    }
+
+    if ((SYSCFG->ROOTLOCKSTATUS & SYSCFG_ROOTLOCKSTATUS_REGLOCK) == 0) {
+      *(volatile uint32_t *)(DCDC_BASE + 0x205CUL) = (0x1UL << 18);
+    }
+
+    if (dcdcIsLock) {
+      DCDC->LOCK = ~DCDC_LOCK_LOCKKEY_UNLOCKKEY;
+    }
+    if (dcdcClkIsOff) {
+      CMU->CLKEN0_CLR = CMU_CLKEN0_DCDC;
+    }
+    if (syscfgClkIsOff) {
+      CMU->CLKEN0_CLR = CMU_CLKEN0_SYSCFG;
+    }
+  }
+#endif
 }
 
-/** @} (end addtogroup CHIP) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup chip) */
 
 #ifdef __cplusplus
 }

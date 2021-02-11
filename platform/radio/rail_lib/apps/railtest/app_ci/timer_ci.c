@@ -3,7 +3,7 @@
  * @brief This file is for testing the RAIL timer interface.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,8 +31,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bsp.h"
-#include "command_interpreter.h"
 #include "response_print.h"
 #include "buffer_pool_allocator.h"
 
@@ -43,14 +41,14 @@
 // Hardware-based, single timer functionality
 // When the multiTimer is enabled, this API uses one instance of the
 // software-based, multiTimer.
-void printTimerStats(int argc, char **argv)
+void printTimerStats(sl_cli_command_arg_t *args)
 {
   bool enabled = RAIL_IsTimerRunning(railHandle);
   bool expired = RAIL_IsTimerExpired(railHandle);
   RAIL_Time_t expirationTime = RAIL_GetTimer(railHandle);
   RAIL_Time_t currentTime = RAIL_GetTime();
 
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "timeUs:%u,ExpirationTime:%u,"
                 "IsRunning:%s,IsExpired:%s",
                 currentTime,
@@ -59,35 +57,37 @@ void printTimerStats(int argc, char **argv)
                 (expired ? "True" : "False"));
 }
 
-void setTimer(int argc, char **argv)
+void setTimer(sl_cli_command_arg_t *args)
 {
-  if (!inAppMode(NONE, argv[0])) {
+  if (!inAppMode(NONE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  uint32_t timeOut = ciGetUnsigned(argv[1]);
+  uint32_t timeOut = sl_cli_get_argument_uint32(args, 0);
   RAIL_TimeMode_t mode = RAIL_TIME_DELAY;
 
   // If this is absolute mode then switch the delay mode
-  if (strcmp(argv[2], "abs") == 0) {
+  if (strcmp(sl_cli_get_argument_string(args, 1), "abs") == 0) {
     mode = RAIL_TIME_ABSOLUTE;
   }
 
   RAIL_CancelTimer(railHandle);
-  if (RAIL_SetTimer(railHandle, timeOut, mode, &RAILCb_TimerExpired)
+  if (RAIL_SetTimer(railHandle, timeOut, mode, &RAILCb_SwTimerExpired)
       != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x40, "SetTimer failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x40, "SetTimer failed");
     return;
   }
 
-  printTimerStats(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  printTimerStats(args);
 }
 
-void timerCancel(int argc, char** argv)
+void timerCancel(sl_cli_command_arg_t *args)
 {
-  if (inAppMode(NONE, argv[0])) {
+  if (inAppMode(NONE, sl_cli_get_command_string(args, 0))) {
     RAIL_CancelTimer(railHandle);
-    printTimerStats(1, argv);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    printTimerStats(args);
   }
 }
 
@@ -95,11 +95,11 @@ void timerCancel(int argc, char** argv)
 #define NUM_MULTI_TIMERS      3
 static RAIL_MultiTimer_t multiTimer[NUM_MULTI_TIMERS];
 
-void printMultiTimerStats(int argc, char **argv)
+void printMultiTimerStats(sl_cli_command_arg_t *args)
 {
-  uint8_t index = ciGetUnsigned(argv[1]);
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
   if (index >= NUM_MULTI_TIMERS) {
-    responsePrintError(argv[0], 0x10,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10,
                        "Invalid multiTimer index - start with 0. Number of multiTimers is %d",
                        NUM_MULTI_TIMERS);
     return;
@@ -111,7 +111,7 @@ void printMultiTimerStats(int argc, char **argv)
                                                   RAIL_TIME_ABSOLUTE);
   RAIL_Time_t currentTime = RAIL_GetTime();
 
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "timeUs:%u,"
                 "ExpirationTime:%u,"
                 "IsRunning:%s,"
@@ -124,21 +124,21 @@ void printMultiTimerStats(int argc, char **argv)
                 index);
 }
 
-void enableMultiTimer(int argc, char **argv)
+void enableMultiTimer(sl_cli_command_arg_t *args)
 {
-  if (!inAppMode(NONE, argv[0])) {
+  if (!inAppMode(NONE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  bool enable = !!ciGetUnsigned(argv[1]);
+  bool enable = !!sl_cli_get_argument_uint8(args, 0);
   bool multiTimerSuccess = RAIL_ConfigMultiTimer(enable);
   if (multiTimerSuccess) {
-    responsePrint(argv[0],
+    responsePrint(sl_cli_get_command_string(args, 0),
                   "status:%s,numMultiTimers:%d",
                   (enable ? "enabled" : "disabled"),
                   NUM_MULTI_TIMERS);
   } else {
-    responsePrintError(argv[0], 0x10, "Unable to configure the multiTimer.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10, "Unable to configure the multiTimer.");
   }
 }
 
@@ -146,6 +146,7 @@ static void RAILCb_MultiTimerExpired(RAIL_MultiTimer_t *tmr,
                                      RAIL_Time_t expectedTimeOfEvent,
                                      void *cbArg)
 {
+  (void)expectedTimeOfEvent;
   void *multitimerHandle = memoryAllocate(sizeof(RailAppEvent_t));
   RailAppEvent_t *multitimer = (RailAppEvent_t *)memoryPtrFromHandle(multitimerHandle);
   if (multitimer == NULL) {
@@ -161,25 +162,25 @@ static void RAILCb_MultiTimerExpired(RAIL_MultiTimer_t *tmr,
   queueAdd(&railAppEventQueue, multitimerHandle);
 }
 
-void setMultiTimer(int argc, char **argv)
+void setMultiTimer(sl_cli_command_arg_t *args)
 {
-  if (!inAppMode(NONE, argv[0])) {
+  if (!inAppMode(NONE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  uint8_t index = ciGetUnsigned(argv[1]);
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
   if (index >= NUM_MULTI_TIMERS) {
-    responsePrintError(argv[0], 0x10,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10,
                        "Invalid multiTimer index - start with 0. Number of multiTimers is %d",
                        NUM_MULTI_TIMERS);
     return;
   }
 
-  uint32_t timeOut = ciGetUnsigned(argv[2]);
+  uint32_t timeOut = sl_cli_get_argument_uint32(args, 1);
   RAIL_TimeMode_t mode = RAIL_TIME_DELAY;
 
   // If this is absolute mode then switch the delay mode
-  if (strcmp(argv[3], "abs") == 0) {
+  if (strcmp(sl_cli_get_argument_string(args, 2), "abs") == 0) {
     mode = RAIL_TIME_ABSOLUTE;
   }
 
@@ -190,30 +191,32 @@ void setMultiTimer(int argc, char **argv)
                          &RAILCb_MultiTimerExpired,
                          (void *)(uint32_t)index)
       != RAIL_STATUS_NO_ERROR) {
-    responsePrintError(argv[0], 0x40, "SetMultiTimer failed");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x40, "SetMultiTimer failed");
     return;
   }
 
-  printMultiTimerStats(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  printMultiTimerStats(args);
 }
 
-void multiTimerCancel(int argc, char** argv)
+void multiTimerCancel(sl_cli_command_arg_t *args)
 {
-  if (!inAppMode(NONE, argv[0])) {
+  if (!inAppMode(NONE, sl_cli_get_command_string(args, 0))) {
     return;
   }
 
-  uint8_t index = ciGetUnsigned(argv[1]);
+  uint8_t index = sl_cli_get_argument_uint8(args, 0);
   if (index >= NUM_MULTI_TIMERS) {
-    responsePrintError(argv[0], 0x10,
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10,
                        "Invalid multiTimer index - start with 0. Number of multiTimers is %d",
                        NUM_MULTI_TIMERS);
     return;
   }
 
   if (RAIL_CancelMultiTimer((&multiTimer[index]))) {
-    printMultiTimerStats(1, argv);
+    args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+    printMultiTimerStats(args);
   } else {
-    responsePrintError(argv[0], 0x10, "MultiTimer unable to cancel.");
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x10, "MultiTimer unable to cancel.");
   }
 }

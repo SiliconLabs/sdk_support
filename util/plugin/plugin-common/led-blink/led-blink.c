@@ -10,7 +10,7 @@
 #include PLATFORM_HEADER
 #include CONFIGURATION_HEADER
 #include "stack/include/ember-types.h"
-#include "stack/include/event.h"
+#include "event_control/event.h"
 #include "hal/hal.h"
 #include "hal/micro/led.h"
 #include "hal/micro/micro.h"
@@ -19,26 +19,8 @@
 // ------------------------------------------------------------------------------
 // Private plugin macros
 
-#if !defined(CORTEXM3_EFR32)
-// The maximum number of GPIO ports and pins for the EM35x
-#define GPIO_PORT_MAX             2
-#define GPIO_PIN_MAX              7
-#endif //! defined(CORTEXM3_EFR32)
-
 // Length restriction for LED pattern
 #define MAX_BLINK_PATTERN_LENGTH  20
-
-// The BSP_LED_COUNT is a HAL Config macro. Therefore, it will need to be
-// manually added to em3xx board headers. Some em3xx boards headers (ist-a39 -
-// dimmer-switch) still contain the MAX_LED_NUMBER macro. This preprocessor
-// logic is a workaround for those board headers. As far as the HAL_LED_ENABLE
-// macro goes...I just added that guy because I think em3xx boards don't have
-// that macro either, and I assume the LEDs should be enabled in an *led*-blink
-// pluin...
-#ifndef BSP_LED_COUNT
-  #define BSP_LED_COUNT MAX_LED_NUMBER
-  #define HAL_LED_ENABLE 1
-#endif
 
 // ------------------------------------------------------------------------------
 // Plugin events
@@ -70,12 +52,6 @@ static void turnLedOn(uint8_t led);
 static void turnLedOff(uint8_t led);
 static uint8_t ledLookup(uint8_t led);
 static void handleLedEvent(uint8_t ledIndex);
-
-#if !defined(CORTEXM3_EFR32)
-static void setBit(uint8_t *data, uint8_t bit);
-static void clearBit(uint8_t *data, uint8_t bit);
-
-#endif
 
 // ------------------------------------------------------------------------------
 // Plugin private global variables
@@ -336,18 +312,7 @@ void halMultiLedBlinkSetActivityLeds(uint8_t led)
 // Port is 0 for port a, 1 for port b, and 2 for port c.
 void halLedBlinkSleepySetGpio(uint8_t port, uint8_t pin)
 {
-#if defined(CORTEXM3_EFR32)
   GPIO_PinOutSet((GPIO_Port_TypeDef)port, pin);
-#else
-  assert(port <= GPIO_PORT_MAX);
-  assert(pin <= GPIO_PIN_MAX);
-
-  halGpioSet((port << 3) | pin);
-
-  // Make sure this stays set during the next power cycle
-  setBit(&(gpioOutPowerUp[port]), pin);
-  setBit(&(gpioOutPowerDown[port]), pin);
-#endif
 }
 
 // *****************************************************************************
@@ -355,18 +320,7 @@ void halLedBlinkSleepySetGpio(uint8_t port, uint8_t pin)
 // Port is 0 for port a, 1 for port b, and 2 for port c.
 void halLedBlinkSleepyClearGpio(uint8_t port, uint8_t pin)
 {
-#if defined(CORTEXM3_EFR32)
   GPIO_PinOutClear((GPIO_Port_TypeDef)port, pin);
-#else
-  assert(port <= GPIO_PORT_MAX);
-  assert(pin <= GPIO_PIN_MAX);
-
-  halGpioClear((port << 3) | pin);
-
-  // Make sure this stays clear during the next power cycle
-  clearBit(&(gpioOutPowerUp[port]), pin);
-  clearBit(&(gpioOutPowerDown[port]), pin);
-#endif
 }
 
 // *****************************************************************************
@@ -384,67 +338,24 @@ static uint8_t ledLookup(uint8_t led)
   return ledIndex;
 }
 
-#if !defined(CORTEXM3_EFR32)
-// *****************************************************************************
-// Helper function to set a bit
-static void setBit(uint8_t *data, uint8_t bit)
-{
-  uint8_t mask = 0x01 << bit;
-
-  *data = *data | mask;
-}
-
-// *****************************************************************************
-// Helper function to clear a bit
-static void clearBit(uint8_t *data, uint8_t bit)
-{
-  uint8_t mask = ~(0x01 << bit);
-
-  *data = *data & mask;
-}
-
-#endif //! defined(CORTEXM3_EFR32)
-
 // *****************************************************************************
 // Drive the LED for a GPIO high and update sleepy state
 static void turnLedOn(uint8_t led)
 {
-#if defined(CORTEXM3_EFR32)
 #ifdef LED_ACTIVE_HIGH
   halSetLed((HalBoardLed)led);
 #else
   halClearLed((HalBoardLed)led);
 #endif // LED_ACTIVE_HIGH
-#else // architecture is EM35x
-  uint8_t port = (led) >> 3;
-  uint8_t pin = (led) & 0x07;
-
-#ifdef LED_ACTIVE_HIGH
-  halLedBlinkSleepySetGpio(port, pin);
-#else
-  halLedBlinkSleepyClearGpio(port, pin);
-#endif // LED_ACTIVE_HIGH
-#endif // defined(CORTEXM3_EFR32)
 }
 
 // *****************************************************************************
 // Drive the LED for a GPIO low and update sleepy state
 static void turnLedOff(uint8_t led)
 {
-#if defined(CORTEXM3_EFR32)
 #ifdef LED_ACTIVE_HIGH
   halClearLed((HalBoardLed)led);
 #else
   halSetLed((HalBoardLed)led);
 #endif // LED_ACTIVE_HIGH
-#else // architecture is EM35x
-  uint8_t port = (led) >> 3;
-  uint8_t pin = (led) & 0x07;
-
-#ifdef LED_ACTIVE_HIGH
-  halLedBlinkSleepyClearGpio(port, pin);
-#else
-  halLedBlinkSleepySetGpio(port, pin);
-#endif // LED_ACTIVE_HIGH
-#endif // defined(CORTEXM3_EFR32)
 }

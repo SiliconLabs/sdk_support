@@ -1,0 +1,51 @@
+id: mbedtls_tls
+package: platform
+label: Mbed TLS Support for TLS Client
+description: This component provides support for TLS using Mbed TLS
+category: Platform|Security
+quality: production
+source:
+  - path: util/third_party/crypto/mbedtls/library/ssl_cache.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_ciphersuites.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_cli.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_cookie.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_msg.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_srv.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_ticket.c
+  - path: util/third_party/crypto/mbedtls/library/ssl_tls.c
+include:
+  - path: util/third_party/crypto/mbedtls/include
+    file_list:
+      - path: mbedtls/ssl.h
+      - path: mbedtls/ssl_cache.h
+      - path: mbedtls/ssl_ciphersuites.h
+      - path: mbedtls/ssl_cookie.h
+      - path: mbedtls/ssl_internal.h
+      - path: mbedtls/ssl_ticket.h
+      - path: mbedtls/debug.h
+      - path: mbedtls/net_sockets.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: ssl_invasive.h
+provides:
+  - name: mbedtls_tls
+requires:
+  - name: mbedtls_hash
+  - name: mbedtls_cipher
+  - name: mbedtls_ccm
+  - name: mbedtls_ecc
+  - name: mbedtls_x509
+  - name: mbedtls_random
+  - name: mbedtls_core
+template_contribution:
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_TLS_C
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_CLI_C
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_PROTO_TLS1_2
+  - name: mbedtls_config
+    value: MBEDTLS_SSL_KEEP_PEER_CERTIFICATE
+documentation:
+  docset: mbed-tls
+  document: group-ssltls-communication-module

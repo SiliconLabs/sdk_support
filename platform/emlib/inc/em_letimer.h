@@ -40,12 +40,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LETIMER
+ * @addtogroup letimer
  * @{
  ******************************************************************************/
 
@@ -287,6 +282,39 @@ __STATIC_INLINE void LETIMER_IntSet(LETIMER_TypeDef *letimer, uint32_t flags)
 #endif
 }
 
+#if defined(_LETIMER_LOCK_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Locks LETIMER registers.
+ *
+ * @param[in] letimer
+ *   Pointer to LETIMER peripheral register block.
+ *
+ * @note When LETIMER registers are locked LETIMER_EN, LETIMER_SWRST,
+ *            LETIMER_CTRL, LETIMER_CMD, LETIMER_CNT, LETIMER_COMPx,
+ *            LETIMER_TOP, LETIMER_TOPBUFF, LETIMER_REPx, and PRSMODE registers
+ *            cannot be written to.
+ ******************************************************************************/
+__STATIC_INLINE void LETIMER_Lock(LETIMER_TypeDef *letimer)
+{
+  letimer->LOCK = ~LETIMER_LOCK_LETIMERLOCKKEY_UNLOCK;
+}
+#endif
+
+#if defined(_LETIMER_LOCK_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Unlocks LETIMER registers.
+ *
+ * @param[in] letimer
+ *   Pointer to LETIMER peripheral register block.
+ ******************************************************************************/
+__STATIC_INLINE void LETIMER_Unlock(LETIMER_TypeDef *letimer)
+{
+  letimer->LOCK = LETIMER_LOCK_LETIMERLOCKKEY_UNLOCK;
+}
+#endif
+
 uint32_t LETIMER_RepeatGet(LETIMER_TypeDef *letimer, unsigned int rep);
 void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
                        unsigned int rep,
@@ -296,8 +324,7 @@ void LETIMER_SyncWait(LETIMER_TypeDef *letimer);
 void LETIMER_TopSet(LETIMER_TypeDef *letimer, uint32_t value);
 uint32_t LETIMER_TopGet(LETIMER_TypeDef *letimer);
 
-/** @} (end addtogroup LETIMER) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup letimer) */
 
 #ifdef __cplusplus
 }

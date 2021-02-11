@@ -198,13 +198,13 @@ static __INLINE void SystemCoreClockUpdate(void)
 }
 
 void     SystemInit(void);
+uint32_t SystemHFRCODPLLClockGet(void);
+void     SystemHFRCODPLLClockSet(uint32_t freq);
 uint32_t SystemSYSCLKGet(void);
 uint32_t SystemMaxCoreClockGet(void);
 uint32_t SystemFSRCOClockGet(void);
 uint32_t SystemHFXOClockGet(void);
 void     SystemHFXOClockSet(uint32_t freq);
-uint32_t SystemHFRCODPLLClockGet(void);
-void     SystemHFRCODPLLClockSet(uint32_t freq);
 uint32_t SystemCLKIN0Get(void);
 uint32_t SystemLFXOClockGet(void);
 void     SystemLFXOClockSet(uint32_t freq);

@@ -30,7 +30,7 @@
 
 #include "si114x_algorithm.h"
 #include "si114x_functions.h"
-#include "si1147_i2c.h"
+#include "si114x_sys_out.h"
 
 #define LED1I                 0xb
 #define LED2I                 0xb
@@ -51,8 +51,8 @@
    through to the lower level i2c functions. The struct below is passed down
    to the low level i2c functions using that pointer.
  */
-static si114x_i2c_t si114x_i2c;
-static si114x_i2c_t *si114x_handle = &si114x_i2c;
+static Si114xPortConfig_t si114x_i2c;
+static Si114xPortConfig_t *si114x_handle = &si114x_i2c;
 
 /* Function Prototypes */
 static gesture_t ProcessSi1147Samples(Si114x_Sample_TypeDef *samples);
@@ -70,8 +70,8 @@ static gesture_t ProcessSi1147Samples(Si114x_Sample_TypeDef *samples);
 int Si1147_Detect_Device(I2C_TypeDef *i2c, uint8_t addr)
 {
   uint8_t data;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
   data                = Si114xReadFromRegister(si114x_handle, 0);
 
   if (data == SI1147_DEVICE_ID) {
@@ -95,8 +95,8 @@ int Si1147_Detect_Device(I2C_TypeDef *i2c, uint8_t addr)
 int Si1147_SetInterruptOutputEnable(I2C_TypeDef *i2c, uint8_t addr, int enable)
 {
   int retval;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
   if (enable) {
     retval = Si114xWriteToRegister(si114x_handle, REG_INT_CFG, ICG_INTOE);
   } else {
@@ -121,8 +121,8 @@ int Si1147_SetInterruptOutputEnable(I2C_TypeDef *i2c, uint8_t addr, int enable)
 int Si1147_GetInterruptOutputEnable(I2C_TypeDef *i2c, uint8_t addr, int *enable)
 {
   int retval = 0;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
   *enable             = Si114xReadFromRegister(si114x_handle, REG_INT_CFG);
   return retval;
 }
@@ -149,8 +149,8 @@ int Si1147_MeasureUVAndObjectPresent(I2C_TypeDef *i2c, uint8_t addr, uint16_t *u
   int      retval = 0;
   int      gestureMode;
   *objectDetect       = 0;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
   Si1147_GetInterruptOutputEnable(i2c, addr, &gestureMode);
   if ( !gestureMode ) { /* Force only if not already running swipe detection. */
     Si114xPsAlsForce(si114x_handle);
@@ -213,8 +213,8 @@ static void readPSData(HANDLE si114x_handle, Si114x_Sample_TypeDef *sample)
 gesture_t Si1147_NewSample(I2C_TypeDef *i2c, uint8_t addr, uint32_t timestamp)
 {
   Si114x_Sample_TypeDef sample;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
   sample.timestamp    = timestamp;
   /*read sample data from si114x */
   readPSData(si114x_handle, &sample);
@@ -362,8 +362,8 @@ int Si1147_ConfigureDetection(I2C_TypeDef *i2c, uint8_t addr, int lowpower)
 {
   s16          retval = 0;
   SI114X_CAL_S si114x_cal;
-  si114x_handle->addr = addr;
-  si114x_handle->i2c  = i2c;
+  si114x_handle->i2cAddress = addr;
+  si114x_handle->i2cPort    = i2c;
 
   /* Note that the Si114xReset() actually performs the following functions: */
   /*     1. Pauses all prior measurements */

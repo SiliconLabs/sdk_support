@@ -31,6 +31,7 @@
 #ifndef EM_BUS_H
 #define EM_BUS_H
 
+#include "em_core.h"
 #include "em_device.h"
 
 #ifdef __cplusplus
@@ -38,12 +39,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup BUS
+ * @addtogroup bus BUS - Bitfield Read/Write
  * @brief BUS register and RAM bit/field read/write API
  * @details
  *  API to perform bit-band and field set/clear access to RAM and peripherals.
@@ -230,7 +226,11 @@ __STATIC_INLINE void BUS_RegMaskedSet(volatile uint32_t *addr,
   uint32_t aliasAddr = PER_BITSET_MEM_BASE + ((uint32_t)addr - PER_MEM_BASE);
   *(volatile uint32_t *)aliasAddr = mask;
 #else
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
   *addr |= mask;
+  CORE_EXIT_CRITICAL();
 #endif
 }
 
@@ -264,22 +264,27 @@ __STATIC_INLINE void BUS_RegMaskedClear(volatile uint32_t *addr,
   uint32_t aliasAddr = PER_BITCLR_MEM_BASE + ((uint32_t)addr - PER_MEM_BASE);
   *(volatile uint32_t *)aliasAddr = mask;
 #else
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
   *addr &= ~mask;
+  CORE_EXIT_CRITICAL();
 #endif
 }
 
 /***************************************************************************//**
  * @brief
- *   Perform peripheral register masked clear and value write.
+ *   Perform peripheral register masked write.
  *
  * @details
- *   This function first clears the mask in the peripheral register, then
- *   writes the value. Typically, the mask is a bit-field in the register and
- *   the value val is within the mask.
+ *   This function first reads the peripheral register and updates only bits
+ *   that are set in the mask with content of val. Typically, the mask is a
+ *   bit-field in the register and the value val is within the mask.
  *
  * @note
- *   This operation is not atomic. Note that the mask is first set to 0 before
- *   the val is set.
+ *   The read-modify-write operation is executed in a critical section to
+ *   guarantee atomicity. Note that atomicity can only be guaranteed if register
+ *   is modified only by the core, and not by other peripherals (like DMA).
  *
  * @param[in] addr A peripheral register address.
  *
@@ -288,19 +293,18 @@ __STATIC_INLINE void BUS_RegMaskedClear(volatile uint32_t *addr,
  * @param[in] val  A peripheral register value. The value must be shifted to the
                   correct bit position in the register corresponding to the field
                   defined by the mask parameter. The register value must be
-                  contained in the field defined by the mask parameter. This
-                  function is not performing masking of val internally.
+                  contained in the field defined by the mask parameter. The
+                  register value is masked to prevent involuntary spillage.
  ******************************************************************************/
 __STATIC_INLINE void BUS_RegMaskedWrite(volatile uint32_t *addr,
                                         uint32_t mask,
                                         uint32_t val)
 {
-#if defined(PER_BITCLR_MEM_BASE) || defined(PER_REG_BLOCK_SET_OFFSET)
-  BUS_RegMaskedClear(addr, mask);
-  BUS_RegMaskedSet(addr, val);
-#else
-  *addr = (*addr & ~mask) | val;
-#endif
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+  *addr = (*addr & ~mask) | (val & mask);
+  CORE_EXIT_CRITICAL();
 }
 
 /***************************************************************************//**
@@ -326,8 +330,7 @@ __STATIC_INLINE uint32_t BUS_RegMaskedRead(volatile const uint32_t *addr,
   return *addr & mask;
 }
 
-/** @} (end addtogroup BUS) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup bus) */
 
 #ifdef __cplusplus
 }

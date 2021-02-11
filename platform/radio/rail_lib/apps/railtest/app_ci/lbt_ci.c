@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief This file implements the LBT commands for RAIL test applications.
+ * @brief This file implements the LBT commands for RAILtest applications.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -30,7 +30,6 @@
 
 #include <string.h>
 
-#include "command_interpreter.h"
 #include "response_print.h"
 
 #include "rail.h"
@@ -42,34 +41,34 @@ RAIL_CsmaConfig_t *csmaConfig = NULL;
 
 static RAIL_LbtConfig_t lbtParams = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK_CSMA;
 
-void setLbtMode(int argc, char **argv)
+void setLbtMode(sl_cli_command_arg_t *args)
 {
-  if (argc > 1) {
-    if (memcmp(argv[1], "off", 3) == 0) {
+  if (sl_cli_get_argument_count(args) >= 1) {
+    if (memcmp(sl_cli_get_argument_string(args, 0), "off", 3) == 0) {
       txType = TX_TYPE_NORMAL;
-    } else if (memcmp(argv[1], "csma", 4) == 0) {
+    } else if (memcmp(sl_cli_get_argument_string(args, 0), "csma", 4) == 0) {
       txType = TX_TYPE_CSMA;
       csmaConfig = (RAIL_CsmaConfig_t*)&lbtParams;
-    } else if (memcmp(argv[1], "lbt", 3) == 0) {
+    } else if (memcmp(sl_cli_get_argument_string(args, 0), "lbt", 3) == 0) {
       txType = TX_TYPE_LBT;
       lbtConfig = &lbtParams; // Used for CSMA and LBT
     } else {
-      responsePrintError(argv[0], 0x70, "Unknown LBT mode specified.");
+      responsePrintError(sl_cli_get_command_string(args, 0), 0x70, "Unknown LBT mode specified.");
       return;
     }
   }
   if (txType == TX_TYPE_NORMAL) {
-    responsePrint(argv[0], "LbtMode:off");
+    responsePrint(sl_cli_get_command_string(args, 0), "LbtMode:off");
   } else if (txType == TX_TYPE_CSMA) {
-    responsePrint(argv[0], "LbtMode:CSMA");
+    responsePrint(sl_cli_get_command_string(args, 0), "LbtMode:CSMA");
   } else if (txType == TX_TYPE_LBT) {
-    responsePrint(argv[0], "LbtMode:LBT");
+    responsePrint(sl_cli_get_command_string(args, 0), "LbtMode:LBT");
   }
 }
 
-void getLbtParams(int argc, char **argv)
+void getLbtParams(sl_cli_command_arg_t *args)
 {
-  responsePrint(argv[0],
+  responsePrint(sl_cli_get_command_string(args, 0),
                 "MinBo:%u,"
                 "MaxBo:%u,"
                 "Tries:%u,"
@@ -86,15 +85,16 @@ void getLbtParams(int argc, char **argv)
                 lbtParams.lbtTimeout);
 }
 
-void setLbtParams(int argc, char **argv)
+void setLbtParams(sl_cli_command_arg_t *args)
 {
-  lbtParams.lbtMinBoRand = ciGetUnsigned(argv[1]);
-  lbtParams.lbtMaxBoRand = ciGetUnsigned(argv[2]);
-  lbtParams.lbtTries     = ciGetUnsigned(argv[3]);
-  lbtParams.lbtThreshold = ciGetSigned(argv[4]);
-  lbtParams.lbtBackoff   = ciGetUnsigned(argv[5]);
-  lbtParams.lbtDuration  = ciGetUnsigned(argv[6]);
-  lbtParams.lbtTimeout   = ciGetUnsigned(argv[7]);
+  lbtParams.lbtMinBoRand = sl_cli_get_argument_uint8(args, 0);
+  lbtParams.lbtMaxBoRand = sl_cli_get_argument_uint8(args, 1);
+  lbtParams.lbtTries     = sl_cli_get_argument_uint8(args, 2);
+  lbtParams.lbtThreshold = sl_cli_get_argument_int8(args, 3);
+  lbtParams.lbtBackoff   = sl_cli_get_argument_uint16(args, 4);
+  lbtParams.lbtDuration  = sl_cli_get_argument_uint16(args, 5);
+  lbtParams.lbtTimeout   = sl_cli_get_argument_uint32(args, 6);
 
-  getLbtParams(1, argv);
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  getLbtParams(args);
 }

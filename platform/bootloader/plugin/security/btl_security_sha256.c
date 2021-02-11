@@ -34,9 +34,9 @@ void btl_initSha256(void *ctx)
 #endif
 
   Sha256Context_t *context = (Sha256Context_t *)ctx;
-  mbedtls_sha256_init(&(context->shaContext));       // Zero out the context
-                                                     // struct
-  mbedtls_sha256_starts(&(context->shaContext), 0);  // Load the SHA256 IV
+  btl_sha256_init(&(context->shaContext));       // Zero out the context
+  // struct
+  (void)btl_sha256_starts_ret(&(context->shaContext), 0);  // Load the SHA256 IV
 }
 
 /** Push data into the SHA algorithm. If the data is not a full SHA block,
@@ -45,7 +45,7 @@ void btl_initSha256(void *ctx)
 void btl_updateSha256(void *ctx, const void *data, size_t length)
 {
   Sha256Context_t *context = (Sha256Context_t *)ctx;
-  mbedtls_sha256_update(&(context->shaContext), data, length);
+  (void)btl_sha256_update_ret(&(context->shaContext), data, length);
 }
 
 /** Finalize the SHA hash. This will run the remainder of the buffer through
@@ -54,7 +54,7 @@ void btl_updateSha256(void *ctx, const void *data, size_t length)
 void btl_finalizeSha256(void *ctx)
 {
   Sha256Context_t *context = (Sha256Context_t *)ctx;
-  mbedtls_sha256_finish(&(context->shaContext), context->sha);
+  (void)btl_sha256_finish_ret(&(context->shaContext), context->sha);
 }
 
 /** Verify the SHA hash contained in shaState with the one in the byte array

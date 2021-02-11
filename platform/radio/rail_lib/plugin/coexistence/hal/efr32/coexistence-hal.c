@@ -3,7 +3,7 @@
  * @brief Radio coexistence EFR32 utilities
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc. Your use of this
@@ -20,58 +20,58 @@
 #include "em_prs.h"
 #include "coexistence-hal.h"
 
-#ifdef BSP_COEX_PHY_SELECT_PORT
+#ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
 static COEX_HAL_GpioConfig_t phySelectCfg = {
-  .port = BSP_COEX_PHY_SELECT_PORT,
-  .pin = BSP_COEX_PHY_SELECT_PIN,
-  .intNo = BSP_COEX_PHY_SELECT_INTNO,
-  .polarity = BSP_COEX_PHY_SELECT_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_PHY_SELECT_PORT,
+  .pin = SL_RAIL_UTIL_COEX_PHY_SELECT_PIN,
+  .intNo = SL_RAIL_UTIL_COEX_PHY_SELECT_INTNO,
+  .polarity = SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL
 };
-#endif //BSP_COEX_PHY_SELECT_PORT
+#endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
 
-#ifdef BSP_COEX_GNT_PORT
+#ifdef SL_RAIL_UTIL_COEX_GNT_PORT
 static COEX_HAL_GpioConfig_t ptaGntCfg = {
-  .port = BSP_COEX_GNT_PORT,
-  .pin = BSP_COEX_GNT_PIN,
-  .intNo = BSP_COEX_GNT_INTNO,
-  .polarity = BSP_COEX_GNT_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_GNT_PORT,
+  .pin = SL_RAIL_UTIL_COEX_GNT_PIN,
+  .intNo = SL_RAIL_UTIL_COEX_GNT_INTNO,
+  .polarity = SL_RAIL_UTIL_COEX_GNT_ASSERT_LEVEL
 };
-#endif //BSP_COEX_GNT_PORT
+#endif //SL_RAIL_UTIL_COEX_GNT_PORT
 
-#ifdef BSP_COEX_PRI_PORT
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
 static COEX_HAL_GpioConfig_t ptaPriCfg = {
-  .port = BSP_COEX_PRI_PORT,
-  .pin = BSP_COEX_PRI_PIN,
-  .polarity = BSP_COEX_PRI_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_PRI_PORT,
+  .pin = SL_RAIL_UTIL_COEX_PRI_PIN,
+  .polarity = SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL
 };
-#endif //BSP_COEX_PRI_PORT
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
 
-#ifdef BSP_COEX_REQ_PORT
+#ifdef SL_RAIL_UTIL_COEX_REQ_PORT
 static COEX_HAL_GpioConfig_t ptaReqCfg = {
-  .port = BSP_COEX_REQ_PORT,
-  .pin = BSP_COEX_REQ_PIN,
-  .intNo = BSP_COEX_REQ_INTNO,
-  .polarity = BSP_COEX_REQ_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_REQ_PORT,
+  .pin = SL_RAIL_UTIL_COEX_REQ_PIN,
+  .intNo = SL_RAIL_UTIL_COEX_REQ_INTNO,
+  .polarity = SL_RAIL_UTIL_COEX_REQ_ASSERT_LEVEL
 };
-#endif //BSP_COEX_REQ_PORT
+#endif //SL_RAIL_UTIL_COEX_REQ_PORT
 
-#ifdef BSP_COEX_PWM_REQ_PORT
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 static COEX_HAL_GpioConfig_t ptaPwmReqCfg = {
-  .port = BSP_COEX_PWM_REQ_PORT,
-  .pin = BSP_COEX_PWM_REQ_PIN,
-  .intNo = BSP_COEX_PWM_REQ_INTNO,
-  .polarity = BSP_COEX_PWM_REQ_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_PWM_REQ_PORT,
+  .pin = SL_RAIL_UTIL_COEX_PWM_REQ_PIN,
+  .intNo = SL_RAIL_UTIL_COEX_PWM_REQ_INTNO,
+  .polarity = SL_RAIL_UTIL_COEX_PWM_REQ_ASSERT_LEVEL
 };
-#endif //BSP_COEX_PWM_REQ_PORT
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 
-#ifdef BSP_COEX_RHO_PORT
+#ifdef SL_RAIL_UTIL_COEX_RHO_PORT
 static COEX_HAL_GpioConfig_t rhoCfg = {
-  .port = BSP_COEX_RHO_PORT,
-  .pin = BSP_COEX_RHO_PIN,
-  .intNo = BSP_COEX_RHO_INTNO,
-  .polarity = BSP_COEX_RHO_ASSERT_LEVEL
+  .port = SL_RAIL_UTIL_COEX_RHO_PORT,
+  .pin = SL_RAIL_UTIL_COEX_RHO_PIN,
+  .intNo = SL_RAIL_UTIL_COEX_RHO_INTNO,
+  .polarity = SL_RAIL_UTIL_COEX_RHO_ASSERT_LEVEL
 };
-#endif //BSP_COEX_RHO_PORT
+#endif //SL_RAIL_UTIL_COEX_RHO_PORT
 
 #define GPIO_FLAG(x) (1ul << x)
 
@@ -170,17 +170,17 @@ static void setGpio(COEX_GpioHandle_t gpioHandle, bool enabled)
   }
 }
 
-#ifndef HAL_COEX_GPIO_PULL_UP_DOWN
-#define HAL_COEX_GPIO_PULL_UP_DOWN 1
-#endif //HAL_COEX_GPIO_PULL_UP_DOWN
+#ifndef SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN
+#define SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN 1
+#endif //SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN
 
-#if HAL_COEX_GPIO_PULL_UP_DOWN
+#if SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN
 #define GPIO_CONFIG_AND (gpioModeWiredAndPullUp)
 #define GPIO_CONFIG_OR  (gpioModeWiredOrPullDown)
-#else //HAL_COEX_GPIO_PULL_UP_DOWN
+#else //SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN
 #define GPIO_CONFIG_AND (gpioModeWiredAnd)
 #define GPIO_CONFIG_OR  (gpioModeWiredOr)
-#endif //HAL_COEX_GPIO_PULL_UP_DOWN
+#endif //SL_RAIL_UTIL_COEX_GPIO_PULL_UP_DOWN
 
 static void configGpio(COEX_GpioHandle_t gpioHandle, COEX_GpioConfig_t *coexGpio)
 {
@@ -229,12 +229,12 @@ static bool isGpioInSet(COEX_GpioHandle_t gpioHandle, bool defaultValue)
 {
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
-#if HAL_COEX_OVERRIDE_GPIO_INPUT
+#if SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
     return COEX_GetGpioInputOverride(gpio->config.index);
-#else //HAL_COEX_OVERRIDE_GPIO_INPUT
+#else //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
     return !!GPIO_PinInGet((GPIO_Port_TypeDef)gpio->port,
                            gpio->pin) == !!gpio->polarity;
-#endif //HAL_COEX_OVERRIDE_GPIO_INPUT
+#endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
   } else {
     return defaultValue;
   }
@@ -302,53 +302,52 @@ bool COEX_HAL_ConfigRadioHoldOff(COEX_HAL_GpioConfig_t *gpioConfig)
   return status;
 }
 
-#ifdef BSP_COEX_RX_ACTIVE_PORT
+#ifdef SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
 bool COEX_HAL_ConfigRxActive(void)
 {
   CMU_ClockEnable(cmuClock_PRS, true);
 #ifdef _SILICON_LABS_32B_SERIES_1
-#if BSP_COEX_RX_ACTIVE_ASSERT_LEVEL
-  PRS->CH[BSP_COEX_RX_ACTIVE_CHANNEL].CTRL = PRS_CH_CTRL_INV;
-#endif //BSP_COEX_RX_ACTIVE_ASSERT_LEVEL
+#if SL_RAIL_UTIL_COEX_RX_ACTIVE_ASSERT_LEVEL
+  PRS->CH[SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL].CTRL = PRS_CH_CTRL_INV;
+#endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_ASSERT_LEVEL
   volatile uint32_t * routeRegister;
   // Configure rx active PRS output to selected channel and location
-  if (BSP_COEX_RX_ACTIVE_CHANNEL < 4) {
+  if (SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL < 4) {
     routeRegister = &PRS->ROUTELOC0;
-  } else if (BSP_COEX_RX_ACTIVE_CHANNEL < 8) {
+  } else if (SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL < 8) {
     routeRegister = &PRS->ROUTELOC1;
-  } else if (BSP_COEX_RX_ACTIVE_CHANNEL < 12) {
+  } else if (SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL < 12) {
     routeRegister = &PRS->ROUTELOC2;
   } else {
     return false; // error
   }
-  PRS_SourceAsyncSignalSet(BSP_COEX_RX_ACTIVE_CHANNEL,
+  PRS_SourceAsyncSignalSet(SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL,
                            0U,
                            PRS_MODEM_FRAMEDET);
   // Route PRS CH/LOC to RX_ACTIVE GPIO output
-  BUS_RegMaskedWrite(routeRegister,
-                     0xFFU << ((BSP_COEX_RX_ACTIVE_CHANNEL & 3) * 8),
-                     BSP_COEX_RX_ACTIVE_LOC << ((BSP_COEX_RX_ACTIVE_CHANNEL & 3) * 8));
-  BUS_RegMaskedSet(&PRS->ROUTEPEN, (1u << BSP_COEX_RX_ACTIVE_CHANNEL));
+  BUS_RegMaskedClear(routeRegister, 0xFFU << ((SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL & 3) * 8));
+  BUS_RegMaskedSet(routeRegister, SL_RAIL_UTIL_COEX_RX_ACTIVE_LOC << ((SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL & 3) * 8));
+  BUS_RegMaskedSet(&PRS->ROUTEPEN, (1u << SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL));
 #else //!_SILICON_LABS_32B_SERIES_1
-  PRS_SourceAsyncSignalSet(BSP_COEX_RX_ACTIVE_CHANNEL,
+  PRS_SourceAsyncSignalSet(SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL,
                            0U,
                            PRS_ASYNC_MODEML_FRAMEDET);
-  PRS_Combine(BSP_COEX_RX_ACTIVE_CHANNEL,
-              WRAP_PRS_ASYNC(BSP_COEX_RX_ACTIVE_CHANNEL - 1),
-              (BSP_COEX_RX_ACTIVE_ASSERT_LEVEL != 0U)
+  PRS_Combine(SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL,
+              WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL - 1),
+              (SL_RAIL_UTIL_COEX_RX_ACTIVE_ASSERT_LEVEL != 0U)
               ? prsLogic_A : prsLogic_NOT_A);
-  PRS_PinOutput(BSP_COEX_RX_ACTIVE_CHANNEL,
+  PRS_PinOutput(SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL,
                 prsTypeAsync,
-                BSP_COEX_RX_ACTIVE_PORT,
-                BSP_COEX_RX_ACTIVE_PIN);
+                SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT,
+                SL_RAIL_UTIL_COEX_RX_ACTIVE_PIN);
 #endif //_SILICON_LABS_32B_SERIES_1
-  GPIO_PinModeSet(BSP_COEX_RX_ACTIVE_PORT,
-                  BSP_COEX_RX_ACTIVE_PIN,
+  GPIO_PinModeSet(SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT,
+                  SL_RAIL_UTIL_COEX_RX_ACTIVE_PIN,
                   gpioModePushPull,
                   0);
   return true;
 }
-#endif //BSP_COEX_RX_ACTIVE_PORT
+#endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
 
 bool COEX_HAL_ConfigPriority(COEX_HAL_GpioConfig_t *gpioConfig)
 {
@@ -378,25 +377,25 @@ void COEX_HAL_Init(void)
   COEX_InitHalConfigOptions();
   GPIOINT_InitSafe();
 
-  #ifdef BSP_COEX_RX_ACTIVE_PORT
+  #ifdef SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
   COEX_HAL_ConfigRxActive();
-  #endif //BSP_COEX_RX_ACTIVE_PORT
-  #ifdef BSP_COEX_PHY_SELECT_PORT
+  #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
+  #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
   COEX_HAL_ConfigPhySelect(&phySelectCfg);
-  #endif //BSP_COEX_PHY_ENABLE_PORT
-  #ifdef BSP_COEX_REQ_PORT
+  #endif //SL_RAIL_UTIL_COEX_PHY_ENABLE_PORT
+  #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
   COEX_HAL_ConfigRequest(&ptaReqCfg);
-  #endif //BSP_COEX_REQ_PORT
-  #ifdef BSP_COEX_PRI_PORT
+  #endif //SL_RAIL_UTIL_COEX_REQ_PORT
+  #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   COEX_HAL_ConfigPriority(&ptaPriCfg);
-  #endif //BSP_COEX_PRI_PORT
-  #ifdef BSP_COEX_PWM_REQ_PORT
+  #endif //SL_RAIL_UTIL_COEX_PRI_PORT
+  #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   COEX_HAL_ConfigPwmRequest(&ptaPwmReqCfg);
-  #endif //BSP_COEX_PWM_REQ_PORT
-  #ifdef BSP_COEX_GNT_PORT
+  #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  #ifdef SL_RAIL_UTIL_COEX_GNT_PORT
   COEX_HAL_ConfigGrant(&ptaGntCfg);
-  #endif //BSP_COEX_GNT_PORT
-  #ifdef BSP_COEX_RHO_PORT
+  #endif //SL_RAIL_UTIL_COEX_GNT_PORT
+  #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
   COEX_HAL_ConfigRadioHoldOff(&rhoCfg);
-  #endif //BSP_COEX_RHO_PORT
+  #endif //SL_RAIL_UTIL_COEX_RHO_PORT
 }

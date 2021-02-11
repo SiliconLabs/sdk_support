@@ -79,6 +79,28 @@ extern uint8_t debugAntennaNSelectLoc;
 
 #include "rail.h"
 
+// Manually detect if we're using one of these specific efr32xg21 modules and
+// default the antenna connection to the module's gpio pin (rf path 0) instead
+// of the module's u.FL connector (rf path 1, RAIL default).
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+  #if (defined(BGM210P022JIA) \
+  || defined(BGM210P032JIA)   \
+  || defined(BGM210PA22JIA)   \
+  || defined(BGM210PA32JIA)   \
+  || defined(BGM210PB22JIA)   \
+  || defined(BGM210PB32JIA)   \
+  || defined(MGM210P022JIA)   \
+  || defined(MGM210P032JIA)   \
+  || defined(MGM210PA22JIA)   \
+  || defined(MGM210PA32JIA)   \
+  || defined(MGM210PB22JIA)   \
+  || defined(MGM210PB32JIA))
+    #define DEFAULT_RFPATH RAIL_ANTENNA_0
+  #else
+    #define DEFAULT_RFPATH RAIL_ANTENNA_1
+  #endif
+#endif
+
 EmberStatus halInitAntenna(void)
 {
  #if     (HAL_ANTDIV_ENABLE || defined(_SILICON_LABS_32B_SERIES_2))
@@ -92,9 +114,15 @@ EmberStatus halInitAntenna(void)
     antennaConfig.ant0Loc = ANTENNA_SELECT_LOC;
   }
  #endif//ANTENNA_SELECT_GPIO
- #ifdef  _SILICON_LABS_32B_SERIES_2
-  antennaConfig.defaultPath = ANTENNA_SELECT_LOC;
- #endif//_SILICON_LABS_32B_SERIES_2
+ #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+   #if defined(HAL_RFPATH_SELECT) && (HAL_RFPATH_SELECT == 0)
+  antennaConfig.defaultPath = RAIL_ANTENNA_0;
+   #elif defined(HAL_RFPATH_SELECT) && (HAL_RFPATH_SELECT == 1)
+  antennaConfig.defaultPath = RAIL_ANTENNA_1;
+   #else
+  antennaConfig.defaultPath = DEFAULT_RFPATH;
+   #endif
+ #endif
  #ifdef  ANTENNA_nSELECT_GPIO
   if (ANTENNA_nSELECT_ENABLED) {
     antennaConfig.ant1PinEn = true;

@@ -143,4 +143,5 @@ typedef struct {
 /** @} End of group MGM21_ULFRCO_BitFields */
 /** @} End of group MGM21_ULFRCO */
 /** @} End of group Parts */
+
 #endif /* MGM21_ULFRCO_H */

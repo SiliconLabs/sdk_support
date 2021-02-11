@@ -30,6 +30,10 @@
 #ifndef SLEEP_H
 #define SLEEP_H
 
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#warning "The sleep driver is deprecated and marked for removal in a later release. Please use the power_manager service instead."
+#endif
+
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -40,17 +44,16 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
- * @addtogroup emdrv
- * @{
- ******************************************************************************/
-/// @addtogroup SLEEP
-/// @brief
-///   Sleep Management Driver.
+/// @addtogroup sleep SLEEP - Sleep Driver
+/// @brief Sleep Management Driver (DEPRECATED)
 ///
 /// @details
 ///
 ///   @n @section sleepdrv_intro Introduction
+///
+///   @warning This driver is deprecated and will be removed in a later relase
+///   Please use the power manager service instead.
+///
 ///   This is a sleep management module consisting of sleep.c and sleep.h
 ///   source files. The main purpose of the module is to make it easy for an
 ///   application to always enter the lowest possible energy mode using a simple
@@ -129,12 +132,12 @@ extern "C" {
  ******************************************************************************/
 
 /**
- * This flag can be returned from the @ref restoreCallback function in order to
+ * This flag can be returned from the restoreCallback function in order to
  * signal that the sleep driver should continue as normal. */
 #define SLEEP_FLAG_NONE              0x0
 
 /**
- * This flag can be returned from the @ref restoreCallback function in order to
+ * This flag can be returned from the restoreCallback function in order to
  * signal to the sleep driver that HF clocks should not be restored and that
  * the sleep driver should go right back to sleep again. */
 #define SLEEP_FLAG_NO_CLOCK_RESTORE  0x1u
@@ -252,8 +255,7 @@ void SLEEP_SleepBlockBegin(SLEEP_EnergyMode_t eMode);
 
 void SLEEP_SleepBlockEnd(SLEEP_EnergyMode_t eMode);
 
-/** @} (end addtogroup SLEEP) */
-/** @} (end addtogroup emdrv) */
+/** @} (end addtogroup sleep) */
 
 #ifdef __cplusplus
 }

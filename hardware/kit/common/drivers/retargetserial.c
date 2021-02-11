@@ -28,12 +28,20 @@
  *
  ******************************************************************************/
 
+#define CURRENT_MODULE_NAME    "RETARGETSERIAL"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 #include <stdio.h>
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_core.h"
 #include "em_gpio.h"
 #include "retargetserial.h"
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 #if defined(HAL_CONFIG)
 #include "retargetserialhalconfig.h"
@@ -50,6 +58,10 @@
  * @addtogroup RetargetIo
  * @{
  ******************************************************************************/
+
+#if defined(RETARGET_EUSART)
+#include "em_eusart.h"
+#endif
 
 #if defined(RETARGET_USART)
 #include "em_usart.h"
@@ -69,13 +81,18 @@ static volatile int     rxCount      = 0;       /**< Keeps track of how much dat
 static volatile uint8_t rxBuffer[RXBUFSIZE];    /**< Buffer to store data */
 static uint8_t          LFtoCRLF    = 0;        /**< LF to CRLF conversion disabled */
 static bool             initialized = false;    /**< Initialize UART/LEUART */
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+static bool             em1HasBeenRequired = false; /**< EM1 requirement indicator */
+#endif
 
 /**************************************************************************//**
  * @brief Disable RX interrupt
  *****************************************************************************/
 static void disableRxInterrupt()
 {
-#if defined(RETARGET_USART)
+#if defined(RETARGET_EUSART)
+  EUSART_IntDisable(RETARGET_UART, EUSART_IF_RXFL);
+#elif defined(RETARGET_USART)
   USART_IntDisable(RETARGET_UART, USART_IF_RXDATAV);
 #else
   LEUART_IntDisable(RETARGET_UART, LEUART_IF_RXDATAV);
@@ -87,7 +104,9 @@ static void disableRxInterrupt()
  *****************************************************************************/
 static void enableRxInterrupt()
 {
-#if defined(RETARGET_USART)
+#if defined(RETARGET_EUSART)
+  EUSART_IntEnable(RETARGET_UART, EUSART_IF_RXFL);
+#elif defined(RETARGET_USART)
   USART_IntEnable(RETARGET_UART, USART_IF_RXDATAV);
 #else
   LEUART_IntEnable(RETARGET_UART, LEUART_IF_RXDATAV);
@@ -99,7 +118,9 @@ static void enableRxInterrupt()
  *****************************************************************************/
 void RETARGET_IRQ_NAME(void)
 {
-#if defined(RETARGET_USART)
+#if defined(RETARGET_EUSART)
+  if (RETARGET_UART->IF & EUSART_IF_RXFL) {
+#elif defined(RETARGET_USART)
   if (RETARGET_UART->STATUS & USART_STATUS_RXDATAV) {
 #else
   if (RETARGET_UART->IF & LEUART_IF_RXDATAV) {
@@ -120,6 +141,9 @@ void RETARGET_IRQ_NAME(void)
        * RETARGET_ReadChar(). */
       disableRxInterrupt();
     }
+#if defined(RETARGET_EUSART)
+    RETARGET_UART->IF_CLR = EUSART_IF_RXFL;
+#endif
   }
 }
 
@@ -151,7 +175,42 @@ void RETARGET_SerialInit(void)
   GPIO_PinModeSet(RETARGET_TXPORT, RETARGET_TXPIN, gpioModePushPull, 1);
   GPIO_PinModeSet(RETARGET_RXPORT, RETARGET_RXPIN, gpioModeInputPull, 1);
 
-#if defined(RETARGET_USART)
+#if defined(RETARGET_EUSART)
+  EUSART_TypeDef *  eusart = RETARGET_UART;
+  EUSART_UartInit_TypeDef  init    = EUSART_UART_INIT_DEFAULT_HF;
+
+  /* Enable DK RS232/UART switch */
+  RETARGET_PERIPHERAL_ENABLE();
+
+  CMU_ClockEnable(RETARGET_CLK, true);
+  CMU_ClockSelectSet(RETARGET_CLK, cmuSelect_EM01GRPACLK);
+
+  /* Configure USART for basic async operation */
+  init.enable = eusartDisable;
+  EUSART_UartInitHf(eusart, &init);
+
+  /* Enable pins at correct UART/USART location. */
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].ROUTEEN =
+    GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_RXPEN;
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].TXROUTE =
+    (RETARGET_TXPORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+    | (RETARGET_TXPIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[RETARGET_UART_INDEX].RXROUTE =
+    (RETARGET_RXPORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+    | (RETARGET_RXPIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+
+  /* Clear previous RX interrupts */
+  EUSART_IntClear(RETARGET_UART, EUSART_IF_RXFL);
+  NVIC_ClearPendingIRQ(RETARGET_IRQn);
+
+  /* Enable RX interrupts */
+  EUSART_IntEnable(RETARGET_UART, EUSART_IF_RXFL);
+  NVIC_EnableIRQ(RETARGET_IRQn);
+
+  /* Finally enable it */
+  EUSART_Enable(eusart, eusartEnable);
+
+#elif defined(RETARGET_USART)
   USART_TypeDef           *usart = RETARGET_UART;
   USART_InitAsync_TypeDef init   = USART_INITASYNC_DEFAULT;
 
@@ -343,7 +402,11 @@ bool RETARGET_SerialEnableFlowControl(void)
  *****************************************************************************/
 void RETARGET_SerialFlush(void)
 {
-#if defined(RETARGET_USART)
+#if defined(RETARGET_EUSART)
+
+#define _GENERIC_UART_STATUS_IDLE     EUSART_STATUS_TXIDLE
+
+#elif defined(RETARGET_USART)
 
 #if defined(USART_STATUS_TXIDLE)
 #define _GENERIC_UART_STATUS_IDLE     USART_STATUS_TXIDLE
@@ -362,6 +425,45 @@ void RETARGET_SerialFlush(void)
 #endif
 
   while (!(RETARGET_UART->STATUS & _GENERIC_UART_STATUS_IDLE)) ;
+}
+
+/**************************************************************************//**
+ * @brief
+ *   The purpose of this function is to control the Energy Mode level
+ *   required by the RETARGET serial module.
+ *
+ * @detail
+ *   Because transmits are blocking, the Energy Mode will stay in EM0 until all
+ *   data has been transmitted independent of this setting.
+ *
+ *   Some serial ports require EM0 or EM1 to receive data. If the application
+ *   enter EM2 or lower, the serial port will in that case not receive data.
+ *   With this function it is possible to require EM1 that make it possible to
+ *   receive data at all time.
+ *
+ * @note
+ *   The default is that the RETARGET serial do not require EM1.
+ *
+ * @note
+ *    If the power manager is not available, the RETARGET serial does not
+ *    control the Energy Modes.
+ *
+ * @param[in] requireEm1
+ *   A bool to tell wether EM1 is required or not.
+ *****************************************************************************/
+void RETARGET_RequireEm1(bool requireEm1)
+{
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  if (requireEm1 && !em1HasBeenRequired) {
+    sl_power_manager_add_em_requirement(SL_POWER_MANAGER_EM1);
+    em1HasBeenRequired = true;
+  } else if (!requireEm1 && em1HasBeenRequired) {
+    sl_power_manager_remove_em_requirement(SL_POWER_MANAGER_EM1);
+    em1HasBeenRequired = false;
+  }
+#else
+  (void)requireEm1;
+#endif
 }
 
 /** @} (end group RetargetIo) */

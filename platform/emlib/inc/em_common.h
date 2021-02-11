@@ -39,33 +39,8 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @defgroup emlib EMLIB
- * @brief Low-level peripheral library
- * @details
- *  EMLIB is a low-level peripheral support library that provides a unified API for
- *  all EFM32, EZR32 and EFR32 MCUs and SoCs from Silicon Laboratories.
- *
- *  EMLIB modules are provided for all peripherals and core features. The library
- *  implements no interrupt handlers. Static data, critical sections and module
- *  interdependencies are kept at a minimum.
- *
- * @note
- *  EMLIB functions assert on error if DEBUG_EFM is defined. See @ref ASSERT
- *  for more information on error handling and default assertion and how to
- *  implement a custom handler.
- *
- * @n
- * @note
- *  The RAIL library provides a generic interface for all Silicon Labs radio features.
- *  RAIL documentation is available from [Simplicity Studio](http://www.silabs.com/simplicity) 
- *  or at [docs.silabs.com](https://docs.silabs.com/rail/latest/).
- *
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup COMMON
- * @brief General purpose utilities and cross-compiler support.
+ * @addtogroup common COMMON - Common Utilities
+ * @brief General purpose utilities and cross-compiler support
  * @details
  *  This SDK supports the following compilers/IDEs:
  *  @li Simplicity Studio
@@ -77,7 +52,7 @@ extern "C" {
  * Therefore, macros such as @ref SL_ALIGN are provided to enable compiler independent
  * code.
  *
- * @note RAM code macros are implemented in a separate module @ref RAMFUNC.
+ * @note RAM code macros are implemented in a separate module @ref ramfunc.
  * Cross-compiler RAM code support needs extended documentation and it is therefore
  * implemented as a separate module.
  *
@@ -88,7 +63,7 @@ extern "C" {
 #define SL_CEILING(n, i)   ((((n) + (i) - 1U) / (i)) * (i))
 
 /** @brief Round n down to closest interval of i. */
-#define SL_FLOOR(n, i) ((n / i) * i))
+#define SL_FLOOR(n, i) ((n / i) * i)
 
 /** @brief Stringify X */
 #define STRINGIZE(X) #X
@@ -210,6 +185,22 @@ extern "C" {
 
 #endif // !defined(__GNUC__)
 
+/** @brief
+ *    Macro for marking deprecated functions
+ *
+ *  @details
+ *    SL_DEPRECATED_API_SDK_<RELEASE> is used to mark functions that are
+ *    deprecated and should not be used from a given version of the SDK.
+ *    The accompanying SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_<RELEASE>
+ *    define can be set to suppress warnings generated when using
+ *    deprecated APIs.
+ */
+#ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_0
+#define SL_DEPRECATED_API_SDK_3_0
+#else
+#define SL_DEPRECATED_API_SDK_3_0 __attribute__ ((deprecated))
+#endif
+
 /***************************************************************************//**
  * @brief
  *   Count trailing number of zeros. Use CLZ instruction if available.
@@ -234,11 +225,13 @@ __STATIC_INLINE uint32_t SL_CTZ(uint32_t value)
 #endif
 }
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /* Deprecated function. New code should use @ref SL_CTZ. */
 __STATIC_INLINE uint32_t EFM32_CTZ(uint32_t value)
 {
   return SL_CTZ(value);
 }
+/** @endcond */
 
 /***************************************************************************//**
  * @brief
@@ -301,8 +294,7 @@ __STATIC_INLINE uint32_t SL_Log2ToDiv(uint32_t log2)
   return 1UL << log2;
 }
 
-/** @} (end addtogroup COMMON) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup common) */
 
 #ifdef __cplusplus
 }

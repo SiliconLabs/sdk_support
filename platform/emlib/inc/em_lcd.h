@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup LCD
+ * @addtogroup lcd
  * @{
  ******************************************************************************/
 
@@ -55,7 +50,9 @@ extern "C" {
  ********************************   DEFINES   **********************************
  ******************************************************************************/
 
+/** Default LCD Frame Rate Divisor. */
 #define LCD_DEFAULT_FRAME_RATE_DIV  4
+/** Default LCD Contrast. */
 #define LCD_DEFAULT_CONTRAST        15
 
 /*******************************************************************************
@@ -87,10 +84,17 @@ typedef enum {
 
 /** Wave type. */
 typedef enum {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /** Low power optimized waveform output. */
+  lcdWaveLowPower = LCD_DISPCTRL_WAVE_TYPEB,
+  /** Regular waveform output */
+  lcdWaveNormal   = LCD_DISPCTRL_WAVE_TYPEA
+#else
   /** Low power optimized waveform output. */
   lcdWaveLowPower = LCD_DISPCTRL_WAVE_LOWPOWER,
   /** Regular waveform output */
   lcdWaveNormal   = LCD_DISPCTRL_WAVE_NORMAL
+#endif
 } LCD_Wave_TypeDef;
 
 /** Bias setting. */
@@ -141,17 +145,32 @@ typedef enum {
 } LCD_VBoostLevel_TypeDef;
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_1)
-/** Mode. */
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+/** Mode of operation. */
 typedef enum {
+#if defined(_SILICON_LABS_32B_SERIES_1)
   lcdModeNoExtCap = LCD_DISPCTRL_MODE_NOEXTCAP, /**< No external capacitor. */
   lcdModeStepDown = LCD_DISPCTRL_MODE_STEPDOWN, /**< External cap with resistor string. */
   lcdModeCpIntOsc = LCD_DISPCTRL_MODE_CPINTOSC, /**< External cap and internal oscillator. */
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  lcdModeStepDown   = LCD_BIASCTRL_MODE_STEPDOWN,   /**< External cap with resistor string. */
+  lcdModeChargePump = LCD_BIASCTRL_MODE_CHARGEPUMP, /**< External cap and internal oscillator. */
+#endif
 } LCD_Mode_Typedef;
 #endif
 
 /** Frame Counter Clock Prescaler, FC-CLK = FrameRate (Hz) / this factor. */
 typedef enum {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /** Prescale Div 1. */
+  lcdFCPrescDiv1 = LCD_BACFG_FCPRESC_DIV1,
+  /** Prescale Div 2. */
+  lcdFCPrescDiv2 = LCD_BACFG_FCPRESC_DIV2,
+  /** Prescale Div 4. */
+  lcdFCPrescDiv4 = LCD_BACFG_FCPRESC_DIV4,
+  /** Prescale Div 8. */
+  lcdFCPrescDiv8 = LCD_BACFG_FCPRESC_DIV8
+#else
   /** Prescale Div 1. */
   lcdFCPrescDiv1 = LCD_BACTRL_FCPRESC_DIV1,
   /** Prescale Div 2. */
@@ -160,6 +179,7 @@ typedef enum {
   lcdFCPrescDiv4 = LCD_BACTRL_FCPRESC_DIV4,
   /** Prescale Div 8. */
   lcdFCPrescDiv8 = LCD_BACTRL_FCPRESC_DIV8
+#endif
 } LCD_FCPreScale_TypeDef;
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
@@ -198,12 +218,38 @@ typedef enum {
 /** Update Data Control. */
 typedef enum {
   /** Regular update, data transfer done immediately. */
-  lcdUpdateCtrlRegular    = LCD_CTRL_UDCTRL_REGULAR,
+  lcdUpdateCtrlRegular      = LCD_CTRL_UDCTRL_REGULAR,
   /** Data transfer done at Frame Counter event. */
-  lcdUpdateCtrlFCEvent    = LCD_CTRL_UDCTRL_FCEVENT,
+  lcdUpdateCtrlFCEvent      = LCD_CTRL_UDCTRL_FCEVENT,
   /** Data transfer done at Frame Start.  */
-  lcdUpdateCtrlFrameStart = LCD_CTRL_UDCTRL_FRAMESTART
+  lcdUpdateCtrlFrameStart   = LCD_CTRL_UDCTRL_FRAMESTART,
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /** Data transfer done at Display Counter event.  */
+  lcdUpdateCtrlDisplayEvent = LCD_CTRL_UDCTRL_DISPLAYEVENT
+#endif
 } LCD_UpdateCtrl_TypeDef;
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/** Auto Load address which will start the synchronization from CLK_BUS to CLK_PER. */
+typedef enum {
+  /** Starts synchronizing registers after a write to BACTRL. */
+  lcdLoadAddrNone   = 0,
+  /** Starts synchronizing registers after a write to BACTRL. */
+  lcdLoadAddrBactrl = LCD_UPDATECTRL_LOADADDR_BACTRLWR,
+  /** Starts synchronizing registers after a write to AREGA. */
+  lcdLoadAddrAregA  = LCD_UPDATECTRL_LOADADDR_AREGAWR,
+  /** Starts synchronizing registers after a write to AREGB. */
+  lcdLoadAddrAregB  = LCD_UPDATECTRL_LOADADDR_AREGBWR,
+  /** Starts synchronizing registers after a write to SEGD0. */
+  lcdLoadAddrSegd0  = LCD_UPDATECTRL_LOADADDR_SEGD0WR,
+  /** Starts synchronizing registers after a write to SEGD1. */
+  lcdLoadAddrSegd1  = LCD_UPDATECTRL_LOADADDR_SEGD1WR,
+  /** Starts synchronizing registers after a write to SEGD2. */
+  lcdLoadAddrSegd2  = LCD_UPDATECTRL_LOADADDR_SEGD2WR,
+  /** Starts synchronizing registers after a write to SEGD3. */
+  lcdLoadAddrSegd3  = LCD_UPDATECTRL_LOADADDR_SEGD3WR
+} LCD_LoadAddr_TypeDef;
+#endif
 
 /** Animation Shift operation; none, left or right. */
 typedef enum {
@@ -223,14 +269,36 @@ typedef enum {
   lcdAnimLogicOr  = LCD_BACTRL_ALOGSEL_OR
 } LCD_AnimLogic_TypeDef;
 
+#if defined(_LCD_BACTRL_ALOC_MASK)
+/** Animation Location, set the LCD segments which animation applies to. */
+typedef enum {
+  /** Animation appears on segments 0 to 7. */
+  lcdAnimLocSeg0To7  = LCD_BACTRL_ALOC_SEG0TO7,
+  /** Animation appears on segments 8 to 15.  */
+  lcdAnimLocSeg8To15 = LCD_BACTRL_ALOC_SEG8TO15
+} LCD_AnimLoc_TypeDef;
+#endif
+
 #if defined(_LCD_DISPCTRL_CHGRDST_MASK)
 /** Charge redistribution control. */
 typedef enum {
   /** Disable charge redistribution. */
-  lcdChargeRedistributionDisable = LCD_DISPCTRL_CHGRDST_DISABLE,
+  lcdChargeRedistributionDisable    = LCD_DISPCTRL_CHGRDST_DISABLE,
   /** Enable charge redistribution. */
-  lcdChargeRedistributionEnable = LCD_DISPCTRL_CHGRDST_ONE
+  lcdChargeRedistributionEnable     = LCD_DISPCTRL_CHGRDST_ONE,
+  lcdChargeRedistributionTwoCycle   = LCD_DISPCTRL_CHGRDST_TWO,
+  lcdChargeRedistributionThreeCycle = LCD_DISPCTRL_CHGRDST_THREE,
+  lcdChargeRedistributionFourCycle  = LCD_DISPCTRL_CHGRDST_FOUR
 } LCD_ChargeRedistribution_TypeDef;
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/** DMA mode of operation. */
+typedef enum {
+  lcdDmaModeDisable      = LCD_BIASCTRL_DMAMODE_DMADISABLE,   /**< No DMA requests are generated. */
+  lcdDmaModeFrameCounterEvent   = LCD_BIASCTRL_DMAMODE_DMAFC, /**< DMA request on frame counter event. */
+  lcdDmaModeDisplayEvent = LCD_BIASCTRL_DMAMODE_DMADISPLAY    /**< DMA request on display counter event. */
+} LCD_DmaMode_Typedef;
 #endif
 
 /*******************************************************************************
@@ -251,9 +319,9 @@ typedef struct {
   LCD_AnimShift_TypeDef BShift;
   /** A and B Logical Operation to use for mixing and outputting resulting segments. */
   LCD_AnimLogic_TypeDef animLogic;
-#if defined(LCD_BACTRL_ALOC)
-  /** Number of first segment to animate. Options are 0 or 8 for Giant/Leopard. End is startSeg+7. */
-  int                   startSeg;
+#if defined(_LCD_BACTRL_ALOC_MASK)
+  /** Number of first segment to animate. */
+  LCD_AnimLoc_TypeDef   startSeg;
 #endif
 } LCD_AnimInit_TypeDef;
 
@@ -283,9 +351,10 @@ typedef struct {
   /** Contrast Configuration. */
   LCD_ConConf_TypeDef contrast;
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_1)
-  /** Mode. */
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+  /** Mode of operation. */
   LCD_Mode_Typedef                      mode;
+  /** Charge redistribution cycles. */
   LCD_ChargeRedistribution_TypeDef      chargeRedistribution;
   uint8_t                               frameRateDivider;
   int                                   contrastLevel;
@@ -319,6 +388,20 @@ typedef struct {
   }
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#define LCD_INIT_DEFAULT           \
+  {                                \
+    true,                          \
+    lcdMuxQuadruplex,              \
+    lcdBiasOneFourth,              \
+    lcdWaveLowPower,               \
+    lcdModeStepDown,               \
+    lcdChargeRedistributionEnable, \
+    LCD_DEFAULT_FRAME_RATE_DIV,    \
+    LCD_DEFAULT_CONTRAST           \
+  }
+#endif
+
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
@@ -334,6 +417,11 @@ void LCD_AnimInit(const LCD_AnimInit_TypeDef *animInit);
 #if defined(_SILICON_LABS_32B_SERIES_0)
 void LCD_SegmentRangeEnable(LCD_SegmentRange_TypeDef segment, bool enable);
 #endif
+#if defined(_SILICON_LABS_32B_SERIES_2)
+void LCD_SegmentEnable(uint32_t seg_nbr, bool enable);
+void LCD_ComEnable(uint8_t com, bool enable);
+void LCD_DmaModeSet(LCD_DmaMode_Typedef mode);
+#endif
 void LCD_SegmentSet(int com, int bit, bool enable);
 void LCD_SegmentSetLow(int com, uint32_t mask, uint32_t bits);
 #if defined(_LCD_SEGD0H_MASK)
@@ -348,9 +436,39 @@ void LCD_VBoostSet(LCD_VBoostLevel_TypeDef vboost);
 void LCD_BiasSegmentSet(int segment, int biasLevel);
 void LCD_BiasComSet(int com, int biasLevel);
 #endif
-#if defined(_SILICON_LABS_32B_SERIES_1)
+#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
 void LCD_ModeSet(LCD_Mode_Typedef mode);
 void LCD_ChargeRedistributionCyclesSet(uint8_t cycles);
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *    Wait for load synchronization completion.
+ *
+ * @note
+ *    Doing any writes to HV registers will not go through and will cause a
+ *    bus fault.
+ ******************************************************************************/
+__STATIC_INLINE void LCD_LoadBusyWait(void)
+{
+  while (LCD->STATUS & _LCD_STATUS_LOADBUSY_MASK) ;
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *    Waits for the LCD to complete resetting or disabling procedure.
+ ******************************************************************************/
+__STATIC_INLINE void LCD_ReadyWait(void)
+{
+  while ((LCD->SWRST & _LCD_SWRST_RESETTING_MASK)
+         || (LCD->EN & _LCD_EN_DISABLING_MASK)
+         || (LCD->STATUS & _LCD_STATUS_LOADBUSY_MASK)) {
+    // Wait for all synchronizations to finish
+  }
+}
 #endif
 
 /***************************************************************************//**
@@ -364,12 +482,49 @@ void LCD_ChargeRedistributionCyclesSet(uint8_t cycles);
  ******************************************************************************/
 __STATIC_INLINE void LCD_Enable(bool enable)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  if (enable) {
+    LCD->EN_SET = LCD_EN_EN;
+  } else {
+    /* Wait for internal synchronization completion. */
+    LCD_LoadBusyWait();
+
+    LCD->EN_CLR = LCD_EN_EN;
+    while (LCD->EN & _LCD_EN_DISABLING_MASK) {
+    }
+  }
+#else
+
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->CTRL_SET = LCD_CTRL_EN;
+  } else {
+    LCD->CTRL_CLR = LCD_CTRL_EN;
+  }
+#else
   if (enable) {
     LCD->CTRL |= LCD_CTRL_EN;
   } else {
     LCD->CTRL &= ~LCD_CTRL_EN;
   }
+#endif // LCD_HAS_SET_CLEAR
+
+#endif // _SILICON_LABS_32B_SERIES_2
 }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Reset the LCD.
+ ******************************************************************************/
+__STATIC_INLINE void LCD_Reset(void)
+{
+  LCD->SWRST_SET = LCD_SWRST_SWRST;
+
+  /* Wait for reset to complete. s*/
+  while ((LCD->SWRST & _LCD_SWRST_RESETTING_MASK)) ;
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -380,11 +535,19 @@ __STATIC_INLINE void LCD_Enable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void LCD_AnimEnable(bool enable)
 {
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->BACTRL_SET = LCD_BACTRL_AEN;
+  } else {
+    LCD->BACTRL_CLR = LCD_BACTRL_AEN;
+  }
+#else
   if (enable) {
     LCD->BACTRL |= LCD_BACTRL_AEN;
   } else {
     LCD->BACTRL &= ~LCD_BACTRL_AEN;
   }
+#endif
 }
 
 /***************************************************************************//**
@@ -396,11 +559,19 @@ __STATIC_INLINE void LCD_AnimEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void LCD_BlinkEnable(bool enable)
 {
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->BACTRL_SET = LCD_BACTRL_BLINKEN;
+  } else {
+    LCD->BACTRL_CLR = LCD_BACTRL_BLINKEN;
+  }
+#else
   if (enable) {
     LCD->BACTRL |= LCD_BACTRL_BLINKEN;
   } else {
     LCD->BACTRL &= ~LCD_BACTRL_BLINKEN;
   }
+#endif
 }
 
 /***************************************************************************//**
@@ -412,28 +583,70 @@ __STATIC_INLINE void LCD_BlinkEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void LCD_BlankEnable(bool enable)
 {
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->BACTRL_SET = LCD_BACTRL_BLANK;
+  } else {
+    LCD->BACTRL_CLR = LCD_BACTRL_BLANK;
+  }
+#else
   if (enable) {
     LCD->BACTRL |= LCD_BACTRL_BLANK;
   } else {
     LCD->BACTRL &= ~LCD_BACTRL_BLANK;
   }
+#endif
 }
 
 /***************************************************************************//**
  * @brief
- *   Enables or disables LCD Frame Control.
+ *   Enables or disables LCD Frame counter.
  *
  * @param[in] enable
  *   Boolean true enables frame counter, false disables frame counter.
  ******************************************************************************/
 __STATIC_INLINE void LCD_FrameCountEnable(bool enable)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /* Ensure no internal sync is in progress. */
+  LCD_LoadBusyWait();
+#endif
+
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->BACTRL_SET = LCD_BACTRL_FCEN;
+  } else {
+    LCD->BACTRL_CLR = LCD_BACTRL_FCEN;
+  }
+#else
   if (enable) {
     LCD->BACTRL |= LCD_BACTRL_FCEN;
   } else {
     LCD->BACTRL &= ~LCD_BACTRL_FCEN;
   }
+#endif
 }
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Enables or disables LCD Display counter.
+ *
+ * @param[in] enable
+ *   Boolean true enables display counter, false disables display counter.
+ ******************************************************************************/
+__STATIC_INLINE void LCD_DisplayCountEnable(bool enable)
+{
+  /* Ensure no internal sync is in progress. */
+  LCD_LoadBusyWait();
+
+  if (enable) {
+    LCD->BACTRL_SET = LCD_BACTRL_DISPLAYCNTEN;
+  } else {
+    LCD->BACTRL_CLR = LCD_BACTRL_DISPLAYCNTEN;
+  }
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -459,6 +672,7 @@ __STATIC_INLINE int LCD_BlinkState(void)
   return (int)(LCD->STATUS & _LCD_STATUS_BLINK_MASK) >> _LCD_STATUS_BLINK_SHIFT;
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   When set, LCD registers will not be updated until cleared.
@@ -475,7 +689,9 @@ __STATIC_INLINE void LCD_FreezeEnable(bool enable)
     LCD->FREEZE = LCD_FREEZE_REGFREEZE_UPDATE;
   }
 }
+#endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   Returns SYNCBUSY bits, indicating which registers have pending updates.
@@ -487,7 +703,9 @@ __STATIC_INLINE uint32_t LCD_SyncBusyGet(void)
 {
   return LCD->SYNCBUSY;
 }
+#endif
 
+#if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
  *   Polls LCD SYNCBUSY flags, until flag has been cleared.
@@ -497,9 +715,66 @@ __STATIC_INLINE uint32_t LCD_SyncBusyGet(void)
  ******************************************************************************/
 __STATIC_INLINE void LCD_SyncBusyDelay(uint32_t flags)
 {
-  while (LCD->SYNCBUSY & flags)
-    ;
+  while (LCD->SYNCBUSY & flags) ;
 }
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Start the synchronization process.
+ *
+ * @param[in] autoload
+ *   Flag indicating if the synchronization is started manually with CMD.LOAD
+ *   (false) or if the synchronization is managed automatically by Auto Load
+ *   (true).
+ *
+ * @param[in] load_addr
+ *   Address which will start the synchronization from CLK_BUS to CLK_PER
+ *   when Auto Load is selected. This argument has no effect if 'autoload' is
+ *   false.
+ ******************************************************************************/
+__STATIC_INLINE void LCD_SyncStart(bool autoload, LCD_LoadAddr_TypeDef load_addr)
+{
+  /* Ensure no synchronization in progress. */
+  LCD_LoadBusyWait();
+
+  if (autoload) {
+    LCD_Enable(false); /* Ensure LCD disabled before writing WSTATIC fields. */
+    LCD_ReadyWait();
+    LCD->UPDATECTRL_CLR = _LCD_UPDATECTRL_LOADADDR_MASK;
+    LCD->UPDATECTRL |= load_addr;
+    LCD->UPDATECTRL_SET = LCD_UPDATECTRL_AUTOLOAD;
+    LCD_Enable(true);
+  } else {
+    /* Start synchronization from HV registers to CLK_PER domain. */
+    LCD->CMD = LCD_CMD_LOAD;
+  }
+}
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/***************************************************************************//**
+ * @brief
+ *   Stop the synchronization process.
+ *
+ * @param[in] autoload
+ *   Flag indicating if the synchronization is stopped manually with CMD.CLEAR
+ *   (false) or if the synchronization managed by Auto Load is disabled (true).
+ ******************************************************************************/
+__STATIC_INLINE void LCD_SyncStop(bool autoload)
+{
+  if (autoload) {
+    /* Autoload cannot be disabled if synchronization in progress. */
+    LCD_LoadBusyWait();
+
+    LCD->UPDATECTRL_CLR = LCD_UPDATECTRL_AUTOLOAD;
+    LCD->UPDATECTRL_CLR = _LCD_UPDATECTRL_LOADADDR_MASK;
+  } else {
+    LCD->CMD = LCD_CMD_CLEAR;
+  }
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -555,7 +830,15 @@ __STATIC_INLINE uint32_t LCD_IntGetEnabled(void)
  ******************************************************************************/
 __STATIC_INLINE void LCD_IntSet(uint32_t flags)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(LCD_HAS_SET_CLEAR)
+  LCD->IF_SET = flags;
+#else
+  LCD->IF |= flags;
+#endif // LCD_HAS_SET_CLEAR
+#else
   LCD->IFS = flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -569,7 +852,11 @@ __STATIC_INLINE void LCD_IntSet(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LCD_IntEnable(uint32_t flags)
 {
+#if defined(LCD_HAS_SET_CLEAR)
+  LCD->IEN_SET = flags;
+#else
   LCD->IEN |= flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -583,7 +870,11 @@ __STATIC_INLINE void LCD_IntEnable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LCD_IntDisable(uint32_t flags)
 {
+#if defined(LCD_HAS_SET_CLEAR)
+  LCD->IEN_CLR = flags;
+#else
   LCD->IEN &= ~flags;
+#endif
 }
 
 /***************************************************************************//**
@@ -597,7 +888,15 @@ __STATIC_INLINE void LCD_IntDisable(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LCD_IntClear(uint32_t flags)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(LCD_HAS_SET_CLEAR)
+  LCD->IF_CLR = flags;
+#else
+  LCD->IF &= ~flags;
+#endif // LCD_HAS_SET_CLEAR
+#else
   LCD->IFC = flags;
+#endif
 }
 
 #if defined(LCD_CTRL_DSC)
@@ -612,16 +911,33 @@ __STATIC_INLINE void LCD_IntClear(uint32_t flags)
  ******************************************************************************/
 __STATIC_INLINE void LCD_DSCEnable(bool enable)
 {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(false); /* Ensure LCD disabled before writing WSTATIC fields. */
+  LCD_ReadyWait();
+#endif
+
+#if defined(LCD_HAS_SET_CLEAR)
+  if (enable) {
+    LCD->CTRL_SET = LCD_CTRL_DSC;
+  } else {
+    LCD->CTRL_CLR = LCD_CTRL_DSC;
+  }
+#else
   if (enable) {
     LCD->CTRL |= LCD_CTRL_DSC;
   } else {
     LCD->CTRL &= ~LCD_CTRL_DSC;
   }
-}
 #endif
 
-/** @} (end addtogroup LCD) */
-/** @} (end addtogroup emlib) */
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD_Enable(true);
+#endif
+}
+
+#endif
+
+/** @} (end addtogroup lcd) */
 
 #ifdef __cplusplus
 }

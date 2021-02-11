@@ -34,12 +34,7 @@
 #if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup GPIO
+ * @addtogroup gpio GPIO - General Purpose Input/Output
  * @brief General Purpose Input/Output (GPIO) API
  * @details
  *  This module contains functions to control the GPIO peripheral of Silicon
@@ -235,12 +230,19 @@ void GPIO_ExtIntConfig(GPIO_Port_TypeDef port,
                        ((pin % 4) & _GPIO_EXTIPINSELL_EXTIPINSEL0_MASK)
                        << (_GPIO_EXTIPINSELL_EXTIPINSEL1_SHIFT * intNo));
   } else {
-#if defined (_GPIO_EXTIPINSELH_MASK) && !defined(_SILICON_LABS_32B_SERIES_2)
+#if defined (_GPIO_EXTIPINSELH_EXTIPINSEL8_MASK)
     BUS_RegMaskedWrite(&GPIO->EXTIPINSELH,
                        _GPIO_EXTIPINSELH_EXTIPINSEL8_MASK
                        << (_GPIO_EXTIPINSELH_EXTIPINSEL9_SHIFT * tmp),
                        ((pin % 4) & _GPIO_EXTIPINSELH_EXTIPINSEL8_MASK)
                        << (_GPIO_EXTIPSELH_EXTIPSEL9_SHIFT * tmp));
+#endif
+#if defined (_GPIO_EXTIPINSELH_EXTIPINSEL0_MASK)
+    BUS_RegMaskedWrite(&GPIO->EXTIPINSELH,
+                       _GPIO_EXTIPINSELH_EXTIPINSEL0_MASK
+                       << (_GPIO_EXTIPINSELH_EXTIPINSEL1_SHIFT * tmp),
+                       ((pin % 4) & _GPIO_EXTIPINSELH_EXTIPINSEL0_MASK)
+                       << (_GPIO_EXTIPSELH_EXTIPSEL1_SHIFT * tmp));
 #endif
   }
 #endif
@@ -378,7 +380,6 @@ void GPIO_EM4EnablePinWakeup(uint32_t pinmask, uint32_t polaritymask)
 }
 #endif
 
-/** @} (end addtogroup GPIO) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup gpio) */
 
 #endif /* defined(GPIO_COUNT) && (GPIO_COUNT > 0) */

@@ -38,12 +38,7 @@
  #include <limits.h>
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup I2C
+ * @addtogroup i2c I2C - Inter-Integrated Circuit
  * @brief Inter-integrated Circuit (I2C) Peripheral API
  * @details
  *  This module contains functions to control the I2C peripheral of Silicon
@@ -646,6 +641,10 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
         if (seq->flags & I2C_FLAG_WRITE_READ) {
           /* Indicate a read request. */
           tmp |= 1;
+          /* If reading only one byte, prepare the NACK now before START command. */
+          if (seq->buf[transfer->bufIndx].len == 1) {
+            i2c->CMD = I2C_CMD_NACK;
+          }
         }
 
         transfer->state = i2cStateRAddrWFAckNack;
@@ -749,12 +748,6 @@ I2C_TransferReturn_TypeDef I2C_Transfer(I2C_TypeDef *i2c)
 
           /* If all requested data is read, the sequence should end. */
           if (transfer->offset >= rxLen) {
-            /* If receiving only one byte, transmit
-               the NACK now before stopping. */
-            if (1 == rxLen) {
-              i2c->CMD  = I2C_CMD_NACK;
-            }
-
             transfer->state = i2cStateWFStopSent;
             i2c->CMD        = I2C_CMD_STOP;
           } else {
@@ -901,6 +894,5 @@ I2C_TransferReturn_TypeDef I2C_TransferInit(I2C_TypeDef *i2c,
   return I2C_Transfer(i2c);
 }
 
-/** @} (end addtogroup I2C) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup i2c) */
 #endif /* defined(I2C_COUNT) && (I2C_COUNT > 0) */

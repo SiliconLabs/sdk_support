@@ -35,12 +35,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup IDAC
+ * @addtogroup idac
  * @{
  ******************************************************************************/
 
@@ -336,7 +331,6 @@ void IDAC_OutEnable(IDAC_TypeDef *idac, bool enable)
 #endif
 }
 
-/** @} (end addtogroup IDAC) */
-/** @} (end addtogroup emlib) */
+/** @} (end addtogroup idac) */
 
 #endif /* defined(IDAC_COUNT) && (IDAC_COUNT > 0) */

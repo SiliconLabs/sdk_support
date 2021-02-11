@@ -64,7 +64,9 @@
 
 #define FLASH_PAGE_MASK (~(FLASH_PAGE_SIZE - 1U))
 
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 #if defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)
 /* On Series 1 Config 1 EFM32GG11, ECC is supported for RAM0 and RAM1
    banks (not RAM2). It is necessary to figure out which is biggest to
@@ -139,6 +141,25 @@
 #define ECC_IF_REG         (SYSCFG->IF)
 #define ECC_IF_1BIT_ERROR  (SYSCFG_IF_RAMERR1B)
 
+#elif defined(_MPAHBRAM_CTRL_MASK)
+
+/* On Series 2 Config 3, aka EFR32XG23, ECC is now standalone in the
+ * MPAHBRAM module */
+#define ECC_RAM0_SYNDROMES_INIT (MPAHBRAM_CTRL_ECCWEN)
+#define ECC_RAM0_CORRECTION_EN  (MPAHBRAM_CTRL_ECCEN)
+
+#define ECC_IF_REG         (DMEM->IF)
+/* number of AHB ports is between 1 and 4 */
+#if defined(MPAHBRAM_IF_AHB3ERR1B)
+#define ECC_IF_1BIT_ERROR       (MPAHBRAM_IF_AHB0ERR1B | MPAHBRAM_IF_AHB1ERR1B | MPAHBRAM_IF_AHB2ERR1B | MPAHBRAM_IF_AHB3ERR1B)
+#elif defined(MPAHBRAM_IF_AHB2ERR1B)
+#define ECC_IF_1BIT_ERROR       (MPAHBRAM_IF_AHB0ERR1B | MPAHBRAM_IF_AHB1ERR1B | MPAHBRAM_IF_AHB2ERR1B)
+#elif defined(MPAHBRAM_IF_AHB1ERR1B)
+#define ECC_IF_1BIT_ERROR       (MPAHBRAM_IF_AHB0ERR1B | MPAHBRAM_IF_AHB1ERR1B)
+#else
+#define ECC_IF_1BIT_ERROR       (MPAHBRAM_IF_AHB0ERR1B)
+#endif
+
 #else
 
 #error "Unknown device"
@@ -149,11 +170,20 @@
 #define ECC_RAM0_MEM_BASE  (RAM_MEM_BASE)
 #define ECC_RAM0_MEM_SIZE  (RAM_MEM_SIZE)
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
 #define ECC_CTRL_REG       (SYSCFG->DMEM0ECCCTRL)
 #define ECC_IFC_REG        (SYSCFG->IF_CLR)
 #define ECC_IFC_MASK       (SYSCFG_IF_RAMERR1B | SYSCFG_IF_RAMERR2B)
 #define ECC_FAULT_CTRL_REG (SYSCFG->CTRL)
 #define ECC_FAULT_EN       (SYSCFG_CTRL_RAMECCERRFAULTEN)
+
+#elif defined(_MPAHBRAM_CTRL_MASK)
+#define ECC_CTRL_REG       (DMEM->CTRL)
+#define ECC_IFC_REG        (DMEM->IF_CLR)
+#define ECC_IFC_MASK       (_MPAHBRAM_IF_MASK)
+#define ECC_FAULT_CTRL_REG (DMEM->CTRL)
+#define ECC_FAULT_EN       (MPAHBRAM_CTRL_ECCERRFAULTEN)
+#endif
 
 #else
 
@@ -187,7 +217,9 @@
  ******************************      TYPEDEFS     ******************************
  ******************************************************************************/
 
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 typedef struct {
   uint32_t           initSyndromeEnable;
   uint32_t           correctionEnable;
@@ -200,7 +232,9 @@ typedef struct {
 /*******************************************************************************
  ******************************      LOCALS      *******************************
  ******************************************************************************/
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 static const MSC_EccBank_Typedef eccBankTbl[MSC_ECC_BANKS] =
 {
   {
@@ -240,12 +274,7 @@ MSC_LoadVerifyAddress(uint32_t* address);
 /** @endcond */
 
 /***************************************************************************//**
- * @addtogroup emlib
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup MSC
+ * @addtogroup msc
  * @{
  ******************************************************************************/
 
@@ -268,7 +297,7 @@ MSC_LoadVerifyAddress(uint32_t* address);
  * @return
  *   Returns the status of a write or erase operation, @ref MSC_Status_TypeDef
  * @verbatim
- *   mscReturnOk - Specified status criterium fulfilled.
+ *   mscReturnOk - Specified status criteria fulfilled.
  *   mscReturnInvalidAddr - Operation tried to write or erase a non-flash area.
  *   flashReturnLocked - MSC registers are locked or the operation tried to
  *                       write or erase a locked area of the flash.
@@ -278,24 +307,42 @@ MSC_LoadVerifyAddress(uint32_t* address);
 MSC_RAMFUNC_DEFINITION_BEGIN
 msc_Return_TypeDef mscStatusWait(uint32_t mask, uint32_t value)
 {
-  uint32_t status;
-  int timeOut = MSC_PROGRAM_TIMEOUT;
+  uint32_t timeOut = MSC_PROGRAM_TIMEOUT;
 
-  while (timeOut > 0) {
-    // Check if any error flags are set
-    if ((status = MSC->STATUS)
-        & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK | MSC_STATUS_INVADDR)) {
-      if (status & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK)) {
-        return mscReturnLocked;
-      }
+  while (timeOut) {
+    uint32_t status = MSC->STATUS;
+
+    /* if INVADDR is asserted by MSC, BUSY will never go high, can be checked early */
+    if (status & MSC_STATUS_INVADDR) {
       return mscReturnInvalidAddr;
     }
-    // Test exit criterium
-    if ((status & mask) == value) {
-      return mscReturnOk;
+
+    /*
+     * if requested operation fails because flash is locked, BUSY will be high
+     * for a few cycles and it's not safe to clear WRITECTRL.WREN during that
+     * period. mscStatusWait should return only when it's safe to do so.
+     *
+     * So if user is checking BUSY flag, make sure it matches user's expected
+     * value and only then check the lock bits. Otherwise, do check early and
+     * bail out if necessary.
+     */
+
+    if ((!(mask & MSC_STATUS_BUSY))
+        && (status & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK))) {
+      return mscReturnLocked;
     }
+
+    if ((status & mask) == value) {
+      if (status & (MSC_STATUS_LOCKED | MSC_STATUS_REGLOCK)) {
+        return mscReturnLocked;
+      } else {
+        return mscReturnOk;
+      }
+    }
+
     timeOut--;
   }
+
   return mscReturnTimeOut;
 }
 MSC_RAMFUNC_DEFINITION_END
@@ -330,28 +377,35 @@ msc_Return_TypeDef writeBurst(uint32_t address,
   msc_Return_TypeDef retVal;
 
   MSC->ADDRB = address;
+
   if (MSC->STATUS & MSC_STATUS_INVADDR) {
     return mscReturnInvalidAddr;
   }
+
   MSC->WDATA = *data++;
   numBytes  -= 4;
 
   while (numBytes) {
-    if ((retVal = mscStatusWait(MSC_STATUS_WDATAREADY, MSC_STATUS_WDATAREADY))
-        != mscReturnOk) {
+    retVal = mscStatusWait(MSC_STATUS_WDATAREADY, MSC_STATUS_WDATAREADY);
+
+    if (retVal != mscReturnOk) {
       MSC->WRITECMD = MSC_WRITECMD_WRITEEND;
       return retVal;
     }
+
     MSC->WDATA = *data++;
     numBytes  -= 4;
   }
 
   MSC->WRITECMD = MSC_WRITECMD_WRITEEND;
-  if ((retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0))
-      == mscReturnOk) {
+
+  retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0);
+
+  if (retVal == mscReturnOk) {
     // We need to check twice to be sure
     retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0);
   }
+
   return retVal;
 }
 MSC_RAMFUNC_DEFINITION_END
@@ -401,13 +455,22 @@ void MSC_ExecConfigSet(MSC_ExecConfig_TypeDef *execConfig)
 {
   uint32_t mscReadCtrl;
 
+#if defined(MSC_RDATACTRL_DOUTBUFEN)
+  mscReadCtrl = MSC->RDATACTRL & ~MSC_RDATACTRL_DOUTBUFEN;
+
+  if (execConfig->doutBufEn) {
+    mscReadCtrl |= MSC_RDATACTRL_DOUTBUFEN;
+  }
+
+  MSC->RDATACTRL = mscReadCtrl;
+#elif defined(MSC_READCTRL_DOUTBUFEN)
   mscReadCtrl = MSC->READCTRL & ~MSC_READCTRL_DOUTBUFEN;
 
   if (execConfig->doutBufEn) {
     mscReadCtrl |= MSC_READCTRL_DOUTBUFEN;
   }
-
   MSC->READCTRL = mscReadCtrl;
+#endif
 }
 
 /***************************************************************************//**
@@ -450,11 +513,14 @@ MSC_Status_TypeDef MSC_ErasePage(uint32_t *startAddress)
   MSC->WRITECTRL_SET = MSC_WRITECTRL_WREN;
   MSC->ADDRB         = (uint32_t)startAddress;
   MSC->WRITECMD      = MSC_WRITECMD_ERASEPAGE;
-  if ((retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0))
-      == mscReturnOk) {
+
+  retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0);
+
+  if (retVal == mscReturnOk) {
     // We need to check twice to be sure
     retVal = mscStatusWait((MSC_STATUS_BUSY | MSC_STATUS_PENDING), 0);
   }
+
   MSC->WRITECTRL_CLR = MSC_WRITECTRL_WREN;
 
   if (wasLocked) {
@@ -468,7 +534,7 @@ MSC_RAMFUNC_DEFINITION_END
 /***************************************************************************//**
  * @brief
  *   Writes data to flash memory. Write data must be aligned to words and
- *   contain a number of bytes that is divisable by four.
+ *   contain a number of bytes that is divisible by four.
  * @note
  *   It is recommended to erase the flash page before performing a write.
  *
@@ -556,12 +622,12 @@ MSC_Status_TypeDef MSC_MassErase(void)
     return mscReturnLocked;
   }
 
-  MSC->WRITECTRL_SET    = MSC_WRITECTRL_WREN;
-  MSC->MISCLOCKWORD_CLR = MSC_MISCLOCKWORD_MELOCKBIT;
-  MSC->WRITECMD         = MSC_WRITECMD_ERASEMAIN0;
-  retVal                = mscStatusWait(MSC_STATUS_BUSY, 0);
-  MSC->MISCLOCKWORD_SET = MSC_MISCLOCKWORD_MELOCKBIT;
-  MSC->WRITECTRL_CLR    = MSC_WRITECTRL_WREN;
+  MSC->WRITECTRL_SET    = MSC_WRITECTRL_WREN;                 // Set write enable bit
+  MSC->MISCLOCKWORD_CLR = MSC_MISCLOCKWORD_MELOCKBIT;         // Enable Write ctrl access
+  MSC->WRITECMD         = MSC_WRITECMD_ERASEMAIN0;            // Start Mass erase procedure
+  retVal                = mscStatusWait(MSC_STATUS_BUSY, 0);  // Wait for end of busy flag or a problem (INVADDR, LOCK, REGLOCK, TIMEOUT)
+  MSC->MISCLOCKWORD_SET = MSC_MISCLOCKWORD_MELOCKBIT;         // Reenable mass erase lock bit
+  MSC->WRITECTRL_CLR    = MSC_WRITECTRL_WREN;                 // Disable Write ctrl access
 
   return retVal;
 }
@@ -645,8 +711,8 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
     }
 
     LDMA->CH[ch].CTRL = LDMA_CH_CTRL_DSTINC_NONE
-                       | LDMA_CH_CTRL_SIZE_WORD
-                       | ((words - 1) << _LDMA_CH_CTRL_XFERCNT_SHIFT);
+                        | LDMA_CH_CTRL_SIZE_WORD
+                        | ((words - 1) << _LDMA_CH_CTRL_XFERCNT_SHIFT);
     LDMA->CH[ch].SRC = (uint32_t)src;
     LDMA->CH[ch].DST = (uint32_t)&MSC->WDATA;
 
@@ -825,7 +891,7 @@ void MSC_ExecConfigSet(MSC_ExecConfig_TypeDef *execConfig)
  * @param[in] address
  *   An address in flash memory. Must be aligned at a 4 byte boundary.
  * @return
- *   Returns the status of the address load operation, #MSC_Status_TypeDef
+ *   Returns the status of the address load operation, @ref MSC_Status_TypeDef
  * @verbatim
  *   mscReturnOk - The operation completed successfully.
  *   mscReturnInvalidAddr - The operation tried to erase a non-flash area.
@@ -1112,7 +1178,7 @@ MSC_RAMFUNC_DEFINITION_END
  *   A pointer to the flash page to erase. Must be aligned to the beginning of the page
  *   boundary.
  * @return
- *   Returns the status of erase operation, #MSC_Status_TypeDef
+ *   Returns the status of erase operation, @ref MSC_Status_TypeDef
  * @verbatim
  *   mscReturnOk - The operation completed successfully.
  *   mscReturnInvalidAddr - The operation tried to erase a non-flash area.
@@ -1279,7 +1345,6 @@ MSC_Status_TypeDef MSC_WriteWordFast(uint32_t *address,
 }
 MSC_RAMFUNC_DEFINITION_END
 
-
 #if (_SILICON_LABS_32B_SERIES > 0)
 /***************************************************************************//**
  * @brief
@@ -1336,7 +1401,7 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
   }
 
   LDMA->CH[ch].REQSEL = LDMA_CH_REQSEL_SOURCESEL_MSC
-                       | LDMA_CH_REQSEL_SIGSEL_MSCWDATA;
+                        | LDMA_CH_REQSEL_SIGSEL_MSCWDATA;
   LDMA->CH[ch].CFG = _LDMA_CH_CFG_RESETVALUE;
   LDMA->CH[ch].LOOP = _LDMA_CH_LOOP_RESETVALUE;
   LDMA->CH[ch].LINK = _LDMA_CH_LINK_RESETVALUE;
@@ -1362,8 +1427,8 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
     }
 
     LDMA->CH[ch].CTRL = LDMA_CH_CTRL_DSTINC_NONE
-                       | LDMA_CH_CTRL_SIZE_WORD
-                       | ((words - 1) << _LDMA_CH_CTRL_XFERCNT_SHIFT);
+                        | LDMA_CH_CTRL_SIZE_WORD
+                        | ((words - 1) << _LDMA_CH_CTRL_XFERCNT_SHIFT);
     LDMA->CH[ch].SRC = (uint32_t)src;
     LDMA->CH[ch].DST = (uint32_t)&MSC->WDATA;
 
@@ -1395,16 +1460,6 @@ MSC_Status_TypeDef MSC_WriteWordDma(int ch,
 #endif
 
 #if defined(_MSC_MASSLOCK_MASK)
-/***************************************************************************//**
- * @brief
- *   Erase the entire Flash in one operation.
- *
- * @note
- *   This command will erase the entire contents of the device.
- *   Use with care, both a debug session and all contents of the flash will be
- *   lost. The lock bit, MLW will prevent this operation from executing and
- *   might prevent a successful mass erase.
- ******************************************************************************/
 SL_RAMFUNC_DEFINITION_BEGIN
 MSC_Status_TypeDef MSC_MassErase(void)
 {
@@ -1452,7 +1507,9 @@ SL_RAMFUNC_DEFINITION_END
 
 #endif // defined(_SILICON_LABS_32B_SERIES_2)
 
-#if defined(_MSC_ECCCTRL_MASK) || defined(_SYSCFG_DMEM0ECCCTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
 
@@ -1471,34 +1528,54 @@ static void mscEccReadWriteExistingPio(const MSC_EccBank_Typedef *eccBank)
 {
   volatile uint32_t *ramptr = (volatile uint32_t *) eccBank->base;
   const uint32_t *endptr = (const uint32_t *) (eccBank->base + eccBank->size);
-  uint32_t val32;
-  uint32_t ctrlReg = ECC_CTRL_REG;
+  volatile uint32_t *ctrlreg = &ECC_CTRL_REG;
+  uint32_t enableEcc = eccBank->initSyndromeEnable;
 
-  // Make sure ECC bit error interrupt event bits are cleared.
-  ECC_IFC_REG = ECC_IFC_MASK;
+#ifndef __GNUC__
+#define __asm__        asm
+#endif
 
-  // Loop through all 32-bit words in RAM block.
-  for (; ramptr < endptr; ramptr++) {
-    // Read value from RAM
-    val32 = *ramptr;
-    if (ECC_IF_REG & ECC_IF_1BIT_ERROR) {
-      /* 1-bit error occurred. The read value is incorrect since the ECC logic
-         has modified it. Disable ECC, re-read correct value from RAM,
-         re-enable ECC, and finally write value which will also initialize the
-         corresponding ECC syndrome. */
-      ctrlReg &= ~eccBank->initSyndromeEnable;
-      ECC_CTRL_REG = ctrlReg;
-      val32 = *ramptr;
-      // Re-enable ECC
-      ctrlReg |= eccBank->initSyndromeEnable;
-      ECC_CTRL_REG = ctrlReg;
-      ECC_IFC_REG = ECC_IFC_MASK;
-    }
-    *ramptr = val32;
-  }
+  EFM_ASSERT(ramptr < endptr);
+  /*
+   * Perform a read and write of all RAM address to initialize
+   * ECC syndromes. ECC is initialized by reading a RAM address
+   * while ECC is disabled and write it back while ECC is enabled.
+   * To make sure we access RAM one time while reading and one
+   * time while writing, we use Assembler.
+   */
+
+  __asm__ volatile (
+    "1:\n\t"                         /* define label 1                       */
+    "LDR r1, [%[ramptr]]\n\t"        /* load content of ramptr into R1, ECC
+                                        is disabled to get a correct value   */
+    "LDR r0, [%[ctrlreg]]\n\t"       /* load ctrlreg content into R0         */
+    "ORR r0, r0, %[enableEcc]\n\t"     /* OR R0 and enableEcc, and store result
+                                          in R0                                */
+    "STR r0, [%[ctrlreg]]\n\t"       /* write R0 into ctrlreg, ECC is
+                                        enabled from now on                  */
+    "STR r1, [%[ramptr]]\n\t"        /* write back ram content where it was,
+                                        syndrome will be written in ECC      */
+    "BIC r0, r0, %[enableEcc]\n\t"     /* bit clear enableEcc from R0, and store
+                                          result in R0                         */
+    "STR r0, [%[ctrlreg]]\n\t"       /* write R0 into ctrlreg, ECC is
+                                        disabled                             */
+    "ADDS %[ramptr], %[ramptr], #4\n\t" /* increment ramptr by 4 (size of
+                                           a word)                           */
+    "CMP %[ramptr], %[endptr]\n\t"   /* compare ramptr and endptr...         */
+    "BCC 1b\n\t"                     /* ... and jump back to label 1 if Carrry
+                                        Clear (meaning ramptr < endptr)      */
+    "ORR r0, r0, %[enableEcc]\n\t"     /* and re-enable ECC ASAP to be sure no */
+    "STR r0, [%[ctrlreg]]\n\t"       /* STR occurs with ECC disabled         */
+    :[ramptr] "+r" (ramptr)
+    :[endptr] "r" (endptr),
+    [ctrlreg] "r" (ctrlreg),
+    [enableEcc] "r" (enableEcc)
+    : "r0", "r1", /* R0  and R1 used as temporary registers */
+    "memory"      /* Memory pointed by ramptr is modified   */
+    );
 }
 
-#else // #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#elif !defined(_MPAHBRAM_CTRL_MASK)
 
 /***************************************************************************//**
  * @brief
@@ -1574,11 +1651,13 @@ static void mscEccReadWriteExistingDma(uint32_t start,
   /* Set last descriptor link bit and address to 0. */
   dmaDesc[descCnt - 1][3] = 0;
 
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   /* Start the LDMA clock now */
   CMU_ClockEnable(cmuClock_LDMA, true);
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+  CMU_ClockEnable(cmuClock_LDMAXBAR, true);
 #endif
-
+#endif
   /* Round robin scheduling for all channels (0 = no fixed priority channels).
    */
   LDMA->CTRL    = 0 << _LDMA_CTRL_NUMFIXED_SHIFT;
@@ -1623,14 +1702,99 @@ static void mscEccReadWriteExistingDma(uint32_t start,
            && ((LDMA->CHDONE & chMask) == chMask))) {
   }
 
-#if !defined(_SILICON_LABS_32B_SERIES_2)
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
   /* Stop the LDMA clock now */
   CMU_ClockEnable(cmuClock_LDMA, false);
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+  CMU_ClockEnable(cmuClock_LDMAXBAR, false);
+#endif
 #endif
 }
 
 #endif // #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
 
+#if defined(_MPAHBRAM_CTRL_MASK)
+/***************************************************************************//**
+ * @brief
+ *    Initialize MPAHBRAM ECC for a given memory bank.
+ *
+ * @brief
+ *    This function initializes ECC for a given memory bank which is specified
+ *    with the MSC_EccBank_Typedef structure input parameter. It copies the RAM
+ *    back to itself through CPU read and writes.
+ *
+ * @param[in] eccBank
+ *    ECC memory bank device structure.
+ *
+ ******************************************************************************/
+static void mscEccMpahbramBankInit(const MSC_EccBank_Typedef *eccBank)
+{
+  uint32_t *ramptr = (uint32_t *) eccBank->base;
+  const uint32_t *endptr = (uint32_t *) (eccBank->base + eccBank->size);
+  volatile uint32_t *ctrlreg = &ECC_CTRL_REG;
+  uint32_t bitmask = eccBank->correctionEnable;
+
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+
+  /* Enable ECC syndrome write */
+  ECC_CTRL_REG |= eccBank->initSyndromeEnable;
+
+  ECC_IFC_REG = ECC_IFC_MASK;
+
+#ifndef __GNUC__
+#define __asm__        asm
+#endif
+
+  EFM_ASSERT(ramptr < endptr);
+
+  /*
+   * MPAHBRAM ECC requires both ECCEN and ECCWEN to be set for the syndromes
+   * to be written in ECC. When ECCEN is enabled, error checking is enabled
+   * and ECC tries to correct errors when values are read from RAM but as
+   * syndromes are uninitialized this is doomed for failure.
+   *
+   * So for ECC initialization to work properly, this must ensures than while
+   * ECC is enabled, RAM will be accessed only through writes, no reads shall
+   * occur. It's hard to have such guarantee with C code because the C
+   * compiler can get in the way and do read access even with simple syntax
+   * such as `*ptr = val`. Assembly allows such guarantee and let ECC be
+   * initialized without triggering errors.
+   */
+  __asm__ volatile (
+    "1:\n\t"                         /* define label 1                       */
+    "LDR r1, [%[ramptr]]\n\t"        /* load content of ramptr into R1       */
+    "LDR r0, [%[ctrlreg]]\n\t"       /* load ctrlreg content into R0         */
+    "ORR r0, r0, %[bitmask]\n\t"     /* OR R0 and bitmask, and store result
+                                        in R0                                */
+    "STR r0, [%[ctrlreg]]\n\t"       /* write R0 into ctrlreg, ECC is
+                                        enabled from now on                  */
+    "STR r1, [%[ramptr]]\n\t"        /* write back ram content where it was,
+                                        syndrome will be written in ECC      */
+    "BIC r0, r0, %[bitmask]\n\t"     /* bit clear bitmask from R0, and store
+                                        result in R0                         */
+    "STR r0, [%[ctrlreg]]\n\t"       /* write R0 into ctrlreg, ECC is
+                                        disabled                             */
+    "ADDS %[ramptr], %[ramptr], #4\n\t" /* increment ramptr by 4 (size of
+                                           a word)                           */
+    "CMP %[ramptr], %[endptr]\n\t"   /* compare ramptr and endptr...         */
+    "BCC 1b\n\t"                     /* ... and jump back to label 1 if Carrry
+                                        Clear (meaning ramptr < endptr)      */
+    "ORR r0, r0, %[bitmask]\n\t"     /* and re-enable ECC ASAP to be sure no */
+    "STR r0, [%[ctrlreg]]\n\t"       /* STR occurs with ECC disabled         */
+    :[ramptr] "+r" (ramptr)
+    :[endptr] "r" (endptr),
+    [ctrlreg] "r" (ctrlreg),
+    [bitmask] "r" (bitmask)
+    : "r0", "r1", /* R0  and R1 used as temporary registers */
+    "memory"      /* Memory pointed by ramptr is modified   */
+    );
+
+  CORE_EXIT_CRITICAL();
+}
+
+#else
 /***************************************************************************//**
  * @brief
  *    Initialize ECC for a given memory bank.
@@ -1649,23 +1813,20 @@ static void mscEccReadWriteExistingDma(uint32_t start,
 static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
                            uint32_t dmaChannels[2])
 {
-  uint32_t ctrlReg;
-
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_CRITICAL();
 
-  /* Enable ECC write. Keep ECC checking disabled during initialization. */
-  ctrlReg  = ECC_CTRL_REG;
-  ctrlReg |= eccBank->initSyndromeEnable;
-  ECC_CTRL_REG = ctrlReg;
-
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
   (void) dmaChannels;
+  /* Disable ECC write */
+  ECC_CTRL_REG &= ~eccBank->initSyndromeEnable;
   /* Initialize ECC syndromes by using core cpu to load and store the existing
      data values in RAM. */
   mscEccReadWriteExistingPio(eccBank);
 #else
+  /* Enable ECC write */
+  ECC_CTRL_REG |= eccBank->initSyndromeEnable;
   /* Initialize ECC syndromes by using DMA to read and write the existing
      data values in RAM. */
   mscEccReadWriteExistingDma(eccBank->base, eccBank->size, dmaChannels);
@@ -1676,11 +1837,11 @@ static void mscEccBankInit(const MSC_EccBank_Typedef *eccBank,
   ECC_IFC_REG = ECC_IFC_MASK;
 
   /* Enable ECC decoder to detect and report ECC errors. */
-  ctrlReg |= eccBank->correctionEnable;
-  ECC_CTRL_REG = ctrlReg;
+  ECC_CTRL_REG |= eccBank->correctionEnable;
 
   CORE_EXIT_CRITICAL();
 }
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -1702,7 +1863,7 @@ static void mscEccBankDisable(const MSC_EccBank_Typedef *eccBank)
 
 /***************************************************************************//**
  * @brief
- *   Configure Error Correcting Code (ECC)
+ *   Configure Error Correcting Code (ECC).
  *
  * @details
  *   This function configures ECC support according to the configuration
@@ -1745,15 +1906,24 @@ void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig)
      the eccConfig->enableEccBank array. */
   for (cnt = 0; cnt < MSC_ECC_BANKS; cnt++) {
     if (eccConfig->enableEccBank[cnt]) {
+#if defined(_MPAHBRAM_CTRL_MASK)
+      mscEccMpahbramBankInit(&eccBankTbl[cnt]);
+#else
       mscEccBankInit(&eccBankTbl[cnt], eccConfig->dmaChannels);
+#endif
     } else {
       mscEccBankDisable(&eccBankTbl[cnt]);
     }
   }
 
 #if defined(ECC_FAULT_CTRL_REG) && !defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)
-  /* Enable ECC faults if ecc fault ctrl register is set.
-     On Series 1 Config 1, aka EFM32GG11, ECC faults should stay disabled. */
+  /*
+   * Enable ECC faults if ecc fault ctrl register is set.
+   * On Series 1 Config 1, aka EFM32GG11, ECC faults should stay disabled.
+   * Reload register first, in case it was modified and/or shared by bank
+   * init functions.
+   */
+  faultCtrlReg = ECC_FAULT_CTRL_REG;
   faultCtrlReg |= ECC_FAULT_EN;
   ECC_FAULT_CTRL_REG = faultCtrlReg;
 #endif
@@ -1761,6 +1931,52 @@ void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig)
 
 #endif /* #if defined(_MSC_ECCCTRL_MASK) */
 
-/** @} (end addtogroup MSC) */
-/** @} (end addtogroup emlib) */
+#if defined(_SYSCFG_DMEM0PORTMAPSEL_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Set MPAHBRAM port to use to access DMEM.
+ *
+ * @details
+ *   This function configures which MPAHBRAM slave port is used to access DMEM.
+ *   Depending on the use case, it might improve performance by spreading the
+ *   load over the two ports, instead of starving because a port is used by
+ *   another master.
+ *
+ * @param[in] master
+ *   AHBHOST master to be configured.
+ * @param[in] port
+ *   AHBHOST slave port to use.
+ ******************************************************************************/
+void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port)
+{
+  uint32_t bitfieldMask = DMEM_NUM_PORTS - 1;
+
+  /* make sure master is within the mask of port map that can be changed
+   * make sure port is a sensible value
+   */
+  EFM_ASSERT(((1 << master) & _SYSCFG_DMEM0PORTMAPSEL_MASK) != 0x0);
+  EFM_ASSERT(port < DMEM_NUM_PORTS);
+
+#if defined(CMU_CLKEN0_SYSCFG)
+  bool disableSyscfgClk = false;
+
+  if (!(CMU->CLKEN0 & _CMU_CLKEN0_SYSCFG_MASK)) {
+    disableSyscfgClk = true;
+    CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
+  }
+#endif
+
+  BUS_RegMaskedWrite(&SYSCFG->DMEM0PORTMAPSEL,
+                     bitfieldMask << master,
+                     (uint32_t)port << master);
+
+#if defined(CMU_CLKEN0_SYSCFG)
+  if (disableSyscfgClk) {
+    CMU->CLKEN0_CLR = CMU_CLKEN0_SYSCFG;
+  }
+#endif
+}
+#endif
+
+/** @} (end addtogroup msc) */
 #endif /* defined(MSC_COUNT) && (MSC_COUNT > 0) */
