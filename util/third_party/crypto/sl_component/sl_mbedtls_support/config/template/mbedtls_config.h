@@ -74,6 +74,9 @@
 #endif
 
 // Custom defines can be placed here before check_config.h is included.
+
+#include "mbedtls/config_psa.h"
+
 #include "mbedtls/check_config.h"
 
 #endif

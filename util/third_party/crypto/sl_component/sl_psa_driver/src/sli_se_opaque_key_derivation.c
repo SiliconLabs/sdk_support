@@ -1,7 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief SE Driver for Silicon Labs devices with an embedded SE, for use with
- *        PSA Crypto and Mbed TLS
+ * @brief Silicon Labs PSA Crypto Opaque Driver Key Derivation functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)

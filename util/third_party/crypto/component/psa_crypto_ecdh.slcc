@@ -1,0 +1,27 @@
+id: psa_crypto_ecdh
+package: platform
+label: PSA Crypto support for ECDH
+description:
+  "This component provides support for key agreement with ECDH in PSA Crypto.\n
+
+  If hardware acceleration of ECDH is available and the 'Mbed TLS Support for \
+  ECDH' component is not included, PSA will not enable fallback to the software \
+  implementation in the Mbed TLS library."
+category: Platform|Security
+quality: production
+provides:
+  - name: psa_crypto_ecdh
+requires:
+  - name: psa_crypto
+  - name: psa_crypto_ecc
+  - name: mbedtls_ecdh
+    condition: [device_series_0]
+  - name: mbedtls_ecdh
+    condition: [device_series_1]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_ECDH
+  - name: psa_crypto_config
+    value: MBEDTLS_PSA_ACCEL_ALG_ECDH
+    condition: [device_series_2]
+    unless: [mbedtls_ecdh]
