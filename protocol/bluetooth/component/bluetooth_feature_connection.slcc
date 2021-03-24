@@ -11,7 +11,7 @@ requires:
 provides:
   - name: "bluetooth_feature_connection"
 template_contribution:
-  - name: bluetooth_stack_init
+  - name: bluetooth_bgapi_class
     value:
-      function: "sl_bt_class_connection_init"
+      class: "connection"
     priority: 4

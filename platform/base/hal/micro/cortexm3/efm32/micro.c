@@ -65,6 +65,7 @@ extern void halStackRadioHoldOffPowerUp(void);   // fwd ref
 
 // Declares the PA curves only if we're in RAIL
 #if     (PHY_RAIL || PHY_DUALRAIL)
+#include "rail.h"
 #include "../plugin/pa-conversions/pa_conversions_efr32.h"
 
 #if !PHY_RAIL_MP && !PHY_RAILGB_MP && !defined(EMBER_STACK_CONNECT)
@@ -289,6 +290,7 @@ void halInit(void)
   halEnergyModeNotificationInit();
 
 #if (PHY_RAIL || PHY_DUALRAIL)
+  (void)RAIL_InitPowerManager();
 #if (BSP_PA_VOLTAGE > 1800) || defined (_SILICON_LABS_32B_SERIES_2)
   RAIL_InitTxPowerCurvesAlt(&RAIL_TxPowerCurvesVbat);
 #else

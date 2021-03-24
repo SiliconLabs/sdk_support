@@ -4,7 +4,7 @@
  *        for EFR32BG22C112F352GM40
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -178,8 +178,8 @@ typedef enum IRQn{
 #define _SILICON_LABS_EFR32_RADIO_2G4HZ                   2                                  /** Radio supports 2.4 GHz */
 #define _SILICON_LABS_EFR32_RADIO_DUALBAND                3                                  /** Radio supports dual band */
 #define _SILICON_LABS_EFR32_RADIO_TYPE                    _SILICON_LABS_EFR32_RADIO_2G4HZ    /** Radio type */
-#define _SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM    0                                  /** Radio 2G4HZ HP PA output power */
-#define _SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT                                              /** Radio 2G4HZ HP PA is present */
+#define _SILICON_LABS_EFR32_2G4HZ_LP_PA_MAX_OUTPUT_DBM    0                                  /** Radio 2G4HZ LP PA output power */
+#define _SILICON_LABS_EFR32_2G4HZ_LP_PA_PRESENT                                              /** Radio 2G4HZ LP PA is present */
 #define LFRCO_PRECISION_MODE                              1                                  /** Precision mode of LFRCO enabled or disabled */
 
 /** Memory Base addresses and limits */

@@ -19,3 +19,8 @@ requires:
   - name: device_has_lcd
   - name: emlib_common
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efr32xg23/group-lcd
+      condition: [device_sdid_210]

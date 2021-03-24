@@ -1352,6 +1352,22 @@ PACKSTRUCT( struct sl_bt_rsp_system_hello_s
 typedef struct sl_bt_rsp_system_hello_s sl_bt_rsp_system_hello_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_system_start_bluetooth_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_system_start_bluetooth_s sl_bt_rsp_system_start_bluetooth_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_system_stop_bluetooth_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_system_stop_bluetooth_s sl_bt_rsp_system_stop_bluetooth_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_system_get_version_s
 {
     uint16_t            result;
@@ -2769,6 +2785,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_dfu_flash_upload_t                                 rsp_dfu_flash_upload;
     sl_bt_rsp_dfu_flash_upload_finish_t                          rsp_dfu_flash_upload_finish;
     sl_bt_rsp_system_hello_t                                     rsp_system_hello;
+    sl_bt_rsp_system_start_bluetooth_t                           rsp_system_start_bluetooth;
+    sl_bt_rsp_system_stop_bluetooth_t                            rsp_system_stop_bluetooth;
     sl_bt_rsp_system_get_version_t                               rsp_system_get_version;
     sl_bt_rsp_system_halt_t                                      rsp_system_halt;
     sl_bt_rsp_system_linklayer_configure_t                       rsp_system_linklayer_configure;

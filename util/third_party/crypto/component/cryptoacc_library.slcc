@@ -1,8 +1,11 @@
 id: cryptoacc_library
 package: platform
 label: Crypto library for EFR32xG22
-description: Hardware acceleration library for the CRYPTOACC hardware peripheral
-category: Platform|Security
+description:
+  "Hardware acceleration library for the CRYPTOACC hardware peripheral.\n
+
+  NOTE: This component is primarily meant for internal (Silicon Labs) use."
+category: Platform|Security|Internal
 quality: production
 component_root_path: util/third_party/crypto/sl_component/sl_cryptoacc_library
 source:

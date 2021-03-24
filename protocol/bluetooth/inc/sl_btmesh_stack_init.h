@@ -1,5 +1,5 @@
 /***************************************************************************//**
- * @brief Bluetooth stack initialization APIs
+ * @brief Initialization APIs for btmesh stack
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
@@ -20,495 +20,84 @@
 
 #include "sl_status.h"
 
-/* Forward declarations of internal initialization functions */
-void sli_btmesh_class_node_init_full();
-void sli_btmesh_class_node_init_optimized();
-void sli_btmesh_class_prov_init_full();
-void sli_btmesh_class_prov_init_optimized();
-void sli_btmesh_class_proxy_init_full();
-void sli_btmesh_class_proxy_init_optimized();
-void sli_btmesh_class_vendor_model_init_full();
-void sli_btmesh_class_vendor_model_init_optimized();
-void sli_btmesh_class_health_client_init_full();
-void sli_btmesh_class_health_client_init_optimized();
-void sli_btmesh_class_health_server_init_full();
-void sli_btmesh_class_health_server_init_optimized();
-void sli_btmesh_class_generic_client_init_full();
-void sli_btmesh_class_generic_client_init_optimized();
-void sli_btmesh_class_generic_server_init_full();
-void sli_btmesh_class_generic_server_init_optimized();
-void sli_btmesh_class_test_init_full();
-void sli_btmesh_class_test_init_optimized();
-void sli_btmesh_class_lpn_init_full();
-void sli_btmesh_class_lpn_init_optimized();
-void sli_btmesh_class_friend_init_full();
-void sli_btmesh_class_friend_init_optimized();
-void sli_btmesh_class_proxy_client_init_full();
-void sli_btmesh_class_proxy_client_init_optimized();
-void sli_btmesh_class_proxy_server_init_full();
-void sli_btmesh_class_proxy_server_init_optimized();
-void sli_btmesh_class_config_client_init_full();
-void sli_btmesh_class_config_client_init_optimized();
-void sli_btmesh_class_sensor_server_init_full();
-void sli_btmesh_class_sensor_server_init_optimized();
-void sli_btmesh_class_sensor_setup_server_init_full();
-void sli_btmesh_class_sensor_setup_server_init_optimized();
-void sli_btmesh_class_sensor_client_init_full();
-void sli_btmesh_class_sensor_client_init_optimized();
-void sli_btmesh_class_lc_client_init_full();
-void sli_btmesh_class_lc_client_init_optimized();
-void sli_btmesh_class_lc_server_init_full();
-void sli_btmesh_class_lc_server_init_optimized();
-void sli_btmesh_class_lc_setup_server_init_full();
-void sli_btmesh_class_lc_setup_server_init_optimized();
-void sli_btmesh_class_scene_client_init_full();
-void sli_btmesh_class_scene_client_init_optimized();
-void sli_btmesh_class_scene_server_init_full();
-void sli_btmesh_class_scene_server_init_optimized();
-void sli_btmesh_class_scene_setup_server_init_full();
-void sli_btmesh_class_scene_setup_server_init_optimized();
-void sli_btmesh_class_scheduler_client_init_full();
-void sli_btmesh_class_scheduler_client_init_optimized();
-void sli_btmesh_class_scheduler_server_init_full();
-void sli_btmesh_class_scheduler_server_init_optimized();
-void sli_btmesh_class_time_server_init_full();
-void sli_btmesh_class_time_server_init_optimized();
-void sli_btmesh_class_time_client_init_full();
-void sli_btmesh_class_time_client_init_optimized();
+/* Forward declarations of BGAPI class declaration structures */
+struct sli_bgapi_class;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_node_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_node_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_prov_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_prov_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_vendor_model_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_vendor_model_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_health_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_health_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_health_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_health_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_generic_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_generic_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_generic_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_generic_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_test_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_test_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lpn_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lpn_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_friend_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_friend_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_proxy_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_config_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_config_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_setup_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_setup_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_sensor_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_setup_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_lc_setup_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_setup_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scene_setup_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scheduler_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scheduler_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scheduler_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_scheduler_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_client_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_client_full;
 
 
+/* Macro to get a pointer to a BGAPI class declaration */
+#ifdef SL_BT_API_FULL
+#define SL_BTMESH_BGAPI_CLASS(class_name) &sli_bgapi_class_btmesh_ ## class_name ## _full
+#else
+#define SL_BTMESH_BGAPI_CLASS(class_name) &sli_bgapi_class_btmesh_ ## class_name ## _optimized
+#endif
 
 /**
- * @brief Initialize SL_BTMESH_API class node.
+ * Initialize the BGAPI classes for btmesh stack.
  *
  * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
+ * Configurator if the feature is included in the project. The application is
  * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_node_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_node_init_full();
-#else
-  sli_btmesh_class_node_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class prov.
  *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_prov_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_prov_init_full();
-#else
-  sli_btmesh_class_prov_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class proxy.
+ * @param[in] classes NULL-terminated array of pointers to class declarations.
+ *   The array must remain valid until the next system reboot.
  *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
+ * @return SL_STATUS_OK if the initialization was successful; Other error code
+ *   indicates a failure.
  */
-static inline void sl_btmesh_class_proxy_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_proxy_init_full();
-#else
-  sli_btmesh_class_proxy_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class vendor_model.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_vendor_model_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_vendor_model_init_full();
-#else
-  sli_btmesh_class_vendor_model_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class health_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_health_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_health_client_init_full();
-#else
-  sli_btmesh_class_health_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class health_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_health_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_health_server_init_full();
-#else
-  sli_btmesh_class_health_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class generic_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_generic_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_generic_client_init_full();
-#else
-  sli_btmesh_class_generic_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class generic_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_generic_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_generic_server_init_full();
-#else
-  sli_btmesh_class_generic_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class test.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_test_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_test_init_full();
-#else
-  sli_btmesh_class_test_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class lpn.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_lpn_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_lpn_init_full();
-#else
-  sli_btmesh_class_lpn_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class friend.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_friend_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_friend_init_full();
-#else
-  sli_btmesh_class_friend_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class proxy_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_proxy_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_proxy_client_init_full();
-#else
-  sli_btmesh_class_proxy_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class proxy_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_proxy_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_proxy_server_init_full();
-#else
-  sli_btmesh_class_proxy_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class config_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_config_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_config_client_init_full();
-#else
-  sli_btmesh_class_config_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class sensor_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_sensor_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_sensor_server_init_full();
-#else
-  sli_btmesh_class_sensor_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class sensor_setup_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_sensor_setup_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_sensor_setup_server_init_full();
-#else
-  sli_btmesh_class_sensor_setup_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class sensor_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_sensor_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_sensor_client_init_full();
-#else
-  sli_btmesh_class_sensor_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class lc_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_lc_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_lc_client_init_full();
-#else
-  sli_btmesh_class_lc_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class lc_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_lc_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_lc_server_init_full();
-#else
-  sli_btmesh_class_lc_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class lc_setup_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_lc_setup_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_lc_setup_server_init_full();
-#else
-  sli_btmesh_class_lc_setup_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class scene_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_scene_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_scene_client_init_full();
-#else
-  sli_btmesh_class_scene_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class scene_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_scene_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_scene_server_init_full();
-#else
-  sli_btmesh_class_scene_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class scene_setup_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_scene_setup_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_scene_setup_server_init_full();
-#else
-  sli_btmesh_class_scene_setup_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class scheduler_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_scheduler_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_scheduler_client_init_full();
-#else
-  sli_btmesh_class_scheduler_client_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class scheduler_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_scheduler_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_scheduler_server_init_full();
-#else
-  sli_btmesh_class_scheduler_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class time_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_time_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_time_server_init_full();
-#else
-  sli_btmesh_class_time_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BTMESH_API class time_client.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_btmesh_class_time_client_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_btmesh_class_time_client_init_full();
-#else
-  sli_btmesh_class_time_client_init_optimized();
-#endif
-}
-
+sl_status_t sl_btmesh_init_classes(const struct sli_bgapi_class * const * classes);
 
 #endif

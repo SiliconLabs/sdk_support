@@ -18,6 +18,7 @@
 #include "em_core.h"
 #include "em_device.h"
 #include "em_emu.h"
+#include "em_chip.h"
 
 #include "ember_btl_interface.h"
 #include "btl_errorcode.h"
@@ -26,15 +27,18 @@ extern const BootloaderAddressTable_t *bootloaderAddressTable;
 
 int32_t bootloader_init(void)
 {
-  if (bootloaderAddressTable->init() == BOOTLOADER_OK) {
-    return BOOTLOADER_OK;
-  } else {
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
+  if (bootloaderAddressTable->init() != BOOTLOADER_OK) {
     return BOOTLOADER_ERROR_INIT_STORAGE;
   }
+#endif
+
+  return BOOTLOADER_OK;
 }
 
 void bootloader_getInfo(BootloaderInformation_t *info)
 {
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
   BootloaderInformation_t *storageInfo;
   storageInfo = (BootloaderInformation_t *)bootloaderAddressTable->storageInfo();
 
@@ -45,42 +49,18 @@ void bootloader_getInfo(BootloaderInformation_t *info)
   info->pageSize = storageInfo->pageSize;
   info->partSize = storageInfo->partSize;
   info->wordSizeBytes = storageInfo->wordSizeBytes;
+#elif SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_STANDALONE
+  info->version = bootloaderAddressTable->bootloaderVersion;
+#endif
 }
 
 int32_t bootloader_deinit(void)
 {
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
   bootloaderAddressTable->deinit();
+#endif
+
   return BOOTLOADER_OK;
-}
-
-// Workaround for brownouts on Dumbo when DCDC is retimed and radio subsystem is reset
-__STATIC_INLINE void disableDcdcRetimingAndRcosync(void)
-{
-  // Ensure access to EMU registers
-  EMU_Unlock();
-  EMU_PowerUnlock();
-
-  // Don't need to disable retiming if DCDC is not powering DVDD
-  if ((EMU->PWRCFG & _EMU_PWRCFG_PWRCFG_MASK) != EMU_PWRCFG_PWRCFG_DCDCTODVDD) {
-    return;
-  }
-
-  // Ensure sequencer is halted
-  uint32_t clockEnable = *(volatile uint32_t *)(0x400E4000 + 0xC8);
-  volatile uint32_t *reg;
-  if (clockEnable & 0x4UL) {
-    reg = (volatile uint32_t *)(0x40084000UL + 0x40);
-    *reg = 0x1UL;
-  }
-
-  // If DCDC is in use, ensure retiming and rcosync are disabled
-  uint32_t dcdcMode = EMU->DCDCCTRL & _EMU_DCDCCTRL_DCDCMODE_MASK;
-  if ((dcdcMode == EMU_DCDCCTRL_DCDCMODE_LOWNOISE)
-      || (dcdcMode == EMU_DCDCCTRL_DCDCMODE_LOWPOWER)) {
-    BUS_RegBitWrite(&EMU->DCDCTIMING, 28, 0);
-    // EMU->DCDCRCOSC is internal, _EMU_DCDCRCOSC_RCOSYNC_SHIFT = 0
-    BUS_RegBitWrite((void *)(EMU_BASE + 0x74), 0, 0);
-  }
 }
 
 void bootloader_rebootAndInstall(void)
@@ -92,8 +72,6 @@ void bootloader_rebootAndInstall(void)
   resetCause->reason = EMBER_BOOTLOADER_RESET_REASON_BOOTLOAD;
   resetCause->signature = EMBER_BOOTLOADER_RESET_SIGNATURE_VALID;
 
-  disableDcdcRetimingAndRcosync();
-
 #if defined(RMU_PRESENT)
   // Clear resetcause
   RMU->CMD = RMU_CMD_RCCLR;
@@ -101,13 +79,16 @@ void bootloader_rebootAndInstall(void)
   RMU->CTRL = (RMU->CTRL & ~_RMU_CTRL_SYSRMODE_MASK) | RMU_CTRL_SYSRMODE_FULL;
 #endif
 
-  NVIC_SystemReset();
+  CHIP_Reset();
 }
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 static uint8_t buff[EEPROM_PAGE_SIZE];
 BootloaderStorageState_t storageState;
 EblConfig_t eblConfig;
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_initVerifyImage(uint32_t slotId, void *context, size_t contextSize)
 {
   (void)slotId;
@@ -126,7 +107,9 @@ int32_t bootloader_initVerifyImage(uint32_t slotId, void *context, size_t contex
 
   return BOOTLOADER_OK;
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_continueVerifyImage(void *context, BootloaderParserCallback_t metadataCallback)
 {
   (void)context;
@@ -145,7 +128,9 @@ int32_t bootloader_continueVerifyImage(void *context, BootloaderParserCallback_t
     return BOOTLOADER_ERROR_PARSE_FAILED;
   }
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_verifyImage(uint32_t slotId, BootloaderParserCallback_t metadataCallback)
 {
   (void)slotId;
@@ -167,12 +152,16 @@ int32_t bootloader_verifyImage(uint32_t slotId, BootloaderParserCallback_t metad
     return retval;
   }
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 bool bootloader_storageIsBusy(void)
 {
   return bootloaderAddressTable->storageBusy();
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_readRawStorage(uint32_t address, uint8_t *buffer, size_t length)
 {
   if (bootloaderAddressTable->storageReadRaw(address, buffer, length) == BOOTLOADER_OK) {
@@ -181,7 +170,9 @@ int32_t bootloader_readRawStorage(uint32_t address, uint8_t *buffer, size_t leng
     return BOOTLOADER_ERROR_STORAGE_GENERIC;
   }
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_writeRawStorage(uint32_t address, uint8_t *buffer, size_t length)
 {
   if (bootloaderAddressTable->storageReadRaw(address, buffer, length) == BOOTLOADER_OK) {
@@ -190,7 +181,9 @@ int32_t bootloader_writeRawStorage(uint32_t address, uint8_t *buffer, size_t len
     return BOOTLOADER_ERROR_STORAGE_GENERIC;
   }
 }
+#endif
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_eraseRawStorage(uint32_t address, size_t length)
 {
   if (bootloaderAddressTable->storageEraseRaw(address, length) == BOOTLOADER_OK) {
@@ -199,3 +192,4 @@ int32_t bootloader_eraseRawStorage(uint32_t address, size_t length)
     return BOOTLOADER_ERROR_STORAGE_GENERIC;
   }
 }
+#endif

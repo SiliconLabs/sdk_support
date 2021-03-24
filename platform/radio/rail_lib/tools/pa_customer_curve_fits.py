@@ -208,6 +208,11 @@ class CurveSegment():
     self.slope = slope
     self.intercept = intercept
 
+  def __eq__(self, other):
+    return (self.maxValue == other.maxValue \
+            and self.slope == other.slope \
+            and self.intercept == other.intercept)
+
 def CalcPowerPolys(yAxisValues, powers, increment):
   global NUM_SEGMENTS_DEFAULT
   polylist = []

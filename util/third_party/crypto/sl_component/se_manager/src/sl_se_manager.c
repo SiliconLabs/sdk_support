@@ -37,7 +37,6 @@
 #include "em_se.h"
 #include "em_core.h"
 #include "em_assert.h"
-#include "em_system.h"
 #include <string.h>
 
 /// @addtogroup sl_se_manager
@@ -62,7 +61,7 @@ static se_manager_osal_mutex_t se_lock;
 static se_manager_osal_completion_t se_command_completion;
 // SE mailbox command response code. This value is read from the SEMAILBOX
 // in ISR in order to clear the command complete interrupt condition.
-static SE_Response_t se_manager_command_response;
+static SE_Response_t se_manager_command_response = SLI_SE_RESPONSE_INTERNAL_ERROR;
   #endif // SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION
 
 #endif // #if defined (SL_SE_MANAGER_THREADING)
@@ -310,6 +309,8 @@ sl_status_t sli_se_execute_and_wait(sl_se_command_context_t *cmd_ctx)
 
     // Get response which is read in the ISR to clear interrupt condition.
     command_response = se_manager_command_response;
+    // Default to an error.
+    se_manager_command_response = SLI_SE_RESPONSE_INTERNAL_ERROR;
   } else {
     // Wait for command completion and get command response
     command_response = SE_readCommandResponse();

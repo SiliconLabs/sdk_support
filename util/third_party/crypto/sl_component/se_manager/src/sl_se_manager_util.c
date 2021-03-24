@@ -34,7 +34,6 @@
 #include "sl_se_manager_util.h"
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_core.h"
 #include "em_assert.h"
 #include "em_system.h"
 #include <string.h>
@@ -471,17 +470,15 @@ sl_status_t sl_se_get_debug_lock_status(sl_se_command_context_t *cmd_ctx,
   #elif defined(CRYPTOACC_PRESENT)
   uint32_t vse_version = 0;
   uint32_t debug_lock_flags = 0;
-  SE_Response_t vse_mbx_status = SE_RESPONSE_MAILBOX_INVALID;
-  sl_status_t status;
 
   // Try to acquire SE lock
-  status = sli_se_lock_acquire();
+  sl_status_t status = sli_se_lock_acquire();
   if (status != SL_STATUS_OK) {
     return status;
   }
 
   // Read SE version from VSE mailbox.
-  vse_mbx_status = SE_getVersion(&vse_version);
+  SE_Response_t vse_mbx_status = SE_getVersion(&vse_version);
 
   // Reading debug lock status is not supported on VSE with versions <= 1.2.2.
   if ((vse_version <= 0x1010202UL) || (vse_mbx_status != SE_RESPONSE_OK)) {
@@ -766,21 +763,18 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
 sl_status_t sl_se_read_otp(sl_se_command_context_t *cmd_ctx,
                            sl_se_otp_init_t *otp_settings)
 {
-  uint32_t mcu_settings_flags = 0;
-  SE_Response_t vse_mbx_status = SE_RESPONSE_MAILBOX_INVALID;
-  sl_status_t status;
-
   if (cmd_ctx == NULL || otp_settings == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   // Try to acquire SE lock
-  status = sli_se_lock_acquire();
+  sl_status_t status = sli_se_lock_acquire();
   if (status != SL_STATUS_OK) {
     return status;
   }
 
-  vse_mbx_status = SE_getConfigStatusBits(&mcu_settings_flags);
+  uint32_t mcu_settings_flags = 0;
+  SE_Response_t vse_mbx_status = SE_getConfigStatusBits(&mcu_settings_flags);
 
   // Release SE lock
   status = sli_se_lock_release();

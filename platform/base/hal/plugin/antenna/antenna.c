@@ -273,7 +273,9 @@ EmberStatus halSetAntennaMode(HalAntennaMode mode)
 EmberStatus halToggleAntenna(void)
 {
   if (txAntennaMode == HAL_ANTENNA_MODE_DIVERSITY) {
-    selectTxAntenna(txAntennaSelection ^ 1);
+    selectTxAntenna(txAntennaSelection
+                    ^ HAL_ANTENNA_SELECT_ANTENNA1
+                    ^ HAL_ANTENNA_SELECT_ANTENNA2);
     return EMBER_SUCCESS;
   }
   return EMBER_ERR_FATAL;

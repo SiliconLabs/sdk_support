@@ -544,10 +544,11 @@ typedef enum {
 typedef enum {
   /** Normal mode  */
   iadcCfgModeNormal        = _IADC_CFG_ADCMODE_NORMAL,
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHSPEED)
   /** High Speed mode  */
   iadcCfgModeHighSpeed     = _IADC_CFG_ADCMODE_HIGHSPEED,
-
+#endif
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
   /** High Accuracy mode  */
   iadcCfgModeHighAccuracy  = _IADC_CFG_ADCMODE_HIGHACCURACY
 #endif
@@ -574,7 +575,7 @@ typedef enum {
   iadcCfgOsrHighSpeed64x  = _IADC_CFG_OSRHS_HISPD64
 } IADC_CfgOsrHighSpeed_t;
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
 /** IADC Over sampling rate for high accuracy. */
 typedef enum {
   /** High accuracy oversampling of 16x */
@@ -784,7 +785,7 @@ typedef struct {
 typedef struct {
   IADC_CfgAdcMode_t          adcMode;         /**< IADC mode; Normal, High speed or High Accuracy. */
   IADC_CfgOsrHighSpeed_t     osrHighSpeed;    /**< Over sampling ratio for High Speed and Normal modes. */
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
   IADC_CfgOsrHighAccuracy_t  osrHighAccuracy; /**< Over sampling ratio for High Accuracy mode. */
 #endif
   IADC_CfgAnalogGain_t       analogGain;      /**< Analog gain. */
@@ -798,7 +799,7 @@ typedef struct {
 } IADC_Config_t;
 
 #if defined(_IADC_CFG_DIGAVG_MASK)
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
 /** Default IADC config structure. */
 #define IADC_CONFIG_DEFAULT                                               \
   {                                                                       \
@@ -827,7 +828,7 @@ typedef struct {
   }
 #endif
 #else
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
 /** Default IADC config structure. */
 #define IADC_CONFIG_DEFAULT                                               \
   {                                                                       \

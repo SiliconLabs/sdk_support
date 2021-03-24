@@ -35,3 +35,5 @@ documentation:
       condition: [device_sdid_200]
     - page: emlib/api/efr32xg22/group-prs
       condition: [device_sdid_205]
+    - page: emlib/api/efr32xg23/group-prs
+      condition: [device_sdid_210]

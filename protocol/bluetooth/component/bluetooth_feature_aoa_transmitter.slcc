@@ -12,7 +12,7 @@ requires:
 provides:
   - name: "bluetooth_feature_aoa_transmitter"
 template_contribution:
-  - name: bluetooth_stack_init
+  - name: bluetooth_bgapi_class
     value:
-      function: "sl_bt_class_cte_transmitter_init"
+      class: "cte_transmitter"
     priority: 10

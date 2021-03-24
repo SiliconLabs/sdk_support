@@ -148,7 +148,7 @@ typedef struct SPIDRV_Init {
   uint8_t             portLocationRx;   ///< A location number for the SPI Rx pin.
   uint8_t             portLocationClk;  ///< A location number for the SPI Clk pin.
   uint8_t             portLocationCs;   ///< A location number for the SPI Cs pin.
-#elif defined(_GPIO_USART_ROUTEEN_MASK)
+#elif defined(_GPIO_USART_ROUTEEN_MASK) || defined(_GPIO_EUSART_ROUTEEN_MASK)
   GPIO_Port_TypeDef   portTx;           ///< Tx port.
   GPIO_Port_TypeDef   portRx;           ///< Rx port.
   GPIO_Port_TypeDef   portClk;          ///< Clock port.

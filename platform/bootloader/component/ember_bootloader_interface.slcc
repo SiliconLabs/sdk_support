@@ -7,6 +7,9 @@ quality: production
 source:
   - path: platform/bootloader/api/ember_btl_interface.c
   - path: platform/bootloader/api/ember_btl_common.c
+config_file:
+  - path: "platform/bootloader/config/sl_ember_bootloader_interface_config.h"
+    file_id: "ember_bootloader_interface_config"
 include:
   - path: platform/bootloader/api
     file_list:

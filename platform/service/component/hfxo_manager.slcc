@@ -1,7 +1,7 @@
 id: hfxo_manager
 label: "HFXO Manager"
 package: platform
-description: HFXO Manager
+description: HFXO Manager - Manager for the High Frequency Crystal Oscillator
 category: Services
 quality: production
 config_file:
@@ -33,4 +33,7 @@ template_contribution:
       event: service_init
       include: sl_hfxo_manager.h
       handler: sl_hfxo_manager_init
-    priority: -5  
+    priority: -5
+documentation:
+  docset: gecko-platform
+  document: service/api/group-hfxo-manager   

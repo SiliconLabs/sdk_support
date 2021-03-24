@@ -34,3 +34,5 @@ documentation:
       condition: [device_sdid_200]
     - page: emlib/api/efr32xg22/group-timer
       condition: [device_sdid_205]
+    - page: emlib/api/efr32xg23/group-timer
+      condition: [device_sdid_210]

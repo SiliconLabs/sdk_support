@@ -160,8 +160,6 @@ void OSTimeDly(OS_TICK  dly,
   if (delay_ticks > 0u) {
     uint32_t delay;
 
-    CORE_ENTER_ATOMIC();
-
     // Check for potential overflow
     if (OSDelayMaxTick != 0 && delay_ticks >= OSDelayMaxTick) {
       RTOS_ERR_SET(*p_err, RTOS_ERR_WOULD_OVF);
@@ -169,6 +167,8 @@ void OSTimeDly(OS_TICK  dly,
     }
 
     delay = (uint64_t)(((uint64_t)delay_ticks * (uint64_t)sl_sleeptimer_get_timer_frequency()) + (OSCfg_TickRate_Hz - 1u)) / OSCfg_TickRate_Hz;
+    
+    CORE_ENTER_ATOMIC();
 
     status = sl_sleeptimer_start_timer(&OSTCBCurPtr->TimerHandle,
                                        delay,

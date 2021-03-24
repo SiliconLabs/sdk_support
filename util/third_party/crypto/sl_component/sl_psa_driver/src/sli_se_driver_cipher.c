@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Driver Cipher functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -122,7 +152,6 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   int trng_ret = -1;
   uint8_t tmp_buf[16] = { 0 };
   uint8_t iv_buf[16] = { 0 };
@@ -133,7 +162,6 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   if (key_buffer == NULL
       || key_buffer_size == 0
       || input == NULL
-      || input_length == 0
       || output == NULL
       || output_length == NULL
       || output_size == 0) {
@@ -149,7 +177,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   sl_se_command_context_t cmd_ctx = { 0 };
   sl_se_key_descriptor_t key_desc = { 0 };
 
-  status = sl_se_init_command_context(&cmd_ctx);
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -523,7 +551,6 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   uint8_t tmp_buf[16] = { 0 };
   uint8_t iv_buf[16] = { 0 };
 
@@ -547,7 +574,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   sl_se_command_context_t cmd_ctx = { 0 };
   sl_se_key_descriptor_t key_desc = { 0 };
 
-  status = sl_se_init_command_context(&cmd_ctx);
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -911,7 +938,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     return psa_status;
   }
 
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   bool lagging;
   size_t bytes_to_boundary = 16 - (operation->processed_length % 16);
   size_t actual_output_length = 0;
@@ -979,7 +1005,7 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
   // Ephemeral contexts
   sl_se_command_context_t cmd_ctx = { 0 };
 
-  status = sl_se_init_command_context(&cmd_ctx);
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -1041,7 +1067,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
         input += operation_size;
         input_length -= operation_size;
-        output += operation_size;
         actual_output_length += operation_size;
         operation->processed_length += operation_size;
       }
@@ -1102,7 +1127,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
         input += operation_size;
         input_length -= operation_size;
-        output += operation_size;
         actual_output_length += operation_size;
         operation->processed_length += operation_size;
       }
@@ -1127,7 +1151,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       }
 
       input += input_length;
-      output += input_length;
       actual_output_length += input_length;
       operation->processed_length += input_length;
       input_length -= input_length;
@@ -1150,7 +1173,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       }
 
       input += input_length;
-      output += input_length;
       actual_output_length += input_length;
       operation->processed_length += input_length;
       input_length -= input_length;
@@ -1181,7 +1203,6 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     }
 
       input += input_length;
-      output += input_length;
       actual_output_length += input_length;
       operation->processed_length += input_length;
       input_length -= input_length;
@@ -1228,7 +1249,6 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
 {
   // Finalize cipher operation. This will only output data for algorithms which include padding.
   // This is currently only AES-CBC with PKCS#7.
-  psa_status_t psa_status = PSA_ERROR_BAD_STATE;
 
   // Argument check
   if (operation == NULL || output == NULL || output_length == NULL) {
@@ -1237,7 +1257,7 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
 
   // Key desc has been properly set by wrapper function
   const sl_se_key_descriptor_t *key_desc = &operation->key_desc;
-  psa_status = validate_key_type(key_desc);
+  psa_status_t psa_status = validate_key_type(key_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }

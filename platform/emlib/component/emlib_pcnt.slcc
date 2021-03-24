@@ -31,3 +31,5 @@ documentation:
       condition: [device_sdid_89]
     - page: emlib/api/efr32xg14/group-pcnt
       condition: [device_sdid_95]
+    - page: emlib/api/efr32xg23/group-pcnt
+      condition: [device_sdid_210]

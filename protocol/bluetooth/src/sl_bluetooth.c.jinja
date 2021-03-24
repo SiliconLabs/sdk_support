@@ -4,6 +4,15 @@
 #include "sl_bluetooth.h"
 {%- if bluetooth_api_ncp_host is not defined %}
 #include "sl_bt_stack_init.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#ifndef SL_CATALOG_GATT_CONFIGURATION_PRESENT
+#include "bg_gattdb_def.h"
+const struct bg_gattdb_def bg_gattdb_data = {0};
+#endif // SL_CATALOG_GATT_CONFIGURATION_PRESENT
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
 {%- endif %}
 {%- for entry in bluetooth_stack_init %}
 {%-   if entry["include"] is string %}
@@ -33,7 +42,17 @@ static sl_bt_configuration_t config = SL_BT_CONFIG_DEFAULT;
 {%- else %}
 static const sl_bt_configuration_t config = SL_BT_CONFIG_DEFAULT;
 {%- endif %}
-{% endif %}
+
+/** @brief Table of used BGAPI classes */
+static const struct sli_bgapi_class * const bt_class_table[] =
+{
+{%- for entry in bluetooth_bgapi_class %}
+  SL_BT_BGAPI_CLASS({{entry["class"]}}),
+{%- endfor %}
+  NULL
+};
+{%- endif %}
+
 void sl_bt_init(void)
 {
 {%- if bluetooth_api_ncp_host is not defined %}
@@ -41,6 +60,7 @@ void sl_bt_init(void)
   linklayer_priorities.scan_max = linklayer_priorities.adv_min + 1;
 {%- endif %}
   sl_bt_init_stack(&config);
+  sl_bt_init_classes(bt_class_table);
 {%- endif %}
   {%- for entry in bluetooth_stack_init %}
   {{ entry["function"] }}();

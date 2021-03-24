@@ -60,17 +60,17 @@
 //  <o>Minimal stack size [words] <0-65535>
 //  <i> Stack for idle task and default task stack in words.
 //  <i> Default: 140
-#define configMINIMAL_STACK_SIZE                ((uint16_t)(140))
+#define configMINIMAL_STACK_SIZE                140
 
 //  <o>Total heap size [bytes] <0-0xFFFFFFFF>
 //  <i> Heap memory size in bytes.
 //  <i> Default: 8192
-#define configTOTAL_HEAP_SIZE                   ((size_t)8192)
+#define configTOTAL_HEAP_SIZE                   8192
 
 //  <o>Kernel tick frequency [Hz] <0-0xFFFFFFFF>
 //  <i> Kernel tick rate in Hz.
 //  <i> Default: 1000
-#define configTICK_RATE_HZ                      ((TickType_t)1000)
+#define configTICK_RATE_HZ                      1000
 
 //  <o>Timer task stack depth [words] <0-65535>
 //  <i> Stack for timer task in words.
@@ -199,27 +199,29 @@
 //  <i> Using Floating Point Unit (FPU) affects context handling.
 //  <i> Enable FPU when application uses floating point operations.
 //  <i> Default: 1
-#define configENABLE_FPU                      1
+#define configENABLE_FPU                        1
 
 //  <q>Use Memory Protection Unit
 //  <i> Using Memory Protection Unit (MPU) requires detailed memory map definition.
 //  <i> This setting is only releavant for MPU enabled ports.
 //  <i> Default: 0
-#define configENABLE_MPU                      0
+#define configENABLE_MPU                        0
 
 //  <o>Minimal secure stack size [words] <0-65535>
 //  <i> Stack for idle task Secure side context in words.
 //  <i> This setting is only relevant when TrustZone extension is enabled.
 //  <i> Default: 128
-#define configMINIMAL_SECURE_STACK_SIZE       ((uint32_t)128)
+#define configMINIMAL_SECURE_STACK_SIZE         128
 // </h>
 
+// <h> Thread Local Storage Settings
 //  <o>Thread local storage pointers
 //  <i> Thread local storage (or TLS) allows the application writer to store
 //  <i> values inside a task's control block, making the value specific to
 //  <i> (local to) the task itself.
 //  <i> Default: 0
 #define configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS 0
+// </h>
 
 //------------- <<< end of configuration section >>> ---------------------------
 

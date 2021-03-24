@@ -24,6 +24,16 @@
 
 #include "em_device.h"
 
+#define SL_EMBER_BOOTLOADER_TYPE_APPLICATION              1U
+#define SL_EMBER_BOOTLOADER_TYPE_STANDALONE               2U
+
+#if !defined(SL_EMBER_BOOTLOADER_TYPE)
+  #error SL_EMBER_BOOTLOADER_TYPE is undefined
+#elif (SL_EMBER_BOOTLOADER_TYPE != SL_EMBER_BOOTLOADER_TYPE_APPLICATION)
+      && (SL_EMBER_BOOTLOADER_TYPE != SL_EMBER_BOOTLOADER_TYPE_STANDALONE)
+  #error SL_EMBER_BOOTLOADER_TYPE has an invalid value
+#endif
+
 #define EBL_MIN_TAG_SIZE                                  128U
 #define IMAGE_STAMP_SIZE                                  8U
 #define IMAGE_INFO_MAXLEN_OLD                             32U
@@ -105,9 +115,11 @@ typedef struct {
 } BaseAddressTable_t;
 
 typedef struct {
-  /** The version of this data structure */
+  /** Version, either of the bootloader for standalone bootloaders or of the
+      storage info struct for application bootloaders*/
   uint16_t version;
 
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
   /** A bitmask describing the capabilites of this particular external EEPROM */
   uint16_t capabilitiesMask;
 
@@ -129,6 +141,7 @@ typedef struct {
 
   /** The number of bytes in a word for the external EEPROM **/
   uint8_t wordSizeBytes;
+#endif
 } BootloaderInformation_t;
 
 typedef struct {
@@ -262,9 +275,9 @@ typedef uint16_t BootloaderParserCallback_t;
 void bootloader_getInfo(BootloaderInformation_t *info);
 
 /***************************************************************************//**
- * Initialize components of the bootloader
- * so the app can use the interface. This typically includes initializing
- * serial peripherals for communication with external SPI flashes, and so on.
+ * Initialize components of the bootloader so the app can use the interface.
+ * For application bootloaders, this initializes the serial peripheral used for
+ * communication with the external serial memory and powers it up if supported.
  *
  * @return Error code. @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_INIT_BASE range.
@@ -273,9 +286,8 @@ int32_t bootloader_init(void);
 
 /***************************************************************************//**
  * De-initialize components of the bootloader that were previously initialized.
- * This typically includes powering down external SPI flashes and
- * de-initializing the serial peripheral used for communication with the
- * external flash.
+ * For application bootloaders, this powers down the external serial memory if 
+ * supported and de-initializes the serial peripheral used for communication.
  *
  * @return Error code. @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_INIT_BASE range.
@@ -294,7 +306,7 @@ int32_t bootloader_deinit(void);
 void bootloader_rebootAndInstall(void);
 
 /***************************************************************************//**
- * Initialize image verification.
+ * Initialize image verification. Only applies to application bootloaders.
  *
  * Initialize verification of an upgrade image stored in a bootloader storage
  * slot.
@@ -324,12 +336,14 @@ void bootloader_rebootAndInstall(void);
  * @return @ref BOOTLOADER_OK if the image parser was initialized, else error
  *         code.
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_initVerifyImage(uint32_t slotId,
                                    void     *context,
                                    size_t   contextSize);
+#endif
 
 /***************************************************************************//**
- * Continue image verification.
+ * Continue image verification. Only applies to application bootloaders.
  *
  * Continue verification of an upgrade image stored in a bootloader storage
  * slot.
@@ -359,10 +373,13 @@ int32_t bootloader_initVerifyImage(uint32_t slotId,
  *         the parser has successfully parsed the image and it passes
  *         verification. Else error code.
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_continueVerifyImage(void *context, BootloaderParserCallback_t metadataCallback);
+#endif
 
 /***************************************************************************//**
- * Verify that the image in the given storage slot is valid.
+ * Verify that the image in the given storage slot is valid. Only applies to
+ * application bootloaders.
  *
  * @param[in] slotId ID of the slot to check
  * @param[in] metadataCallback Function pointer which gets called when
@@ -378,17 +395,22 @@ int32_t bootloader_continueVerifyImage(void *context, BootloaderParserCallback_t
  *
  * @return @ref BOOTLOADER_OK if the image is valid, else error code.
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_verifyImage(uint32_t slotId, BootloaderParserCallback_t metadataCallback);
+#endif
 
 /***************************************************************************//**
- * Check whether the bootloader storage is busy.
+ * Check whether the bootloader storage is busy. Only applies to application
+ * bootloaders.
  *
  * @return True if the storage is busy
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 bool bootloader_storageIsBusy(void);
+#endif
 
 /***************************************************************************//**
- * Read raw data from storage.
+ * Read raw data from storage. Only applies to application bootloaders.
  *
  * @param[in]  address Address to start reading from
  * @param[out] buffer  Buffer to store the data
@@ -397,10 +419,12 @@ bool bootloader_storageIsBusy(void);
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_readRawStorage(uint32_t address, uint8_t *buffer, size_t length);
+#endif
 
 /***************************************************************************//**
- * Write data to storage.
+ * Write data to storage. Only applies to application bootloaders.
  *
  * @param[in] address Address to start writing to
  * @param[in] buffer  Buffer to read data to write from
@@ -409,10 +433,12 @@ int32_t bootloader_readRawStorage(uint32_t address, uint8_t *buffer, size_t leng
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_writeRawStorage(uint32_t address, uint8_t *buffer, size_t length);
+#endif
 
 /***************************************************************************//**
- * Erase data from storage.
+ * Erase data from storage. Only applies to application bootloaders.
  *
  * @note Erasing storage must adhere to the limitations of the underlying
  *       storage medium, such as requiring full page erases. Use
@@ -425,6 +451,8 @@ int32_t bootloader_writeRawStorage(uint32_t address, uint8_t *buffer, size_t len
  * @return @ref BOOTLOADER_OK on success, else error code in
  *         @ref BOOTLOADER_ERROR_STORAGE_BASE range
  ******************************************************************************/
+#if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
 int32_t bootloader_eraseRawStorage(uint32_t address, size_t length);
+#endif
 
 #endif // EMBER_BTL_INTERFACE_H

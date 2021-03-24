@@ -13,7 +13,7 @@ provides:
   - name: "btmesh_core"
     allow_multiple: true
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_prov_init"
+      class: "prov"
     priority: 1

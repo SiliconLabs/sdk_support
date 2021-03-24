@@ -1,7 +1,7 @@
 id: psa_driver
 package: platform
 label: PSA Crypto Hardware Acceleration
-description: |-
+description: >-
   This component provides drivers for hardware accelerated crypto operations
   in PSA Crypto.
 category: Platform|Security

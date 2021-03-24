@@ -159,6 +159,10 @@ void sli_hfxo_manager_end_startup_measurement(void)
   // Complete HFXO restore time measurement
   hfxo_last_startup_time = sl_sleeptimer_get_tick_count() - hfxo_startup_time_tc_inital;
 
+  // With low precision clock, the HFXO startup time measure could be zero.
+  // In that case, ensure it's a least 1 tick.
+  hfxo_last_startup_time = (hfxo_last_startup_time == 0) ? 1 : hfxo_last_startup_time;
+
   // Calculate average for HFXO restore time
   hfxo_startup_time_sum_average -= (int32_t)hfxo_startup_time_table[hfxo_startup_time_table_index] - (int32_t)hfxo_last_startup_time;
   hfxo_startup_time_table[hfxo_startup_time_table_index] = hfxo_last_startup_time;

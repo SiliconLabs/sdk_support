@@ -12,7 +12,7 @@ requires:
 provides:
   - name: "btmesh_feature_config_client"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_config_client_init"
+      class: "config_client"
     priority: 1

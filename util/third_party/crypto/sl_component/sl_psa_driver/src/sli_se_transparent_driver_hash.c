@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver Hash functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -74,8 +104,6 @@ psa_status_t sli_se_transparent_hash_update(sli_se_transparent_hash_operation_t 
                                             const uint8_t *input,
                                             size_t input_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
-
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -83,7 +111,7 @@ psa_status_t sli_se_transparent_hash_update(sli_se_transparent_hash_operation_t 
 
   // create ephemeral contexts
   sl_se_command_context_t ephemeral_se_ctx;
-  status = sl_se_init_command_context(&ephemeral_se_ctx);
+  sl_status_t status = sl_se_init_command_context(&ephemeral_se_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -108,7 +136,6 @@ psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t 
                                             size_t hash_size,
                                             size_t *hash_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   if (operation == NULL
       || hash_length == NULL
       || hash == NULL) {
@@ -117,7 +144,7 @@ psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t 
 
   // create ephemeral contexts
   sl_se_command_context_t ephemeral_se_ctx;
-  status = sl_se_init_command_context(&ephemeral_se_ctx);
+  sl_status_t status = sl_se_init_command_context(&ephemeral_se_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -183,8 +210,6 @@ psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
                                              size_t hash_size,
                                              size_t *hash_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
-
   if ((input == NULL && input_length > 0)
       || hash == NULL
       || hash_length == NULL) {
@@ -221,7 +246,7 @@ psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  status = sl_se_init_command_context(&ephemeral_se_ctx);
+  sl_status_t status = sl_se_init_command_context(&ephemeral_se_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }

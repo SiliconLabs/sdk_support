@@ -9,6 +9,8 @@ root_path: "protocol/bluetooth/component"
 requires:
   - name: "btmesh_stack"
   - name: "btmesh_feature_node"
+  - name: bluetooth_feature_gatt_server  
+  - name: gatt_configuration
   
 provides:
   - name: "btmesh_feature_gatt_prov_bearer"

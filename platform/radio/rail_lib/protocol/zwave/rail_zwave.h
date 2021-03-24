@@ -179,6 +179,14 @@ RAIL_ENUM_GENERIC(RAIL_ZWAVE_NodeId_t, uint16_t) {
 #define RAIL_ZWAVE_NODE_ID_DEFAULT   ((RAIL_ZWAVE_NodeId_t) RAIL_ZWAVE_NODE_ID_DEFAULT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/** Defines for subPhyID field in RAIL_RxPacketDetails_t */
+#define RAIL_ZWAVE_RX_SUBPHY_ID_0     (0U)
+#define RAIL_ZWAVE_RX_SUBPHY_ID_1     (1U)
+#define RAIL_ZWAVE_RX_SUBPHY_ID_2     (2U)
+#define RAIL_ZWAVE_RX_SUBPHY_ID_3     (3U)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
 /**
  * @enum RAIL_ZWAVE_HomeId_t
  * @brief A Z-Wave Home ID.

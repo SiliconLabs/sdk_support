@@ -40,6 +40,7 @@
 
 #include "rail_ble.h"
 #include "rail_ieee802154.h"
+#include "rail_mfm.h"
 #include "rail_zwave.h"
 
 #include "app_common.h"

@@ -12,7 +12,7 @@ requires:
 provides:
   - name: "bluetooth_feature_system"
 template_contribution:
-  - name: bluetooth_stack_init
+  - name: bluetooth_bgapi_class
     value:
-      function: "sl_bt_class_system_init"
+      class: "system"
     priority: 2

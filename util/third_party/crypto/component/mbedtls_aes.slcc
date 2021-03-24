@@ -1,7 +1,8 @@
 id: mbedtls_aes
 package: platform
 label: Mbed TLS Support for AES
-description: This component provides support for AES block cipher using Mbed TLS
+description: >-
+  This component provides support for the AES block cipher using Mbed TLS.
 category: Platform|Security
 quality: production
 source:

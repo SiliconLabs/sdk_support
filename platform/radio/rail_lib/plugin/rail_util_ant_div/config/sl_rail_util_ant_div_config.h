@@ -55,6 +55,10 @@
 // <SL_RAIL_UTIL_ANT_DIV_ANTENNA1=> Use Antenna 1 Only
 // <i> Default: SL_RAIL_UTIL_ANT_DIV_DISABLED
 #define SL_RAIL_UTIL_ANT_DIV_TX_MODE  SL_RAIL_UTIL_ANT_DIV_DISABLED
+// <e SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT> Enable/Disable Runtime PHY Select
+// <i> Default: 0
+#define SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT 0
+// </e>
 // </h>
 
 // <<< end of configuration section >>>

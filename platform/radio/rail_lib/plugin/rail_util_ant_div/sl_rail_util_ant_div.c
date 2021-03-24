@@ -26,6 +26,12 @@
 #define RX_ANTENNA_SUPPORT (SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT \
                             || (ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED))
 
+#if defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)
+#define SL_RAIL_UTIL_ANT_DIV_ENABLE 1
+#else //!(defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT))
+#define SL_RAIL_UTIL_ANT_DIV_ENABLE 0
+#endif //defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)
+
 // Flag any mis-configuration
 #if     ANTENNA_USE_RAIL_SCHEME
   #if     (defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) && !defined(SL_RAIL_UTIL_ANT_DIV_ANT0_LOC))
@@ -233,7 +239,7 @@ sl_status_t sl_rail_util_ant_div_set_antenna_mode(sl_rail_util_antenna_mode_t mo
 sl_status_t sl_rail_util_ant_div_toggle_antenna(void)
 {
   if (txAntennaMode == SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY) {
-    selectTxAntenna(txAntennaSelection ^ 1);
+    selectTxAntenna(txAntennaSelection ^ SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1 ^ SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA2);
     return SL_STATUS_OK;
   }
   return SL_STATUS_NOT_SUPPORTED;
@@ -279,17 +285,13 @@ void sl_rail_util_ant_div_init_tx_options(RAIL_TxOptions_t *txOptions)
 
 #define ANTDIV_RX_PHY_DEFAULT_ENABLED (ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
 
-#if SL_RAIL_UTIL_ANTDIV_RX_RUNTIME_PHY_SELECT
-#if ANTDIV_RX_PHY_DEFAULT_ENABLED
-static volatile bool antDivRxPhySelected = true;
-#else //!ANTDIV_PHY_DEFAULT_ENABLED
-static volatile bool antDivRxPhySelected = false;
-#endif //ANTDIV_PHY_DEFAULT_ENABLED
+#if SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT
+#define antDivRxPhySelected (rxAntennaMode == SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY)
 #elif ANTDIV_RX_PHY_DEFAULT_ENABLED
 #define antDivRxPhySelected (true)
 #else //!ANTDIV_RX_PHY_DEFAULT_ENABLED
 #define antDivRxPhySelected (false)
-#endif //SL_RAIL_UTIL_ANTDIV_RX_RUNTIME_PHY_SELECT
+#endif //SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT
 
 bool sl_rail_util_ant_div_get_phy_select(void)
 {

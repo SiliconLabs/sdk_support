@@ -137,53 +137,86 @@ static psa_status_t get_expected_key_size( const psa_key_attributes_t *attribute
                                            size_t *expected_size )
 {
     size_t buffer_size = 0;
-    if( PSA_KEY_LIFETIME_GET_LOCATION( attributes->core.lifetime ) == PSA_KEY_LOCATION_LOCAL_STORAGE )
+    psa_key_location_t location = PSA_KEY_LIFETIME_GET_LOCATION( attributes->core.lifetime );
+    psa_key_type_t key_type = attributes->core.type;
+    size_t key_bits = attributes->core.bits;
+
+    switch( location )
     {
-        buffer_size = PSA_KEY_EXPORT_MAX_SIZE( attributes->core.type,
-                                               attributes->core.bits );
+        case PSA_KEY_LOCATION_LOCAL_STORAGE:
+            buffer_size = PSA_KEY_EXPORT_MAX_SIZE( key_type, key_bits );
 
-        if( buffer_size == 0 )
-            return( PSA_ERROR_NOT_SUPPORTED );
+            if( buffer_size == 0 )
+                return( PSA_ERROR_NOT_SUPPORTED );
 
-        *expected_size = buffer_size;
-        return( PSA_SUCCESS );
-    }
-    else
+            *expected_size = buffer_size;
+            return( PSA_SUCCESS );
+
 #if defined(SEMAILBOX_PRESENT) && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    if  (PSA_KEY_LIFETIME_GET_LOCATION( attributes->core.lifetime ) == PSA_KEY_LOCATION_SLI_SE_OPAQUE){
-        buffer_size = PSA_KEY_EXPORT_MAX_SIZE( attributes->core.type,
-                                               attributes->core.bits );
+        case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
+            buffer_size = PSA_KEY_EXPORT_MAX_SIZE( key_type, key_bits );
 
-        if( buffer_size == 0 )
-            return( PSA_ERROR_INVALID_ARGUMENT );
+            if( buffer_size == 0 )
+                return( PSA_ERROR_INVALID_ARGUMENT );
 
-        // Remove public key format byte
-        if( PSA_KEY_TYPE_IS_PUBLIC_KEY(attributes->core.type) ) {
-            buffer_size--;
-        }
-
-        // Compensate for word alignment demands
-        buffer_size = sli_se_word_align( buffer_size );
-        if( PSA_BITS_TO_BYTES( attributes->core.bits ) & 0x3 ) {
-            if( PSA_KEY_TYPE_IS_PUBLIC_KEY(attributes->core.type) ) {
-                // Allocate extra word for public keys, since alignment constrains
-                // May require that
-                buffer_size += sizeof(uint32_t);
+            // Remove public key format byte
+            if( PSA_KEY_TYPE_IS_PUBLIC_KEY( key_type ) ) {
+                buffer_size--;
             }
-        }
-        // Add wrapped context overhead
-        buffer_size += sizeof(sli_se_opaque_wrapped_key_context_t);
 
-        *expected_size = buffer_size;
+            // Compensate for word alignment demands
+            buffer_size = sli_se_word_align( buffer_size );
+            if( PSA_BITS_TO_BYTES( attributes->core.bits ) & 0x3 ) {
+                if( PSA_KEY_TYPE_IS_PUBLIC_KEY(attributes->core.type) ) {
+                    // Allocate extra word for public keys, since alignment constrains
+                    // May require that
+                    buffer_size += sizeof(uint32_t);
+                }
+            }
+            // Add wrapped context overhead
+            buffer_size += sizeof(sli_se_opaque_wrapped_key_context_t);
 
-        return ( PSA_SUCCESS );
-    }
+            *expected_size = buffer_size;
+
+            return ( PSA_SUCCESS );
 #endif // VAULT
-    {
-        /* TBD: opaque driver support: need to calculate size through a
-         * driver-defined size function, since the size of an opaque (wrapped)
-         * key will be different for each implementation. */
-        return( PSA_ERROR_NOT_SUPPORTED );
+
+#if defined(PSA_CRYPTO_DRIVER_TEST)
+        case PSA_CRYPTO_TEST_DRIVER_LIFETIME:
+#ifdef TEST_DRIVER_KEY_CONTEXT_SIZE_FUNCTION
+            *expected_size = test_size_function( key_type, key_bits );
+            return( PSA_SUCCESS );
+#else /* TEST_DRIVER_KEY_CONTEXT_SIZE_FUNCTION */
+            if( PSA_KEY_TYPE_IS_KEY_PAIR( key_type ) )
+            {
+                int public_key_overhead = ( ( TEST_DRIVER_KEY_CONTEXT_STORE_PUBLIC_KEY == 1 ) ?
+                                           PSA_KEY_EXPORT_MAX_SIZE( key_type, key_bits ) : 0 );
+                *expected_size = TEST_DRIVER_KEY_CONTEXT_BASE_SIZE
+                                 + TEST_DRIVER_KEY_CONTEXT_PUBLIC_KEY_SIZE
+                                 + public_key_overhead;
+            }
+            else if( PSA_KEY_TYPE_IS_PUBLIC_KEY( attributes->core.type ) )
+            {
+                *expected_size = TEST_DRIVER_KEY_CONTEXT_BASE_SIZE
+                                 + TEST_DRIVER_KEY_CONTEXT_PUBLIC_KEY_SIZE;
+            }
+            else if ( !PSA_KEY_TYPE_IS_KEY_PAIR( key_type ) &&
+                      !PSA_KEY_TYPE_IS_PUBLIC_KEY ( attributes->core.type ) )
+            {
+                *expected_size = TEST_DRIVER_KEY_CONTEXT_BASE_SIZE
+                                 + TEST_DRIVER_KEY_CONTEXT_SYMMETRIC_FACTOR
+                                 * ( ( key_bits + 7 ) / 8 );
+            }
+            else
+            {
+                return( PSA_ERROR_NOT_SUPPORTED );
+            }
+            return( PSA_SUCCESS );
+#endif /* TEST_DRIVER_KEY_CONTEXT_SIZE_FUNCTION */
+#endif /* PSA_CRYPTO_DRIVER_TEST */
+
+        default:
+            return( PSA_ERROR_NOT_SUPPORTED );
     }
 }
 #endif /* PSA_CRYPTO_DRIVER_PRESENT */
@@ -260,8 +293,6 @@ psa_status_t psa_driver_wrapper_allocate_key(
             /* Key is declared with a lifetime not known to us */
             return( PSA_ERROR_NOT_SUPPORTED );
     }
-
-    return( PSA_ERROR_NOT_SUPPORTED );
 #else
     return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* PSA_CRYPTO_DRIVER_PRESENT && PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
@@ -664,7 +695,7 @@ psa_status_t psa_driver_wrapper_validate_key(
     size_t data_length,
     size_t *bits )
 {
-#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT) && ( defined(PSA_CRYPTO_DRIVER_TEST) || defined(CRYPTOACC_PRESENT) )
+#if defined(PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT) && ( defined(PSA_CRYPTO_DRIVER_TEST) || defined(CRYPTOACC_PRESENT) || defined(SEMAILBOX_PRESENT) )
     psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
     /* Try accelerators in turn */
 #if defined(PSA_CRYPTO_DRIVER_TEST)
@@ -1523,11 +1554,18 @@ psa_status_t psa_driver_wrapper_verify_hash( psa_key_slot_t *slot,
             /* Key is declared with a lifetime not known to us */
             return( status );
     }
-#else
+#else /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
     return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* PSA_CRYPTO_ACCELERATOR_DRIVER_PRESENT */
 
 #else /* PSA_CRYPTO_DRIVER_PRESENT */
+    (void)slot;
+    (void)alg;
+    (void)hash;
+    (void)hash_length;
+    (void)signature;
+    (void)signature_length;
+
     return( PSA_ERROR_NOT_SUPPORTED );
 #endif /* PSA_CRYPTO_DRIVER_PRESENT */
 }
@@ -2682,7 +2720,7 @@ psa_status_t psa_driver_wrapper_cipher_encrypt_setup(
 #endif /* PSA_CRYPTO_DRIVER_TEST */
         default:
             /* Key is declared with a lifetime not known to us */
-            return( PSA_ERROR_BAD_STATE );
+            return( PSA_ERROR_NOT_SUPPORTED );
     }
 
 #else /* PSA_CRYPTO_DRIVER_PRESENT */
@@ -2863,7 +2901,7 @@ psa_status_t psa_driver_wrapper_cipher_decrypt_setup(
 #endif /* PSA_CRYPTO_DRIVER_TEST */
         default:
             /* Key is declared with a lifetime not known to us */
-            return( PSA_ERROR_BAD_STATE );
+            return( PSA_ERROR_NOT_SUPPORTED );
     }
 
 #else /* PSA_CRYPTO_DRIVER_PRESENT */

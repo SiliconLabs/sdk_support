@@ -12,7 +12,7 @@ requires:
 provides:
   - name: "btmesh_feature_time_server"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_time_server_init"
+      class: "time_server"
     priority: 1

@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Opaque Driver Cipher functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -10,11 +40,8 @@
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
 
-#include "mbedtls/entropy_poll.h"
-
 #include "sl_se_manager.h"
 #include "sl_se_manager_cipher.h"
-#include "sl_se_manager_entropy.h"
 
 #include "sli_se_driver_cipher.h"
 #include "sli_se_driver_key_management.h"
@@ -32,46 +59,44 @@ static psa_status_t initialize_key_in_context(const psa_key_attributes_t *attrib
                                               const uint8_t *key_buffer,
                                               size_t key_buffer_size)
 {
-  // Initialize the key descriptor
-  const size_t key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
-  psa_status_t psa_status = sli_se_key_desc_from_psa_attributes(attributes,
-                                                                key_size,
-                                                                &operation->operation.key_desc);
+  // Double check that the location of the key actually is
+  // as expected for this driver.
+  if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes))
+      != PSA_KEY_LOCATION_SLI_SE_OPAQUE) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // Initialize the key descriptor.
+  psa_status_t psa_status = sli_se_key_desc_from_input(attributes,
+                                                       key_buffer,
+                                                       key_buffer_size,
+                                                       &operation->operation.key_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
-  if (key_buffer_size < key_size + sizeof(sli_se_opaque_wrapped_key_context_t)) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-  // The key desc will always point to the key buffer in the operation struct
-  // so we can set its size value once and forget about it.
-  operation->operation.key_desc.storage.location.buffer.size
-    = sizeof(operation->key);
 
-  // Copy the key material
-  psa_key_location_t location =
-    PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes));
-  size_t offset = 0;
-  switch (location) {
-    case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
-      offset = offsetof(sli_se_opaque_wrapped_key_context_t, wrapped_buffer);
-      break;
-    default:
-      return PSA_ERROR_NOT_SUPPORTED;
+  // Copy the key material -- could be either a built-in or a wrapped key.
+  sli_se_opaque_key_context_header_t *key_context_header =
+    (sli_se_opaque_key_context_header_t *)key_buffer;
+  if (key_context_header->builtin_key_id != 0) { // Built-in key.
+    memcpy(operation->key,
+           key_buffer,
+           sizeof(sli_se_opaque_key_context_header_t));
+    operation->key_len = sizeof(sli_se_opaque_key_context_header_t);
+  } else { // Wrapped key.
+    size_t key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
+    size_t offset = offsetof(sli_se_opaque_wrapped_key_context_t, wrapped_buffer);
+    if (key_buffer_size < key_size + sizeof(sli_se_opaque_wrapped_key_context_t)) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    if (sizeof(operation->key) < key_size + SLI_SE_WRAPPED_KEY_OVERHEAD) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+    memcpy(operation->key,
+           key_buffer + offset,
+           key_size + SLI_SE_WRAPPED_KEY_OVERHEAD);
+    operation->key_len = key_size + SLI_SE_WRAPPED_KEY_OVERHEAD;
   }
-  if (key_buffer_size < offset) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-  if (key_size + SLI_SE_WRAPPED_KEY_OVERHEAD > sizeof(operation->key)) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-  if (key_size + SLI_SE_WRAPPED_KEY_OVERHEAD + offset > key_buffer_size) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-  memcpy(operation->key,
-         key_buffer + offset,
-         key_size + SLI_SE_WRAPPED_KEY_OVERHEAD);
-  operation->key_len = key_size + SLI_SE_WRAPPED_KEY_OVERHEAD;
 
   return PSA_SUCCESS;
 }
@@ -218,8 +243,12 @@ psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *opera
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  // Set the key correctly
-  update_key_from_context(operation);
+  // For wrapped keys, set the key correctly
+  sli_se_opaque_key_context_header_t *key_context_header =
+    (sli_se_opaque_key_context_header_t *)operation->key;
+  if (key_context_header->builtin_key_id == 0) {
+    update_key_from_context(operation);
+  }
 
   // Compute
   return sli_se_driver_cipher_update(&operation->operation,
@@ -239,8 +268,12 @@ psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *opera
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  // Set the key correctly
-  update_key_from_context(operation);
+  // For wrapped keys, set the key correctly
+  sli_se_opaque_key_context_header_t *key_context_header =
+    (sli_se_opaque_key_context_header_t *)operation->key;
+  if (key_context_header->builtin_key_id == 0) {
+    update_key_from_context(operation);
+  }
 
   // Compute
   return sli_se_driver_cipher_finish(&operation->operation,

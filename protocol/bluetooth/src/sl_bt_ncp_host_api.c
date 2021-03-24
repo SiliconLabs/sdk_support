@@ -92,6 +92,34 @@ sl_status_t sl_bt_system_hello() {
 
 }
 
+sl_status_t sl_bt_system_start_bluetooth() {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_system_start_bluetooth_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_system_start_bluetooth.result;
+
+}
+
+sl_status_t sl_bt_system_stop_bluetooth() {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_system_stop_bluetooth_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_system_stop_bluetooth.result;
+
+}
+
 sl_status_t sl_bt_system_get_version(uint16_t *major,
                                      uint16_t *minor,
                                      uint16_t *patch,

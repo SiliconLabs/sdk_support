@@ -37,6 +37,7 @@
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
 #include "sl_status.h"
+#include "sl_slist.h"
 
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -121,6 +122,9 @@ typedef struct {
   GPIO_Port_TypeDef rts_port;                   ///< Flow control, RTS port
   unsigned int rts_pin;                         ///< Flow control, RTS pin
   uint8_t flags;                                ///< Configuration flags
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+  sl_slist_node_t node;
+#endif
 } sl_iostream_eusart_context_t;
 
 // -----------------------------------------------------------------------------

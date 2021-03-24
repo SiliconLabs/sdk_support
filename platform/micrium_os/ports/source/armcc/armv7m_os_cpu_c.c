@@ -473,7 +473,7 @@ void OSTaskSwHook(void)
 #endif
 
 #if (OS_CFG_SCHED_ROUND_ROBIN_EN == DEF_ENABLED)
-  if (OSSchedRoundRobinEn) {
+  if (OSTCBHighRdyPtr != DEF_NULL && OSSchedRoundRobinEn) {
     if (OSTCBHighRdyPtr->TimeQuantaCtr == 0u) {
       OS_SchedRoundRobinResetQuanta(OSTCBHighRdyPtr);
     }

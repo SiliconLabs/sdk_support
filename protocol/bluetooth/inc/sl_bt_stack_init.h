@@ -1,5 +1,5 @@
 /***************************************************************************//**
- * @brief Bluetooth stack initialization APIs
+ * @brief Initialization APIs for bt stack
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
@@ -18,52 +18,49 @@
 #ifndef SL_BT_STACK_INIT_H
 #define SL_BT_STACK_INIT_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "sl_status.h"
 #include "sl_bt_api.h"
 #include "sl_bt_stack_config.h"
 
 
-/* Forward declarations of internal initialization functions */
-void sli_bt_class_dfu_init_full();
-void sli_bt_class_dfu_init_optimized();
-void sli_bt_class_system_init_full();
-void sli_bt_class_system_init_optimized();
-void sli_bt_class_gap_init_full();
-void sli_bt_class_gap_init_optimized();
-void sli_bt_class_advertiser_init_full();
-void sli_bt_class_advertiser_init_optimized();
-void sli_bt_class_scanner_init_full();
-void sli_bt_class_scanner_init_optimized();
-void sli_bt_class_sync_init_full();
-void sli_bt_class_sync_init_optimized();
-void sli_bt_class_connection_init_full();
-void sli_bt_class_connection_init_optimized();
-void sli_bt_class_gatt_init_full();
-void sli_bt_class_gatt_init_optimized();
-void sli_bt_class_gatt_server_init_full();
-void sli_bt_class_gatt_server_init_optimized();
-void sli_bt_class_nvm_init_full();
-void sli_bt_class_nvm_init_optimized();
-void sli_bt_class_test_init_full();
-void sli_bt_class_test_init_optimized();
-void sli_bt_class_sm_init_full();
-void sli_bt_class_sm_init_optimized();
-void sli_bt_class_ota_init_full();
-void sli_bt_class_ota_init_optimized();
-void sli_bt_class_coex_init_full();
-void sli_bt_class_coex_init_optimized();
-void sli_bt_class_l2cap_init_full();
-void sli_bt_class_l2cap_init_optimized();
-void sli_bt_class_cte_transmitter_init_full();
-void sli_bt_class_cte_transmitter_init_optimized();
-void sli_bt_class_cte_receiver_init_full();
-void sli_bt_class_cte_receiver_init_optimized();
-void sli_bt_class_memory_profiler_init_full();
-void sli_bt_class_memory_profiler_init_optimized();
+/* Forward declarations of BGAPI class declaration structures */
+struct sli_bgapi_class;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_dfu_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_dfu_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_system_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_system_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gap_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gap_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_advertiser_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_advertiser_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_scanner_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_scanner_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_sync_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_sync_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_connection_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_connection_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_server_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_server_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_nvm_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_nvm_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_test_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_test_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_sm_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_sm_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_ota_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_ota_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_coex_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_coex_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_l2cap_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_l2cap_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_cte_transmitter_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_cte_transmitter_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_cte_receiver_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_cte_receiver_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_memory_profiler_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_memory_profiler_full;
 
 extern void ll_initAFH();
 extern void ll_initPeriodicAdv();
@@ -71,6 +68,14 @@ extern void ll_connSchAlgorithmEvenEnable();
 extern void sli_bt_init_periodic_advertising();
 extern void sli_bt_init_whitelisting();
 extern void sl_memory_profiler_init();
+extern void sli_bt_init_on_demand_start();
+
+/* Macro to get a pointer to a BGAPI class declaration */
+#ifdef SL_BT_API_FULL
+#define SL_BT_BGAPI_CLASS(class_name) &sli_bgapi_class_bt_ ## class_name ## _full
+#else
+#define SL_BT_BGAPI_CLASS(class_name) &sli_bgapi_class_bt_ ## class_name ## _optimized
+#endif
 
 /**
  * @brief Initialize the Bluetooth stack.
@@ -80,6 +85,18 @@ extern void sl_memory_profiler_init();
  *   indicates a failure.
  */
 sl_status_t sl_bt_init_stack(const sl_bt_configuration_t *config);
+
+/**
+ * Initialize the Bluetooth on-demand start feature.
+ *
+ * This function is automatically called by code generated by the Universal
+ * Configurator if the feature is included in the project. The application is
+ * not expected to call this function directly.
+ */
+static inline void sl_bt_init_on_demand_start()
+{
+  sli_bt_init_on_demand_start();
+}
 
 /**
  * Initialize multiprotocol. Please note that multiprotocol version of RAIL is
@@ -141,297 +158,19 @@ static inline void sl_bt_init_whitelisting()
 }
 
 
-
 /**
- * @brief Initialize SL_BT_API class dfu.
+ * Initialize the BGAPI classes for bt stack.
  *
  * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
+ * Configurator if the feature is included in the project. The application is
  * not expected to call this function directly.
- */
-static inline void sl_bt_class_dfu_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_dfu_init_full();
-#else
-  sli_bt_class_dfu_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class system.
  *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_system_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_system_init_full();
-#else
-  sli_bt_class_system_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class gap.
+ * @param[in] classes NULL-terminated array of pointers to class declarations.
+ *   The array must remain valid until the next system reboot.
  *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
+ * @return SL_STATUS_OK if the initialization was successful; Other error code
+ *   indicates a failure.
  */
-static inline void sl_bt_class_gap_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_gap_init_full();
-#else
-  sli_bt_class_gap_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class advertiser.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_advertiser_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_advertiser_init_full();
-#else
-  sli_bt_class_advertiser_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class scanner.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_scanner_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_scanner_init_full();
-#else
-  sli_bt_class_scanner_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class sync.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_sync_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_sync_init_full();
-#else
-  sli_bt_class_sync_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class connection.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_connection_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_connection_init_full();
-#else
-  sli_bt_class_connection_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class gatt.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_gatt_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_gatt_init_full();
-#else
-  sli_bt_class_gatt_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class gatt_server.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_gatt_server_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_gatt_server_init_full();
-#else
-  sli_bt_class_gatt_server_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class nvm.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_nvm_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_nvm_init_full();
-#else
-  sli_bt_class_nvm_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class test.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_test_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_test_init_full();
-#else
-  sli_bt_class_test_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class sm.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_sm_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_sm_init_full();
-#else
-  sli_bt_class_sm_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class ota.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_ota_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_ota_init_full();
-#else
-  sli_bt_class_ota_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class coex.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_coex_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_coex_init_full();
-#else
-  sli_bt_class_coex_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class l2cap.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_l2cap_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_l2cap_init_full();
-#else
-  sli_bt_class_l2cap_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class cte_transmitter.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_cte_transmitter_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_cte_transmitter_init_full();
-#else
-  sli_bt_class_cte_transmitter_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class cte_receiver.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_cte_receiver_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_cte_receiver_init_full();
-#else
-  sli_bt_class_cte_receiver_init_optimized();
-#endif
-}
-
-/**
- * @brief Initialize SL_BT_API class memory_profiler.
- *
- * This function is automatically called by code generated by the Universal
- * Configurator if the class is included in the project. The application is
- * not expected to call this function directly.
- */
-static inline void sl_bt_class_memory_profiler_init()
-{
-#ifdef SL_BT_API_FULL
-  sli_bt_class_memory_profiler_init_full();
-#else
-  sli_bt_class_memory_profiler_init_optimized();
-#endif
-}
-
-#ifdef __cplusplus
-}
-#endif
+sl_status_t sl_bt_init_classes(const struct sli_bgapi_class * const * classes);
 
 #endif

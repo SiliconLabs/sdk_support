@@ -199,6 +199,8 @@ psa_status_t sli_crypto_transparent_aead_decrypt(const psa_key_attributes_t *att
                                                  size_t plaintext_size,
                                                  size_t *plaintext_length);
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_crypto_transparent_aead_encrypt_setup(sli_crypto_transparent_aead_operation_t *operation,
                                                        const psa_key_attributes_t *attributes,
                                                        const uint8_t *key_buffer,
@@ -251,6 +253,8 @@ psa_status_t sli_crypto_transparent_aead_verify(sli_crypto_transparent_aead_oper
                                                 size_t tag_length);
 
 psa_status_t sli_crypto_transparent_aead_abort(sli_crypto_transparent_aead_operation_t *operation);
+
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #ifdef __cplusplus
 }

@@ -61,7 +61,6 @@ static int32_t decompressData(uint8_t          *dstBuffer,
                               size_t           *dstBufferLen,
                               uint8_t          *srcBuffer,
                               size_t           *srcBufferLen,
-                              ELzmaFinishMode  finishMode,
                               ELzmaStatus      *status);
 static void *lzmaAlloc(ISzAllocPtr p, size_t size);
 static void lzmaFree(ISzAllocPtr p, void *address);
@@ -87,10 +86,6 @@ static size_t outputBufferPos;
 
 static CLzmaDec decompressorState;
 static bool firstCallInProgTag;
-
-#if LZMA_SUPPORT_NO_END_MARK
-static uint32_t totalRemainingSize;
-#endif
 
 static ISzAlloc lzmaAllocator = { &lzmaAlloc, &lzmaFree };
 static int allocSeq = 0;
@@ -147,17 +142,18 @@ static int32_t decompressData(uint8_t          *dstBuffer,
                               size_t           *dstBufferLen,
                               uint8_t          *srcBuffer,
                               size_t           *srcBufferLen,
-                              ELzmaFinishMode  finishMode,
                               ELzmaStatus      *status)
 {
   SRes res;
 
+  // We might not have large enough output buffer and need "more decompression rounds",
+  // Use "LZMA_FINISH_ANY" mode and get so much of data asked for.
   res = LzmaDec_DecodeToBuf(&decompressorState,
                             dstBuffer,
                             dstBufferLen,
                             srcBuffer,
                             srcBufferLen,
-                            finishMode,
+                            LZMA_FINISH_ANY,
                             status);
 
   BTL_DEBUG_PRINT("Decompressed ");
@@ -189,9 +185,7 @@ static int32_t decompressData(uint8_t          *dstBuffer,
     BTL_DEBUG_PRINTLN("  Result: ERROR_DATA");
   }
 
-  if ((res != SZ_OK)
-      && !((finishMode == LZMA_FINISH_END)
-           && (*status == LZMA_STATUS_NOT_FINISHED))) {
+  if (res != SZ_OK) {
     return BOOTLOADER_ERROR_COMPRESSION_DATA;
   }
   if (*status == LZMA_STATUS_NOT_SPECIFIED) {
@@ -211,13 +205,7 @@ static int32_t decompressAndFlash(ParserContext_t                   *ctx,
     // outputPos starts out as the size of the output buffer less any leftover
     // data already in the buffer, or the remaining expected input size,
     // whichever is smaller
-
-#if LZMA_SUPPORT_NO_END_MARK
-    unsigned int outputPos = SL_MIN(OUTPUT_BUFFER_SIZE - outputBufferPos,
-                                    totalRemainingSize);
-#else
     unsigned int outputPos = OUTPUT_BUFFER_SIZE - outputBufferPos;
-#endif
     // inputPos starts out as the size of the available input data
     unsigned int inputPos = inputBufferPos;
 
@@ -227,32 +215,18 @@ static int32_t decompressAndFlash(ParserContext_t                   *ctx,
     BTL_DEBUG_PRINT_WORD_HEX(outputBufferPos);
     BTL_DEBUG_PRINT_LF();
 
-    ELzmaFinishMode finishMode = LZMA_FINISH_ANY;
-    if (finish) {
-      finishMode = LZMA_FINISH_END;
-    }
-
     // Decompress data. The output buffer starts after any unaligned data left
     // from a previous iteration.
     ret = decompressData(&outputBuffer[outputBufferPos],
                          &outputPos,
                          inputBuffer,
                          &inputPos,
-                         finishMode,
                          &status);
     if (ret != BOOTLOADER_OK) {
       return ret;
     }
-
     // outputPos is now the actual size of the decompressed data
     // inputPos is now the position in the input buffer after processing
-
-#if LZMA_SUPPORT_NO_END_MARK
-    totalRemainingSize -= outputPos;
-    BTL_DEBUG_PRINT("  Decompressed size remaining: 0x");
-    BTL_DEBUG_PRINT_WORD_HEX(totalRemainingSize);
-    BTL_DEBUG_PRINT_LF();
-#endif
 
     // Flash word-aligned decompressed data, consisting of any leftover data
     // from a previous iteration + newly decompressed data
@@ -287,9 +261,6 @@ static int32_t decompressAndFlash(ParserContext_t                   *ctx,
 
   // Verify that decompression finished if this was expected to be the last data
   if (finish
-#if LZMA_SUPPORT_NO_END_MARK
-      && (status != LZMA_STATUS_MAYBE_FINISHED_WITHOUT_MARK)
-#endif
       && (status != LZMA_STATUS_FINISHED_WITH_MARK)) {
     ret = BOOTLOADER_ERROR_COMPRESSION_STATE;
   }
@@ -345,13 +316,6 @@ int32_t gbl_lzmaParseProgTag(ParserContext_t *ctx,
       return BOOTLOADER_ERROR_COMPRESSION_MEM;
     }
     LzmaDec_Init(&decompressorState);
-
-#if LZMA_SUPPORT_NO_END_MARK
-    totalRemainingSize = *(uint32_t *)&dataArray[9U];
-    BTL_DEBUG_PRINT("Total size: 0x");
-    BTL_DEBUG_PRINT_WORD_HEX(totalRemainingSize);
-    BTL_DEBUG_PRINT_LF();
-#endif
 
     // 4 bytes address + 5 byte header + 8 byte file length should be skipped
     dataOffset = 17UL;

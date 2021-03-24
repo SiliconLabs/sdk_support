@@ -98,6 +98,11 @@ extern "C" {
 /// Vendor Key ID for SE-provisioned AES 128 key
 #define SL_SE_BUILTIN_KEY_AES128_ID                   (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 3)
 #endif
+
+/// Built-in AES key mode of operation, defaults to CTR mode
+#ifndef SL_SE_BUILTIN_KEY_AES128_ALG
+#define SL_SE_BUILTIN_KEY_AES128_ALG                  (PSA_ALG_CTR)
+#endif
 #endif /* MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
 
 /*******************************************************************************
