@@ -1,7 +1,9 @@
 id: mbedtls_cipher
 package: platform
-label: Mbed TLS Support for a Generic Cipher API
-description: This component provides the common interface to available ciphers using Mbed TLS
+label: Mbed TLS Support for Ciphers
+description: >-
+  This component provides support for the generic APIs for encryption and decryption
+  using symmetric ciphers in Mbed TLS.
 category: Platform|Security
 quality: production
 source:

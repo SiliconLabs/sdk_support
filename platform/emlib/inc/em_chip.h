@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Chip Initialization API
+ * @brief Chip Errata Workarounds
  *******************************************************************************
  * # License
  * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
@@ -32,6 +32,7 @@
 #define EM_CHIP_H
 
 #include "em_device.h"
+#include "em_common.h"
 #include "em_system.h"
 #include "em_gpio.h"
 #include "em_bus.h"
@@ -41,10 +42,10 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup chip CHIP - Chip Initialization
- * @brief Chip errata workarounds initialization API
+ * @addtogroup chip CHIP - Chip Errata Workarounds
+ * @brief Chip errata workaround APIs
  * @details
- *  API to initialize chip for errata workarounds.
+ *  API to apply chip errata workarounds at initialization and reset.
  * @{
  ******************************************************************************/
 
@@ -377,6 +378,47 @@ __STATIC_INLINE void CHIP_Init(void)
     }
   }
 #endif
+}
+
+/**************************************************************************//**
+ * @brief
+ *   Chip reset routine with errata workarounds.
+ *
+ * @note
+ *   This function should be called to reset the chip. It does not return.
+ *
+ * This function applies any errata workarounds needed to cleanly reset the
+ * device and then performs a system reset. See the device-specific errata for
+ * details.
+ *****************************************************************************/
+
+__STATIC_INLINE void CHIP_Reset(void)
+{
+#if defined(_EFR_DEVICE) && defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+  /****************************
+   * Workaround for errata DCDC_E206.
+   * Disable radio interference minimization features when resetting */
+
+  // Ensure access to EMU registers
+  EMU->LOCK = EMU_LOCK_LOCKKEY_UNLOCK;
+  EMU->PWRLOCK = EMU_PWRLOCK_LOCKKEY_LOCK;
+
+  // No need to do anything if the DCDC is not powering DVDD
+  if ((EMU->PWRCFG & _EMU_PWRCFG_PWRCFG_MASK) == EMU_PWRCFG_PWRCFG_DCDCTODVDD) {
+    // Make sure radio cannot accidentally re-enable features
+    *(volatile uint32_t *)(0x40084040UL) = 0x1UL;
+
+    // If DCDC is in use, disable features
+    uint32_t dcdcMode = EMU->DCDCCTRL & _EMU_DCDCCTRL_DCDCMODE_MASK;
+    if ((dcdcMode == EMU_DCDCCTRL_DCDCMODE_LOWNOISE)
+        || (dcdcMode == EMU_DCDCCTRL_DCDCMODE_LOWPOWER)) {
+      BUS_RegBitWrite((volatile uint32_t *)(0x400E3060UL), 28UL, 0);
+      BUS_RegBitWrite((volatile uint32_t *)(0x400E3074UL), 0, 0);
+    }
+  }
+#endif
+
+  NVIC_SystemReset();
 }
 
 /** @} (end addtogroup chip) */

@@ -10,7 +10,7 @@ description: >
   This component includes only the SPI driver core. To configure and create
   instances of this driver, the SPIDRV component should be included in the 
   project.
-category: "Platform|Driver"
+category: "Platform|Driver|SPI"
 quality: "production"
 root_path: "platform/emdrv/spidrv"
 provides:

@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Driver Mac functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -8,7 +38,6 @@
 
 #include "sl_se_manager.h"
 #include "sl_se_manager_cipher.h"
-#include "sl_se_manager_entropy.h"
 
 #include <string.h>
 
@@ -184,17 +213,15 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  sl_status_t status; // Used for SE manager returns
-  psa_status_t psa_status = PSA_ERROR_INVALID_ARGUMENT; // Used to track return value
   // Ephemeral contexts
   sl_se_command_context_t cmd_ctx = { 0 };
 
-  status = sl_se_init_command_context(&cmd_ctx);
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  psa_status = PSA_ERROR_NOT_SUPPORTED;
+  psa_status_t psa_status = PSA_ERROR_NOT_SUPPORTED;
   switch (PSA_ALG_FULL_LENGTH_MAC(operation->alg)) {
     case PSA_ALG_CBC_MAC:
       if (input_length == 0) {
@@ -346,22 +373,21 @@ psa_status_t sli_se_driver_mac_sign_finish(sli_se_driver_mac_operation_t *operat
     operation->ctx.cmac.key = key_desc;
 
     status = sl_se_cmac_finish(&operation->ctx.cmac, tmp_mac);
+    if (status != SL_STATUS_OK) {
+      *mac_length = 0;
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
 
     // Cleanup
     status = sl_se_deinit_command_context(&cmd_ctx);
     if (status != SL_STATUS_OK) {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-
-    if (status == SL_STATUS_OK) {
-      // Copy the requested number of bytes (max 16) to the user buffer.
-      memcpy(mac, tmp_mac, mac_size);
-      *mac_length = mac_size;
-      return PSA_SUCCESS;
-    } else {
       *mac_length = 0;
       return PSA_ERROR_HARDWARE_FAILURE;
     }
+    // Copy the requested number of bytes (max 16) to the user buffer.
+    memcpy(mac, tmp_mac, mac_size);
+    *mac_length = mac_size;
+    return PSA_SUCCESS;
   }
 
   return PSA_ERROR_NOT_SUPPORTED;

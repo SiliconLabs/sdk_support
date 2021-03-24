@@ -1,7 +1,9 @@
 id: mbedtls_entropy_default
 package: platform
 label: Mbed TLS Support for Default Hardware Entropy Source
-description: This component provides support for using entropy gathered from the default hardware entropy source on Silicon Labs devices.
+description: >-
+  This component provides support for using entropy gathered from the default
+  hardware entropy source on Silicon Labs devices.
 category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto

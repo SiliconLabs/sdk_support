@@ -1,3 +1,8 @@
+What's new in Gecko Platform 3.1.1.0
+* Fixed an issue that could prevent the MX25 Flash to shut down properly.
+* Some bug fixes in Power Manager.
+* Added support for new ZG14 OPN.
+
 What's new in Gecko Platform 3.1.0.0
 * Peripherals: Include handling pcntModeOvsQuadx modes in PCNT_Init
 * Services: New NVM3 function that enables reading only parts of a data object
@@ -14,7 +19,6 @@ What's new in Gecko Platform 3.1.0.0
   * Removed several MCU sample apps.
 * Boards and External Devices: Added better support for 60 Ohm ESR crystals.
 * Other Platform Components: Added alpha support for TensorFlow Lite for Microcontrollers version 2.3.1.
-* RAIL Library: EFR32FG23 Alpha 2 Support
 
 
 

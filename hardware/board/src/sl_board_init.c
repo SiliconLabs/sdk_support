@@ -36,7 +36,7 @@
 #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_PRESENT)
+#if defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_USART_PRESENT) || defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_EUSART_PRESENT)
 #include "sl_mx25_flash_shutdown.h"
 #endif
 
@@ -86,7 +86,8 @@ void sl_board_init(void)
   sl_board_enable_memory(SL_BOARD_MEMORY_QSPI);
 #endif
 
-#if defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_PRESENT) && defined(SL_BOARD_DISABLE_MEMORY_SPI) && SL_BOARD_DISABLE_MEMORY_SPI
+#if (defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_USART_PRESENT) || defined(SL_CATALOG_MX25_FLASH_SHUTDOWN_EUSART_PRESENT)) && \
+    defined(SL_BOARD_DISABLE_MEMORY_SPI) && SL_BOARD_DISABLE_MEMORY_SPI
   sl_mx25_flash_shutdown();
 #endif
 }

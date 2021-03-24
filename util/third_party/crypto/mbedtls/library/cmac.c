@@ -543,6 +543,9 @@ static const unsigned char aes_128_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
     }
 };
 
+#if defined(SILABS_SUPPORT) \
+    && (defined(CRYPTO_PRESENT) || defined(AES_PRESENT))
+#else
 /* CMAC-AES192 Test Data */
 static const unsigned char aes_192_key[24] = {
     0x8e, 0x73, 0xb0, 0xf7,     0xda, 0x0e, 0x64, 0x52,
@@ -583,7 +586,12 @@ static const unsigned char aes_192_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
         0x4d, 0x77, 0x58, 0x96,     0x59, 0xf3, 0x9a, 0x11
     }
 };
+#endif /* SILABS_SUPPORT && (CRYPTO_PRESENT || AES_PRESENT) */
 
+#if defined(SILABS_SUPPORT) \
+    && defined(AES_PRESENT) \
+    && !defined(AES_CTRL_AES256)
+#else
 /* CMAC-AES256 Test Data */
 static const unsigned char aes_256_key[32] = {
     0x60, 0x3d, 0xeb, 0x10,     0x15, 0xca, 0x71, 0xbe,
@@ -625,9 +633,14 @@ static const unsigned char aes_256_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
         0x69, 0x6a, 0x2c, 0x05,     0x6c, 0x31, 0x54, 0x10
     }
 };
+#endif /* MBEDTLS_AES_C && AES_PRESENT && !AES_CTRL_AES256 */
+
 #endif /* MBEDTLS_AES_C */
 
-#if defined(MBEDTLS_DES_C)
+#if defined(MBEDTLS_DES_C) \
+    && (defined(SILABS_SUPPORT) && defined(MBEDTLS_CMAC_ALT))
+    /* 3DES not supported by the ALT implementation provided by Silabs */
+#elif defined(MBEDTLS_DES_C)
 /* Truncation point of message for 3DES CMAC tests  */
 static const unsigned int des3_message_lengths[NB_CMAC_TESTS_PER_KEY] = {
     0,
@@ -712,7 +725,7 @@ static const unsigned char des3_3key_expected_result[NB_CMAC_TESTS_PER_KEY][MBED
     }
 };
 
-#endif /* MBEDTLS_DES_C */
+#endif /* MBEDTLS_DES_C && SILABS_SUPPORT && MBEDTLS_CMAC_ALT */
 
 #if defined(MBEDTLS_AES_C)
 /* AES AES-CMAC-PRF-128 Test Data */

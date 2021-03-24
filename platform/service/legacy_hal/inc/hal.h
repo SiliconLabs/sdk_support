@@ -30,6 +30,7 @@
 #include "serial.h"
 #include "led.h"
 #include "button.h"
+#include "crc.h"
 
 #include "random.h"
 #include "sl_token_api.h"
@@ -46,9 +47,11 @@
 uint16_t halCommonGetInt16uMillisecondTick(void);
 uint32_t halCommonGetInt32uMillisecondTick(void);
 uint64_t halCommonGetInt64uMillisecondTick(void);
+uint16_t halCommonGetInt16uQuarterSecondTick(void);
 uint16_t halInternalStartSystemTimer(void);
 void halCommonDelayMicroseconds(uint16_t us);
 void halCommonDelayMilliseconds(uint16_t ms);
+void halStackSymbolDelayAIsr(void);
 #define simulatedTimePasses()
 
 void halStackRadioPowerMainControl(bool powerUp);

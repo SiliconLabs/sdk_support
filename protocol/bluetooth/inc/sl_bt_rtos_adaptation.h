@@ -28,21 +28,21 @@
  * The Bluetooth RTOS adaptation component implements the relevant interfaces
  * for running the Bluetooth stack in an RTOS. When initialized in @ref
  * sl_bt_rtos_init(), the component creates the required RTOS tasks for the
- * Bluetooth stack itself, and an event task that is used to deliver @ref
- * sl_bt_process_event() and @ref sl_bt_on_event() callbacks to the application.
+ * Bluetooth stack itself, and an event task that is used to deliver
+ * sl_bt_process_event() and sl_bt_on_event() callbacks to the application.
  *
  * To guarantee thread safety and avoid the risk of deadlocks, the Bluetooth
  * RTOS adaptation implementation makes the following promises with regard to
  * the locking mechanism provided in the API:
  *
- * 1. The stack will never directly call @ref sl_bt_process_event() or @ref
+ * 1. The stack will never directly call sl_bt_process_event() or
  *    sl_bt_on_event() from within the same callstack that is calling a command
  *    function. The callbacks always come from a processing loop in an event
  *    task created for this purpose.
  *
  * 2. The stack will never internally obtain the @ref sl_bt_bluetooth_pend()
  *    lock. It is safe for the application to obtain the lock also from within
- *    the @ref sl_bt_on_event() callback.
+ *    the sl_bt_on_event() callback.
  */
 
 /**

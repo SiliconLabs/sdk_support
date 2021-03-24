@@ -31,7 +31,7 @@ define:
   - name: SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE
     value: '1'
     condition:
-      - memlcd
+      - dmd_memlcd
 template_contribution:
   - name: event_handler
     value:

@@ -35,6 +35,7 @@
 
 #include "rail.h"
 #include "rail_ieee802154.h"
+#include "rail_mfm.h"
 #include "rail_zwave.h"
 #include "sl_rail_util_init.h"
 #include "sl_rail_util_protocol.h"
@@ -296,10 +297,6 @@ static void changeTxPayload(uint32_t offset,
 // Function called from sl_system_init before the main super loop.
 void sl_rail_test_internal_app_init(void)
 {
-#if !defined(__CROSSWORKS_ARM) && defined(__GNUC__)
-  setvbuf(stdout, NULL, _IONBF, 0);   /*Set unbuffered mode for stdout (newlib)*/
-#endif
-
   // Get RAIL handle.
   railHandle = sl_rail_util_get_handle(SL_RAIL_UTIL_HANDLE_INST0);
 

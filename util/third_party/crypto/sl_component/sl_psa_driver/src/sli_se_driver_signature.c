@@ -133,7 +133,6 @@ psa_status_t sli_se_sign_hash(const psa_key_attributes_t *attributes,
                               size_t signature_size,
                               size_t *signature_length)
 {
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   uint8_t* tmp_signature_p = signature;
   size_t tmp_signature_size = signature_size;
 
@@ -217,7 +216,7 @@ psa_status_t sli_se_sign_hash(const psa_key_attributes_t *attributes,
   }
   tmp_signature_size = 2 * (offset + key_size);
 
-  status = sl_se_init_command_context(&cmd_ctx);
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -356,9 +355,6 @@ psa_status_t sli_se_verify_hash(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
-  psa_status_t psa_status = PSA_ERROR_INVALID_ARGUMENT;
-
   // Argument check
   if (hash == NULL
       || hash_length == 0
@@ -370,10 +366,10 @@ psa_status_t sli_se_verify_hash(const psa_key_attributes_t *attributes,
   sl_se_command_context_t cmd_ctx = { 0 };
   sl_se_key_descriptor_t key_desc = { 0 };
 
-  psa_status = sli_se_key_desc_from_input(attributes,
-                                          key_buffer,
-                                          key_buffer_size,
-                                          &key_desc);
+  psa_status_t psa_status = sli_se_key_desc_from_input(attributes,
+                                                       key_buffer,
+                                                       key_buffer_size,
+                                                       &key_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
@@ -436,6 +432,7 @@ psa_status_t sli_se_verify_hash(const psa_key_attributes_t *attributes,
 
   // SE manager only accepts public keys for signature verification,
   // so we must generate a public key if we are passed a private one
+  sl_status_t status = SL_STATUS_INVALID_PARAMETER;
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(keytype)) {
     sl_se_key_descriptor_t pubkey_desc = key_desc;
     // Unset private key flag and set public

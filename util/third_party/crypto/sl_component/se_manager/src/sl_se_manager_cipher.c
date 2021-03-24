@@ -34,9 +34,7 @@
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_core.h"
 #include "em_assert.h"
-#include "em_system.h"
 #include <string.h>
 
 /// @addtogroup sl_se_manager
@@ -877,8 +875,11 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
   }
   if (// IV length is required to be 96 bits for SE.
     (iv_len != 96 / 8)
-    // AD are limited to 2^64 bits, so 2^61 bytes.
-    || (((uint64_t)add_len) >> 61 != 0)) {
+    // AD is limited to 2^64 bits, so 2^61 bytes.
+    // However, on 32 bit platforms, that amount of continous data cannot be
+    // available.
+    // || (((uint64_t)add_len) >> 61 != 0)
+    ) {
     return SL_STATUS_INVALID_PARAMETER;
   }
   switch (key->type) {
@@ -958,9 +959,6 @@ sl_status_t sl_se_gcm_crypt_and_tag(sl_se_command_context_t *cmd_ctx,
   SE_addDataOutput(se_cmd, &data_out);
 
   SE_DataTransfer_t mac_out = SE_DATATRANSFER_DEFAULT(tagbuf, sizeof(tagbuf));
-  if (tag == NULL) {
-    mac_out.length |= SE_DATATRANSFER_DISCARD;
-  }
   SE_addDataOutput(se_cmd, &mac_out);
 
   // Execute GCM operation.
@@ -1002,13 +1000,16 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
   }
   if (// IV length is required to be 96 bits for SE.
     (iv_len != 96 / 8)
-    // AD are limited to 2^64 bits, so 2^61 bytes.
-    || (((uint64_t)add_len) >> 61 != 0)) {
+    // AD is limited to 2^64 bits, so 2^61 bytes.
+    // However, on 32 bit platforms, that amount of continous data cannot be
+    // available.
+    // || (((uint64_t)add_len) >> 61 != 0)
+    ) {
     return SL_STATUS_INVALID_PARAMETER;
   }
   switch (key->type) {
-    case SL_SE_KEY_TYPE_AES_128:
-    case SL_SE_KEY_TYPE_AES_192:
+    case SL_SE_KEY_TYPE_AES_128: // Fallthrough
+    case SL_SE_KEY_TYPE_AES_192: // Fallthrough
     case SL_SE_KEY_TYPE_AES_256:
       break;
 
@@ -1075,7 +1076,10 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
   }
   if ((iv_len != 12)
       // AD are limited to 2^64 bits, so 2^61 bytes.
-      || (uint64_t)add_len >> 61 != 0) {
+      // However, on 32 bit platforms, that amount of continous data cannot be
+      // available.
+      // || (((uint64_t)add_len) >> 61 != 0)
+      ) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -1123,15 +1127,8 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
     }
 
     {
-      // SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
-      // SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
-      iv_in.data = (void*)iv;
-      iv_in.next = (void*) SE_DATATRANSFER_STOP;
-      iv_in.length = (iv_len) | SE_DATATRANSFER_REALIGN;
-
-      add_in.data = (void*)add;
-      add_in.next = (void*) SE_DATATRANSFER_STOP;
-      add_in.length = (add_len) | SE_DATATRANSFER_REALIGN;
+      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
       SE_DataTransfer_t ctx_out =
         SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx_enc, sizeof(gcm_ctx->se_ctx_enc));
 
@@ -1159,18 +1156,10 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
 
     // Do decryption if requested
     if (gcm_ctx->mode == SL_SE_DECRYPT) {
-      // SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-      // SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
+      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
       SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx_dec,
                                                           sizeof(gcm_ctx->se_ctx_dec));
-
-      iv_in.data = (void*)iv;
-      iv_in.next = (void*) SE_DATATRANSFER_STOP;
-      iv_in.length = (iv_len) | SE_DATATRANSFER_REALIGN;
-
-      add_in.data = (void*)add;
-      add_in.next = (void*) SE_DATATRANSFER_STOP;
-      add_in.length = (add_len) | SE_DATATRANSFER_REALIGN;
 
       sli_se_command_init(cmd_ctx,
                           SLI_SE_COMMAND_AES_GCM_DECRYPT

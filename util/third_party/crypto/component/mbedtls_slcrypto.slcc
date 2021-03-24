@@ -1,8 +1,13 @@
 id: mbedtls_slcrypto
 package: platform
 label: Mbed TLS Support for EFM32/EFR32 Crypto Acceleration
-description: Mbed TLS hardware acceleration support for EFM32/EFR32 devices
-category: Platform|Security
+description:
+  "This component enables hardware acceleration in Mbed TLS for EFM32 and \
+  EFR32 devices.\n
+
+  NOTE: There should not be any need for selecting this component manually,\
+  any other components requiring it will select it automatically."
+category: Platform|Security|Internal
 quality: production
 component_root_path: util/third_party/crypto
 source:

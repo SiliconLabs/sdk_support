@@ -31,3 +31,4 @@ requires:
   - name: emlib_gpio
   - name: emlib_eusart
   - name: atomic
+  - name: slist

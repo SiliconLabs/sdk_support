@@ -1,0 +1,20 @@
+id: psa_crypto_hmac
+package: platform
+label: PSA Crypto support for HMAC
+description: 
+  "This component provides support for hash-based message authentication codes \
+  (HMACs) in PSA Crypto.\n
+
+  At the moment, it is not possible to have HMAC hardware accelerated through PSA \
+  Crypto; this means that the 'Mbed TLS Support for \ HMAC' component is required \
+  for this functionality to be available."
+category: Platform|Security
+quality: production
+provides:
+  - name: psa_crypto_hmac
+requires:
+  - name: psa_crypto
+  - name: mbedtls_hmac
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_HMAC

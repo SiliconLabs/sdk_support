@@ -1,11 +1,12 @@
 id: sli_protocol_crypto
 label: Accelerated Crypto Primitives (CRYPTO and RADIOAES)
 package: platform
-description: |-
-  Accelerated cryptographic primitives using the CRYPTO (series-1) and
-  RADIOAES (series-2) peripherals. Primarily intended for low-level operation
-  in wireless stacks.
-category: Platform|Security
+description:
+  "This component provides accelerated cryptographic primitives using the CRYPTO \
+  (series-1) and RADIOAES (series-2) peripherals.\n
+
+  NOTE: This component is primarily meant for internal (Silicon Labs) use."
+category: Platform|Security|Internal
 quality: production
 source:
   - path: util/third_party/crypto/sl_component/sl_protocol_crypto/src/sli_protocol_crypto_crypto.c

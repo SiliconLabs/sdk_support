@@ -752,7 +752,9 @@ void OSSched(void)
     OS_StatIdleEnterNotify();
 #endif
 #if OS_CFG_TASK_PROFILE_EN > 0u
-    OSTCBCurPtr->CyclesStart = OS_TS_GET();
+    if (OSTCBCurPtr != DEF_NULL) {
+      OSTCBCurPtr->CyclesStart = OS_TS_GET();
+    }
 #endif
     OS_TRACE_ON_IDLE_ENTER();
     OSIdleEnterHook();

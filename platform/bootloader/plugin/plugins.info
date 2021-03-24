@@ -692,7 +692,7 @@ plugin(mbedtls) {
 
   setup(additionalFiles) {
     PATH(ABSOLUTE):$CRYPTO/mbedtls/include
-    PATH(ABSOLUTE):$CRYPTO/sl_component/sl_mbedtls_support/inc/configs
+    PATH(ABSOLUTE):$CRYPTO/sl_component/sl_mbedtls_support/config
     PATH(ABSOLUTE):$CRYPTO/sl_component/sl_mbedtls_support/inc
     PATH(ABSOLUTE):$CRYPTO/sl_component/sl_cryptoacc_library/include
     PATH(ABSOLUTE):$CRYPTO/sl_component/sl_cryptoacc_library/src

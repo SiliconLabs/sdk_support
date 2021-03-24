@@ -13,7 +13,7 @@ requires:
 provides:
   - name: "btmesh_feature_scene_setup_server"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_scene_setup_server_init"
+      class: "scene_setup_server"
     priority: 1

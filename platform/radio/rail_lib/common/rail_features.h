@@ -540,17 +540,17 @@ bool RAIL_BLE_SupportsAntennaSwitching(RAIL_Handle_t railHandle);
 bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports the BLE Simulscan PHY
-/// used for Long-Range.
+/// used for simultaneous BLE 1Mbps and Coded PHY reception.
 /// See also runtime refinement \ref RAIL_BLE_SupportsSimulscanPhy().
-#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2))
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
 #define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY 0
 #endif
 
 /**
- * Indicate whether this chip supports BLE Simulscan PHY used for Long-Range.
+ * Indicate whether this chip supports BLE Simulscan PHY used for simultaneous
+ * BLE 1Mbps and Coded PHY reception.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return true if BLE Simulscan PHY is supported; false otherwise.
@@ -1082,6 +1082,7 @@ bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
  */
 bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 /// Boolean to indicate whether the selected chip supports
 /// MFM protocol.
 /// See also runtime refinement \ref RAIL_SupportsProtocolMfm().
@@ -1100,6 +1101,8 @@ bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_MFM.
  */
 bool RAIL_SupportsProtocolMfm(RAIL_Handle_t railHandle);
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
 /** @} */ // end of group Features
 
 /** @} */ // end of group RAIL_API

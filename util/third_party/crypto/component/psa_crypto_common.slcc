@@ -1,21 +1,19 @@
 id: psa_crypto_common
 package: platform
 label: PSA Crypto Common
-description: |-
-  Common PSA crypto component.
-
-  The aim of this component is to list a common set of implementation files
-  in order for components like psa_driver and psa_crypto to operate separately.
-
+description: >-
+  This component provides a set of common header files required for the 'PSA
+  Crypto' and 'PSA Crypto Hardware Acceleration' components to be able to
+  function independently.
 category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto/mbedtls
-
 include:
   - path: include
     file_list:
       - path: psa/crypto.h
       - path: psa/crypto_compat.h
+      - path: psa/crypto_config.h
       - path: psa/crypto_driver_common.h
       - path: psa/crypto_extra.h
       - path: psa/crypto_platform.h

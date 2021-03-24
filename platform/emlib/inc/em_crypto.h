@@ -32,6 +32,18 @@
 
 #include "em_device.h"
 
+# if defined(__GNUC__)
+#  define CRYPTO_WARNINGS_NO_CAST_ALIGN \
+  _Pragma("GCC diagnostic push")        \
+  _Pragma("GCC diagnostic ignored \"-Wcast-align\"")
+
+#  define CRYPTO_WARNINGS_RESET \
+  _Pragma("GCC diagnostic pop")
+# else
+#  define CRYPTO_WARNINGS_NO_CAST_ALIGN
+#  define CRYPTO_WARNINGS_RESET
+# endif
+
 #if defined(CRYPTO_COUNT) && (CRYPTO_COUNT > 0)
 
 #include "em_bus.h"
@@ -756,6 +768,7 @@ __STATIC_INLINE void CRYPTO_DataWrite(CRYPTO_DataReg_TypeDef dataReg,
  * @param[in]  val    Pointer to value to write to the DATA register.
  *                    Can be unaligned.
  ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
 __STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
                                                const uint8_t * val)
 {
@@ -773,6 +786,7 @@ __STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
     CRYPTO_DataWrite(reg, (const uint32_t*)tmp_val_ptr);
   }
 }
+CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
  * @brief
@@ -807,6 +821,7 @@ __STATIC_INLINE void CRYPTO_DataRead(CRYPTO_DataReg_TypeDef  dataReg,
  * @param[out] val    Location where to store the value in memory.
  *                    Can be unaligned.
  ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
 __STATIC_INLINE void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
                                               uint8_t * val)
 {
@@ -824,6 +839,7 @@ __STATIC_INLINE void CRYPTO_DataReadUnaligned(volatile uint32_t * reg,
     CRYPTO_DataRead(reg, (uint32_t*)tmp_val_ptr);
   }
 }
+CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
  * @brief
@@ -955,6 +971,7 @@ __STATIC_INLINE void CRYPTO_KeyBufWrite(CRYPTO_TypeDef          *crypto,
  * @param[in]  keyWidth
  *   Key width - 128 or 256 bits.
  ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
 __STATIC_INLINE
 void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
                                  const uint8_t *          val,
@@ -978,6 +995,7 @@ void CRYPTO_KeyBufWriteUnaligned(CRYPTO_TypeDef          *crypto,
     CRYPTO_KeyBufWrite(crypto, (uint32_t*)tmp_val_ptr, keyWidth);
   }
 }
+CRYPTO_WARNINGS_RESET
 
 void CRYPTO_KeyRead(CRYPTO_TypeDef *crypto,
                     CRYPTO_KeyBuf_TypeDef   val,
@@ -1130,6 +1148,7 @@ __STATIC_INLINE bool CRYPTO_DData1_MSBitRead(CRYPTO_TypeDef *crypto)
  * @param[in]  instructionSequence
  *   An instruction sequence to load.
  ******************************************************************************/
+CRYPTO_WARNINGS_NO_CAST_ALIGN
 __STATIC_INLINE
 void CRYPTO_InstructionSequenceLoad(CRYPTO_TypeDef *crypto,
                                     const CRYPTO_InstructionSequence_TypeDef instructionSequence)
@@ -1142,6 +1161,7 @@ void CRYPTO_InstructionSequenceLoad(CRYPTO_TypeDef *crypto,
   crypto->SEQ3 = pas[3];
   crypto->SEQ4 = pas[4];
 }
+CRYPTO_WARNINGS_RESET
 
 /***************************************************************************//**
  * @brief

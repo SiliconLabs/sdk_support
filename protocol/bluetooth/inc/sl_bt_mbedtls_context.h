@@ -16,12 +16,6 @@
 
 #ifndef PROTOCOL_BLUETOOTH_BGCOMMON_INCLUDE_SL_BT_MBEDTLS_CONTEXT_H_
 #define PROTOCOL_BLUETOOTH_BGCOMMON_INCLUDE_SL_BT_MBEDTLS_CONTEXT_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
 #include <stddef.h>
 #include "mbedtls/aes.h"
 #include "mbedtls/ccm.h"
@@ -38,9 +32,5 @@ size_t sl_bt_get_mbedtls_ccm_ctx_size();
 size_t sl_bt_get_mbedtls_ecp_group_size();
 size_t sl_bt_get_mbedtls_ecp_point_size();
 size_t sl_bt_get_mbedtls_mpi_size();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif /* PROTOCOL_BLUETOOTH_BGCOMMON_INCLUDE_SL_BT_MBEDTLS_CONTEXT_H_ */

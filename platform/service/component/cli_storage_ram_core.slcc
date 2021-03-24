@@ -1,5 +1,5 @@
 id: cli_storage_ram_core
-label: "CLI: Storage in RAM"
+label: "CLI: Storage in RAM Core"
 package: platform
 description: CLI Storage in RAM Core
 category: Services|CLI

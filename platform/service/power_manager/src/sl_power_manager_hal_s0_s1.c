@@ -238,10 +238,8 @@ bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait)
  * @return True, if restore is complete
  *         False, otherwise.
  ******************************************************************************/
-bool sli_power_manager_restore_states(restore_caller_id_t caller_id)
+void sli_power_manager_restore_states(void)
 {
-  (void)caller_id;
-
   // For the cases where it's not started from an early wake up
   if (!is_hf_x_oscillator_already_started
       && is_hf_x_oscillator_used) {
@@ -268,8 +266,6 @@ bool sli_power_manager_restore_states(restore_caller_id_t caller_id)
   }
 #endif
 #endif
-
-  return true;
 }
 
 /***************************************************************************//**

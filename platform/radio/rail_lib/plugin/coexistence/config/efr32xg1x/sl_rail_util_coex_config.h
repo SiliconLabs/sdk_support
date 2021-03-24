@@ -33,6 +33,27 @@
 
 #include "sl_rail_util_coex_common_config.h"
 
+// <<< Use Configuration Wizard in Context Menu >>>
+// <h> Coexistence IEEE802.15.4 PHY Configuration
+// <q SL_RAIL_UTIL_COEX_PHY_ENABLED> True: Optimize for Wi-Fi Blocker; False: Optimize for 15.4 Radio Blocker
+// <i> Default: 1
+#define SL_RAIL_UTIL_COEX_PHY_ENABLED 1
+// <h> Phy Select Signal (Phy Select) Configuration
+// <e SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT> Enable/Disable
+// <i> Default: 0
+#define SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT 0
+// <q SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL> Polarity of PHY Select signal level
+// <i> Default: 1
+#define SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL 1
+// <o SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT> Wi-Fi Optimization will be selected for 1-254 ms after 'Wi-Fi Select' deasserted
+// <0-255:1>
+// <i> Default: 0
+#define SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT 0
+// </e>
+// </h>
+// </h>
+// <<< end of configuration section >>>
+
 // <<< sl:start pin_tool >>>
 
 #if SL_RAIL_UTIL_COEX_GNT_ENABLED
@@ -71,7 +92,7 @@
 #endif //SL_RAIL_UTIL_COEX_REQ_PORT
 #endif //SL_RAIL_UTIL_COEX_REQ_ENABLED
 
-#if SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED
+#if SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_REQ_SHARED
 // Pin used for PWM Request signal
 // <gpio optional=true> SL_RAIL_UTIL_COEX_PWM_REQ
 // $[GPIO_SL_RAIL_UTIL_COEX_PWM_REQ]
@@ -81,7 +102,7 @@
 #ifndef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 #error "SL_RAIL_UTIL_COEX_PWM_REQ undefined"
 #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
-#endif //SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED && SL_RAIL_UTIL_COEX_REQ_SHARED
 
 #if SL_RAIL_UTIL_COEX_RHO_ENABLED
 // Pin used for Radio Holdoff signal
@@ -151,6 +172,15 @@
 #error "SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL undefined"
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_CHANNEL
 #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_ENABLED
+
+#if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+// Pin used for WiFi Blocker optimized PHY select signal
+// <gpio optional=true> SL_RAIL_UTIL_COEX_PHY_SELECT
+// $[GPIO_SL_RAIL_UTIL_COEX_PHY_SELECT]
+// #define SL_RAIL_UTIL_COEX_PHY_SELECT_PORT        gpioPortC
+// #define SL_RAIL_UTIL_COEX_PHY_SELECT_PIN         9
+// [GPIO_SL_RAIL_UTIL_COEX_PHY_SELECT]$
+#endif //SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
 // <<< sl:end pin_tool >>>
 

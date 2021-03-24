@@ -1,7 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief SE Driver for Silicon Labs devices with an embedded SE, for use with
- *        PSA Crypto and Mbed TLS
+ * @brief Silicon Labs PSA Crypto Driver Key Management functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -328,8 +327,11 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
   if (location != PSA_KEY_LOCATION_LOCAL_STORAGE) {
     bool can_export = usage & PSA_KEY_USAGE_EXPORT;
     bool can_copy = usage & PSA_KEY_USAGE_COPY;
-    (void)can_copy; // TODO: Does attribute exist in SE flags?
 
+    if (can_copy) {
+      // We do not support copying opaque keys (currently).
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
     if (!can_export) {
       key_desc->flags |= SL_SE_KEY_FLAG_NON_EXPORTABLE;
     }
@@ -430,7 +432,7 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
     {
       if (key_buffer_size < sizeof(sli_se_opaque_key_context_header_t)) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
+        return PSA_ERROR_INVALID_ARGUMENT;
       }
 
       sli_se_opaque_key_context_header_t *key_context_header =
@@ -488,7 +490,7 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
       } else {
         #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         if (key_buffer_size < sizeof(sli_se_opaque_wrapped_key_context_t)) {
-          return PSA_ERROR_BUFFER_TOO_SMALL;
+          return PSA_ERROR_INVALID_ARGUMENT;
         }
 
         // Refer to wrapped key context in input
@@ -518,7 +520,7 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
         }
         if (key_desc->storage.location.buffer.size < key_full_size + SLI_SE_WRAPPED_KEY_OVERHEAD) {
           memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
-          return PSA_ERROR_BUFFER_TOO_SMALL;
+          return PSA_ERROR_INVALID_ARGUMENT;
         }
         #else // _SILICON_LABS_SECURITY_FEATURE_VAULT
         return PSA_ERROR_NOT_SUPPORTED;
@@ -1091,6 +1093,9 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
                                           key_buffer_size,
                                           key_size,
                                           &key_desc);
+  if (psa_status != PSA_SUCCESS) {
+    return psa_status;
+  }
 
   // Generate the key using SE manager
   sl_se_command_context_t cmd_ctx = { 0 };
@@ -1315,6 +1320,9 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
   uint32_t storage_size = 0;
   sl_status_t sl_status =
     sli_key_get_storage_size(&pub_key_desc, &storage_size);
+  if (sl_status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
   // We must fit entire output key + possibly a format byte
   // We don't have to fit the padding bytes into the data buffer.
   storage_size = storage_size + prepend_format_byte - (2 * padding);
@@ -1426,7 +1434,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
         *bits = data_length * 8;
 
         uint8_t *modulus_ptr = NULL;
-        switch (*bits) {
+        switch (data_length * 8) {
           case 192:
             modulus_ptr = (uint8_t*)ecc_p192_n;
             break;

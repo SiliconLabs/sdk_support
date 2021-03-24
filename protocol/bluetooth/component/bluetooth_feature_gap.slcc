@@ -11,7 +11,7 @@ requires:
 provides:
   - name: "bluetooth_feature_gap"
 template_contribution:
-  - name: bluetooth_stack_init
+  - name: bluetooth_bgapi_class
     value:
-      function: "sl_bt_class_gap_init"
+      class: "gap"
     priority: 3

@@ -193,7 +193,7 @@ void IADC_init(IADC_TypeDef *iadc,
   unsigned uiAnaGain;
   uint16_t uiGainCAna;
   IADC_CfgAdcMode_t adcMode;
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
   float anaGain;
   int anaGainRound;
   float offsetAna;
@@ -273,7 +273,7 @@ void IADC_init(IADC_TypeDef *iadc,
                                     | _IADC_CFG_DIGAVG_MASK
 #endif
                                     | _IADC_CFG_TWOSCOMPL_MASK
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
                                     | _IADC_CFG_OSRHA_MASK
 #endif
                                     );
@@ -281,7 +281,7 @@ void IADC_init(IADC_TypeDef *iadc,
                             | (((uint32_t)(adcMode) << _IADC_CFG_ADCMODE_SHIFT) & _IADC_CFG_ADCMODE_MASK)
                             | (((uint32_t)(allConfigs->configs[config].osrHighSpeed) << _IADC_CFG_OSRHS_SHIFT)
                                & _IADC_CFG_OSRHS_MASK)
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
                             | (((uint32_t)(allConfigs->configs[config].osrHighAccuracy) << _IADC_CFG_OSRHA_SHIFT)
                                & _IADC_CFG_OSRHA_MASK)
 #endif
@@ -325,7 +325,7 @@ void IADC_init(IADC_TypeDef *iadc,
       uint32_t scale;
       int iOffset, iOsr;
       case iadcCfgModeNormal:
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHSPEED)
       case iadcCfgModeHighSpeed:
 #endif
         offset = 0.0f;
@@ -404,7 +404,7 @@ void IADC_init(IADC_TypeDef *iadc,
         iadc->CFG[config].SCALE = scale;
         break;
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+#if defined(_IADC_CFG_ADCMODE_HIGHACCURACY)
       case iadcCfgModeHighAccuracy:
         switch (allConfigs->configs[config].reference) {
           case iadcCfgReferenceInt1V2:

@@ -210,6 +210,8 @@ typedef enum {
   SL_RAIL_UTIL_COEX_EVENT_COUNT,
 } sl_rail_util_coex_event_t;
 
+void sl_rail_util_coex_counter_on_event(sl_rail_util_coex_event_t event);
+
 #define sl_rail_util_coex_pwm_args_t COEX_PwmArgs_t
 
 // Release PTA request if long request not enabled or toggle request on macretransmit enabled

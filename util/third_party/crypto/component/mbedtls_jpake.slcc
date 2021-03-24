@@ -1,9 +1,10 @@
 id: mbedtls_jpake
 package: platform
-label: Mbed TLS Support for J-PAKE
-description: >
-  This component provides support for Elliptic curve J-PAKE using Mbed TLS.
-  J-PAKE is typically used in a Thread network stack for key exchange.
+label: Mbed TLS Support for J-PAKE over Elliptic Curves
+description: >-
+  This component provides support for Elliptic Curve (EC) J-PAKE using Mbed TLS.
+  This password-authenticated key agreement protocol is typically used in a Thread 
+  network stack for key exchanges.
 category: Platform|Security
 quality: production
 source:

@@ -1,7 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief SE Driver for Silicon Labs devices with an embedded SE, for use with
- *        PSA Crypto and Mbed TLS
+ * @brief Silicon Labs PSA Crypto Driver Key Derivation functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,6 +27,7 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -44,7 +44,7 @@
 #include "mbedtls/platform.h" // calloc
 
 #include "sl_se_manager.h"
-#include "sli_se_manager_internal.h"
+#include "sl_se_manager_util.h"
 #include <string.h>
 
 #ifdef __cplusplus
@@ -987,8 +987,6 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                          size_t output_size,
                                          size_t *output_length)
 {
-  psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
-  sl_status_t sl_status = SL_STATUS_FAIL;
   sl_se_key_descriptor_t priv_desc = { 0 };
   sl_se_key_descriptor_t pub_desc = { 0 };
   sl_se_key_descriptor_t shared_desc = { 0 };
@@ -1031,25 +1029,40 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-  // Initialize ephemeral key attributes struct.
-  psa_key_attributes_t tmp_peer_key_attributes = psa_key_attributes_init();
-  psa_set_key_type(&tmp_peer_key_attributes,
-                   PSA_KEY_TYPE_ECC_PUBLIC_KEY(curve_type));
-  psa_set_key_bits(&tmp_peer_key_attributes, key_bits);
-
-  // Validate key.
-  size_t bits = 0;
-  psa_status = sli_se_driver_validate_key(&tmp_peer_key_attributes,
-                                          peer_key,
-                                          peer_key_length,
-                                          &bits);
-  if (psa_status != PSA_SUCCESS) {
-    return psa_status;
+  // External public key validation is required for older versions of SE firmware.
+  // SE version 1.2.2 is first version with public key validation inside of SE for ECDH.
+  uint32_t oldest_version_with_validation = (1U << (8 * 2)) + (2U << (8 * 1)) + (2U << (8 * 0));
+  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
+  if (sl_status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
   }
+  uint32_t se_version = 0;
+  sl_status = sl_se_get_se_version(&cmd_ctx, &se_version);
+  if (sl_status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+  if ((se_version & 0x00FFFFFFU) < oldest_version_with_validation) {
+    // Initialize ephemeral key attributes struct.
+    psa_key_attributes_t tmp_peer_key_attributes = psa_key_attributes_init();
+    psa_set_key_type(&tmp_peer_key_attributes,
+                     PSA_KEY_TYPE_ECC_PUBLIC_KEY(curve_type));
+    psa_set_key_bits(&tmp_peer_key_attributes, key_bits);
 
-  // Check that validated key is actally on the same curve as expected.
-  if (bits != key_bits) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    // Validate key.
+    size_t bits = 0;
+    psa_status_t psa_status = sli_se_driver_validate_key(&tmp_peer_key_attributes,
+                                                         peer_key,
+                                                         peer_key_length,
+                                                         &bits);
+    if (psa_status != PSA_SUCCESS) {
+      return psa_status;
+    }
+
+    // Check that validated key is actally on the same curve as expected.
+    if (bits != key_bits) {
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
   }
 
   switch (key_type) {
@@ -1117,10 +1130,10 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
   }
 
   // Generate a key descriptor for private key.
-  psa_status = sli_se_key_desc_from_input(attributes,
-                                          key_buffer,
-                                          key_buffer_size,
-                                          &priv_desc);
+  psa_status_t psa_status = sli_se_key_desc_from_input(attributes,
+                                                       key_buffer,
+                                                       key_buffer_size,
+                                                       &priv_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
@@ -1165,8 +1178,7 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
   pub_desc.flags |= SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY;
   shared_desc.type = SL_SE_KEY_TYPE_SYMMETRIC;
 
-  // Create ephemeral SE command context.
-  sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+  // Re-init SE command context.
   sl_status = sl_se_init_command_context(&cmd_ctx);
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -1178,7 +1190,10 @@ psa_status_t sli_se_driver_key_agreement(psa_algorithm_t alg,
                                                &pub_desc,
                                                &shared_desc);
   if (sl_status != SL_STATUS_OK) {
-    return PSA_ERROR_HARDWARE_FAILURE;
+    // If the ECDH operation failed, this is most likely due to the peer key
+    // being an invalid elliptic curve point. Other sources for failure should
+    // hopefully have been caught during parameter validation.
+    return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)

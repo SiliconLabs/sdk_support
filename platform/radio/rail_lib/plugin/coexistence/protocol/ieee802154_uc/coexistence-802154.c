@@ -16,11 +16,13 @@
  ******************************************************************************/
 #include "rail.h"
 #include "sl_status.h"
-#include "sl_sleeptimer.h"
 #include "sl_rail_util_ieee802154_stack_event.h"
 #include "coexistence-802154.h"
 #include "coexistence-hal.h"
+
+#ifndef COEXISTENCE_HAL_SIMULATOR
 #include "ustimer.h"
+#endif
 
 #ifdef RTOS
   #include "rtos/rtos.h"
@@ -218,7 +220,7 @@
 
 #if !defined(SL_RAIL_UTIL_COEX_PHY_SELECT_PORT)         \
   && (SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT > 0) \
-  && (SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT < 255)
+  && (SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT < SL_RAIL_UTIL_COEX_PHY_SELECT_TIMEOUT_MAX)
 #error "Select SL_RAIL_UTIL_COEX_PHY_SELECT GPIO before enabling COEX PHY select timeout!"
 #endif
 
@@ -232,8 +234,7 @@ extern void emRadioHoldOffIsr(bool active);
 
 #define COEX_STACK_EVENT_SUPPORT \
   (COEX_SUPPORT                  \
-   || COEX_RHO_SUPPORT           \
-   || RUNTIME_PHY_SELECT)        \
+   || COEX_RHO_SUPPORT)          \
 
 #if SL_RAIL_UTIL_COEX_PHY_ENABLED
 static uint8_t phySelectTimeoutMs = SL_RAIL_UTIL_COEX_PHY_SELECT_TIMEOUT_MAX;
@@ -583,7 +584,7 @@ static void ptaPhySelectTimerCb(RAIL_MultiTimer_t * tmr,
 
 static void phySelectTick(void)
 {
-  if (phySelectTimeoutMs != 0U && !RAIL_IsMultiTimerRunning(&ptaPhySelectTimer)) {
+  if (phySelectTimeoutMs != SL_RAIL_UTIL_COEX_PHY_SELECT_TIMEOUT_MAX && phySelectTimeoutMs != 0U && !RAIL_IsMultiTimerRunning(&ptaPhySelectTimer)) {
     coexNewPhySelectedCoex = false;
     COEX_EnablePhySelectIsr(true);
   }
@@ -808,7 +809,6 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
       if (sl_rail_util_coex_is_enabled()) {
         (void) sl_rail_util_coex_set_tx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
       }
-      break;
 
     default:
       break;

@@ -644,6 +644,8 @@ static void send_frame(uint8_t mac_index)
 
   //EMZIGBEE-5351, this allows the prepare_tx_callback to drop a packet by setting the length byte to 0
   if (s.outgoing_flat_packet[0] == 0) {
+    //EMZIGBEE-6708, trigger complete callback with success despite droping the packet
+    sl_mac_packet_send_complete_callback(MAC_INDEX, SL_STATUS_OK);
     sl_mac_kickstart(MAC_INDEX);
   } else {
     sl_mac_lower_mac_send(MAC_INDEX, s.outgoing_flat_packet, use_csma);

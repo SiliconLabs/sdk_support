@@ -118,9 +118,9 @@ void setTxLength(sl_cli_command_arg_t *args)
 
   txDataLen = length;
   if (railDataConfig.txMethod == PACKET_MODE) {
-    RAIL_WriteTxFifo(railHandle, txData, txDataLen, true);
+    length = RAIL_WriteTxFifo(railHandle, txData, txDataLen, true);
   }
-  responsePrint(sl_cli_get_command_string(args, 0), "TxLength:%d", txDataLen);
+  responsePrint(sl_cli_get_command_string(args, 0), "TxLength:%d,TxLength Written:%d", txDataLen, length);
 }
 
 void printAckPacket(sl_cli_command_arg_t *args)

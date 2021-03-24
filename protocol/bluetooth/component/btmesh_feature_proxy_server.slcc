@@ -11,6 +11,7 @@ requires:
   - name: "btmesh_feature_proxy"
   - name: "btmesh_core"
   - name: "bluetooth_feature_gatt_server"
+  - name: gatt_configuration
   
 provides:
   - name: "btmesh_feature_proxy_server"  
@@ -20,9 +21,9 @@ config_file:
     directory: btconf
 
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_proxy_server_init"
+      class: "proxy_server"
     priority: 1
   - name: btmesh_feature_proxy_server
     value: 1

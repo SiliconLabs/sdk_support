@@ -158,12 +158,25 @@ static void halConfigClockInit(void)
   #endif
   #endif // CONFIG 2
 
-  bool locked = false;
-  while (!locked) {
-    locked = CMU_DPLLLock(&dpllInit);
+  CMU_Select_TypeDef selected_sysclk = CMU_ClockSelectGet(cmuClock_SYSCLK);
+
+  if (selected_sysclk == cmuSelect_HFRCODPLL) {
+    // From Reference Manual:
+    // The CMU should not be running from the HFRCO. If necessary, the CMU
+    // should switch to the FSRCO until after the DPLL has locked to avoid
+    // over-clocking due to overshoot.
+    CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
   }
 
-  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+  #if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  CMU_ClockEnable(cmuClock_DPLL0, true);
+  #endif
+
+  CMU_DPLLLock(&dpllInit);
+
+  if (selected_sysclk == cmuSelect_HFRCODPLL) {
+    CMU_ClockSelectSet(cmuClock_SYSCLK, selected_sysclk);
+  }
 #else
   #error Must define HAL_CLK_HFCLK_SOURCE
 #endif // HAL_CLK_HFCLK_SOURCE
@@ -297,7 +310,7 @@ Ecode_t halConfigInit(void)
   Ecode_t status = ECODE_OK;
 
   INTERRUPTS_ON();   //enables using USB and the proper emberSerialReadByte
-#if defined (_EMU_DCDCCTRL_MASK)
+#if defined(_EMU_DCDCCTRL_MASK) || defined(_DCDC_CTRL_MASK)
 #if BSP_DCDC_PRESENT
   EMU_DCDCInit_TypeDef dcdcInit = BSP_DCDC_INIT;
   #if HAL_DCDC_BYPASS
@@ -494,42 +507,62 @@ Ecode_t halConfigInit(void)
   return status;
 }
 
-#if HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
-static HalAntennaMode activeAntennaRxMode = HAL_ANTENNA_MODE_DISABLED;
+#define ANTDIV_PHY_DEFAULT_ENABLED (ANTENNA_RX_DEFAULT_MODE != HAL_ANTENNA_MODE_DISABLED)
+#define HAL_RADIO_CONFIG_154_2P4_DEFAULT_SUPPORTED                   \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || !ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || !HAL_COEX_PHY_ENABLED)         \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || !HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_ANTDIV_SUPPORTED                   \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || !HAL_COEX_PHY_ENABLED)        \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || !HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_COEX_SUPPORTED                      \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || !ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || HAL_COEX_PHY_ENABLED)          \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || !HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_SUPPORTED              \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || HAL_COEX_PHY_ENABLED)         \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || !HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_FEM_SUPPORTED                       \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || !ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || !HAL_COEX_PHY_ENABLED)         \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_ANTDIV_FEM_SUPPORTED               \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || !HAL_COEX_PHY_ENABLED)        \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_COEX_FEM_SUPPORTED                  \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || !ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || HAL_COEX_PHY_ENABLED)          \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || HAL_FEM_OPTIMIZED_PHY_ENABLE))
+#define HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM_SUPPORTED          \
+  ((HAL_ANTDIV_RX_RUNTIME_PHY_SELECT || ANTDIV_PHY_DEFAULT_ENABLED) \
+   && (HAL_COEX_RUNTIME_PHY_SELECT || HAL_COEX_PHY_ENABLED)         \
+   && (HAL_FEM_RUNTIME_PHY_SELECT || HAL_FEM_OPTIMIZED_PHY_ENABLE))
 
-bool halAntDivRxPhyChanged(void)
-{
-  return (halGetAntennaRxMode() == HAL_ANTENNA_MODE_DIVERSITY)
-         != (activeAntennaRxMode == HAL_ANTENNA_MODE_DIVERSITY);
-}
+#if ANTDIV_PHY_DEFAULT_ENABLED
+#define DEFAULT_ANTDIV_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_ANT_DIV
+#else //!ANTDIV_PHY_DEFAULT_ENABLED
+#define DEFAULT_ANTDIV_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_DEFAULT
+#endif //ANTDIV_PHY_DEFAULT_ENABLED
 
-static RAIL_Status_t halCoexConfigNormalPhy(RAIL_Handle_t railHandle)
-{
-  activeAntennaRxMode = halGetAntennaRxMode();
-  if (activeAntennaRxMode == HAL_ANTENNA_MODE_DIVERSITY) {
-    return RAIL_IEEE802154_Config2p4GHzRadioAntDiv(railHandle);
-  } else {
-    return RAIL_IEEE802154_Config2p4GHzRadio(railHandle);
-  }
-}
-#if HAL_COEX_PHY_ENABLED || HAL_COEX_RUNTIME_PHY_SELECT
-static RAIL_Status_t halCoexConfigCoexPhy(RAIL_Handle_t railHandle)
-{
-  activeAntennaRxMode = halGetAntennaRxMode();
-  if (activeAntennaRxMode == HAL_ANTENNA_MODE_DIVERSITY) {
-    return RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(railHandle);
-  } else {
-    return RAIL_IEEE802154_Config2p4GHzRadioCoex(railHandle);
-  }
-}
-#endif//HAL_COEX_PHY_ENABLED || HAL_COEX_RUNTIME_PHY_SELECT
-#elif ANTENNA_USE_RAIL_SCHEME && (ANTENNA_RX_DEFAULT_MODE != HAL_ANTENNA_MODE_DISABLED)
-#define halCoexConfigNormalPhy RAIL_IEEE802154_Config2p4GHzRadioAntDiv
-#define halCoexConfigCoexPhy   RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex
-#else
-#define halCoexConfigNormalPhy RAIL_IEEE802154_Config2p4GHzRadio
-#define halCoexConfigCoexPhy   RAIL_IEEE802154_Config2p4GHzRadioCoex
-#endif
+#if HAL_COEX_PHY_ENABLED
+#define DEFAULT_COEX_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_COEX
+#else //!HAL_COEX_PHY_ENABLED
+#define DEFAULT_COEX_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_DEFAULT
+#endif //HAL_COEX_PHY_ENABLED
+
+#if HAL_FEM_OPTIMIZED_PHY_ENABLE
+#define DEFAULT_FEM_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_FEM
+#else //!HAL_FEM_OPTIMIZED_PHY_ENABLE
+#define DEFAULT_FEM_RADIO_CONFIG HAL_RADIO_CONFIG_154_2P4_ANT_DIV
+#endif //HAL_FEM_OPTIMIZED_PHY_ENABLE
+
+#define DEFAULT_RADIO_CONFIG (HAL_RADIO_CONFIG_154_2P4_DEFAULT \
+                              | DEFAULT_ANTDIV_RADIO_CONFIG    \
+                              | DEFAULT_COEX_RADIO_CONFIG      \
+                              | DEFAULT_FEM_RADIO_CONFIG)
 
 #if     HAL_COEX_RUNTIME_PHY_SELECT
 #if     HAL_COEX_PHY_ENABLED
@@ -543,22 +576,110 @@ bool halCoexPhySelectedCoex = false;
 #define halCoexPhySelectedCoex (false)
 #endif//HAL_COEX_RUNTIME_PHY_SELECT
 
+#if HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
+bool halAntDivRxPhyChanged(void)
+{
+  return ((desiredRadioConfig & HAL_RADIO_CONFIG_154_2P4_ANT_DIV)
+          != (activeAntennaRxMode & HAL_RADIO_CONFIG_154_2P4_ANT_DIV));
+}
+#define halAntDivRxPhySelected() (halGetAntennaRxMode() == HAL_ANTENNA_MODE_DIVERSITY)
+#else //!HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
+#define halAntDivRxPhySelected() (ANTENNA_RX_DEFAULT_MODE != HAL_ANTENNA_MODE_DISABLED)
+#endif //HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
+
+static volatile HalRadioConfig_t desiredRadioConfig = DEFAULT_RADIO_CONFIG;
+static volatile HalRadioConfig_t activeRadioConfig = DEFAULT_RADIO_CONFIG;
+
+#if HAL_FEM_RUNTIME_PHY_SELECT
+static bool halFemPhySelected = (HAL_FEM_OPTIMIZED_PHY_ENABLE != 0U);
+
+bool halFemPhyIsEnabled(void)
+{
+  return halFemPhySelected;
+}
+
+void halFemPhySetEnable(bool enable)
+{
+  halFemPhySelected = enable;
+}
+#else //!HAL_FEM_RUNTIME_PHY_SELECT
+
+#if HAL_FEM_OPTIMIZED_PHY_ENABLE
+#define halFemPhySelected (true)
+#else //!HAL_FEM_OPTIMIZED_PHY_ENABLE
+#define halFemPhySelected (false)
+#endif //HAL_FEM_OPTIMIZED_PHY_ENABLE
+
+bool halFemPhyIsEnabled(void)
+{
+  return halFemPhySelected;
+}
+
+void halFemPhySetEnable(bool enable)
+{
+  (void)enable;
+}
+#endif //HAL_FEM_RUNTIME_PHY_SELECT
+
+HalRadioConfig_t halGetDesiredRadioConfig(void)
+{
+  return ((halAntDivRxPhySelected() ? HAL_RADIO_CONFIG_154_2P4_ANT_DIV : HAL_RADIO_CONFIG_154_2P4_DEFAULT)
+          | (halCoexPhySelectedCoex ? HAL_RADIO_CONFIG_154_2P4_COEX : HAL_RADIO_CONFIG_154_2P4_DEFAULT)
+          | (halFemPhySelected ? HAL_RADIO_CONFIG_154_2P4_FEM : HAL_RADIO_CONFIG_154_2P4_DEFAULT));
+}
+
 RAIL_Status_t halPluginConfig2p4GHzRadio(RAIL_Handle_t railHandle)
 {
   // Establish the proper radio config supporting antenna diversity
-  RAIL_Status_t status;
- #if     HAL_COEX_RUNTIME_PHY_SELECT
-  if (halCoexPhySelectedCoex) {
-    status = halCoexConfigCoexPhy(railHandle);
-  } else {
-    status = halCoexConfigNormalPhy(railHandle);
+  RAIL_Status_t status = RAIL_STATUS_INVALID_STATE;
+
+  desiredRadioConfig = halGetDesiredRadioConfig();
+  switch (desiredRadioConfig) {
+#if HAL_RADIO_CONFIG_154_2P4_DEFAULT_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_DEFAULT:
+      status = RAIL_IEEE802154_Config2p4GHzRadio(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_DEFAULT_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_ANTDIV_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_ANTDIV:
+      status = RAIL_IEEE802154_Config2p4GHzRadioAntDiv(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_ANTDIV_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_COEX_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_COEX:
+      status = RAIL_IEEE802154_Config2p4GHzRadioCoex(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_COEX_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX:
+      status = RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_FEM_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_FEM:
+      status = RAIL_IEEE802154_Config2p4GHzRadioFem(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_FEM_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_ANTDIV_FEM_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_ANTDIV_FEM:
+      status = RAIL_IEEE802154_Config2p4GHzRadioAntDivFem(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_ANTDIV_FEM_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_COEX_FEM_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_COEX_FEM:
+      status = RAIL_IEEE802154_Config2p4GHzRadioCoexFem(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_COEX_FEM_SUPPORTED
+#if HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM_SUPPORTED
+    case HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM:
+      status = RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(railHandle);
+      break;
+#endif //HAL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM_SUPPORTED
+    default:
+      break;
   }
- #elif   HAL_COEX_PHY_ENABLED
-  status = halCoexConfigCoexPhy(railHandle);
- #else
-  status = halCoexConfigNormalPhy(railHandle);
- #endif//HAL_COEX_RUNTIME_PHY_SELECT
   assert(status == RAIL_STATUS_NO_ERROR);
+  activeRadioConfig = desiredRadioConfig;
 
  #if ANTENNA_USE_RAIL_SCHEME && (ANTENNA_RX_DEFAULT_MODE != HAL_ANTENNA_MODE_DISABLED)
   // Tell RAIL what Rx antenna mode to use
@@ -569,24 +690,7 @@ RAIL_Status_t halPluginConfig2p4GHzRadio(RAIL_Handle_t railHandle)
   return status;
 }
 
-#define ANTDIV_PHY_MODE                    \
-  (halCoexPhySelectedCoex                  \
-   ? HAL_RADIO_CONFIG_154_2P4_ANT_DIV_COEX \
-   : HAL_RADIO_CONFIG_154_2P4_ANT_DIV)
-#define DEFAULT_PHY_MODE           \
-  (halCoexPhySelectedCoex          \
-   ? HAL_RADIO_CONFIG_154_2P4_COEX \
-   : HAL_RADIO_CONFIG_154_2P4_DEFAULT)
-
-#if HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
-#define antennaPhySelected() \
-  (activeAntennaRxMode == HAL_ANTENNA_MODE_DIVERSITY)
-#else //!HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
-#define antennaPhySelected() \
-  (ANTENNA_RX_DEFAULT_MODE != HAL_ANTENNA_MODE_DISABLED)
-#endif //HAL_ANTDIV_RX_RUNTIME_PHY_SELECT
-
 HalRadioConfig_t halGetActiveRadioConfig(void)
 {
-  return antennaPhySelected() ? ANTDIV_PHY_MODE : DEFAULT_PHY_MODE;
+  return activeRadioConfig;
 }

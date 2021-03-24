@@ -2,7 +2,7 @@ id: spidrv
 package: platform
 label: "SPIDRV"
 description: >
-  The SPI driver sets up the USART for SPI communication and supports
+  The SPI USART driver sets up the USART for SPI communication and supports
   both master and slave roles. Both blocking and interrupt driven asynchrounous
   APIs are provided for transmit and receive operations.
 
@@ -21,30 +21,32 @@ description: >
 
   Selecting this component will also include the SPIDRV Core component, which is 
   the implementation of the SPI driver itself.
-category: "Platform|Driver"
+category: "Platform|Driver|SPI"
 quality: production
 root_path: "platform/emdrv/spidrv"
 instantiable:
   prefix: "inst"
 config_file:
-  - path: "config/s0/sl_spidrv_{{instance}}_config.h"
+  - path: "config/usart/s0/sl_spidrv_{{instance}}_config.h"
     file_id: spidrv_config
     condition: [device_series_0]
-  - path: "config/s1/sl_spidrv_{{instance}}_config.h"
+  - path: "config/usart/s1/sl_spidrv_{{instance}}_config.h"
     file_id: spidrv_config
     condition: [device_series_1]
-  - path: "config/s2/sl_spidrv_{{instance}}_config.h"
+  - path: "config/usart/s2/sl_spidrv_{{instance}}_config.h"
     file_id: spidrv_config
     condition: [device_series_2]
 validation_helper:
   - path: script/spidrv_validation.py
 provides:
-  - name: spidrv
+  - name: "spidrv_instance"
+    allow_multiple: true
+  - name: "spidrv"
     allow_multiple: true
 requires:
-  - name: spidrv_core
+  - name: "spidrv_core"
 template_contribution:
-  - name: spidrv_instances
+  - name: "spidrv_instances"
     value: "{{instance}}"
 documentation:
     docset: gecko-platform

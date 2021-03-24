@@ -35,11 +35,6 @@ extern sl_status_t ll_connPowerControlEnable(const sl_bt_ll_power_control_config
 
 sl_status_t sl_bt_init_power_control()
 {
-  sl_status_t sta = sli_bt_init_power_control();
-  if (sta == SL_STATUS_OK) {
-    sl_bt_ll_power_control_config_t config = SL_BT_POWER_CONTROL_CONFIG;
-    sta = ll_connPowerControlEnable(&config);
-  }
-
-  return sta;
+  sl_bt_ll_power_control_config_t config = SL_BT_POWER_CONTROL_CONFIG;
+  return sli_bt_init_power_control(&config);
 }

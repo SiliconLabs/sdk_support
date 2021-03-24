@@ -13,9 +13,9 @@ requires:
 provides:
   - name: "btmesh_feature_friend"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_friend_init"
+      class: "friend"
     priority: 1
   - name: btmesh_feature_bitmask
     value:

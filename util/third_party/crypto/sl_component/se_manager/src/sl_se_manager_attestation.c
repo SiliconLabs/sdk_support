@@ -96,6 +96,60 @@ static sl_status_t validate_and_update_command_word(uint32_t *command_word,
 
 /***************************************************************************//**
  * @brief
+ *   Get the PSA initial attest token from the SE
+ *
+ * @param[in] cmd_ctx
+ *   SE command context struct.
+ *
+ * @param[in] challenge_size
+ *   Size of the challenge object in bytes. Must be either 32, 48 or 64.
+ *
+ * @param[out] token_size
+ *   Number of bytes actually used in token_buf.
+ *
+ * @param[in] command_word
+ *   The command word to send to the SE, to differentiat between token types
+ *
+ * @return
+ *   Status code, @ref sl_status.h.
+ ******************************************************************************/
+static sl_status_t get_attestation_token_size(sl_se_command_context_t *cmd_ctx,
+                                              size_t challenge_size,
+                                              size_t *token_size,
+                                              uint32_t command_word)
+{
+  // Parameter check
+  if (cmd_ctx == NULL || token_size == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  // Check command word and challenge size
+  sl_status_t status = validate_and_update_command_word(&command_word,
+                                                        challenge_size);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  // Use a dummy nonce since the SE requires nonce input even if we just
+  // want to find the token length
+  uint8_t dummy_nonce[SL_SE_ATTESTATION_CHALLENGE_SIZE_64] = { 0 };
+
+  // Build and execute the command
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+  // Or comman word with 0x01 to enable length output only
+  sli_se_command_init(cmd_ctx, command_word | 0x01UL);
+  SE_DataTransfer_t noncedata =
+    SE_DATATRANSFER_DEFAULT(dummy_nonce, challenge_size);
+  SE_addDataInput(se_cmd, &noncedata);
+  SE_DataTransfer_t sizedata =
+    SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
+  SE_addDataOutput(se_cmd, &sizedata);
+
+  return sli_se_execute_and_wait(cmd_ctx);
+}
+
+/***************************************************************************//**
+ * @brief
  *   Get an attestation token from the SE
  *
  * @param[in] cmd_ctx
@@ -145,6 +199,18 @@ static sl_status_t get_attestation_token(sl_se_command_context_t *cmd_ctx,
     return status;
   }
 
+  // Check that buffer is sufficiently large
+  status = get_attestation_token_size(cmd_ctx,
+                                      challenge_size,
+                                      token_size,
+                                      command_word);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+  if (((*token_size + 0x3) & ~0x3) > token_buf_size) {
+    return SL_STATUS_WOULD_OVERFLOW;
+  }
+
   // Build and execute the command
   SE_Command_t *se_cmd = &cmd_ctx->command;
   sli_se_command_init(cmd_ctx, command_word);
@@ -155,62 +221,8 @@ static sl_status_t get_attestation_token(sl_se_command_context_t *cmd_ctx,
     SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
   SE_addDataOutput(se_cmd, &sizedata);
   SE_DataTransfer_t tokendata =
-    SE_DATATRANSFER_DEFAULT(token_buf, ((token_buf_size + 0x3) & ~0x3));
+    SE_DATATRANSFER_DEFAULT(token_buf, ((*token_size + 0x3) & ~0x3));
   SE_addDataOutput(se_cmd, &tokendata);
-
-  return sli_se_execute_and_wait(cmd_ctx);
-}
-
-/***************************************************************************//**
- * @brief
- *   Get the PSA initial attest token from the SE
- *
- * @param[in] cmd_ctx
- *   SE command context struct.
- *
- * @param[in] challenge_size
- *   Size of the challenge object in bytes. Must be either 32, 48 or 64.
- *
- * @param[out] token_size
- *   Number of bytes actually used in token_buf.
- *
- * @param[in] command_word
- *   The command word to send to the SE, to differentiat between token types
- *
- * @return
- *   Status code, @ref sl_status.h.
- ******************************************************************************/
-static sl_status_t get_attestation_token_size(sl_se_command_context_t *cmd_ctx,
-                                              size_t challenge_size,
-                                              size_t *token_size,
-                                              uint32_t command_word)
-{
-  // Parameter check
-  if (cmd_ctx == NULL || token_size == NULL) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  // Check command word and challenge size
-  sl_status_t status = validate_and_update_command_word(&command_word,
-                                                        challenge_size);
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
-
-  // Use a dummy nonce since the SE requires nonce input even if we just
-  // want to find the token length
-  uint8_t dummy_nonce[SL_SE_ATTESTATION_CHALLENGE_SIZE_64] = { 0 };
-
-  // Build and execute the command
-  SE_Command_t *se_cmd = &cmd_ctx->command;
-  // Or comman word with 0x01 to enable length output only
-  sli_se_command_init(cmd_ctx, command_word | 0x01UL);
-  SE_DataTransfer_t noncedata =
-    SE_DATATRANSFER_DEFAULT(dummy_nonce, challenge_size);
-  SE_addDataInput(se_cmd, &noncedata);
-  SE_DataTransfer_t sizedata =
-    SE_DATATRANSFER_DEFAULT(token_size, sizeof(*token_size));
-  SE_addDataOutput(se_cmd, &sizedata);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }

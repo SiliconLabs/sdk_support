@@ -11,9 +11,9 @@ requires:
 provides:
   - name: "bluetooth_feature_sync"
 template_contribution:
-  - name: bluetooth_stack_init
+  - name: bluetooth_bgapi_class
     value:
-      function: "sl_bt_class_sync_init"
+      class: "sync"
     priority: 10
     unless:
       - "device_sdid_80"

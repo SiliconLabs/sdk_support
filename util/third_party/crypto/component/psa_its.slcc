@@ -1,9 +1,10 @@
 id: psa_its
 package: platform
 label: PSA ITS
-description: |-
+description: >-
   This component provides an implementation of the PSA ITS (Internal Trusted
-  Storage) API based on Silicon Labs NVM3.
+  Storage) API based on Silicon Labs NVM3. For example, this component is
+  required for enabling the use of persistent key storage in PSA Crypto.
 category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto/

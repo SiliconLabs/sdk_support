@@ -34,7 +34,6 @@
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_core.h"
 #include "em_assert.h"
 #include "em_system.h"
 #include <string.h>
@@ -437,7 +436,7 @@ sl_status_t sl_se_ecjpake_check(const sl_se_ecjpake_context_t *ctx)
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  if (ctx->curve_flags == 0 || (ctx->pwd_len > 0 && ctx->pwd == NULL)) {
+  if (ctx->curve_flags == 0) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 

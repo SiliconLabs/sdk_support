@@ -274,7 +274,9 @@
   && !defined(MBEDTLS_ECP_DP_CURVE448_ENABLED)
 
   #if !( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE) \
-  && defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED) )
+  && (defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED)                               \
+  || defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)                                 \
+  || defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)  ) )
     #if defined(SE_COMMAND_CREATE_KEY)
       #define MBEDTLS_ECDH_GEN_PUBLIC_ALT
       #define MBEDTLS_ECDSA_GENKEY_ALT
@@ -288,12 +290,20 @@
 
   #if defined(SE_COMMAND_SIGNATURE_SIGN) \
   && !defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED)
-    #define MBEDTLS_ECDSA_SIGN_ALT
+    #if !( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE) \
+  && (defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)                                  \
+  || defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)  ) )
+      #define MBEDTLS_ECDSA_SIGN_ALT
+    #endif
   #endif
 
   #if defined(SE_COMMAND_SIGNATURE_VERIFY) \
   && !defined(MBEDTLS_ECP_DP_CURVE25519_ENABLED)
-    #define MBEDTLS_ECDSA_VERIFY_ALT
+    #if !( (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_SE) \
+  && (defined(MBEDTLS_ECP_DP_SECP384R1_ENABLED)                                  \
+  || defined(MBEDTLS_ECP_DP_SECP521R1_ENABLED)  ) )
+      #define MBEDTLS_ECDSA_VERIFY_ALT
+    #endif
   #endif
 
 #endif // #if !defined(MBEDTLS_ECP_DP_XXXX_ENABLED) && ...

@@ -1,11 +1,38 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver Cipher functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
 #include MBEDTLS_CONFIG_FILE
 #endif
-
-// We compile this driver only when PSA Crypto is included
-#if defined(MBEDTLS_PSA_CRYPTO_C)
 
 #include "em_device.h"
 
@@ -905,7 +932,7 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  psa_status_t status;
+  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
   bool lagging;
   size_t bytes_to_boundary = 16 - (operation->processed_length % 16);
   size_t actual_output_length = 0;
@@ -1045,6 +1072,7 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
 
         if (cache_full_block && (bytes_to_boundary == input_length)) {
           // Don't process the streaming block if there is no more input data
+          status = PSA_SUCCESS;
         } else {
           status = sl_crypto_aes_crypt_cbc(operation->key,
                                            operation->key_len,
@@ -1093,7 +1121,6 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
 
         input += operation_size;
         input_length -= operation_size;
-        output += operation_size;
         actual_output_length += operation_size;
         operation->processed_length += operation_size;
       }
@@ -1192,7 +1219,7 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
   exit:
   if (status != PSA_SUCCESS) {
     *output_length = 0;
-    return PSA_ERROR_HARDWARE_FAILURE;
+    return status;
   } else {
     *output_length = actual_output_length;
     return PSA_SUCCESS;
@@ -1209,7 +1236,8 @@ psa_status_t sli_crypto_transparent_cipher_finish(sli_crypto_transparent_cipher_
   psa_status_t psa_status = PSA_ERROR_BAD_STATE;
 
   // Argument check
-  if (operation == NULL) {
+  if (operation == NULL
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -1806,4 +1834,3 @@ static psa_status_t sl_crypto_aes_crypt_ctr(const uint8_t *key_buffer,
   return PSA_SUCCESS;
 }
 #endif // defined(CRYPTO_PRESENT)
-#endif // defined(MBEDTLS_PSA_CRYPTO_C)

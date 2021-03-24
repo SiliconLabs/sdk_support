@@ -47,13 +47,6 @@ typedef struct {
   const char *module_name;
 } sli_power_debug_requirement_entry_t;
 
-typedef enum restore_caller_id {
-  RESTORE_CALLER_ID_SLEEP_EXIT,
-  RESTORE_CALLER_ID_EARLY_WAKEUP_TIMEOUT,
-  RESTORE_CALLER_ID_RESTORE_READY_NOTIFICATION,
-  RESTORE_CALLER_ID_ADD_REQUIREMENT
-} restore_caller_id_t;
-
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
@@ -68,7 +61,7 @@ void sli_power_manager_restore_high_freq_accuracy_clk(void);
 
 bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait);
 
-bool sli_power_manager_restore_states(restore_caller_id_t caller_id);
+void sli_power_manager_restore_states(void);
 
 void sli_power_manager_apply_em(sl_power_manager_em_t em);
 

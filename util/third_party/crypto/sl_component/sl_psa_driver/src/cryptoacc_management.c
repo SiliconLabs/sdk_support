@@ -45,14 +45,12 @@
 psa_status_t cryptoacc_management_acquire(void)
 {
 #if defined(MBEDTLS_THREADING_C)
-  sl_status_t ret;
-
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
   // Take SE lock - wait/block if taken by another thread.
-  ret = sli_se_lock_acquire();
+  sl_status_t ret = sli_se_lock_acquire();
 
   if (ret != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
@@ -84,20 +82,19 @@ psa_status_t cryptoacc_management_release(void)
 
 psa_status_t cryptoacc_trng_initialize(void)
 {
-  psa_status_t status;
-  status = cryptoacc_management_acquire();
+  psa_status_t status = cryptoacc_management_acquire();
   if (status != 0) {
     return status;
   }
   if ((ba431_read_controlreg() & BA431_CTRL_NDRNG_ENABLE) == 0u) {
     status = sx_trng_init(DO_TRNG_COND_TEST);
     if (status != CRYPTOLIB_SUCCESS) {
-      cryptoacc_management_release();
+      cryptoacc_management_release(); // Ignore return value. Should end up with
+                                      // HARDWARE_FAILURE regardless
       return PSA_ERROR_HARDWARE_FAILURE;
     }
   }
-  cryptoacc_management_release();
-  return PSA_SUCCESS;
+  return cryptoacc_management_release();
 }
 
 #endif /* CRYPTOACC_PRESENT */
