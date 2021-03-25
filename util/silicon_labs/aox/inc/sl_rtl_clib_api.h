@@ -1,5 +1,5 @@
 /***************************************************************************//**
- *  @brief Silicon Labs Real-Time Locationing library for AoA/D and locationing 
+ *  @brief Silicon Labs Real-Time Locationing library for AoA/D and locationing
  *******************************************************************************
  * # License
  * <b>Copyright 2019-2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -26,17 +26,17 @@
  *  This is the API for the Silicon Labs Real-Time Locationing library.
  *  It provides an interface for estimating arrival and departure angles of
  *  signals and the positions of AoA/AoD signal transmitters. AoA stands for
- *  Angle-of-Arrival and AoD for Angle-of-Departure. AoX is used here when
+ *  Angle-of-Arrival and AoD for Angle-of-Departure. AoX is used when
  *  referring to both techniques.
  *
  *  Estimators can be created individually for each locator node using the API.
  *  Even multiple estimators with different parameters can be created for a
  *  single node. An instance of the estimator is created as a libitem and the
- *  estimator is initialized. Next the estimation parameters such as antenna
- *  array type, number of antennas, estimation mode, etc. can be set using the
- *  function calls described below.
- * 
- *  One snapshot means a set of IQ-samples where we have exactly one sample per 
+ *  estimator is initialized. Next, the estimation parameters such as antenna
+ *  array type, number of antennas, estimation mode, and so on can be set
+ *  using the function calls described below.
+ *
+ *  One snapshot means a set of IQ-samples with exactly one sample per
  *  each antenna.
  *
  *****************************************************************************/
@@ -57,7 +57,7 @@ enum sl_rtl_error_code
   SL_RTL_ERROR_NUMBER_OF_SNAPHOTS_DO_NOT_MATCH, ///< Initialized and calculated number of snapshots do not match
   SL_RTL_ERROR_ESTIMATOR_NOT_CREATED, ///< Estimator not yet created
   SL_RTL_ERROR_NOT_INITIALIZED, ///< Library item not yet initialized
-  SL_RTL_ERROR_INTERNAL, ///< An internal error occured
+  SL_RTL_ERROR_INTERNAL, ///< An internal error occurred
   SL_RTL_ERROR_IQ_SAMPLE_QA, ///< IQ sample quality analysis failed
   SL_RTL_ERROR_FEATURE_NOT_SUPPORTED, ///< The requested feature is not supported by the library
 
@@ -70,15 +70,15 @@ enum sl_rtl_error_code
  *
  * @brief Angle of Arrival / Departure
  *
- * These functions are related to the calculation of the Angle of Arrival 
+ * These functions are related to the calculation of the Angle of Arrival
  * and Angle of Departure from I/Q samples. The angles can be calculated
  * following these steps:
- *   1. Initialize a sl_rtl_aox_libitem instance. 
- *   2. Setup the antenna array and angle calculation parameters. 
- *   3. Create the estimator. 
- *   4. Set the antenna switching pattern. 
- *   5. Input the I/Q data into the libitem. 
- *   6. Process the I/Q data into an angle. 
+ *   1. Initialize a sl_rtl_aox_libitem instance.
+ *   2. Set up the antenna array and angle calculation parameters.
+ *   3. Create the estimator.
+ *   4. Set the antenna switching pattern.
+ *   5. Input the I/Q data into the libitem.
+ *   6. Process the I/Q data into an angle.
  */
 
 /// AoX antenna array type
@@ -120,7 +120,7 @@ enum sl_rtl_aox_constraint_type
 // AoX switch pattern modes
 enum sl_rtl_aox_switch_pattern_mode
 {
-  SL_RTL_AOX_SWITCH_PATTERN_MODE_DEFAULT = 0, ///< Interally defined switch pattern: 0, 1, 2, ..., N-1, where N is the number of antennas
+  SL_RTL_AOX_SWITCH_PATTERN_MODE_DEFAULT = 0, ///< Internally defined switch pattern: 0, 1, 2, ..., N-1, where N is the number of antennas
   SL_RTL_AOX_SWITCH_PATTERN_MODE_RANDOM, ///< Internally defined random switch pattern
   SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL ///< Switch pattern set externally by the user
 };
@@ -128,7 +128,7 @@ enum sl_rtl_aox_switch_pattern_mode
 /// Angle of Arrival / Departure library item
 typedef void* sl_rtl_aox_libitem;
 
-// Structure for IQ sample quality calculation antenna specific results
+// Structure for IQ sample quality calculation antenna-specific results
 typedef struct
 {
   float level;             ///< Antenna signal level, in decibels
@@ -142,7 +142,7 @@ typedef struct
 {
   bool data_available;     ///< If false, all the antenna values are undefined
   uint32_t curr_channel;   ///< Radio channel for the last packet
-  float ref_freq;          ///< Apparent suplemental tone frequency
+  float ref_freq;          ///< Apparent supplemental tone frequency
   float ref_sndr;          ///< Reference period signal to noise and distortion ratio
 
   // available only when raw samples are used
@@ -153,7 +153,7 @@ typedef struct
 #define  SL_RTL_AOX_IQ_SAMPLE_QA_ALL_OK         0
 #define SL_RTL_AOX_IQ_SAMPLE_QA_FAILURE         0xffffffff
 typedef enum {
-  SL_RTL_AOX_IQ_SAMPLE_QA_INVAL_REF            = 0,  ///< Invalid refenrence period data
+  SL_RTL_AOX_IQ_SAMPLE_QA_INVAL_REF            = 0,  ///< Invalid reference period data
   SL_RTL_AOX_IQ_SAMPLE_QA_DCOFFSET             = 2,  ///< DC offset too large
   SL_RTL_AOX_IQ_SAMPLE_QA_SNDR                 = 3,  ///< Reference period SNDR too large
   SL_RTL_AOX_IQ_SAMPLE_QA_ROTATING_ERROR       = 4,  ///< Rotation error too large
@@ -213,33 +213,33 @@ enum sl_rtl_error_code sl_rtl_aox_set_num_snapshots(sl_rtl_aox_libitem* item, ui
 enum sl_rtl_error_code sl_rtl_aox_set_array_type(sl_rtl_aox_libitem* item, enum sl_rtl_aox_array_type array_type);
 
 /**************************************************************************//**
- * Set the estimation mode. 
+ * Set the estimation mode.
  *
  * @param[in] item Pointer to the initialized AoX libitem
  * @param[in] mode Estimator mode as ::sl_rtl_aox_mode
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * Set the estimation mode. For example ::SL_RTL_AOX_MODE_BASIC sets medium filtering
+ * Set the estimation mode. For example, ::SL_RTL_AOX_MODE_BASIC sets medium filtering
  * and estimates both azimuth and elevation. For further description of the modes,
- * see the documentation of ::sl_rtl_aox_mode. 
+ * see the documentation of ::sl_rtl_aox_mode.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_set_mode(sl_rtl_aox_libitem* item, enum sl_rtl_aox_mode mode);
 
 /**************************************************************************//**
- * Estimate the I/Q-sample phase rotation error in degrees. 
+ * Estimate the I/Q-sample phase rotation error in degrees.
  *
  * @param[in] item Pointer to the initialized AoX libitem
- * @param[in] iq_data_downsampling_factor Ratio between reference period IQ-data sampling rate 
- * and actual IQ-data (i.e. antenna array data) sampling rate.
- *            For example 1e6 / 500e3 = 2.0
+ * @param[in] iq_data_downsampling_factor Ratio between reference period IQ-data sampling rate
+ * and actual IQ-data (i.e., antenna array data) sampling rate.
+ *            For example, 1e6 / 500e3 = 2.0
  * @param[in] i_samples Float-array of the reference period I samples
  * @param[in] q_samples Float-array of the reference period Q samples
  * @param[in] num_samples Number of samples, or size of the I or Q sample array
  * @param[out] phase_rotation_out Returned phase rotation value as float in degrees
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * Estimate the I/Q-sample phase rotation error caused by switching 
- * and CTE frequency error based on I/Q samples from the reference period.  
+ * Estimate the I/Q-sample phase rotation error caused by switching
+ * and CTE frequency error based on I/Q samples from the reference period.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_calculate_iq_sample_phase_rotation(sl_rtl_aox_libitem* item, float iq_data_downsampling_factor, float* i_samples, float* q_samples, uint32_t num_samples, float* phase_rotation_out);
 
@@ -261,13 +261,13 @@ enum sl_rtl_error_code sl_rtl_aox_set_iq_sample_phase_rotation(sl_rtl_aox_libite
  * Add constraints for the estimator. Call before sl_rtl_aox_create_estimator.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
- * @param[in] constraint_type Select which constraint should be added.
+ * @param[in] constraint_type Select which constraints should be added.
  * @param[in] min_value Starting (minimum) value of the range including the min_value.
  * @param[in] max_value Ending (maximum) value of the range including the max_value.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
- * 
- * For example constraint for SL_RTL_AOX_CONSTRAINT_TYPE_AZIMUTH with min_value = 0 
- * and max_value = 90 would mean that the angular range 0 to 90 degrees is excluded 
+ *
+ * For example, constraint for SL_RTL_AOX_CONSTRAINT_TYPE_AZIMUTH with min_value = 0
+ * and max_value = 90 means that the angular range 0 to 90 degrees is excluded
  * from the estimators internal processing range and angle estimated between that range
  * are not considered as valid results. Setting constraints will help ruling
  * out false multipath-detections when the locator is installed nearby a wall or
@@ -300,16 +300,16 @@ enum sl_rtl_error_code sl_rtl_aox_set_num_radio_channels(sl_rtl_aox_libitem* ite
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * The IQ sample quality analysis is not done by default, this function turns
- * the functionality on.
+ * This function turns the IQ sample quality analysis,
+ * which is not done by default.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_iq_sample_qa_configure(sl_rtl_aox_libitem* item);
 
 /**************************************************************************//**
- * Get the IQ sample quality analysis overal results.
+ * Get the IQ sample quality analysis overall results.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
- * @return bitmask of found problems, zero means everything is OK
+ * @return bitmask of found problems, zero indicates that everything is OK
  *****************************************************************************/
 uint32_t sl_rtl_aox_iq_sample_qa_get_results(sl_rtl_aox_libitem* item);
 
@@ -317,8 +317,8 @@ uint32_t sl_rtl_aox_iq_sample_qa_get_results(sl_rtl_aox_libitem* item);
  * Get the IQ sample quality analysis detailed results for the latest packet.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
- * @param[out] results The data structure with all the data related to the latest data packet
- * @param[out] antenna_data The array of antenna specific results
+ * @param[out] results The data structure with data related to the latest data packet
+ * @param[out] antenna_data The array of antenna-specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
  * Fetch the results for the latest packet.
@@ -330,18 +330,18 @@ enum sl_rtl_error_code sl_rtl_aox_iq_sample_qa_get_details(sl_rtl_aox_libitem* i
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] channel Radio channel to show results for.
- * @param[out] results The data structure with all the data related to the last data packet using the requested channel
- * @param[out] antenna_data The array of antenna specific results
+ * @param[out] results The data structure with data related to the last data packet using the requested channel
+ * @param[out] antenna_data The array of antenna-specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *
- * Fetch the latest results for the given radio channel. That may be other than the latest
+ * Fetch the latest results for the given radio channel, which may be other than the latest
  * packet received.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_iq_sample_qa_get_channel_details(sl_rtl_aox_libitem* item, uint8_t channel, sl_rtl_clib_iq_sample_qa_dataset_t *results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
 
 
 /**************************************************************************//**
- * Create the estimator after initializing the libitem and setting the parameters.
+ * Create the estimator after initializing the libitem and setting parameters.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @return ::SL_RTL_ERROR_SUCCESS if successful
@@ -352,31 +352,31 @@ enum sl_rtl_error_code sl_rtl_aox_create_estimator(sl_rtl_aox_libitem* item);
  * Convert data in RAW IQ-data buffers to downsampled IQ-data buffers.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
- * @param[in] start_offset The start offset in the buffer (for example for skipping a reference period)
- * @param[in] iq_data_downsampling_factor Ratio between chip IQ-data sampling rate and downsampled rate. 
- *            For example 4.8e6 / 500e3 = 9.6
+ * @param[in] start_offset The start offset in the buffer (for example, for skipping a reference period)
+ * @param[in] iq_data_downsampling_factor Ratio between chip IQ-data sampling rate and downsampled rate.
+ *            For example, 4.8e6 / 500e3 = 9.6
  * @param[in] raw_i_samples_in I-part sample buffer input
  * @param[in] raw_q_samples_in Q-part sample buffer input
  * @param[in] num_raw_samples_in Number of IQ-sample pairs in the input buffers
- * @param[out] i_samples_out Buffer for the processed I-samples. Must be allocated by the user. 
+ * @param[out] i_samples_out Buffer for the processed I-samples. Must be allocated by the user.
  *             Indexing: i_samples_out[snapshot][antenna]
- * @param[out] q_samples_out Buffer for the processed Q-samples. Must be allocated by the user. 
+ * @param[out] q_samples_out Buffer for the processed Q-samples. Must be allocated by the user.
  *             Indexing: q_samples_out[snapshot][antenna]
- * @param[in] num_snapshots_out Number of snaphots allocated in the output buffers. This function will 
+ * @param[in] num_snapshots_out Number of snaphots allocated in the output buffers. This function will
  *            check if the given number of snaphots and calculated snapshots based on the length of RAW-data match
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_convert_raw_samples(sl_rtl_aox_libitem* item, uint32_t start_offset, float iq_data_downsampling_factor, float* raw_i_samples_in, float* raw_q_samples_in, uint32_t num_raw_samples_in, float** i_samples_out, float** q_samples_out, uint32_t num_snapshots_out);
 
 /**************************************************************************//**
- * Calculate the number of downsampled snaphots in a RAW IQ-data buffer. This function can be used for getting the number
- * of snaphots for allocating the i_samples and q_samples buffers for the process-function.
+ * Calculate the number of downsampled snaphots in a RAW IQ-data buffer. Use this function to get the number
+ * of snaphots to allocate the i_samples and q_samples buffers for the process-function.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] num_raw_samples_in Total number of RAW IQ-sample pairs
- * @param[in] start_offset The start offset in the buffer (for example for skipping a reference period)
- * @param[in] iq_data_downsampling_factor Ratio between chip IQ-data sampling rate and downsampled rate. 
- *            For example 4.8e6 / 500e3 = 9.6.
+ * @param[in] start_offset The start offset in the buffer (for example, for skipping a reference period)
+ * @param[in] iq_data_downsampling_factor Ratio between chip IQ-data sampling rate and downsampled rate.
+ *            For example, 4.8e6 / 500e3 = 9.6.
  * @param[in] num_channels Number of channels in the RAW data
  * @param[out] num_snapshots_out Calculated number of snaphots based on the input
  * @return ::SL_RTL_ERROR_SUCCESS if successful
@@ -385,10 +385,10 @@ enum sl_rtl_error_code sl_rtl_aox_calculate_number_of_snapshots(sl_rtl_aox_libit
 
 /**************************************************************************//**
  * Set switch pattern mode. Sets internal mode used by the library. See enum sl_rtl_aox_switch_pattern_mode
- * for detailed description of the modes. In case this function has not been called, a default switch pattern
+ * for detailed description of the modes. If this function isn't called, a default switch pattern
  * of: 0, 1, 2, 3, ..., N-1 will be used, where N is the number of antennas.
- * This function can be called run-time after initializing and creating the estimator. 
- * 
+ * This function can be called at run-time after initializing and creating the estimator.
+ *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] mode Required mode
  * @return ::SL_RTL_ERROR_SUCCESS if successful
@@ -396,14 +396,14 @@ enum sl_rtl_error_code sl_rtl_aox_calculate_number_of_snapshots(sl_rtl_aox_libit
 enum sl_rtl_error_code sl_rtl_aox_set_switch_pattern_mode(sl_rtl_aox_libitem* item, enum sl_rtl_aox_switch_pattern_mode mode);
 
 /**************************************************************************//**
- * Update switch pattern. Calling this function updates switching pattern used by the estimator algorithm.
- * This function must be called before calling function sl_rtl_aox_process.
- * This function can be called run-time after initializing and creating the estimator. 
- * 
+ * Update switch pattern, which is used by the estimator algorithm.
+ * This function must be called before calling the function sl_rtl_aox_process.
+ * It can be called at run-time after initializing and creating the estimator.
+ *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] switch_pattern_in Pointer to the switch pattern array. The pointer must point to a valid switch pattern when
  * SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL is used.
- * @param[out] switch_pattern_out Pointer to the user defined uint32_t* variable. This pointer must be non-zero when using 
+ * @param[out] switch_pattern_out Pointer to the user defined uint32_t* variable. This pointer must be non-zero when using
  * internally defined switch pattern modes, otherwise can be zero.
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
@@ -411,15 +411,15 @@ enum sl_rtl_error_code sl_rtl_aox_update_switch_pattern(sl_rtl_aox_libitem* item
 
 /**************************************************************************//**
  * Reset estimator state. Calling this function causes the selected aox-mode to start from its initial state.
- * This function can be called run-time after initializing and creating the estimator. 
- * 
+ * This function can be called at run-time after initializing and creating the estimator.
+ *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_reset_estimator(sl_rtl_aox_libitem* item);
 
 /**************************************************************************//**
- * Calculate the angle estimate. 
+ * Calculate the angle estimate.
  *
  * @param[in] item Pointer to the initialized and configured AoX libitem
  * @param[in] i_samples Two-dimensional float-array of captured I samples
@@ -427,21 +427,21 @@ enum sl_rtl_error_code sl_rtl_aox_reset_estimator(sl_rtl_aox_libitem* item);
  * @param[in] q_samples Two-dimensional float-array of captured Q samples
  * as q_samples[snapshot][antenna], corresponding to the I samples array
  * @param[in] tone_frequency The frequency of the signal from which the
- *  I/Q data was captured from as float (e.g. 2.46e9f)
+ *  I/Q data was captured from as float (e.g., 2.46e9f)
  * @param[out] az_out Output azimuth angle
  * @param[out] el_out Output elevation angle
  * @return ::SL_RTL_ERROR_SUCCESS if successful and
- *   ::SL_RTL_ERROR_ESTIMATION_IN_PROGRESS if estimate is not yet final 
+ *   ::SL_RTL_ERROR_ESTIMATION_IN_PROGRESS if estimate is not yet final
  *   and more I/Q data needs to be processed.
  *
  * Calculate the angle estimate from the given I/Q samples captured at the
- * given frequency. Needs to be called with new I/Q data as many times as 
- * indicated by the ::sl_rtl_aox_mode used by the estimator before the final 
+ * given frequency. Call this function with new I/Q data as many times as
+ * indicated by the ::sl_rtl_aox_mode used by the estimator before the final
  * estimate is output.
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_process(sl_rtl_aox_libitem* item, float** i_samples, float** q_samples, float tone_frequency, float* az_out, float* el_out);
 
-/** @} */ // end addtogroup sl_rtl_aox 
+/** @} */ // end addtogroup sl_rtl_aox
 
 /**
  * @addtogroup sl_rtl_loc Location Finding
@@ -533,7 +533,7 @@ struct sl_rtl_loc_locator_item
   float coordinate_y; ///< Y-axis coordinate of the locator
   float coordinate_z; ///< Z-axis coordinate of the locator
   float orientation_x_axis_degrees; ///< X-axis rotation of the locator (Euler angles) in degrees
-  float orientation_y_axis_degrees; ///< Y-axis rotation of the locator (Euler angles) in degrees 
+  float orientation_y_axis_degrees; ///< Y-axis rotation of the locator (Euler angles) in degrees
   float orientation_z_axis_degrees; ///< Z-axis rotation of the locator (Euler angles) in degrees
 };
 
@@ -559,9 +559,21 @@ enum sl_rtl_error_code sl_rtl_loc_init(sl_rtl_loc_libitem* item);
 enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
 
 /**************************************************************************//**
+ * Reinitialize the locationing libitem instance.
+ *
+ * Reset the libitem's internal values to the starting point so that it can
+ * start all over from the beginning. This can be used for example in testing
+ * instead of deleting and re-creating the libitem object.
+ *
+ * @param[in] item Pointer to the libitem to be initialized
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_reinit(sl_rtl_loc_libitem* item);
+
+/**************************************************************************//**
  * Set the locationing dimensionality mode. Possible choices are 2D or 3D
  * modes. Two-dimensional mode does not vary the z-position of the target and
- * assumes it is 0 at all times. When updating e.g. the distance measure-
+ * assumes it is 0 at all times. When updating, for example, the distance measure-
  * ment from the locator to the target in 2D mode, it should be noted that
  * even if the locator and tag are on different z-planes, the distance should
  * be given as the distance as if they were on the same z-plane.
@@ -574,7 +586,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_mode(sl_rtl_loc_libitem* item, enum sl_rtl
 
 /**************************************************************************//**
  * Add a locator item into the locationing estimator after setting its position
- * and orientation parameters. All locators need to be added using this
+ * and orientation parameters. Add all locators using this
  * function before calling ::sl_rtl_loc_create_position_estimator to create
  * the estimator instance.
  *
@@ -600,7 +612,7 @@ enum sl_rtl_error_code sl_rtl_loc_create_position_estimator(sl_rtl_loc_libitem* 
  * measurement covariances.
  *
  * @param[in] item Pointer to the libitem
- * @param[in] locator_id ID of the locator for which the parameter shall be set
+ * @param[in] locator_id ID of the locator for which the parameter will be set
  * @param[in] parameter Parameter to be set (as enum)
  * @param[in] value New value for the parameter
  * @return ::SL_RTL_ERROR_SUCCESS if successful
@@ -609,7 +621,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_locator_parameter(sl_rtl_loc_libitem* item
 
 /**************************************************************************//**
  * Set target-specific parameters, such as the process noise covariance or
- * the known target height. 
+ * the known target height.
  *
  * @param[in] item Pointer to the libitem
  * @param[in] parameter Parameter to be set (as enum)
@@ -619,7 +631,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_locator_parameter(sl_rtl_loc_libitem* item
 enum sl_rtl_error_code sl_rtl_loc_set_target_parameter(sl_rtl_loc_libitem* item, enum sl_rtl_loc_target_parameter parameter, float value);
 
 /**************************************************************************//**
- * Clears previous measurements. This function should be called before setting 
+ * Clear previous measurements. Call this function before setting
  * new measurements if the previous measurements are not valid for the next
  * iteration step.
  *
@@ -629,7 +641,7 @@ enum sl_rtl_error_code sl_rtl_loc_set_target_parameter(sl_rtl_loc_libitem* item,
 enum sl_rtl_error_code sl_rtl_loc_clear_measurements(sl_rtl_loc_libitem* item);
 
 /**************************************************************************//**
- * Set a new measurement for a locator specified by the locator ID. 
+ * Set a new measurement for a locator specified by the locator ID.
  *
  * @param[in] item Pointer to the libitem
  * @param[in] locator_id ID of the locator for which the measurement will be set
@@ -640,8 +652,8 @@ enum sl_rtl_error_code sl_rtl_loc_clear_measurements(sl_rtl_loc_libitem* item);
 enum sl_rtl_error_code sl_rtl_loc_set_locator_measurement(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float value);
 
 /**************************************************************************//**
- * Set a new measurement for the target. Current version does not support this
- * function and calling it will have no effect.
+ * Set a new measurement for the target. Because the current version does not support this
+ * function calling it has no effect.
  *
  * @param[in] item Pointer to the libitem
  * @param[in] field Measurement to be updated (as enum)
@@ -651,10 +663,10 @@ enum sl_rtl_error_code sl_rtl_loc_set_locator_measurement(sl_rtl_loc_libitem* it
 enum sl_rtl_error_code sl_rtl_loc_set_target_measurement(sl_rtl_loc_libitem* item, enum sl_rtl_loc_target_measurement_field field, float value);
 
 /**************************************************************************//**
- * Process the current time step of the locationing filter. This function
- * should be called after old measurements have been cleared and new 
- * measurements have been set for the current time step. The process will step 
- * the filter forward and provide new state results and state covariance 
+ * Process the current time step of the locationing filter. Call this function
+ * after old measurements are cleared and new
+ * measurements are set for the current time step. The process will step
+ * the filter forward and provide new state results and state covariance
  * values, which can be retrieved with separate function calls.
  *
  * @param[in] item Pointer to the libitem
@@ -669,19 +681,19 @@ enum sl_rtl_error_code sl_rtl_loc_process(sl_rtl_loc_libitem* item, float time_s
  *
  * @param[in] item Pointer to the libitem
  * @param[in] result The desired state variable result as enum
- * @param[out] value The value output of the state variable 
+ * @param[out] value The value output of the state variable
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_result(sl_rtl_loc_libitem* item, enum sl_rtl_loc_result result, float* value);
 
 /**************************************************************************//**
- * Get latest measurement converted into the coordinate system of the 
+ * Get latest measurement converted into the coordinate system of the
  * multi-locator system.
  *
  * @param[in] item Pointer to the libitem
  * @param[in] locator_id ID of the locator whose measurement will be retrieved
  * @param[in] field Measurement to be retrieved (as enum)
- * @param[out] value_out The value output of the state variable 
+ * @param[out] value_out The value output of the state variable
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float* value_out);
@@ -689,22 +701,22 @@ enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates(sl_rtl_l
 /** @} */ // end addtogroup sl_rtl_loc
 
 /**
- * @addtogroup sl_rtl_util Utility Functionality 
+ * @addtogroup sl_rtl_util Utility Functionality
  * @{
  *
  * @brief Utility Functionality
  *
- * These functions provide supporting functionality such as conversions, 
- * additional filtering, diagnostics and setup functions.
+ * These functions provide supporting functionality such as conversions,
+ * additional filtering, diagnostics, and setup functions.
  */
 
-/// Utility library item 
+/// Utility library item
 typedef void* sl_rtl_util_libitem;
 
 /// Util parameter
 enum sl_rtl_util_parameter
 {
-  SL_RTL_UTIL_PARAMETER_AMOUNT_OF_FILTERING = 0 ///< Amount of filtering in range [0.0f, 1.0f] 
+  SL_RTL_UTIL_PARAMETER_AMOUNT_OF_FILTERING = 0 ///< Amount of filtering in range [0.0f, 1.0f]
 };
 
 /**************************************************************************//**
@@ -724,7 +736,7 @@ enum sl_rtl_error_code sl_rtl_util_init(sl_rtl_util_libitem* item);
 enum sl_rtl_error_code sl_rtl_util_deinit(sl_rtl_util_libitem* item);
 
 /**************************************************************************//**
- * Set util parameters
+ * Set util parameters.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] parameter Parameter to change
@@ -734,39 +746,39 @@ enum sl_rtl_error_code sl_rtl_util_deinit(sl_rtl_util_libitem* item);
 enum sl_rtl_error_code sl_rtl_util_set_parameter(sl_rtl_util_libitem* item, enum sl_rtl_util_parameter parameter, float value);
 
 /**************************************************************************//**
- * Filter a value using moving average
+ * Filter a value using the moving average.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] value_in Value to be fed to the filter
- * @param[out] value_out Pointer to the outcoming, filtered value
+ * @param[out] value_out Pointer to the filtered value
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_filter(sl_rtl_util_libitem* item, float value_in, float* value_out);
 
 /**************************************************************************//**
- * Convert an RSSI-value to distance in meters
+ * Convert an RSSI-value to distance in meters.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] tx_power Reference RSSI value of the TX-device at 1.0 m distance in dBm, for example -45.0f
- * @param[in] rssi Measured rssi from the receiver
- * @param[out] distance_out Distance in meters 
+ * @param[in] rssi Measured RSSI from the receiver
+ * @param[out] distance_out Distance in meters
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_rssi2distance(float tx_power, float rssi, float* distance_out);
 
 /**************************************************************************//**
- * Setup the IQ sample quality analysis
+ * Set up the IQ sample quality analysis.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] level Analysis level
  * @param[in] num_antennas The number of antennas in the array
- * @param[in] raw_samples The data contains raw samples instead of picked ones
+ * @param[in] raw_samples Data contains raw samples instead of picked ones
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_setup(sl_rtl_util_libitem *item, uint32_t level, uint32_t num_antennas, bool raw_samples);
 
 /**************************************************************************//**
- * Setup parameters for the IQ sample quality analysis
+ * Set up parameters for the IQ sample quality analysis.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] sampleRate The sampling rate
@@ -777,7 +789,7 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_setup(sl_rtl_util_libitem *item,
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_parameters(sl_rtl_util_libitem* item, uint32_t sampleRate, uint8_t sampleOffset, uint8_t samplesInSlot, uint8_t numberOfChannels);
 
 /**************************************************************************//**
- * Setup IQ sample QA downsampling ratio
+ * Set up IQ sample QA downsampling ratio.
  *
  * Set the downsampling factor used during the antenna samples (related to the
  * sampling rate of the reference period)
@@ -789,10 +801,10 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_parameters(sl_rtl_util_libit
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_downsampling_factor(sl_rtl_util_libitem* item, float dsf);
 
 /**************************************************************************//**
- * Set data samples' offset
+ * Set data samples offset.
  *
  * Set the offset for the data samples from the start of the reference
- * period. The use of this function is optional and if not given
+ * period. The use of this function is optional and, if not given,
  * the default values are used.
  *
  * @param[in] item Pointer to the initialized Util libitem
@@ -802,27 +814,27 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_downsampling_factor(sl_rtl_u
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_data_offset(sl_rtl_util_libitem* item, uint32_t offset);
 
 /**************************************************************************//**
- * Set the switch pattern for the IQ sample quality
+ * Set the switch pattern for the IQ sample quality.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] size The size of the switch pattern
- * @param[in] pattern Array of intergers representing the switch pattern
+ * @param[in] pattern Array of integers representing the switch pattern
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_set_switch_pattern(sl_rtl_util_libitem* item, uint32_t size, uint32_t *pattern);
 
 /**************************************************************************//**
- * Feed the IQ sample quality analysis the reference period data
+ * Feed the IQ sample quality analysis the reference period data.
  *
  * @param[in] item Pointer to the initialized Util libitem
- * @param[in] num_samples The size of the data
+ * @param[in] num_samples The size of data
  * @param[in] i_samples I-part of the sample data
  * @param[in] q_samples Q-part of the sample data
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_reference(sl_rtl_util_libitem *item, uint32_t num_samples, float *i_samples, float *q_samples);
 /**************************************************************************//**
- * Feed the IQ sample quality analysis the antenna data
+ * Feed the IQ sample quality analysis the antenna data.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] num_snapshots The size of the data
@@ -834,7 +846,7 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_reference(sl_rtl_util_libite
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_data(sl_rtl_util_libitem *item, uint32_t num_snapshots, float **i_samples, float **q_samples, uint8_t channel);
 
 /**************************************************************************//**
- * Get the overall results of the IQ sample quality analysis
+ * Get the overall results of the IQ sample quality analysis.
  *
  * @param[in] item Pointer to the initialized Util libitem
 
@@ -843,33 +855,33 @@ enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_add_data(sl_rtl_util_libitem *it
 uint32_t sl_rtl_util_iq_sample_qa_get_results(sl_rtl_util_libitem *item);
 
 /**************************************************************************//**
- * Get the detailed results of the IQ sample quality analysis
+ * Get the detailed results of the IQ sample quality analysis.
  *
  * @param[in] item Pointer to the initialized Util libitem
- * @param[out] results The data structure with all the data related to the previous data packet
- * @param[out] antenna_data The array of antenna specific results
+ * @param[out] results The data structure with data related to the previous data packet
+ * @param[out] antenna_data The array of antenna-specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_details(sl_rtl_util_libitem *item, sl_rtl_clib_iq_sample_qa_dataset_t *iq_sample_qa_results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
 
 /**************************************************************************//**
- * Get the detailed results of the IQ sample quality analysis for the specified radio channel
+ * Get the detailed results of the IQ sample quality analysis for the specified radio channel.
  *
  * @param[in] item Pointer to the initialized Util libitem
  * @param[in] channel Radio channel to show results for.
- * @param[out] results The data structure with all the data related to the last data packet using the requested channel
+ * @param[out] results The data structure with data related to the last data packet using the requested channel
  * @param[out] antenna_data The array of antenna specific results
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_util_iq_sample_qa_get_channel_details(sl_rtl_util_libitem* item, uint8_t channel, sl_rtl_clib_iq_sample_qa_dataset_t *iq_sample_qa_results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
 
 /**************************************************************************//**
- * Write the IQ sample quality analysis codes as human readable strings in the provided buffer
+ * Write the IQ sample quality analysis code as human readable strings in the provided buffer.
  *
  * @param[in] buf Buffer for the results to be written
  * @param[in] size Size of the buffer
- * @param[in] code The results previously got from the sl_rtl_util_iq_sample_qa_get_results()
- * @returns pointer to the buffer containing the data, or to a constant string
+ * @param[in] code The results previously received from the sl_rtl_util_iq_sample_qa_get_results()
+ * @returns pointer to the buffer containing data, or to a constant string
  *****************************************************************************/
 char *sl_rtl_util_iq_sample_qa_code2string(char *buf, int size, uint32_t code);
 

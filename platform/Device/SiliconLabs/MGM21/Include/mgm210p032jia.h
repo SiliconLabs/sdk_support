@@ -4,7 +4,7 @@
  *        for MGM210P032JIA
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -177,7 +177,11 @@ typedef enum IRQn{
 #define _SILICON_LABS_EFR32_RADIO_DUALBAND                3                                 /** Radio supports dual band */
 #define _SILICON_LABS_EFR32_RADIO_TYPE                    _SILICON_LABS_EFR32_RADIO_2G4HZ   /** Radio type */
 #define _SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM    20                                /** Radio 2G4HZ HP PA output power */
+#define _SILICON_LABS_EFR32_2G4HZ_MP_PA_MAX_OUTPUT_DBM    10                                /** Radio 2G4HZ MP PA output power */
+#define _SILICON_LABS_EFR32_2G4HZ_LP_PA_MAX_OUTPUT_DBM    0                                 /** Radio 2G4HZ LP PA output power */
 #define _SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT                                             /** Radio 2G4HZ HP PA is present */
+#define _SILICON_LABS_EFR32_2G4HZ_MP_PA_PRESENT                                             /** Radio 2G4HZ MP PA is present */
+#define _SILICON_LABS_EFR32_2G4HZ_LP_PA_PRESENT                                             /** Radio 2G4HZ LP PA is present */
 
 /** Memory Base addresses and limits */
 #define FLASH_MEM_BASE                                    (0x00000000UL) /** FLASH_MEM base address */

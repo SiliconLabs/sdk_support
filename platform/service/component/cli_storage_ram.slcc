@@ -1,7 +1,7 @@
 id: cli_storage_ram
 label: "CLI: Storage in RAM"
 package: platform
-description: A component that let the applicaiton store cli commands in RAM.
+description: A component that let the application store cli commands in RAM.
 category: Services|CLI
 quality: production
 instantiable:

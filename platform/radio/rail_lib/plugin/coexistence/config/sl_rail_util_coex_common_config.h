@@ -42,10 +42,6 @@
 // <q SL_RAIL_UTIL_COEX_ACKHOLDOFF> Disable ACKing when GRANT deasserted, RHO asserted, or REQUEST deasserted
 // <i> Default: 1
 #define SL_RAIL_UTIL_COEX_ACKHOLDOFF 1
-
-// <q SL_RAIL_UTIL_COEX_PHY_ENABLED> Optimize for Wi-Fi Blocker
-// <i> Default: 1
-#define SL_RAIL_UTIL_COEX_PHY_ENABLED 1
 // </h>
 
 // <e>  REQUEST

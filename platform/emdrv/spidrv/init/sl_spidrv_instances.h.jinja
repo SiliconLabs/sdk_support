@@ -9,6 +9,12 @@ extern "C" {
 {%- for instance in spidrv_instances %}
 extern SPIDRV_Handle_t sl_spidrv_{{instance}}_handle;
 {%- endfor %}
+{%- for instance in spidrv_usart_instances %}
+extern SPIDRV_Handle_t sl_spidrv_usart_{{instance}}_handle;
+{%- endfor %}
+{%- for instance in spidrv_eusart_instances %}
+extern SPIDRV_Handle_t sl_spidrv_eusart_{{instance}}_handle;
+{%- endfor %}
 
 void sl_spidrv_init_instances(void);
 

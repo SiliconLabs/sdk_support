@@ -460,8 +460,8 @@ typedef enum {
 #if defined(_SMU_PPUPATD1_LCD_SHIFT)
   smuPeripheralLCD          = 32 + _SMU_PPUPATD1_LCD_SHIFT,       /**< SMU peripheral identifier for LCD       */
 #endif
-#if defined(_SMU_PPUPATD1_KEYPAD_SHIFT)
-  smuPeripheralKEYPAD       = 32 + _SMU_PPUPATD1_KEYPAD_SHIFT,    /**< SMU peripheral identifier for KEYPAD    */
+#if defined(_SMU_PPUPATD1_KEYSCAN_SHIFT)
+  smuPeripheralKEYSCAN      = 32 + _SMU_PPUPATD1_KEYSCAN_SHIFT,   /**< SMU peripheral identifier for KEYSCAN   */
 #endif
 #if defined(_SMU_PPUPATD1_DMEM_SHIFT)
   smuPeripheralDMEM         = 32 + _SMU_PPUPATD1_DMEM_SHIFT,      /**< SMU peripheral identifier for DMEM      */
@@ -979,7 +979,7 @@ typedef struct {
 
   bool privilegedSYSRTC       : 1;  /**< Privileged access enabler for SYSRTC       */
   bool privilegedLCD          : 1;  /**< Privileged access enabler for LCD          */
-  bool privilegedKEYPAD       : 1;  /**< Privileged access enabler for KEYPAD       */
+  bool privilegedKEYSCAN      : 1;  /**< Privileged access enabler for KEYSCAN      */
   bool privilegedDMEM         : 1;  /**< Privileged access enabler for DMEM         */
   bool privilegedLCDRF        : 1;  /**< Privileged access enabler for LCDRF        */
   bool privilegedPFMXPPRF     : 1;  /**< Privileged access enabler for PFMXPPRF     */

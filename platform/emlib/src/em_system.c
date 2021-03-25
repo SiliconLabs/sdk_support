@@ -128,46 +128,54 @@ bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
  *   Get family security capability.
  *
  * @note
- *   This function retrives family security capability. The security capabilities
- *   are represented by ::SYSTEM_SecurityCapability_TypeDef.
+ *   This function retrieves the family security capability based on the
+ *   device number. The device number is one letter and 3 digits:
+ *   DEVICENUMBER = (alpha-'A')*1000 + numeric. i.e. 0d = "A000"; 1123d = "B123".
+ *   The security capabilities are represented by ::SYSTEM_SecurityCapability_TypeDef.
  *
  * @return
  *   Security capability of MCU.
  ******************************************************************************/
 SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void)
 {
-#if (_SILICON_LABS_32B_SERIES == 2)
-  SYSTEM_PartFamily_TypeDef partFamily;
-  partFamily = SYSTEM_GetFamily();
-
-  if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
-       >> _DEVINFO_PART_FAMILYNUM_SHIFT) == 21UL) {
-    // Series 2 Config 1 device family
-    uint16_t partNumber = SYSTEM_GetPartNumber();
-    // Check for B in part number.
-    if ((partNumber / 1000) == 1) {
-      return securityCapabilityVault;
-    } else {
-      return securityCapabilitySE;
-    }
-  } else if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
-              >>  _DEVINFO_PART_FAMILYNUM_SHIFT) == 22UL) {
-    // Series 2 Config 2 device family
-    return securityCapabilityRoT;
-  } else if ((((uint32_t)partFamily & _DEVINFO_PART_FAMILYNUM_MASK)
-              >>  _DEVINFO_PART_FAMILYNUM_SHIFT) == 23UL) {
-    // Series 2 Config 3 device family
-    return securityCapabilitySE;
-  }
-
-  return securityCapabilityUnknown;
+  SYSTEM_SecurityCapability_TypeDef sc;
+#if (_SILICON_LABS_32B_SERIES == 0)
+  sc = securityCapabilityNA;
 #elif (_SILICON_LABS_32B_SERIES == 1)
-  return securityCapabilityBasic;
-#elif (_SILICON_LABS_32B_SERIES == 0)
-  return securityCapabilityNA;
+  sc = securityCapabilityBasic;
 #else
-  return securityCapabilityUnknown;
+  sc = securityCapabilityUnknown;
 #endif
+
+#if (_SILICON_LABS_32B_SERIES == 2)
+  uint16_t mcuFeatureSetMajor;
+  uint16_t deviceNumber;
+  deviceNumber = SYSTEM_GetPartNumber();
+  mcuFeatureSetMajor = 'A' + (deviceNumber / 1000);
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+  // override feature set since BRD4182A Rev A00 -> rev B02 are marked "A"
+  mcuFeatureSetMajor = 'C';
+#endif
+
+  switch (mcuFeatureSetMajor) {
+    case 'A':
+      sc = securityCapabilitySE;
+      break;
+
+    case 'B':
+      sc = securityCapabilityVault;
+      break;
+
+    case 'C':
+      sc = securityCapabilityRoT;
+      break;
+
+    default:
+      sc = securityCapabilityUnknown;
+  }
+#endif
+
+  return sc;
 }
 
 /** @} (end addtogroup system) */

@@ -47,7 +47,8 @@
 typedef struct {
   __IM uint32_t CAL;              /**< CRC of DI-page and calibration temperature  */
   __IM uint32_t MODULEINFO;       /**< Module trace information  */
-  uint32_t      RESERVED0[6U];    /**< Reserved for future use **/
+  __IM uint32_t MODXOCAL;         /**< Module Crystal Oscillator Calibration  */
+  uint32_t      RESERVED0[5U];    /**< Reserved for future use **/
   __IM uint32_t EXTINFO;          /**< External Component description  */
   uint32_t      RESERVED1[1U];    /**< Reserved for future use **/
   __IM uint32_t EUI48L;           /**< EUI48 OUI and Unique identifier  */
@@ -142,9 +143,58 @@ typedef struct {
 #define _DEVINFO_CAL_TEMP_MASK                                   0xFF0000UL   /**< Bit mask for TEMP */
 
 /* Bit fields for DEVINFO MODULEINFO */
-#define _DEVINFO_MODULEINFO_MASK                                 0xFFFFFFFFUL /**< Mask for DEVINFO_MODULEINFO */
-#define _DEVINFO_MODULEINFO_RESERVED1_SHIFT                      0            /**< Shift value for RESERVED1 */
-#define _DEVINFO_MODULEINFO_RESERVED1_MASK                       0xFFFFFFFFUL /**< Bit mask for RESERVED1 */
+#define _DEVINFO_MODULEINFO_MASK                                 0xFFFFFFFFUL                                    /**< Mask for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_HWREV_SHIFT                          0                                               /**< Shift value for HWREV */
+#define _DEVINFO_MODULEINFO_HWREV_MASK                           0x1FUL                                          /**< Bit mask for HWREV */
+#define _DEVINFO_MODULEINFO_ANTENNA_SHIFT                        5                                               /**< Shift value for ANTENNA */
+#define _DEVINFO_MODULEINFO_ANTENNA_MASK                         0xE0UL                                          /**< Bit mask for ANTENNA */
+#define _DEVINFO_MODULEINFO_ANTENNA_BUILTIN                      0x00000000UL                                    /**< Mode BUILTIN for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_ANTENNA_CONNECTOR                    0x00000001UL                                    /**< Mode CONNECTOR for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_ANTENNA_RFPAD                        0x00000002UL                                    /**< Mode RFPAD for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_ANTENNA_BUILTIN                       (_DEVINFO_MODULEINFO_ANTENNA_BUILTIN << 5)      /**< Shifted mode BUILTIN for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_ANTENNA_CONNECTOR                     (_DEVINFO_MODULEINFO_ANTENNA_CONNECTOR << 5)    /**< Shifted mode CONNECTOR for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_ANTENNA_RFPAD                         (_DEVINFO_MODULEINFO_ANTENNA_RFPAD << 5)        /**< Shifted mode RFPAD for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_MODNUMBER_SHIFT                      8                                               /**< Shift value for MODNUMBER */
+#define _DEVINFO_MODULEINFO_MODNUMBER_MASK                       0x7F00UL                                        /**< Bit mask for MODNUMBER */
+#define _DEVINFO_MODULEINFO_TYPE_SHIFT                           15                                              /**< Shift value for TYPE */
+#define _DEVINFO_MODULEINFO_TYPE_MASK                            0x8000UL                                        /**< Bit mask for TYPE */
+#define _DEVINFO_MODULEINFO_TYPE_PCB                             0x00000000UL                                    /**< Mode PCB for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_TYPE_SIP                             0x00000001UL                                    /**< Mode SIP for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_TYPE_PCB                              (_DEVINFO_MODULEINFO_TYPE_PCB << 15)            /**< Shifted mode PCB for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_TYPE_SIP                              (_DEVINFO_MODULEINFO_TYPE_SIP << 15)            /**< Shifted mode SIP for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_LFXO_SHIFT                           16                                              /**< Shift value for LFXO */
+#define _DEVINFO_MODULEINFO_LFXO_MASK                            0x10000UL                                       /**< Bit mask for LFXO */
+#define _DEVINFO_MODULEINFO_LFXO_NONE                            0x00000000UL                                    /**< Mode NONE for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_LFXO_PRESENT                         0x00000001UL                                    /**< Mode PRESENT for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_LFXO_NONE                             (_DEVINFO_MODULEINFO_LFXO_NONE << 16)           /**< Shifted mode NONE for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_LFXO_PRESENT                          (_DEVINFO_MODULEINFO_LFXO_PRESENT << 16)        /**< Shifted mode PRESENT for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_EXPRESS_SHIFT                        17                                              /**< Shift value for EXPRESS */
+#define _DEVINFO_MODULEINFO_EXPRESS_MASK                         0x20000UL                                       /**< Bit mask for EXPRESS */
+#define _DEVINFO_MODULEINFO_EXPRESS_SUPPORTED                    0x00000000UL                                    /**< Mode SUPPORTED for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_EXPRESS_NONE                         0x00000001UL                                    /**< Mode NONE for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_EXPRESS_SUPPORTED                     (_DEVINFO_MODULEINFO_EXPRESS_SUPPORTED << 17)   /**< Shifted mode SUPPORTED for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_EXPRESS_NONE                          (_DEVINFO_MODULEINFO_EXPRESS_NONE << 17)        /**< Shifted mode NONE for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_LFXOCALVAL_SHIFT                     18                                              /**< Shift value for LFXOCALVAL */
+#define _DEVINFO_MODULEINFO_LFXOCALVAL_MASK                      0x40000UL                                       /**< Bit mask for LFXOCALVAL */
+#define _DEVINFO_MODULEINFO_LFXOCALVAL_VALID                     0x00000000UL                                    /**< Mode VALID for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_LFXOCALVAL_NOTVALID                  0x00000001UL                                    /**< Mode NOTVALID for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_LFXOCALVAL_VALID                      (_DEVINFO_MODULEINFO_LFXOCALVAL_VALID << 18)    /**< Shifted mode VALID for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_LFXOCALVAL_NOTVALID                   (_DEVINFO_MODULEINFO_LFXOCALVAL_NOTVALID << 18) /**< Shifted mode NOTVALID for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_HFXOCALVAL_SHIFT                     19                                              /**< Shift value for HFXOCALVAL */
+#define _DEVINFO_MODULEINFO_HFXOCALVAL_MASK                      0x80000UL                                       /**< Bit mask for HFXOCALVAL */
+#define _DEVINFO_MODULEINFO_HFXOCALVAL_VALID                     0x00000000UL                                    /**< Mode VALID for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_HFXOCALVAL_NOTVALID                  0x00000001UL                                    /**< Mode NOTVALID for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_HFXOCALVAL_VALID                      (_DEVINFO_MODULEINFO_HFXOCALVAL_VALID << 19)    /**< Shifted mode VALID for DEVINFO_MODULEINFO */
+#define DEVINFO_MODULEINFO_HFXOCALVAL_NOTVALID                   (_DEVINFO_MODULEINFO_HFXOCALVAL_NOTVALID << 19) /**< Shifted mode NOTVALID for DEVINFO_MODULEINFO */
+#define _DEVINFO_MODULEINFO_RESERVED1_SHIFT                      20                                              /**< Shift value for RESERVED1 */
+#define _DEVINFO_MODULEINFO_RESERVED1_MASK                       0xFFF00000UL                                    /**< Bit mask for RESERVED1 */
+
+/* Bit fields for DEVINFO MODXOCAL */
+#define _DEVINFO_MODXOCAL_MASK                                   0x0000FFFFUL /**< Mask for DEVINFO_MODXOCAL */
+#define _DEVINFO_MODXOCAL_HFXOCTUNE_SHIFT                        0            /**< Shift value for HFXOCTUNE */
+#define _DEVINFO_MODXOCAL_HFXOCTUNE_MASK                         0x1FFUL      /**< Bit mask for HFXOCTUNE */
+#define _DEVINFO_MODXOCAL_LFXOTUNING_SHIFT                       9            /**< Shift value for LFXOTUNING */
+#define _DEVINFO_MODXOCAL_LFXOTUNING_MASK                        0xFE00UL     /**< Bit mask for LFXOTUNING */
 
 /* Bit fields for DEVINFO EXTINFO */
 #define _DEVINFO_EXTINFO_MASK                                    0x00FFFFFFUL                            /**< Mask for DEVINFO_EXTINFO */
@@ -152,15 +202,19 @@ typedef struct {
 #define _DEVINFO_EXTINFO_TYPE_MASK                               0xFFUL                                  /**< Bit mask for TYPE */
 #define _DEVINFO_EXTINFO_TYPE_IS25LQ040B                         0x00000001UL                            /**< Mode IS25LQ040B for DEVINFO_EXTINFO */
 #define _DEVINFO_EXTINFO_TYPE_AT25S041                           0x00000002UL                            /**< Mode AT25S041 for DEVINFO_EXTINFO */
+#define _DEVINFO_EXTINFO_TYPE_WF200                              0x00000003UL                            /**< Mode WF200 for DEVINFO_EXTINFO */
 #define _DEVINFO_EXTINFO_TYPE_NONE                               0x000000FFUL                            /**< Mode NONE for DEVINFO_EXTINFO */
 #define DEVINFO_EXTINFO_TYPE_IS25LQ040B                          (_DEVINFO_EXTINFO_TYPE_IS25LQ040B << 0) /**< Shifted mode IS25LQ040B for DEVINFO_EXTINFO */
 #define DEVINFO_EXTINFO_TYPE_AT25S041                            (_DEVINFO_EXTINFO_TYPE_AT25S041 << 0)   /**< Shifted mode AT25S041 for DEVINFO_EXTINFO */
+#define DEVINFO_EXTINFO_TYPE_WF200                               (_DEVINFO_EXTINFO_TYPE_WF200 << 0)      /**< Shifted mode WF200 for DEVINFO_EXTINFO */
 #define DEVINFO_EXTINFO_TYPE_NONE                                (_DEVINFO_EXTINFO_TYPE_NONE << 0)       /**< Shifted mode NONE for DEVINFO_EXTINFO */
 #define _DEVINFO_EXTINFO_CONNECTION_SHIFT                        8                                       /**< Shift value for CONNECTION */
 #define _DEVINFO_EXTINFO_CONNECTION_MASK                         0xFF00UL                                /**< Bit mask for CONNECTION */
 #define _DEVINFO_EXTINFO_CONNECTION_SPI                          0x00000001UL                            /**< Mode SPI for DEVINFO_EXTINFO */
+#define _DEVINFO_EXTINFO_CONNECTION_SDIO                         0x00000002UL                            /**< Mode SDIO for DEVINFO_EXTINFO */
 #define _DEVINFO_EXTINFO_CONNECTION_NONE                         0x000000FFUL                            /**< Mode NONE for DEVINFO_EXTINFO */
 #define DEVINFO_EXTINFO_CONNECTION_SPI                           (_DEVINFO_EXTINFO_CONNECTION_SPI << 8)  /**< Shifted mode SPI for DEVINFO_EXTINFO */
+#define DEVINFO_EXTINFO_CONNECTION_SDIO                          (_DEVINFO_EXTINFO_CONNECTION_SDIO << 8) /**< Shifted mode SDIO for DEVINFO_EXTINFO */
 #define DEVINFO_EXTINFO_CONNECTION_NONE                          (_DEVINFO_EXTINFO_CONNECTION_NONE << 8) /**< Shifted mode NONE for DEVINFO_EXTINFO */
 #define _DEVINFO_EXTINFO_REV_SHIFT                               16                                      /**< Shift value for REV */
 #define _DEVINFO_EXTINFO_REV_MASK                                0xFF0000UL                              /**< Bit mask for REV */

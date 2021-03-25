@@ -208,6 +208,8 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 
 /* Command and Response IDs */
 #define sl_bt_cmd_system_hello_id                                    0x00010020
+#define sl_bt_cmd_system_start_bluetooth_id                          0x1c010020
+#define sl_bt_cmd_system_stop_bluetooth_id                           0x1d010020
 #define sl_bt_cmd_system_get_version_id                              0x1b010020
 #define sl_bt_cmd_system_reset_id                                    0x01010020
 #define sl_bt_cmd_system_halt_id                                     0x0c010020
@@ -224,6 +226,8 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_cmd_system_set_soft_timer_id                           0x19010020
 #define sl_bt_cmd_system_set_lazy_soft_timer_id                      0x1a010020
 #define sl_bt_rsp_system_hello_id                                    0x00010020
+#define sl_bt_rsp_system_start_bluetooth_id                          0x1c010020
+#define sl_bt_rsp_system_stop_bluetooth_id                           0x1d010020
 #define sl_bt_rsp_system_get_version_id                              0x1b010020
 #define sl_bt_rsp_system_reset_id                                    0x01010020
 #define sl_bt_rsp_system_halt_id                                     0x0c010020
@@ -592,6 +596,10 @@ typedef struct sl_bt_evt_system_soft_timer_s sl_bt_evt_system_soft_timer_t;
  * Verify whether the communication between the host and the device is
  * functional.
  *
+ * <b>NOTE:</b> This command is available even if the Bluetooth stack has not
+ * been started. See @ref sl_bt_system_start_bluetooth for description of how
+ * the Bluetooth stack is started.
+ *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -600,7 +608,52 @@ sl_status_t sl_bt_system_hello();
 
 /***************************************************************************//**
  *
+ * If the Bluetooth on-demand start component is not included in the application
+ * build, the Bluetooth stack is automatically started at UC initialization
+ * time. In this configuration the on-demand start command is not available and
+ * the command returns the error SL_STATUS_NOT_AVAILABLE. When the Bluetooth
+ * on-demand start component is included in the application build, this command
+ * is used by the application to start the Bluetooth stack when the application
+ * needs it. This command allocates the resources and configures the Bluetooth
+ * stack based on the configuration passed at UC initialization time. The
+ * configured classes and stack features become available when the command has
+ * successfully completed.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_system_start_bluetooth();
+
+/***************************************************************************//**
+ *
+ * If the Bluetooth on-demand start component is not included in the application
+ * build, the Bluetooth stack is automatically started at UC initialization time
+ * and never stopped. In this configuration the stop command is not available
+ * and the command returns the error SL_STATUS_NOT_AVAILABLE. When the Bluetooth
+ * on-demand start component is included in the application build, this command
+ * is used by the application to stop the Bluetooth stack when the application
+ * no longer needs it. This command gracefully restores Bluetooth to an idle
+ * state by disconnecting any active connections and stopping any on-going
+ * advertising and scanning. Any resources that were allocated when the stack
+ * was started are freed when the stack is stopped. After this command the BGAPI
+ * classes other than @ref sl_bt_system become unavailable. The application can
+ * use the command @ref sl_bt_system_start_bluetooth in order to continue using
+ * Bluetooth later.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_system_stop_bluetooth();
+
+/***************************************************************************//**
+ *
  * Get the firmware version information.
+ *
+ * <b>NOTE:</b> This command is available even if the Bluetooth stack has not
+ * been started. See @ref sl_bt_system_start_bluetooth for description of how
+ * the Bluetooth stack is started.
  *
  * @param[out] major Major release version
  * @param[out] minor Minor release version
@@ -624,6 +677,10 @@ sl_status_t sl_bt_system_get_version(uint16_t *major,
  * Reset the system. The command does not have a response but it triggers one of
  * the boot events (normal reset or boot to DFU mode) depending on the selected
  * boot mode.
+ *
+ * <b>NOTE:</b> This command is available even if the Bluetooth stack has not
+ * been started. See @ref sl_bt_system_start_bluetooth for description of how
+ * the Bluetooth stack is started.
  *
  * @param[in] dfu Enum @ref sl_bt_system_boot_mode_t. Boot mode. Values:
  *     - <b>sl_bt_system_boot_mode_normal (0x0):</b> Boot to normal mode
@@ -1224,11 +1281,13 @@ typedef enum
 /**
  * @addtogroup sl_bt_evt_advertiser_timeout sl_bt_evt_advertiser_timeout
  * @{
- * @brief Indicates that the advertiser has completed the configured number of
- * advertising events in the advertising set and advertising has stopped
+ * @brief Indicates the advertising of an advertising set has stopped, because
+ * the advertiser has completed the configured number of advertising events or
+ * the advertising has reached the configured duration
  *
- * The maximum number of advertising events can be configured by the maxevents
- * parameter in the command @ref sl_bt_advertiser_set_timing.
+ * The maximum number of advertising events or advertising duration can be
+ * configured by the @p maxevents or @p duration parameter in the command @ref
+ * sl_bt_advertiser_set_timing.
  */
 
 /** @brief Identifier of the timeout event */
@@ -2784,9 +2843,7 @@ typedef struct sl_bt_evt_connection_remote_tx_power_s sl_bt_evt_connection_remot
  ******************************************************************************/
 PACKSTRUCT( struct sl_bt_evt_connection_closed_s
 {
-  uint16_t reason;     /**< Result code
-                              - <b>0:</b> success
-                              - <b>Non-zero:</b> an error has occurred */
+  uint16_t reason;     /**< Reason of connection close */
   uint8_t  connection; /**< Handle of the closed connection */
 });
 
@@ -5480,12 +5537,7 @@ PACKSTRUCT( struct sl_bt_evt_sm_list_bonding_entry_s
                                - <b>sl_bt_gap_public_address (0x0):</b> Public
                                  device address
                                - <b>sl_bt_gap_static_address (0x1):</b> Static
-                                 device address
-                               - <b>sl_bt_gap_random_resolvable_address
-                                 (0x2):</b> Private resolvable random address
-                               - <b>sl_bt_gap_random_nonresolvable_address
-                                 (0x3):</b> Private non-resolvable random
-                                 address */
+                                 device address */
 });
 
 typedef struct sl_bt_evt_sm_list_bonding_entry_s sl_bt_evt_sm_list_bonding_entry_t;

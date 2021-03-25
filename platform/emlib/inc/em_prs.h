@@ -716,10 +716,10 @@ typedef enum {
   prsConsumerLESENSE_START       = offsetof(PRS_TypeDef, CONSUMER_LESENSE_START),       /**< LESENSE_START consumer. */
 #endif
 #if defined(VDAC0)
-  prsConsumerVDAC0_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC_ASYNCTRIGCH0),   /**< VDAC ASYNC TRIGER CH0 consumer. */
-  prsConsumerVDAC0_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC_ASYNCTRIGCH1),   /**< VDAC ASYNC TRIGER CH1 consumer. */
-  prsConsumerVDAC0_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC_SYNCTRIGCH0),    /**< VDAC SYNC TRIGER CH0 consumer. */
-  prsConsumerVDAC0_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC_SYNCTRIGCH1),    /**< VDAC SYNC TRIGER CH1 consumer. */
+  prsConsumerVDAC0_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH0),  /**< VDAC0 ASYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC0_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH1),  /**< VDAC0 ASYNC TRIGER CH1 consumer. */
+  prsConsumerVDAC0_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH0),   /**< VDAC0 SYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC0_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH1),   /**< VDAC0 SYNC TRIGER CH1 consumer. */
 #endif
 } PRS_Consumer_t;
 #endif

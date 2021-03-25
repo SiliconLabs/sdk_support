@@ -58,13 +58,6 @@
 #define LZMA_DICT_SIZE_KB           (8UL)
 #endif
 
-#ifndef LZMA_SUPPORT_NO_END_MARK
-/// @brief Support not using an end mark in the LZMA compressed file
-/// Not having an end mark in the LZMA file requires more bookkeeping
-/// during decompression. Disable this option to save some code space.
-#define LZMA_SUPPORT_NO_END_MARK    (0)
-#endif
-
 /***************************************************************************//**
  * Enter an LZMA compressed programming tag.
  * @param ctx Parser context

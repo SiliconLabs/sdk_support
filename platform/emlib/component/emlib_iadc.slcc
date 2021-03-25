@@ -28,3 +28,5 @@ documentation:
       condition: [device_sdid_200]
     - page: emlib/api/efr32xg22/group-iadc
       condition: [device_sdid_205]
+    - page: emlib/api/efr32xg22/group-iadc
+      condition: [device_sdid_210]

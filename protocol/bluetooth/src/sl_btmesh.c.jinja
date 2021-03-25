@@ -21,8 +21,23 @@
 {%-   endif %}
 {%- endfor %}
 
+{%- if bluetooth_api_ncp_host is not defined %}
+
+/** @brief Table of used BGAPI classes */
+static const struct sli_bgapi_class * const btmesh_class_table[] =
+{
+{%- for entry in btmesh_bgapi_class %}
+  SL_BTMESH_BGAPI_CLASS({{entry["class"]}}),
+{%- endfor %}
+  NULL
+};
+{%- endif %}
+
 void sl_btmesh_init(void)
 {
+{%- if bluetooth_api_ncp_host is not defined %}
+  sl_btmesh_init_classes(btmesh_class_table);
+{%- endif %}
   {%- for entry in btmesh_stack_init %}
   {{ entry["function"] }}();
   {%- endfor %}

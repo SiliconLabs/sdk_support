@@ -27,10 +27,25 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+#ifndef SL_DEVICE_INIT_NVIC_H
+#define SL_DEVICE_INIT_NVIC_H
+
 #include "sl_status.h"
 
-// -----------------------------------------------------------------------------
-// Prototypes
+/**
+ * @addtogroup device_init
+ * @{
+ * @addtogroup device_init_nvic NVIC Initialization
+ * @brief Initialize the NVIC Interrupt Handlers priority.
+ * @details
+ * Set all interrupt priorities, except the Fault exceptions, to
+ * `CORE_INTERRUPT_DEFAULT_PRIORITY` value.
+ *
+ * When the Device Init NVIC module is present and no configuration overwrites
+ * the em_core `CORE_ATOMIC_METHOD` define, the atomic method is automatically
+ * set to BASEPRI (`CORE_ATOMIC_METHOD_BASEPRI`).
+ * @{
+ */
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,3 +61,10 @@ sl_status_t sl_device_init_nvic(void);
 #ifdef __cplusplus
 }
 #endif
+
+/**
+ * @} device_init_nvic
+ * @} device_init
+ */
+
+#endif // SL_DEVICE_INIT_NVIC_H

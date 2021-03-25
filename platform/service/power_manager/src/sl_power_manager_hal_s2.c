@@ -327,13 +327,8 @@ bool sli_power_manager_is_high_freq_accuracy_clk_ready(bool wait)
 /***************************************************************************//**
  * Restore CMU HF clock select state, oscillator enable, and voltage scaling.
  ******************************************************************************/
-bool sli_power_manager_restore_states(restore_caller_id_t caller_id)
+void sli_power_manager_restore_states(void)
 {
-  if (is_hf_x_oscillator_used == true
-      && caller_id == RESTORE_CALLER_ID_EARLY_WAKEUP_TIMEOUT) {
-    return false;
-  }
-
   EMU_Restore();
 
   // Restore SYSCLK to what it was before the deepsleep
@@ -353,8 +348,6 @@ bool sli_power_manager_restore_states(restore_caller_id_t caller_id)
     }
   }
 #endif
-
-  return true;
 }
 
 /***************************************************************************//**

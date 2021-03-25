@@ -279,6 +279,7 @@ requires:
   - name: "mbedtls_ccm"
   - name: "mbedtls_ecdh"
   - name: "mbedtls_ecc"
+  - name: "mbedtls_ecc_secp256r1"
   - name: "mbedtls_cmac"
   - name: "mbedtls_random"
   - name: "sli_protocol_crypto"

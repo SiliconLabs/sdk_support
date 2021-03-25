@@ -26,3 +26,5 @@ documentation:
       condition: [device_sdid_200]
     - page: emlib/api/efr32xg22/group-burtc
       condition: [device_sdid_205]
+    - page: emlib/api/efr32xg23/group-burtc
+      condition: [device_sdid_210]

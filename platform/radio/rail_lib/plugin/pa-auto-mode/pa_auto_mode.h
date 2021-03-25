@@ -28,7 +28,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
-
+#ifndef __PA_AUTO_MODE_H
+#define __PA_AUTO_MODE_H
 #include "rail.h"
 
 #include "em_common.h"
@@ -83,3 +84,4 @@ extern RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[];
  * @}
  * end of RAIL_API
  */
+#endif // __PA_AUTO_MODE_H

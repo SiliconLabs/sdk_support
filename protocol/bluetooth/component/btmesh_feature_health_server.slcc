@@ -12,7 +12,7 @@ requires:
 provides:
   - name: "btmesh_feature_health_server"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_health_server_init"
+      class: "health_server"
     priority: 1

@@ -74,6 +74,18 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="28" name="start_bluetooth" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="29" name="stop_bluetooth" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <command index="27" name="get_version" >
             <params/>
             <returns>

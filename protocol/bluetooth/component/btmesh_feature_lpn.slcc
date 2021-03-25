@@ -13,9 +13,9 @@ requires:
 provides:
   - name: "btmesh_feature_lpn"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_lpn_init"
+      class: "lpn"
     priority: 1
   - name: btmesh_feature_bitmask
     value:

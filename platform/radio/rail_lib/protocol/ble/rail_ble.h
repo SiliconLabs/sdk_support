@@ -170,6 +170,16 @@ RAIL_ENUM(RAIL_BLE_Phy_t) {
 #define RAIL_BLE_Coded500kbps ((RAIL_BLE_Phy_t) RAIL_BLE_Coded500kbps)
 #endif //DOXYGEN_SHOULD_SKIP_THIS
 
+// Defines for subPhyID field in RAIL_RxPacketDetails_t
+/** subPhyId indicating a 500kbps packet */
+#define RAIL_BLE_RX_SUBPHY_ID_500K     (0U)
+/** subPhyId indicating a 125kbps packet */
+#define RAIL_BLE_RX_SUBPHY_ID_125K     (1U)
+/** subPhyId value indicating a 1Mbps packet */
+#define RAIL_BLE_RX_SUBPHY_ID_1M       (2U)
+/** Invalid subPhyId value */
+#define RAIL_BLE_RX_SUBPHY_ID_INVALID  (3U)
+
 /**
  *
  * The maximum number of GPIO pins used for AoX Antenna switching.
@@ -347,7 +357,7 @@ RAIL_Status_t RAIL_BLE_ConfigPhyCoded(RAIL_Handle_t railHandle,
  * 500 kbps packet, a subPhyId of 1 marks a 125 kbps packet, and a
  * subPhyId of 2 marks a 1 Mbps packet.
  *
- * @note: The Simulscan PHY is supported only on 2.4 GHz Series-2 parts.
+ * @note: The Simulscan PHY is supported only on some 2.4 GHz Series-2 parts.
  * The preprocessor symbol \ref RAIL_BLE_SUPPORTS_SIMULSCAN_PHY and the
  * runtime function \ref RAIL_BLE_SupportsSimulscanPhy() may be used to
  * test for support of the Simulscan PHY.
@@ -466,7 +476,7 @@ RAIL_ENUM_GENERIC(RAIL_BLE_AoxOptions_t, uint16_t) {
  */
 #define RAIL_BLE_AOX_OPTIONS_CONN                (1U << RAIL_BLE_AOX_OPTIONS_CONN_SHIFT)
 /**
- * Enables connection based AoX Rx packets.
+ * Disables CTE buffer lock.
  */
 #define RAIL_BLE_AOX_OPTIONS_DISABLE_BUFFER_LOCK (1U << RAIL_BLE_AOX_OPTIONS_BUFFER_LOCK_SHIFT)
 /**

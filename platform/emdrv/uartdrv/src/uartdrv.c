@@ -762,7 +762,7 @@ static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle
     case uartdrvUartTypeLeuart:
       baud = LEUART_BaudrateGet(handle->peripheral.leuart);
       break;
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif defined(EUART_COUNT) && (EUART_COUNT > 0) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
     case uartdrvUartTypeEuart:
       baud = EUSART_BaudrateGet(handle->peripheral.euart);
       break;
@@ -801,7 +801,7 @@ static void TransmitDmaCompleteDelayed(sl_sleeptimer_timer_handle_t *timer_handl
       reg = uartdrv_handle->peripheral.leuart->STATUS;
       txComplete = reg & LEUART_STATUS_TXC;
       break;
-#elif defined(EUART_COUNT) && (EUART_COUNT > 0)
+#elif defined(EUART_COUNT) && (EUART_COUNT > 0) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
     case uartdrvUartTypeEuart:
       reg = uartdrv_handle->peripheral.euart->STATUS;
       txComplete = reg & EUSART_STATUS_TXC;
@@ -1988,7 +1988,7 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
   CMU_ClockEnable(handle->uartClock, false);
 
 #if (EMDRV_UARTDRV_FLOW_CONTROL_ENABLE)
-  if (handle->fcType != uartdrvFlowControlHwUart) {
+  if (handle->fcType == uartdrvFlowControlHw) {
     GPIOINT_CallbackRegister(handle->ctsPin, NULL);
   }
 #endif
@@ -2757,6 +2757,7 @@ Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
   Ecode_t retVal;
   UARTDRV_Buffer_t inputBuffer;
   UARTDRV_Buffer_t *queueBuffer;
+  uint32_t txState;
 
   retVal = CheckParams(handle, data, count);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
@@ -2767,6 +2768,32 @@ Ecode_t UARTDRV_Transmit(UARTDRV_Handle_t handle,
   inputBuffer.itemsRemaining = count;
   inputBuffer.callback = callback;
   inputBuffer.transferStatus = ECODE_EMDRV_UARTDRV_WAITING;
+
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
+  if (handle->type == uartdrvUartTypeUart) {
+    txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+  } else if (handle->type == uartdrvUartTypeLeuart) {
+    txState = (handle->peripheral.leuart->STATUS & LEUART_STATUS_TXENS);
+  } else {
+    EFM_ASSERT(false);
+    txState = 0;
+  }
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
+  if (handle->type == uartdrvUartTypeUart) {
+    txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+  } else if (handle->type == uartdrvUartTypeEuart) {
+    txState = EUSART_StatusGet(handle->peripheral.euart) & EUSART_STATUS_TXENS;
+  } else {
+    EFM_ASSERT(false);
+    txState = 0;
+  }
+#else
+  txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+#endif
+
+  if (!txState) {
+    EnableTransmitter(handle);
+  }
 
   retVal = EnqueueBuffer(handle->txQueue, &inputBuffer, &queueBuffer);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
@@ -2804,6 +2831,7 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
   Ecode_t retVal;
   UARTDRV_Buffer_t outputBuffer;
   UARTDRV_Buffer_t *queueBuffer;
+  uint32_t txState;
 
   retVal = CheckParams(handle, data, count);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {
@@ -2814,6 +2842,32 @@ Ecode_t UARTDRV_TransmitB(UARTDRV_Handle_t handle,
   outputBuffer.itemsRemaining = count;
   outputBuffer.callback = NULL;
   outputBuffer.transferStatus = ECODE_EMDRV_UARTDRV_WAITING;
+
+#if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
+  if (handle->type == uartdrvUartTypeUart) {
+    txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+  } else if (handle->type == uartdrvUartTypeLeuart) {
+    txState = (handle->peripheral.leuart->STATUS & LEUART_STATUS_TXENS);
+  } else {
+    EFM_ASSERT(false);
+    txState = 0;
+  }
+#elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
+  if (handle->type == uartdrvUartTypeUart) {
+    txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+  } else if (handle->type == uartdrvUartTypeEuart) {
+    txState = EUSART_StatusGet(handle->peripheral.euart) & EUSART_STATUS_TXENS;
+  } else {
+    EFM_ASSERT(false);
+    txState = 0;
+  }
+#else
+  txState = (handle->peripheral.uart->STATUS & USART_STATUS_TXENS);
+#endif
+
+  if (!txState) {
+    EnableTransmitter(handle);
+  }
 
   retVal = EnqueueBuffer(handle->txQueue, &outputBuffer, &queueBuffer);
   if (retVal != ECODE_EMDRV_UARTDRV_OK) {

@@ -11,7 +11,7 @@ requires:
 provides:
   - name: "btmesh_feature_test"
 template_contribution:
-  - name: btmesh_stack_init
+  - name: btmesh_bgapi_class
     value:
-      function: "sl_btmesh_class_test_init"
+      class: "test"
     priority: 1

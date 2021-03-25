@@ -3,7 +3,7 @@
  * @brief EFR32FG23 PRS register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -146,10 +146,10 @@ typedef struct {
   __IOM uint32_t       CONSUMER_USART0_RX;                /**< RX Consumer register                               */
   __IOM uint32_t       CONSUMER_USART0_TRIGGER;           /**< TRIGGER Consumer register                          */
   uint32_t             RESERVED4[3U];                     /**< Reserved for future use                            */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH0;        /**< ASYNCTRIG consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH1;        /**< ASYNCTRIG Consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH0;         /**< SYNCTRIG Consumer register                         */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH1;         /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH0;       /**< ASYNCTRIG consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH1;       /**< ASYNCTRIG Consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH0;        /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH1;        /**< SYNCTRIG Consumer register                         */
   __IOM uint32_t       CONSUMER_WDOG0_SRC0;               /**< SRC0 consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG0_SRC1;               /**< SRC1 Consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG1_SRC0;               /**< SRC0 consumer register                             */
@@ -249,10 +249,10 @@ typedef struct {
   __IOM uint32_t       CONSUMER_USART0_RX_SET;            /**< RX Consumer register                               */
   __IOM uint32_t       CONSUMER_USART0_TRIGGER_SET;       /**< TRIGGER Consumer register                          */
   uint32_t             RESERVED11[3U];                    /**< Reserved for future use                            */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH0_SET;    /**< ASYNCTRIG consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH1_SET;    /**< ASYNCTRIG Consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH0_SET;     /**< SYNCTRIG Consumer register                         */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH1_SET;     /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH0_SET;   /**< ASYNCTRIG consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH1_SET;   /**< ASYNCTRIG Consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH0_SET;    /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH1_SET;    /**< SYNCTRIG Consumer register                         */
   __IOM uint32_t       CONSUMER_WDOG0_SRC0_SET;           /**< SRC0 consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG0_SRC1_SET;           /**< SRC1 Consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG1_SRC0_SET;           /**< SRC0 consumer register                             */
@@ -352,10 +352,10 @@ typedef struct {
   __IOM uint32_t       CONSUMER_USART0_RX_CLR;            /**< RX Consumer register                               */
   __IOM uint32_t       CONSUMER_USART0_TRIGGER_CLR;       /**< TRIGGER Consumer register                          */
   uint32_t             RESERVED18[3U];                    /**< Reserved for future use                            */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH0_CLR;    /**< ASYNCTRIG consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH1_CLR;    /**< ASYNCTRIG Consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH0_CLR;     /**< SYNCTRIG Consumer register                         */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH1_CLR;     /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH0_CLR;   /**< ASYNCTRIG consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH1_CLR;   /**< ASYNCTRIG Consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH0_CLR;    /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH1_CLR;    /**< SYNCTRIG Consumer register                         */
   __IOM uint32_t       CONSUMER_WDOG0_SRC0_CLR;           /**< SRC0 consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG0_SRC1_CLR;           /**< SRC1 Consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG1_SRC0_CLR;           /**< SRC0 consumer register                             */
@@ -455,10 +455,10 @@ typedef struct {
   __IOM uint32_t       CONSUMER_USART0_RX_TGL;            /**< RX Consumer register                               */
   __IOM uint32_t       CONSUMER_USART0_TRIGGER_TGL;       /**< TRIGGER Consumer register                          */
   uint32_t             RESERVED25[3U];                    /**< Reserved for future use                            */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH0_TGL;    /**< ASYNCTRIG consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_ASYNCTRIGCH1_TGL;    /**< ASYNCTRIG Consumer register                        */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH0_TGL;     /**< SYNCTRIG Consumer register                         */
-  __IOM uint32_t       CONSUMER_VDAC_SYNCTRIGCH1_TGL;     /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH0_TGL;   /**< ASYNCTRIG consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_ASYNCTRIGCH1_TGL;   /**< ASYNCTRIG Consumer register                        */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH0_TGL;    /**< SYNCTRIG Consumer register                         */
+  __IOM uint32_t       CONSUMER_VDAC0_SYNCTRIGCH1_TGL;    /**< SYNCTRIG Consumer register                         */
   __IOM uint32_t       CONSUMER_WDOG0_SRC0_TGL;           /**< SRC0 consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG0_SRC1_TGL;           /**< SRC1 Consumer register                             */
   __IOM uint32_t       CONSUMER_WDOG1_SRC0_TGL;           /**< SRC0 consumer register                             */
@@ -1482,37 +1482,37 @@ typedef struct {
 #define _PRS_CONSUMER_USART0_TRIGGER_PRSSEL_DEFAULT          0x00000000UL                                       /**< Mode DEFAULT for PRS_CONSUMER_USART0_TRIGGER*/
 #define PRS_CONSUMER_USART0_TRIGGER_PRSSEL_DEFAULT           (_PRS_CONSUMER_USART0_TRIGGER_PRSSEL_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_CONSUMER_USART0_TRIGGER*/
 
-/* Bit fields for PRS CONSUMER_VDAC_ASYNCTRIGCH0 */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH0_RESETVALUE           0x00000000UL                                          /**< Default value for PRS_CONSUMER_VDAC_ASYNCTRIGCH0*/
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH0_MASK                 0x0000000FUL                                          /**< Mask for PRS_CONSUMER_VDAC_ASYNCTRIGCH0     */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH0_PRSSEL_SHIFT         0                                                     /**< Shift value for PRS_PRSSEL                  */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH0_PRSSEL_MASK          0xFUL                                                 /**< Bit mask for PRS_PRSSEL                     */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH0_PRSSEL_DEFAULT       0x00000000UL                                          /**< Mode DEFAULT for PRS_CONSUMER_VDAC_ASYNCTRIGCH0*/
-#define PRS_CONSUMER_VDAC_ASYNCTRIGCH0_PRSSEL_DEFAULT        (_PRS_CONSUMER_VDAC_ASYNCTRIGCH0_PRSSEL_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC_ASYNCTRIGCH0*/
+/* Bit fields for PRS CONSUMER_VDAC0_ASYNCTRIGCH0 */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_RESETVALUE          0x00000000UL                                           /**< Default value for PRS_CONSUMER_VDAC0_ASYNCTRIGCH0*/
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_MASK                0x0000000FUL                                           /**< Mask for PRS_CONSUMER_VDAC0_ASYNCTRIGCH0    */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_PRSSEL_SHIFT        0                                                      /**< Shift value for PRS_PRSSEL                  */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_PRSSEL_MASK         0xFUL                                                  /**< Bit mask for PRS_PRSSEL                     */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_PRSSEL_DEFAULT      0x00000000UL                                           /**< Mode DEFAULT for PRS_CONSUMER_VDAC0_ASYNCTRIGCH0*/
+#define PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_PRSSEL_DEFAULT       (_PRS_CONSUMER_VDAC0_ASYNCTRIGCH0_PRSSEL_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC0_ASYNCTRIGCH0*/
 
-/* Bit fields for PRS CONSUMER_VDAC_ASYNCTRIGCH1 */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH1_RESETVALUE           0x00000000UL                                          /**< Default value for PRS_CONSUMER_VDAC_ASYNCTRIGCH1*/
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH1_MASK                 0x0000000FUL                                          /**< Mask for PRS_CONSUMER_VDAC_ASYNCTRIGCH1     */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH1_PRSSEL_SHIFT         0                                                     /**< Shift value for PRS_PRSSEL                  */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH1_PRSSEL_MASK          0xFUL                                                 /**< Bit mask for PRS_PRSSEL                     */
-#define _PRS_CONSUMER_VDAC_ASYNCTRIGCH1_PRSSEL_DEFAULT       0x00000000UL                                          /**< Mode DEFAULT for PRS_CONSUMER_VDAC_ASYNCTRIGCH1*/
-#define PRS_CONSUMER_VDAC_ASYNCTRIGCH1_PRSSEL_DEFAULT        (_PRS_CONSUMER_VDAC_ASYNCTRIGCH1_PRSSEL_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC_ASYNCTRIGCH1*/
+/* Bit fields for PRS CONSUMER_VDAC0_ASYNCTRIGCH1 */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_RESETVALUE          0x00000000UL                                           /**< Default value for PRS_CONSUMER_VDAC0_ASYNCTRIGCH1*/
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_MASK                0x0000000FUL                                           /**< Mask for PRS_CONSUMER_VDAC0_ASYNCTRIGCH1    */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_PRSSEL_SHIFT        0                                                      /**< Shift value for PRS_PRSSEL                  */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_PRSSEL_MASK         0xFUL                                                  /**< Bit mask for PRS_PRSSEL                     */
+#define _PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_PRSSEL_DEFAULT      0x00000000UL                                           /**< Mode DEFAULT for PRS_CONSUMER_VDAC0_ASYNCTRIGCH1*/
+#define PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_PRSSEL_DEFAULT       (_PRS_CONSUMER_VDAC0_ASYNCTRIGCH1_PRSSEL_DEFAULT << 0) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC0_ASYNCTRIGCH1*/
 
-/* Bit fields for PRS CONSUMER_VDAC_SYNCTRIGCH0 */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH0_RESETVALUE            0x00000000UL                                          /**< Default value for PRS_CONSUMER_VDAC_SYNCTRIGCH0*/
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH0_MASK                  0x00000300UL                                          /**< Mask for PRS_CONSUMER_VDAC_SYNCTRIGCH0      */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH0_SPRSSEL_SHIFT         8                                                     /**< Shift value for PRS_SPRSSEL                 */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH0_SPRSSEL_MASK          0x300UL                                               /**< Bit mask for PRS_SPRSSEL                    */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH0_SPRSSEL_DEFAULT       0x00000000UL                                          /**< Mode DEFAULT for PRS_CONSUMER_VDAC_SYNCTRIGCH0*/
-#define PRS_CONSUMER_VDAC_SYNCTRIGCH0_SPRSSEL_DEFAULT        (_PRS_CONSUMER_VDAC_SYNCTRIGCH0_SPRSSEL_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC_SYNCTRIGCH0*/
+/* Bit fields for PRS CONSUMER_VDAC0_SYNCTRIGCH0 */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH0_RESETVALUE           0x00000000UL                                           /**< Default value for PRS_CONSUMER_VDAC0_SYNCTRIGCH0*/
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH0_MASK                 0x00000300UL                                           /**< Mask for PRS_CONSUMER_VDAC0_SYNCTRIGCH0     */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH0_SPRSSEL_SHIFT        8                                                      /**< Shift value for PRS_SPRSSEL                 */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH0_SPRSSEL_MASK         0x300UL                                                /**< Bit mask for PRS_SPRSSEL                    */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH0_SPRSSEL_DEFAULT      0x00000000UL                                           /**< Mode DEFAULT for PRS_CONSUMER_VDAC0_SYNCTRIGCH0*/
+#define PRS_CONSUMER_VDAC0_SYNCTRIGCH0_SPRSSEL_DEFAULT       (_PRS_CONSUMER_VDAC0_SYNCTRIGCH0_SPRSSEL_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC0_SYNCTRIGCH0*/
 
-/* Bit fields for PRS CONSUMER_VDAC_SYNCTRIGCH1 */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH1_RESETVALUE            0x00000000UL                                          /**< Default value for PRS_CONSUMER_VDAC_SYNCTRIGCH1*/
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH1_MASK                  0x00000300UL                                          /**< Mask for PRS_CONSUMER_VDAC_SYNCTRIGCH1      */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH1_SPRSSEL_SHIFT         8                                                     /**< Shift value for PRS_SPRSSEL                 */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH1_SPRSSEL_MASK          0x300UL                                               /**< Bit mask for PRS_SPRSSEL                    */
-#define _PRS_CONSUMER_VDAC_SYNCTRIGCH1_SPRSSEL_DEFAULT       0x00000000UL                                          /**< Mode DEFAULT for PRS_CONSUMER_VDAC_SYNCTRIGCH1*/
-#define PRS_CONSUMER_VDAC_SYNCTRIGCH1_SPRSSEL_DEFAULT        (_PRS_CONSUMER_VDAC_SYNCTRIGCH1_SPRSSEL_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC_SYNCTRIGCH1*/
+/* Bit fields for PRS CONSUMER_VDAC0_SYNCTRIGCH1 */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH1_RESETVALUE           0x00000000UL                                           /**< Default value for PRS_CONSUMER_VDAC0_SYNCTRIGCH1*/
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH1_MASK                 0x00000300UL                                           /**< Mask for PRS_CONSUMER_VDAC0_SYNCTRIGCH1     */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH1_SPRSSEL_SHIFT        8                                                      /**< Shift value for PRS_SPRSSEL                 */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH1_SPRSSEL_MASK         0x300UL                                                /**< Bit mask for PRS_SPRSSEL                    */
+#define _PRS_CONSUMER_VDAC0_SYNCTRIGCH1_SPRSSEL_DEFAULT      0x00000000UL                                           /**< Mode DEFAULT for PRS_CONSUMER_VDAC0_SYNCTRIGCH1*/
+#define PRS_CONSUMER_VDAC0_SYNCTRIGCH1_SPRSSEL_DEFAULT       (_PRS_CONSUMER_VDAC0_SYNCTRIGCH1_SPRSSEL_DEFAULT << 8) /**< Shifted mode DEFAULT for PRS_CONSUMER_VDAC0_SYNCTRIGCH1*/
 
 /* Bit fields for PRS CONSUMER_WDOG0_SRC0 */
 #define _PRS_CONSUMER_WDOG0_SRC0_RESETVALUE                  0x00000000UL                                   /**< Default value for PRS_CONSUMER_WDOG0_SRC0   */

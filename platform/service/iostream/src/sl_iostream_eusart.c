@@ -33,6 +33,7 @@
 #endif
 
 #include "sl_status.h"
+#include "sl_slist.h"
 #include "sl_iostream.h"
 #include "sl_iostream_uart.h"
 #include "sli_iostream_uart.h"
@@ -52,6 +53,26 @@
 #include "em_core.h"
 #include "em_eusart.h"
 #include "em_gpio.h"
+
+/*******************************************************************************
+ **************************   LOCAL VARIABLES   ********************************
+ ******************************************************************************/
+
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+static sl_power_manager_em_transition_event_handle_t on_power_manager_event_handle;
+
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to);
+
+static sl_power_manager_em_transition_event_info_t on_power_manager_event_info =
+{
+  .event_mask = (SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3),
+  .on_event = on_power_manager_event,
+};
+
+// List of EUSART streams
+sl_slist_node_t *eusart_stream_list = NULL;
+#endif
 
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
@@ -226,6 +247,14 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
   // Finally enable it
   EUSART_Enable(eusart_config->eusart, eusartEnable);
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Subscribe to notification to re-enable eusart after deepsleep.
+  if (eusart_stream_list == NULL) {
+    sl_power_manager_subscribe_em_transition_event(&on_power_manager_event_handle, &on_power_manager_event_info);
+  }
+  sl_slist_push(&eusart_stream_list, &eusart_context->node);
+#endif
+
   return SL_STATUS_OK;
 }
 
@@ -324,5 +353,33 @@ static sl_status_t eusart_deinit(void *context)
   // Disable USART Clock
   CMU_ClockEnable(eusart_context->clock, false);
 
+  #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  // Subscribe to notification to re-enable eusart after deepsleep.
+  sl_slist_remove(&eusart_stream_list, &eusart_context->node);
+  if (eusart_stream_list == NULL) {
+    sl_power_manager_unsubscribe_em_transition_event(&on_power_manager_event_handle);
+  }
+#endif
+
   return SL_STATUS_OK;
 }
+
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+/***************************************************************************//**
+ * Power Manager callback notification for EUSART.
+ * It is used to re-enabled EUSART module after deepsleeping.
+ ******************************************************************************/
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to)
+{
+  (void)from;
+
+  if (to == SL_POWER_MANAGER_EM1
+      || to == SL_POWER_MANAGER_EM0) {
+    sl_iostream_eusart_context_t *eusart_context;
+    SL_SLIST_FOR_EACH_ENTRY(eusart_stream_list, eusart_context, sl_iostream_eusart_context_t, node) {
+      EUSART_Enable(eusart_context->eusart, eusartEnable);
+    }
+  }
+}
+#endif
