@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver Key Management functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(CRYPTOACC_PRESENT)
@@ -25,13 +55,6 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
                                                     size_t key_buffer_size,
                                                     size_t *key_length)
 {
-  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  block_t n = NULL_blk;
-  block_t *domain_ptr = NULL;
-  uint32_t curve_flags = 0;
-  struct sx_rng trng = { NULL, sx_trng_fill_blk };
-
   // Argument check.
   if (attributes == NULL
       || key_buffer == NULL
@@ -59,6 +82,7 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
   }
 
   // Always generate private key.
+  block_t n = NULL_blk;
   switch (key_bits) {
     case 192:
       // The order n is stored as the second element in the curve-parameter tuple
@@ -87,7 +111,7 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
 
   block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
 
-  status = cryptoacc_trng_initialize();
+  psa_status_t status = cryptoacc_trng_initialize();
   if (status != PSA_SUCCESS) {
     return status;
   }
@@ -97,7 +121,9 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
   if (status != PSA_SUCCESS) {
     return status;
   }
-  sx_ret = ecc_generate_private_key(n, priv, trng);
+
+  struct sx_rng trng = { NULL, sx_trng_fill_blk };
+  uint32_t sx_ret = ecc_generate_private_key(n, priv, trng);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {
@@ -106,6 +132,8 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
 
   // If public key is requested, get it by performing point multiplication of the private key.
   if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
+    block_t *domain_ptr = NULL;
+    uint32_t curve_flags = 0;
     switch (key_bits) {
       case 192:
         curve_flags = sx_ecc_curve_p192.pk_flags;
@@ -154,11 +182,6 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
                                                          size_t data_size,
                                                          size_t *data_length)
 {
-  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  block_t *domain_ptr = NULL;
-  uint32_t curve_flags = 0;
-
   // Argument check.
   if (key_buffer == NULL
       || key_buffer_size == 0
@@ -186,6 +209,8 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
       return PSA_ERROR_BUFFER_TOO_SMALL;
     }
 
+    block_t *domain_ptr = NULL;
+    uint32_t curve_flags = 0;
     switch (key_bits) {
       case 192:
         curve_flags = sx_ecc_curve_p192.pk_flags;
@@ -206,15 +231,15 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
     block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
     block_t pub = block_t_convert(data + 1, PSA_BITS_TO_BYTES(key_bits) * 2);
 
-    status = cryptoacc_management_acquire();
+    psa_status_t status = cryptoacc_management_acquire();
     if (status != PSA_SUCCESS) {
       return status;
     }
-    sx_ret = ecc_generate_public_key(*domain_ptr,
-                                     pub,
-                                     priv,
-                                     PSA_BITS_TO_BYTES(key_bits),
-                                     curve_flags);
+    uint32_t sx_ret = ecc_generate_public_key(*domain_ptr,
+                                              pub,
+                                              priv,
+                                              PSA_BITS_TO_BYTES(key_bits),
+                                              curve_flags);
     status = cryptoacc_management_release();
     if (sx_ret != CRYPTOLIB_SUCCESS
         || status != PSA_SUCCESS) {
@@ -236,7 +261,6 @@ psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *
                                                     size_t *bits)
 {
   psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
 
   // Argument check.
   if (attributes == NULL
@@ -366,10 +390,10 @@ psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *
     if (status != PSA_SUCCESS) {
       return status;
     }
-    sx_ret = ecc_is_point_on_curve(*domain_ptr,
-                                   point,
-                                   PSA_BITS_TO_BYTES(*bits),
-                                   curve_flags);
+    uint32_t sx_ret = ecc_is_point_on_curve(*domain_ptr,
+                                            point,
+                                            PSA_BITS_TO_BYTES(*bits),
+                                            curve_flags);
     status = cryptoacc_management_release();
     if (status != PSA_SUCCESS) {
       return status;

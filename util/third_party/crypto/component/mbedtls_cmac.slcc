@@ -1,7 +1,9 @@
 id: mbedtls_cmac
 package: platform
 label: Mbed TLS Support for CMAC
-description: This component provides support for CMAC using Mbed TLS
+description: >-
+  This component provides support for message authentication with the CMAC
+  algorithm using Mbed TLS.
 category: Platform|Security
 quality: production
 source:

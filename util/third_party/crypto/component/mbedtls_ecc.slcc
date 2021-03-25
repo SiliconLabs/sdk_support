@@ -1,7 +1,10 @@
 id: mbedtls_ecc
 package: platform
 label: Mbed TLS Support for ECC
-description: This component provides support for Elliptic Curve Cryptography (ECC) using Mbed TLS
+description: >-
+  This component provides support for Elliptic Curve Cryptography (ECC) using
+  Mbed TLS. The primary purpose of this component is to enable the software
+  fallback implementation of ECC in PSA Crypto.
 category: Platform|Security
 quality: production
 source:

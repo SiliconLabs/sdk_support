@@ -1,7 +1,8 @@
 id: mbedtls_sha512
 package: platform
 label: Mbed TLS Support for SHA-384 and SHA-512
-description: This component provides support for SHA-384 and SHA-512 hash functions using mbedTLS
+description: >-
+  This component provides support for SHA-384 and SHA-512 hash functions using mbedTLS.
 category: Platform|Security
 quality: production
 source:

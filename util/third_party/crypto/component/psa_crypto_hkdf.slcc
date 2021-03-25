@@ -1,0 +1,30 @@
+id: psa_crypto_hkdf
+package: platform
+label: PSA Crypto support for HKDF
+description:
+  "This component provides support for key derivation using HKDF in PSA Crypto.\n
+
+  If hardware acceleration of HKDF is available and the 'Mbed TLS Support for \
+  HKDF' component is not included, PSA will not enable fallback to the software \
+  implementation (which in this case uses the HMAC API) in the Mbed TLS library."
+category: Platform|Security
+quality: production
+provides:
+  - name: psa_crypto_hkdf
+requires:
+  - name: psa_crypto
+  - name: mbedtls_hkdf
+    condition: [device_series_0]
+  - name: mbedtls_hkdf
+    condition: [device_series_1]
+  - name: mbedtls_hkdf
+    condition: [device_security_se]
+  - name: mbedtls_hkdf
+    condition: [device_has_cryptoacc]
+template_contribution:
+  - name: psa_crypto_config
+    value: PSA_WANT_ALG_HKDF
+  - name: mbedtls_config
+    value: MBEDTLS_PSA_ACCEL_ALG_HKDF
+    condition: [device_security_vault]
+    unless: [mbedtls_hkdf]

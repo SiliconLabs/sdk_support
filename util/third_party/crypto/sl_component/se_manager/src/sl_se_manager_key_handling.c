@@ -113,14 +113,12 @@
 sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
                                      uint32_t *storage_size)
 {
-  sl_status_t status;
-  uint32_t key_size;
-
   if (key == NULL || storage_size == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  status = sli_key_get_size(key, &key_size);
+  uint32_t key_size = 0;
+  sl_status_t status = sli_key_get_size(key, &key_size);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -313,12 +311,12 @@ sl_status_t sli_key_check_equivalent(const sl_se_key_descriptor_t *key_1,
   }
 
   // Verify key sizes
-  uint32_t key_1_size;
+  uint32_t key_1_size = 0;
   status = sli_key_get_size(key_1, &key_1_size);
   if (status != SL_STATUS_OK) {
     return status;
   }
-  uint32_t key_2_size;
+  uint32_t key_2_size = 0;
   status = sli_key_get_size(key_2, &key_2_size);
   if (status != SL_STATUS_OK) {
     return status;

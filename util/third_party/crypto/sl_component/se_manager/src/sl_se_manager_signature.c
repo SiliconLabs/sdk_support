@@ -34,9 +34,7 @@
 #include "sl_se_manager.h"
 #include "sli_se_manager_internal.h"
 #include "em_se.h"
-#include "em_core.h"
 #include "em_assert.h"
-#include "em_system.h"
 #include <string.h>
 
 /// @addtogroup sl_se_manager

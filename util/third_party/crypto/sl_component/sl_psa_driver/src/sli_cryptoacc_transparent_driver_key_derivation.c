@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver Key Derivation functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(CRYPTOACC_PRESENT)
@@ -12,7 +42,6 @@
 #include "psa/crypto_struct.h"
 #include "sx_dh_alg.h"
 #include "sx_ecc_curves.h"
-#include "sx_primitives.h"
 #include "sx_errors.h"
 #include "cryptolib_types.h"
 
@@ -96,26 +125,19 @@ psa_status_t sli_cryptoacc_transparent_key_agreement(psa_algorithm_t alg,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  // Check that public key is a point on the curve.
+  // Compute shared key.
   status = cryptoacc_management_acquire();
   if (status != PSA_SUCCESS) {
     return status;
   }
-  sx_ret = ecc_is_point_on_curve(domain,
-                                 pub,
-                                 PSA_BITS_TO_BYTES(key_bits),
-                                 curve_flags);
-  if (sx_ret != CRYPTOLIB_SUCCESS) {
-    cryptoacc_management_release();
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  // Compute shared key.
   sx_ret = dh_shared_key_ecdh(domain, priv, pub, shared_key, PSA_BITS_TO_BYTES(key_bits), curve_flags);
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {
-    return PSA_ERROR_HARDWARE_FAILURE;
+    // If the ECDH libcryptosoc operation failed, this is most likely due to
+    // the peer key being an invalid elliptic curve point. Other sources for
+    // failure should hopefully have been caught during parameter validation.
+    return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   memcpy(output, tmp_output_buf, PSA_BITS_TO_BYTES(key_bits));

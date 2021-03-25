@@ -93,7 +93,9 @@ extern "C" {
  *   Buffer where the output token will be stored.
  *
  * @param[in] token_buf_size
- *   Size of token_buf in bytes.
+ *   Size of token_buf in bytes. Must be at least the size found by calling
+ *   \ref sl_se_attestation_get_psa_iat_token_size with equivalent arguments,
+ *   and padded to word alignment.
  *
  * @param[out] token_size
  *   Number of bytes actually used in token_buf.
@@ -123,10 +125,10 @@ sl_status_t sl_se_attestation_get_psa_iat_token(sl_se_command_context_t *cmd_ctx
  *   Pointer to an SE command context object.
  *
  * @param[in] challenge_size
- *   Pointer to sl_se_key_descriptor_t structure.
+ *   Size of the challenge object in bytes. Must be either 32, 48 or 64.
  *
  * @param[out] token_size
- *   Buffer holding the input data.
+ *   Pointer to output word. Result is stored here.
  *
  * @return
  *   Status code, @ref sl_status.h.
@@ -152,7 +154,9 @@ sl_status_t sl_se_attestation_get_psa_iat_token_size(sl_se_command_context_t *cm
  *   Buffer where the output token will be stored.
  *
  * @param[in] token_buf_size
- *   Size of token_buf in bytes.
+ *   Size of token_buf in bytes. Must be at least the size found by calling
+ *   \ref sl_se_attestation_get_config_token_size with equivalent arguments,
+ *   and padded to word alignment.
  *
  * @param[out] token_size
  *   Number of bytes actually used in token_buf.
@@ -182,10 +186,10 @@ sl_status_t sl_se_attestation_get_config_token(sl_se_command_context_t *cmd_ctx,
  *   Pointer to an SE command context object.
  *
  * @param[in] challenge_size
- *   Size of the challenge object in bytes. Must be either 32, 48 or 64.
+ *   Size of the challenge object in bytes. Must be 32.
  *
  * @param[out] token_size
- *   Number of bytes actually used in token_buf.
+ *   Pointer to output word. Result is stored here.
  *
  * @return
  *   Status code, @ref sl_status.h.

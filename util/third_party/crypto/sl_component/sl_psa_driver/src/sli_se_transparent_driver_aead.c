@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver AEAD functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -116,6 +146,8 @@ psa_status_t sli_se_transparent_aead_decrypt_setup(sli_se_transparent_aead_opera
                                                   0);
 }
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_transparent_aead_generate_nonce(sli_se_transparent_aead_operation_t *operation,
                                                     uint8_t *nonce,
                                                     size_t nonce_size,
@@ -131,6 +163,8 @@ psa_status_t sli_se_transparent_aead_generate_nonce(sli_se_transparent_aead_oper
                                            nonce_length);
 }
 
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation_t *operation,
                                                const uint8_t *nonce,
                                                size_t nonce_size)
@@ -143,6 +177,8 @@ psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation
                                       nonce,
                                       nonce_size);
 }
+
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_transparent_aead_set_lengths(sli_se_transparent_aead_operation_t *operation,
                                                  size_t ad_length,
@@ -157,6 +193,8 @@ psa_status_t sli_se_transparent_aead_set_lengths(sli_se_transparent_aead_operati
                                         ad_length,
                                         plaintext_length);
 }
+
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_transparent_aead_update_ad(sli_se_transparent_aead_operation_t *operation,
                                                const uint8_t *input,
@@ -209,6 +247,8 @@ psa_status_t sli_se_transparent_aead_finish(sli_se_transparent_aead_operation_t 
                                    tag_length);
 }
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_transparent_aead_verify(sli_se_transparent_aead_operation_t *operation,
                                             uint8_t *plaintext,
                                             size_t plaintext_size,
@@ -239,5 +279,7 @@ psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *
   memset(operation, 0, sizeof(*operation));
   return PSA_ERROR_NOT_SUPPORTED;
 }
+
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // defined(SEMAILBOX_PRESENT)

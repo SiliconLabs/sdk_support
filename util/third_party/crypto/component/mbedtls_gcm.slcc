@@ -1,9 +1,9 @@
 id: mbedtls_gcm
 package: platform
 label: Mbed TLS Support for GCM
-description: >
-  This component provides support for GCM (Galois Counter Mode) for block
-  ciphers using Mbed TLS.
+description: >-
+  This component provides support for authenticated encryption and decryption
+  in GCM mode for block ciphers using Mbed TLS.
 category: Platform|Security
 quality: production
 source:

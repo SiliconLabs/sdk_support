@@ -118,18 +118,26 @@ psa_status_t sli_se_driver_aead_encrypt_decrypt_setup(sli_se_driver_aead_operati
                                                       size_t key_storage_buffer_size,
                                                       size_t key_storage_overhead);
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_driver_aead_generate_nonce(sli_se_driver_aead_operation_t *operation,
                                                uint8_t *nonce,
                                                size_t nonce_size,
                                                size_t *nonce_length);
 
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_driver_aead_set_nonce(sli_se_driver_aead_operation_t *operation,
                                           const uint8_t *nonce,
                                           size_t nonce_size);
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *operation,
                                             size_t ad_length,
                                             size_t plaintext_length);
+
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operation,
                                           uint8_t *key_buffer,
@@ -153,6 +161,8 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                        size_t tag_size,
                                        size_t *tag_length);
 
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
+
 psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation,
                                        uint8_t *key_buffer,
                                        uint8_t *plaintext,
@@ -160,6 +170,8 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                        size_t *plaintext_length,
                                        const uint8_t *tag,
                                        size_t tag_length);
+
+#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // SEMAILBOX_PRESENT
 

@@ -284,6 +284,8 @@
 //#undef MBEDTLS_ECP_DP_BP512R1_ENABLED
 //#undef MBEDTLS_SHA512_C
 
+#include "mbedtls/config_psa.h"
+
 #include "mbedtls/check_config.h"
 
 /** @} (end sl_crypto_config) */

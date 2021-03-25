@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Driver Builtin key functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(SEMAILBOX_PRESENT)
@@ -5,7 +35,6 @@
 #include <psa/crypto.h>
 #include "mbedtls/platform.h"
 #include "sli_se_opaque_types.h"
-#include "sl_se_manager_internal_keys.h"
 
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
 
@@ -53,9 +82,10 @@ static psa_status_t set_builtin_key_context(
       psa_set_key_bits(attributes, 128);
       psa_set_key_type(attributes, PSA_KEY_TYPE_AES);
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT);
-      psa_set_key_algorithm(attributes, PSA_ALG_ECB_NO_PADDING);
+      psa_set_key_algorithm(attributes, SL_SE_BUILTIN_KEY_AES128_ALG);
       break;
     default:
+      mbedtls_free(header);
       return(PSA_ERROR_DOES_NOT_EXIST);
   }
 

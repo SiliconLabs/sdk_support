@@ -1,10 +1,10 @@
 id: mbedtls_chachapoly
 package: platform
 label: Mbed TLS Support for ChaChaPoly
-description: >
- This component provides support for the ChaChaPoly api in Mbed TLS provided
- by the chachapoly.h file. This component also provides support for ChaCha20
- and Poly1305.
+description: >-
+  This component provides support for authenticated encryption and decryption with
+  ChaChaPoly using Mbed TLS. This component also provides support for the ChaCha20
+  stream cipher and Poly1305 message authentication codes.
 category: Platform|Security
 quality: production
 source:

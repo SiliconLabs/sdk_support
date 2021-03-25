@@ -1,3 +1,33 @@
+/***************************************************************************//**
+ * @file
+ * @brief Silicon Labs PSA Crypto Transparent Driver Signature functions.
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
+
 #include "em_device.h"
 
 #if defined(CRYPTOACC_PRESENT)
@@ -69,11 +99,6 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
                                                  size_t signature_size,
                                                  size_t *signature_length)
 {
-  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  struct sx_rng trng = { NULL, sx_trng_fill_blk };
-  sx_ecc_curve_t *curve = NULL;
-
   // Argument check.
   if (key_buffer_size == 0
       || hash == NULL
@@ -96,6 +121,7 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  sx_ecc_curve_t *curve = NULL;
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
     if (curve_type == PSA_ECC_CURVE_SECP_R1) {
       switch (key_bits) {
@@ -121,15 +147,16 @@ psa_status_t sli_cryptoacc_transparent_sign_hash(const psa_key_attributes_t *att
       block_t data_in = block_t_convert(hash, hash_length);
       block_t data_out = block_t_convert(signature, PSA_ECDSA_SIGNATURE_SIZE(key_bits));
 
-      status = cryptoacc_management_acquire();
+      psa_status_t status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
         return status;
       }
-      sx_ret = ecdsa_generate_signature_digest(curve,
-                                               data_in,
-                                               priv,
-                                               data_out,
-                                               trng);
+      struct sx_rng trng = { NULL, sx_trng_fill_blk };
+      uint32_t sx_ret = ecdsa_generate_signature_digest(curve,
+                                                        data_in,
+                                                        priv,
+                                                        data_out,
+                                                        trng);
       status = cryptoacc_management_release();
       if (sx_ret != CRYPTOLIB_SUCCESS
           || status != PSA_SUCCESS) {
@@ -198,13 +225,6 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
                                                    const uint8_t *signature,
                                                    size_t signature_length)
 {
-  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  block_t pub = NULL_blk;
-  uint8_t pub_buf[64] = { 0 };
-  uint32_t curve_flags = 0;
-  sx_ecc_curve_t *curve_ptr = NULL;
-
   // Argument check.
   if (key_buffer_size == 0
       || hash == NULL
@@ -226,6 +246,8 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  uint32_t curve_flags = 0;
+  sx_ecc_curve_t *curve_ptr = NULL;
   if (curve_type == PSA_ECC_CURVE_SECP_R1) {
     switch (key_bits) {
       case 192:
@@ -249,6 +271,10 @@ psa_status_t sli_cryptoacc_transparent_verify_hash(const psa_key_attributes_t *a
     }
 
     // Export public key if necessary.
+    psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+    uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+    block_t pub = NULL_blk;
+    uint8_t pub_buf[64] = { 0 };
     if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
       block_t curve = block_t_convert(curve_ptr->params.addr, 6 * PSA_BITS_TO_BYTES(key_bits));
       block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));

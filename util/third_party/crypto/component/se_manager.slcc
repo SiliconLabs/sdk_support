@@ -1,12 +1,12 @@
 id: se_manager
 label: SE Manager
 package: platform
-description: |-
-  Driver for interacting with the Secure Element or Root Code on Series 2
-  devices. The available functionality varies accross parts. On all parts,
-  device management utilities (sl_se_manager_util) are available. On parts
-  with a Secure Element a low level crypto API is available. Vault parts
-  also include key storage functionality.
+description: >-
+  Driver for interacting with the SE or Root Code on Series 2 devices. The
+  available functionality varies accross parts: device management utilities
+  are available on all parts; on parts with the SE subsystem, a low level
+  crypto API is available; finally, Vault parts also include key storage
+  functionality.
 category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto/sl_component/se_manager
