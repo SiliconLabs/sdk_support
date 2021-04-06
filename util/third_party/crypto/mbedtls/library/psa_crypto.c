@@ -1619,7 +1619,7 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_RSA_PUBLIC_KEY)
             mbedtls_rsa_context *rsa = NULL;
-            psa_status_t status = psa_load_rsa_representation(
+            status = psa_load_rsa_representation(
                                     slot->attr.type,
                                     slot->data.key.data,
                                     slot->data.key.bytes,
@@ -1648,7 +1648,7 @@ static psa_status_t psa_internal_export_key( const psa_key_slot_t *slot,
 #if defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR) || \
     defined(MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY)
             mbedtls_ecp_keypair *ecp = NULL;
-            psa_status_t status = psa_load_ecp_representation(
+            status = psa_load_ecp_representation(
                                     slot->attr.type,
                                     slot->data.key.data,
                                     slot->data.key.bytes,
