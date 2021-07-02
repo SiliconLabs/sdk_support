@@ -20,3 +20,14 @@ requires:
   - name: emlib_common
   - name: emlib_cmu
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efm32g/group-dac
+      condition: [device_sdid_71]
+    - page: emlib/api/efm32gg/group-dac
+      condition: [device_sdid_72]
+    - page: emlib/api/efm32tg/group-dac
+      condition: [device_sdid_73]
+    - page: emlib/api/efm32lg/group-dac
+      condition: [device_sdid_74]

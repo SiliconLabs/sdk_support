@@ -66,6 +66,7 @@
 static PRS_Signal_t getSignal(unsigned int ch, PRS_ChType_t type)
 {
   PRS_Signal_t signal;
+
 #if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_MASK)
   if (type == prsTypeAsync) {
     signal = (PRS_Signal_t) (PRS->ASYNC_CH[ch].CTRL
@@ -81,6 +82,8 @@ static PRS_Signal_t getSignal(unsigned int ch, PRS_ChType_t type)
 #endif
   return signal;
 }
+
+/** @endcond */
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
@@ -129,6 +132,11 @@ uint32_t PRS_ConvertToSyncSource(uint32_t asyncSource)
 #if defined(VDAC0)
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_VDAC0L:
       syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_VDAC0;
+      break;
+#endif
+#if defined(VDAC1)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_VDAC1L:
+      syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_VDAC1;
       break;
 #endif
     default:
@@ -243,6 +251,21 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
       }
       break;
 #endif
+#if defined(VDAC1)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_VDAC1L:
+      switch (asyncSignal) {
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_VDAC1LCH0DONEASYNC:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_VDAC1CH0DONESYNC;
+          break;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_VDAC1LCH1DONEASYNC:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_VDAC1CH1DONESYNC;
+          break;
+        default:
+          EFM_ASSERT(false);
+          break;
+      }
+      break;
+#endif
     default:
       // No translation
       break;
@@ -251,8 +274,6 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
 }
 
 #endif
-
-/** @endcond */
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -557,7 +578,7 @@ void PRS_PinOutput(unsigned int ch, PRS_ChType_t type, GPIO_Port_TypeDef port, u
   }
   addr += ch;
   *addr = ((uint32_t)port << _GPIO_PRS_ASYNCH0ROUTE_PORT_SHIFT)
-          | (pin << _GPIO_PRS_ASYNCH0ROUTE_PIN_SHIFT);
+          | ((uint32_t)pin << _GPIO_PRS_ASYNCH0ROUTE_PIN_SHIFT);
 
   if (type == prsTypeAsync) {
     GPIO->PRSROUTE[0].ROUTEEN |= 0x1 << (ch + _GPIO_PRS_ROUTEEN_ASYNCH0PEN_SHIFT);

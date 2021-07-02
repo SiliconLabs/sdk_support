@@ -322,6 +322,7 @@ OS_MSG_QTY OSQFlush(OS_Q     *p_q,
  *                           - RTOS_ERR_ABORT
  *                           - RTOS_ERR_TIMEOUT
  *                           - RTOS_ERR_NOT_READY
+ *                           - RTOS_ERR_INVALID_STATE
  *
  * @return   != (void *)0    Pointer to the message received.
  *           == (void *)0 :
@@ -359,6 +360,10 @@ void *OSQPend(OS_Q        *p_q,
 
   //                                                               Validate object type
   OS_ASSERT_DBG_ERR_SET((p_q->Type == OS_OBJ_TYPE_Q), *p_err, RTOS_ERR_INVALID_TYPE, DEF_NULL);
+
+  //                                                               Not allowed to pend in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE, DEF_NULL);
 
   //                                                               Make sure kernel is running.
   if (OSRunning != OS_STATE_OS_RUNNING) {

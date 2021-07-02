@@ -111,6 +111,7 @@
 #define CREATOR_MFG_SERIAL_NUMBER                         0xD34E // msb+'S'+'E' (Serial Number)
 #define CREATOR_MFG_LFXO_TUNE                             0xCC54 // msb+'L'+'T' (LFXO TUNE Value)
 #define CREATOR_MFG_CTUNE                                 0xC354 // msb+'C'+'T' (CTUNE Value)
+#define CREATOR_MFG_KIT_SIGNATURE                         0xCB53 // msb+'K'+'S' (Kit Signature)
 #define CREATOR_MFG_EUI_64                                0xB634
 
 //--- Lock Bits ---
@@ -135,6 +136,7 @@
 #define CREATOR_MFG_ZW_PUK                                0xDA55 // msb+'Z'+'U' (Zwave pUblic Key)
 #define CREATOR_MFG_ZW_QR_CODE                            0xDA51 // msb+'Z'+'Q' (Zwave QR Code)
 #define CREATOR_MFG_ZW_INITIALIZED                        0xDA49 // msb+'Z'+'I' (Zwave Initialized)
+#define CREATOR_MFG_ZW_QR_CODE_EXT                        0xDA45 // msb+'Z'+'E' (Zwave qr code Extension)
 
 // Defines indicating the verions number these definitions work with.
 #define CURRENT_MFG_CUSTOM_VERSION 0x01FE //MSB is version, LSB is complement
@@ -159,6 +161,7 @@ typedef uint8_t tokTypeMfgZwavePseudoRandomNumber[16];
 typedef uint8_t tokTypeMfgSerialNumber[16];
 typedef uint8_t tokTypeMfgLfxoTune;
 typedef uint16_t tokTypeMfgCTune;
+typedef uint8_t tokTypeMfgKitSignature[4];
 typedef uint8_t tokTypeMfgEui64[8];
 
 //--- Lock Bits ---
@@ -267,6 +270,7 @@ typedef uint8_t tokTypeMfgZwaveInitialized[1];
 #define MFG_SERIAL_NUMBER_LOCATION              (USERDATA_TOKENS | 0x08C)  //  16 bytes
 #define MFG_LFXO_TUNE_LOCATION                  (USERDATA_TOKENS | 0x09C)  //   1 bytes
 #define MFG_CTUNE_LOCATION                      (USERDATA_TOKENS | 0x100)  //   2 bytes
+#define MFG_KIT_SIGNATURE_LOCATION              (USERDATA_TOKENS | 0x104)  //   4 bytes
 
 //--- Lock Bits ---
 //The LOCKBITS_BASE page is physically mapped to 0x0FE04000-0x0FE047FF.
@@ -302,6 +306,7 @@ typedef uint8_t tokTypeMfgZwaveInitialized[1];
 #define MFG_ZW_PUK_LOCATION                     (LOCKBITSDATA_TOKENS | 0x3E0)  //  32 bytes
 #define MFG_ZW_QR_CODE_LOCATION                 (LOCKBITSDATA_TOKENS | 0x400)  //  90 bytes
 #define MFG_ZW_INITIALIZED_LOCATION             (LOCKBITSDATA_TOKENS | 0x45C)  //   1 bytes
+#define MFG_ZW_QR_CODE_EXT_LOCATION             (LOCKBITSDATA_TOKENS | 0x460)  //  16 bytes
 
 //--- Virtual MFG Tokens ---
 #define MFG_EUI_64_LOCATION                       0xb634  //   8 bytes
@@ -400,6 +405,11 @@ TOKEN_MFG(MFG_CTUNE, CREATOR_MFG_CTUNE,
           0, 0, tokTypeMfgCTune, 1,
           { 0xFFFF })
 
+TOKEN_NEXT_ADDRESS(MFG_KIT_SIGNATURE_ADDR, MFG_KIT_SIGNATURE_LOCATION)
+TOKEN_MFG(MFG_KIT_SIGNATURE, CREATOR_MFG_KIT_SIGNATURE,
+          0, 0, tokTypeMfgKitSignature, 1,
+          { 0xFF, })
+
 //--- Lock Bits ---
 TOKEN_NEXT_ADDRESS(MFG_LOCKBITS_PLW_ADDR, MFG_LOCKBITS_PLW_LOCATION)
 TOKEN_MFG(MFG_LOCKBITS_PLW, CREATOR_MFG_LOCKBITS_PLW,
@@ -496,6 +506,11 @@ TOKEN_NEXT_ADDRESS(MFG_ZW_INITIALIZED_ADDR, MFG_ZW_INITIALIZED_LOCATION)
 TOKEN_MFG(MFG_ZW_INITIALIZED, CREATOR_MFG_ZW_INITIALIZED,
           0, 0, tokTypeMfgZwaveInitialized, 1,
           { 0xFF, }) // 0xFF = Z-Wave fields are not initialized
+
+TOKEN_NEXT_ADDRESS(MFG_ZW_QR_CODE_EXT_ADDR, MFG_ZW_QR_CODE_EXT_LOCATION)
+TOKEN_MFG(MFG_ZW_QR_CODE_EXT, CREATOR_MFG_ZW_QR_CODE_EXT,
+          0, 0, tokTypeMfgQRCode, 1,
+          { 0xFF, }) // 0xFF = Z-Wave QR Code is not initialized
 
 TOKEN_NEXT_ADDRESS(MFG_EUI_64_ADDR, MFG_EUI_64_LOCATION)
 TOKEN_MFG(MFG_EUI_64, CREATOR_MFG_EUI_64,

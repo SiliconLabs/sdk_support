@@ -559,18 +559,6 @@ enum sl_rtl_error_code sl_rtl_loc_init(sl_rtl_loc_libitem* item);
 enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
 
 /**************************************************************************//**
- * Reinitialize the locationing libitem instance.
- *
- * Reset the libitem's internal values to the starting point so that it can
- * start all over from the beginning. This can be used for example in testing
- * instead of deleting and re-creating the libitem object.
- *
- * @param[in] item Pointer to the libitem to be initialized
- * @return ::SL_RTL_ERROR_SUCCESS if successful
- *****************************************************************************/
-enum sl_rtl_error_code sl_rtl_loc_reinit(sl_rtl_loc_libitem* item);
-
-/**************************************************************************//**
  * Set the locationing dimensionality mode. Possible choices are 2D or 3D
  * modes. Two-dimensional mode does not vary the z-position of the target and
  * assumes it is 0 at all times. When updating, for example, the distance measure-

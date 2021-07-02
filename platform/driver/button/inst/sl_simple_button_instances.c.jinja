@@ -16,11 +16,11 @@
  ******************************************************************************/
 
 #include "sl_simple_button.h"
-{% for inst in simple_button_instance -%}
+{% for inst in simple_button_instance | sort -%}
 #include "sl_simple_button_{{ inst }}_config.h"
 {% endfor -%}
 
-{% for inst in simple_button_instance %}
+{% for inst in simple_button_instance | sort %}
 sl_simple_button_context_t simple_{{ inst | lower }}_context = {
   .state = 0,
   .history = 0,
@@ -39,19 +39,23 @@ const sl_button_t sl_button_{{ inst | lower }} = {
 };
 {%- endfor %}
 
-const sl_button_t *simple_button_array[] = { {% for inst in simple_button_instance %}&sl_button_{{ inst | lower }}{% if not loop.last %}, {% endif %}{% endfor %} };
-const uint8_t simple_button_count = sizeof(simple_button_array) / sizeof(simple_button_array[0]);
+const sl_button_t *sl_simple_button_array[] = {
+{%- for inst in simple_button_instance | sort %}
+  &sl_button_{{ inst | lower }}{% if not loop.last %}, {% endif %}
+{%- endfor %}
+};
+const uint8_t simple_button_count = {{ simple_button_instance | length }};
 
 void sl_simple_button_init_instances(void)
 {
-  {% for inst in simple_button_instance -%}
+  {%- for inst in simple_button_instance %}
   sl_button_init(&sl_button_{{ inst | lower }});
-  {% endfor %}
+  {%- endfor %}
 }
 
 void sl_simple_button_poll_instances(void)
 {
-  {% for inst in simple_button_instance -%}
+  {%- for inst in simple_button_instance %}
   sl_button_poll_step(&sl_button_{{ inst | lower }});
-  {% endfor %}
+  {%- endfor %}
 }

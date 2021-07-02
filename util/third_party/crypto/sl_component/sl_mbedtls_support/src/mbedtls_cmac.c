@@ -73,6 +73,10 @@
 #define MAC_ABORT_FCT       sli_se_transparent_mac_abort
 #define MAC_ONESHOT_EN_FCT  sli_se_transparent_mac_compute
 #define MAC_ONESHOT_DE_FCT  sli_se_transparent_mac_verify
+
+#if defined(RADIOAES_PRESENT)
+#include "sli_protocol_crypto.h"
+#endif
 #elif defined(CRYPTO_PRESENT)
 #include "sli_crypto_transparent_functions.h"
 #define MAC_IMPLEMENTATION_PRESENT
@@ -100,7 +104,6 @@
 #if defined(MAC_IMPLEMENTATION_PRESENT)
 
 #include <string.h>
-#include "mbedtls/platform_util.h"
 
 static int psa_status_to_mbedtls(psa_status_t status)
 {
@@ -148,7 +151,7 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
       psa_set_key_bits(&attr, 256);
       break;
     default:
-      return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
+      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
   }
 
   if ( ctx->cmac_ctx == NULL ) {
@@ -160,7 +163,7 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
 
     ctx->cmac_ctx = cmac_ctx;
   } else {
-    mbedtls_platform_zeroize(ctx->cmac_ctx, sizeof(ctx->cmac_ctx) );
+    mbedtls_platform_zeroize(ctx->cmac_ctx, sizeof(*ctx->cmac_ctx) );
   }
 
   return psa_status_to_mbedtls(
@@ -213,13 +216,13 @@ int mbedtls_cipher_cmac_reset(mbedtls_cipher_context_t *ctx)
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
   sl_psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
 
-  if ( ctx->cmac_ctx->ctx.key_len > sizeof(key) ) {
+  if ( ctx->cmac_ctx->ctx.cipher_mac.key_len > sizeof(key) ) {
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
 
   /* Save the key to be able to restart the operation */
-  memcpy(key, ctx->cmac_ctx->ctx.key, ctx->cmac_ctx->ctx.key_len);
-  key_len = ctx->cmac_ctx->ctx.key_len;
+  memcpy(key, ctx->cmac_ctx->ctx.cipher_mac.key, ctx->cmac_ctx->ctx.cipher_mac.key_len);
+  key_len = ctx->cmac_ctx->ctx.cipher_mac.key_len;
   psa_set_key_bits(&attr, key_len * 8);
 
   /* Abort and restart with the same key */
@@ -241,9 +244,28 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
 
+  if ( (cipher_info->type != MBEDTLS_CIPHER_AES_128_ECB)
+       && (cipher_info->type != MBEDTLS_CIPHER_AES_192_ECB)
+       && (cipher_info->type != MBEDTLS_CIPHER_AES_256_ECB)) {
+    return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
+  }
+
   if ( keylen != 128UL && keylen != 192UL && keylen != 256UL) {
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
+
+#if defined(RADIOAES_PRESENT) && defined(SEMAILBOX_PRESENT)
+  /* For speeding up PBKDF2-CMAC, which needs a lot of iterations with small-size
+   * CMAC operations, we can dispatch these to the RADIOAES instance if there is
+   * one available. */
+  if ( (keylen == 128UL || keylen == 256UL) && (ilen <= 2 * MBEDTLS_AES_BLOCK_SIZE) ) {
+    return sli_aes_cmac_radio(key,
+                              keylen,
+                              input,
+                              ilen,
+                              output);
+  }
+#endif
 
   size_t olen = 0;
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
@@ -279,7 +301,6 @@ int mbedtls_aes_cmac_prf_128(const unsigned char *key, size_t key_length,
                              unsigned char *output)
 {
   int ret;
-  const mbedtls_cipher_info_t *cipher_info;
   unsigned char zero_key[MBEDTLS_AES_BLOCK_SIZE];
   unsigned char int_key[MBEDTLS_AES_BLOCK_SIZE];
 
@@ -287,12 +308,10 @@ int mbedtls_aes_cmac_prf_128(const unsigned char *key, size_t key_length,
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
 
-  cipher_info = mbedtls_cipher_info_from_type(MBEDTLS_CIPHER_AES_128_ECB);
-  if ( cipher_info == NULL ) {
-    // Failing at this point must be due to a build issue
-    ret = MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
-    goto exit;
-  }
+  size_t olen = 0;
+  psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
+  sl_psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
+  psa_set_key_bits(&attr, 128);
 
   if ( key_length == MBEDTLS_AES_BLOCK_SIZE ) {
     /* Use key as is */
@@ -300,15 +319,23 @@ int mbedtls_aes_cmac_prf_128(const unsigned char *key, size_t key_length,
   } else {
     memset(zero_key, 0, MBEDTLS_AES_BLOCK_SIZE);
 
-    ret = mbedtls_cipher_cmac(cipher_info, zero_key, 128, key,
-                              key_length, int_key);
+    ret = psa_status_to_mbedtls(
+      MAC_ONESHOT_EN_FCT(&attr,
+                         zero_key, MBEDTLS_AES_BLOCK_SIZE,
+                         PSA_ALG_CMAC,
+                         key, key_length,
+                         int_key, MBEDTLS_AES_BLOCK_SIZE, &olen) );
     if ( ret != 0 ) {
       goto exit;
     }
   }
 
-  ret = mbedtls_cipher_cmac(cipher_info, int_key, 128, input, in_len,
-                            output);
+  ret = psa_status_to_mbedtls(
+    MAC_ONESHOT_EN_FCT(&attr,
+                       int_key, MBEDTLS_AES_BLOCK_SIZE,
+                       PSA_ALG_CMAC,
+                       input, in_len,
+                       output, in_len, &olen) );
 
   exit:
   mbedtls_platform_zeroize(int_key, sizeof(int_key) );

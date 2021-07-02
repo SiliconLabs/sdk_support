@@ -191,7 +191,7 @@ static void emRequestDeinit(SPIDRV_Handle_t handle)
  *                     SPIDRV_Handle_t.
  *
  * @param[in] initData Pointer to an initialization data structure;
- *                     refer to @ref SPIDRV_Init_t.
+ *                     refer to @ref SPIDRV_Init.
  *
  * @return
  *    @ref ECODE_EMDRV_SPIDRV_OK on success. On failure, an appropriate
@@ -216,7 +216,7 @@ Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
  *                     SPIDRV_Handle_t.
  *
  * @param[in] initData Pointer to an initialization data structure;
- *                     refer to @ref SPIDRV_Init_t.
+ *                     refer to @ref SPIDRV_Init.
  *
  * @return
  *    @ref ECODE_EMDRV_SPIDRV_OK on success. On failure, an appropriate
@@ -496,7 +496,7 @@ static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
  *                     SPIDRV_Handle_t.
  *
  * @param[in] initData Pointer to an initialization data structure;
- *                     refer to @ref SPIDRV_Init_t.
+ *                     refer to @ref SPIDRV_Init.
  *
  * @return
  *    @ref ECODE_EMDRV_SPIDRV_OK on success. On failure, an appropriate

@@ -31,7 +31,7 @@ typedef uint8_t EmberEUI64[EUI64_SIZE];
 
 typedef uint8_t EmberMessageLength;
 #define EMBER_NO_CHILD_DEFAULT   0x0000 // default value in tokens for child table
-#define EMBER_NULL_NODE_ID       0xFFFF
+#define EMBER_NULL_NODE_ID       0xFFFFu
 #define EMBER_USE_LONG_ADDRESS   0xFFFE
 #define EMBER_BROADCAST_PAN_ID   0xFFFF
 

@@ -45,7 +45,9 @@
 #if SL_SLEEPTIMER_PERIPHERAL == SL_SLEEPTIMER_PERIPHERAL_PRORTC
 
 // Minimum difference between current count value and what the comparator of the timer can be set to.
-#define SLEEPTIMER_COMPARE_MIN_DIFF  2
+// 1 tick is added to the minimum diff for the algorithm of compensation for the IRQ handler that
+// triggers when CNT == compare_value + 1. For more details refer to sleeptimer_hal_set_compare() function's header.
+#define SLEEPTIMER_COMPARE_MIN_DIFF  (2 + 1)
 #define PRORTC_CNT_MASK              0xFFFFFFFFUL
 
 #define SLEEPTIMER_TMR_WIDTH (PRORTC_CNT_MASK)
@@ -204,6 +206,11 @@ uint32_t sleeptimer_hal_get_compare(void)
 
 /******************************************************************************
  * Sets PRORTC compare value.
+ *
+ * @note Compare match value is set to the requested value - 1. This is done
+ * to compensate for the fact that the PRORTC compare match interrupt always
+ * triggers at the end of the requested ticks and that the IRQ handler is
+ * executed when current tick count == compare_value + 1.
  *****************************************************************************/
 void sleeptimer_hal_set_compare(uint32_t value)
 {
@@ -221,9 +228,9 @@ void sleeptimer_hal_set_compare(uint32_t value)
     compare_value %= SLEEPTIMER_TMR_WIDTH;
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
-    PRORTC->COMP[TIMER_COMP_REQ].COMP = compare_value;
+    PRORTC->COMP[TIMER_COMP_REQ].COMP = compare_value - 1;
 #else
-    PRORTC->CC[TIMER_COMP_REQ].OCVALUE = compare_value;
+    PRORTC->CC[TIMER_COMP_REQ].OCVALUE = compare_value - 1;
 #endif
 
     sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);

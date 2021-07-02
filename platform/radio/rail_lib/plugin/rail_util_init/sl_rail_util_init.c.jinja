@@ -32,7 +32,18 @@
 #include "sli_rail_util_callbacks.h" // for internal-only callback signatures
 #include "sl_rail_util_init.h"
 #include "sl_rail_util_protocol.h"
-#include "sl_flex_assert.h"
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_APP_ASSERT_PRESENT
+#include "app_assert.h"
+#define APP_ASSERT(expr, ...) app_assert(expr,__VA_ARGS__)
+#else
+#define APP_ASSERT(expr, ...) \
+  do {                        \
+    if (!(expr)) {            \
+      while (1) ;             \
+    }                         \
+  } while (0)
+#endif
 
 #if 0U \
 {%- for inst in rail_util_init_instance %}

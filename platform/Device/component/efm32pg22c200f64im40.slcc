@@ -6,14 +6,22 @@
 - quality: production
 - define:
   - name: EFM32PG22C200F64IM40
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32PG22/Source/system_efm32pg22.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32PG22/Source/IAR/startup_efm32pg22.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32PG22/Source/GCC/startup_efm32pg22.c
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32pg22c200f64im40.h
@@ -57,6 +65,8 @@
     - path: em_device.h
     - path: system_efm32pg22.h
     path: platform/Device/SiliconLabs/EFM32PG22/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32pg22c200f64im40
   - name: device
@@ -120,6 +130,8 @@
   - name: device_has_usart1
   - name: device_has_wdog
   - name: device_has_wdog0
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
 - requires:
@@ -155,7 +167,6 @@
     value: 2048
 - tag:
   - device:opn:efm32pg22c200f64im40
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32pg22c200f64im40

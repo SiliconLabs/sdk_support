@@ -16,15 +16,7 @@
 
 #include "stdint.h"
 #include "sl_btmesh_device_properties.h"
-/*
- * Sensor model IDs
- */
-/** Sensor Server model ID */
-#define MESH_SENSOR_SERVER_MODEL_ID 0x1100
-/** Sensor Setup Server model ID*/
-#define MESH_SENSOR_SETUP_SERVER_MODEL_ID 0x1101
-/** Sensor Client model ID */
-#define MESH_SENSOR_CLIENT_MODEL_ID 0x1102
+#include "sl_btmesh_model_specification_defs.h"
 
 /** Sensor model events */
 typedef enum mesh_sensor_event_type {

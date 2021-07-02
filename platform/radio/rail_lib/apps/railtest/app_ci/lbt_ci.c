@@ -29,6 +29,10 @@
  ******************************************************************************/
 
 #include <string.h>
+#if !defined(__ICCARM__)
+// IAR doesn't have strings.h and puts those declarations in string.h
+#include <strings.h>
+#endif
 
 #include "response_print.h"
 
@@ -44,12 +48,12 @@ static RAIL_LbtConfig_t lbtParams = RAIL_CSMA_CONFIG_802_15_4_2003_2p4_GHz_OQPSK
 void setLbtMode(sl_cli_command_arg_t *args)
 {
   if (sl_cli_get_argument_count(args) >= 1) {
-    if (memcmp(sl_cli_get_argument_string(args, 0), "off", 3) == 0) {
+    if (strcasecmp(sl_cli_get_argument_string(args, 0), "off") == 0) {
       txType = TX_TYPE_NORMAL;
-    } else if (memcmp(sl_cli_get_argument_string(args, 0), "csma", 4) == 0) {
+    } else if (strcasecmp(sl_cli_get_argument_string(args, 0), "csma") == 0) {
       txType = TX_TYPE_CSMA;
       csmaConfig = (RAIL_CsmaConfig_t*)&lbtParams;
-    } else if (memcmp(sl_cli_get_argument_string(args, 0), "lbt", 3) == 0) {
+    } else if (strcasecmp(sl_cli_get_argument_string(args, 0), "lbt") == 0) {
       txType = TX_TYPE_LBT;
       lbtConfig = &lbtParams; // Used for CSMA and LBT
     } else {

@@ -7,6 +7,8 @@ quality: production
 requires:
   - name: rail_lib
   - name: emlib_cmu
+  - name: device
+  - name: emlib_common
 provides:
   - name: rail_util_pa
 documentation:
@@ -40,6 +42,13 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
+    unless:
+      - fpga
+    file_id: rail_util_pa_config
+  - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg24/config/sl_rail_util_pa_config.h
+    condition:
+      - device_series_2
+      - device_sdid_215
     unless:
       - fpga
     file_id: rail_util_pa_config
@@ -77,6 +86,13 @@ include:
     condition:
       - device_series_2
       - device_sdid_210
+  - path: platform/radio/rail_lib/plugin/pa-conversions/efr32xg24
+    file_list:
+      - path: sl_rail_util_pa_curves_10dbm.h
+      - path: sl_rail_util_pa_curves_20dbm.h
+    condition:
+      - device_series_2
+      - device_sdid_215
 source:
   - path: platform/radio/rail_lib/plugin/pa-conversions/pa_conversions_efr32.c
   - path: platform/radio/rail_lib/plugin/pa-conversions/pa_curves_efr32.c

@@ -36,8 +36,11 @@
 {%- set flash_addr = device_flash_addr | first | default(0, true) %}
 {%- set flash_size = device_flash_size | first %}
 {%- set flash_page_size = device_flash_page_size | first %}
-{%- set bootloader_flash_addr = '0xFE10000' | int(base=16) %}
-{%- set bootloader_flash_size = device_bootloader_flash_size | sum %}
+
+{%- if bootloader_enable %}
+  {%- set bootloader_flash_size = bootloader_main_size | sum %}
+  {%- set bootloader_flash_startaddr = bootloader_flash_addr | sum %}
+{%- endif %}
 
 {#-
   Application specific sizes. Here we start to calculate the application view
@@ -72,11 +75,24 @@
 {%- set app_flash_size = app_flash_end - app_flash_start %}
 {%- set app_ram_size = app_ram_end - app_ram_start %}
 
-MEMORY
-{
-  FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
-  RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
-}
+{%- set rtt = 0 %}
+{% if linker_rtt_section is defined %}
+{%-   set rtt = 1 %}
+{% endif %}
+
+{%- if bootloader_enable %}
+ MEMORY
+ {
+   FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % bootloader_flash_startaddr }}, LENGTH = 0x{{ '%0x' % bootloader_flash_size }}
+   RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+ }
+{%- else %}
+ MEMORY
+ {
+   FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
+   RAM     (rwx) : ORIGIN = 0x{{ '%0x' % app_ram_start }}, LENGTH = 0x{{ '%0x' % app_ram_size }}
+ }
+{%- endif %}
 
 ENTRY(Reset_Handler)
 
@@ -196,10 +212,17 @@ SECTIONS
 
   } > RAM
 
+{%- if bootloader_enable %}
+  __rom_end__ = __etext + SIZEOF(.data);
+{%- endif %}
+
   .bss . :
   {
     . = ALIGN(4);
     __bss_start__ = .;
+{%- if rtt == 1 %}
+    *(SEGGER_RTT)
+{%- endif %}
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
@@ -218,8 +241,9 @@ SECTIONS
   } > RAM
 
   __heap_size = __HeapLimit - __HeapBase;
+  __main_flash_end__ = 0x{{ '%0x' % app_flash_start }} + 0x{{ '%0x' % app_flash_size }};
 
-  /* This is where we handle flash storage blocks. We use dummy sections for finding the configured
+   /* This is where we handle flash storage blocks. We use dummy sections for finding the configured
    * block sizes and then "place" them at the end of flash when the size is known. */
   .internal_storage (DSECT) : {
     KEEP(*(.internal_storage*))
@@ -229,7 +253,7 @@ SECTIONS
     KEEP(*(.simee*))
   } > FLASH
 
-  linker_nvm_end = ORIGIN(FLASH) + LENGTH(FLASH);
+  linker_nvm_end = __main_flash_end__;
   linker_nvm_begin = linker_nvm_end - SIZEOF(.nvm);
   linker_nvm_size = SIZEOF(.nvm);
   linker_storage_end = linker_nvm_begin;
@@ -237,6 +261,12 @@ SECTIONS
   linker_storage_size = SIZEOF(.internal_storage);
   __nvm3Base = linker_nvm_begin;
 
-  ASSERT( (ORIGIN(FLASH) + LENGTH(FLASH)) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
-  ASSERT( (ORIGIN(RAM) + LENGTH(RAM)) >= (__HeapBase + SIZEOF(.heap)), "RAM memory overflowed !")
+{%- if bootloader_enable %}
+  _app_rollback_protection_size = 0x{{ '%0x' % (app_rollback_protection_size | sum) }};
+  {%- if (device_series | first) == 2 %}
+    ASSERT( ((ORIGIN(FLASH) + LENGTH(FLASH)) - 0x40 - _app_rollback_protection_size) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
+  {%- else %}
+    ASSERT( ((ORIGIN(FLASH) + LENGTH(FLASH)) - 0x4 - _app_rollback_protection_size) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
+  {%- endif %}
+{%- endif %}
 }

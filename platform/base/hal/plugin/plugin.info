@@ -352,6 +352,8 @@ plugin(hal-library) {
   $SERVICE/hfxo_manager/src/sl_hfxo_manager.c                        (efr32~series[2])
   $SERVICE/hfxo_manager/src/sl_hfxo_manager_hal_s2.c                 (efr32~series[2])
   $COMMON/src/sl_slist.c                                             (efr32)
+  $RAIL_LIB/plugin/pa-conversions/pa_conversions_efr32.c             (efr32~!module)
+  $RAIL_LIB/plugin/pa-conversions/pa_curves_efr32.c                  (efr32~!module)
 
   callbacks=config/hal-callback.info
 
@@ -392,6 +394,7 @@ plugin(hal-library) {
     (efr32)=PATH(ABSOLUTE):$SERVICE/sleeptimer/src
     (efr32)=PATH(ABSOLUTE):$HAL/hal/micro/cortexm3/efm32/config
     (efr32~series[2])=PATH(ABSOLUTE):$SERVICE/hfxo_manager/inc
+    (efr32~!module)=PATH(ABSOLUTE):$RAIL_LIB/plugin/pa-conversions
   }
 
   setup(macros){

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!--Build Version : -->
+<!--Build Version v3.2.0 -->
 <api device_id="5" device_name="btmesh">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
@@ -297,6 +297,21 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="34" name="set_adv_phy" >
+            <params>
+                <param datatype="uint8" name="phy" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="35" name="get_adv_phy" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="phy" type="uint8"/>
+            </returns>
+        </command>
         <event index="0" name="initialized">
             <params>
                 <param datatype="uint8" name="provisioned" type="uint8"/>
@@ -433,51 +448,51 @@
             </params>
         </event>
         <enums name="auth_method_flag">
-            <enum name="auth_method_flag_none" value="0"/>
-            <enum name="auth_method_flag_static" value="0"/>
-            <enum name="auth_method_flag_input" value="0"/>
-            <enum name="auth_method_flag_output" value="0"/>
+            <enum name="auth_method_flag_none" value="0x1"/>
+            <enum name="auth_method_flag_static" value="0x2"/>
+            <enum name="auth_method_flag_input" value="0x4"/>
+            <enum name="auth_method_flag_output" value="0x8"/>
         </enums>
         <enums name="oob_input_action_flag">
-            <enum name="oob_input_action_flag_push" value="0"/>
-            <enum name="oob_input_action_flag_twist" value="0"/>
-            <enum name="oob_input_action_flag_numeric" value="0"/>
-            <enum name="oob_input_action_flag_alpha" value="0"/>
+            <enum name="oob_input_action_flag_push" value="0x1"/>
+            <enum name="oob_input_action_flag_twist" value="0x2"/>
+            <enum name="oob_input_action_flag_numeric" value="0x4"/>
+            <enum name="oob_input_action_flag_alpha" value="0x8"/>
         </enums>
         <enums name="oob_input_action">
-            <enum name="oob_input_action_push" value="0"/>
-            <enum name="oob_input_action_twist" value="0"/>
-            <enum name="oob_input_action_numeric" value="0"/>
-            <enum name="oob_input_action_alpha" value="0"/>
+            <enum name="oob_input_action_push" value="0x0"/>
+            <enum name="oob_input_action_twist" value="0x1"/>
+            <enum name="oob_input_action_numeric" value="0x2"/>
+            <enum name="oob_input_action_alpha" value="0x3"/>
         </enums>
         <enums name="oob_output_action_flag">
-            <enum name="oob_output_action_flag_blink" value="0"/>
-            <enum name="oob_output_action_flag_beep" value="0"/>
-            <enum name="oob_output_action_flag_vibrate" value="0"/>
-            <enum name="oob_output_action_flag_numeric" value="0"/>
-            <enum name="oob_output_action_flag_alpha" value="0"/>
+            <enum name="oob_output_action_flag_blink" value="0x1"/>
+            <enum name="oob_output_action_flag_beep" value="0x2"/>
+            <enum name="oob_output_action_flag_vibrate" value="0x4"/>
+            <enum name="oob_output_action_flag_numeric" value="0x8"/>
+            <enum name="oob_output_action_flag_alpha" value="0x10"/>
         </enums>
         <enums name="oob_output_action">
-            <enum name="oob_output_action_blink" value="0"/>
-            <enum name="oob_output_action_beep" value="0"/>
-            <enum name="oob_output_action_vibrate" value="0"/>
-            <enum name="oob_output_action_numeric" value="0"/>
-            <enum name="oob_output_action_alpha" value="0"/>
+            <enum name="oob_output_action_blink" value="0x0"/>
+            <enum name="oob_output_action_beep" value="0x1"/>
+            <enum name="oob_output_action_vibrate" value="0x2"/>
+            <enum name="oob_output_action_numeric" value="0x3"/>
+            <enum name="oob_output_action_alpha" value="0x4"/>
         </enums>
         <enums name="key_type">
-            <enum name="key_type_net" value="0"/>
-            <enum name="key_type_app" value="1"/>
+            <enum name="key_type_net" value="0x0"/>
+            <enum name="key_type_app" value="0x1"/>
         </enums>
         <enums name="config_state">
-            <enum name="dcd" value="0"/>
-            <enum name="beacon" value="0"/>
-            <enum name="default_ttl" value="0"/>
-            <enum name="friendship" value="0"/>
-            <enum name="gatt_proxy" value="0"/>
-            <enum name="key_refresh" value="0"/>
-            <enum name="relay" value="0"/>
-            <enum name="identity" value="0"/>
-            <enum name="nettx" value="0"/>
+            <enum name="dcd" value="0x8008"/>
+            <enum name="beacon" value="0x8009"/>
+            <enum name="default_ttl" value="0x800c"/>
+            <enum name="friendship" value="0x800f"/>
+            <enum name="gatt_proxy" value="0x8012"/>
+            <enum name="key_refresh" value="0x8015"/>
+            <enum name="relay" value="0x8023"/>
+            <enum name="identity" value="0x8042"/>
+            <enum name="nettx" value="0x8024"/>
         </enums>
     </class>
     <class index="21" name="prov">
@@ -876,6 +891,23 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </params>
         </event>
+        <event index="25" name="add_ddb_entry_complete">
+            <params>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uuid_128" name="uuid" type="uuid_128"/>
+            </params>
+        </event>
+        <event index="26" name="delete_ddb_entry_complete">
+            <params>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uuid_128" name="uuid" type="uuid_128"/>
+            </params>
+        </event>
+        <event index="27" name="initialization_failed">
+            <params>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </params>
+        </event>
     </class>
     <class index="24" name="proxy">
         <command index="0" name="connect" >
@@ -920,6 +952,14 @@
                 <param datatype="uint32" name="handle" type="uint32"/>
                 <param datatype="uint16" name="netkey_index" type="uint16"/>
                 <param datatype="uint16" name="address" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="optimisation_toggle" >
+            <params>
+                <param datatype="uint8" name="enable" type="uint8"/>
             </params>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -1323,6 +1363,12 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="16" name="init_hsl" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="server_status">
             <params>
                 <param datatype="uint16" name="client_address" type="uint16"/>
@@ -1441,6 +1487,12 @@
             </returns>
         </command>
         <command index="15" name="init_ctl" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="16" name="init_hsl" >
             <params/>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
@@ -1892,6 +1944,14 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="44" name="set_replay_protection_list_diagnostics" >
+            <params>
+                <param datatype="uint8" name="enable" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="local_heartbeat_subscription_complete">
             <params>
                 <param datatype="uint16" name="count" type="uint16"/>
@@ -1899,9 +1959,30 @@
                 <param datatype="uint8" name="hop_max" type="uint8"/>
             </params>
         </event>
+        <event index="1" name="replay_protection_list_entry_set">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+                <param datatype="uint8" name="cancel" type="uint8"/>
+            </params>
+        </event>
+        <event index="2" name="replay_protection_list_entry_cleared">
+            <params>
+                <param datatype="uint16" name="address" type="uint16"/>
+            </params>
+        </event>
+        <event index="3" name="replay_protection_list_saved">
+            <params>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint16" name="saved_count" type="uint16"/>
+                <param datatype="uint16" name="total_count" type="uint16"/>
+            </params>
+        </event>
+        <event index="4" name="replay_protection_list_full">
+            <params/>
+        </event>
         <enums name="key_type">
-            <enum name="key_type_net" value="0"/>
-            <enum name="key_type_app" value="1"/>
+            <enum name="key_type_net" value="0x0"/>
+            <enum name="key_type_app" value="0x1"/>
         </enums>
     </class>
     <class index="35" name="lpn">
@@ -1969,11 +2050,11 @@
             </params>
         </event>
         <enums name="settings">
-            <enum name="queue_length" value="0"/>
-            <enum name="poll_timeout" value="1"/>
-            <enum name="receive_delay" value="2"/>
-            <enum name="request_retries" value="3"/>
-            <enum name="retry_interval" value="4"/>
+            <enum name="queue_length" value="0x0"/>
+            <enum name="poll_timeout" value="0x1"/>
+            <enum name="receive_delay" value="0x2"/>
+            <enum name="request_retries" value="0x3"/>
+            <enum name="retry_interval" value="0x4"/>
         </enums>
     </class>
     <class index="36" name="friend">
@@ -3485,18 +3566,18 @@
             </params>
         </event>
         <enums name="lc_state">
-            <enum name="lc_state_off" value="0"/>
-            <enum name="lc_state_standby" value="1"/>
-            <enum name="lc_state_fade_on" value="2"/>
-            <enum name="lc_state_run" value="3"/>
-            <enum name="lc_state_fade" value="4"/>
-            <enum name="lc_state_prolong" value="5"/>
-            <enum name="lc_state_fade_standby_auto" value="6"/>
-            <enum name="lc_state_fade_standby_manual" value="7"/>
+            <enum name="lc_state_off" value="0x0"/>
+            <enum name="lc_state_standby" value="0x1"/>
+            <enum name="lc_state_fade_on" value="0x2"/>
+            <enum name="lc_state_run" value="0x3"/>
+            <enum name="lc_state_fade" value="0x4"/>
+            <enum name="lc_state_prolong" value="0x5"/>
+            <enum name="lc_state_fade_standby_auto" value="0x6"/>
+            <enum name="lc_state_fade_standby_manual" value="0x7"/>
         </enums>
         <enums name="lc_debug_events">
-            <enum name="lc_event_state_updated" value="1"/>
-            <enum name="lc_event_regulator_debug_info" value="2"/>
+            <enum name="lc_event_state_updated" value="0x1"/>
+            <enum name="lc_event_regulator_debug_info" value="0x2"/>
         </enums>
     </class>
     <class index="78" name="lc_setup_server">
@@ -4184,10 +4265,24 @@
             </params>
         </event>
         <enums name="time_roles">
-            <enum name="time_role_none" value="0"/>
-            <enum name="time_role_authority" value="1"/>
-            <enum name="time_role_relay" value="2"/>
-            <enum name="time_role_client" value="3"/>
+            <enum name="time_role_none" value="0x0"/>
+            <enum name="time_role_authority" value="0x1"/>
+            <enum name="time_role_relay" value="0x2"/>
+            <enum name="time_role_client" value="0x3"/>
         </enums>
+    </class>
+    <class index="96" name="migration">
+        <command index="1" name="migrate_keys" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="migrate_ddb" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
     </class>
 </api>

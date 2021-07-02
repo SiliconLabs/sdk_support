@@ -3,7 +3,7 @@ label: "Device Init: LFXO"
 package: platform
 description: >
   Device initialization for LFXO - Low Frequency Crystal Oscillator.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:

@@ -126,14 +126,15 @@ void configTxOptions(sl_cli_command_arg_t *args)
 
   responsePrint(sl_cli_get_command_string(args, 0), "waitForAck:%s,removeCrc:%s,syncWordId:%d,"
                                                     "txAntenna:%s,altPreambleLen:%s,ccaPeakRssi:%s,"
-                                                    "ccaOnly:%s",
+                                                    "ccaOnly:%s,resend:%s",
                 ((txOptions & RAIL_TX_OPTION_WAIT_FOR_ACK) ? "True" : "False"),
                 ((txOptions & RAIL_TX_OPTION_REMOVE_CRC) ? "True" : "False"),
                 ((txOptions & RAIL_TX_OPTION_SYNC_WORD_ID) >> RAIL_TX_OPTION_SYNC_WORD_ID_SHIFT),
                 configuredTxAntenna(txOptions),
                 ((txOptions & RAIL_TX_OPTION_ALT_PREAMBLE_LEN) ? "True" : "False"),
                 ((txOptions & RAIL_TX_OPTION_CCA_PEAK_RSSI) ? "True" : "False"),
-                ((txOptions & RAIL_TX_OPTION_CCA_ONLY) ? "True" : "False"));
+                ((txOptions & RAIL_TX_OPTION_CCA_ONLY) ? "True" : "False"),
+                ((txOptions & RAIL_TX_OPTION_RESEND) ? "True" : "False"));
 }
 
 void txAtTime(sl_cli_command_arg_t *args)
@@ -513,7 +514,7 @@ void sleep(sl_cli_command_arg_t *args)
   char* em4State = "";
   void (*em4Function)(void) = &EMU_EnterEM4;
 
-  uint8_t emMode = sl_cli_get_argument_uint8(args, 0);
+  uint8_t emMode = (uint8_t)sl_cli_get_argument_string(args, 0)[0] - '0';
   uint8_t rfSenseSyncWordNumBytes = 0U;
   uint32_t rfSenseSyncWord = 0U;
   RailRfSenseMode_t mode = RAIL_RFSENSE_MODE_OFF;
@@ -594,11 +595,11 @@ void sleep(sl_cli_command_arg_t *args)
     // *only* wakeup possible out of EM4 is RFsense (or reset).
     responsePrint(sl_cli_get_command_string(args, 0), "EM:%u%s,SerialWakeup:%s,RfSense:%s,RfSensitivity:%s,ButtonWakeup:%s",
                   emMode, em4State,
-#if (defined(_SILICON_LABS_32B_SERIES_2) && ((SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortC) || (SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortD)))
-                  (emMode < 2) ? "On" : "Off",
-#else
-                  (emMode < 4) ? "On" : "Off",
+#if defined(_SILICON_LABS_32B_SERIES_2)
+                  (SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortC || SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortD)
+                  ? ((emMode < 2) ? "On" : "Off") :
 #endif
+                  (emMode < 4) ? "On" : "Off",
                   rfBands[rfBand & RAIL_RFSENSE_ANY],
                   rfSensitivity[(rfBand & 0x20U) >> 5U],
 #if (defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT))
@@ -614,7 +615,7 @@ void sleep(sl_cli_command_arg_t *args)
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_CRITICAL();
 
-#ifdef _SILICON_LABS_32B_SERIES_2
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
     // Sleep the USART Tx pin on series 2 devices to save energy
     if (emMode >= 2) {
       GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,
@@ -649,11 +650,13 @@ void sleep(sl_cli_command_arg_t *args)
         break;
     }
 
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
     // Configure the USART Rx pin as a GPIO interrupt for sleep-wake purposes,
     // falling-edge only
     GPIO_IntConfig(SL_IOSTREAM_USART_VCOM_RX_PORT,
                    SL_IOSTREAM_USART_VCOM_RX_PIN,
                    false, true, true);
+#endif
 
     serEvent = false;
     rxPacketEvent = false;
@@ -670,6 +673,7 @@ void sleep(sl_cli_command_arg_t *args)
     wakeReasons_t wakeReasons[2] = { { 0, 0, }, { 0, 0, }, };
    #endif//DEBUG_SLEEP_LOOP
 
+#ifndef FPGA
     // Used for wakeup from sleep
     buttonWakeEvent = false;
 
@@ -697,10 +701,13 @@ void sleep(sl_cli_command_arg_t *args)
       CORE_ENTER_CRITICAL(); // but shut back off in case we loop
       rfSensed = RAIL_IsRfSensed(railHandle);
     } while (!rfSensed && !serEvent && !rxPacketEvent && !buttonWakeEvent);
+#endif // not FPGA
 
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
     // Disable serial interrupt so it's not bothersome
     GPIO_IntDisable(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
     GPIO_IntClear(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
+#endif
 
     CORE_EXIT_CRITICAL(); // Back on permanently
 
@@ -710,7 +717,7 @@ void sleep(sl_cli_command_arg_t *args)
       enableAppMode(RF_SENSE, false, NULL);
     }
 
-#ifdef _SILICON_LABS_32B_SERIES_2
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
     // Wake the USART Tx pin back up
     if (emMode >= 2) {
       GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,

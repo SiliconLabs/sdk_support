@@ -56,6 +56,11 @@
 extern "C" {
 #endif
 
+/***************************************************************************//**
+ * @addtogroup cli
+ * @{
+ ******************************************************************************/
+
 #if ((!defined(SL_CATALOG_KERNEL_PRESENT))       \
   && (defined(SL_CATALOG_CLI_DELAY_PRESENT)      \
   || defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT) \
@@ -179,6 +184,8 @@ typedef struct {
   uint32_t loop_delay_ms;                        ///< The task loop delay.
 #endif
 } sl_cli_instance_parameters_t;
+
+/** @} (end addtogroup cli) */
 
 #ifdef __cplusplus
 }

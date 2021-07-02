@@ -77,6 +77,10 @@ int32_t btl_verifyEcdsaP256r1(const uint8_t *sha256,
                               const uint8_t *keyX,
                               const uint8_t *keyY)
 {
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
+#endif
+
   uint32_t keyspec;
   if ((sha256 == NULL) || (signatureR == NULL) || (signatureS == NULL)) {
     return BOOTLOADER_ERROR_SECURITY_INVALID_PARAM;

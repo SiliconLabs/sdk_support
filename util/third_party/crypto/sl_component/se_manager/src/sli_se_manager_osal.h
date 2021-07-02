@@ -38,17 +38,14 @@
 #endif
 
 #if defined (SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
+  #include "sl_component_catalog.h"
 #endif
 
 #include "sl_status.h"
 
-#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
-// Include MicriumOS kernel abstraction layer:
-  #include "sli_se_manager_osal_micriumos.h"
-#elif defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
-// Include FreeRTOS kernel abstraction layer:
-  #include "sli_se_manager_osal_freertos.h"
+#if defined(SL_SE_MANAGER_THREADING)
+// Include CMSIS RTOS2 kernel abstraction layer:
+  #include "sli_se_manager_osal_cmsis_rtos2.h"
 #else
 // Include bare metal abstraction layer:
   #include "sli_se_manager_osal_baremetal.h"

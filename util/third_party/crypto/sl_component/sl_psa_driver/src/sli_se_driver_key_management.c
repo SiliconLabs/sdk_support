@@ -45,28 +45,98 @@ extern "C" {
 
 #include "sli_se_manager_internal.h"
 #include "sl_se_manager_key_derivation.h"
+#include "sl_se_manager_internal_keys.h"
+#include "sl_se_manager_util.h"
 
 // -----------------------------------------------------------------------------
 // Static consts
 
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)
+
 // Define group orders (n) for secp_r1 curves.
+#if defined(PSA_WANT_ECC_SECP_R1_192)
 static const uint8_t ecc_p192_n[] = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x99, 0xde, 0xf8, 0x36, 0x14, 0x6b, 0xc9, 0xb1, 0xb4, 0xd2, 0x28, 0x31
 };
+#endif // PSA_WANT_ECC_SECP_R1_192
+// Define group orders (n) for secp_r1 curves.
+#if defined(PSA_WANT_ECC_SECP_R1_224) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+static const uint8_t ecc_p224_n[] = {
+  0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x16, 0xa2, 0xe0, 0xb8, 0xf0, 0x3e, 0x13, 0xdd, 0x29, 0x45, 0x5c, 0x5c, 0x2a, 0x3d
+};
+#endif // PSA_WANT_ECC_SECP_R1_224
+#if defined(PSA_WANT_ECC_SECP_R1_256)
 static const uint8_t ecc_p256_n[] = {
   0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84, 0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51
 };
+#endif // PSA_WANT_ECC_SECP_R1_256
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(PSA_WANT_ECC_SECP_R1_384)
 static const uint8_t ecc_p384_n[] = {
   0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xc7, 0x63, 0x4d, 0x81, 0xf4, 0x37, 0x2d, 0xdf, 0x58, 0x1a, 0x0d, 0xb2, 0x48, 0xb0, 0xa7, 0x7a, 0xec, 0xec, 0x19, 0x6a, 0xcc, 0xc5, 0x29, 0x73
 };
+#endif // PSA_WANT_ECC_SECP_R1_384
+#if defined(PSA_WANT_ECC_SECP_R1_521)
 static const uint8_t ecc_p521_n[] = {
   0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xfa, 0x51, 0x86, 0x87, 0x83, 0xbf, 0x2f, 0x96, 0x6b, 0x7f, 0xcc, 0x01, 0x48, 0xf7, 0x09, 0xa5, 0xd0, 0x3b, 0xb5, 0xc9, 0xb8, 0x89, 0x9c, 0x47, 0xae, 0xbb, 0x6f, 0xb7, 0x1e, 0x91, 0x38, 0x64, 0x09
 };
-#endif
+#endif // PSA_WANT_ECC_SECP_R1_521
+#endif // #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
+#endif /* #if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
+       || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY) */
 
 // -----------------------------------------------------------------------------
 // Static functions
+
+/**
+ * @brief
+ *   Clamp if Montgomery or Twisted Edwards private key
+ *
+ * @param attributes
+ *   The PSA attributes struct representing a key
+ * @param key_data
+ *   Key data
+ * @param key_bits
+ *   Key size in bits
+ * @returns
+ *   N/A
+ */
+static inline void clamp_private_key_if_needed(const psa_key_attributes_t* attributes,
+                                               uint8_t *key_data,
+                                               size_t key_bits)
+{
+#if defined(SLI_PSA_WANT_ECC_MONTGOMERY)
+  psa_key_type_t key_type = psa_get_key_type(attributes);
+  // Apply clamping
+  if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)
+      && ((PSA_KEY_TYPE_GET_CURVE(key_type) == PSA_ECC_FAMILY_MONTGOMERY))) {
+    switch (key_bits) {
+#if defined(PSA_WANT_ECC_MONTGOMERY_255)
+      case 255:
+        key_data[0] &= 248U;
+        key_data[31] &= 127U;
+        key_data[31] |= 64U;
+        break;
+#endif // PSA_WANT_ECC_MONTGOMERY_255
+#if defined(PSA_WANT_ECC_MONTGOMERY_448)
+      case 448:
+        key_data[0] &= 252U;
+        key_data[55] |= 128U;
+        break;
+#endif // PSA_WANT_ECC_MONTGOMERY_448
+      default:
+        break;
+    }
+  }
+#else // SLI_PSA_WANT_ECC_MONTGOMERY
+  (void) attributes;
+  (void) key_data;
+  (void) key_bits;
+#endif // SLI_PSA_WANT_ECC_MONTGOMERY
+}
 
 /**
  * @brief
@@ -138,8 +208,11 @@ set_key_buffer_length(const psa_key_attributes_t *attributes,
       break;
     #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
+      #if defined(SLI_SE_KEY_PADDING_REQUIRED)
+      data_size = sli_se_word_align(data_size);
+      #endif
       *key_buffer_length = sizeof(sli_se_opaque_wrapped_key_context_t)
-                           + sli_se_word_align(data_size);
+                           + data_size;
       break;
     #endif
     default:
@@ -225,74 +298,115 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
   if (type == PSA_KEY_TYPE_RAW_DATA
-      || type == PSA_KEY_TYPE_AES
       || type == PSA_KEY_TYPE_HMAC
       || type == PSA_KEY_TYPE_DERIVE) {
-    if (type == PSA_KEY_TYPE_AES) {
-      switch (key_size) {
-        case 16:
-          key_desc->type = SL_SE_KEY_TYPE_AES_128;
-          break;
-        case 24:
-          key_desc->type = SL_SE_KEY_TYPE_AES_192;
-          break;
-        case 32:
-          key_desc->type = SL_SE_KEY_TYPE_AES_256;
-          break;
-        default:
-          // SE doesn't support off-size AES keys
-          return PSA_ERROR_INVALID_ARGUMENT;
-      }
-    } else {
-      // Set attributes
-      key_desc->type = SL_SE_KEY_TYPE_SYMMETRIC;
+    // Set attributes
+    key_desc->type = SL_SE_KEY_TYPE_SYMMETRIC;
+    key_desc->size = key_size;
+  } else
+  #if defined(PSA_WANT_KEY_TYPE_AES)
+  if (type == PSA_KEY_TYPE_AES) {
+    switch (key_size) {
+      case 16:
+        key_desc->type = SL_SE_KEY_TYPE_AES_128;
+        break;
+      case 24:
+        key_desc->type = SL_SE_KEY_TYPE_AES_192;
+        break;
+      case 32:
+        key_desc->type = SL_SE_KEY_TYPE_AES_256;
+        break;
+      default:
+        // SE doesn't support off-size AES keys
+        return PSA_ERROR_INVALID_ARGUMENT;
     }
     key_desc->size = key_size;
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  } else if (type == PSA_KEY_TYPE_CHACHA20) {
+  } else
+  #endif // PSA_WANT_KEY_TYPE_AES
+  #if defined(PSA_WANT_KEY_TYPE_CHACHA20) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+  if (type == PSA_KEY_TYPE_CHACHA20) {
     if (key_size != 0x20) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
     // Set attributes
     key_desc->type = SL_SE_KEY_TYPE_CHACHA20;
     key_desc->size = 0x20;
-  #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
-  } else if (PSA_KEY_TYPE_IS_ECC(type)) {
-    if (PSA_KEY_TYPE_GET_CURVE(type) == PSA_ECC_CURVE_SECP_R1) {
+  } else
+  #endif // PSA_WANT_KEY_TYPE_CHACHA20 && _SILICON_LABS_SECURITY_FEATURE_VAULT
+  #if defined(SLI_PSA_WANT_ECC)
+  if (PSA_KEY_TYPE_IS_ECC(type)) {
+    #if defined(SLI_PSA_WANT_ECC_SECP)
+    if (PSA_KEY_TYPE_ECC_GET_FAMILY(type) == PSA_ECC_FAMILY_SECP_R1) {
       // Find key size and set key type
       switch (key_size) {
+        #if defined(PSA_WANT_ECC_SECP_R1_192)
         case 24:
           key_desc->type = SL_SE_KEY_TYPE_ECC_P192;
           break;
+        #endif // PSA_WANT_ECC_SECP_R1_192
+        #if defined(PSA_WANT_ECC_SECP_R1_224) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+        // Series-2-config-1 devices do not support SECP224R1.
+        case 28:
+          key_desc->type = SL_SE_KEY_TYPE_ECC_P224;
+          break;
+        #endif // PSA_WANT_ECC_SECP_R1_224
+        #if defined(PSA_WANT_ECC_SECP_R1_256)
         case 32:
           key_desc->type = SL_SE_KEY_TYPE_ECC_P256;
           break;
+        #endif // PSA_WANT_ECC_SECP_R1_256
         #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+        #if defined(PSA_WANT_ECC_SECP_R1_384)
         case 48:
           key_desc->type = SL_SE_KEY_TYPE_ECC_P384;
           break;
+        #endif // PSA_WANT_ECC_SECP_R1_384
+        #if defined(PSA_WANT_ECC_SECP_R1_521)
         case 66:
           key_desc->type = SL_SE_KEY_TYPE_ECC_P521;
           break;
-        #endif
+        #endif // PSA_WANT_ECC_SECP_R1_521
+        #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    } else if (PSA_KEY_TYPE_GET_CURVE(type) == PSA_ECC_CURVE_MONTGOMERY) {
+    } else
+    #endif // SLI_PSA_WANT_ECC_SECP
+    #if defined(SLI_PSA_WANT_ECC_MONTGOMERY)
+    if (PSA_KEY_TYPE_ECC_GET_FAMILY(type) == PSA_ECC_FAMILY_MONTGOMERY) {
       // Find key size and set key type
       switch (key_size) {
+        #if defined(PSA_WANT_ECC_MONTGOMERY_255)
         case 32:
           key_desc->type = SL_SE_KEY_TYPE_ECC_X25519;
           break;
+        #endif // PSA_WANT_ECC_MONTGOMERY_255
+        #if defined(PSA_WANT_ECC_MONTGOMERY_448)
         case 56:
           key_desc->type = SL_SE_KEY_TYPE_ECC_X448;
           break;
+        #endif // PSA_WANT_ECC_MONTGOMERY_448
         default:
           return PSA_ERROR_NOT_SUPPORTED;
       }
-    #endif
-    } else {
+    } else
+    #endif // SLI_PSA_WANT_ECC_MONTGOMERY
+    #if defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+    if (PSA_KEY_TYPE_ECC_GET_FAMILY(type) == PSA_ECC_FAMILY_TWISTED_EDWARDS) {
+      // Find key size and set key type
+      switch (key_size) {
+        #if defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
+        case 32:
+          key_desc->type = SL_SE_KEY_TYPE_ECC_ED25519;
+          break;
+        #endif // PSA_WANT_ECC_TWISTED_EDWARDS_255
+        default:
+          return PSA_ERROR_NOT_SUPPORTED;
+      }
+    } else
+    #endif // SLI_PSA_WANT_ECC_TWISTED_EDWARDS
+    {
       return PSA_ERROR_NOT_SUPPORTED;
     }
 
@@ -306,7 +420,7 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
     }
 
     // Decide whether the key will be used for signing or derivation
-    bool is_signing = (usage & (PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH)) != 0;
+    bool is_signing = (usage & (PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH | PSA_KEY_USAGE_SIGN_MESSAGE | PSA_KEY_USAGE_VERIFY_MESSAGE)) != 0;
     bool is_deriving = (usage & (PSA_KEY_USAGE_DERIVE | PSA_KEY_USAGE_ENCRYPT | PSA_KEY_USAGE_DECRYPT)) != 0;
 
     if (is_signing && !is_deriving) {
@@ -316,8 +430,14 @@ sli_se_key_desc_from_psa_attributes(const psa_key_attributes_t *attributes,
     } else if (is_signing && is_deriving) {
       // SE does not support a key to be used for both signing and derivation operations.
       return PSA_ERROR_NOT_SUPPORTED;
+    } else {
+      // ECC key is not setup for either signing or deriving. Default to not setting
+      // the 'sign' flag (legacy behaviour)
+      key_desc->flags = (key_desc->flags & ~SL_SE_KEY_FLAG_ASYMMMETRIC_SIGNING_ONLY);
     }
-  } else {
+  } else
+  #endif // SLI_PSA_WANT_ECC
+  {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
@@ -384,10 +504,11 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
   switch (location) {
     case PSA_KEY_LOCATION_LOCAL_STORAGE:
     {
-      psa_key_type_t key_type = psa_get_key_type(attributes);
       uint8_t *actual_key_buffer = (uint8_t *)key_buffer;
       size_t actual_key_buffer_size = key_buffer_size;
 
+      #if defined(SLI_PSA_WANT_ECC)
+      psa_key_type_t key_type = psa_get_key_type(attributes);
       if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
         // For ECC public keys, the attributes key size is always the factor
         // determining the curve size
@@ -402,18 +523,23 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
           if (actual_key_buffer_size != 2 * key_size) {
             return PSA_ERROR_INVALID_ARGUMENT;
           }
-        #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-        } else if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type)
-                   == PSA_ECC_FAMILY_MONTGOMERY) {
+        #if defined(SLI_PSA_WANT_ECC_MONTGOMERY) \
+          || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+        } else if ((PSA_KEY_TYPE_ECC_GET_FAMILY(key_type)
+                    == PSA_ECC_FAMILY_MONTGOMERY)
+                   || (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type)
+                       == PSA_ECC_FAMILY_TWISTED_EDWARDS)) {
           if (actual_key_buffer_size != key_size) {
             return PSA_ERROR_INVALID_ARGUMENT;
           }
-        #endif // VAULT
+        #endif // SLI_PSA_WANT_ECC_MONTGOMERY...
         } else {
           // No other curves supported yet.
           return PSA_ERROR_NOT_SUPPORTED;
         }
-      } else {
+      } else
+      #endif // SLI_PSA_WANT_ECC
+      {
         key_size = key_buffer_size;
       }
       // Fill the key desc from attributes
@@ -443,50 +569,30 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
       }
 
       if (key_context_header->builtin_key_id != 0) {
+        sl_se_key_descriptor_t builtin_key_desc;
         switch (key_context_header->builtin_key_id) {
           case SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY:
-            key_desc->type = SL_SE_KEY_TYPE_ECC_P256;
-            key_desc->flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY;
-            key_desc->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
-            key_desc->storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY;
-            return PSA_SUCCESS;
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_APPLICATION_SECURE_BOOT_KEY;
+            break;
           case SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY:
-            key_desc->type = SL_SE_KEY_TYPE_ECC_P256;
-            key_desc->flags = SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PUBLIC_KEY
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY;
-            key_desc->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
-            key_desc->storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY;
-            return PSA_SUCCESS;
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_APPLICATION_SECURE_DEBUG_KEY;
+            break;
           case SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY:
-            key_desc->type = SL_SE_KEY_TYPE_AES_128;
-            key_desc->flags = SL_SE_KEY_FLAG_NON_EXPORTABLE;
-            key_desc->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
-            key_desc->storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY;
-            return PSA_SUCCESS;
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_APPLICATION_AES_128_KEY;
+            break;
           #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
           case SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY:
-            key_desc->type = SL_SE_KEY_TYPE_ECC_P256;
-            key_desc->flags = SL_SE_KEY_FLAG_NON_EXPORTABLE
-                              | SL_SE_KEY_FLAG_IS_DEVICE_GENERATED
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY;
-            key_desc->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
-            key_desc->storage.location.slot = SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY;
-            return PSA_SUCCESS;
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_APPLICATION_ATTESTATION_KEY;
+            break;
           case SL_SE_KEY_SLOT_SE_ATTESTATION_KEY:
-            key_desc->type = SL_SE_KEY_TYPE_ECC_P256;
-            key_desc->flags = SL_SE_KEY_FLAG_NON_EXPORTABLE
-                              | SL_SE_KEY_FLAG_IS_DEVICE_GENERATED
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY
-                              | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY;
-            key_desc->storage.method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE;
-            key_desc->storage.location.slot = SL_SE_KEY_SLOT_SE_ATTESTATION_KEY;
-            return PSA_SUCCESS;
+            builtin_key_desc = (sl_se_key_descriptor_t) SL_SE_SYSTEM_ATTESTATION_KEY;
+            break;
           #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
           default:
             return PSA_ERROR_DOES_NOT_EXIST;
         }
+        memcpy(key_desc, &builtin_key_desc, sizeof(*key_desc));
+        return PSA_SUCCESS;
       } else {
         #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
         if (key_buffer_size < sizeof(sli_se_opaque_wrapped_key_context_t)) {
@@ -515,9 +621,11 @@ sli_se_key_desc_from_input(const psa_key_attributes_t* attributes,
         }
 
         uint32_t key_full_size = key_size;
-        if (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_CURVE_SECP_R1 && PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(psa_get_key_type(attributes))) {
+        #if defined(SLI_PSA_WANT_ECC)
+        if (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_SECP_R1 && PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(psa_get_key_type(attributes))) {
           key_full_size = 2 * key_full_size;
         }
+        #endif
         if (key_desc->storage.location.buffer.size < key_full_size + SLI_SE_WRAPPED_KEY_OVERHEAD) {
           memset(key_desc, 0, sizeof(sl_se_key_descriptor_t));
           return PSA_ERROR_INVALID_ARGUMENT;
@@ -561,13 +669,18 @@ sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
         return PSA_ERROR_INSUFFICIENT_MEMORY;
       }
       key_desc->storage.location.buffer.pointer = key_buffer;
-      // TODO: Improve SE manager alignment requirements
-      key_desc->storage.location.buffer.size =
-        sli_se_word_align(key_buffer_size);
+
+      #if defined(SLI_SE_KEY_PADDING_REQUIRED)
+      key_buffer_size = sli_se_word_align(key_buffer_size);
+      #endif
+
+      key_desc->storage.location.buffer.size = key_buffer_size;
       break;
     #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case PSA_KEY_LOCATION_SLI_SE_OPAQUE:
+      #if defined(SLI_SE_KEY_PADDING_REQUIRED)
       key_size = sli_se_word_align(key_size);
+      #endif
 
       if (key_buffer_size < sizeof(sli_se_opaque_wrapped_key_context_t)
           + key_size) {
@@ -585,6 +698,36 @@ sli_se_set_key_desc_output(const psa_key_attributes_t* attributes,
   }
   return PSA_SUCCESS;
 }
+
+#if defined(SLI_PSA_WANT_ALG_EDDSA)
+/* Check for an erratta causing the SE to emit a faulty EdDSA public key for operations
+ * where only a private key is provided. */
+psa_status_t sli_se_check_eddsa_errata(const psa_key_attributes_t* attributes,
+                                       sl_se_command_context_t* cmd_ctx)
+{
+  if (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_TWISTED_EDWARDS) {
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    uint32_t version;
+    sl_status_t status = sl_se_get_se_version(cmd_ctx, &version);
+    if (status == SL_STATUS_OK) {
+      version &= 0x00FFFFFFUL;
+      if (version < 0x010202UL || version > 0x010208UL) {
+        return PSA_SUCCESS;
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+    } else {
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
+#else
+    (void) cmd_ctx;
+    return PSA_ERROR_NOT_SUPPORTED;
+#endif
+  } else {
+    return PSA_SUCCESS;
+  }
+}
+#endif // SLI_PSA_WANT_ALG_EDDSA
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /**
@@ -681,23 +824,35 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
 
   // Store bits value for imported key
   *bits = 8 * data_length;
-  if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1) {
-    if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
-      *bits -= 8;
-      *bits /= 2;
-    }
-    if (*bits == PSA_BITS_TO_BYTES(521) * 8) {
-      *bits = 521;
-    }
-  } else if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_MONTGOMERY) {
-    if (data_length == 32) {
-      *bits = 255;
-    }
+
+  switch (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type)) {
+    #if defined(SLI_PSA_WANT_ECC_SECP)
+    case PSA_ECC_FAMILY_SECP_R1:
+      if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
+        *bits -= 8;
+        *bits /= 2;
+      }
+      if (*bits == PSA_BITS_TO_BYTES(521) * 8) {
+        *bits = 521;
+      }
+      break;
+    #endif // SLI_PSA_WANT_ECC_SECP
+    #if defined(SLI_PSA_WANT_ECC_MONTGOMERY) || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+    case PSA_ECC_FAMILY_MONTGOMERY:
+    case PSA_ECC_FAMILY_TWISTED_EDWARDS:
+      if (data_length == 32) {
+        *bits = 255;
+      }
+      break;
+    #endif // SLI_PSA_WANT_ECC_MONTGOMERY || SLI_PSA_WANT_ECC_TWISTED_EDWARDS
+    default:
+      break;
   }
 
   size_t offset = 0;
   size_t padding = 0;
   size_t key_size = 0;
+  #if defined(SLI_PSA_WANT_ECC)
   if (PSA_KEY_TYPE_IS_ECC(key_type)) {
     // Validate key and get size.
     psa_status = sli_se_driver_validate_key(attributes,
@@ -712,16 +867,23 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
       data_length -= 1;
       data += 1;
     }
+
+    #if defined(SLI_SE_KEY_PADDING_REQUIRED)
     if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1) {
       // We must add some padding if offset is nonzero
       offset = sli_se_get_padding(key_size);
     }
-  } else {
+    #endif
+  } else
+  #endif // SLI_PSA_WANT_ECC
+  {
     key_size = data_length;
   }
 
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Size must at least fit max ECC key size plus padding
   uint8_t temp_buffer[SLI_SE_MAX_PADDED_PUBLIC_KEY_SIZE] = { 0 };
+  #endif
 
   // Create a key desc that will represent the wrapped key
   sl_se_key_descriptor_t imported_key_desc = { 0 };
@@ -734,6 +896,8 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
   }
   // Create a key desc representing the plaintext input key
   sl_se_key_descriptor_t plaintext_key_desc = imported_key_desc;
+
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   if (offset == 0) {
     sli_se_key_descriptor_set_plaintext(&plaintext_key_desc, data, data_length);
   } else {
@@ -742,6 +906,7 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
     if (sizeof(temp_buffer) < data_length + 2 * offset) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
+    #if defined(SLI_PSA_WANT_ECC_SECP)
     if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_FAMILY_SECP_R1) {
       if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
         sli_se_pad_big_endian(temp_buffer, data, key_size);
@@ -754,10 +919,17 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
       sli_se_key_descriptor_set_plaintext(&plaintext_key_desc,
                                           temp_buffer,
                                           data_length + padding);
-    } else {
+    } else
+    #endif // SLI_PSA_WANT_ECC_SECP
+    {
       return PSA_ERROR_CORRUPTION_DETECTED;
     }
   }
+  #else
+  (void)offset;
+  sli_se_key_descriptor_set_plaintext(&plaintext_key_desc, data, data_length);
+  #endif
+
   sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
   sl_status_t sl_status = SL_STATUS_OK;
   // Set location specific properties for the output key buffer
@@ -800,7 +972,9 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
     psa_status = PSA_ERROR_HARDWARE_FAILURE;
   }
   exit:
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   memset(temp_buffer, 0, sizeof(temp_buffer));
+  #endif
   return psa_status;
 }
 
@@ -875,7 +1049,7 @@ psa_status_t sli_se_opaque_import_key(const psa_key_attributes_t *attributes,
  * \retval #PSA_ERROR_BUFFER_TOO_SMALL
  *         The size of the \p data buffer is too small. You can determine a
  *         sufficient buffer size by calling
- *         #PSA_KEY_EXPORT_MAX_SIZE(\c type, \c bits)
+ *         #PSA_EXPORT_KEY_OUTPUT_SIZE(\c type, \c bits)
  *         where \c type is the key type
  *         and \c bits is the key size in bits.
  * \retval #PSA_ERROR_COMMUNICATION_FAILURE
@@ -929,13 +1103,21 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
     data += 1;
     data_size -= 1;
   }
+
+  size_t key_bits = psa_get_key_bits(attributes);
+
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // We must handle non-word-aligned keys with a temporary buffer
   uint8_t temp_key_buffer[SLI_SE_MAX_PADDED_PUBLIC_KEY_SIZE] = { 0 };
-  size_t key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
   size_t padding = 0;
+
+  #if defined(SLI_PSA_WANT_ECC)
+  size_t key_size = PSA_BITS_TO_BYTES(key_bits);
   if (PSA_KEY_TYPE_IS_ECC(key_type)) {
     padding = sli_se_get_padding(key_size);
   }
+  #endif // SLI_PSA_WANT_ECC
+
   if (padding > 0) {
     if (storage_size > sizeof(temp_key_buffer)) {
       return PSA_ERROR_BUFFER_TOO_SMALL;
@@ -944,10 +1126,12 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
                                         temp_key_buffer,
                                         sizeof(temp_key_buffer));
     storage_size -= padding;
+    #if defined(SLI_PSA_WANT_ECC)
     if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
       // Padding must be applied twice for public keys
       storage_size -= padding;
     }
+    #endif // SLI_PSA_WANT_ECC_SECP
   } else {
     if ((storage_size - imported_key.size) < 4) {
       // SE manager has rounded the storage size up for word-alignment
@@ -955,6 +1139,10 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
     }
     sli_se_key_descriptor_set_plaintext(&plaintext_key, data, data_size);
   }
+  #else // SLI_SE_KEY_PADDING_REQUIRED
+  sli_se_key_descriptor_set_plaintext(&plaintext_key, data, data_size);
+  #endif // SLI_SE_KEY_PADDING_REQUIRED
+
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -974,31 +1162,26 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
   } else {
     psa_status = PSA_SUCCESS;
 
+    #if defined(SLI_SE_KEY_PADDING_REQUIRED)
     // Handle padding.
     if (padding > 0) {
+      #if defined(SLI_PSA_WANT_ECC)
       // Copy out the padded key
       if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
         sli_se_unpad_big_endian(temp_key_buffer, data, key_size);
       } else if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
         sli_se_unpad_curve_point(temp_key_buffer, data, key_size);
-      } else {
+      } else
+      #endif // SLI_PSA_WANT_ECC
+      {
         // This should never happen
         return PSA_ERROR_BAD_STATE;
       }
     }
+    #endif
 
-    // Apply masking.
-    if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)
-        && PSA_KEY_TYPE_GET_CURVE(key_type) == PSA_ECC_CURVE_MONTGOMERY) {
-      if (psa_get_key_bits(attributes) == 255) {
-        data[0] &= 248U;
-        data[31] &= 127U;
-        data[31] |= 64U;
-      } else if (psa_get_key_bits(attributes) == 448) {
-        data[0] &= 252U;
-        data[55] |= 128U;
-      }
-    }
+    // Apply clamping if this is a Montgomery or Twisted Edwards key.
+    clamp_private_key_if_needed(attributes, data, key_bits);
 
     // Successful operation. Set ouput length
     *data_length = storage_size + prepend_format_byte;
@@ -1065,16 +1248,19 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  size_t key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
+  size_t key_bits = psa_get_key_bits(attributes);
+  size_t key_size = PSA_BITS_TO_BYTES(key_bits);
   if (key_size == 0) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
   psa_key_type_t key_type = psa_get_key_type(attributes);
-  if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
-    // Does not make sense to generate a public key for itself
-    // The remainder of the function does not support outputting public keys,
-    // so error out here.
+  if (PSA_KEY_TYPE_IS_UNSTRUCTURED(key_type)
+      && ((key_bits & 0x7) != 0)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  } else if (PSA_KEY_TYPE_IS_PUBLIC_KEY(key_type)) {
+    // PSA Crypto defines generate_key to be an invalid call with a key type
+    // of public key.
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
@@ -1110,7 +1296,10 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
   } else {
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes))
-        != PSA_KEY_LOCATION_LOCAL_STORAGE) {
+        == PSA_KEY_LOCATION_LOCAL_STORAGE) {
+      // Apply clamping if this is a Montgomery or Twisted Edwards key.
+      clamp_private_key_if_needed(attributes, key_buffer, key_bits);
+    } else {
       // Add the key desc to the output array for opaque keys
       psa_status = store_key_desc_in_context(&key_desc, key_buffer, key_buffer_size);
       if (psa_status != PSA_SUCCESS) {
@@ -1118,20 +1307,6 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
       }
     }
   #endif
-    if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes))
-        == PSA_KEY_LOCATION_LOCAL_STORAGE
-        && PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)
-        && PSA_KEY_TYPE_GET_CURVE(key_type) == PSA_ECC_CURVE_MONTGOMERY) {
-      // Take care of masking.
-      if (psa_get_key_bits(attributes) == 255) {
-        key_buffer[0] &= 248U;
-        key_buffer[31] &= 127U;
-        key_buffer[31] |= 64U;
-      } else if (psa_get_key_bits(attributes) == 448) {
-        key_buffer[0] &= 252U;
-        key_buffer[55] |= 128U;
-      }
-    }
     psa_status = set_key_buffer_length(attributes, key_size, key_buffer_length);
   }
   // Cleanup
@@ -1229,7 +1404,7 @@ sli_se_transparent_generate_key(const psa_key_attributes_t *attributes,
  * \retval #PSA_ERROR_BUFFER_TOO_SMALL
  *         The size of the \p data buffer is too small. You can determine a
  *         sufficient buffer size by calling
- *         #PSA_KEY_EXPORT_MAX_SIZE(#PSA_KEY_TYPE_PUBLIC_KEY_OF_KEY_PAIR(\c type), \c bits)
+ *         #PSA_EXPORT_KEY_OUTPUT_SIZE(#PSA_KEY_TYPE_PUBLIC_KEY_OF_KEY_PAIR(\c type), \c bits)
  *         where \c type is the key type
  *         and \c bits is the key size in bits.
  * \retval #PSA_ERROR_COMMUNICATION_FAILURE
@@ -1250,6 +1425,8 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
                                 size_t data_size,
                                 size_t *data_length)
 {
+#if defined(SLI_PSA_WANT_ECC)
+
   if (attributes == NULL
       || key_buffer == NULL
       || key_buffer_size == 0
@@ -1258,7 +1435,6 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
       || data_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
-  psa_key_type_t key_type = psa_get_key_type(attributes);
 
   // Build key descs for the private key
   sl_se_key_descriptor_t priv_key_desc = { 0 };
@@ -1273,18 +1449,23 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
   // ECC public keys are written in uncompressed format with a preceeding 0x04
   // format byte. This byte should however not be present for Montgomery keys
   uint32_t prepend_format_byte = 1;
-  if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) == PSA_ECC_CURVE_MONTGOMERY) {
+  #if defined(SLI_PSA_WANT_ECC_MONTGOMERY) \
+  || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+  if ((PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_MONTGOMERY)
+      || (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(attributes)) == PSA_ECC_FAMILY_TWISTED_EDWARDS)) {
     prepend_format_byte = 0;
   }
+  #endif
 
   sl_se_key_descriptor_t pub_key_desc = priv_key_desc;
   size_t padding = 0;
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+  && defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Since we were able to successfully build a key desc, we know that the key
   // is supported. However, we must also account for non-word-aligned keys
   uint8_t temp_pub_buffer[SLI_SE_MAX_PADDED_PUBLIC_KEY_SIZE] = { 0 };
   uint8_t temp_priv_buffer[SLI_SE_MAX_PADDED_KEY_PAIR_SIZE] = { 0 };
-  if (PSA_KEY_TYPE_IS_ECC(key_type)) {
+  if (PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes))) {
     padding = sli_se_get_padding(PSA_BITS_TO_BYTES(psa_get_key_bits(attributes)));
   }
   if (padding > 0) {
@@ -1305,7 +1486,7 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
                                         temp_pub_buffer,
                                         sizeof(temp_pub_buffer));
   } else
-  #endif // VAULT
+  #endif // VAULT padding
   {
     // Account for format byte where applicable
     sli_se_key_descriptor_set_plaintext(&pub_key_desc,
@@ -1335,6 +1516,14 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
   if (sl_status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+
+  #if defined(SLI_PSA_WANT_ALG_EDDSA)
+  psa_status = sli_se_check_eddsa_errata(attributes, &cmd_ctx);
+  if (psa_status != PSA_SUCCESS) {
+    return psa_status;
+  }
+  #endif // SLI_PSA_WANT_ALG_EDDSA
+
   sl_status = sl_se_export_public_key(&cmd_ctx, &priv_key_desc, &pub_key_desc);
   if (sl_status == SL_STATUS_FAIL) {
     // This specific code maps to 'does not exist' for builtin keys
@@ -1343,7 +1532,8 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
     psa_status = PSA_ERROR_HARDWARE_FAILURE;
   } else {
     psa_status = PSA_SUCCESS;
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+    && defined(SLI_SE_KEY_PADDING_REQUIRED)
     if (padding > 0) {
       // Now it is time to copy the actual ket from the temp buffer to the
       // output buffer. Write to an offset if applicable, to account for the
@@ -1367,6 +1557,19 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_HARDWARE_FAILURE;
   }
   return psa_status;
+
+#else // SLI_PSA_WANT_ECC
+
+  (void) attributes;
+  (void) key_buffer;
+  (void) key_buffer_size;
+  (void) data;
+  (void) data_size;
+  (void) data_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // SLI_PSA_WANT_ECC
 }
 
 // Simple wrapper for opaque driver
@@ -1395,6 +1598,12 @@ sli_se_transparent_export_public_key(const psa_key_attributes_t *attributes,
                                      size_t data_size,
                                      size_t *data_length)
 {
+  // If the key is stored transparently and is already a public key,
+  // let the core handle it.
+  if (PSA_KEY_TYPE_IS_PUBLIC_KEY(psa_get_key_type(attributes))) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
   return sli_se_driver_export_public_key(attributes,
                                          key_buffer,
                                          key_buffer_size,
@@ -1408,7 +1617,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
                                         size_t data_length,
                                         size_t *bits)
 {
-  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
+#if defined(SLI_PSA_WANT_ECC)
 
   // Argument check.
   if (attributes == NULL
@@ -1418,6 +1627,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
   psa_key_type_t key_type = psa_get_key_type(attributes);
 
   // Driver can only handle ECC keys.
@@ -1425,42 +1635,65 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  psa_ecc_curve_t curve_type = PSA_KEY_TYPE_GET_CURVE(key_type);
+  psa_ecc_family_t curve_type = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
 
   switch (curve_type) {
-    case PSA_ECC_CURVE_SECP_R1: {
+#if defined(SLI_PSA_WANT_ECC_SECP)
+    case PSA_ECC_FAMILY_SECP_R1: {
       if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) { // Private key.
-        // Determine key bit-size (including possible padding).
-        *bits = data_length * 8;
-
         uint8_t *modulus_ptr = NULL;
-        switch (data_length * 8) {
+        *bits = psa_get_key_bits(attributes);
+
+        // Determine key bit-size
+        if (*bits == 0) {
+          *bits = data_length * 8;
+        } else {
+          if (PSA_BITS_TO_BYTES(*bits) != data_length) {
+            return PSA_ERROR_INVALID_ARGUMENT;
+          }
+        }
+
+        switch (*bits) {
+          #if defined(PSA_WANT_ECC_SECP_R1_192)
           case 192:
             modulus_ptr = (uint8_t*)ecc_p192_n;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_192
+          #if defined(PSA_WANT_ECC_SECP_R1_224) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+          // Series-2-config-1 devices do not support SECP224R1.
           case 224:
-            return PSA_ERROR_NOT_SUPPORTED;
+            modulus_ptr = (uint8_t*)ecc_p224_n;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_224
+          #if defined(PSA_WANT_ECC_SECP_R1_256)
           case 256:
             modulus_ptr = (uint8_t*)ecc_p256_n;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_256
           #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+          #if defined(PSA_WANT_ECC_SECP_R1_384)
           case 384:
             modulus_ptr = (uint8_t*)ecc_p384_n;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_384
+          #if defined(PSA_WANT_ECC_SECP_R1_521)
+          case 521:
+            modulus_ptr = (uint8_t*)ecc_p521_n;
+            break;
           case 528:
+            // Maybe a 521 bit long key which has been padded to 66 bytes.
+            // Make sure the key size is not actually 528
+            if (psa_get_key_bits(attributes) == 528) {
+              return PSA_ERROR_NOT_SUPPORTED;
+            }
             // Actually a 521 bit long key which has been padded to 66 bytes.
             *bits = 521;
             modulus_ptr = (uint8_t*)ecc_p521_n;
             break;
-          #else
-          case 384: // fall through
-          case 528:
-            return PSA_ERROR_NOT_SUPPORTED;
-            break;
-          #endif
+          #endif // PSA_WANT_ECC_SECP_R1_521
+          #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
           default:
-            return PSA_ERROR_INVALID_ARGUMENT;
+            return PSA_ERROR_NOT_SUPPORTED;
             break;
         }
 
@@ -1516,6 +1749,35 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
           return PSA_ERROR_INVALID_ARGUMENT;
         }
 
+        // Create ephemeral SE command context.
+        sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
+        sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
+        if (sl_status != SL_STATUS_OK) {
+          return PSA_ERROR_HARDWARE_FAILURE;
+        }
+
+#if !defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_2)
+        // SE version 1.2.2 is first version with public key validation inside of SE
+        uint32_t se_version = 0;
+        sl_status = sl_se_get_se_version(&cmd_ctx, &se_version);
+        if (sl_status != SL_STATUS_OK) {
+          return PSA_ERROR_HARDWARE_FAILURE;
+        }
+
+        if ((se_version & 0x00FFFFFFU) < SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION) {
+#if defined(MBEDTLS_ECP_C) && defined(MBEDTLS_PSA_CRYPTO_C) && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+          return_status = sli_se_driver_validate_pubkey_with_fallback(key_type,
+                                                                      psa_get_key_bits(attributes),
+                                                                      data,
+                                                                      data_length);
+#else
+          // No fallback code is compiled in, cannot do public key validation
+          return_status = PSA_ERROR_NOT_SUPPORTED;
+#endif
+          break;
+        }
+#endif
+
         // Temporary buffer for storing ECDH input private key,
         // possibly padded input public key, and output shared key.
         #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -1558,35 +1820,51 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
 
         uint8_t padding_bytes = 0;
         switch (*bits) {
+          #if defined(PSA_WANT_ECC_SECP_R1_192)
           case 192:
             input_public_key_desc.type = SL_SE_KEY_TYPE_ECC_P192;
             tmp_private_key_desc.type = SL_SE_KEY_TYPE_ECC_P192;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_192
+          #if defined(PSA_WANT_ECC_SECP_R1_224)
           case 224:
+            #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+            // Series-2-config-1 devices do not support SECP224R1.
             return PSA_ERROR_NOT_SUPPORTED;
+            #else
+            input_public_key_desc.type = SL_SE_KEY_TYPE_ECC_P224;
+            tmp_private_key_desc.type = SL_SE_KEY_TYPE_ECC_P224;
             break;
+            #endif // _SILICON_LABS_32B_SERIES_2_CONFIG_1
+          #endif // PSA_WANT_ECC_SECP_R1_224
+          #if defined(PSA_WANT_ECC_SECP_R1_256)
           case 256:
             input_public_key_desc.type = SL_SE_KEY_TYPE_ECC_P256;
             tmp_private_key_desc.type = SL_SE_KEY_TYPE_ECC_P256;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_256
           #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+          #if defined(PSA_WANT_ECC_SECP_R1_384)
           case 384:
             input_public_key_desc.type = SL_SE_KEY_TYPE_ECC_P384;
             tmp_private_key_desc.type = SL_SE_KEY_TYPE_ECC_P384;
             break;
+          #endif // PSA_WANT_ECC_SECP_R1_384
+          #if defined(PSA_WANT_ECC_SECP_R1_521)
           case 528:
             // Actually a 521 bit long key which has been padded to 66 bytes.
             *bits = 521;
-            padding_bytes = 2;
+            padding_bytes = SLI_SE_P521_PADDING_BYTES;
             input_public_key_desc.type = SL_SE_KEY_TYPE_ECC_P521;
             tmp_private_key_desc.type = SL_SE_KEY_TYPE_ECC_P521;
             break;
-          #else
+          #endif // PSA_WANT_ECC_SECP_R1_521
+          #else // _SILICON_LABS_SECURITY_FEATURE_VAULT
           case 384: // fall through
           case 528:
             return PSA_ERROR_NOT_SUPPORTED;
             break;
-          #endif
+          #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
           default:
             return PSA_ERROR_INVALID_ARGUMENT;
             break;
@@ -1609,13 +1887,6 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
                                               sizeof(tmp_key_buffer) - 2);
         }
         #endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-
-        // Create ephemeral SE command context.
-        sl_se_command_context_t cmd_ctx = SL_SE_COMMAND_CONTEXT_INIT;
-        sl_status_t sl_status = sl_se_init_command_context(&cmd_ctx);
-        if (sl_status != SL_STATUS_OK) {
-          return PSA_ERROR_HARDWARE_FAILURE;
-        }
 
         // Perform key agreement algorithm (ECDH).
         sl_status = sl_se_ecdh_compute_shared_secret(&cmd_ctx,
@@ -1640,56 +1911,151 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
       }
       break;
     }
-    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    case PSA_ECC_CURVE_MONTGOMERY:
-      switch (data_length) {
-        case 32:
-          // For private keys, validate clamping.
-          if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
-            if ((data[0] & 7U) != 0
-                || (data[31] & 128U) != 0
-                || (data[31] & 64U) != 64U) {
-              return PSA_ERROR_INVALID_ARGUMENT;
-            }
+    #endif // SLI_PSA_WANT_ECC_SECP
+    #if defined(SLI_PSA_WANT_ECC_MONTGOMERY) \
+    || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+    case PSA_ECC_FAMILY_MONTGOMERY: // Explicit fallthrough
+    case PSA_ECC_FAMILY_TWISTED_EDWARDS:
+      // Determine key bit-size
+      if (*bits == 0) {
+        *bits = data_length * 8;
+      } else {
+        if (PSA_BITS_TO_BYTES(*bits) != data_length) {
+          return PSA_ERROR_INVALID_ARGUMENT;
+        }
+      }
+      switch (*bits) {
+        #if defined(PSA_WANT_ECC_MONTGOMERY_255) \
+        || defined(PSA_WANT_ECC_TWISTED_EDWARDS_255)
+        case 255:
+          return_status = PSA_SUCCESS;
+          break;
+        case 256:
+          // Maybe a 255 bit long key which has been padded to 32 bytes.
+          // Make sure the key size is not actually 256
+          if (psa_get_key_bits(attributes) == 256) {
+            return PSA_ERROR_NOT_SUPPORTED;
           }
           *bits = 255;
           return_status = PSA_SUCCESS;
           break;
-        case 56:
-          // For private keys, validate clamping.
-          if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
-            if ((data[0] & 3U) != 0
-                || (data[55] & 128U) != 128U) {
-              return PSA_ERROR_INVALID_ARGUMENT;
-            }
-          }
-          *bits = 448;
+        #endif // PSA_WANT_ECC_MONTGOMERY_255 || PSA_WANT_ECC_TWISTED_EDWARDS_255
+        #if defined(PSA_WANT_ECC_MONTGOMERY_448)
+        case 448:
           return_status = PSA_SUCCESS;
           break;
+        #endif // PSA_WANT_ECC_MONTGOMERY_448
         default:
-          return PSA_ERROR_INVALID_ARGUMENT;
+          return PSA_ERROR_NOT_SUPPORTED;
           break;
       }
       break;
-    #endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    #endif  // SLI_PSA_WANT_ECC_MONTGOMERY || SLI_PSA_WANT_ECC_TWISTED_EDWARDS
     default:
       return PSA_ERROR_NOT_SUPPORTED;
       break;
   }
   return return_status;
+
+#else // SLI_PSA_WANT_ECC
+
+  (void) attributes;
+  (void) data;
+  (void) data_length;
+  (void) bits;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // SLI_PSA_WANT_ECC
 }
 
-// Transparent wrapper.
-psa_status_t sli_se_transparent_validate_key(const psa_key_attributes_t *attributes,
-                                             const uint8_t *data,
-                                             size_t data_length,
-                                             size_t *bits)
+psa_status_t sli_se_transparent_import_key(const psa_key_attributes_t *attributes,
+                                           const uint8_t *data,
+                                           size_t data_length,
+                                           uint8_t *key_buffer,
+                                           size_t key_buffer_size,
+                                           size_t *key_buffer_length,
+                                           size_t *bits)
 {
-  return sli_se_driver_validate_key(attributes,
-                                    data,
-                                    data_length,
-                                    bits);
+  psa_status_t status;
+
+  status = sli_se_driver_validate_key(attributes,
+                                      data, data_length,
+                                      bits);
+  if ( status == PSA_SUCCESS ) {
+    if ( key_buffer_size >= data_length ) {
+      memcpy(key_buffer, data, data_length);
+      clamp_private_key_if_needed(attributes, key_buffer, *bits);
+      *key_buffer_length = data_length;
+    } else {
+      status = PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+  }
+
+  return status;
 }
+
+#if !defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_2) \
+  && defined(MBEDTLS_ECP_C)                  \
+  && defined(MBEDTLS_PSA_CRYPTO_C)           \
+  && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+#include "mbedtls/ecp.h"
+#include "psa/crypto_extra.h"
+#include "psa_crypto_core.h"
+psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type,
+                                                         size_t key_bits,
+                                                         const uint8_t *data,
+                                                         size_t data_length)
+{
+#if defined(SLI_PSA_WANT_ECC)
+
+  psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+  mbedtls_ecp_group_id grp_id = MBEDTLS_ECP_DP_NONE;
+  mbedtls_ecp_keypair pubkey_to_check;
+  mbedtls_ecp_keypair_init(&pubkey_to_check);
+
+  // Get software-defined curve structure
+  grp_id = mbedtls_ecc_group_of_psa(PSA_KEY_TYPE_ECC_GET_FAMILY(key_type),
+                                    key_bits,
+                                    1);
+  if (grp_id == MBEDTLS_ECP_DP_NONE) {
+    goto exit;
+  }
+
+  psa_status = mbedtls_to_psa_error(mbedtls_ecp_group_load(&pubkey_to_check.grp, grp_id));
+  if (psa_status != PSA_SUCCESS) {
+    goto exit;
+  }
+
+  // Load public key into mbed TLS structure
+  psa_status = mbedtls_to_psa_error(mbedtls_ecp_point_read_binary(
+                                      &pubkey_to_check.grp,
+                                      &pubkey_to_check.Q,
+                                      data,
+                                      data_length) );
+  if (psa_status != PSA_SUCCESS) {
+    goto exit;
+  }
+
+  // Validate key.
+  psa_status = mbedtls_to_psa_error(mbedtls_ecp_check_pubkey(&pubkey_to_check.grp, &pubkey_to_check.Q));
+
+  exit:
+  mbedtls_ecp_keypair_free(&pubkey_to_check);
+  return psa_status;
+
+#else // SLI_PSA_WANT_ECC
+
+  (void) key_type;
+  (void) key_bits;
+  (void) data;
+  (void) data_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // SLI_PSA_WANT_ECC
+}
+#endif /* Software fallback for public key validation on SE < 1.2.2 */
 
 #endif // SEMAILBOX_PRESENT
 

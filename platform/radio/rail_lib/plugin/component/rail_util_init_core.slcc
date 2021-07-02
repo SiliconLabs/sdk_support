@@ -8,6 +8,7 @@ ui_hints:
   visibility: never
 requires:
   - name: rail_lib
+  - name: rail_util_init
 provides:
   - name: rail_util_init_core
 template_file:

@@ -1,22 +1,22 @@
-id: "micriumos_net_app_http"
-label: "Network Suite: HTTP core code"
-package: "micrium-tcpx"
-description: "Micrium OS Network HTTP core code"
+id: micriumos_net_app_http
+label: Network Suite - HTTP core code
+package: micrium-tcpx
+description: Micrium OS Network HTTP core code
 category: Services|Network Suite|Applications
-quality: "production"
-component_root_path: "platform/micrium_os/net"
+quality: production
+component_root_path: platform/micrium_os/net
 source:
-  - path: "source/http/http.c"
-  - path: "source/http/http_dict.c"
+  - path: source/http/http.c
+  - path: source/http/http_dict.c
 include:
-  - path: "source"
+  - path: source
     file_list:
-      - path: "http/http_priv.h"
-      - path: "http/http_dict_priv.h"
-  - path: "include"
+      - path: http/http_priv.h
+      - path: http/http_dict_priv.h
+  - path: include
     file_list:
-      - path: "http.h"
+      - path: http.h
 provides:
-  - name: "net_app_http"
+  - name: net_app_http
 requires:
-  - name: "net"
+  - name: net

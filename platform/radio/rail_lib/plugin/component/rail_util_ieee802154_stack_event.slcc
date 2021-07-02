@@ -9,6 +9,8 @@ ui_hints:
 requires:
   - name: device
   - name: status
+  - name: emlib_common
+  - name: rail_lib
 provides:
   - name: rail_util_ieee802154_stack_event
 documentation:

@@ -32,6 +32,9 @@
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)
 #include "sl_se_manager.h"
 #endif
+#if defined(SLI_RADIOAES_REQUIRES_MASKING)
+#include "sli_radioaes_management.h"
+#endif
 
 /*
  * Initialize the Silicon Labs platform integration of mbedTLS.
@@ -55,5 +58,13 @@ void sl_mbedtls_init(void)
                             &THREADING_FreeMutex,
                             &THREADING_TakeMutexBlocking,
                             &THREADING_GiveMutex);
+#endif
+
+#if defined(SLI_RADIOAES_REQUIRES_MASKING)
+  /* Initialize the RADIOAES mask value early to avoid taking the hit of
+   * requesting RNG output in IRQ context. Just acquiring and releasing the
+   * peripheral should ensure the mask is properly set. */
+  (void) sli_radioaes_acquire();
+  (void) sli_radioaes_release();
 #endif
 }

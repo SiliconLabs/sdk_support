@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -35,8 +35,10 @@
 #include "sli_se_manager_internal.h"
 #include "sli_se_manager_osal.h"
 #include "em_se.h"
-#include "em_core.h"
 #include "em_assert.h"
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+#include "em_bus.h"
+#endif
 #include <string.h>
 
 /// @addtogroup sl_se_manager
@@ -47,14 +49,33 @@
 
 #if defined(SL_SE_MANAGER_THREADING) \
   || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
+
 // Flag to indicate that the SE Manager is initialized or not.
-static bool se_manager_initialized = false;
+static volatile bool se_manager_initialized = false;
 
   #if defined(SL_SE_MANAGER_THREADING)
 // Lock mutex for synchronizing multiple threads calling into the
 // SE Manager API.
-static se_manager_osal_mutex_t se_lock;
-  #endif
+static se_manager_osal_mutex_t se_lock = { 0 };
+
+  #define SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_START                     \
+  int32_t kernel_lock_state = 0;                                           \
+  osKernelState_t kernel_state = se_manager_osal_kernel_get_state();       \
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) { \
+    kernel_lock_state = se_manager_osal_kernel_lock();                     \
+    if (kernel_lock_state < 0) {                                           \
+      return SL_STATUS_FAIL;                                               \
+    }                                                                      \
+  }
+
+  #define SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_END                       \
+  if (kernel_state != osKernelInactive && kernel_state != osKernelReady) { \
+    if (se_manager_osal_kernel_restore_lock(kernel_lock_state) < 0) {      \
+      return SL_STATUS_FAIL;                                               \
+    }                                                                      \
+  }
+
+  #endif // SL_SE_MANAGER_THREADING
 
   #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 // SE command completion.
@@ -79,9 +100,9 @@ sl_status_t sl_se_init(void)
   #if defined (SL_SE_MANAGER_THREADING) \
   || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 
-  CORE_DECLARE_IRQ_STATE;
-
-  CORE_ENTER_CRITICAL();
+  #if defined(SL_SE_MANAGER_THREADING)
+  SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_START
+  #endif
 
   if ( !se_manager_initialized ) {
       #if defined(SL_SE_MANAGER_THREADING)
@@ -106,7 +127,9 @@ sl_status_t sl_se_init(void)
     }
   }
 
-  CORE_EXIT_CRITICAL();
+  #if defined(SL_SE_MANAGER_THREADING)
+  SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_END
+  #endif
 
   #endif // #if defined (SL_SE_MANAGER_THREADING)
   //   || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
@@ -124,14 +147,16 @@ sl_status_t sl_se_deinit(void)
   #if defined (SL_SE_MANAGER_THREADING) \
   || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 
-  CORE_DECLARE_IRQ_STATE;
-
-  CORE_ENTER_CRITICAL();
+  #if defined(SL_SE_MANAGER_THREADING)
+  SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_START
+  #endif
 
   if ( se_manager_initialized ) {
     // We need to exit the critical section in case the SE lock is held by a
     // thread, and we want to take it before de-initializing.
-    CORE_EXIT_CRITICAL();
+    #if defined(SL_SE_MANAGER_THREADING)
+    SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_END
+    #endif
 
     // Acquire the SE lock to make sure no thread is executing SE commands
     // when we de-initialize.
@@ -157,9 +182,12 @@ sl_status_t sl_se_deinit(void)
 
     // Mark the SE Manager as un-initialized.
     se_manager_initialized = false;
-  } else {
-    CORE_EXIT_CRITICAL();
   }
+  #if defined(SL_SE_MANAGER_THREADING)
+  else {
+    SLI_SE_MANAGER_KERNEL_CRITICAL_SECTION_END
+  }
+  #endif
 
   #endif // #if defined (SL_SE_MANAGER_THREADING)
   //   || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
@@ -195,6 +223,10 @@ sl_status_t sli_se_to_sl_status(SE_Response_t res)
       return SL_STATUS_INVALID_PARAMETER;
     case SLI_SE_RESPONSE_ABORT:
       return SL_STATUS_ABORT;
+    case SLI_SE_RESPONSE_SELFTEST_ERROR:
+      return SL_STATUS_INITIALIZATION;
+    case SLI_SE_RESPONSE_NOT_INITIALIZED:
+      return SL_STATUS_NOT_INITIALIZED;
 #if defined(CRYPTOACC_PRESENT)
     case SLI_SE_RESPONSE_MAILBOX_INVALID:
       return SL_STATUS_COMMAND_IS_INVALID;
@@ -206,41 +238,40 @@ sl_status_t sli_se_to_sl_status(SE_Response_t res)
   }
 }
 
-#if defined(SL_SE_MANAGER_THREADING)
-
 /***************************************************************************//**
- * Take the SE lock in order to synchronize multiple threads calling into
- * the SE Manager API concurrently.
+ * Acquire the SE lock for exclusive access if necessary (thread mode).
+ * Enable the SEMAILBOX clock if necessary.
  ******************************************************************************/
 sl_status_t sli_se_lock_acquire(void)
 {
-  return se_manager_osal_take_mutex(&se_lock);
+  #if defined(SL_SE_MANAGER_THREADING)
+  sl_status_t status = se_manager_osal_take_mutex(&se_lock);
+  #else
+  sl_status_t status = SL_STATUS_OK;
+  #endif
+  #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  if (status == SL_STATUS_OK) {
+    BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 1);
+  }
+  #endif
+  return status;
 }
 
 /***************************************************************************//**
- * Give the SE lock in order to synchronize multiple threads calling into
- * the SE Manager API concurrently.
+ * Release the SE lock if necessary (thread mode).
+ * Disable the SEMAILBOX clock if necessary.
  ******************************************************************************/
 sl_status_t sli_se_lock_release(void)
 {
+  #if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  BUS_RegBitWrite(&CMU->CLKEN1, _CMU_CLKEN1_SEMAILBOXHOST_SHIFT, 0);
+  #endif
+  #if defined(SL_SE_MANAGER_THREADING)
   return se_manager_osal_give_mutex(&se_lock);
-}
-
-#else // SL_SE_MANAGER_THREADING
-
-// No MT synchronization when the app does not need threading (e.g. bare metal)
-
-sl_status_t sli_se_lock_acquire(void)
-{
+  #else
   return SL_STATUS_OK;
+  #endif
 }
-
-sl_status_t sli_se_lock_release(void)
-{
-  return SL_STATUS_OK;
-}
-
-#endif // SL_SE_MANAGER_THREADING
 
 #if defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION)
 

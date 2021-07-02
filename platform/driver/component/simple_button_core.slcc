@@ -1,6 +1,6 @@
-id: "simple_button_core"
-label: "Simple Button Core"
-package: "platform"
+id: simple_button_core
+label: Simple Button Core
+package: platform
 description: >
   The Simple Button Driver provides an implementation of the Generic Button API.
   This driver supports both active high and low buttons and configurable
@@ -10,26 +10,29 @@ description: >
   This component includes only the Simple Button driver core. To configure and create
   instances of this driver, the Simple Button component should be included in the 
   project.
-category: "Platform|Driver"
-quality: "production"
+category: Platform|Driver|Button
+quality: production
+root_path: platform/driver/button/
+ui_hints:
+  visibility: never
 config_file:
-  - path: "platform/driver/button/config/sl_simple_button_config.h"
+  - path: config/sl_simple_button_config.h
 source:
-  - path: "platform/driver/button/src/sl_simple_button.c"
+  - path: src/sl_simple_button.c
 include:
-  - path: "platform/driver/button/inc"
+  - path: inc
     file_list:
-      - path: "sl_simple_button.h"
+      - path: sl_simple_button.h
 provides:
-  - name: "simple_button_core"
+  - name: simple_button_core
 requires:
-  - name: "gpiointerrupt"
-  - name: "emlib_gpio"
-  - name: "emlib_cmu"
-  - name: "button"
+  - name: gpiointerrupt
+  - name: emlib_gpio
+  - name: emlib_cmu
+  - name: button
 template_file:
-  - path: "platform/driver/button/inst/sl_simple_button_instances.c.jinja"
-  - path: "platform/driver/button/inst/sl_simple_button_instances.h.jinja"
+  - path: "inst/sl_simple_button_instances.c.jinja"
+  - path: "inst/sl_simple_button_instances.h.jinja"
 template_contribution:
   - condition: [simple_button]
     name: event_handler

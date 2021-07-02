@@ -307,7 +307,7 @@ Ecode_t nvm3_writeData(nvm3_Handle_t *h, nvm3_ObjectKey_t key, const void *value
  *   A pointer to the application data buffer. The read function will copy
  *   data to this location.
  *
- * @param[in] maxLen
+ * @param[in] len
  *   The maximum object size in number of bytes. The @ref nvm3_getObjectInfo() function
  *   can be used to find the actual size.
  *

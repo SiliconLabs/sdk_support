@@ -73,5 +73,5 @@ void emberAfPluginGetActiveRadioPhy(void)
   if (activePhy >= PHY_COUNT) {
     activePhy = PHY_COUNT;
   }
-  emberSerialPrintfLine(APP_SERIAL, "Active Radio PHY:%d", phyNames[activePhy]);
+  emberSerialPrintfLine(APP_SERIAL, "Active Radio PHY:%p", phyNames[activePhy]);
 }

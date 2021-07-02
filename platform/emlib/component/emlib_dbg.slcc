@@ -20,3 +20,18 @@ requires:
   - name: emlib_cmu
   - name: emlib_gpio
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efm32g/group-dbg
+      condition: [device_sdid_71]
+    - page: emlib/api/efm32gg/group-dbg
+      condition: [device_sdid_72]
+    - page: emlib/api/efm32tg/group-dbg
+      condition: [device_sdid_73]
+    - page: emlib/api/efm32lg/group-dbg
+      condition: [device_sdid_74]
+    - page: emlib/api/efm32zg/group-dbg
+      condition: [device_sdid_76]
+    - page: emlib/api/efm32hg/group-dbg
+      condition: [device_sdid_77]

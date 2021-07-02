@@ -22,5 +22,7 @@ requires:
 documentation:
   docset: gecko-platform
   document:
-    - page: peripheral/api/efr32xg23/group-sysrtc
+    - page: emlib/api/efr32xg23/group-sysrtc
       condition: [device_sdid_210]
+    - page: emlib/api/efr32xg24/group-sysrtc
+      condition: [device_sdid_215]

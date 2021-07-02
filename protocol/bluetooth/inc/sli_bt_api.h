@@ -840,6 +840,18 @@ PACKSTRUCT( struct sl_bt_cmd_gatt_server_read_client_configuration_s
 typedef struct sl_bt_cmd_gatt_server_read_client_configuration_s sl_bt_cmd_gatt_server_read_client_configuration_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_gatt_server_send_user_prepare_write_response_s
+{
+    uint8_t             connection;
+    uint16_t            characteristic;
+    uint8_t             att_errorcode;
+    uint16_t            offset;
+    uint8array          value;
+});
+
+typedef struct sl_bt_cmd_gatt_server_send_user_prepare_write_response_s sl_bt_cmd_gatt_server_send_user_prepare_write_response_t;
+
+
 
 PACKSTRUCT( struct sl_bt_cmd_nvm_save_s
 {
@@ -2138,6 +2150,14 @@ PACKSTRUCT( struct sl_bt_rsp_gatt_server_read_client_configuration_s
 typedef struct sl_bt_rsp_gatt_server_read_client_configuration_s sl_bt_rsp_gatt_server_read_client_configuration_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_send_user_prepare_write_response_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gatt_server_send_user_prepare_write_response_s sl_bt_rsp_gatt_server_send_user_prepare_write_response_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_nvm_save_s
 {
     uint16_t            result;
@@ -2730,6 +2750,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_gatt_server_send_indication_t                      cmd_gatt_server_send_indication;
     sl_bt_cmd_gatt_server_notify_all_t                           cmd_gatt_server_notify_all;
     sl_bt_cmd_gatt_server_read_client_configuration_t            cmd_gatt_server_read_client_configuration;
+    sl_bt_cmd_gatt_server_send_user_prepare_write_response_t     cmd_gatt_server_send_user_prepare_write_response;
     sl_bt_cmd_nvm_save_t                                         cmd_nvm_save;
     sl_bt_cmd_nvm_load_t                                         cmd_nvm_load;
     sl_bt_cmd_nvm_erase_t                                        cmd_nvm_erase;
@@ -2878,6 +2899,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_gatt_server_send_indication_t                      rsp_gatt_server_send_indication;
     sl_bt_rsp_gatt_server_notify_all_t                           rsp_gatt_server_notify_all;
     sl_bt_rsp_gatt_server_read_client_configuration_t            rsp_gatt_server_read_client_configuration;
+    sl_bt_rsp_gatt_server_send_user_prepare_write_response_t     rsp_gatt_server_send_user_prepare_write_response;
     sl_bt_rsp_nvm_save_t                                         rsp_nvm_save;
     sl_bt_rsp_nvm_load_t                                         rsp_nvm_load;
     sl_bt_rsp_nvm_erase_t                                        rsp_nvm_erase;

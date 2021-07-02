@@ -180,7 +180,8 @@ typedef enum sl_wfx_indications_ids_e {
   SL_WFX_AP_CLIENT_CONNECTED_IND_ID              = 0xcd,   ///< \b AP_CLIENT_CONNECTED indication id. Content is SL_WFX_AP_CLIENT_CONNECTED_IND_BODY
   SL_WFX_AP_CLIENT_REJECTED_IND_ID               = 0xce,   ///< \b AP_CLIENT_REJECTED indication id. Content is SL_WFX_AP_CLIENT_REJECTED_IND_BODY
   SL_WFX_AP_CLIENT_DISCONNECTED_IND_ID           = 0xcf,   ///< \b AP_CLIENT_DISCONNECTED indication id. Content is SL_WFX_AP_CLIENT_DISCONNECTED_IND_BODY
-  SL_WFX_EXT_AUTH_IND_ID                         = 0xd2    ///< \b EXT_AUTH indication Id. Content is SL_WFX_EXT_AUTH_IND_BOODY
+  SL_WFX_EXT_AUTH_IND_ID                         = 0xd2,   ///< \b EXT_AUTH indication Id. Content is SL_WFX_EXT_AUTH_IND_BODY
+  SL_WFX_PS_MODE_ERROR_IND_ID                    = 0xd3    ///< \b PS_MODE_ERROR indication Id. Content is SL_WFX_PS_MODE_ERROR_IND_BODY
 } sl_wfx_indications_ids_t;
 
 /**
@@ -268,6 +269,14 @@ typedef enum sl_wfx_pm_mode_e {
   WFM_PM_MODE_PS                                 = 0x1,    ///< Use power_save and wake up on beacons
   WFM_PM_MODE_DTIM                               = 0x2     ///< Use power_save and wake up on DTIM
 } sl_wfx_pm_mode_t;
+
+/**
+ * @brief Device power save polling strategy.
+ */
+typedef enum sl_wfx_pm_poll_e {
+  WFM_PM_POLL_UAPSD                              = 0x0,    ///< Use U-APSD
+  WFM_PM_POLL_FAST_PS                            = 0x1     ///< Use Fast PS
+} sl_wfx_pm_poll_t;
 
 /**
  * @brief Data priority level per 802.1D.
@@ -1073,7 +1082,14 @@ typedef struct __attribute__((__packed__)) sl_wfx_set_pm_mode_req_body_s {
    *          <BR><B>WFM_PM_MODE_DTIM</B>: the device will wake-up on DTIMs.
    *          <BR>See wfm_pm_mode for enumeration values.
    */
-  uint16_t power_mode;
+  uint8_t power_mode;
+  /**
+   * @brief Power save polling strategy.
+   * @details <B>WFM_PM_POLL_UAPSD</B>: the device will use U-APSD (default).
+   *          <BR><B>WFM_PM_POLL_FAST_PS</B>: the device will use Fast Power Save.
+   *          <BR>See WFM_PM_POLL for enumeration values.
+   */
+  uint8_t polling_strategy;
   /**
    * @brief Number of beacons/DTIMs to skip while sleeping.
    * @details <B>0</B>: wake-up on every beacon/DTIM.
@@ -1124,6 +1140,16 @@ typedef struct __attribute__((__packed__)) sl_wfx_set_pm_mode_cnf_s {
   /** Confirmation message body. */
   sl_wfx_set_pm_mode_cnf_body_t body;
 } sl_wfx_set_pm_mode_cnf_t;
+
+/**
+ * @brief Indication message used to signal that the device has switched to Fast Power Save.
+ * @details This indication occurs when the devices switches to Fast PS as an attempt to mitigate
+ *          poor performance with U-APSD. Listen interval falls back to 0 (listen to every beacon/DTIM).
+ *          This can be overridden by issuing SL_WFX_SET_PM_MODE_REQ command again.
+ * @ingroup WFM_GROUP_MESSAGES
+ * @ingroup WFM_GROUP_MODE_STA
+ */
+typedef sl_wfx_header_t SL_WFX_PS_MODE_ERROR_IND;
 
 /**
  * @brief Request message body for sl_wfx_start_ap_req_t.

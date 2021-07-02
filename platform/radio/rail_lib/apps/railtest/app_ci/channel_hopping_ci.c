@@ -38,14 +38,14 @@
 #include "app_common.h"
 #include "rail_zwave.h"
 
-#if RAIL_FEAT_CHANNEL_HOPPING
+#if RAIL_SUPPORTS_CHANNEL_HOPPING
 
 static RAIL_RxChannelHoppingConfigEntry_t channelHoppingEntries[MAX_NUMBER_CHANNELS];
 static RAIL_RxChannelHoppingConfigMultiMode_t multiModeParams[MAX_NUMBER_CHANNELS];
 static RAIL_RxChannelHoppingConfig_t channelHoppingConfig = {
   .entries = channelHoppingEntries,
   .bufferLength = CHANNEL_HOPPING_BUFFER_SIZE,
-  .numberOfChannels = 0
+  .numberOfChannels = MAX_NUMBER_CHANNELS
 };
 // Enable RX duty cycle with power manager schedule wakeup
 static bool enableRxDutyCycleWithSchedWakeup = false;
@@ -65,6 +65,9 @@ void configRxChannelHopping(sl_cli_command_arg_t *args)
   if (sl_cli_get_argument_count(args) == 0) {
 #if RAIL_SUPPORTS_PROTOCOL_ZWAVE
     // If no arguments are provided, use the Z-Wave timings set by the calculator
+    channelHoppingConfig.entries = channelHoppingEntries;
+    channelHoppingConfig.bufferLength = CHANNEL_HOPPING_BUFFER_SIZE;
+    channelHoppingConfig.numberOfChannels = MAX_NUMBER_CHANNELS;
     status = RAIL_ZWAVE_ConfigRxChannelHopping(railHandle, &channelHoppingConfig);
     responsePrint(sl_cli_get_command_string(args, 0),
                   "numberOfChannels:%d,paramCh0:%d,paramCh1:%d,paramCh2:%d,paramCh3:%d,buffer:0x%x,Success:%s",
@@ -495,3 +498,116 @@ bool getRxDutyCycleSchedWakeupEnable(RAIL_Time_t *sleepInterval)
 }
 
 #endif
+
+void setNextTxRepeat(sl_cli_command_arg_t *args)
+{
+  RAIL_TxRepeatConfig_t repeats = {
+    .iterations = sl_cli_get_argument_uint16(args, 0),
+    .repeatOptions = RAIL_TX_REPEAT_OPTIONS_NONE,
+    .delayOrHop.delay = RAIL_TRANSITION_TIME_KEEP,
+  };
+  uint32_t argc = sl_cli_get_argument_count(args);
+  char *command = sl_cli_get_command_string(args, 0);
+
+  if (argc < 2U) {
+    // repeats already setup appropriately
+  } else if (argc <= 2U) {
+    repeats.delayOrHop.delay = sl_cli_get_argument_uint32(args, 1);
+  } else { // argc > 2U
+#if RAIL_SUPPORTS_CHANNEL_HOPPING
+    RAIL_TxChannelHoppingConfigEntry_t *txChannelHoppingEntries =
+      (RAIL_TxChannelHoppingConfigEntry_t *) channelHoppingEntries;
+    uint32_t i = 0U;
+    for (uint32_t arg = 2U; arg < argc; arg += 2U) {
+      uint32_t channel = sl_cli_get_argument_uint32(args, arg);
+      if (channel > (uint32_t)UINT16_MAX) {
+        responsePrintError(command, 0x16, "Channel must be a 16 bit value.");
+        return;
+      }
+      txChannelHoppingEntries[i].delay = sl_cli_get_argument_uint32(args, arg - 1U);
+      txChannelHoppingEntries[i].channel = (uint16_t)channel;
+      i++;
+    }
+    repeats.repeatOptions = RAIL_TX_REPEAT_OPTION_HOP;
+    repeats.delayOrHop.channelHopping.numberOfChannels = i;
+    repeats.delayOrHop.channelHopping.buffer = channelHoppingBuffer;
+    repeats.delayOrHop.channelHopping.bufferLength = CHANNEL_HOPPING_BUFFER_SIZE;
+    repeats.delayOrHop.channelHopping.entries = txChannelHoppingEntries;
+#else
+    responsePrintError(command, 0x16, "Hopping not supported on this platform.");
+    return;
+#endif
+  }
+
+  RAIL_Status_t ret = RAIL_SetNextTxRepeat(railHandle, &repeats);
+  if (ret != RAIL_STATUS_NO_ERROR) {
+    repeats.iterations = 0;
+  }
+  txRepeatCount = repeats.iterations;
+  responsePrint(command, "RepeatedTxCount:%u", repeats.iterations);
+}
+
+void setNextBleTxRepeat(sl_cli_command_arg_t *args)
+{
+  RAIL_BLE_TxRepeatConfig_t repeats = {
+    .iterations = sl_cli_get_argument_uint16(args, 0),
+    .repeatOptions = RAIL_TX_REPEAT_OPTIONS_NONE,
+    .delayOrHop.delay = RAIL_TRANSITION_TIME_KEEP,
+  };
+  uint32_t argc = sl_cli_get_argument_count(args);
+  char *command = sl_cli_get_command_string(args, 0);
+
+  if (argc < 2U) {
+    // repeats already setup appropriately
+  } else if (argc <= 2U) {
+    repeats.delayOrHop.delay = sl_cli_get_argument_uint32(args, 1);
+  } else if (argc <= 5U) {
+    responsePrintError(command, 0x17, "Need at least 6 parameters for BLE hop config.");
+    return;
+  } else { // argc > 5U
+#if RAIL_SUPPORTS_CHANNEL_HOPPING
+    // Default parameters to not exceed CLI parameter limits
+    uint32_t crcInit = 0x00555555UL;
+    bool disableWhitening = false;
+
+    RAIL_BLE_TxChannelHoppingConfigEntry_t *txChannelHoppingEntries =
+      (RAIL_BLE_TxChannelHoppingConfigEntry_t *) channelHoppingEntries;
+    uint32_t i = 0U;
+    for (uint32_t arg = 2U; arg < argc; arg += 5U) {
+      uint32_t railChannel    = sl_cli_get_argument_uint32(args, arg + 1U);
+      uint32_t logicalChannel = sl_cli_get_argument_uint32(args, arg + 2U);
+      if (railChannel >= 40U) {
+        responsePrintError(command, 0x27, "RAIL channel must be a valid BLE channel.");
+      }
+      if (logicalChannel >= 40U) {
+        responsePrintError(command, 0x28, "Logical channel must be a valid BLE channel.");
+      }
+
+      txChannelHoppingEntries[i].delay            = sl_cli_get_argument_uint32(args, arg - 1U);
+      txChannelHoppingEntries[i].phy              = sl_cli_get_argument_uint32(args, arg);
+      txChannelHoppingEntries[i].railChannel      = (uint8_t)railChannel;
+      txChannelHoppingEntries[i].logicalChannel   = (uint8_t)logicalChannel;
+      txChannelHoppingEntries[i].accessAddress    = sl_cli_get_argument_uint32(args, arg + 3U);
+
+      txChannelHoppingEntries[i].disableWhitening = disableWhitening;
+      txChannelHoppingEntries[i].crcInit          = crcInit;
+      i++;
+    }
+    repeats.repeatOptions = RAIL_TX_REPEAT_OPTION_HOP;
+    repeats.delayOrHop.channelHopping.numberOfChannels = i;
+    repeats.delayOrHop.channelHopping.buffer = channelHoppingBuffer;
+    repeats.delayOrHop.channelHopping.bufferLength = CHANNEL_HOPPING_BUFFER_SIZE;
+    repeats.delayOrHop.channelHopping.entries = txChannelHoppingEntries;
+#else
+    responsePrintError(command, 0x16, "Hopping not supported on this platform.");
+    return;
+#endif
+  }
+
+  RAIL_Status_t ret = RAIL_BLE_SetNextTxRepeat(railHandle, &repeats);
+  if (ret != RAIL_STATUS_NO_ERROR) {
+    repeats.iterations = 0;
+  }
+  txRepeatCount = repeats.iterations;
+  responsePrint(command, "RepeatedTxCount:%u", repeats.iterations);
+}

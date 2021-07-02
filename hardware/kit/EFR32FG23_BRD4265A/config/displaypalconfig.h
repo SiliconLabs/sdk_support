@@ -28,9 +28,9 @@
 /*.
  * Select which USART to use for SPI communication to the display.
  */
-#define PAL_SPI_USART_UNIT          USART1
-#define PAL_SPI_USART_INDEX         1
-#define PAL_SPI_USART_CLOCK         cmuClock_USART1
+#define PAL_SPI_USART_UNIT          USART0
+#define PAL_SPI_USART_INDEX         0
+#define PAL_SPI_USART_CLOCK         cmuClock_USART0
 
 /*
  * Specify the SPI baud rate:

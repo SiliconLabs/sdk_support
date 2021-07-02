@@ -37,6 +37,8 @@
   || defined(CRYPTOACC_PRESENT) \
   || defined(CRYPTO_PRESENT)
 
+#include "psa/crypto.h"
+
 #if defined(SEMAILBOX_PRESENT)
   #include "sli_se_transparent_functions.h"
   #include "sl_se_manager.h"

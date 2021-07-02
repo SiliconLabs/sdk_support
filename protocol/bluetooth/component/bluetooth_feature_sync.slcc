@@ -11,6 +11,8 @@ requires:
 provides:
   - name: "bluetooth_feature_sync"
 template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_sync
   - name: bluetooth_bgapi_class
     value:
       class: "sync"

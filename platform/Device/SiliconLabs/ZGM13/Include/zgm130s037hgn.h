@@ -4,7 +4,7 @@
  *        for ZGM130S037HGN
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -2153,4 +2153,5 @@ typedef enum IRQn{
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* ZGM130S037HGN_H */

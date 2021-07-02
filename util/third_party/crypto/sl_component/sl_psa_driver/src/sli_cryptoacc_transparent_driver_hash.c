@@ -34,12 +34,18 @@
 
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
+
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
 #include "cryptoacc_management.h"
 #include "sx_hash.h"
 #include "sx_errors.h"
 #include <string.h>
 
 // Define all init vectors.
+#if defined(PSA_WANT_ALG_SHA_1)
 static const uint8_t init_state_sha1[32] = {
   0x67, 0x45, 0x23, 0x01,
   0xEF, 0xCD, 0xAB, 0x89,
@@ -50,6 +56,8 @@ static const uint8_t init_state_sha1[32] = {
   0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00
 };
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
 static const uint8_t init_state_sha224[32] = {
   0xC1, 0x05, 0x9E, 0xD8,
   0x36, 0x7C, 0xD5, 0x07,
@@ -60,6 +68,8 @@ static const uint8_t init_state_sha224[32] = {
   0x64, 0xF9, 0x8F, 0xA7,
   0xBE, 0xFA, 0x4F, 0xA4
 };
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
 static const uint8_t init_state_sha256[32] = {
   0x6A, 0x09, 0xE6, 0x67,
   0xBB, 0x67, 0xAE, 0x85,
@@ -70,10 +80,17 @@ static const uint8_t init_state_sha256[32] = {
   0x1F, 0x83, 0xD9, 0xAB,
   0x5B, 0xE0, 0xCD, 0x19
 };
+#endif // PSA_WANT_ALG_SHA_256
+
+#endif // PSA_WANT_ALG_SHA_*
 
 psa_status_t sli_cryptoacc_transparent_hash_setup(sli_cryptoacc_transparent_hash_operation_t *operation,
                                                   psa_algorithm_t alg)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -86,18 +103,24 @@ psa_status_t sli_cryptoacc_transparent_hash_setup(sli_cryptoacc_transparent_hash
   memset(operation, 0, sizeof(sli_cryptoacc_transparent_hash_operation_t));
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       operation->hash_type = e_SHA1;
       memcpy(operation->state, init_state_sha1, SHA1_INITSIZE);
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       operation->hash_type = e_SHA224;
       memcpy(operation->state, init_state_sha224, SHA224_INITSIZE);
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       operation->hash_type = e_SHA256;
       memcpy(operation->state, init_state_sha256, SHA256_INITSIZE);
       break;
+#endif // PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -105,12 +128,25 @@ psa_status_t sli_cryptoacc_transparent_hash_setup(sli_cryptoacc_transparent_hash
   operation->total = 0;
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_cryptoacc_transparent_hash_update(sli_cryptoacc_transparent_hash_operation_t *operation,
                                                    const uint8_t *input,
                                                    size_t input_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   size_t blocks, fill, left;
   block_t data_in;
   block_t state;
@@ -122,11 +158,20 @@ psa_status_t sli_cryptoacc_transparent_hash_update(sli_cryptoacc_transparent_has
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  // State must have not been initialized by the setup function.
-  if (!(operation->hash_type == e_SHA1
-        || operation->hash_type == e_SHA224
-        || operation->hash_type == e_SHA256)) {
-    return PSA_ERROR_BAD_STATE;
+  switch (operation->hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
+    case e_SHA1:
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
+    case e_SHA224:
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
+    case e_SHA256:
+#endif // PSA_WANT_ALG_SHA_256
+    break;
+    default:
+      // State must have not been initialized by the setup function.
+      return PSA_ERROR_BAD_STATE;
   }
 
   if (input_length == 0) {
@@ -188,6 +233,16 @@ psa_status_t sli_cryptoacc_transparent_hash_update(sli_cryptoacc_transparent_has
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_cryptoacc_transparent_hash_finish(sli_cryptoacc_transparent_hash_operation_t *operation,
@@ -195,6 +250,10 @@ psa_status_t sli_cryptoacc_transparent_hash_finish(sli_cryptoacc_transparent_has
                                                    size_t hash_size,
                                                    size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   psa_status_t status;
   uint32_t sx_ret;
   block_t state;
@@ -202,16 +261,25 @@ psa_status_t sli_cryptoacc_transparent_hash_finish(sli_cryptoacc_transparent_has
   block_t data_out;
 
   if (operation == NULL
-      || hash_length == NULL
-      || hash == NULL) {
+      || (hash_length == NULL && hash_size > 0)
+      || (hash == NULL && hash_size > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  // State must have not been initialized by the setup function.
-  if (!(operation->hash_type == e_SHA1
-        || operation->hash_type == e_SHA224
-        || operation->hash_type == e_SHA256)) {
-    return PSA_ERROR_BAD_STATE;
+  switch (operation->hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
+    case e_SHA1:
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
+    case e_SHA224:
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
+    case e_SHA256:
+#endif // PSA_WANT_ALG_SHA_256
+    break;
+    default:
+      // State must have not been initialized by the setup function.
+      return PSA_ERROR_BAD_STATE;
   }
 
   if (hash_size < sx_hash_get_digest_size(operation->hash_type)) {
@@ -246,16 +314,39 @@ psa_status_t sli_cryptoacc_transparent_hash_finish(sli_cryptoacc_transparent_has
   memset(operation, 0, sizeof(sli_cryptoacc_transparent_hash_operation_t));
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)hash;
+  (void)hash_size;
+  (void)hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_cryptoacc_transparent_hash_abort(sli_cryptoacc_transparent_hash_operation_t *operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (operation != NULL) {
     // Accelerator does not keep state, so just zero out the context and we're good.
     memset(operation, 0, sizeof(sli_cryptoacc_transparent_hash_operation_t));
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_cryptoacc_transparent_hash_compute(psa_algorithm_t alg,
@@ -265,33 +356,43 @@ psa_status_t sli_cryptoacc_transparent_hash_compute(psa_algorithm_t alg,
                                                     size_t hash_size,
                                                     size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   psa_status_t status;
   uint32_t sx_ret = CRYPTOLIB_INVALID_PARAM;
   block_t data_in;
   block_t data_out;
 
   if ((input == NULL && input_length > 0)
-      || hash == NULL
-      || hash_length == NULL) {
+      || (hash == NULL && hash_size > 0)
+      || (hash_length == NULL && hash_size > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       if (hash_size < SHA1_DIGESTSIZE) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       if (hash_size < SHA224_DIGESTSIZE) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       if (hash_size < SHA256_DIGESTSIZE) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
       break;
+#endif // PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -303,20 +404,28 @@ psa_status_t sli_cryptoacc_transparent_hash_compute(psa_algorithm_t alg,
   if (status != PSA_SUCCESS) {
     return status;
   }
+
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       sx_ret = sx_hash_blk(e_SHA1, data_in, data_out);
       *hash_length = SHA1_DIGESTSIZE;
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       sx_ret = sx_hash_blk(e_SHA224, data_in, data_out);
       *hash_length = SHA224_DIGESTSIZE;
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       sx_ret = sx_hash_blk(e_SHA256, data_in, data_out);
       *hash_length = SHA256_DIGESTSIZE;
       break;
+#endif // PSA_WANT_ALG_SHA_256
   }
+
   status = cryptoacc_management_release();
   if (sx_ret != CRYPTOLIB_SUCCESS
       || status != PSA_SUCCESS) {
@@ -325,11 +434,28 @@ psa_status_t sli_cryptoacc_transparent_hash_compute(psa_algorithm_t alg,
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)hash;
+  (void)hash_size;
+  (void)hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_cryptoacc_transparent_hash_clone(const sli_cryptoacc_transparent_hash_operation_t *source_operation,
                                                   sli_cryptoacc_transparent_hash_operation_t *target_operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (source_operation == NULL
       || target_operation == NULL) {
     return PSA_ERROR_BAD_STATE;
@@ -350,6 +476,15 @@ psa_status_t sli_cryptoacc_transparent_hash_clone(const sli_cryptoacc_transparen
   *target_operation = *source_operation;
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)source_operation;
+  (void)target_operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 #endif // defined(CRYPTOACC_PRESENT)

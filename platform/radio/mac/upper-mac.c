@@ -899,8 +899,7 @@ sl_status_t sl_mac_send_raw_message(uint8_t mac_index,
 {
   uint8_t macInfoFlags = (EMBER_MAC_INFO_TYPE_PASSTHROUGH | (!useCca ? MAC_INHIBIT_CCA : 0));
 
-  PacketHeader header  = sl_mac_make_raw_message(emGetBufferLength(message),
-                                                 emGetBufferPointer(message),
+  PacketHeader header  = sl_mac_make_raw_message(message,
                                                  macInfoFlags,
                                                  // TODO this is incorrect
                                                  // Should be the current stack network context instead

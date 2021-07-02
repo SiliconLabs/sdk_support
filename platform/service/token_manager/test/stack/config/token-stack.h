@@ -176,6 +176,7 @@
 // NVM3KEY_USER_TEST_TOK_02 is an indexed token
 #define NVM3KEY_USER_TEST_TOK_02      (NVM3KEY_DOMAIN_USER | 0x0010)
 #define NVM3KEY_USER_TEST_TOK_COUNTER (NVM3KEY_DOMAIN_USER | 0x0020)
+#define NVM3KEY_USER_TEST_TOK_MAX_KEY (NVM3KEY_DOMAIN_USER | 0xfffc)
 
 /** @} END NVM3 Object Keys  */
 
@@ -238,6 +239,7 @@ typedef EmberEUI64 tokTypeParentLongId;
 typedef uint32_t tokTypeTestTok01;
 typedef uint32_t tokTypeTestTok02;
 typedef uint32_t tokTypeTestCounter;
+typedef uint32_t tokTypeTestTokMaxKey;
 
 #endif //DEFINETYPES
 
@@ -286,6 +288,9 @@ DEFINE_INDEXED_TOKEN(USER_TEST_TOK_02,
 DEFINE_COUNTER_TOKEN(USER_TEST_TOK_COUNTER,
                      tokTypeTestCounter,
                      0)
+DEFINE_BASIC_TOKEN(USER_TEST_TOK_MAX_KEY,
+                   tokTypeTestTokMaxKey,
+                   0x0000)
 #endif //DEFINETOKENS
 
 #ifdef MAC_DEBUG_TOKEN

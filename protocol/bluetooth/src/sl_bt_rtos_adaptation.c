@@ -47,7 +47,8 @@ static volatile sl_bgapi_handler command_handler_func = NULL;
 //Bluetooth stack thread
 static void bluetooth_thread(void *p_arg);
 static osThreadId_t tid_thread_bluetooth;
-__ALIGNED(8) static uint8_t thread_bluetooth_stk[(500 * sizeof(void *)) & 0xFFFFFFF8u];
+__ALIGNED(8) static uint8_t thread_bluetooth_stk[
+  SL_BT_RTOS_HOST_STACK_TASK_STACK_SIZE & 0xFFFFFFF8u];
 __ALIGNED(4) static uint8_t thread_bluetooth_cb[osThreadCbSize];
 
 static const osThreadAttr_t thread_bluetooth_attr = {
@@ -62,7 +63,8 @@ static const osThreadAttr_t thread_bluetooth_attr = {
 //Bluetooth linklayer thread
 static void linklayer_thread(void *p_arg);
 static osThreadId_t tid_thread_link_layer;
-__ALIGNED(8) static uint8_t thread_link_layer_stk[(250 * sizeof(void *)) & 0xFFFFFFF8u];
+__ALIGNED(8) static uint8_t thread_link_layer_stk[
+  SL_BT_RTOS_LINK_LAYER_TASK_STACK_SIZE & 0xFFFFFFF8u];
 __ALIGNED(4) static uint8_t thread_link_layer_cb[osThreadCbSize];
 static const osThreadAttr_t thread_Linklayer_attr = {
   .name = "Bluetooth linklayer",
@@ -77,7 +79,8 @@ static const osThreadAttr_t thread_Linklayer_attr = {
 #ifndef SL_BT_DISABLE_EVENT_TASK
 static void event_handler_thread(void *p_arg);
 static osThreadId_t tid_thread_event_handler;
-__ALIGNED(8) static uint8_t thread_event_handler_stk[(250 * sizeof(void *)) & 0xFFFFFFF8u];
+__ALIGNED(8) static uint8_t thread_event_handler_stk[
+  SL_BT_RTOS_EVENT_HANDLER_STACK_SIZE & 0xFFFFFFF8u];
 __ALIGNED(4) static uint8_t thread_event_handler_cb[osThreadCbSize];
 static const osThreadAttr_t thread_event_handler_attr = {
   .name = "Bluetooth event handler",
@@ -107,33 +110,51 @@ static const osMutexAttr_t bluetooth_mutex_attr = {
   .cb_size = osMutexCbSize
 };
 
+static osMutexId_t bgapi_mutex_id;
+__ALIGNED(4) static uint8_t bgapi_mutex_cb[osMutexCbSize];
+static const osMutexAttr_t bgapi_mutex_attr = {
+  .name = "BGAPI Mutex",
+  .attr_bits = osMutexRecursive | osMutexPrioInherit,
+  .cb_mem = bgapi_mutex_cb,
+  .cb_size = osMutexCbSize
+};
+
 sl_status_t sl_bt_rtos_init()
 {
   bluetooth_event_flags = osEventFlagsNew(&bluetooth_event_flags_attr);
   bluetooth_mutex_id = osMutexNew(&bluetooth_mutex_attr);
+  bgapi_mutex_id = osMutexNew(&bgapi_mutex_attr);
+
+  sli_bgapi_set_cmd_handler_delegate(sli_bt_cmd_handler_rtos_delegate);
+
+  // Create thread for Bluetooth stack
   tid_thread_bluetooth = osThreadNew(bluetooth_thread,
                                      NULL,
                                      &thread_bluetooth_attr);
-  if (bluetooth_event_flags == NULL
-      || bluetooth_mutex_id == NULL
-      || tid_thread_bluetooth == NULL) {
-    return SL_STATUS_FAIL;
-  }
-  return SL_STATUS_OK;
-}
 
-static void sli_bt_rtos_create_threads()
-{
-  //create tasks for Linklayer
+  // Create thread for Linklayer
   tid_thread_link_layer = osThreadNew(linklayer_thread,
                                       NULL,
                                       &thread_Linklayer_attr);
-  //create tasks for Bluetooth event handler
+
+  // Create thread for Bluetooth event handler
 #ifndef SL_BT_DISABLE_EVENT_TASK
   tid_thread_event_handler = osThreadNew(event_handler_thread,
                                          NULL,
                                          &thread_event_handler_attr);
 #endif
+
+  if (bluetooth_event_flags == NULL
+      || bluetooth_mutex_id == NULL
+      || bgapi_mutex_id == NULL
+      || tid_thread_bluetooth == NULL
+#ifndef SL_BT_DISABLE_EVENT_TASK
+      || tid_thread_event_handler == NULL
+#endif
+      || tid_thread_link_layer == NULL) {
+    return SL_STATUS_FAIL;
+  }
+  return SL_STATUS_OK;
 }
 
 //This callback is called from interrupt context (Kernel Aware)
@@ -169,8 +190,7 @@ void bluetooth_thread(void *p_arg)
   uint32_t flags = SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED;
 
   sl_bt_init();
-  sli_bgapi_set_cmd_handler_delegate(sli_bt_cmd_handler_rtos_delegate);
-  sli_bt_rtos_create_threads();
+
   while (1) {
     //Command needs to be sent to Bluetooth stack
     if (flags & SL_BT_RTOS_EVENT_FLAG_CMD_WAITING) {
@@ -183,7 +203,8 @@ void bluetooth_thread(void *p_arg)
                       SL_BT_RTOS_EVENT_FLAG_RSP_WAITING);
     }
 
-    //Bluetooth stack needs updating, and evt can be used
+    //Run Bluetooth stack. Pop the next event for application
+    sl_bt_run();
     if (sl_bt_event_pending() && (flags & SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED)) {  //update bluetooth & read event
       sl_status_t status = sl_bt_pop_event((sl_bt_msg_t*) &bluetooth_evt_instance);
       if (SL_STATUS_OK != status) {
@@ -348,6 +369,19 @@ static sl_status_t os2sl_status(osStatus_t ret)
     default:
       return SL_STATUS_FAIL; //return this error for codes haven't been mapped yet
   }
+}
+
+// Called by Bluetooth stack to lock BGAPI for exclusive access
+sl_status_t sli_bgapi_lock()
+{
+  osStatus_t ret = osMutexAcquire(bgapi_mutex_id, osWaitForever);
+  return os2sl_status(ret);
+}
+
+// Called by Bluetooth stack to release the lock obtained by @ref sli_bgapi_lock
+void sli_bgapi_unlock()
+{
+  (void) osMutexRelease(bgapi_mutex_id);
 }
 
 sl_status_t sl_bt_bluetooth_pend()

@@ -172,6 +172,7 @@ SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void)
 
     default:
       sc = securityCapabilityUnknown;
+      break;
   }
 #endif
 

@@ -51,13 +51,6 @@
  * @{
  ******************************************************************************/
 
-// Ocelot FGPA ID
-#define FPGA_WIRE 0x05
-#define FPGA_OTA  0x0F
-#define FPGA_SE   0x00
-
-#define FPGA_ID_MASK 0x0F
-
 #if defined(HFRCO_STARTUP_FREQ)
 #define HFRCO_CLK_FREQ HFRCO_STARTUP_FREQ
 #else
@@ -70,17 +63,17 @@ CMU_Select_TypeDef cmu_euart0_clk_source = cmuSelect_HFRCO;
 CMU_Select_TypeDef cmu_eusart0_clk_source = cmuSelect_HFRCO;
 CMU_Select_TypeDef cmu_eusart1_clk_source = cmuSelect_HFRCO;
 CMU_Select_TypeDef cmu_eusart2_clk_source = cmuSelect_HFRCO;
+CMU_Select_TypeDef cmu_eusart3_clk_source = cmuSelect_HFRCO;
 
 uint32_t Get_Fpga_Core_freq(void)
 {
-  if ((SYSCFG->FPGAIPOTHW & FPGA_ID_MASK) == FPGA_WIRE ) {
-#if defined(HFRCO_STARTUP_FREQ)
-    return HFRCO_STARTUP_FREQ;
-#else
-    return 9600000u;
-#endif
-  } else if ((SYSCFG->FPGAIPOTHW & FPGA_ID_MASK) == FPGA_OTA) {
-    return 38400000u;
+  if ((SYSCFG->FPGAIPOTHW & SYSCFG_FPGAIPOTHW_FPGA_FPGA) != 0U) {
+    // TODO dacabrer: accomodate other clocking configuration options
+    if ((SYSCFG->FPGAIPOTHW & SYSCFG_FPGAIPOTHW_OTA_OTA) != 0U) {
+      return 38400000U;
+    } else {
+      return 9600000U;
+    }
   } else {
     return SystemHFXOClockGet();
   }
@@ -182,13 +175,13 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
     case cmuClock_TIMER4:
     case cmuClock_BURAM:
     case cmuClock_KEYSCAN:
-      #ifdef USART0
+#if defined(USART0)
     case cmuClock_USART0:
 #endif
-#ifdef USART1
+#if defined(USART1)
     case cmuClock_USART1:
 #endif
-#ifdef USART2
+#if defined(USART2)
     case cmuClock_USART2:
 #endif
       return Get_Fpga_Core_freq();
@@ -211,11 +204,11 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
     case cmuClock_LESENSE:
       return LFRCO_CLK_FREQ;
     case cmuClock_BURTC:
-#ifdef WDOG1
+#if defined(WDOG1)
     case cmuClock_WDOG1:
 #endif
       return ULFRCO_CLK_FREQ;
-#ifdef EUART0
+#if defined(EUART0)
     case cmuClock_EUART0:
       switch (cmu_euart0_clk_source) {
         case cmuSelect_EM01GRPACLK:
@@ -236,19 +229,23 @@ uint32_t CMU_ClockFreqGet(CMU_Clock_TypeDef clock)
       }
       return freq;
 #endif
-#ifdef EUSART0
+#if defined(EUSART0)
     case cmuClock_EUSART0:
       switch (cmu_eusart0_clk_source) {
         case cmuSelect_EM01GRPACLK:
+        case cmuSelect_EM01GRPCCLK:
           freq = Get_Fpga_Core_freq();
           break;
-        case cmuSelect_EM23GRPACLK:
+        case cmuSelect_EM23GRPACLK:       // This is for Lynx
+        case cmuSelect_LFRCO:             // This is for Ocelot/Bobcat
           freq = LFRCO_CLK_FREQ;
           break;
         case cmuSelect_ULFRCO:
           freq = ULFRCO_CLK_FREQ;
           break;
+        case cmuSelect_HFRCO:
         case cmuSelect_HFRCODPLL:
+        case cmuSelect_HFRCOEM23:
           freq = Get_Fpga_Core_freq();
           break;
         default:
@@ -268,7 +265,7 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
   CMU_Select_TypeDef clock_source = (CMU_Select_TypeDef) 0;
 
   switch (clock) {
-#ifdef EUART0
+#if defined(EUART0)
     case cmuClock_EUART0:
 //      clock_source = cmu_euart0_clk_source;
       if (cmu_euart0_clk_source == cmuSelect_EM01GRPACLK) {
@@ -278,22 +275,24 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
       }
       break;
 #endif
-#ifdef EUSART0
+#if defined(EUSART0)
     case cmuClock_EUSART0:
-      if (cmu_eusart0_clk_source == cmuSelect_EM01GRPACLK) {
-        clock_source = cmuSelect_HFRCO;
-      } else if (cmu_eusart0_clk_source == cmuSelect_EM23GRPACLK) {
-        clock_source = cmuSelect_LFRCO;
-      }
+      clock_source = cmu_eusart0_clk_source;
       break;
 #endif
-#ifdef EUSART1
+#if defined(EUSART1)
     case cmuClock_EUSART1:
-      if (cmu_eusart1_clk_source == cmuSelect_EM01GRPACLK) {
-        clock_source = cmuSelect_HFRCO;
-      } else if (cmu_eusart1_clk_source == cmuSelect_EM23GRPACLK) {
-        clock_source = cmuSelect_LFRCO;
-      }
+      clock_source = cmu_eusart1_clk_source;
+      break;
+#endif
+#if defined(EUSART2)
+    case cmuClock_EUSART2:
+      clock_source = cmu_eusart2_clk_source;
+      break;
+#endif
+#if defined(EUSART3)
+    case cmuClock_EUSART3:
+      clock_source = cmu_eusart3_clk_source;
       break;
 #endif
     default:
@@ -306,26 +305,32 @@ CMU_Select_TypeDef CMU_ClockSelectGet(CMU_Clock_TypeDef clock)
 
 void CMU_ClockSelectSet(CMU_Clock_TypeDef clock, CMU_Select_TypeDef ref)
 {
-  (void) ref;
   switch (clock) {
-#ifdef EUART0
+#if defined(EUART0)
     case cmuClock_EUART0:
       cmu_euart0_clk_source = ref;
       break;
 #endif
-#ifdef EUSART0
+#if defined(EUSART0)
     case cmuClock_EUSART0:
+    case cmuClock_EUSART0CLK:
+    case cmuClock_EM01GRPCCLK:
       cmu_eusart0_clk_source = ref;
       break;
 #endif
-#ifdef EUSART1
+#if defined(EUSART1)
     case cmuClock_EUSART1:
       cmu_eusart1_clk_source = ref;
       break;
 #endif
-#ifdef EUSART2
+#if defined(EUSART2)
     case cmuClock_EUSART2:
       cmu_eusart2_clk_source = ref;
+      break;
+#endif
+#if defined(EUSART3)
+    case cmuClock_EUSART3:
+      cmu_eusart3_clk_source = ref;
       break;
 #endif
     default:
@@ -415,6 +420,11 @@ void CMU_UpdateWaitStates(uint32_t freq, int vscale)
   (void)vscale;
 }
 
+void CMU_LFXOPrecisionSet(uint16_t precision)
+{
+  (void)precision;
+}
+
 /** @} (end addtogroup CMU) */
 /** @} (end addtogroup emlib) */
-#endif /* #if defined(CMU_PRESENT) && defined(FPGA) */
+#endif /* defined(CMU_PRESENT) && defined(FPGA) */

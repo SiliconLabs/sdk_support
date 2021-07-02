@@ -126,7 +126,7 @@ uint32_t parser_getBootloaderUpgradeAddress(void)
     return 0UL;
   }
 #else
-  return BTL_UPGRADE_LOCATION_BASE;
+  return FLASH_BASE + BTL_UPGRADE_LOCATION_BASE;
 #endif
 }
 

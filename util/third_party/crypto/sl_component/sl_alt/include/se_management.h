@@ -39,8 +39,8 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * \addtogroup sl_se_management Peripheral Instance Management: Secure Element
- * \brief Concurrency management functions for Secure Element mailbox access
+ * \addtogroup sl_se_management Peripheral Instance Management: Secure Engine
+ * \brief Concurrency management functions for Secure Engine mailbox access
  *
  * \{
  ******************************************************************************/

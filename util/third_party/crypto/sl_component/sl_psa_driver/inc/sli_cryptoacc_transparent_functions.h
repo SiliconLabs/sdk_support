@@ -121,11 +121,6 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt_setup(sli_cryptoacc_transp
                                                             size_t key_buffer_size,
                                                             psa_algorithm_t alg);
 
-psa_status_t sli_cryptoacc_transparent_cipher_generate_iv(sli_cryptoacc_transparent_cipher_operation_t *operation,
-                                                          uint8_t *iv,
-                                                          size_t iv_size,
-                                                          size_t *iv_length);
-
 psa_status_t sli_cryptoacc_transparent_cipher_set_iv(sli_cryptoacc_transparent_cipher_operation_t *operation,
                                                      const uint8_t *iv,
                                                      size_t iv_length);
@@ -179,6 +174,12 @@ psa_status_t sli_cryptoacc_transparent_mac_sign_setup(sli_cryptoacc_transparent_
                                                       size_t key_buffer_size,
                                                       psa_algorithm_t alg);
 
+psa_status_t sli_cryptoacc_transparent_mac_verify_setup(sli_cryptoacc_transparent_mac_operation_t *operation,
+                                                        const psa_key_attributes_t *attributes,
+                                                        const uint8_t *key_buffer,
+                                                        size_t key_buffer_size,
+                                                        psa_algorithm_t alg);
+
 psa_status_t sli_cryptoacc_transparent_mac_update(sli_cryptoacc_transparent_mac_operation_t *operation,
                                                   const uint8_t *input,
                                                   size_t input_length);
@@ -187,6 +188,10 @@ psa_status_t sli_cryptoacc_transparent_mac_sign_finish(sli_cryptoacc_transparent
                                                        uint8_t *mac,
                                                        size_t mac_size,
                                                        size_t *mac_length);
+
+psa_status_t sli_cryptoacc_transparent_mac_verify_finish(sli_cryptoacc_transparent_mac_operation_t *operation,
+                                                         const uint8_t *mac,
+                                                         size_t mac_length);
 
 psa_status_t sli_cryptoacc_transparent_mac_abort(sli_cryptoacc_transparent_mac_operation_t *operation);
 
@@ -287,10 +292,13 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
                                                          size_t data_size,
                                                          size_t *data_length);
 
-psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *attributes,
-                                                    const uint8_t *data,
-                                                    size_t data_length,
-                                                    size_t *bits);
+psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *attributes,
+                                                  const uint8_t *data,
+                                                  size_t data_length,
+                                                  uint8_t *key_buffer,
+                                                  size_t key_buffer_size,
+                                                  size_t *key_buffer_length,
+                                                  size_t *bits);
 
 psa_status_t sli_cryptoacc_transparent_key_agreement(psa_algorithm_t alg,
                                                      const psa_key_attributes_t *attributes,

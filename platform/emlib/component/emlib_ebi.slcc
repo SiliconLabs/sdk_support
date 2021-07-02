@@ -19,3 +19,16 @@ requires:
   - name: device_has_ebi
   - name: emlib_common
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efm32g/group-ebi
+      condition: [device_sdid_71]
+    - page: emlib/api/efm32gg/group-ebi
+      condition: [device_sdid_72]
+    - page: emlib/api/efm32lg/group-ebi
+      condition: [device_sdid_74]
+    - page: emlib/api/efm32gg11/group-ebi
+      condition: [device_sdid_100]
+    - page: emlib/api/efm32gg12/group-ebi
+      condition: [device_sdid_106]

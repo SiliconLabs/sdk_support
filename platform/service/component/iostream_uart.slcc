@@ -1,28 +1,43 @@
 id: iostream_uart
-package: platform
 label: "IO Stream: UART"
-description: Core of IO Stream USART.
+package: platform
+description: IO Stream over Universal Asynchronous Receiver Transceiver (UART) communication protocol.
 category: Services|IO Stream
 quality: production
-ui_hints:
-  visibility: never
+instantiable:
+  prefix: inst
+root_path: platform/service/iostream
+config_file:
+  - path: "config/s0/sl_iostream_uart_{{instance}}_config.h"
+    file_id: iostream_uart_config
+    condition: [device_series_0]
+  - path: "config/s1/sl_iostream_uart_{{instance}}_config.h"
+    file_id: iostream_uart_config
+    condition: [device_series_1]
 provides:
   - name: iostream_uart
-root_path: platform/service/iostream
-include:
-  - path: inc
-    file_list:
-      - path: sl_iostream_uart.h
-      - path: sli_iostream_uart.h
-source:
-  - path: src/sl_iostream_uart.c
-template_contribution:
-  - name: component_catalog
-    value: iostream_uart
+    allow_multiple: true
+  - name: iostream_transport
+    allow_multiple: true
 requires:
-  - name: iostream
-  - name: status
-  - name: atomic
+  - name: iostream_uart_core
+template_contribution:
+  - name: iostream_uart_instances
+    value: "{{instance}}"
+  - name: event_handler
+    value:
+      event: iostream_instance_init
+      include: sl_iostream_init_uart_instances.h
+      handler: sl_iostream_uart_init_instances
+  - name: iostream_instance_info
+    value:
+      include: sl_iostream_init_uart_instances.h
+      handler: "sl_iostream_instance_{{instance}}_info"
+  - name: power_manager_handler
+    value:
+      event: sleep_on_isr_exit
+      include: sl_iostream_init_uart_instances.h
+      handler: "sl_iostream_uart_{{instance}}_sleep_on_isr_exit"
 documentation:
     docset: gecko-platform
-    document: service/api/group-iostream-uart
+    document: service/api/group-iostream-usart

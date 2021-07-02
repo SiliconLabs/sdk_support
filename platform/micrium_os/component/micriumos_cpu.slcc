@@ -33,6 +33,6 @@ template_contribution:
   - name: event_handler
     value:
       event: platform_init
-      include: "cpu.h"
-      handler: "CPU_Init"
+      include: cpu.h
+      handler: CPU_Init
     priority: 2

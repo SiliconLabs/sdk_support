@@ -6,35 +6,35 @@ xsi:schemaLocation="http://www.silabs.com/ss/ContentItem.ecore file:/C:/Users/CA
   <contentItemData
     priority="2"
     category="Getting Started"
-    itemURI="https://doc.micrium.com/display/OSUM50900/General+Concepts"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-general-concepts/"
     label="General Concepts"
     description="Description of general concepts that are used throughout Micrium OS products"
   ></contentItemData>
   <contentItemData
     priority="1"
     category="API References"
-    itemURI="https://doc.micrium.com/display/OSUM50900/Kernel+API"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-kernel-api/"
     label="Kernel API Reference"
     description="API Reference for Micrium OS Kernel"
   ></contentItemData>
   <contentItemData
     priority="4"
     category="API References"
-    itemURI="https://doc.micrium.com/display/OSUM50900/IO+API"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-io-api/"
     label="IO API Reference"
     description="API Reference for Micrium OS IO"
   ></contentItemData>
   <contentItemData
     priority="2"
     category="API References"
-    itemURI="https://doc.micrium.com/display/OSUM50900/CPU+API"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-cpu-api/"
     label="CPU API Reference"
     description="API Reference for Micrium OS CPU"
   ></contentItemData>
   <contentItemData
     priority="3"
     category="API References"
-    itemURI="https://doc.micrium.com/display/OSUM50900/Common+API"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-common-api/"
     label="Common API Reference"
     description="API Reference for Micrium OS Common"
   ></contentItemData>

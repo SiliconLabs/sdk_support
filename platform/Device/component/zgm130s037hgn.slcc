@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: ZGM130S037HGN
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/ZGM13/Source/system_zgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/ZGM13/Source/IAR/startup_zgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/ZGM13/Source/GCC/startup_zgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/ZGM13/Source/ARM/startup_zgm13.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: zgm130s037hgn.h
@@ -71,6 +81,8 @@
     - path: zgm13_wdog.h
     - path: zgm13_wdog_pch.h
     path: platform/Device/SiliconLabs/ZGM13/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: zgm130s037hgn
   - name: device
@@ -139,6 +151,8 @@
   - name: device_has_wtimer
   - name: device_has_wtimer0
   - name: device_has_bootloader_flash
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -183,7 +197,6 @@
     value: 2048
 - tag:
   - device:opn:zgm130s037hgn
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: zgm130s037hgn

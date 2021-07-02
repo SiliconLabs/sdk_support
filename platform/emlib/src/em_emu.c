@@ -202,6 +202,9 @@ static errataFixDcdcHs_TypeDef errataFixDcdcHsState = errataFixDcdcHsInit;
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
 #define RAM0_BLOCKS            4U
 #define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#define RAM0_BLOCKS           16U
+#define RAM0_BLOCK_SIZE   0x4000U // 16 kB blocks
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
@@ -606,6 +609,24 @@ static void dpllState(dpllState_TypeDef action)
  * @{
  ******************************************************************************/
 
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(EMU_VSCALE_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *   Energy mode 01 voltage scaling hook function.
+ *
+ * @details
+ *   This function is called by EMU_VScaleEM01 to let EFP know that voltage scaling
+ *   is requested.
+ *
+ * @param[in] voltage
+ *   Voltage to set in EFP.
+ ******************************************************************************/
+SL_WEAK void EMU_EFPEM01VScale(EMU_VScaleEM01_TypeDef voltage)
+{
+  (void)voltage;
+}
+#endif
+
 /***************************************************************************//**
  * @brief
  *   Energy mode 2/3 pre-sleep hook function.
@@ -615,6 +636,18 @@ static void dpllState(dpllState_TypeDef action)
  *   just prior to execution of the WFI instruction. The function implementation
  *   does not perform anything, but it is SL_WEAK so that it can be re-
  *   implemented in application code if actions are needed.
+ ******************************************************************************/
+SL_WEAK void EMU_EM23PresleepHook(void)
+{
+}
+
+/***************************************************************************//**
+ * @brief
+ *   EFP's Energy mode 2/3 pre-sleep hook function.
+ *
+ * @details
+ *   This function is similar to @ref EMU_EM23PresleepHook() but is reserved
+ *   for EFP usage.
  *
  * @note
  *   The function is primarily meant to be used in systems with EFP circuitry.
@@ -622,7 +655,7 @@ static void dpllState(dpllState_TypeDef action)
  *   In such systems there is a need to drive certain signals to EFP pins to
  *   notify about energy mode transitions.
  ******************************************************************************/
-SL_WEAK void EMU_EM23PresleepHook(void)
+SL_WEAK void EMU_EFPEM23PresleepHook(void)
 {
 }
 
@@ -635,6 +668,18 @@ SL_WEAK void EMU_EM23PresleepHook(void)
  *   just after wakeup from the WFI instruction. The function implementation
  *   does not perform anything, but it is SL_WEAK so that it can be re-
  *   implemented in application code if actions are needed.
+ ******************************************************************************/
+SL_WEAK void EMU_EM23PostsleepHook(void)
+{
+}
+
+/***************************************************************************//**
+ * @brief
+ *   EFP's Energy mode 2/3 post-sleep hook function.
+ *
+ * @details
+ *   This function is similar to @ref EMU_EM23PostsleepHook() but is reserved
+ *   for EFP usage.
  *
  * @note
  *   The function is primarily meant to be used in systems with EFP circuitry.
@@ -642,7 +687,7 @@ SL_WEAK void EMU_EM23PresleepHook(void)
  *   In such systems there is a need to drive certain signals to EFP pins to
  *   notify about energy mode transitions.
  ******************************************************************************/
-SL_WEAK void EMU_EM23PostsleepHook(void)
+SL_WEAK void EMU_EFPEM23PostsleepHook(void)
 {
 }
 
@@ -760,6 +805,7 @@ void EMU_EnterEM2(bool restore)
 #endif
 
   EMU_EM23PresleepHook();
+  EMU_EFPEM23PresleepHook();
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205) \
   || defined(ERRATA_FIX_EMU_E110_ENABLE)
   CORE_CRITICAL_SECTION(ramWFI(); )
@@ -773,6 +819,7 @@ void EMU_EnterEM2(bool restore)
 #else
   __WFI();
 #endif
+  EMU_EFPEM23PostsleepHook();
   EMU_EM23PostsleepHook();
 
 #if defined(ERRATA_FIX_DCDC_FETCNT_SET_ENABLE)
@@ -1038,6 +1085,38 @@ void EMU_Restore(void)
 
 /***************************************************************************//**
  * @brief
+ *   Energy mode 4 pre-sleep hook function.
+ *
+ * @details
+ *   This function is called by @ref EMU_EnterEM4() just prior to the sequence
+ *   of writes to put the device in EM4. The function implementation does not
+ *   perform anything, but it is SL_WEAK so that it can be re-implemented in
+ *   application code if actions are needed.
+ ******************************************************************************/
+SL_WEAK void EMU_EM4PresleepHook(void)
+{
+}
+
+/***************************************************************************//**
+ * @brief
+ *   EFP's Energy mode 4 pre-sleep hook function.
+ *
+ * @details
+ *   This function is similar to @ref EMU_EM4PresleepHook() but is reserved for
+ *   EFP usage.
+ *
+ * @note
+ *   The function is primarily meant to be used in systems with EFP circuitry.
+ *   (EFP = Energy Friendly Pmic (PMIC = Power Management IC)).
+ *   In such systems there is a need to drive certain signals to EFP pins to
+ *   notify about energy mode transitions.
+ ******************************************************************************/
+SL_WEAK void EMU_EFPEM4PresleepHook(void)
+{
+}
+
+/***************************************************************************//**
+ * @brief
  *   Enter energy mode 4 (EM4).
  *
  * @note
@@ -1075,8 +1154,9 @@ void EMU_EnterEM4(void)
   }
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   /* Workaround for bug that may cause a Hard Fault on EM4 entry */
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
   /* Switch from DCDC regulation mode to bypass mode before entering EM4. */
@@ -1127,6 +1207,9 @@ void EMU_EnterEM4(void)
     }
   }
 #endif
+
+  EMU_EM4PresleepHook();
+  EMU_EFPEM4PresleepHook();
 
   for (i = 0; i < 4; i++) {
 #if defined(_EMU_EM4CTRL_EM4ENTRY_SHIFT)
@@ -1228,7 +1311,8 @@ void EMU_MemPwrDown(uint32_t blocks)
  *
  * @note
  *   Only a reset can power up the specified memory block(s) after power down
- *   on a series 0 device.
+ *   on a series 0 device. The specified memory block(s) will stay off
+ *   until a call to EMU_RamPowerUp() is done on series 1/2.
  *
  * @param[in] start
  *   The start address of the RAM region to power down. This address is
@@ -1478,6 +1562,7 @@ void EMU_VScaleEM01(EMU_VScaleEM01_TypeDef voltage, bool wait)
 
   CORE_ENTER_CRITICAL();
   EMU->IF_CLR = EMU_IF_VSCALEDONE;
+  EMU_EFPEM01VScale(voltage);
   EMU->CMD = vScaleEM01Cmd(voltage);
 
   // Note that VSCALEDONE interrupt flag must be used instead of VSCALEBUSY
@@ -2986,8 +3071,7 @@ bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit)
 #endif
 #if defined(_DCDC_CTRL_DCMONLYEN_MASK)
   DCDC->CTRL = (DCDC->CTRL & ~(_DCDC_CTRL_IPKTMAXCTRL_MASK
-                               | _DCDC_CTRL_DCMONLYEN_MASK
-                               ))
+                               | _DCDC_CTRL_DCMONLYEN_MASK))
                | ((uint32_t)dcdcInit->tonMax << _DCDC_CTRL_IPKTMAXCTRL_SHIFT)
                | ((uint32_t)(dcdcInit->dcmOnlyEn ? 1U : 0U) << _DCDC_CTRL_DCMONLYEN_SHIFT);
 #else
@@ -3079,7 +3163,7 @@ bool EMU_DCDCPowerOff(void)
  * @brief
  *   Set EMO1 mode Peak Current setting.
  *
- * @param[in] value
+ * @param[in] peakCurrentEM01
  *  Peak load current coefficient in EM01 mode.
  ******************************************************************************/
 void EMU_EM01PeakCurrentSet(const EMU_DcdcPeakCurrent_TypeDef peakCurrentEM01)
@@ -3230,6 +3314,7 @@ void EMU_DCDCSetPFMXTimeoutMaxCtrl(EMU_DcdcTonMaxTimeout_TypeDef value)
 static uint32_t vmonCalibratedThreshold(EMU_VmonChannel_TypeDef channel,
                                         int threshold)
 {
+  uint32_t tDiff = 0;
   uint32_t tLow = 0;
   uint32_t tHigh = 0;
   uint32_t calReg;
@@ -3311,14 +3396,15 @@ static uint32_t vmonCalibratedThreshold(EMU_VmonChannel_TypeDef channel,
       break;
   }
 
-  if (tLow < tHigh) {
+  tDiff = tHigh - tLow;
+  if (tDiff > 0) {
     /* Calculate threshold.
      *
      * Note that volt is used in the reference manual. However, the results
      * should be in millivolts. The precision of Va and Vb are increased in the
      * calculation instead of using floating points.
      */
-    uint32_t va = (1120U * 100U) / (tHigh - tLow);
+    uint32_t va = (1120U * 100U) / (tDiff);
     uint32_t vb = (1860U * 100U) - (va * tLow);
     // If (tHigh - tLow) is large, Va could be zero. Caught by CSTAT.
     if (va != 0) {
@@ -3653,6 +3739,70 @@ float EMU_TemperatureGet(void)
 #endif
 }
 #endif //defined(_EMU_TEMP_TEMP_MASK)
+
+#if defined(EMU_CTRL_EFPDIRECTMODEEN)
+/***************************************************************************//**
+ * @brief
+ *   Enable/disable EFP Direct Mode.
+ *
+ * @param[in] enable
+ *   True to enable direct mode.
+ ******************************************************************************/
+void EMU_EFPDirectModeEnable(bool enable)
+{
+  if (enable) {
+    EMU->CTRL_SET = EMU_CTRL_EFPDIRECTMODEEN;
+  } else {
+    EMU->CTRL_CLR = EMU_CTRL_EFPDIRECTMODEEN;
+  }
+}
+#endif
+
+#if defined(EMU_CTRL_EFPDRVDECOUPLE)
+/***************************************************************************//**
+ * @brief
+ *   Set to enable EFP to drive Decouple voltage.
+ *
+ * @details
+ *   Once set, internal LDO will be disabled, and the EMU will control EFP for
+ *   voltage-scaling. Note that because this bit disables the internal LDO
+ *   powering the core, it should not be set until after EFP's DECOUPLE output has
+ *   been configured and enabled.
+ *
+ * @param[in] enable
+ *   True to enable EFP to drive Decouple voltage.
+ ******************************************************************************/
+void EMU_EFPDriveDecoupleSet(bool enable)
+{
+  if (enable) {
+    EMU->CTRL_SET = EMU_CTRL_EFPDRVDECOUPLE;
+  } else {
+    EMU->CTRL_CLR = EMU_CTRL_EFPDRVDECOUPLE;
+  }
+}
+#endif
+
+#if defined(EMU_CTRL_EFPDRVDVDD)
+/***************************************************************************//**
+ * @brief
+ *   Set to enable EFP to drive DVDD voltage.
+ *
+ * @details
+ *   Set this if EFP's DCDC output is powering DVDD supply. This mode assumes that
+ *   internal DCDC is not being used.
+ *
+ * @param[in] enable
+ *   True to enable EFP to drive DVDD voltage.
+ ******************************************************************************/
+void EMU_EFPDriveDvddSet(bool enable)
+{
+  if (enable) {
+    EMU->CTRL_SET = EMU_CTRL_EFPDRVDVDD;
+  } else {
+    EMU->CTRL_CLR = EMU_CTRL_EFPDRVDVDD;
+  }
+}
+#endif
 
 /** @} (end addtogroup emu) */
 #endif /* __EM_EMU_H */

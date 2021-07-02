@@ -130,8 +130,10 @@ int mbedtls_aes_xts_setkey_enc(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
@@ -157,8 +159,10 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
@@ -178,51 +182,6 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
   /* Set crypt key for decryption. */
   return mbedtls_aes_setkey_dec(&ctx->crypt, key1, key1bits);
 }
-
-#if defined(MBEDTLS_CIPHER_MODE_OFB)
-/*
- * AES-OFB (Output Feedback Mode) buffer encryption/decryption
- */
-int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
-                          size_t length,
-                          size_t *iv_off,
-                          unsigned char iv[16],
-                          const unsigned char *input,
-                          unsigned char *output)
-{
-  int ret = 0;
-  size_t n;
-
-  AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(iv_off != NULL);
-  AES_VALIDATE_RET(iv != NULL);
-  AES_VALIDATE_RET(input != NULL);
-  AES_VALIDATE_RET(output != NULL);
-
-  n = *iv_off;
-
-  if ( n > 15 ) {
-    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
-  }
-
-  while ( length-- ) {
-    if ( n == 0 ) {
-      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
-      if ( ret != 0 ) {
-        goto exit;
-      }
-    }
-    *output++ =  *input++ ^ iv[n];
-
-    n = (n + 1) & 0x0F;
-  }
-
-  *iv_off = n;
-
-  exit:
-  return(ret);
-}
-#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 /* Endianess with 64 bits values */
 #ifndef GET_UINT64_LE
@@ -473,7 +432,7 @@ void mbedtls_aes_encrypt(mbedtls_aes_context *ctx,
                          const unsigned char input[16],
                          unsigned char output[16])
 {
-  mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, input, output);
+  (void) mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, input, output);
 }
 
 /*
@@ -483,7 +442,7 @@ void mbedtls_aes_decrypt(mbedtls_aes_context *ctx,
                          const unsigned char input[16],
                          unsigned char output[16])
 {
-  mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_DECRYPT, input, output);
+  (void) mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_DECRYPT, input, output);
 }
 
 /*
@@ -910,6 +869,51 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
   return ret;
 }
 #endif /* MBEDTLS_CIPHER_MODE_CTR */
+
+#if defined(MBEDTLS_CIPHER_MODE_OFB)
+/*
+ * AES-OFB (Output Feedback Mode) buffer encryption/decryption
+ */
+int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
+                          size_t length,
+                          size_t *iv_off,
+                          unsigned char iv[16],
+                          const unsigned char *input,
+                          unsigned char *output)
+{
+  int ret = 0;
+  size_t n;
+
+  AES_VALIDATE_RET(ctx != NULL);
+  AES_VALIDATE_RET(iv_off != NULL);
+  AES_VALIDATE_RET(iv != NULL);
+  AES_VALIDATE_RET(input != NULL);
+  AES_VALIDATE_RET(output != NULL);
+
+  n = *iv_off;
+
+  if ( n > 15 ) {
+    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
+  }
+
+  while ( length-- ) {
+    if ( n == 0 ) {
+      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+      if ( ret != 0 ) {
+        goto exit;
+      }
+    }
+    *output++ =  *input++ ^ iv[n];
+
+    n = (n + 1) & 0x0F;
+  }
+
+  *iv_off = n;
+
+  exit:
+  return(ret);
+}
+#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 #endif /* MBEDTLS_AES_ALT */
 

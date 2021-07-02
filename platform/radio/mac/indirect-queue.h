@@ -28,6 +28,9 @@ void sl_mac_indirect_queue_init(uint16_t timeoutMs);
 
 void sl_mac_mark_indirect_buffers(void);
 
+// Set function for runtime configuration of indirect transmission timeout
+void sl_mac_set_indirect_transmission_timeout (uint16_t newTimeoutMs);
+
 // Submit a message to the indirect transmit queue.  This message will be sent
 // to the device when the device polls for the data.
 sl_status_t sl_mac_indirect_submit(PacketHeader header);

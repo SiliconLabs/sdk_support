@@ -111,7 +111,7 @@ extern "C" {
  *    Timeout is set very large (in the order of 100x longer than
  *    necessary). This is to avoid any corner case.
  */
-#define MSC_PROGRAM_TIMEOUT    10000000ul
+#define MSC_PROGRAM_TIMEOUT    10000000UL
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 #if defined(_EFM32_GECKO_FAMILY) || defined(_SILICON_LABS_32B_SERIES_2)
@@ -156,7 +156,27 @@ typedef enum {
   mscDmemMasterAHBSRW  = _SYSCFG_DMEM0PORTMAPSEL_AHBSRWPORTSEL_SHIFT,
   mscDmemMasterSRWECA0 = _SYSCFG_DMEM0PORTMAPSEL_SRWECA0PORTSEL_SHIFT,
   mscDmemMasterSRWECA1 = _SYSCFG_DMEM0PORTMAPSEL_SRWECA1PORTSEL_SHIFT,
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  mscDmemMasterMVPAHBDATA0 = _SYSCFG_DMEM0PORTMAPSEL_MVPAHBDATA0PORTSEL_SHIFT,
+  mscDmemMasterMVPAHBDATA1 = _SYSCFG_DMEM0PORTMAPSEL_MVPAHBDATA1PORTSEL_SHIFT,
+  mscDmemMasterMVPAHBDATA2 = _SYSCFG_DMEM0PORTMAPSEL_MVPAHBDATA2PORTSEL_SHIFT,
+#endif
 } MSC_DmemMaster_TypeDef;
+#endif
+
+#if defined(_MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK)
+/** AHB port given priority. */
+typedef enum {
+  mscPortPriorityNone  = _MPAHBRAM_CTRL_AHBPORTPRIORITY_NONE,
+  mscPortPriorityPort0 = _MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT0,
+  mscPortPriorityPort1 = _MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT1,
+#if defined(_MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT2)
+  mscPortPriorityPort2 = _MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT2,
+#endif
+#if defined(_MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT3)
+  mscPortPriorityPort3 = _MPAHBRAM_CTRL_AHBPORTPRIORITY_PORT3,
+#endif
+} MSC_PortPriority_TypeDef;
 #endif
 
 #if defined(MSC_READCTRL_DOUTBUFEN) || defined(MSC_RDATACTRL_DOUTBUFEN)
@@ -194,9 +214,9 @@ typedef struct {
   }
 #endif
 
-#if defined(_MSC_ECCCTRL_MASK) || \
-    defined(_SYSCFG_DMEM0ECCCTRL_MASK) || \
-    defined(_MPAHBRAM_CTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 
 #if defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)
 /** EFM32GG11B incorporates 2 memory banks including ECC support. */
@@ -220,9 +240,10 @@ typedef struct {
     { 0, 1 },                 \
   }
 
-#elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || \
-       defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || \
-       defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3))
+#elif (defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)   \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4))
 
 /** Series 2 chips incorporate 1 memory bank including ECC support. */
 #define MSC_ECC_BANKS  (1)
@@ -528,14 +549,19 @@ __STATIC_INLINE void MSC_BusStrategy(mscBusStrategy_Typedef mode)
 void MSC_Init(void);
 void MSC_Deinit(void);
 void MSC_ExecConfigSet(MSC_ExecConfig_TypeDef *execConfig);
-#if defined(_MSC_ECCCTRL_MASK) || \
-    defined(_SYSCFG_DMEM0ECCCTRL_MASK) || \
-    defined(_MPAHBRAM_CTRL_MASK)
+#if defined(_MSC_ECCCTRL_MASK)          \
+  || defined(_SYSCFG_DMEM0ECCCTRL_MASK) \
+  || defined(_MPAHBRAM_CTRL_MASK)
 void MSC_EccConfigSet(MSC_EccConfig_TypeDef *eccConfig);
 #endif
 
 #if defined(_SYSCFG_DMEM0PORTMAPSEL_MASK)
 void MSC_DmemPortMapSet(MSC_DmemMaster_TypeDef master, uint8_t port);
+#endif
+
+#if defined(_MPAHBRAM_CTRL_AHBPORTPRIORITY_MASK)
+void MSC_PortSetPriority(MSC_PortPriority_TypeDef portPriority);
+MSC_PortPriority_TypeDef MSC_PortGetCurrentPriority(void);
 #endif
 
 MSC_RAMFUNC_DECLARATOR MSC_Status_TypeDef

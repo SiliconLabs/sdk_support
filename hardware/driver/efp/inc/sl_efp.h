@@ -1,10 +1,9 @@
 /***************************************************************************//**
- * @file sl_efp.h
+ * @file
  * @brief EFP (Energy Friendly PMIC) driver API definitions.
- * @version 5.7.0
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -18,7 +17,6 @@
 #ifndef EFP_H
 #define EFP_H
 
-#include "sl_i2cspm.h"
 #include "sl_efp01.h"
 #include "em_cmu.h"
 #include "em_gpio.h"
@@ -40,43 +38,94 @@ extern "C" {
 
 @section EFP_DOC EFP (Energy Friendly PMIC) Driver Documentation
 
+
   @li @ref sl_efp_intro
   @li @ref sl_efp_configuration
   @li @ref sl_efp_example
+  @li @ref sl_efp_builtin_support
 
 @n @section sl_efp_intro Introduction
 
-  The EFP is a flexible, highly efficient, multi-output power
-  management IC. This driver provides an API to configure and control EFP ICs.
-  The EFP is controlled by the host SoC using an I2C bus. The driver support
-  systems with multiple EFP ICs.
+The EFP is a flexible, highly efficient, multi-output power
+management IC. This driver provides an API to configure and control EFP ICs.
+The EFP is controlled by the host SoC using an I2C bus. The driver support
+systems with multiple EFP ICs.
+
 
 @n @section sl_efp_configuration Configuring the EFP driver
 
-  Your application must provide a header file named
-  <em>efp_<b>instance</b>_config.h</em>. <em><b>instance</b></em> can be freely
-  selected and could for example be EFP0 and EFP1 in a system with two EFP devices.
-  Configuration file templates are found in the driver config folder.
+EFP component provides multiple configurations options. You can add as many
+instances as you have EFPs in the system (efp0, efp1, ...) and each instance
+have its own configurations options. EFP instance is configured through the
+configuration file <em>sl_efp_{instance}_config.h</em> (which {instance} is
+the instance name (efp0, efp1, ...)). This file is inside the config folder
+of your project.
 
-  Configuration options:
-  @li Energy mode transition mode. Host SoC can use several methods for
-      changing EFP energy mode. Methods are either direct mode or
-      I2C mode. I2C mode change EFP energy mode with I2C commands, direct mode
-      use level transitions on I2C SDA and SCL lines. This provides fast energy
-      mode transitions. Direct mode is achieved by host SoC using GPIO bit-banging
-      or automatically by EMU hardware on SoCs with built in EFP support (check
-      EMU section of reference manual for EFP support).
-  @li EFP interrupt. The EFP has an interrupt line that can be useful for a host
-      SoC. Set this option to have the EFP driver configure a GPIO for this use.
-  @li EFP powers host SoC. Set if the EFP IC power the host SoC, there can only
-      be one EFP with this option in a system.
-  @li I2C instance: Select which I2C peripheral to use.
-  @li GPIO definitions for I2C SDA/SCL and IRQ pins.
+The configurations options are used to populate the initialization structure
+in <em>sl_efp_instances.c</em>. This file is inside the autogen folder of your
+project. Simplicity Studio provides a graphic interface to configure EFP, and
+this will be reflected in the configuration file.
 
-  Here is an example configuration file: @n @n
-  @verbatim
-#ifndef EFP_INSTANCE_CONFIG_H
-#define EFP_INSTANCE_CONFIG_H
+Here is an example of an initialization structure for instance efp0 using the
+configuration file.
+
+
+@verbatim
+sl_efp_init_data_t sl_efp_efp0_init = {
+  .reset_to_default = SL_EFP_EFP0_RESET_TO_DEFAULT, // Reset EFP to out-of-reset defaults during initialization
+  .config_size = 0,                                 // No initial config
+  .config_data = NULL,                              // No config data
+  .handoff_size = 0,                                // No initial DCDC handoff configuration config
+  .handoff_parameters = NULL,                       // No initial DCDC handoff configuration parameters
+  .is_host_efp = SL_EFP_EFP0_POWERS_HOST,           // This EFP powers host
+  .em_transition_mode = SL_EFP_EFP0_EM_CTRL_MODE,   // EFP EM transition mode
+  .irq_pin_mode = SL_EFP_EFP0_IRQ_MODE,             // Init EFP IRQ mode
+  .irq_port = SL_EFP_EFP0_IRQ_PORT,                 // EFP IRQ port
+  .irq_pin = SL_EFP_EFP0_IRQ_PIN,                   // EFP IRQ pin
+  .i2c_peripheral = SL_EFP_EFP0_I2C_PERIPHERAL,     // I2C port instance
+  .i2c_scl_port = SL_EFP_EFP0_I2C_SCL_PORT,         // SCL port
+  .i2c_scl_pin = SL_EFP_EFP0_I2C_SCL_PIN,           // SCL pin
+  .i2c_sda_port = SL_EFP_EFP0_I2C_SDA_PORT,         // SDA port
+  .i2c_sda_pin = SL_EFP_EFP0_I2C_SDA_PIN,           // SDA pin
+#if defined(SL_EFP_EFP0_I2C_ROUTE_LOC)
+  .i2c_port_location = SL_EFP_EFP0_I2C_ROUTE_LOC,   // I2C location number
+#endif
+#if defined(SL_EFP_EFP0_I2C_SCL_LOC)
+  .i2c_scl_port_location = SL_EFP_EFP0_I2C_SCL_LOC, // SCL port location
+  .i2c_sda_port_location = SL_EFP_EFP0_I2C_SDA_LOC, // SDA port location
+#endif
+};
+@endverbatim
+
+
+Some configurations options must be added manually in the application. From the
+above initialization structure, `handoff_size` and `handoff_parameters` are
+generated by EFP Configurator.
+
+Here are the configuration options found in <em>sl_efp_{instance}_config.h</em>
+and used in initialization structure.
+
+Configuration options:
+@li Energy mode transition mode. Host SoC can use several methods for
+    changing EFP energy mode. Methods are either direct mode or
+    I2C mode. I2C mode changes EFP energy mode with I2C commands, direct mode
+    uses level transitions on I2C SDA and SCL lines. This provides fast energy
+    mode transitions. Direct mode is achieved by host SoC using GPIO bit-banging
+    or automatically by EMU hardware on SoCs with built-In EFP support (check
+    EMU section of reference manual for EFP support).
+@li EFP interrupt. The EFP has an interrupt line that can be useful for a host
+    SoC. Set this option to have the EFP driver configure a GPIO for this use.
+@li EFP powers host SoC. Set if the EFP IC power the host SoC, there can only
+    be one EFP with this option in a system.
+@li Reset EFP. Set to reset EFP to default values during initialization.
+@li I2C instance: Select which I2C peripheral to use.
+@li GPIO definitions for I2C SDA/SCL and IRQ pins.
+
+Here is an example configuration file for the board BRD4179B: @n @n
+
+@verbatim
+#ifndef SL_EFP_INST_CONFIG_H
+#define SL_EFP_INST_CONFIG_H
 
 #include "sl_efp.h"
 
@@ -88,20 +137,29 @@ extern "C" {
 
 // <h>EFP driver configuration
 
-// <o EFP_INSTANCE_EM_CTRL_MODE> Selects method of controlling EFP Energy Mode (EM) transitions.
+// <o SL_EFP_EFP0_EM_CTRL_MODE> Selects method of controlling EFP Energy Mode (EM) transitions.
 // <efp_em_transition_mode_gpio_bitbang=> GPIO driven direct mode EM transitions
 // <efp_em_transition_mode_i2c=> I2C transfers control EM transitions
-// <efp_em_transition_mode_emu=> Built in EMU controlled direct mode EM transitions
-// <i> Default: efp_em_transition_mode_gpio_bitbang
-#define EFP_INSTANCE_EM_CTRL_MODE       efp_em_transition_mode_gpio_bitbang
+// <efp_em_transition_mode_emu=> Builtin EMU controlled direct mode EM transitions
+// <i> Default: efp_em_transition_mode_i2c
+#define SL_EFP_EFP0_EM_CTRL_MODE            efp_em_transition_mode_i2c
 
-// <q EFP_INSTANCE_ENABLE_IRQ> Enable GPIO as interrupt input line from EFP.
+// <q SL_EFP_EFP0_ENABLE_IRQ> Enable GPIO as interrupt input line from EFP.
 // <i> Default: 1
-#define EFP_INSTANCE_ENABLE_IRQ         1
+#define SL_EFP_EFP0_ENABLE_IRQ              1
 
-// <q EFP_INSTANCE_POWERS_HOST> This EFP powers host SoC.
+// <q SL_EFP_EFP0_POWERS_HOST> This EFP powers host SoC.
 // <i> Default: 1
-#define EFP_INSTANCE_POWERS_HOST        1
+#define SL_EFP_EFP0_POWERS_HOST             1
+
+// <q SL_EFP_EFP0_RESET_TO_DEFAULT> Reset EFP to Default values during initialization.
+// <i> Default: 0
+#define SL_EFP_EFP0_RESET_TO_DEFAULT        0
+
+// <q SL_EFP_EFP0_ADD_EFP_CALC> EFP Config parameters header is included in the project.
+// <i> Set this if the header sl_efpdrv_calc.h generated by EFP Configurator is included in the project.
+// <i> Default: 0
+#define SL_EFP_EFP0_ADD_EFP_CALC            0
 
 // </h> end EFP configuration
 
@@ -109,58 +167,47 @@ extern "C" {
 
 // <<< sl:start pin_tool >>>
 
-// <gpio optional> EFP_INSTANCE_IRQ
-// $[GPIO_EFP_INSTANCE_IRQ]
-#define EFP_INSTANCE_IRQ_PORT           gpioPortC
-#define EFP_INSTANCE_IRQ_PIN            9
-// [GPIO_EFP_INSTANCE_IRQ]$
+// <gpio> SL_EFP_EFP0_IRQ
+// $[GPIO_SL_EFP_EFP0_IRQ]
+#define SL_EFP_EFP0_IRQ_PORT                     gpioPortA
+#define SL_EFP_EFP0_IRQ_PIN                      0
 
-// <i2c signal=SDA,SCL> EFP_INSTANCE_I2C
-// $[I2C_EFP_INSTANCE_I2C]
-#define EFP_INSTANCE_I2C_PERIPHERAL     I2C0
+// [GPIO_SL_EFP_EFP0_IRQ]$
 
-#define EFP_INSTANCE_I2C_SDA_PORT       gpioPortC
-#define EFP_INSTANCE_I2C_SDA_PIN        11
-#define EFP_INSTANCE_I2C_SDA_LOC        16
+// <i2c signal=SDA,SCL> SL_EFP_EFP0_I2C
+// $[I2C_SL_EFP_EFP0_I2C]
+#define SL_EFP_EFP0_I2C_PERIPHERAL               I2C1
+#define SL_EFP_EFP0_I2C_PERIPHERAL_NO            1
 
-#define EFP_INSTANCE_I2C_SCL_PORT       gpioPortC
-#define EFP_INSTANCE_I2C_SCL_PIN        10
-#define EFP_INSTANCE_I2C_SCL_LOC        14
-// [I2C_EFP_INSTANCE_I2C]$
+// I2C1 SDA on PC01
+#define SL_EFP_EFP0_I2C_SDA_PORT                 gpioPortC
+#define SL_EFP_EFP0_I2C_SDA_PIN                  1
 
+// I2C1 SCL on PC00
+#define SL_EFP_EFP0_I2C_SCL_PORT                 gpioPortC
+#define SL_EFP_EFP0_I2C_SCL_PIN                  0
+
+// [I2C_SL_EFP_EFP0_I2C]$
 // <<< sl:end pin_tool >>>
-
-#define SL_EFP_INSTANCE_INIT {                                                         \
-    .config_size = 0,                                   // No initial config           \
-    .config_data = NULL,                                // No config data              \
-    .is_host_efp = EFP_INSTANCE_POWERS_HOST,            // This EFP powers host SOC    \
-    .em_transition_mode = EFP_INSTANCE_EM_CTRL_MODE,    // EFP EM transition mode      \
-    .enable_irq_pin = EFP_INSTANCE_ENABLE_IRQ,          // Init GPIO as EFP IRQ        \
-    .irq_port = EFP_INSTANCE_IRQ_PORT,                  // EFP IRQ port                \
-    .irq_pin = EFP_INSTANCE_IRQ_PIN,                    // EFP IRQ pin                 \
-    .i2c_peripheral = EFP_INSTANCE_I2C_PERIPHERAL,      // I2C port instance           \
-    .i2c_scl_port = EFP_INSTANCE_I2C_SCL_PORT,          // SCL port                    \
-    .i2c_scl_pin = EFP_INSTANCE_I2C_SCL_PIN,            // SCL pin                     \
-    .i2c_sda_port = EFP_INSTANCE_I2C_SDA_PORT,          // SDA port                    \
-    .i2c_sda_pin = EFP_INSTANCE_I2C_SDA_PIN,            // SDA pin                     \
-    .i2c_scl_port_location = EFP_INSTANCE_I2C_SCL_LOC,  // SCL port location           \
-    .i2c_sda_port_location = EFP_INSTANCE_I2C_SDA_LOC,  // SDA port location           \
-}
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // EFP_INSTANCE_CONFIG_H @endverbatim
+#endif // SL_EFP_INST_CONFIG_H
+@endverbatim
 
 @n @section sl_efp_example EFP driver example code
 
-  Basic example: @n @n
-  @verbatim
-#include "efp_instance_config.h"
+@note Examples here are just code snippet for API illustration. Use Simplicity Studio
+to add full support for EFP component usage.
 
-sl_efp_handle_data_t efp_handle_data;          // EFP instance data structure
-sl_efp_handle_t      efp = &efp_handle_data;   // EFP instance pointer
+Basic example 1: Let VOA drive DVDD. @n @n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
 
 int main( void )
 {
@@ -168,37 +215,122 @@ int main( void )
   ...
 
   // Initialize EFP.
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
 
-  // Load all configurations into an init structure, and pass it to the
-  // driver initialization function.
-  sl_efp_init_data_t init = SL_EFP_INSTANCE_INIT;
-  sl_efp_init(efp, &init);
+  // Set voltage regulator A (VOA) output voltage and peak currents.
+  // Peak currents value could be obained using EFP Configurator.
+  sl_efp_set_voa_em01_ipk(sl_efp_efp0, 0x12);  // Peak Current setting for DCDC A in EM0
+  sl_efp_set_voa_em23_ipk(sl_efp_efp0, 0x04);  // Peak Current setting for DCDC A in EM2
 
-  // Set voltage regulator B (VOB) output voltage and peak currents.
-  sl_efp_set_vob_em01_voltage(efp, 1100);
-  sl_efp_set_vob_em23_voltage(efp, 1100);
-  sl_efp_set_vob_em01_peak_current(efp, 108, 3300, 1100, 3300);
-  sl_efp_set_vob_em23_peak_current(efp, 108, 3300, 1100, 3300);
+  // Set VOA output mode
+  sl_efp_set_voa_mode(sl_efp_efp0, efp_voa_mode_wired_buck_ldo);
 
-  // Enable VOB in buck mode.
-  sl_efp_set_vob_mode(efp, efp_vob_mode_buck);
+  // Set VOA voltage to 1.8V
+  sl_efp_set_voa_voltage(sl_efp_efp0, 1800);
 
   ...
 
-} @endverbatim
+}
+@endverbatim
 
-@n Code for preparing for EFP interrupts: @n @n
-  @verbatim
-#include "efp_instance_config.h"
+@n
+Basic example 2: VOB drives Decouple input. @n @n
+In this example, handoff parameters must be defined by using EFP Configurator
+tool in Simplicity Studio.
+
+It generates the header <em>sl_efpdrv_calc.h</em>. Copy this file and put it
+in your project.
+
+As an example, here are handoff parameters obtained:
+@n
+
+@verbatim
+#define SL_EFP_DECOUPLE_HANDOFF_ARGS_SIZE  3
+#define SL_DECOUPLE_HANDOFF_ARGS           {0, 7, 10} // (BK_IRI_CON, BK_TON_MAX, BK_IPK)
+@endverbatim
+
+EFP Configurator generates also the config data to setup EFP options.
+Here is the config data output from EFP Configurator:
+
+@verbatim
+#define SL_EFP_GEN_SIZE 13
+
+#define SL_EFP_GEN {  \
+    {EFP01_VOA_V, 0x04},  \
+    {EFP01_BB_IPK, 0x92}, \
+    {EFP01_BB_CTRL5, 0x80}, \
+    {EFP01_BB_CTRL6, 0x00}, \
+    {EFP01_LDOC_BB_CTRL, 0x50}, \
+    {EFP01_BB_CTRL3, 0xB5}, \
+    {EFP01_VOB_EM0_V, 0x8D},  \
+    {EFP01_VOB_EM2_V, 0x0D},  \
+    {EFP01_BK_IPK, 0x48}, \
+    {EFP01_BK_CTRL2, 0x50}, \
+    {EFP01_LDOB_CTRL, 0x01},  \
+    {EFP01_VOC_V, 0x05},  \
+    {EFP01_LDOC_CTRL, 0x0C},  \
+}
+@endverbatim
+
+Main file:
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+
+int main(void)
+{
+
+  ...
+
+  // Set handoff parameters.
+  sl_efp_efp0_init.handoff_size = SL_EFP_DECOUPLE_HANDOFF_ARGS_SIZE;
+  uint8_t handoffParameters[SL_EFP_DECOUPLE_HANDOFF_ARGS_SIZE] = SL_DECOUPLE_HANDOFF_ARGS;
+  sl_efp_efp0_init.handoff_parameters = handoffParameters;
+
+  // Set config data
+  // Pass array of custom settings to init function.
+  sl_efp_efp0_init.config_size        = SL_EFP_GEN_SIZE;
+  uint8_t efp_settings[SL_EFP_GEN_SIZE][2] = SL_EFP_GEN;
+  sl_efp_efp0_init.config_data        = efp_settings[0];
+
+  // Initialize EFP. This will disable internal LDO.
+  // During initialization, a handoff happens and VOB will power decouple.
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
+
+  ...
+
+}
+@endverbatim
+@n
+EFP initialization code is generated automatically when creating a project with
+EFP component. In previous examples, initialization code including setting
+handoff parameters and config data is found in the function `sl_efp_init_instances()`
+under <em>sl_efp_instances.c</em>.
+
+`sl_efp_init_instances()` sets handoff parameters and config data if they are defined
+and calls `sl_efp_init()`.
+
+@n
+Code for preparing for EFP interrupts: @n @n
+For series 1 and xG21 (series 2) devices:
+@n
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+#include "em_emu.h"
 
 int main( void )
 {
 
   ...
 
-  // Prepare for EFP IRQ from Coulomb counter (CC) full flag.
+  // Prepare for EFP IRQ from Coulomb counter (CC) calibration flag. Flag
+  // is set when calibration is done.
   sl_efp_write_register(efp, EFP01_STATUS_GM, 0xFF);    // Unmask all G flags
-  sl_efp_write_register(efp, EFP01_CC_CAL, 0x28);       // Enable CC A
+  sl_efp_write_register(efp, EFP01_CC_CAL, 0x28);       // Enable CC VOA
 
   // Setup GPIO interrupt.
   NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
@@ -207,8 +339,9 @@ int main( void )
 
   ...
 
-  // Force CC full flag interrupt. This will trigger an IRQ.
-  sl_efp_write_register(efp, EFP01_CMD, 0x10);          // Start CC Calibration
+  // Start CC Calibration
+  // This will set CCC_ISDONE (calibration is done) flag interrupt and trigger an IRQ.
+  sl_efp_write_register(efp, EFP01_CMD, 0x10);
 
   ...
 
@@ -223,13 +356,71 @@ void GPIO_ODD_IRQHandler(void)
 
   // Clear GPIO interrupt flag.
   GPIO_IntClear(1 << init.irq_pin);
-} @endverbatim
+}
+@endverbatim
 
-@n Example with custom EFP configuration data. The @ref sl_efp_init() function
-  can perform EFP configuration by passing an array of EFP {address,value} pairs.
-  This array can be generated by the EFP calculator tool in Simplicity Studio.
-@n @n @verbatim
-#include "efp_instance_config.h"
+@n
+xG22 and later devices have a built-in support for communications with EFP.
+There is a dedicated IRQ vector to use instead of using gpio interrupts.
+The interrupt should be enabled in EMU using <em>EMU_EFPIntEnable()</em>.
+@n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+#include "em_emu.h"
+
+int main( void )
+{
+
+  ...
+
+  // Prepare for EFP IRQ from Coulomb counter (CC) calibration flag. Flag
+  // is set when calibration is done.
+  sl_efp_write_register(efp, EFP01_STATUS_GM, 0xFF);    // Unmask all G flags
+  sl_efp_write_register(efp, EFP01_CC_CAL, 0x28);       // Enable CC VOA
+
+  // Setup GPIO interrupt.
+  NVIC_ClearPendingIRQ(EMUEFP_IRQn);
+  NVIC_EnableIRQ(EMUEFP_IRQn);
+
+  // Enable EFP interrupt in EMU.
+  EMU_EFPIntEnable(EMU_EFPIF_EFPIF);
+
+  ...
+
+  // Start CC Calibration
+  // This will set CCC_ISDONE (calibration is done) flag interrupt and trigger an IRQ.
+  sl_efp_write_register(efp, EFP01_CMD, 0x10);
+
+  ...
+
+}
+
+void EMUEFP_IRQHandler(void)
+{
+  // Make sure any ongoing EFP I2C transfer is completed before writing to EFP.
+
+  // Clear EFP IRQ flag.
+  sl_efp_write_register(efp, EFP01_STATUS_G, 0x40);
+
+  EMU_EFPIntClear(EMU_EFPIF_EFPIF);
+
+}
+@endverbatim
+
+@n
+Example with custom EFP configuration data. The @ref sl_efp_init() function
+can perform EFP configuration by passing an array of EFP {address,value} pairs.
+
+This array can be generated by the EFP Configurator tool in Simplicity Studio.
+@n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
 
 #define SL_EFP_INSTANCE_GEN_SIZE 10
 
@@ -255,16 +446,131 @@ int main( void )
   ...
 
   // Initialize EFP, pass array of custom settings to init function.
-  sl_efp_init_data_t init = SL_EFP_INSTANCE_INIT;
-  init.config_size        = SL_EFP_INSTANCE_GEN_SIZE;
-  init.config_data        = efp_settings[0];
-  sl_efp_init(efp, &init);
+  sl_efp_efp0_init.config_size        = SL_EFP_INSTANCE_GEN_SIZE;
+  sl_efp_efp0_init.config_data        = efp_settings[0];
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
 
   ...
 
-} @endverbatim
+}
+@endverbatim
 
- ******************************************************************************/
+
+@n @section sl_efp_builtin_support EFP Built-in support in xG22 and later devices
+
+@n
+As mentioned before, beginning from xG22, devices have a built-in EFP hardware
+support.
+@n
+A new Direct Mode interface with EFP is added for fast energy mode transitions.
+This Direct Mode allows to go to the lowest energy mode, EM4. When MCU pass from
+an energy mode to another it puts EFP in the appropriate energy mode automatically
+without software intervention. Use @ref sl_efp_set_em_transition_mode() and
+@ref sl_efp_enable_direct_mode() to enable direct mode.
+@n
+Basic example using EFP to pass to EM2 energy mode:
+@n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+#include "em_emu.h"
+
+int main( void )
+{
+  // Set EM2 init. This setup voltage scaling for EM2
+  EMU_EM23Init_TypeDef em23Init = EMU_EM23INIT_DEFAULT;
+  EMU_EM23Init(&em23Init);
+
+  // Init EFP with handoff parameters defined. See example above to set handoff
+  // parameters.
+  // Init function will initialize voltage scaling in EFP according to the MCU's
+  // voltage scaling.
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
+
+  // Enter to EM2.
+  // This will enter the MCU into EM2 and therefore EFP pass to EM2 as well. EFP
+  // will adjust voltage according to em23Init.vScaleEM23Voltage.
+  EMU_EnterEM2(true);
+
+}
+@endverbatim
+@n
+@note
+    Voltage scaling with EFP is supported only in xG22 and later devices.
+@n
+Basic example to demonstrate voltage scaling in EM0:
+@n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+#include "em_emu.h"
+
+int main( void )
+{
+  // Init EMU. This will set EM0 voltage to 1.1V (high performance voltage)
+  EMU_EM01Init_TypeDef em01_init = EMU_EM01INIT_DEFAULT;
+  EMU_EM01Init(&em01_init);
+
+  // Init EFP with handoff parameters defined. See example above to set handoff
+  // parameters
+  // Init function will initialize voltage scaling in EFP according to the MCU's
+  // voltage scaling.
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
+
+  // Change voltage on decouple to 1.0V (low power voltage)
+  EMU_VScaleEM01_TypeDef voltage = emuVScaleEM01_LowPower;
+
+  EMU_VScaleEM01(voltage, true);
+
+}
+@endverbatim
+@n
+
+@warning
+   EFP in EM4 mode is supported only on devices that have Direct Mode hardware
+   support integrated in EMU (EFRxG22 and later devices). So this requires
+   `init_data.em_transition_mode == efp_em_transition_mode_emu`.
+
+EMU direct mode can be set in Configuration file:
+
+@verbatim
+#define SL_EFP_EFP0_EM_CTRL_MODE            efp_em_transition_mode_emu
+@endverbatim
+
+@n
+The main:
+@n
+
+@verbatim
+#include "sl_efp.h"
+#include "sl_efp_instances.h"
+#include "sl_efp_efp0_config.h"
+#include "em_emu.h"
+
+int main( void )
+{
+  // Set EM4 init.
+  EMU_EM4Init_TypeDef em4Init = EMU_EM4INIT_DEFAULT;
+
+  // Enable Pin Retention through EM4 and wakeup
+  em4Init.pinRetentionMode = emuPinRetentionLatch;
+
+  EMU_EM4Init(&em4Init);
+
+  // Init function will initialize direct mode.
+  sl_efp_init(sl_efp_efp0, &sl_efp_efp0_init);
+
+  // Enter to EM4.
+  // This will enter MCU and EFP into EM4.
+  EMU_EnterEM4();
+}
+@endverbatim
+
+******************************************************************************/
 /* *INDENT-ON* */
 
 
@@ -274,6 +580,13 @@ typedef enum {
   efp_em_transition_mode_i2c,           ///< I2C transfers control EM transitions.
   efp_em_transition_mode_emu            ///< Built in EMU controlled "direct mode" EM transitions.
 } sl_efp_em_transition_mode_t;
+
+/// Method for supporting EFP01 interrupt.
+typedef enum {
+  efp_irq_pin_disabled, ///< Don't use interrupt
+  efp_irq_pin_gpio,     ///< Normal GPIO interrupt
+  efp_irq_pin_emu       ///< Builtin EMU controlled IRQ on dedicated pin
+} sl_efp_irq_mode_t;
 
 /// VOA regulator modes.
 typedef enum {
@@ -305,11 +618,14 @@ typedef enum {
 
 /// EFP driver initialization structure.
 typedef struct {
+  bool                reset_to_default;           ///< Set to True to rewrite EFP's register to OTP defaults during init.
   unsigned int        config_size;                ///< Number of register writes inside the configuration data. Set to 0 on preprogrammed parts.
   uint8_t             *config_data;               ///< Configuration data, pairs of (addr,data),(addr,data),... Set to NULL on preprogrammed parts.
+  unsigned int        handoff_size;               ///< Number of values in the handoff parameter list. Set to 0 if unused.
+  uint8_t             *handoff_parameters;        ///< Array of handoff parameters. Set to NULL if unused.
   bool                is_host_efp;                ///< True if this EFP powers host SoC.
   sl_efp_em_transition_mode_t em_transition_mode; ///< Method for controlling EFP Energy Mode (EM) transitions.
-  bool                enable_irq_pin;             ///< Initialize a GPIO pin as EFP IRQ input.
+  sl_efp_irq_mode_t   irq_pin_mode;               ///< Initialize a GPIO pin as EFP IRQ input.
   GPIO_Port_TypeDef   irq_port;                   ///< GPIO port to use for EFP IRQ GPIO pin.
   unsigned int        irq_pin;                    ///< GPIO pin number to use for EFP IRQ GPIO pin.
   I2C_TypeDef         *i2c_peripheral;            ///< I2C peripheral instance pointer.
@@ -317,12 +633,12 @@ typedef struct {
   unsigned int        i2c_scl_pin;                ///< GPIO pin number to use for I2C SCL signal.
   GPIO_Port_TypeDef   i2c_sda_port;               ///< GPIO port to use for I2C SDA signal.
   unsigned int        i2c_sda_pin;                ///< GPIO pin number to use for I2C SDA signal.
-  #if defined(_SILICON_LABS_32B_SERIES_0)
-    unsigned int      i2c_port_location;          ///< I2C location number to use for I2C signals.
-  #elif defined(_SILICON_LABS_32B_SERIES_1)
-    unsigned int      i2c_scl_port_location;      ///< I2C location number to use for I2C SCL signal.
-    unsigned int      i2c_sda_port_location;      ///< I2C location number to use for I2C SDA signal.
-  #endif
+#if defined(_SILICON_LABS_32B_SERIES_0)
+  unsigned int        i2c_port_location;          ///< I2C location number to use for I2C signals.
+#elif defined(_SILICON_LABS_32B_SERIES_1)
+  unsigned int        i2c_scl_port_location;      ///< I2C location number to use for I2C SCL signal.
+  unsigned int        i2c_sda_port_location;      ///< I2C location number to use for I2C SDA signal.
+#endif
 } sl_efp_init_data_t;
 
 /// An EFP driver instance handle data structure.
@@ -360,30 +676,34 @@ sl_status_t sl_efp_reset(sl_efp_handle_t handle);
 sl_status_t sl_efp_reset_to_default(sl_efp_handle_t handle);
 sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
                                           sl_efp_em_transition_mode_t mode);
+sl_status_t sl_efp_set_voa_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
+sl_status_t sl_efp_set_voa_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
 sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
                                              unsigned int vddb_mv,
                                              unsigned int voa_mv,
-                                             unsigned int inductor_nh);
+                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
                                              unsigned int vddb_mv,
                                              unsigned int voa_mv,
-                                             unsigned int inductor_nh);
+                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_voa_mode(sl_efp_handle_t handle, sl_efp_voa_mode_t mode);
 sl_status_t sl_efp_set_voa_sw_mode(sl_efp_handle_t handle, sl_efp_voa_sw_mode_t mode);
 sl_status_t sl_efp_set_voa_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
+sl_status_t sl_efp_set_vob_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
 sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
                                              unsigned int vddb_mv,
                                              unsigned int vob_mv,
-                                             unsigned int inductor_nh);
+                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_vob_em01_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
+sl_status_t sl_efp_set_vob_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
 sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
                                              unsigned int vddb_mv,
                                              unsigned int vob_mv,
-                                             unsigned int inductor_nh);
+                                             unsigned int inductor_nh) SL_DEPRECATED_API_SDK_3_2;
 sl_status_t sl_efp_set_vob_em23_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
 sl_status_t sl_efp_set_vob_mode(sl_efp_handle_t handle, sl_efp_vob_mode_t mode);
 sl_status_t sl_efp_set_voc_voltage(sl_efp_handle_t handle, unsigned int voltage_mv);
@@ -392,7 +712,6 @@ sl_status_t sl_efp_write_register(sl_efp_handle_t handle, uint8_t addr, uint8_t 
 sl_status_t sl_efp_write_register_field(sl_efp_handle_t handle,
                                         uint8_t addr, uint8_t data,
                                         uint8_t mask, uint8_t pos);
-
 
 // Documented prototypes
 
@@ -410,7 +729,8 @@ sl_status_t sl_efp_deinit(sl_efp_handle_t handle);
 
 /***************************************************************************//**
  * @brief
- *   Configure I2C GPIO pins for "direct mode" EM transfer mode.
+ *   Enable direct mode in EFP and EMU. And configure I2C pins for bitbang EM
+ *   transfer mode.
  *
  * @param[in] handle
  *   EFP instance handle.
@@ -431,6 +751,9 @@ sl_status_t sl_efp_enable_direct_mode(sl_efp_handle_t handle);
  * @brief
  *   Set EFP in EM0 energy mode.
  *
+ * @note
+ *   This function enables direct mode if necessary.
+ *
  * @param[in] handle
  *   EFP instance handle.
  *
@@ -442,6 +765,9 @@ sl_status_t sl_efp_enter_em0(sl_efp_handle_t handle);
 /***************************************************************************//**
  * @brief
  *   Set EFP in EM2 energy mode.
+ *
+ * @note
+ *   This function enables direct mode if necessary.
  *
  * @param[in] handle
  *   EFP instance handle.
@@ -593,8 +919,18 @@ sl_status_t sl_efp_read_register_field(sl_efp_handle_t handle,
 
 /***************************************************************************//**
  * @brief
- *   Reset EFP. Perform a full reset of the EFP, this is eqvivalent to a power
+ *   Reset EFP. Perform a full reset of the EFP, this is equivalent to a power
  *   on reset.
+ *
+ * @warning
+ *   When using the CMD.RESET bit, all the EFP's internal registers will
+ *   be momentarily reset to 0's before being overwritten with the OTP defaults.
+ *   This means that any enabled DCDCs or LDOs will be momentarily disabled, then
+ *   re-enabled.
+ *   If the load current on that output is large enough during this reset, the
+ *   voltage may drop and cause a brownout.
+ *   Recommend use of the sl_efp_reset_to_default() function instead, which
+ *   simply reloads the OTP defaults without clearning all the registers to 0 first.
  *
  * @param[in] handle
  *   EFP instance handle.
@@ -606,7 +942,8 @@ sl_status_t sl_efp_reset(sl_efp_handle_t handle);
 
 /***************************************************************************//**
  * @brief
- *   Reprogram all EFP registers with default values.
+ *   Reset EFP to default settings. This function is recommended over
+ *   sl_efp_reset() to reset EFP.
  *
  * @param[in] handle
  *   EFP instance handle.
@@ -640,6 +977,21 @@ sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
  * @param[in] handle
  *   EFP instance handle.
  *
+ * @param[in] ipk
+ *   Target peak current setting.
+ *
+ * @return
+ *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ ******************************************************************************/
+sl_status_t sl_efp_set_voa_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
+
+/***************************************************************************//**
+ * @brief
+ *   Set regulator VOA EM01 peak output current.
+ *
+ * @param[in] handle
+ *   EFP instance handle.
+ *
  * @param[in] current_ma
  *   Target peak current expressed in milliamperes.
  *
@@ -654,12 +1006,29 @@ sl_status_t sl_efp_set_em_transition_mode(sl_efp_handle_t handle,
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ *
+ * @deprecated
  ******************************************************************************/
 sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
                                              unsigned int vddb_mv,
                                              unsigned int voa_mv,
                                              unsigned int inductor_nh);
+
+/***************************************************************************//**
+ * @brief
+ *   Set regulator VOA EM23 peak output current.
+ *
+ * @param[in] handle
+ *   EFP instance handle.
+ *
+ * @param[in] ipk
+ *   Target peak current setting.
+ *
+ * @return
+ *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ ******************************************************************************/
+sl_status_t sl_efp_set_voa_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
 
 /***************************************************************************//**
  * @brief
@@ -682,6 +1051,8 @@ sl_status_t sl_efp_set_voa_em01_peak_current(sl_efp_handle_t handle,
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ *
+ * @deprecated
  ******************************************************************************/
 sl_status_t sl_efp_set_voa_em23_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
@@ -741,6 +1112,21 @@ sl_status_t sl_efp_set_voa_voltage(sl_efp_handle_t handle, unsigned int voltage_
  * @param[in] handle
  *   EFP instance handle.
  *
+ * @param[in] ipk
+ *   Target peak current setting.
+ *
+ * @return
+ *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ ******************************************************************************/
+sl_status_t sl_efp_set_vob_em01_ipk(sl_efp_handle_t handle, uint8_t ipk);
+
+/***************************************************************************//**
+ * @brief
+ *   Set regulator VOB EM01 peak output current.
+ *
+ * @param[in] handle
+ *   EFP instance handle.
+ *
  * @param[in] current_ma
  *   Target peak current expressed in milliamperes.
  *
@@ -755,6 +1141,8 @@ sl_status_t sl_efp_set_voa_voltage(sl_efp_handle_t handle, unsigned int voltage_
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ *
+ * @deprecated
  ******************************************************************************/
 sl_status_t sl_efp_set_vob_em01_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
@@ -784,6 +1172,21 @@ sl_status_t sl_efp_set_vob_em01_voltage(sl_efp_handle_t handle, unsigned int vol
  * @param[in] handle
  *   EFP instance handle.
  *
+ * @param[in] ipk
+ *   Target peak current setting.
+ *
+ * @return
+ *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ ******************************************************************************/
+sl_status_t sl_efp_set_vob_em23_ipk(sl_efp_handle_t handle, uint8_t ipk);
+
+/***************************************************************************//**
+ * @brief
+ *   Set regulator VOB EM23 peak output current.
+ *
+ * @param[in] handle
+ *   EFP instance handle.
+ *
  * @param[in] current_ma
  *   Target peak current expressed in milliamperes.
  *
@@ -798,6 +1201,8 @@ sl_status_t sl_efp_set_vob_em01_voltage(sl_efp_handle_t handle, unsigned int vol
  *
  * @return
  *   SL_STATUS_OK or SL_STATUS_IO on I2C transfer errors.
+ *
+ * @deprecated
  ******************************************************************************/
 sl_status_t sl_efp_set_vob_em23_peak_current(sl_efp_handle_t handle,
                                              unsigned int current_ma,
@@ -916,7 +1321,6 @@ sl_status_t sl_efp_write_register(sl_efp_handle_t handle, uint8_t addr, uint8_t 
 sl_status_t sl_efp_write_register_field(sl_efp_handle_t handle,
                                         uint8_t addr, uint8_t data,
                                         uint8_t mask, uint8_t pos);
-
 /** @} (end addtogroup sl_efp) */
 
 

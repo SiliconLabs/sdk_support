@@ -42,9 +42,14 @@ sl_status_t sl_debug_swo_init(void)
   freq = CMU_ClockFreqGet(cmuClock_DBG);
 #else //_SILICON_LABS_32B_SERIES >= 2
 
-#if defined(HFRCOEM23_PRESENT) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_CMU_TRACECLKCTRL_CLKSEL_MASK)
+#if defined(_CMU_TRACECLKCTRL_CLKSEL_HFRCOEM23)
+#if defined(CMU_CLKEN0_HFRCOEM23)
+  CMU->CLKEN0_SET = CMU_CLKEN0_HFRCOEM23;
+#endif
   // Select HFRCOEM23 as source for TRACECLK
   CMU_ClockSelectSet(cmuClock_TRACECLK, cmuSelect_HFRCOEM23);
+#endif
 #endif
 
   freq = CMU_ClockFreqGet(cmuClock_TRACECLK);

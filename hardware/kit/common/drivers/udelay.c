@@ -31,7 +31,8 @@
 #include "em_device.h"
 #include "em_cmu.h"
 #include "em_core.h"
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #define UDELAY_CLOCK_SOURCE_BURTC
 #include "em_burtc.h"
 #elif defined(RTCC_PRESENT) && (RTCC_COUNT == 1)
@@ -99,8 +100,9 @@ void UDELAY_Calibrate(void)
 #if (_SILICON_LABS_32B_SERIES >= 2)
   CMU_Clock_TypeDef  rtcClkSrc;
   CMU_Select_TypeDef rtcClkSel;
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   bool lfrcoClkTurnoff = false;
 #if defined(UDELAY_CLOCK_SOURCE_BURTC)
   bool burtcClkTurnoff = false;
@@ -195,10 +197,10 @@ void UDELAY_Calibrate(void)
   /* Remember current clock source selection for RTC. */
   rtcClkSel = CMU_ClockSelectGet(rtcClkSrc);
 
-#if defined(LFRCO_PRESENT)
-  CMU_ClockSelectSet(rtcClkSrc, cmuSelect_LFRCO);
-#elif defined(PLFRCO_PRESENT)
+#if defined(PLFRCO_PRESENT)
   CMU_ClockSelectSet(rtcClkSrc, cmuSelect_PLFRCO);
+#elif defined(LFRCO_PRESENT)
+  CMU_ClockSelectSet(rtcClkSrc, cmuSelect_LFRCO);
 #else
 #error Neither LFRCO nor PLFRCO is present.
 #endif
@@ -314,21 +316,17 @@ void UDELAY_Calibrate(void)
 #if (_SILICON_LABS_32B_SERIES >= 2) \
   && (defined(UDELAY_CLOCK_SOURCE_BURTC) || (defined(RTCC_PRESENT) && (RTCC_COUNT == 1)))
 
-#if defined(LFRCO_PRESENT)
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   if (!(CMU->CLKEN0 & CMU_CLKEN0_LFRCO)) {
     lfrcoClkTurnoff = true;
   }
   CMU_ClockEnable(cmuClock_LFRCO, true);
 #endif
-  /* Wait for oscillator to stabilize. */
+#if defined(LFRCO_PRESENT) || defined(PLFRCO_PRESENT)
   while ((LFRCO->STATUS & (LFRCO_STATUS_ENS | LFRCO_STATUS_RDY))
          != (LFRCO_STATUS_ENS | LFRCO_STATUS_RDY)) {
-  }
-#elif defined(PLFRCO_PRESENT)
-  while ((PLFRCO->STATUS & (PLFRCO_STATUS_ENS | PLFRCO_STATUS_RDY))
-         != (PLFRCO_STATUS_ENS | PLFRCO_STATUS_RDY)) {
   }
 #else
 #error Neither LFRCO nor PLFRCO is present.
@@ -420,8 +418,9 @@ void UDELAY_Calibrate(void)
 #else /* #if (_SILICON_LABS_32B_SERIES < 2) */
   /* Restore original clock source selection. */
   CMU_ClockSelectSet(rtcClkSrc, rtcClkSel);
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) \
-  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   if (lfrcoClkTurnoff == true) {
     CMU_ClockEnable(cmuClock_LFRCO, false);
   }
@@ -437,7 +436,7 @@ void UDELAY_Calibrate(void)
     CMU_ClockEnable(cmuClock_RTCC, false);
   }
 #endif
-#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG_2 || _SILICON_LABS_32B_SERIES_2_CONFIG_3 */
+#endif /* _SILICON_LABS_32B_SERIES_2_CONFIG_2 || _SILICON_LABS_32B_SERIES_2_CONFIG_3 || _SILICON_LABS_32B_SERIES_2_CONFIG_4 */
 
 #endif /* #if (_SILICON_LABS_32B_SERIES < 2) */
 }

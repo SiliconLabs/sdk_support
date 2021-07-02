@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -46,7 +46,7 @@
  * @details
  *   API for performing symmetric encryption, Authenticated Encryption and
  *   Additional Data (AEAD) operations, and computing Message Authentication
- *   Codes (MACs) using the Secure Element.
+ *   Codes (MACs) using the Secure Engine.
  *
  * @{
  ******************************************************************************/

@@ -34,6 +34,8 @@
 #include "em_bus.h"
 #include "em_gpio.h"
 
+#include <stddef.h>
+
 /***************************************************************************//**
  * @addtogroup lcd LCD - Liquid Crystal Display
  * @brief Liquid Crystal Display (LCD) Peripheral API
@@ -45,13 +47,8 @@
  * @{
  ******************************************************************************/
 
-/* Frame counter uses a maximum of 5 bits (FCTOP[5:0]). */
+/** Frame counter uses a maximum of 5 bits (FCTOP[5:0]). */
 #define LCD_FRAME_COUNTER_VAL_MAX  64
-
-#if defined(_SILICON_LABS_32B_SERIES_2)
-#define LCD_COM_LINES_MAX  4
-#define LCD_SEGMENT_LINES_MAX  20
-#endif
 
 /***************************************************************************//**
  * @brief
@@ -81,6 +78,11 @@ void LCD_Init(const LCD_Init_TypeDef *lcdInit)
 #if defined(_SILICON_LABS_32B_SERIES_2)
   /* Initialize LCD registers to hardware reset state. */
   LCD_Reset();
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  LCD->CTRL &= ~_LCD_CTRL_PRESCALE_MASK;
+  LCD->CTRL |= lcdInit->clockPrescaler << _LCD_CTRL_PRESCALE_SHIFT;
 #endif
 
   /* Make sure the other bit fields don't get affected (i.e., voltage boost). */
@@ -865,7 +867,7 @@ void LCD_BiasSegmentSet(int segmentLine, int biasLevel)
       segmentRegister = &LCD->SEGD3;
       break;
     default:
-      segmentRegister = (uint32_t *)0x00000000;
+      segmentRegister = NULL;
       EFM_ASSERT(0);
       break;
   }
@@ -985,7 +987,7 @@ void LCD_BiasComSet(int comLine, int biasLevel)
     return;
   }
 
-  biasRegister = comLine % 2;
+  biasRegister = (uint32_t) comLine % 2;
   bitShift     = (comLine / 2) * 4;
 
   switch (biasRegister) {
@@ -996,7 +998,7 @@ void LCD_BiasComSet(int comLine, int biasLevel)
       comRegister = &LCD->AREGB;
       break;
     default:
-      comRegister = (uint32_t *)0x00000000;
+      comRegister = NULL;
       EFM_ASSERT(0);
       break;
   }
@@ -1049,7 +1051,7 @@ void LCD_ChargeRedistributionCyclesSet(uint8_t cycles)
 #endif
 
   LCD->DISPCTRL = (LCD->DISPCTRL & ~_LCD_DISPCTRL_CHGRDST_MASK)
-                  | (cycles << _LCD_DISPCTRL_CHGRDST_SHIFT);
+                  | ((uint32_t)cycles << _LCD_DISPCTRL_CHGRDST_SHIFT);
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   LCD_Enable(true);

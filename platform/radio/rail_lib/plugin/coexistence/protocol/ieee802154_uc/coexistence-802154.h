@@ -24,38 +24,17 @@
 #define __COEXISTENCE_802154_H__
 
 #include "sl_status.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+#include "coexistence-hal.h"
 #include "sl_rail_util_coex_config.h"
-#include "sl_rail_util_ieee802154_stack_event.h"
+#endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
-/** @name Radio HoldOff Configuration Definitions
- *
- * The following are used to aid in the abstraction with Radio
- * HoldOff (RHO).  The microcontroller-specific sources use these
- * definitions so they are able to work across a variety of boards
- * which could have different connections.  The names and ports/pins
- * used below are intended to match with a schematic of the system to
- * provide the abstraction.
- *
- * The Radio HoldOff input GPIO is abstracted like BUTTON0/1.
- */
-//@{
-
-/**
- * @brief The GPIO configuration register for Radio HoldOff.
- */
-
-/** @brief The following definitions are helpers for managing
- *  Radio HoldOff and should not be modified.
- */
-#if  defined(SL_RAIL_UTIL_COEX_RHO_PORT)
-// Initial bootup configuration is for Radio HoldOff
-  #define halInternalInitRadioHoldOff() halSetRadioHoldOff(true)
-#else//!defined(SL_RAIL_UTIL_COEX_RHO_PORT)
-// Initial bootup configuration is for default
-  #define halInternalInitRadioHoldOff() /* no-op */
-#endif//defined(SL_RAIL_UTIL_COEX_RHO_PORT)
-
-//@} //END OF RADIO HOLDOFF CONFIGURATION DEFINITIONS
+#include "rail_util_ieee802154/sl_rail_util_ieee802154_stack_event.h"
 
 /** @name PTA Configuration Definitions
  *
@@ -177,7 +156,7 @@
 
 typedef uint32_t sl_rail_util_coex_options_t;
 
-#include "coexistence.h"
+#include "coexistence/common/coexistence.h"
 
 #define SL_RAIL_UTIL_COEX_GPIO_INDEX_RHO        0x00u // Radio holdfoff GPIO index
 #define SL_RAIL_UTIL_COEX_GPIO_INDEX_REQ        0x01u // Request GPIO index
@@ -218,6 +197,9 @@ void sl_rail_util_coex_counter_on_event(sl_rail_util_coex_event_t event);
   #define  sl_rail_util_coex_get_tx_req_release() \
   (((SL_RAIL_UTIL_COEX_OPT_LONG_REQ | SL_RAIL_UTIL_COEX_OPT_TOGGLE_REQ_ON_MACRETRANSMIT) & sl_rail_util_coex_get_options()) != SL_RAIL_UTIL_COEX_OPT_LONG_REQ)
 sl_rail_util_coex_options_t sl_rail_util_coex_get_options(void);
+
+// Initialize coexistence
+void sl_rail_util_coex_init(void);
 
 sl_status_t sl_rail_util_coex_set_options(sl_rail_util_coex_options_t options);
 
@@ -271,6 +253,12 @@ bool sl_rail_util_coex_get_gpio_input_override(sl_rail_util_coex_gpio_index_t gp
 // the input value of a PTA is read from a virtual GPIO
 // rather than the physical PTA GPIO
 sl_status_t sl_rail_util_coex_set_gpio_input_override(sl_rail_util_coex_gpio_index_t gpioIndex, bool enabled);
+
+// Return whether or not Radio Hold-Off is enabled
+bool sl_rail_util_coex_get_radio_holdoff(void);
+
+// Enable/disable Radio Hold-Off
+sl_status_t sl_rail_util_coex_set_radio_holdoff(bool enabled);
 #endif //__COEXISTENCE_802154_H__
 
 /**@} END micro group

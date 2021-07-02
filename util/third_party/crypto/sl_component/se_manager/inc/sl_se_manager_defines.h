@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API definitions
+ * @brief Silicon Labs Secure Engine Manager API definitions
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -41,7 +41,7 @@
 #endif
 
 #if defined (SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
+  #include "sl_component_catalog.h"
 #endif
 
 /// @addtogroup sl_se_manager
@@ -142,6 +142,8 @@ extern "C" {
 
 /// ECC NIST P-192
 #define SL_SE_KEY_TYPE_ECC_P192     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x18))
+/// ECC NIST P-224
+#define SL_SE_KEY_TYPE_ECC_P224     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x1C))
 /// ECC NIST P-256
 #define SL_SE_KEY_TYPE_ECC_P256     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x20))
 
@@ -163,6 +165,12 @@ extern "C" {
   #define SL_SE_KEY_TYPE_ECC_X25519   (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x20))
 /// ECC X448 key for ECDH
   #define SL_SE_KEY_TYPE_ECC_X448     (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x38))
+
+/// ECC Ed25519 key for EdDSA
+  #define SL_SE_KEY_TYPE_ECC_ED25519  (SL_SE_KEY_TYPE_ECC_EDDSA | (0x20))
+/// ECC Ed448 key for EdDSA
+  #define SL_SE_KEY_TYPE_ECC_ED448    (SL_SE_KEY_TYPE_ECC_EDDSA | (0x38))
+
 #endif
 
 /// Key storage methods
@@ -250,6 +258,8 @@ extern "C" {
 #define SL_SE_TAMPER_LEVEL_PERMANENTLY_ERASE_OTP  7  ///< Erase OTP - THIS WILL MAKE THE DEVICE INOPERATIONAL!
 
 // SE tamper signals
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+
 #define SL_SE_TAMPER_SIGNAL_RESERVED_1                  0x0   ///< Reserved tamper signal
 #define SL_SE_TAMPER_SIGNAL_FILTER_COUNTER              0x1   ///< Filter counter exceeds threshold
 #define SL_SE_TAMPER_SIGNAL_WATCHDOG                    0x2   ///< SE watchdog timeout
@@ -283,6 +293,45 @@ extern "C" {
 #define SL_SE_TAMPER_SIGNAL_DIGITAL_GLITCH              0x1E  ///< Digital glitch detector detected an event
 #define SL_SE_TAMPER_SIGNAL_SE_ICACHE_ERROR             0x1F  ///< SE ICACHE checksum error
 #define SL_SE_TAMPER_SIGNAL_NUM_SIGNALS                 0x20  ///< Number of tamper signals
+
+#else
+
+// SE tamper signals
+#define SL_SE_TAMPER_SIGNAL_RESERVED_1                  0x0   ///< Reserved tamper signal
+#define SL_SE_TAMPER_SIGNAL_FILTER_COUNTER              0x1   ///< Filter counter exceeds threshold
+#define SL_SE_TAMPER_SIGNAL_WATCHDOG                    0x2   ///< SE watchdog timeout
+#define SL_SE_TAMPER_SIGNAL_RESERVED_2                  0x3   ///< Reserved tamper signal
+#define SL_SE_TAMPER_SIGNAL_SE_RAM_ECC_2                0x4   ///< SE RAM 2-bit ECC error
+#define SL_SE_TAMPER_SIGNAL_SE_HARDFAULT                0x5   ///< SE CPU hardfault
+#define SL_SE_TAMPER_SIGNAL_RESERVED_3                  0x6   ///< Reserved tamper signal
+#define SL_SE_TAMPER_SIGNAL_SE_SOFTWARE_ASSERTION       0x7   ///< SE software triggers an assert
+#define SL_SE_TAMPER_SIGNAL_SE_SECURE_BOOT_FAILED       0x8   ///< Secure boot of SE firmware failed
+#define SL_SE_TAMPER_SIGNAL_USER_SECURE_BOOT_FAILED     0x9   ///< Secure boot of user code failed
+#define SL_SE_TAMPER_SIGNAL_MAILBOX_AUTHORIZATION_ERROR 0xA   ///< Unauthorised command received over the Mailbox interface
+#define SL_SE_TAMPER_SIGNAL_DCI_AUTHORIZATION_ERROR     0xB   ///< Unauthorised command received over the DCI interface
+#define SL_SE_TAMPER_SIGNAL_FLASH_INTEGRITY_ERROR       0xC   ///< Flash content couldn't be properly authenticated
+#define SL_SE_TAMPER_SIGNAL_RESERVED_4                  0xD   ///< Reserved tamper signal
+#define SL_SE_TAMPER_SIGNAL_SELFTEST_FAILED             0xE   ///< Integrity error of internal storage is detected
+#define SL_SE_TAMPER_SIGNAL_TRNG_MONITOR                0xF   ///< TRNG monitor detected lack of entropy
+#define SL_SE_TAMPER_SIGNAL_SECURE_LOCK_ERROR           0x10  ///< Debug lock internal logic check failed
+#define SL_SE_TAMPER_ATAMPDET_EMPGD                     0x11  ///< Electromagnetic pulse glitch detector
+#define SL_SE_TAMPER_ATAMPDET_SUPGD                     0x12  ///< Supply glitch detector
+#define SL_SE_TAMPER_SE_ICACHE_ERROR                    0x13  ///< SE ICache RAM error
+#define SL_SE_TAMPER_SIGNAL_SE_RAM_ECC_1                0x14  ///< SE RAM 1-bit ECC error
+#define SL_SE_TAMPER_SIGNAL_BOD                         0x15  ///< Brown-out-detector threshold alert
+#define SL_SE_TAMPER_SIGNAL_TEMPERATURE_SENSOR          0x16  ///< On-device temperature sensor
+#define SL_SE_TAMPER_SIGNAL_DPLL_LOCK_FAIL_LOW          0x17  ///< DPLL lock fail low
+#define SL_SE_TAMPER_SIGNAL_DPLL_LOCK_FAIL_HIGH         0x18  ///< DPLL lock fail high
+#define SL_SE_TAMPER_SIGNAL_PRS0                        0x19  ///< PRS channel 0 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS1                        0x1a  ///< PRS channel 1 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS2                        0x1b  ///< PRS channel 2 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS3                        0x1c  ///< PRS channel 3 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS4                        0x1d  ///< PRS channel 4 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS5                        0x1e  ///< PRS channel 5 asserted
+#define SL_SE_TAMPER_SIGNAL_PRS6                        0x1f  ///< PRS channel 6 asserted
+#define SL_SE_TAMPER_SIGNAL_NUM_SIGNALS                 0x20  ///< Number of tamper signals
+
+#endif
 
 // SE tamper filter timeout period.
 #define SL_SE_TAMPER_FILTER_PERIOD_32MS     0x0   ///< Timeout ~32ms

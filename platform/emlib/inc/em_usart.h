@@ -151,18 +151,26 @@ typedef enum {
 #if defined(_USART_ROUTEPEN_RTSPEN_MASK) && defined(_USART_ROUTEPEN_CTSPEN_MASK)
 /** Hardware Flow Control Selection. */
 typedef enum {
+  /** No hardware flow control. */
   usartHwFlowControlNone = 0,
+  /** CTS signal is enabled for TX flow control. */
   usartHwFlowControlCts = USART_ROUTEPEN_CTSPEN,
+  /** RTS signal is enabled for RX flow control. */
   usartHwFlowControlRts = USART_ROUTEPEN_RTSPEN,
+  /** CTS and RTS signals are enabled for TX and RX flow control. */
   usartHwFlowControlCtsAndRts = USART_ROUTEPEN_CTSPEN | USART_ROUTEPEN_RTSPEN,
 } USART_HwFlowControl_TypeDef;
 
 #elif defined(USART_CTRLX_CTSEN)
 /** Hardware Flow Control Selection. */
 typedef enum {
+  /** No hardware flow control. */
   usartHwFlowControlNone = 0,
+  /** CTS signal is enabled for TX flow control. */
   usartHwFlowControlCts,
+  /** RTS signal is enabled for RX flow control. */
   usartHwFlowControlRts,
+  /** CTS and RTS signals are enabled for TX and RX flow control. */
   usartHwFlowControlCtsAndRts
 } USART_HwFlowControl_TypeDef;
 #endif

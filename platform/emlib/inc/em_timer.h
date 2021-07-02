@@ -234,10 +234,10 @@ typedef uint8_t TIMER_PRSSEL_TypeDef;
 #if defined (_TIMER_CC_CFG_INSEL_MASK)
 /** PRS input type */
 typedef enum {
-  timerPrsInputNone       =  0x0,                               /** No PRS input */
-  timerPrsInputSync       =  _TIMER_CC_CFG_INSEL_PRSSYNC,       /** Synchronous PRS selected */
-  timerPrsInputAsyncLevel =  _TIMER_CC_CFG_INSEL_PRSASYNCLEVEL, /** Asynchronous level PRS selected */
-  timerPrsInputAsyncPulse =  _TIMER_CC_CFG_INSEL_PRSASYNCPULSE, /** Asynchronous pulse PRS selected */
+  timerPrsInputNone       =  0x0,                               /**< No PRS input. */
+  timerPrsInputSync       =  _TIMER_CC_CFG_INSEL_PRSSYNC,       /**< Synchronous PRS selected. */
+  timerPrsInputAsyncLevel =  _TIMER_CC_CFG_INSEL_PRSASYNCLEVEL, /**< Asynchronous level PRS selected. */
+  timerPrsInputAsyncPulse =  _TIMER_CC_CFG_INSEL_PRSASYNCPULSE, /**< Asynchronous pulse PRS selected. */
 } TIMER_PrsInput_TypeDef;
 #endif
 

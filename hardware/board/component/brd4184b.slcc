@@ -13,6 +13,7 @@
   - name: hardware_board
   - name: hardware_board_tb
   - name: hardware_board_from_tb
+  - name: hardware_board_from_sltb010a
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -42,7 +43,7 @@
 - tag:
   - board:pn:BRD4184
   - board:variant:B
-  - board:revision:A03
+  - board:revision:A04
   - board:device:efr32bg22c224f512im40
   - hardware:has:vcom
   - hardware:has:pti

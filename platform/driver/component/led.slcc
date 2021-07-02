@@ -1,24 +1,25 @@
-id: "led"
+id: led
 label: Generic LED API
-package: "platform"
+package: platform
 description: >
   This component provides a generic LED API. In addition, an LED driver
   implementation component such as the Simple LED component should be
   included in the project to implement full LED handling.
-category: "Platform|Driver"
-quality: "production"
+category: Platform|Driver|LED
+quality: production
+root_path: platform/driver/leddrv/
 source:
-  - path: "platform/driver/leddrv/src/sl_led.c"
+  - path: src/sl_led.c
 include:
-  - path: "platform/driver/leddrv/inc"
+  - path: inc
     file_list:
       - path: sl_led.h
 provides:
-  - name: "led"
+  - name: led
 requires:
-  - name: "emlib_common"
-  - name: "status"
-  - name: "component_catalog"
+  - name: emlib_common
+  - name: status
+  - name: component_catalog
 documentation:
     docset: gecko-platform
     document: driver/api/group-led

@@ -25,7 +25,14 @@
 
 #include "rail.h"
 #include "sl_status.h"
+
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 #include "sl_rail_util_ant_div_config.h"
+#endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
 /** @brief Antenna modes
  */
@@ -51,48 +58,37 @@ typedef int8_t sl_rail_util_antenna_mode_t;
 typedef int8_t sl_rail_util_antenna_selection_t;
 #define SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1 1 /**< Select antenna 1 */
 #define SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA2 2 /**< Select antenna 2 */
-
-// The existence of Antenna GPIO location information on EFR32XG1 series
-// parts enables use of the more flexible RAIL scheme va. legacy GPIO scheme
-// for Tx-only diversity. However, the EFR32XG2 series doesn't use locations
-// so the HAL configurator doesn't provide any. But EFR32XG2 does have RfPath
-// selection, and SL_RAIL_UTIL_ANT_DIV_ANT0_LOC is used for that.
-// On EFR32XG1 series, default location(s) to -1 to select legacy GPIO scheme.
-// On EFR32XG2 series, default location(s) to 1 to select RAIL scheme RfPath 1;
-// to force use of legacy GPIO scheme (because their GPIO choice for Tx-only
-// diversity isn't supported by the radio), user must define each respective
-// SL_RAIL_UTIL_ANT_DIV_[N]SEL_LOC as -1 in their HAL config include.
-#ifdef  _SILICON_LABS_32B_SERIES_2
-  #define ANTENNA_UNSPECIFIED_LOC  1 // Location to use RAIL scheme on RfPath 1
-#else//!_SILICON_LABS_32B_SERIES_2
-  #define ANTENNA_UNSPECIFIED_LOC -1 // Dummy location to select legacy GPIO scheme
-#endif//_SILICON_LABS_32B_SERIES_2
+//@} //END OF ANTENNA SELECTION
 
 // Establish Tx default mode
 #ifdef  SL_RAIL_UTIL_ANT_DIV_TX_MODE
-  #define ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_TX_MODE
+  #define SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_TX_MODE
 #else//!SL_RAIL_UTIL_ANT_DIV_TX_MODE
-  #define ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY
+  #define SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY
 #endif//SL_RAIL_UTIL_ANT_DIV_TX_MODE
 
 // Establish Rx default mode
 #ifdef  SL_RAIL_UTIL_ANT_DIV_RX_MODE
-  #define ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_RX_MODE
+  #define SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANT_DIV_RX_MODE
 #else//!SL_RAIL_UTIL_ANT_DIV_RX_MODE
-  #define ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DISABLED
+  #define SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE SL_RAIL_UTIL_ANTENNA_MODE_DISABLED
 #endif//SL_RAIL_UTIL_ANT_DIV_RX_MODE
 
-// Determine scheme to use based on platform, PHY, debug, and GPIO location(s):
-#if (!defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)                                          \
-  && (((defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)) \
-  && (!defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || (SL_RAIL_UTIL_ANT_DIV_ANT0_LOC >= 0))     \
-  && (!defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT) || (SL_RAIL_UTIL_ANT_DIV_ANT1_LOC >= 0)))))
-  #define ANTENNA_USE_RAIL_SCHEME 1
-#else
-  #define ANTENNA_USE_RAIL_SCHEME 0
-#endif
-
-//@} //END OF ANTENNA SELECTION
+// Backwards compatibility macros
+#define sl_rail_util_ant_div_set_antenna_mode(mode) \
+  sl_rail_util_ant_div_set_tx_antenna_mode(mode)
+#define sl_rail_util_ant_div_get_antenna_mode() \
+  sl_rail_util_ant_div_get_tx_antenna_mode()
+#define sl_rail_util_ant_div_get_antenna_selected() \
+  sl_rail_util_ant_div_get_tx_antenna_selected()
+#define sl_rail_util_ant_div_toggle_antenna() \
+  sl_rail_util_ant_div_toggle_tx_antenna()
+#define sl_rail_util_ant_div_set_antenna(txAntenna) \
+  sl_rail_util_ant_div_set_tx_antenna(txAntenna)
+#define sl_rail_util_ant_div_set_antenna_rx_mode(mode) \
+  sl_rail_util_ant_div_set_rx_antenna_mode(mode)
+#define sl_rail_util_ant_div_get_antenna_rx_mode() \
+  sl_rail_util_ant_div_get_rx_antenna_mode()
 
 /** @brief Initialize antenna GPIOs
  *
@@ -107,32 +103,32 @@ sl_status_t sl_rail_util_ant_div_init(void);
  * @return SL_STATUS_OK if Tx antenna mode is configured as desired
  * or SL_STATUS_NOT_SUPPORTED if Tx antenna mode is unsupported.
  */
-sl_status_t sl_rail_util_ant_div_set_antenna_mode(sl_rail_util_antenna_mode_t mode);
+sl_status_t sl_rail_util_ant_div_set_tx_antenna_mode(sl_rail_util_antenna_mode_t mode);
 
 /** @brief Returns the current Tx antenna mode.
  *
  * @return The current Tx antenna mode.
  */
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_mode(void);
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_tx_antenna_mode(void);
 
 /** @brief Returns the current Tx antenna selected.
  *
  * @return The current Tx antenna selected.
  */
-sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_antenna_selected(void);
+sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_tx_antenna_selected(void);
 
 /** @brief Toggles the enabled Tx antenna.
  *
  * @return SL_STATUS_OK if Tx antenna was toggled, SL_STATUS_NOT_SUPPORTED otherwise
  */
-sl_status_t sl_rail_util_ant_div_toggle_antenna(void);
+sl_status_t sl_rail_util_ant_div_toggle_tx_antenna(void);
 
 /** @brief Sets the enabled Tx antenna.
  *
  * @param txAntenna The antenna to use for transmit.
  * @return SL_STATUS_OK if Tx antenna was set, SL_STATUS_NOT_SUPPORTED otherwise
  */
-sl_status_t sl_rail_util_ant_div_set_antenna(sl_rail_util_antenna_selection_t txAntenna);
+sl_status_t sl_rail_util_ant_div_set_tx_antenna(sl_rail_util_antenna_selection_t txAntenna);
 
 /** @brief Sets the Rx antenna mode.
  *
@@ -140,13 +136,13 @@ sl_status_t sl_rail_util_ant_div_set_antenna(sl_rail_util_antenna_selection_t tx
  * @return SL_STATUS_OK if Rx antenna mode is configured as desired
  * or SL_STATUS_NOT_SUPPORTED if Rx antenna mode is unsupported.
  */
-sl_status_t sl_rail_util_ant_div_set_antenna_rx_mode(sl_rail_util_antenna_mode_t mode);
+sl_status_t sl_rail_util_ant_div_set_rx_antenna_mode(sl_rail_util_antenna_mode_t mode);
 
 /** @brief Returns the current Rx antenna mode.
  *
  * @return The current Rx antenna mode.
  */
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_rx_mode(void);
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_rx_antenna_mode(void);
 
 /** @brief Returns the current Rx antenna diversity optimized PHY select
  *

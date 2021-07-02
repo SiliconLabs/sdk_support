@@ -30,6 +30,9 @@ template_file:
   - path: inc/sl_legacy_bootloader_device_info.h.jinja
 define:
   - name: EMBER_AF_API_BOOTLOADER_INTERFACE
+template_contribution:
+  - name: "component_catalog"
+    value: legacy_bootloader_interface
 documentation:
     docset: gecko-platform
     document: service/api/group-common-bootload

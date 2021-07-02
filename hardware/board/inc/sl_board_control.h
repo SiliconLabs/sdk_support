@@ -84,6 +84,17 @@ sl_status_t sl_board_disable_vcom(void);
 /***************************************************************************//**
  * @brief Enable a sensor.
  *
+ * @warning
+ *   On boards 4166A, 4184A, and 4184B sensors
+ *     - Pressure Sensor, RH/Temp Sensor, and UV/Ambient Light Sensor;
+ *     - UV/Ambient Light Sensor, Hall-effect Sensor, and RH/Temp Sensor;
+ *     - Ambient Light Sensor, Hall-effect Sensor, and RH/Temp Sensor
+ *   respectively, are tied to the same enable pin. Calling the enable function
+ *   for only one of these sensors has the side-effect of enabling all three;
+ *   and calling the disable function for only one of them has the
+ *   side-effect of disabling all three.
+ *   The latter scenario seems less than desirable.
+ *
  * @param[in] sensor Sensor to enable
  *
  * @return Status code
@@ -95,6 +106,17 @@ sl_status_t sl_board_enable_sensor(sl_board_sensor_t sensor);
 
 /***************************************************************************//**
  * @brief Disable a sensor.
+ *
+ * @warning
+ *   On boards 4166A, 4184A, and 4184B sensors
+ *     - Pressure Sensor, RH/Temp Sensor, and UV/Ambient Light Sensor;
+ *     - UV/Ambient Light Sensor, Hall-effect Sensor, and RH/Temp Sensor;
+ *     - Ambient Light Sensor, Hall-effect Sensor, and RH/Temp Sensor
+ *   respectively, are tied to the same enable pin. Calling the enable function
+ *   for only one of these sensors has the side-effect of enabling all three;
+ *   and calling the disable function for only one of them has the
+ *   side-effect of disabling all three.
+ *   The latter scenario seems less than desirable.
  *
  * @param[in] sensor Sensors to disable
  *

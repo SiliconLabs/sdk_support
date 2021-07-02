@@ -18,6 +18,8 @@ requires:
   - name: mbedtls_aes
   - name: mbedtls_cipher
   - name: mbedtls_core
+  - name: sli_protocol_crypto
+    condition: [device_has_radioaes, device_has_semailbox]
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_CMAC_C

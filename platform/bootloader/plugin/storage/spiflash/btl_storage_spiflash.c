@@ -342,13 +342,13 @@ static bool verifyAddressRange(uint32_t                address,
                                uint32_t                length,
                                StorageSpiflashDevice_t *pDeviceType)
 {
-  // all parts support addresses less than DEVICE_SIZE_2M
-  if ((address + length) <= DEVICE_SIZE_2M) {
-    return true;
+  uint32_t deviceSize = getDeviceSize(pDeviceType);
+  if ((length > deviceSize)
+     || (address > deviceSize)) {
+    return false;
   }
 
-  // if address is greater than DEVICE_SIZE_2M, need to query the chip
-  if ((address + length) <= getDeviceSize(pDeviceType)) {
+  if ((address + length) <= deviceSize) {
     return true;
   }
 

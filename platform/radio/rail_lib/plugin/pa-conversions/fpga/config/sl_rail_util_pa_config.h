@@ -45,7 +45,7 @@
 // <i> Default: 2
 #define SL_RAIL_UTIL_PA_RAMP_TIME_US        2
 
-// <o SL_RAIL_UTIL_PA_VOLTAGE_MV> Milli-volts on PA supply pin (PA_VDD)
+// <o SL_RAIL_UTIL_PA_VOLTAGE_MV> Milli-volts on PA supplyp pin (PA_VDD)
 // <0-65535:1>
 // <i> Default: 1800
 #define SL_RAIL_UTIL_PA_VOLTAGE_MV          1800
@@ -67,7 +67,7 @@
 // <RAIL_TX_POWER_MODE_SUBGIG_LP=> Sub-1 GHz, Low Power (s2)
 // <RAIL_TX_POWER_MODE_NONE=> None (s1, s2)
 // <i> Default: RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
-#define SL_RAIL_UTIL_PA_SELECTION_SUBGHZ    RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
+#define SL_RAIL_UTIL_PA_SELECTION_SUBGHZ    RAIL_TX_POWER_MODE_NONE
 
 // <s.50 SL_RAIL_UTIL_PA_CURVE_HEADER> Header file containing custom PA curves
 // <i> Default: "pa_curves_efr32.h"

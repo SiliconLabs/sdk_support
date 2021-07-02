@@ -102,6 +102,7 @@ typedef struct {
 typedef struct {
   OS_MUTEX    mutex;
   uint8_t     dyn_alloc;
+  uint8_t     recursive;
 } osMutex_t;
 #endif
 

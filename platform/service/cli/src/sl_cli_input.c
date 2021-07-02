@@ -204,18 +204,31 @@ void sl_cli_input_autocomplete(sl_cli_handle_t handle)
   // Number of matches is one, write match to buffer and terminal
   if (number_of_matches == 1) {
     int length = strlen(possible_matches);
-    for (int j = input_length; j < length; j++) {
-      handle->input_buffer[j + input_position] = possible_matches[j];
+    int remaining_length = length - input_length;
+    char *buf_dest = &handle->input_buffer[input_length + input_position];
+    char *buf_src = &possible_matches[input_length];
+
+    while (remaining_length > 0) {
+      *buf_dest = *buf_src;
+      buf_dest++;
+      buf_src++;
+      remaining_length--;
     }
-    handle->input_buffer[length + input_position] = '\0';
+
+    *buf_dest = '\0';
+
     for (int j = handle->input_pos; j < input_position + input_length; j++) {
       write_right_arrow(handle, handle->input_pos);
       handle->input_pos++;
     }
     handle->input_len += length - input_length;
     handle->input_pos += length - input_length;
-    for (int j = input_length; j < length; j++) {
-      input_putchar(possible_matches[j]);
+    buf_src = &possible_matches[input_length];
+    remaining_length = length - input_length;
+    while (remaining_length > 0) {
+      input_putchar(*buf_src);
+      buf_src++;
+      remaining_length--;
     }
 
     // Number of matches is larger than one, print list of matches and write
@@ -273,16 +286,26 @@ void sl_cli_input_autocomplete(sl_cli_handle_t handle)
 
     // Update input buffer to longest common prefix
     int prefix_length = strlen(longest_common_prefix);
-    for (int j = input_length; j < prefix_length; j++) {
-      handle->input_buffer[j + input_position] = longest_common_prefix[j];
+    char *buf_dest = &handle->input_buffer[input_length + input_position];
+    char *buf_src = &longest_common_prefix[input_length];
+    int  remain_length = prefix_length - input_length;
+    while (remain_length > 0) {
+      *buf_dest = *buf_src;
+      buf_dest++;
+      buf_src++;
       handle->input_pos++;
       handle->input_len++;
+      remain_length--;
     }
-    handle->input_buffer[handle->input_len] = '\0';
 
+    *buf_dest = '\0';
+    buf_src = &longest_common_prefix[input_length];
+    remain_length = prefix_length - input_length;
     // Write longest common prefix to terminal
-    for (int j = input_length; j < prefix_length; j++) {
-      input_putchar(longest_common_prefix[j]);
+    while (remain_length > 0) {
+      input_putchar(*buf_src);
+      buf_src++;
+      remain_length--;
     }
   }
 }

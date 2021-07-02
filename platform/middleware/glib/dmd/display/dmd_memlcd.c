@@ -42,7 +42,7 @@ static DMD_DisplayGeometry dimensions;
 /* The memory lcd display is row based, so we store one "dirty" bit for each
  * row. When a row is touched we set the "dirty" bit for that row, marking it
  * for rendering. */
-static uint32_t dirtyRows[SL_MEMLCD_DISPLAY_HEIGHT / sizeof(uint32_t) / 8];
+static uint32_t dirtyRows[(SL_MEMLCD_DISPLAY_HEIGHT  + (sizeof(uint32_t) * 8 - 1)) / sizeof(uint32_t) / 8];
 
 /* This framebuffer is large enough to store one full frame. */
 static uint8_t framebuffer[(SL_MEMLCD_DISPLAY_WIDTH * SL_MEMLCD_DISPLAY_HEIGHT * SL_MEMLCD_DISPLAY_BPP) / 8];

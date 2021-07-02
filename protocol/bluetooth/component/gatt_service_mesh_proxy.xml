@@ -1,14 +1,8 @@
 <gatt>
-    <capabilities_declare>
-      <capability enable="false">mesh_proxy_service</capability>
-    </capabilities_declare>
   <!--Mesh Proxy Service-->
   <service advertise="false" name="Mesh Proxy Service" requirement="mandatory" sourceId="com.silabs.service.mesh_proxy" type="primary" uuid="1828">
     <informativeText>Abstract:  The Mesh Proxy Service is used to enable a server to send and receive Proxy PDUs with a client.  </informativeText>
-    <capabilities>
-      <capability>mesh_proxy_service</capability>
-    </capabilities>
-    
+
     <!--Mesh Proxy Data In-->
     <characteristic name="Mesh Proxy Data In" sourceId="com.silabs.characteristic.mesh_proxy_data_in" uuid="2add">
       <informativeText>Abstract:  The Mesh Proxy Data In characteristic is used by the client to send Proxy PDUs to the server  </informativeText>

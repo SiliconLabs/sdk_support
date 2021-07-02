@@ -21,18 +21,19 @@ description: >
 
   Selecting this component will also include the PWM Core component, which is 
   the implementation of the PWM driver itself.
-category: Platform|Driver
+category: Platform|Driver|PWM
 quality: production
+root_path: platform/driver/pwm/
 instantiable:
   prefix: pwm
 config_file:
-  - path: platform/driver/pwm/config/s0/sl_pwm_init_{{instance}}_config.h
+  - path: "config/s0/sl_pwm_init_{{instance}}_config.h"
     file_id: pwm_config
     condition: [device_series_0]
-  - path: platform/driver/pwm/config/s1/sl_pwm_init_{{instance}}_config.h
+  - path: "config/s1/sl_pwm_init_{{instance}}_config.h"
     file_id: pwm_config
     condition: [device_series_1]
-  - path: platform/driver/pwm/config/s2/sl_pwm_init_{{instance}}_config.h
+  - path: "config/s2/sl_pwm_init_{{instance}}_config.h"
     file_id: pwm_config
     condition: [device_series_2]
 provides:

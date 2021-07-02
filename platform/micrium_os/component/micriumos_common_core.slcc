@@ -6,9 +6,9 @@ category: RTOS|Micrium OS|Common
 quality: production
 component_root_path: platform/micrium_os/common
 config_file:
-  - path: "../cfg/common_cfg.h"
-  - path: "../cfg/rtos_cfg.h"
-  - path: "../cfg/rtos_err_cfg.h"
+  - path: ../cfg/common_cfg.h
+  - path: ../cfg/rtos_cfg.h
+  - path: ../cfg/rtos_err_cfg.h
 source:
   - path: source/kal/kal_kernel.c
   - path: source/lib/lib_ascii.c

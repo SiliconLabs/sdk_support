@@ -48,6 +48,14 @@
 
 #include <string.h>
 
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
 static void update_key_from_context(sli_se_opaque_cipher_operation_t* ctx)
 {
   // Point the key to the buffer
@@ -101,6 +109,8 @@ static psa_status_t initialize_key_in_context(const psa_key_attributes_t *attrib
   return PSA_SUCCESS;
 }
 
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_*
+
 psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes,
                                           const uint8_t *key_buffer,
                                           size_t key_buffer_size,
@@ -111,6 +121,16 @@ psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   return sli_se_driver_cipher_encrypt(attributes,
                                       key_buffer,
                                       key_buffer_size,
@@ -120,6 +140,22 @@ psa_status_t sli_se_opaque_cipher_encrypt(const psa_key_attributes_t *attributes
                                       output,
                                       output_size,
                                       output_length);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes,
@@ -132,6 +168,16 @@ psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   return sli_se_driver_cipher_decrypt(attributes,
                                       key_buffer,
                                       key_buffer_size,
@@ -141,6 +187,22 @@ psa_status_t sli_se_opaque_cipher_decrypt(const psa_key_attributes_t *attributes
                                       output,
                                       output_size,
                                       output_length);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t *operation,
@@ -149,6 +211,14 @@ psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t
                                                 size_t key_buffer_size,
                                                 psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -168,6 +238,18 @@ psa_status_t sli_se_opaque_cipher_encrypt_setup(sli_se_opaque_cipher_operation_t
                                          key_buffer,
                                          key_buffer_size);
   return psa_status;
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t *operation,
@@ -176,6 +258,14 @@ psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t
                                                 size_t key_buffer_size,
                                                 psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -196,29 +286,32 @@ psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t
                                          key_buffer,
                                          key_buffer_size);
   return psa_status;
-}
 
-psa_status_t sli_se_opaque_cipher_generate_iv(sli_se_opaque_cipher_operation_t *operation,
-                                              uint8_t *iv,
-                                              size_t iv_size,
-                                              size_t *iv_length)
-{
-  if (operation == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 
-  if (operation->key_len == 0) {
-    // context hasn't been properly initialised
-    return PSA_ERROR_BAD_STATE;
-  }
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
 
-  return sli_se_driver_cipher_generate_iv(&operation->operation, iv, iv_size, iv_length);
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *operation,
                                          const uint8_t *iv,
                                          size_t iv_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -229,6 +322,16 @@ psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *opera
   }
 
   return sli_se_driver_cipher_set_iv(&operation->operation, iv, iv_length);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)iv;
+  (void)iv_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *operation,
@@ -238,6 +341,14 @@ psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *opera
                                          size_t output_size,
                                          size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   // Argument check
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -257,6 +368,19 @@ psa_status_t sli_se_opaque_cipher_update(sli_se_opaque_cipher_operation_t *opera
                                      output,
                                      output_size,
                                      output_length);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *operation,
@@ -264,6 +388,14 @@ psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *opera
                                          size_t output_size,
                                          size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -280,16 +412,43 @@ psa_status_t sli_se_opaque_cipher_finish(sli_se_opaque_cipher_operation_t *opera
                                      output,
                                      output_size,
                                      output_length);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_se_opaque_cipher_abort(sli_se_opaque_cipher_operation_t *operation)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation != NULL) {
     // Wipe context
     memset(operation, 0, sizeof(sli_se_opaque_cipher_operation_t));
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 #endif // VAULT || MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS

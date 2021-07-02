@@ -35,6 +35,11 @@
 #include <stdbool.h>
 #include "em_device.h"
 
+#ifdef BOOTLOADER_ENABLE
+#include "api/btl_interface.h"
+
+#endif
+
 /*----------------------------------------------------------------------------
  * Linker generated Symbols
  *----------------------------------------------------------------------------*/
@@ -48,6 +53,17 @@ extern uint32_t __zero_table_end__;
 extern uint32_t __bss_start__;
 extern uint32_t __bss_end__;
 extern uint32_t __StackTop;
+
+#ifdef BOOTLOADER_ENABLE
+extern MainBootloaderTable_t mainStageTable;
+
+extern void SystemInit2(void);
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler Function Prototype
+ *----------------------------------------------------------------------------*/
+typedef void (*pFunc)(void);
+#endif
 
 /*----------------------------------------------------------------------------
  * External References
@@ -146,7 +162,7 @@ void ACMP0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void ACMP1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void WDOG0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void WDOG1_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
-void SYXO0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
+void HFXO0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void HFRCO0_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void HFRCOEM23_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
 void CMU_IRQHandler(void) __attribute__ ((weak, alias("Default_Handler")));
@@ -194,7 +210,11 @@ const tVectorEntry        __Vectors[] __attribute__ ((section(".vectors"))) = {
   { Default_Handler },                      /*      Reserved                  */
   { Default_Handler },                      /*      Reserved                  */
   { Default_Handler },                      /*      Reserved                  */
+#ifdef BOOTLOADER_ENABLE
+  { (pFunc) & mainStageTable },
+#else
   { Default_Handler },                      /*      Reserved                  */
+#endif
   { SVC_Handler },                          /*      SVCall Handler            */
   { DebugMon_Handler },                     /*      Debug Monitor Handler     */
   { sl_app_properties },                    /*      Application properties    */
@@ -247,7 +267,7 @@ const tVectorEntry        __Vectors[] __attribute__ ((section(".vectors"))) = {
   { ACMP1_IRQHandler },                            /* 26 = ACMP1 */
   { WDOG0_IRQHandler },                            /* 27 = WDOG0 */
   { WDOG1_IRQHandler },                            /* 28 = WDOG1 */
-  { SYXO0_IRQHandler },                            /* 29 = SYXO0 */
+  { HFXO0_IRQHandler },                            /* 29 = HFXO0 */
   { HFRCO0_IRQHandler },                           /* 30 = HFRCO0 */
   { HFRCOEM23_IRQHandler },                        /* 31 = HFRCOEM23 */
   { CMU_IRQHandler },                              /* 32 = CMU */
@@ -290,6 +310,10 @@ void Reset_Handler(void)
 
 #ifndef __NO_SYSTEM_INIT
   SystemInit();
+#endif
+
+#ifdef BOOTLOADER_ENABLE
+  SystemInit2();
 #endif
 
 /*  Firstly it copies data from read only memory to RAM. There are two schemes

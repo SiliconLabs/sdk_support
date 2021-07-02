@@ -112,28 +112,19 @@ include:
   - path: util/third_party/crypto/mbedtls/library
     file_list:
       - path: common.h
+      - path: ecp_invasive.h
       - path: ssl_invasive.h
       - path: ssl_tls13_keys.h
 
 requires:
-  - name: silabs_core_sl_malloc
   - name: device
+  - name: silabs_core_sl_malloc
+    condition: [device_cortexm]
   - name: mbedtls_slcrypto
-    condition: [device_series_0]
-  - name: mbedtls_slcrypto
-    condition: [device_series_1]
-  - name: mbedtls_slcrypto
-    condition: [device_sdid_200]
-  - name: mbedtls_slcrypto
-    condition: [device_sdid_205]
-    # xg23 (device_sdid_210) currently only has SW crypto
+    condition: [device_cortexm]
 define:
   - name: MBEDTLS_CONFIG_FILE
     value: "<mbedtls_config.h>"
-  # xg23 currently only has SW crypto
-  - name: NO_CRYPTO_ACCELERATION
-    value: 1
-    condition: [device_sdid_210]
 provides:
   - name: mbedtls_core
   - name: mbedtls_config

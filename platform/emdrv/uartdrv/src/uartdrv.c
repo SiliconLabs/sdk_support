@@ -80,9 +80,6 @@
 
 //****************************************************************************
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-struct sl_sleeptimer_timer_handle delayedTxTimer;
-#endif
 #if (HANDLES_ARE_AVAILABLE)
 static bool uartdrvHandleIsInitialized = false;
 static UARTDRV_Handle_t uartdrvHandle[EMDRV_UARTDRV_MAX_DRIVER_INSTANCES];
@@ -147,9 +144,9 @@ static void emRequestDeinit(UARTDRV_Handle_t handle)
   bool running;
 
   CORE_ENTER_ATOMIC();
-  status = sl_sleeptimer_is_timer_running(&delayedTxTimer, &running);
+  status = sl_sleeptimer_is_timer_running(&handle->delayedTxTimer, &running);
   if ((status == SL_STATUS_OK) && (running)) {
-    sl_sleeptimer_stop_timer(&delayedTxTimer);
+    sl_sleeptimer_stop_timer(&handle->delayedTxTimer);
   }
   CORE_EXIT_ATOMIC();
 #endif
@@ -612,9 +609,9 @@ static void StartTransmitDma(UARTDRV_Handle_t handle,
   bool running;
 
   CORE_ENTER_ATOMIC();
-  status = sl_sleeptimer_is_timer_running(&delayedTxTimer, &running);
+  status = sl_sleeptimer_is_timer_running(&handle->delayedTxTimer, &running);
   if ((status == 0) && (running)) {
-    sl_sleeptimer_stop_timer(&delayedTxTimer);
+    sl_sleeptimer_stop_timer(&handle->delayedTxTimer);
     em1RequestRemove(handle);
   }
   CORE_EXIT_ATOMIC();
@@ -755,7 +752,7 @@ static bool ReceiveDmaComplete(unsigned int channel,
 static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle)
 {
   uint32_t baud;
-  uint32_t ticks;
+  uint32_t ticks = 0;
 
   switch (handle->type) {
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
@@ -772,12 +769,15 @@ static uint32_t calculateSleeptimerTicksToFlushTxBuffers(UARTDRV_Handle_t handle
       baud = USART_BaudrateGet(handle->peripheral.uart);
       break;
   }
-  // Calculate the number of sleeptimer ticks for:
-  // 3 bytes: two in FIFO and one in shift register.
-  // 12 bits pr byte: one start bit, 8 data bits, parity and 2 stop bits.
-  ticks = (sl_sleeptimer_get_timer_frequency() * 3 * 12) / baud;
-  // Round up.
-  ticks++;
+
+  if (baud != 0) {  // Avoid division by 0
+    // Calculate the number of sleeptimer ticks for:
+    // 3 bytes: two in FIFO and one in shift register.
+    // 12 bits pr byte: one start bit, 8 data bits, parity and 2 stop bits.
+    ticks = (sl_sleeptimer_get_timer_frequency() * 3 * 12) / baud;
+    // Round up.
+    ticks++;
+  }
 
   return ticks;
 }
@@ -824,7 +824,7 @@ static void TransmitDmaCompleteDelayed(sl_sleeptimer_timer_handle_t *timer_handl
     // Restart the timer if not completed.
     // May be the case if flow control is used.
     uint32_t ticks = calculateSleeptimerTicksToFlushTxBuffers(uartdrv_handle);
-    sl_sleeptimer_start_timer(&delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
+    sl_sleeptimer_start_timer(&uartdrv_handle->delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
   }
 }
 #endif
@@ -848,7 +848,7 @@ static bool TransmitDmaComplete(unsigned int channel,
 
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   uint32_t ticks = calculateSleeptimerTicksToFlushTxBuffers(handle);
-  sl_sleeptimer_start_timer(&delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
+  sl_sleeptimer_start_timer(&handle->delayedTxTimer, ticks, TransmitDmaCompleteDelayed, userParam, 0, 0);
 #else
   em1RequestRemove(handle);
 #endif
@@ -1626,10 +1626,13 @@ Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
   CMU_ClockEnable(cmuClock_HFLE, true);
 #endif
 
-  // Only try to use LF clock if LFXO is enabled and requested baudrate is low
+  // Only try to use LF clock if LFXO or LFRCO is enabled and requested baudrate is low
   if (CMU->STATUS & CMU_STATUS_LFXOENS
       && (leuartInit.baudrate <= SystemLFXOClockGet())) {
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFXO);
+  } else if (CMU->STATUS & CMU_STATUS_LFRCOENS
+             && (leuartInit.baudrate <= SystemLFRCOClockGet())) {
+    CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_LFRCO);
   } else {
     // Try to figure out the prescaler that will give us the best stability
     CMU_ClockSelectSet(cmuClock_LFB, cmuSelect_HFCLKLE);
@@ -1849,7 +1852,8 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
     CMU_ClockEnable(cmuClock_EM23GRPACLK, true);
     CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFRCO);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM23GRPACLK);
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_LFRCO);
 #else
   #error "Please assign a LF clock to EUSART instance"
@@ -1858,8 +1862,9 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     CMU_ClockEnable(cmuClock_EM01GRPACLK, true);
     CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM01GRPACLK);
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
-    if (handle->uartClock == cmuClock_EUSART0CLK) {
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+    if (handle->uartClock == cmuClock_EUSART0) {
       CMU_ClockSelectSet(handle->uartClock, cmuSelect_EM01GRPCCLK);
     }
 #else
@@ -1898,10 +1903,10 @@ Ecode_t UARTDRV_InitEuart(UARTDRV_Handle_t handle,
   if (initData->fcType == uartdrvFlowControlHwUart) {
 #if defined(EUART_PRESENT)
     GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
-    GPIO->EUARTROUTE_SET->RTSROUTE =
+    GPIO->EUARTROUTE_SET[0].RTSROUTE =
       (initData->rtsPort << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
       | (initData->rtsPin << _GPIO_EUART_RTSROUTE_PIN_SHIFT);
-    GPIO->EUARTROUTE_SET->CTSROUTE =
+    GPIO->EUARTROUTE_SET[0].CTSROUTE =
       (initData->ctsPort << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
       | (initData->ctsPin << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
 #elif defined(EUSART_PRESENT)
@@ -1957,10 +1962,6 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
     return ECODE_EMDRV_UARTDRV_ILLEGAL_HANDLE;
   }
 
-#if (HANDLES_ARE_AVAILABLE)
-  removeHandle(handle);
-#endif
-
   // Stop DMA transfers.
   UARTDRV_Abort(handle, uartdrvAbortAll);
 
@@ -1968,6 +1969,10 @@ Ecode_t UARTDRV_DeInit(UARTDRV_Handle_t handle)
   UARTDRV_FlowControlSet(handle, uartdrvFlowControlOn);
 
   ConfigGpio(handle, false);
+
+#if (HANDLES_ARE_AVAILABLE)
+  removeHandle(handle);
+#endif
 
   if (handle->type == uartdrvUartTypeUart) {
     handle->peripheral.uart->CMD = USART_CMD_RXDIS | USART_CMD_TXDIS;
@@ -2111,6 +2116,11 @@ Ecode_t UARTDRV_Abort(UARTDRV_Handle_t handle, UARTDRV_AbortType_t type)
       DisableReceiver(handle);
     }
   }
+
+  if (handle->em1RequestCount > 0) {
+    em1RequestRemove(handle);
+  }
+
   CORE_EXIT_ATOMIC();
 
   return ECODE_EMDRV_UARTDRV_OK;

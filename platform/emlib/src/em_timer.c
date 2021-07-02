@@ -115,7 +115,7 @@ typedef struct {
 static void timerPrsConfig(TIMER_TypeDef * timer, unsigned int cc, unsigned int prsCh, bool async)
 {
   int i = TIMER_DEVICE_ID(timer);
-  PRS_TIMERn_TypeDef * base = (PRS_TIMERn_TypeDef *) &PRS->CONSUMER_TIMER0_CC0;
+  volatile PRS_TIMERn_TypeDef * base = (PRS_TIMERn_TypeDef *) &PRS->CONSUMER_TIMER0_CC0;
   EFM_ASSERT(i != -1);
 
   if (async) {
@@ -401,7 +401,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
 
 #if defined(TIMER_EN_EN)
   timer->EN_SET = TIMER_EN_EN;
-#endif 
+#endif
 
   /* Make sure disabled first, before resetting other registers. */
   timer->CMD = TIMER_CMD_STOP;

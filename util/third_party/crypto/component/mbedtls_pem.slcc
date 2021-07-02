@@ -22,3 +22,5 @@ requires:
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_PEM_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_PEM_WRITE_C

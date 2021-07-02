@@ -179,29 +179,8 @@ RAIL_ENUM(RAIL_BLE_Phy_t) {
 #define RAIL_BLE_RX_SUBPHY_ID_1M       (2U)
 /** Invalid subPhyId value */
 #define RAIL_BLE_RX_SUBPHY_ID_INVALID  (3U)
-
-/**
- *
- * The maximum number of GPIO pins used for AoX Antenna switching.
- *
- * If the user configures more pins using
- * \ref RAIL_BLE_ConfigAoxAntenna than allowed
- * \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT, then
- * \ref RAIL_STATUS_INVALID_PARAMETER status will be returned.
- *
- * \ref RAIL_STATUS_INVALID_CALL is returned if :
- * \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT is set to 0 or
- * The user configures no pins.
- *
- * The maximum value \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT can take depends on
- * number of Antenna route pins , a chip provides.
- * For EFR32XG22, the maximum value of \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT is 6.
- * If the user configures fewer pins than \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT,
- * then only number of pins asked by user will be configured with
- * \ref RAIL_STATUS_NO_ERROR.
- *
- */
-#define RAIL_BLE_AOX_ANTENNA_PIN_COUNT (6U)
+/** subPhyId indicating the total count */
+#define RAIL_BLE_RX_SUBPHY_COUNT       (4U)
 
 /**
  * @struct RAIL_BLE_State_t
@@ -226,6 +205,8 @@ typedef struct RAIL_BLE_State {
  * parameters to match what is needed for BLE. To switch back to a
  * default RAIL mode, call RAIL_BLE_Deinit() first. This function
  * will configure the protocol output on PTI to \ref RAIL_PTI_PROTOCOL_BLE.
+ *
+ * @note BLE may not be enabled while Auto-ACKing is enabled.
  */
 void RAIL_BLE_Init(RAIL_Handle_t railHandle);
 
@@ -432,6 +413,29 @@ RAIL_Status_t RAIL_BLE_PhySwitchToRx(RAIL_Handle_t railHandle,
  */
 
 /**
+ *
+ * The maximum number of GPIO pins used for AoX Antenna switching.
+ *
+ * If the user configures more pins using
+ * \ref RAIL_BLE_ConfigAoxAntenna than allowed
+ * \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT, then
+ * \ref RAIL_STATUS_INVALID_PARAMETER status will be returned.
+ *
+ * \ref RAIL_STATUS_INVALID_CALL is returned if :
+ * \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT is set to 0 or
+ * The user configures no pins.
+ *
+ * The maximum value \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT can take depends on
+ * number of Antenna route pins , a chip provides.
+ * For EFR32XG22, the maximum value of \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT is 6.
+ * If the user configures fewer pins than \ref RAIL_BLE_AOX_ANTENNA_PIN_COUNT,
+ * then only number of pins asked by user will be configured with
+ * \ref RAIL_STATUS_NO_ERROR.
+ *
+ */
+#define RAIL_BLE_AOX_ANTENNA_PIN_COUNT (6U)
+
+/**
  * @enum RAIL_BLE_AoxOptions_t
  * @brief Angle of Arrival/Departure options bit fields
  */
@@ -626,6 +630,214 @@ RAIL_Status_t RAIL_BLE_ConfigAoxAntenna(RAIL_Handle_t railHandle,
                                         RAIL_BLE_AoxAntennaConfig_t *antennaConfig);
 
 /** @} */  // end of group AoX
+
+/// @addtogroup BLETX2TX BLE TX Channel Hopping
+/// @{
+/// @code{.c}
+///
+/// // Configuration to send one additional packet
+/// static RAIL_BLE_TxChannelHoppingConfigEntry_t entry[1];
+/// static uint32_t buffer[BUFFER_SIZE];
+/// static RAIL_BLE_TxRepeatConfig_t repeat = {
+///   .iterations = 1,
+///   .repeatOptions = RAIL_TX_REPEAT_OPTION_HOP,
+///   .delayOrHop.channelHopping = {
+///     .buffer = buffer,
+///     .bufferLength = BUFFER_SIZE,
+///     .numberOfChannels = 1,
+///     .entries = &entry[0],
+///   },
+/// };
+///
+/// // Send a normal packet on the current channel, then a packet on a new channel
+/// int bleSendThenAdvertise(uint8_t *firstPacket, uint8_t *secondPacket)
+/// {
+///   // Load both packets into the FIFO
+///   RAIL_WriteTxFifo(railHandle, firstPacket, FIRST_PACKET_LEN, true);
+///   RAIL_WriteTxFifo(railHandle, secondPacket, SECOND_PACKET_LEN, false);
+///
+///   // Configure a 300 us turnaround between transmits
+///   entry[0].delayMode = RAIL_CHANNEL_HOPPING_DELAY_MODE_STATIC;
+///   entry[0].delay = 300; // microseconds
+///
+///   // Use default advertising parameters
+///   entry[0].disableWhitening = false;
+///   entry[0].crcInit = 0x00555555;
+///   entry[0].accessAddress = 0x8E89BED6;
+///
+///   // Transmit the repeated packet on the first advertising channel
+///   entry[0].phy = RAIL_BLE_1Mbps;
+///   entry[0].railChannel = 0;
+///   entry[0].logicalChannel = 37;
+///
+///  // Configure repeated transmit in RAIL, then transmit, sending both packets
+///  RAIL_BLE_SetNextTxRepeat(railHandle, &repeat);
+///  RAIL_StartTx(railHandle, currentChannel, RAIL_TX_OPTIONS_DEFAULT, NULL);
+/// }
+/// @endcode
+
+/**
+ * @struct RAIL_BLE_TxChannelHoppingConfigEntry_t
+ * @brief Structure that represents one of the channels that is part of a
+ *   \ref RAIL_BLE_TxChannelHoppingConfig_t sequence of channels used in
+ *   channel hopping.
+ */
+typedef struct RAIL_BLE_TxChannelHoppingConfigEntry {
+  /**
+   * Idle time in microseconds to wait before hopping into the
+   * channel indicated by this entry.
+   */
+  uint32_t delay;
+  /**
+   * The BLE PHY to use for this hop's transmit.
+   */
+  RAIL_BLE_Phy_t phy;
+  /**
+   * The logical channel to use for this hop's transmit. The whitener will
+   * be reinitialized if used.
+   */
+  uint8_t logicalChannel;
+  /**
+   * The channel number to be used for this hop's transmit. If this is an
+   * invalid channel for the chosen PHY, the call to \ref RAIL_SetNextTxRepeat()
+   * will fail.
+   */
+  uint8_t railChannel;
+  /**
+   * This can turn off the whitening engine and is useful for sending BLE test
+   * mode packets that don't have this turned on.
+   */
+  bool disableWhitening;
+  /**
+   * The value to use for CRC initialization.
+   */
+  uint32_t crcInit;
+  /**
+   * The access address to use for the connection.
+   */
+  uint32_t accessAddress;
+} RAIL_BLE_TxChannelHoppingConfigEntry_t;
+
+/**
+ * @struct RAIL_BLE_TxChannelHoppingConfig_t
+ * @brief Wrapper struct that will contain the sequence of
+ *   \ref RAIL_BLE_TxChannelHoppingConfigEntry_t that represents the channel
+ *   sequence to use during TX Channel Hopping.
+ */
+typedef struct RAIL_BLE_TxChannelHoppingConfig {
+  /**
+   * Pointer to contiguous global read-write memory that will be used
+   * by RAIL to store channel hopping information throughout its operation.
+   * It need not be initialized and applications should never write
+   * data anywhere in this buffer.
+   */
+  uint32_t *buffer;
+  /**
+   * This parameter must be set to the length of the buffer array. This way,
+   * during configuration, the software can confirm it's writing within the
+   * range of the buffer. The configuration API will return an error
+   * if bufferLength is insufficient.
+   */
+  uint16_t bufferLength;
+  /** The number of channels that is in the channel hopping sequence. */
+  uint8_t numberOfChannels;
+  /**
+   * Pad bytes reserved for future use and currently ignored.
+   */
+  uint8_t reserved;
+  /**
+   * A pointer to the first element of an array of \ref
+   * RAIL_BLE_TxChannelHoppingConfigEntry_t that represents the channels
+   * used during channel hopping. The length of this array must be
+   * numberOfChannels.
+   */
+  RAIL_BLE_TxChannelHoppingConfigEntry_t *entries;
+} RAIL_BLE_TxChannelHoppingConfig_t;
+
+/// @struct RAIL_BLE_TxRepeatConfig_t
+/// @brief A configuration structure for repeated transmits
+///
+typedef struct RAIL_BLE_TxRepeatConfig {
+  /**
+   * The number of repeated transmits to run. A total of (iterations + 1)
+   * transmits will go on-air in the absence of errors.
+   */
+  uint16_t iterations;
+  /**
+   * Repeat option(s) to apply.
+   */
+  RAIL_TxRepeatOptions_t repeatOptions;
+  /**
+   * Per-repeat delay or hopping configuration, depending on repeatOptions.
+   */
+  union {
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is not set, this specifies
+     * the delay time between each repeated transmit. Specify \ref
+     * RAIL_TRANSITION_TIME_KEEP to use the current \ref
+     * RAIL_StateTiming_t::txToTx transition time setting.
+     */
+    RAIL_TransitionTime_t delay;
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is set, this specifies
+     * the channel hopping configuration to use when hopping between
+     * repeated transmits. Per-hop delays are configured within each
+     * \ref RAIL_BLE_TxChannelHoppingConfigEntry_t::delay rather than
+     * this union's delay field.
+     */
+    RAIL_BLE_TxChannelHoppingConfig_t channelHopping;
+  } delayOrHop;
+} RAIL_BLE_TxRepeatConfig_t;
+
+/**
+ * Set up automatic repeated transmits after the next transmit.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] repeatConfig The configuration structure for repeated transmits.
+ * @return Status code indicating a success of the function call.
+ *
+ * Repeated transmits will occur after an application-initiated transmit caused
+ * by calling one of the \ref Packet_TX APIs. The repetition will only occur
+ * after the first application-initiated transmit after this function is
+ * called. Future repeated transmits must be requested by calling this function
+ * again.
+ *
+ * Each repeated transmit that occurs will have full \ref PTI information, and
+ * will receive events such as \ref RAIL_EVENT_TX_PACKET_SENT as normal.
+ *
+ * If a TX error occurs during the repetition, the process will abort and the
+ * TX error transition from \ref RAIL_SetTxTransitions will be used. If the
+ * repetition completes successfully, then the TX success transition from
+ * \ref RAIL_SetTxTransitions will be used.
+ *
+ * Any call to \ref RAIL_Idle or \ref RAIL_StopTx will clear the pending
+ * repeated transmits. The state will also be cleared by another call to this
+ * function. To clear the repeated transmits before they've started without
+ * stopping other radio actions, call this function with a \ref
+ * RAIL_BLE_TxRepeatConfig_t::iterations count of 0. A DMP switch will clear this
+ * state only if the initial transmit triggering the repeated transmits has
+ * started.
+ *
+ * The application is responsible for populating the transmit data to be used
+ * by the repeated transmits via \ref RAIL_SetTxFifo or \ref RAIL_WriteTxFifo.
+ * Data will be transmitted from the TX FIFO. If the TX FIFO does not have
+ * sufficient data to transmit, a TX error will be caused and a \ref
+ * RAIL_EVENT_TX_UNDERFLOW will occur. In order to avoid an underflow, the
+ * application should queue data to be transmitted as early as possible.
+ *
+ * This function will fail to configure the repetition if a transmit of any
+ * kind is ongoing, including during the time between an initial transmit and
+ * the end of a previously-configured repetition.
+ *
+ * @note This feature/API is not supported on the EFR32XG1 family of chips.
+ *        Use the compile time symbol \ref RAIL_SUPPORTS_TX_TO_TX or the runtime
+ *        call \ref RAIL_SupportsTxToTx() to check whether the platform supports
+ *        this feature.
+ */
+RAIL_Status_t RAIL_BLE_SetNextTxRepeat(RAIL_Handle_t railHandle,
+                                       const RAIL_BLE_TxRepeatConfig_t *repeatConfig);
+
+/** @} */  // end of group BLETX2TX
 
 /** @} */ // end of BLE
 

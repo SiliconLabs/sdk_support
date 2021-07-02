@@ -2,7 +2,7 @@
  * @file
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -23,11 +23,13 @@
 #include "em_cmu.h"
 #include "em_gpio.h"
 #include "em_csen.h"
-#include "em_ldma.h"
+#include "dmadrv.h"
 
 /// Configures LDMA channels to set BASELINE values and read CSEN data
-static LDMA_Descriptor_t LDMA_descCh0;
-static LDMA_Descriptor_t LDMA_descCh1;
+static unsigned int DMAChanA;
+static unsigned int DMAChanB;
+
+static volatile bool DMATransferInProgress = false;
 
 /// Set LDMA transfer ISR, checked/cleared by CSLIB timing callback checkTimer()
 uint8_t CSENtimerTick = 0;
@@ -121,6 +123,11 @@ uint8_t indexTRST = 0;             // index to current TRST setting
 void CSLIB_initNoiseCharacterization(void);
 
 static void configureCSENActiveMode(void);
+
+// DMADRV transfer callback
+static bool transferCallback(unsigned int channel,
+                             unsigned int sequenceNo,
+                             void *userParam);
 
 /**************************************************************************//**
  * CSEN pin mapping function
@@ -299,41 +306,34 @@ void setupCSLIBClock(uint32_t clock_period, CSEN_Init_TypeDef* csen_init)
  *****************************************************************************/
 static void setupCSENdataDMA(void)
 {
-  static const LDMA_Init_t ldma_init = LDMA_INIT_DEFAULT;
+  Ecode_t ecode;
 
-  LDMA_TransferCfg_t csenTransfer =
-    LDMA_TRANSFER_CFG_PERIPHERAL(LDMA_CH_REQSEL_SIGSEL_CSENDATA | LDMA_CH_REQSEL_SOURCESEL_CSEN);
+  DMATransferInProgress = true;
 
-  LDMA_Descriptor_t csenTransferDesc = LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&CSEN->DATA,
-                                                                       autoScanBuffer,
-                                                                       DEF_NUM_SENSORS);
+  ecode = DMADRV_MemoryPeripheral(DMAChanA,
+                                  dmadrvPeripheralSignal_CSEN_BSLN,
+                                  (void *)&CSEN->DMBASELINE,
+                                  (void *)autoBaselineBuffer,
+                                  true,
+                                  DEF_NUM_SENSORS,
+                                  dmadrvDataSize4,
+                                  transferCallback,
+                                  (void *)0);
+  EFM_ASSERT(ecode == ECODE_EMDRV_DMADRV_OK);
 
-  LDMA_TransferCfg_t baselineTransfer =
-    LDMA_TRANSFER_CFG_PERIPHERAL(LDMA_CH_REQSEL_SIGSEL_CSENBSLN | LDMA_CH_REQSEL_SOURCESEL_CSEN);
+  ecode = DMADRV_PeripheralMemory(DMAChanB,
+                                  dmadrvPeripheralSignal_CSEN_DATA,
+                                  (void *)autoScanBuffer,
+                                  (void *)&CSEN->DATA,
+                                  true,
+                                  DEF_NUM_SENSORS,
+                                  dmadrvDataSize4,
+                                  transferCallback,
+                                  (void *)0);
 
-  LDMA_Descriptor_t baselineTransferDesc = LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(autoBaselineBuffer, &CSEN->DMBASELINE,
-                                                                           DEF_NUM_SENSORS);
+  DMATransferInProgress = false;
 
-  /* Initialize descriptor for CSEN DATA LDMA transfer */
-  LDMA_descCh0 = csenTransferDesc;
-  LDMA_descCh0.xfer.doneIfs = 0;
-  LDMA_descCh0.xfer.blockSize = ldmaCtrlBlockSizeUnit1;
-  LDMA_descCh0.xfer.ignoreSrec = 0;
-  LDMA_descCh0.xfer.reqMode = ldmaCtrlReqModeBlock;
-  LDMA_descCh0.xfer.size = ldmaCtrlSizeWord;
-
-  /* Initialize descriptor for CSEN BASELINE LDMA transfer */
-  LDMA_descCh1 = baselineTransferDesc;
-  LDMA_descCh1.xfer.doneIfs = 0;
-  LDMA_descCh1.xfer.blockSize = ldmaCtrlBlockSizeUnit1;
-  LDMA_descCh1.xfer.ignoreSrec = 0;
-  LDMA_descCh1.xfer.reqMode = ldmaCtrlReqModeBlock;
-  LDMA_descCh1.xfer.size = ldmaCtrlSizeWord;
-
-  /* Initialize the LDMA with default values. */
-  LDMA_Init(&ldma_init);
-  LDMA_StartTransfer(1, &baselineTransfer, &LDMA_descCh1);
-  LDMA_StartTransfer(0, &csenTransfer, &LDMA_descCh0);
+  EFM_ASSERT(ecode == ECODE_EMDRV_DMADRV_OK);
 }
 
 /**************************************************************************//**
@@ -406,47 +406,52 @@ static void CSLIB_TRSTSwitchIfHighNoise(void)
  * LDMA for the next transfer and sets flags for timing and sample processing.
  *
  *****************************************************************************/
-void LDMA_IRQHandler(void)
+static bool transferCallback(unsigned int channel,
+                             unsigned int sequenceNo,
+                             void *userParam)
 {
-  uint32_t pending;
+  (void)channel;
+  (void)sequenceNo;
+  (void)userParam;
   uint32_t index;
-  /* Read and clear interrupt source */
-  pending = LDMA_IntGetEnabled();
+  bool channelADone;
+  bool channelBDone;
 
   if ( (CSEN->CTRL & CSEN_CTRL_CONVSEL_DM) == CSEN_CTRL_CONVSEL_DM) {
-    if ((pending & 3) == 3) {
-      /* Setup LDMA for next transfer, common for single and scan mode */
-      LDMA->IFC = 0x03;
-      for ( index = 0; index < DEF_NUM_SENSORS; index++ ) {
-        // Only use the updated point if it is greater than  (library baseline - DELTA_CUTOFF)
-        // This step must be done here because the sensor baseline must not be polluted with bad points.
-        if ( autoScanBuffer[CSLIB_muxValues[index]] > (CSLIB_node[index].currentBaseline - DELTA_CUTOFF)) {
-          CSLIB_autoScanBuffer[index] = autoScanBuffer[CSLIB_muxValues[index]];
-          autoBaselineBuffer[(index - 1 + DEF_NUM_SENSORS) % DEF_NUM_SENSORS] = autoScanBuffer[index];
+    /* Setup DMA for next transfer, common for single and scan mode */
+    if (!DMATransferInProgress) {
+      EFM_ASSERT(DMADRV_TransferDone(DMAChanA, &channelADone) == ECODE_EMDRV_DMADRV_OK);
+      EFM_ASSERT(DMADRV_TransferDone(DMAChanB, &channelBDone) == ECODE_EMDRV_DMADRV_OK);
+      if (channelADone && channelBDone) {
+        for ( index = 0; index < DEF_NUM_SENSORS; index++ ) {
+          // Only use the updated point if it is greater than  (library baseline - DELTA_CUTOFF)
+          // This step must be done here because the sensor baseline must not be polluted with bad points.
+          if ( autoScanBuffer[CSLIB_muxValues[index]] > (CSLIB_node[index].currentBaseline - DELTA_CUTOFF)) {
+            CSLIB_autoScanBuffer[index] = autoScanBuffer[CSLIB_muxValues[index]];
+            autoBaselineBuffer[(index - 1 + DEF_NUM_SENSORS) % DEF_NUM_SENSORS] = autoScanBuffer[index];
+          }
         }
+        CSEN->DMBASELINE = autoBaselineBuffer[DEF_NUM_SENSORS - 1];
+        setupCSENdataDMA();
+        CSLIB_autoScanComplete = 1;
+        CSENtimerTick = 1;
       }
-      CSEN->DMBASELINE = autoBaselineBuffer[DEF_NUM_SENSORS - 1];
-      setupCSENdataDMA();
-      CSLIB_autoScanComplete = 1;
-      CSENtimerTick = 1;
     }
   } else {
-    if ((pending & 3) == 1) {
-      /* Setup LDMA for next transfer, common for single and scan mode */
-      LDMA->IFC = 0x01;
-      for ( index = 0; index < DEF_NUM_SENSORS; index++ ) {
-        CSLIB_autoScanBuffer[index] = autoScanBuffer[CSLIB_muxValues[index]];
-        autoBaselineBuffer[(index - 1 + DEF_NUM_SENSORS) % DEF_NUM_SENSORS] = autoScanBuffer[index];
-      }
-      setupCSENdataDMA();
-      CSLIB_autoScanComplete = 1;
-      CSENtimerTick = 1;
+    /* Setup DMA for next transfer, common for single and scan mode */
+    for ( index = 0; index < DEF_NUM_SENSORS; index++ ) {
+      CSLIB_autoScanBuffer[index] = autoScanBuffer[CSLIB_muxValues[index]];
+      autoBaselineBuffer[(index - 1 + DEF_NUM_SENSORS) % DEF_NUM_SENSORS] = autoScanBuffer[index];
     }
+    setupCSENdataDMA();
+    CSLIB_autoScanComplete = 1;
+    CSENtimerTick = 1;
   }
 
   CSLIB_TRSTSwitchIfHighNoise();
   // Notify comms we have new data and it should update
   sendComms = true;
+  return true;
 }
 
 /**************************************************************************//**
@@ -478,6 +483,16 @@ void CSEN_IRQHandler(void)
  *****************************************************************************/
 void CSLIB_configureSensorForActiveModeCB(void)
 {
+  Ecode_t ecode;
+
+  ecode = DMADRV_Init();
+  if (ecode == ECODE_EMDRV_DMADRV_OK) {
+    ecode = DMADRV_AllocateChannel(&DMAChanA, (void *)0);
+    EFM_ASSERT(ecode == ECODE_EMDRV_DMADRV_OK);
+
+    ecode = DMADRV_AllocateChannel(&DMAChanB, (void *)0);
+    EFM_ASSERT(ecode == ECODE_EMDRV_DMADRV_OK);
+  }
   configureCSENActiveMode();           // Initialize CSEN and LDMA
   CSLIB_autoScan = 1;                  // Signal to CSLIB to use auto scan state machine
 }

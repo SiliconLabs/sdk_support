@@ -5,7 +5,7 @@ description: >-
   Driver for interacting with the SE or Root Code on Series 2 devices. The
   available functionality varies accross parts: device management utilities
   are available on all parts; on parts with the SE subsystem, a low level
-  crypto API is available; finally, Vault parts also include key storage
+  crypto API is available; finally, Vault High devices also include key storage
   functionality.
 category: Platform|Security
 quality: production
@@ -42,11 +42,9 @@ include:
     file_list:
       - path: sli_se_manager_osal.h
       - path: sli_se_manager_osal_baremetal.h
-        unless: [freertos, micriumos]
-      - path: sli_se_manager_osal_freertos.h
-        condition: [freertos]
-      - path: sli_se_manager_osal_micriumos.h
-        condition: [micriumos]
+        unless: [cmsis_rtos2]
+      - path: sli_se_manager_osal_cmsis_rtos2.h
+        condition: [cmsis_rtos2]
 requires:
   - name: device
   - name: emlib_common
@@ -58,3 +56,6 @@ provides:
 documentation:
     docset: gecko-platform
     document: service/api/group-sl-se-manager
+template_contribution:
+  - name: component_catalog
+    value: se_manager

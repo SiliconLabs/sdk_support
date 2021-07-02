@@ -36,22 +36,23 @@ extern "C" {
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-#define BUTTON_ERROR  0xFFFF
+#define BUTTON_ERROR  0xFFFF              ///< Error when trying to return state
 
 /*******************************************************************************
  *****************************   DATA TYPES   *********************************
  ******************************************************************************/
 
-typedef uint8_t sl_button_mode_t;
-typedef uint8_t sl_button_state_t;
+typedef uint8_t sl_button_mode_t;       ///< BUTTON mode
+typedef uint8_t sl_button_state_t;      ///< BUTTON state
 
+/// A BUTTON instance
 typedef struct {
-  void                  *context;
-  sl_status_t           (*init)(void *context);
-  sl_button_state_t     (*get_state)(void *context);
-  void                  (*poll)(void *context);
-  void                  (*enable)(void *context);
-  void                  (*disable)(void *context);
+  void                  *context;                       ///< The context for this BUTTON instance
+  sl_status_t           (*init)(void *context);         ///< Member function to initialize BUTTON instance
+  void                  (*poll)(void *context);         ///< Member function to poll BUTTON
+  void                  (*enable)(void *context);       ///< Member function to enable BUTTON
+  void                  (*disable)(void *context);      ///< Member function to disable BUTTON
+  sl_button_state_t     (*get_state)(void *context);    ///< Member function to retrieve BUTTON state
 } sl_button_t;
 
 /*******************************************************************************
@@ -105,7 +106,7 @@ void sl_button_poll_step(const sl_button_t *handle);
 /***************************************************************************//**
  * A callback called in interrupt context whenever a button changes its state.
  *
- * @appusage Can be implemented by the application if required. This function
+ * @remark Can be implemented by the application if required. This function
  * can contain the functionality to be executed in response to changes of state
  * in each of the buttons, or callbacks to appropriate functionality.
  *
@@ -119,7 +120,7 @@ void sl_button_on_change(const sl_button_t *handle);
 /** @} (end addtogroup button) */
 
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup button Button Driver
+/// @addtogroup button Button API
 /// @{
 ///
 ///   @details

@@ -30,10 +30,10 @@
  ******************************************************************************/
 
 #ifndef __RAIL_CHIP_SPECIFIC_H_
-#ifndef __RAIL_TYPES_H__
+#if !defined(__RAIL_TYPES_H__) && !defined(DOXYGEN_SHOULD_SKIP_THIS)
 #warning rail_chip_specific.h should only be included by rail_types.h
 #include "rail_types.h" // Force rail_chip_specific.h only within rail_types.h
-#endif
+#else // __RAIL_TYPES_H__
 /// Include guard
 #define __RAIL_CHIP_SPECIFIC_H_
 
@@ -42,16 +42,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// -----------------------------------------------------------------------------
-// Multiprotocol
-// -----------------------------------------------------------------------------
-
-/**
- * @def TRANSITION_TIME_US
- * @brief Time it takes to take care of protocol switching.
- */
-#define TRANSITION_TIME_US 500
 
 /**
  * @addtogroup General_EFR32XG2 EFR32xG2
@@ -65,28 +55,28 @@ extern "C" {
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state.
  */
-#define EFR32XG21_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG21_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG22_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state.
  */
-#define EFR32XG22_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG22_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG23_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state.
  */
-#define EFR32XG23_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG23_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG24_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state.
  */
-#define EFR32XG24_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG24_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
 #define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG21_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
@@ -127,28 +117,28 @@ typedef struct RAILSched_Config {
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG21 series.
  */
-#define EFR32XG21_RAIL_STATE_UINT32_BUFFER_SIZE 102
+#define EFR32XG21_RAIL_STATE_UINT32_BUFFER_SIZE 106
 
 /**
  * @def EFR32XG22_RAIL_STATE_UINT32_BUFFER_SIZE
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG22 series.
  */
-#define EFR32XG22_RAIL_STATE_UINT32_BUFFER_SIZE 108
+#define EFR32XG22_RAIL_STATE_UINT32_BUFFER_SIZE 112
 
 /**
  * @def EFR32XG23_RAIL_STATE_UINT32_BUFFER_SIZE
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG23 series.
  */
-#define EFR32XG23_RAIL_STATE_UINT32_BUFFER_SIZE 110
+#define EFR32XG23_RAIL_STATE_UINT32_BUFFER_SIZE 118
 
 /**
  * @def EFR32XG24_RAIL_STATE_UINT32_BUFFER_SIZE
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
- *   internal state for the EFR32XG23 series.
+ *   internal state for the EFR32XG24 series.
  */
-#define EFR32XG24_RAIL_STATE_UINT32_BUFFER_SIZE 106
+#define EFR32XG24_RAIL_STATE_UINT32_BUFFER_SIZE 110
 
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
 #define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG21_RAIL_STATE_UINT32_BUFFER_SIZE
@@ -212,12 +202,21 @@ typedef struct RAIL_Config {
 
 /** @} */ // end of group General_EFR32XG2
 
+// -----------------------------------------------------------------------------
+// Multiprotocol
+// -----------------------------------------------------------------------------
 /**
  * @addtogroup Multiprotocol_EFR32 EFR32
  * @{
  * @brief EFR32-specific multiprotocol support defines
  * @ingroup Multiprotocol
  */
+
+/**
+ * @def TRANSITION_TIME_US
+ * @brief Time it takes to take care of protocol switching.
+ */
+#define TRANSITION_TIME_US 500
 
 /**
  * A placeholder for a chip-specific RAIL handle. Using NULL as a RAIL handle is
@@ -334,7 +333,7 @@ typedef struct RAIL_AntennaConfig {
  * @def RAIL_RF_PATHS_2P4GIG
  * @brief Indicates the number of 2.4 GHz RF Paths suppported
  */
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4
 #define RAIL_RF_PATHS_2P4GIG 2
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 2
 #define RAIL_RF_PATHS_2P4GIG 1
@@ -618,7 +617,7 @@ typedef int16_t RAIL_FrequencyOffset_t;
 #define RAIL_FREQUENCY_OFFSET_MIN ((RAIL_FrequencyOffset_t) -RAIL_FREQUENCY_OFFSET_MAX)
 
 /**
- * Specifies an invalid frequency offset value. This will be returned if you
+ * Specify an invalid frequency offset value. This will be returned if you
  * call \ref RAIL_GetRxFreqOffset() at an invalid time.
  */
 #define RAIL_FREQUENCY_OFFSET_INVALID ((RAIL_FrequencyOffset_t) 0x8000)
@@ -703,8 +702,14 @@ typedef uint8_t RAIL_TxPowerLevel_t;
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_HP mode.
+ *  EFR32XG24: capable of 20dBm max output power has max powerlevel:180
+ *  EFR32XG24: capable of 10dBm max output power has max powerlevel:90
  */
+#if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM > 10)
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (180U)
+#else
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (90U)
+#endif
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_HP mode.
@@ -712,19 +717,9 @@ typedef uint8_t RAIL_TxPowerLevel_t;
 #define RAIL_TX_POWER_LEVEL_2P4_HP_MIN     (0U)
 /**
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_2P4_MP mode.
- */
-#define RAIL_TX_POWER_LEVEL_2P4_MP_MAX     (90U)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
- * RAIL_TX_POWER_MODE_2P4_MP mode.
- */
-#define RAIL_TX_POWER_LEVEL_2P4_MP_MIN     (1U)
-/**
- * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_LP mode.
  */
-#define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (64U)
+#define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (15U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_LP mode.
@@ -735,7 +730,7 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_HP mode.
  */
-#define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (128U)
+#define RAIL_TX_POWER_LEVEL_2P4_HP_MAX     (127U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_HP mode.
@@ -745,7 +740,7 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_LP mode.
  */
-#define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (16U)
+#define RAIL_TX_POWER_LEVEL_2P4_LP_MAX     (15U)
 /**
  * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
  * RAIL_TX_POWER_MODE_2P4_LP mode.
@@ -775,6 +770,36 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  * RAIL_TX_POWER_MODE_SUBGIG mode.
  */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN (1U)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_MP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_MP_MAX (248U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_MP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_MP_MIN (1U)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_LP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_LP_MAX (248U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_LP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_LP_MIN (1U)
+/**
+ * The maximum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_LLP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MAX (248U)
+/**
+ * The minimum valid value for the \ref RAIL_TxPowerLevel_t when in \ref
+ * RAIL_TX_POWER_MODE_SUBGIG_LLP mode.
+ */
+#define RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MIN (1U)
 #endif //RAIL_FEAT_SUBGIG_RADIO
 
 /** Backwards compatability define */
@@ -820,11 +845,13 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
    *  High-power 2.4 GHz amplifier
    *  EFR32XG21: up to 20 dBm, raw values: 1-180
    *  EFR32XG22: up to 6 dBm, raw values: 1-128
+   *  EFR32XG24: capable of 20dBm max output power supports powerlevel: 0-180
+   *  EFR32XG24: capable of 10dBm max output power supports powerlevel: 0-90
    */
   RAIL_TX_POWER_MODE_2P4GIG_HP,
   /** Deprecated enum equivalent to \ref RAIL_TX_POWER_MODE_2P4GIG_HP */
   RAIL_TX_POWER_MODE_2P4_HP = RAIL_TX_POWER_MODE_2P4GIG_HP,
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
   /**
    *  Mid-power 2.4 GHz amplifier
    *  EFR32XG21: up to 10 dBm, raw values: 1-90
@@ -839,6 +866,7 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
    *  Low-power 2.4 GHz amplifier
    *  EFR32XG21: up to 0 dBm, raw values: 1-64
    *  EFR32XG22: up to 0 dBm, raw values: 1-16
+   *  EFR32XG24: up to 0 dBm, raw values: 1-16
    */
   RAIL_TX_POWER_MODE_2P4GIG_LP,
   /** Deprecated enum equivalent to \ref RAIL_TX_POWER_MODE_2P4GIG_LP */
@@ -850,10 +878,16 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
   RAIL_TX_POWER_MODE_2P4_HIGHEST = RAIL_TX_POWER_MODE_2P4GIG_HIGHEST,
 #endif
 #if RAIL_FEAT_SUBGIG_RADIO
-  /** High-power amplifier, up to 20 dBm, raw values: 0-180 */
+  /** High-power amplifier (Class D mode), up to 20 dBm, raw values: 0-180 */
   RAIL_TX_POWER_MODE_SUBGIG_HP,
   /** Deprecated enum equivalent to \ref RAIL_TX_POWER_MODE_SUBGIG_HP */
   RAIL_TX_POWER_MODE_SUBGIG = RAIL_TX_POWER_MODE_SUBGIG_HP,
+  /** Mid-power amplifier, greater than -10 dBm, raw values: 0-90 */
+  RAIL_TX_POWER_MODE_SUBGIG_MP,
+  /** Low-power amplifier, greater than -20 dBm, raw values: 1-7 */
+  RAIL_TX_POWER_MODE_SUBGIG_LP,
+  /** Low-Low-power amplifier, greater than -30 dBm, raw values: 1-7 */
+  RAIL_TX_POWER_MODE_SUBGIG_LLP,
   /** Select the highest power PA available on the current chip. */
   RAIL_TX_POWER_MODE_SUBGIG_HIGHEST,
 #endif
@@ -864,9 +898,10 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 /**
  * The number of PA's on this chip.
  */
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4))
 #define RAIL_NUM_PA (2U)
-#elif  (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
 #define RAIL_NUM_PA (1U)
 #else
 #define RAIL_NUM_PA (3U)
@@ -877,10 +912,10 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #if RAIL_FEAT_2G4_RADIO
 #define RAIL_TX_POWER_MODE_2P4GIG_HP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_HP)
 #define RAIL_TX_POWER_MODE_2P4_HP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4_HP)
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
 #define RAIL_TX_POWER_MODE_2P4GIG_MP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_MP)
 #define RAIL_TX_POWER_MODE_2P4_MP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4_MP)
-#endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 1 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+#endif //_SILICON_LABS_32B_SERIES_2_CONFIG == 1
 #if _SILICON_LABS_32B_SERIES_2_CONFIG != 3
 #define RAIL_TX_POWER_MODE_2P4GIG_LP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4GIG_LP)
 #define RAIL_TX_POWER_MODE_2P4_LP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_2P4_LP)
@@ -890,6 +925,9 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #endif //RAIL_FEAT_2G4_RADIO
 #if RAIL_FEAT_SUBGIG_RADIO
 #define RAIL_TX_POWER_MODE_SUBGIG_HP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_HP)
+#define RAIL_TX_POWER_MODE_SUBGIG_MP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_MP)
+#define RAIL_TX_POWER_MODE_SUBGIG_LP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_LP)
+#define RAIL_TX_POWER_MODE_SUBGIG_LLP ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_LLP)
 #define RAIL_TX_POWER_MODE_SUBGIG ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG)
 #define RAIL_TX_POWER_MODE_SUBGIG_HIGHEST ((RAIL_TxPowerMode_t) RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
 #endif //RAIL_FEAT_SUBGIG_RADIO
@@ -897,11 +935,12 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 #if RAIL_FEAT_2G4_RADIO
-#if _SILICON_LABS_32B_SERIES_2_CONFIG == 2
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
   "RAIL_TX_POWER_MODE_2P4GIG_HP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_LP",
-#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 3
+#elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG \
   "RAIL_TX_POWER_MODE_2P4GIG_HP",
 #else
@@ -909,14 +948,17 @@ RAIL_ENUM(RAIL_TxPowerMode_t) {
   "RAIL_TX_POWER_MODE_2P4GIG_HP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_MP",       \
   "RAIL_TX_POWER_MODE_2P4GIG_LP",
-#endif //_SILICON_LABS_32B_SERIES_2_CONFIG
+#endif // (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #else
 #define RAIL_TX_POWER_MODE_NAMES_2P4GIG
 #endif //RAIL_FEAT_2G4_RADIO
 
 #if RAIL_FEAT_SUBGIG_RADIO
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG \
-  "RAIL_TX_POWER_MODE_SUBGIG_HP",
+  "RAIL_TX_POWER_MODE_SUBGIG_HP",       \
+  "RAIL_TX_POWER_MODE_SUBGIG_MP",       \
+  "RAIL_TX_POWER_MODE_SUBGIG_LP",       \
+  "RAIL_TX_POWER_MODE_SUBGIG_LLP",
 #else
 #define RAIL_TX_POWER_MODE_NAMES_SUBGIG
 #endif
@@ -1040,10 +1082,10 @@ typedef struct RAIL_PtiConfig {
 // Retiming
 // -----------------------------------------------------------------------------
 /**
- * @addtogroup Retiming_EFR32 EFR32
+ * @addtogroup Retiming_EFR32 Retiming
  * @{
  * @brief EFR32-specific retiming capability.
- * @ingroup Retiming
+ * @ingroup RAIL_API
  *
  * The EFR product families have many digital and analog modules that can run
  * in parallel with a radio. Such combinations can result in interference and
@@ -1101,8 +1143,7 @@ RAIL_ENUM(RAIL_RetimeOptions_t) {
  * Configure retiming options.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[out] pOptions A pointer to configured retiming options
-                        bitmask indicating which are enabled.
+ * @param[in] mask A bitmask containing which options should be modified.
  * @param[in] options A bitmask containing desired configuration settings.
  *   Bit positions for each option are found in the \ref RAIL_RetimeOptions_t.
  * @return Status code indicating success of the function call.
@@ -1115,13 +1156,54 @@ RAIL_Status_t RAIL_ConfigRetimeOptions(RAIL_Handle_t railHandle,
  * Gets currently configured retiming option.
  *
  * @param[in] railHandle A handle of RAIL instance.
- * @param[out] pOptions A pointer to configured retiming option to populate.
+ * @param[out] pOptions A pointer to configured retiming options
+                        bitmask indicating which are enabled.
  * @return Status code indicating success of the function call.
  */
 RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
                                     RAIL_RetimeOptions_t *pOptions);
 
 /** @} */ // end of group Retiming_EFR32
+
+// -----------------------------------------------------------------------------
+// Notch filter
+// -----------------------------------------------------------------------------
+/**
+ * @addtogroup Notch_EFR32 Notch Filter
+ * @{
+ * @brief EFR32-specific notch capability.
+ * @ingroup RAIL_API
+ *
+ * Many wireless protocols operate on similar RF frequency bands.
+ * The EFR product families have the ability to reduce interference
+ * from undesired RF signal operating in the same frequency band.
+ */
+/**
+ * @struct RAIL_NotchConfig_t
+ * @brief RAIL Notch filter configuration.
+ *
+ * This structure describes the undesired RF interferencer
+ */
+typedef struct RAIL_NotchConfig {
+/** undesired interferer center frequency in Hz.
+    setting it to 0 will disable this feature.*/
+  uint32_t interfererFreqHz;
+/** undesired interferer frequency bandwidth in Hz*/
+  uint32_t interfererBwHz;
+} RAIL_NotchConfig_t;
+
+/**
+ * Configure RAIL Notch filter
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pNotchConfig Pointer to Notch filter configuration.
+ * @return A status code indicating success of the function call.
+ *
+ */
+RAIL_Status_t RAIL_ConfigNotch(RAIL_Handle_t railHandle,
+                               const RAIL_NotchConfig_t *pNotchConfig);
+
+/** @} */  // end of group Notch_EFR32
 
 /******************************************************************************
  * RX Channel Hopping
@@ -1133,7 +1215,7 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 
 /// The static amount of memory needed per channel for channel
 /// hopping, regardless of the size of radio configuration structures.
-#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (23U)
+#define RAIL_CHANNEL_HOPPING_BUFFER_SIZE_PER_CHANNEL (30U)
 
 /** @} */  // end of group Rx_Channel_Hopping
 
@@ -1162,6 +1244,12 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 
 /** @} */ // end of group Sleep
 
+/**
+ * @addtogroup Data_Management_EFR32XG2X EFR32XG2X
+ * @{
+ * @ingroup Data_Management
+ */
+
 /// Fixed-width type indicating the needed alignment for RX and TX FIFOs. Note
 /// that docs.silabs.com will incorrectly indicate that this is always a
 /// uint8_t, but it does vary across RAIL platforms.
@@ -1174,8 +1262,40 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 /// Alignment that is needed for the RX and TX FIFOs.
 #define RAIL_FIFO_ALIGNMENT (sizeof(RAIL_FIFO_ALIGNMENT_TYPE))
 
+/** @} */ // end of group Data_Management_EFR32
+
+/**
+ * @addtogroup State_Transitions_EFR32XG2X
+ * @{
+ * @ingroup State_Transitions
+ */
+
+/**
+ * @def RAIL_MINIMUM_TRANSITION_US
+ * @brief The minimum value for a consistent RAIL transition
+ * @note Transitions may need to be slower than this when using longer
+ *   \ref RAIL_TxPowerConfig_t::rampTime values
+ */
+#define RAIL_MINIMUM_TRANSITION_US (100U)
+
+/**
+ * @def RAIL_MAXIMUM_TRANSITION_US
+ * @brief The maximum value for a consistent RAIL transition
+ */
+#define RAIL_MAXIMUM_TRANSITION_US (1000000U)
+
+/**
+ * @typedef RAIL_TransitionTime_t
+ * @brief Suitable type for the supported transition time range.
+ */
+typedef uint32_t RAIL_TransitionTime_t;
+
+/** @} */ // end of group State_Transitions_EFR32
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif //__RAIL_TYPES_H__
+
+#endif //__RAIL_CHIP_SPECIFIC_H_

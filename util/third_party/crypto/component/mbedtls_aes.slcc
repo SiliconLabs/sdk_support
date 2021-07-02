@@ -17,16 +17,9 @@ provides:
     allow_multiple: true
 requires:
   - name: mbedtls_core
-  - name: mbedtls_random
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_AES_C
-  - name: mbedtls_config
-    value: MBEDTLS_CIPHER_MODE_CTR
-  - name: mbedtls_config
-    value: MBEDTLS_CIPHER_MODE_CBC
-  - name: mbedtls_config
-    value: MBEDTLS_CIPHER_MODE_CFB
 documentation:
   docset: mbed-tls
   document: group-sl-crypto-aes

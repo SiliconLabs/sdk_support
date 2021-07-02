@@ -14,6 +14,8 @@ include:
       - path: "sl_bt_rtos_adaptation.h"
 source:
   - path: "src/sl_bt_rtos_adaptation.c"
+requires:
+  - name: bluetooth_stack
 template_contribution:
   - name: event_handler
     value:

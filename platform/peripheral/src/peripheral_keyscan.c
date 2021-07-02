@@ -34,12 +34,7 @@
 #include "em_bus.h"
 
 /***************************************************************************//**
- * @addtogroup peripheral
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup KEYSCAN
+ * @addtogroup keyscan KEYSCAN - Keyboard Scan
  * @brief Keyscan (KEYSCAN) Peripheral API
  * @details
  *  This module contains functions to control the KEYSCAN peripheral of Silicon
@@ -143,6 +138,5 @@ void sl_keyscan_reset(void)
   KEYSCAN->SWRST_SET = KEYSCAN_SWRST_SWRST;
 }
 
-/** @} (end addtogroup KEYSCAN) */
-/** @} (end addtogroup peripheral) */
+/** @} (end addtogroup keyscan) */
 #endif /* defined(KEYSCAN_COUNT) && (KEYSCAN_COUNT > 0) */

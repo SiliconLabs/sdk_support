@@ -18,6 +18,10 @@
  *
  ******************************************************************************/
 
+#ifdef UC_BUILD
+#include "af.h"
+#include "eeprom-config.h"
+#else // !UC_BUILD
 #ifdef EMBER_AF_API_AF_HEADER // AFV2
   #include EMBER_AF_API_AF_HEADER
 #else                         // AFV6
@@ -27,13 +31,13 @@
   #ifdef EMBER_AF_API_DEBUG_PRINT
     #include EMBER_AF_API_DEBUG_PRINT
   #endif
-
   #ifdef EMBER_TEST
     #define EMBER_TEST_ASSERT(x) assert((x))
   #else
     #define EMBER_TEST_ASSERT(x)
   #endif
 #endif
+#endif // UC_BUILD
 
 #include "eeprom.h"
 

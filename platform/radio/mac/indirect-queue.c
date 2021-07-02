@@ -84,6 +84,11 @@ void sl_mac_mark_indirect_buffers(void)
   emMarkBuffer(&shortIndirectPool);
 }
 
+void sl_mac_set_indirect_transmission_timeout(uint16_t newTimeoutMs)
+{
+  indirectTimeoutMs = newTimeoutMs;
+}
+
 //-------------------------------------------------------
 // Interface upwards.
 
@@ -134,14 +139,30 @@ sl_status_t sl_mac_indirect_submit(PacketHeader header)
 
 bool sl_mac_long_id_data_pending(EmberEUI64 address)
 {
-  Buffer finger = emBufferQueueHead(&longIndirectPool);
-  while (finger != NULL_BUFFER) {
-    if (MEMCOMPARE(address, sl_mac_destination_pointer(finger), EUI64_SIZE) == 0) {
-      return true;
-    }
-    finger = emBufferQueueNext(&longIndirectPool, finger);
+  // This function is called from the ISR context to determine whether data pending
+  // flag needs to be set in the mac ack. Therefore, it is not okay to access buffer
+  // queues in this function as buffer compaction may be in progress in main while
+  // this function fires
+
+  // This function only gets called during association since source addressing =
+  // long address only during that time. After receiving an association request,
+  // we add an entry into the child table. But this is only done for end devices and
+  // sleepy end devices. Therefore, we can always return true for routers and check
+  // the child table for end devices and sleepy end devices to try and prevent them
+  // from staying awake when it isnt necessary
+
+  // Check if EUI64 is in the child table
+  uint8_t childIndex = sl_mac_child_long_index(address);
+
+  // No entry in child table - therefore, EUI is of a router. Return true
+  // to avoid accessing buffers
+  if ( 0xFF == childIndex ) {
+    return true;
+  } else {
+    // Check flag in the child table to see if there is data pending for the child
+    return (SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE
+            == (sl_mac_get_child_info_flags(childIndex) & SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE));
   }
-  return false;
 }
 
 //-------------------------------------------------------
@@ -462,6 +483,7 @@ static PacketHeader matchingPoolAddress(bool isShort, uint8_t *address, uint8_t 
 
 static void recalculateMacDataPendingBitField(void)
 {
+  // Clear short and long pending flags for all entries in the child table
 #ifndef EMBER_MULTI_NETWORK_STRIPPED
   for (uint8_t nwk_index = 0; nwk_index < SL_MAC_MAX_SUPPORTED_NETWORKS; nwk_index++)
 #endif // EMBER_MULTI_NETWORK_STRIPPED
@@ -475,23 +497,38 @@ static void recalculateMacDataPendingBitField(void)
     }
   }
 
-  Buffer finger = emBufferQueueHead(&shortIndirectPool);
+  // Loop 2 times - First time set flags for devices that are still in the short indirect queue
+  // second time around, the loop does the same thing for the the long indirect queue.
+  for (uint8_t i = 0; i < 2; i++) {
+    Buffer finger;
+    Buffer *indirect_queue;
+    uint8_t flag;
 
-  while (finger != NULL_BUFFER) {
-#ifndef EMBER_MULTI_NETWORK_STRIPPED
-    UNUSED uint8_t nwk_index = sl_mac_nwk_index(finger);
-#endif // EMBER_MULTI_NETWORK_STRIPPED
-    if (NWK_INDEX < SL_MAC_MAX_SUPPORTED_NETWORKS) {
-      // Switch the child table pointers to the new network
-      if (sli_mac_push_child_table_pointer(NWK_INDEX) == SL_STATUS_OK) {
-        uint8_t childIndex = sl_mac_header_outgoing_child_index(finger);
-        if (childIndex != 0xFF) {
-          sl_mac_set_child_flag(childIndex, SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE, true);
+    if ( i == 0 ) {
+      indirect_queue = &shortIndirectPool;
+      flag = SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE;
+    } else {
+      indirect_queue = &longIndirectPool;
+      flag = SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE;
+    }
+
+    finger = emBufferQueueHead(indirect_queue);
+    while (finger != NULL_BUFFER) {
+  #ifndef EMBER_MULTI_NETWORK_STRIPPED
+      UNUSED uint8_t nwk_index = sl_mac_nwk_index(finger);
+  #endif // EMBER_MULTI_NETWORK_STRIPPED
+      if (NWK_INDEX < SL_MAC_MAX_SUPPORTED_NETWORKS) {
+        // Switch the child table pointers to the new network
+        if (sli_mac_push_child_table_pointer(NWK_INDEX) == SL_STATUS_OK) {
+          uint8_t childIndex = sl_mac_header_outgoing_child_index(finger);
+          if (childIndex != 0xFF) {
+            sl_mac_set_child_flag(childIndex, flag, true);
+          }
+          finger = emBufferQueueNext(indirect_queue, finger);
+
+          // Restore the child table pointers
+          sli_mac_pop_child_table_pointer();
         }
-        finger = emBufferQueueNext(&shortIndirectPool, finger);
-
-        // Restore the child table pointers
-        sli_mac_pop_child_table_pointer();
       }
     }
   }

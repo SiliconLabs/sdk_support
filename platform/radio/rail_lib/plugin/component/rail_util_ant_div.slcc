@@ -7,15 +7,18 @@ quality: production
 requires:
   - name: device
   - name: status
+  - name: rail_lib
+  - name: rail_util_ant_div_cli
+    condition:
+      - cli
   - name: rail_util_ieee802154_phy_select
   - name: rail_util_rf_path
     condition:
-      - device_series_2
       - device_sdid_200
   - name: rail_util_rf_path
     condition:
-      - device_series_2
       - device_sdid_210
+  - name: emlib_gpio
 provides:
   - name: rail_util_ant_div
 documentation:

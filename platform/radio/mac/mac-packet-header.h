@@ -183,8 +183,7 @@ PacketHeader sl_mac_make_data_message(sl_mac_node_id_t destination,
                                       uint16_t macInfoFlags,
                                       uint8_t nwk_index);
 
-PacketHeader sl_mac_make_raw_message(uint8_t payloadLength,
-                                     const uint8_t *payload,
+PacketHeader sl_mac_make_raw_message(Buffer payload,
                                      uint16_t macInfoFlags,
                                      uint8_t nwk_index);
 

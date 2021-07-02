@@ -30,3 +30,9 @@ documentation:
       condition: [device_sdid_89]
     - page: emlib/api/efr32xg14/group-cryotimer
       condition: [device_sdid_95]
+    - page: emlib/api/efm32gg11/group-cryotimer
+      condition: [device_sdid_100]
+    - page: emlib/api/efm32tg11/group-cryotimer
+      condition: [device_sdid_103]
+    - page: emlib/api/efm32gg12/group-cryotimer
+      condition: [device_sdid_106]

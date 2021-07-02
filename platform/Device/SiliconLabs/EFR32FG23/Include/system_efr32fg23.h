@@ -3,7 +3,7 @@
  * @brief CMSIS system header file for EFR32FG23
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -133,7 +133,7 @@ void ACMP0_IRQHandler(void);             /**< ACMP0 IRQ Handler */
 void ACMP1_IRQHandler(void);             /**< ACMP1 IRQ Handler */
 void WDOG0_IRQHandler(void);             /**< WDOG0 IRQ Handler */
 void WDOG1_IRQHandler(void);             /**< WDOG1 IRQ Handler */
-void SYXO0_IRQHandler(void);             /**< SYXO0 IRQ Handler */
+void HFXO0_IRQHandler(void);             /**< HFXO0 IRQ Handler */
 void HFRCO0_IRQHandler(void);            /**< HFRCO0 IRQ Handler */
 void HFRCOEM23_IRQHandler(void);         /**< HFRCOEM23 IRQ Handler */
 void CMU_IRQHandler(void);               /**< CMU IRQ Handler */

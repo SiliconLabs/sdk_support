@@ -25,9 +25,11 @@ struct bgbuf_t;
 
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include "sl_btmesh_compatibility_macros.h"
 #include "sl_status.h"
 #include "sl_btmesh_memory_config.h"
+#include <stdbool.h>
 
 /** Dummy vendor ID for Mesh specification models */
 #define MESH_SPEC_VENDOR_ID 0xffff
@@ -705,9 +707,10 @@ typedef enum {
 typedef enum {
   mesh_instr_net_pdu_not_sent_out_of_memory = 0x00,
   mesh_instr_net_pdu_not_sent_internal_error = 0x01,
+  mesh_instr_net_pdu_not_sent_hop_limit = 0x02,
 } mesh_instr_net_pdu_not_sent_reason_t;
 /** Number of instrumentation errors for not sending a network PDU */
-#define mesh_instr_net_pdu_not_sent_reasons 2
+#define mesh_instr_net_pdu_not_sent_reasons 3
 
 /** Instrumentation result codes for not handling a transport PDU */
 typedef enum {
@@ -891,6 +894,13 @@ typedef enum {
   mesh_stack_diag_event_config_server_nettx_get,
   mesh_stack_diag_event_config_server_node_identity_get,
   mesh_stack_diag_event_config_server_relay_get,
+
+  mesh_stack_diag_event_replay_protection_list_load,
+  mesh_stack_diag_event_replay_protection_list_save,
+  mesh_stack_diag_event_replay_protection_list_flush,
+  mesh_stack_diag_event_replay_protection_list_set_entry,
+  mesh_stack_diag_event_replay_protection_list_clear_entry,
+  mesh_stack_diag_event_replay_protection_list_full,
 } mesh_stack_diag_event_type_t;
 
 /** Diagnostic event for configuration server change */
@@ -914,11 +924,35 @@ typedef union {
   } relay; /**< Value of relay state after set request */
 } mesh_stack_diag_event_config_server_t;
 
+/** Diagnostic event for replay protection list */
+typedef union {
+  struct {
+    uint16_t loaded_count;
+    uint16_t total_count;
+    sl_status_t result;
+  } load; /**< Replay protection list loaded from flash */
+  struct {
+    uint16_t saved_count;
+    uint16_t total_count;
+    sl_status_t result;
+  } save; /**< Replay protection list saved to flash */
+  // Nothing for flush
+  struct {
+    mesh_addr_t src;
+    bool cancel;
+  } set; /**< Replay protection list entry set */
+  struct {
+    mesh_addr_t src;
+  } clear; /**< Replay protection list entry removed */
+  // Nothing for full
+} mesh_stack_diag_event_replay_protection_list_t;
+
 /** Stack diagnostic event */
 typedef struct {
   mesh_stack_diag_event_type_t type; /**< Event type */
   union {
     mesh_stack_diag_event_config_server_t config_server; /**< Config server event */
+    mesh_stack_diag_event_replay_protection_list_t replay_protection_list; /**< Replay protection list event */
   };
 } mesh_stack_diag_event_t;
 

@@ -34,6 +34,7 @@
 
 #include "sli_radioaes_management.h"
 #include "sli_protocol_crypto.h"
+#include "em_core.h"
 
 #define AES_BLOCK_BYTES       16U
 
@@ -107,6 +108,8 @@
 #define AES_OFFSET_IV2       56
 /// BA411E offset for Configuration word in DMA Scatter-Gather Tag
 #define AES_OFFSET_KEY2      72
+/// BA411E offset for Configuration word in DMA Scatter-Gather Tag
+#define AES_OFFSET_MASK      104
 
 /// BA411E Mode Register value for ECB mode of operation
 #define AES_MODEID_ECB        0x00000100
@@ -148,17 +151,6 @@
 #define AES_CTX_SIZE          16
 
 ///
-/// @brief Structure that represent a descriptor for the DMA module
-/// (in scatter-gather mode).
-///
-typedef struct {
-  volatile uint32_t address;
-  volatile uint32_t nextDescr;
-  volatile uint32_t lengthAndIrq;
-  volatile uint32_t tag;
-} dma_sg_descr_t;
-
-///
 /// @brief Select which IP core the DMA will use. To set in descriptor sli_radioaes_dma_sg_descr.tag.
 ///
 typedef enum {
@@ -168,6 +160,27 @@ typedef enum {
   DMA_SG_ENGINESELECT_BA413  = 0x03,  ///< data flow through BA413 Hash
   DMA_SG_ENGINESELECT_BA417  = 0x04   ///< data flow through BA417 ChaChaPoly
 } dma_engine_select_t;
+
+///
+/// @brief Structure that represent a descriptor for the DMA module
+/// (in scatter-gather mode).
+///
+typedef struct {
+  volatile uint32_t address;
+  volatile uint32_t nextDescr;
+  volatile uint32_t lengthAndIrq;
+  volatile uint32_t tag;
+} sli_radioaes_dma_descr_t;
+
+#if defined(SLI_RADIOAES_REQUIRES_MASKING)
+#define SLI_RADIOAES_MASK_DESCRIPTOR(next_descr_addr) \
+  {                                                   \
+    .address       = (uint32_t) &sli_radioaes_mask,   \
+    .nextDescr     = next_descr_addr,                 \
+    .lengthAndIrq  = 0x20000004UL,                    \
+    .tag           = 0x00006811UL                     \
+  };
+#endif
 
 // Local CCM variables
 static const uint32_t aes_ccm_config_encrypt = AES_MODEID_CCM
@@ -182,7 +195,7 @@ static const uint32_t aes_ccm_config_decrypt = AES_MODEID_CCM
 static const uint32_t zeros = 0;
 
 // CONST FETCHERS
-static const dma_sg_descr_t ccm_desc_fetcher_tag_padding = {
+static const sli_radioaes_dma_descr_t ccm_desc_fetcher_tag_padding = {
   .address       = (uint32_t) &zeros,
   .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
   .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_TAG_BYTES) | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
@@ -190,11 +203,47 @@ static const dma_sg_descr_t ccm_desc_fetcher_tag_padding = {
 };
 
 // CONST PUSHERS
-static const dma_sg_descr_t ccm_desc_pusher_ver_padding = {
+static const sli_radioaes_dma_descr_t ccm_desc_pusher_ver_padding = {
   .address       = (uint32_t) NULL,
   .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
   .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_VER_BYTES) | DMA_AXI_DESCR_DISCARD
 };
+
+static int sli_radioaes_run_operation(sli_radioaes_dma_descr_t *first_fetch_descriptor,
+                                      sli_radioaes_dma_descr_t *first_push_descriptor)
+{
+  sli_radioaes_state_t aes_ctx;
+  #if defined(SLI_RADIOAES_REQUIRES_MASKING)
+  sli_radioaes_dma_descr_t mask_descr = SLI_RADIOAES_MASK_DESCRIPTOR((uint32_t)first_fetch_descriptor);
+  #endif
+
+  int aq = sli_radioaes_acquire();
+  if (aq > 0) {
+    sli_radioaes_save_state(&aes_ctx);
+  } else if (aq < 0) {
+    return aq;
+  }
+
+  RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
+
+  #if defined(SLI_RADIOAES_REQUIRES_MASKING)
+  RADIOAES->FETCHADDR = (uint32_t) &mask_descr;
+  #else
+  RADIOAES->FETCHADDR = (uint32_t) first_fetch_descriptor;
+  #endif
+  RADIOAES->PUSHADDR  = (uint32_t) first_push_descriptor;
+
+  RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
+  while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) {
+    // Wait for completion
+  }
+
+  if (aq > 0) {
+    sli_radioaes_restore_state(&aes_ctx);
+  }
+
+  return sli_radioaes_release();
+}
 
 static int aes_ccm_ble(bool                encrypt,
                        unsigned char       *data,
@@ -211,42 +260,42 @@ static int aes_ccm_ble(bool                encrypt,
   size_t data_pad_bytes = AES_BLOCK_BYTES - 1 - ((length - 1) % AES_BLOCK_BYTES);
 
   // fetchers
-  dma_sg_descr_t ccm_desc_fetcher_tag = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_tag = {
     .address       = (uint32_t) tag,
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_tag_padding,
     .lengthAndIrq  = BLE_CCM_TAG_BYTES,
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
   };
 
-  dma_sg_descr_t ccm_desc_fetcher_data_padding = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_data_padding = {
     .address       = (uint32_t) &zeros,
     .nextDescr     = (encrypt ? DMA_AXI_DESCR_NEXT_STOP : (uint32_t) &ccm_desc_fetcher_tag),
     .lengthAndIrq  = (uint32_t) data_pad_bytes | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD | (encrypt ? DMA_SG_TAG_ISLAST : 0) | DMA_SG_TAG_SETINVALIDBYTES(data_pad_bytes),
   };
 
-  dma_sg_descr_t ccm_desc_fetcher_data = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_data = {
     .address       = (uint32_t) data,
     .nextDescr     = ((data_pad_bytes != 0) ? (uint32_t) &ccm_desc_fetcher_data_padding : (encrypt ? DMA_AXI_DESCR_NEXT_STOP : (uint32_t) &ccm_desc_fetcher_tag)),
     .lengthAndIrq  = length | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD | (((data_pad_bytes == 0) && encrypt) ? DMA_SG_TAG_ISLAST : 0),
   };
 
-  dma_sg_descr_t ccm_desc_fetcher_B0B1 = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_B0B1 = {
     .address       = (uint32_t) b0b1,
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_data,
     .lengthAndIrq  = BLE_CCM_B_BYTES * 2 | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESHEADER
   };
 
-  dma_sg_descr_t ccm_desc_fetcher_key = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_key = {
     .address       = (uint32_t) key,
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_B0B1,
     .lengthAndIrq  = BLE_CCM_KEY_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
   };
 
-  dma_sg_descr_t ccm_desc_fetcher_config = {
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_config = {
     .address       = (uint32_t) (encrypt ? &aes_ccm_config_encrypt : &aes_ccm_config_decrypt),
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_key,
     .lengthAndIrq  = RADIOAES_CONFIG_BYTES,
@@ -254,37 +303,37 @@ static int aes_ccm_ble(bool                encrypt,
   };
 
   // Pushers
-  dma_sg_descr_t ccm_desc_pusher_ver = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_ver = {
     .address       = (uint32_t) &ver_failed,
     .nextDescr     = (uint32_t) &ccm_desc_pusher_ver_padding,
     .lengthAndIrq  = BLE_CCM_VER_BYTES
   };
 
-  dma_sg_descr_t ccm_desc_pusher_tag_padding = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_tag_padding = {
     .address       = (uint32_t) NULL,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_TAG_BYTES) | DMA_AXI_DESCR_DISCARD
   };
 
-  dma_sg_descr_t ccm_desc_pusher_tag = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_tag = {
     .address       = (uint32_t) tag,
     .nextDescr     = (uint32_t) &ccm_desc_pusher_tag_padding,
     .lengthAndIrq  = BLE_CCM_TAG_BYTES
   };
 
-  dma_sg_descr_t ccm_desc_pusher_data_padding = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_data_padding = {
     .address       = (uint32_t) NULL,
     .nextDescr     = (uint32_t) (encrypt ? &ccm_desc_pusher_tag : &ccm_desc_pusher_ver),
     .lengthAndIrq  = (uint32_t) data_pad_bytes | DMA_AXI_DESCR_DISCARD,
   };
 
-  dma_sg_descr_t ccm_desc_pusher_data = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_data = {
     .address       = (uint32_t) data,
     .nextDescr     = (uint32_t) ((data_pad_bytes != 0) ? &ccm_desc_pusher_data_padding : (encrypt ? &ccm_desc_pusher_tag : &ccm_desc_pusher_ver)),
     .lengthAndIrq  = (uint32_t) length | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
   };
 
-  dma_sg_descr_t ccm_desc_pusher_B0B1 = {
+  sli_radioaes_dma_descr_t ccm_desc_pusher_B0B1 = {
     .address       = (uint32_t) NULL,
     .nextDescr     = (uint32_t) &ccm_desc_pusher_data,
     .lengthAndIrq  = (BLE_CCM_B_BYTES * 2) | DMA_AXI_DESCR_DISCARD
@@ -307,28 +356,7 @@ static int aes_ccm_ble(bool                encrypt,
   b0b1[BLE_CCM_B_BYTES + 1] = BLE_CCM_AUTH_BLOCKS;
   b0b1[BLE_CCM_B_BYTES + 2] = header;
 
-  sli_radioaes_state_t aes_ctx;
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
-    sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
-  }
-
-  RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
-  RADIOAES->FETCHADDR = (uint32_t) &ccm_desc_fetcher_config;
-  RADIOAES->PUSHADDR  = (uint32_t) &ccm_desc_pusher_B0B1;
-
-  RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
-  while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) {
-    // Wait for completion
-  }
-
-  if (aq > 0) {
-    sli_radioaes_restore_state(&aes_ctx);
-  }
-
-  aq = sli_radioaes_release();
+  int aq = sli_radioaes_run_operation(&ccm_desc_fetcher_config, &ccm_desc_pusher_B0B1);
 
   // Check MIC
   if (!encrypt && (ver_failed != 0)) {
@@ -344,7 +372,6 @@ int sli_aes_crypt_ctr_ble(const unsigned char    *key,
                           volatile unsigned char iv_out[AES_BLOCK_BYTES],
                           volatile unsigned char output[AES_BLOCK_BYTES])
 {
-  sli_radioaes_state_t aes_ctx;
   uint32_t aes_config;
   static const uint32_t zero = 0;
 
@@ -361,77 +388,56 @@ int sli_aes_crypt_ctr_ble(const unsigned char    *key,
       return SL_STATUS_INVALID_KEY;
   }
 
-  dma_sg_descr_t aes_desc_pusher_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_ctx = {
     .address       = (uint32_t) iv_out,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
   };
 
-  dma_sg_descr_t aes_desc_pusher_data = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
     .address       = (uint32_t) output,
     .nextDescr     = (((uint32_t)iv_out != 0) ? (uint32_t) &aes_desc_pusher_ctx : DMA_AXI_DESCR_NEXT_STOP),
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA
   };
 
-  dma_sg_descr_t aes_desc_fetcher_data = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
     .address       = (uint32_t) input,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
   };
 
-  dma_sg_descr_t aes_desc_fetcher_no_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_no_ctx = {
     .address       = (uint32_t) &zero,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_ctx = {
     .address       = (uint32_t) iv_in,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_config = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
     .address       = (uint32_t) &aes_config,
     .nextDescr     = (((uint32_t)iv_in != 0) ? (uint32_t) &aes_desc_fetcher_ctx : (uint32_t) &aes_desc_fetcher_no_ctx),
     .lengthAndIrq  = sizeof(aes_config),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_key = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
     .address       = (uint32_t) key,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
     .lengthAndIrq  = (uint32_t) (keybits / 8) | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
   };
 
-  // Start operation
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
-    sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
-  }
-
-  RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
-  RADIOAES->FETCHADDR = (uint32_t) &aes_desc_fetcher_key;
-  RADIOAES->PUSHADDR  = (uint32_t) &aes_desc_pusher_data;
-
-  RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
-  while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) {
-    // Wait for completion
-  }
-
-  if (aq > 0) {
-    sli_radioaes_restore_state(&aes_ctx);
-  }
-
-  return sli_radioaes_release();
+  return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
 }
 
 int sli_aes_crypt_ctr_radio(const unsigned char    *key,
@@ -441,7 +447,6 @@ int sli_aes_crypt_ctr_radio(const unsigned char    *key,
                             volatile unsigned char iv_out[AES_BLOCK_BYTES],
                             volatile unsigned char output[AES_BLOCK_BYTES])
 {
-  sli_radioaes_state_t aes_ctx;
   uint32_t aes_config;
   static const uint32_t zero = 0;
 
@@ -458,49 +463,49 @@ int sli_aes_crypt_ctr_radio(const unsigned char    *key,
       return SL_STATUS_INVALID_KEY;
   }
 
-  dma_sg_descr_t aes_desc_pusher_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_ctx = {
     .address       = (uint32_t) iv_out,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
   };
 
-  dma_sg_descr_t aes_desc_pusher_data = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
     .address       = (uint32_t) output,
     .nextDescr     = (((uint32_t)iv_out != 0) ? (uint32_t) &aes_desc_pusher_ctx : DMA_AXI_DESCR_NEXT_STOP),
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA
   };
 
-  dma_sg_descr_t aes_desc_fetcher_data = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
     .address       = (uint32_t) input,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
   };
 
-  dma_sg_descr_t aes_desc_fetcher_no_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_no_ctx = {
     .address       = (uint32_t) &zero,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_ctx = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_ctx = {
     .address       = (uint32_t) iv_in,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_config = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
     .address       = (uint32_t) &aes_config,
     .nextDescr     = (((uint32_t)iv_in != 0) ? (uint32_t) &aes_desc_fetcher_ctx : (uint32_t) &aes_desc_fetcher_no_ctx),
     .lengthAndIrq  = sizeof(aes_config),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_key = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
     .address       = (uint32_t) key,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
     .lengthAndIrq  = (uint32_t) (keybits / 8) | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
@@ -508,27 +513,7 @@ int sli_aes_crypt_ctr_radio(const unsigned char    *key,
   };
 
   // Start operation
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
-    sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
-  }
-
-  RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
-  RADIOAES->FETCHADDR = (uint32_t) &aes_desc_fetcher_key;
-  RADIOAES->PUSHADDR  = (uint32_t) &aes_desc_pusher_data;
-
-  RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
-  while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) {
-    // Wait for completion
-  }
-
-  if (aq > 0) {
-    sli_radioaes_restore_state(&aes_ctx);
-  }
-
-  return sli_radioaes_release();
+  return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
 }
 
 int sli_aes_crypt_ecb_radio(bool                   encrypt,
@@ -537,7 +522,6 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
                             const unsigned char    input[AES_BLOCK_BYTES],
                             volatile unsigned char output[AES_BLOCK_BYTES])
 {
-  sli_radioaes_state_t aes_ctx;
   uint32_t aes_config;
 
   switch (keybits) {
@@ -555,28 +539,28 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
 
   aes_config |= encrypt ? AES_MODEID_ENCRYPT : AES_MODEID_DECRYPT;
 
-  dma_sg_descr_t aes_desc_pusher_data = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
     .address       = (uint32_t) output,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
   };
 
-  dma_sg_descr_t aes_desc_fetcher_data = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
     .address       = (uint32_t) input,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
   };
 
-  dma_sg_descr_t aes_desc_fetcher_config = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
     .address       = (uint32_t) &aes_config,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = sizeof(aes_config),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
   };
 
-  dma_sg_descr_t aes_desc_fetcher_key = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
     .address       = (uint32_t) key,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
     .lengthAndIrq  = (uint32_t) (keybits / 8) | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
@@ -584,27 +568,72 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
   };
 
   // Start operation
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
-    sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
+  return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
+}
+
+int sli_aes_cmac_radio(const unsigned char    *key,
+                       unsigned int           keybits,
+                       const unsigned char    *input,
+                       unsigned int           length,
+                       volatile unsigned char output[16])
+{
+  uint32_t aes_config;
+
+  switch (keybits) {
+    case 256:
+      aes_config = AES_MODEID_CMA | AES_MODEID_NO_CX | AES_MODEID_AES256 | AES_MODEID_ENCRYPT;
+      break;
+    case 192:
+      return SL_STATUS_NOT_SUPPORTED;
+    case 128:
+      aes_config = AES_MODEID_CMA | AES_MODEID_NO_CX | AES_MODEID_AES128 | AES_MODEID_ENCRYPT;
+      break;
+    default:
+      return SL_STATUS_INVALID_KEY;
   }
 
-  RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
-  RADIOAES->FETCHADDR = (uint32_t) &aes_desc_fetcher_key;
-  RADIOAES->PUSHADDR  = (uint32_t) &aes_desc_pusher_data;
-
-  RADIOAES->CMD = AES_CMD_STARTPUSHER | AES_CMD_STARTFETCHER;
-  while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY)) {
-    // Wait for completion
+  size_t pad_len = 16 - (length % 16);
+  if (pad_len == 16 && length > 0) {
+    pad_len = 0;
   }
 
-  if (aq > 0) {
-    sli_radioaes_restore_state(&aes_ctx);
+  if (length == 0) {
+    length = 16UL;
+    input = (const unsigned char *)&zeros;
+  } else {
+    length = (length + 15) & ~0xFUL;
   }
 
-  return sli_radioaes_release();
+  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
+    .address       = (uint32_t) output,
+    .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
+    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
+    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
+  };
+
+  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
+    .address       = (uint32_t) input,
+    .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
+    .lengthAndIrq  = length | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
+    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD | DMA_SG_TAG_SETINVALIDBYTES(pad_len)
+  };
+
+  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
+    .address       = (uint32_t) &aes_config,
+    .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
+    .lengthAndIrq  = sizeof(aes_config),
+    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
+  };
+
+  sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
+    .address       = (uint32_t) key,
+    .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
+    .lengthAndIrq  = (uint32_t) (keybits / 8) | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
+    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
+  };
+
+  // Start operation
+  return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
 }
 
 //
@@ -664,31 +693,32 @@ int sli_process_ble_rpa(const unsigned char keytable[],
   uint32_t rpa_data_in[BLE_RPA_DATA_BYTES / 4] = { 0 };
   volatile uint32_t rpa_data_out[BLE_RPA_DATA_BYTES / 4];
   sli_radioaes_state_t aes_ctx;
+  CORE_DECLARE_IRQ_STATE;
 
   rpa_data_in[3] = __REV(prand);
 
-  dma_sg_descr_t aes_desc_pusher_data = {
+  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
     .address       = (uint32_t) rpa_data_out,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
   };
 
-  dma_sg_descr_t aes_desc_fetcher_data = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
     .address       = (uint32_t) rpa_data_in,
     .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
     .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
   };
 
-  dma_sg_descr_t aes_desc_fetcher_config = {
+  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
     .address       = (uint32_t) &aes_rpa_config,
     .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
     .lengthAndIrq  = sizeof(aes_rpa_config),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
   };
 
-  volatile dma_sg_descr_t aes_desc_fetcher_key = {
+  volatile sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
     .address       = (uint32_t) NULL, // Filled out in each round of RPA check
     .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
     .lengthAndIrq  = (uint32_t) BLE_RPA_KEY_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
@@ -705,10 +735,23 @@ int sli_process_ble_rpa(const unsigned char keytable[],
 
   RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
 
+  #if defined(SLI_RADIOAES_REQUIRES_MASKING)
+  // Start with feeding the mask input
+  sli_radioaes_dma_descr_t mask_descr = SLI_RADIOAES_MASK_DESCRIPTOR(DMA_AXI_DESCR_NEXT_STOP);
+  RADIOAES->FETCHADDR = (uint32_t) &mask_descr;
+  RADIOAES->CMD = AES_CMD_STARTFETCHER;
+  #endif
+
+  // Start a critical section to avoid preemption in-between loading of the RPA key
+  // and starting the corresponding data pusher.
+  CORE_ENTER_CRITICAL();
+
   // Data output contains hash in the most significant word (WORD3).
   // Descriptors for blocks that are not included in key mask will be skipped.
   for (block = 0; block < RADIOAES_BLE_RPA_MAX_KEYS; block++) {
     if ( keymask & (1U << block) ) {  // Skip masked keys
+      // Handle pending interrupts while the peripheral is in 'preemptable' state
+      CORE_YIELD_CRITICAL();
       // Write key address and start operation
       while (RADIOAES->STATUS & AES_STATUS_FETCHERBSY) {
         // Wait for completion
@@ -737,6 +780,8 @@ int sli_process_ble_rpa(const unsigned char keytable[],
       previous_block = block;
     }
   }
+
+  CORE_EXIT_CRITICAL();
 
   // Wait for last data and check it
   while (RADIOAES->STATUS & AES_STATUS_PUSHERBSY) {

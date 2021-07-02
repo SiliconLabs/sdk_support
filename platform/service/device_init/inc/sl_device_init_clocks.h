@@ -47,6 +47,7 @@
  *  - Errata fixes are applied on all devices
  *  - EMU initialization is added on all devices
  *  - Clock tree initialization is added on all devices
+ *  - NVIC initialization is added on all devices
  *  - DCDC initialization is added on devices with a DCDC converter
  *  - HFXO initialization is added on Silicon Labs modules and development
  *    boards with HFXO

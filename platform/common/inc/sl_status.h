@@ -69,6 +69,8 @@
 #define SL_STATUS_BLUETOOTH_SMP_SPACE     ((sl_status_t)0x1200)
 #define SL_STATUS_BLUETOOTH_MESH_FOUNDATION_SPACE     ((sl_status_t)0x1300)
 
+#define SL_STATUS_WISUN_SPACE             ((sl_status_t)0x1400)
+
 // -----------------------------------------------------------------------------
 // Status Defines
 
@@ -317,6 +319,8 @@
 #define SL_STATUS_BT_MESH_PROV_CANNOT_ASSIGN_ADDR                                                        ((sl_status_t)0x0511)     ///< Device could not assign unicast addresses to all of its elements.
 #define SL_STATUS_BT_MESH_ADDRESS_TEMPORARILY_UNAVAILABLE                                                ((sl_status_t)0x0512)     ///< Returned when trying to reuse an address of a previously deleted device before an IV Index Update has been executed.
 #define SL_STATUS_BT_MESH_ADDRESS_ALREADY_USED                                                           ((sl_status_t)0x0513)     ///< Returned when trying to assign an address that is used by one of the devices in the Device Database, or by the Provisioner itself.
+#define SL_STATUS_BT_MESH_PUBLISH_NOT_CONFIGURED                                                         ((sl_status_t)0x0514)     ///< Application key or publish address are not set
+#define SL_STATUS_BT_MESH_APP_KEY_NOT_BOUND                                                              ((sl_status_t)0x0515)     ///< Application key is not bound to a model
 
 // Bluetooth Mesh foundation status codes
 #define SL_STATUS_BT_MESH_FOUNDATION_INVALID_ADDRESS                                                     ((sl_status_t)0x1301)      ///< Returned when address in request was not valid

@@ -35,22 +35,23 @@ extern "C" {
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-#define SL_LED_CURRENT_STATE_OFF  0U
-#define SL_LED_CURRENT_STATE_ON   1U
+#define SL_LED_CURRENT_STATE_OFF  0U            ///< LED state off
+#define SL_LED_CURRENT_STATE_ON   1U            ///< LED state on
 
 /*******************************************************************************
  *****************************   DATA TYPES   **********************************
  ******************************************************************************/
 
-typedef uint8_t sl_led_state_t;
+typedef uint8_t sl_led_state_t;                 ///< LED state
 
+/// A LED instance
 typedef struct {
-  void           *context;
-  sl_status_t    (*init)(void *context);
-  void           (*turn_on)(void *context);
-  void           (*turn_off)(void *context);
-  void           (*toggle)(void *context);
-  sl_led_state_t (*get_state)(void *context);
+  void           *context;                        ///< The context for this LED instance
+  sl_status_t    (*init)(void *context);          ///< Member function to initialize LED instance
+  void           (*turn_on)(void *context);       ///< Member function to turn on LED
+  void           (*turn_off)(void *context);      ///< Member function to turn off LED
+  void           (*toggle)(void *context);        ///< Member function to toggle LED
+  sl_led_state_t (*get_state)(void *context);     ///< Member function to retrieve LED state
 } sl_led_t;
 
 /*******************************************************************************
@@ -101,7 +102,7 @@ sl_led_state_t sl_led_get_state(const sl_led_t *led_handle);
 /** @} (end group led) */
 
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup led LEDDRV - LED Driver
+/// @addtogroup led LED API
 /// @{
 ///
 ///   @details

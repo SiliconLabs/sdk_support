@@ -41,7 +41,7 @@
 - tag:
   - board:pn:BRD4179
   - board:variant:B
-  - board:revision:A04
+  - board:revision:A05
   - board:device:efr32mg21a010f1024im32
   - hardware:has:vcom
   - hardware:has:pti

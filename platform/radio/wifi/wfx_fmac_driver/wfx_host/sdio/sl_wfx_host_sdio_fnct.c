@@ -293,10 +293,10 @@ void sdio_fnct_rdblk(CPU_INT32U    reg_addr,
 }
 
 void sdio_fnct_wrblk(CPU_INT32U   reg_addr,
-                           CPU_INT08U  *p_buf,
-                           CPU_INT16U   blk_nbr,
-                           CPU_BOOLEAN  fixed_addr,
-                           RTOS_ERR    *p_err)
+                     CPU_INT08U  *p_buf,
+                     CPU_INT16U   blk_nbr,
+                     CPU_BOOLEAN  fixed_addr,
+                     RTOS_ERR    *p_err)
 {
   SD_IO_FnctWrBlk(sdio_fnct_bus_handle,
                   sdio_fnct_handle,

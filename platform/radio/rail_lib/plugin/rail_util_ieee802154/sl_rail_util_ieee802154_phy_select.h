@@ -31,23 +31,93 @@
 #ifndef SL_RAIL_UTIL_IEEE802154_PHY_SELECT_H
 #define SL_RAIL_UTIL_IEEE802154_PHY_SELECT_H
 
+#include "rail_types.h"
 #include "sl_rail_util_ieee802154_stack_event.h"
 
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_DEFAULT         0
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV          1
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX            2
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX     3
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_FEM             4
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_FEM      5
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX_FEM        6
-#define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM 7
-typedef uint8_t sl_rail_util_radio_config_t;
+/**
+ * @addtogroup IEEE802154_Phy_Select IEEE802.15.4 Phy Select
+ * @{
+ */
 
+/**
+ * @enum sl_rail_util_radio_config_t
+ * @brief IEEE802.15.4 2.4Ghz radio configuration index.
+ */
+RAIL_ENUM(sl_rail_util_radio_config_t) {
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_DEFAULT
+ * @brief Default IEEE802.15.4 2.4Ghz radio configuration
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_DEFAULT,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for RX antenna diversity
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX
+ * @brief IEEE802.15.4 2.4Ghz radio configuration optimized for radio coexistence
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for RX antenna diversity
+ * optimized for radio coexistence
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_FEM
+ * @brief IEEE802.15.4 2.4Ghz radio configuration optimized for a front end module
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_FEM,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_FEM
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for RX antenna diversity
+ * optimized for a front end module
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_FEM,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX_FEM
+ * @brief IEEE802.15.4 2.4Ghz radio configuration optimized for radio coexistence
+ * and a front end module
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_COEX_FEM,
+/**
+ * @def SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM
+ * @brief IEEE802.15.4 2.4Ghz radio configuration for RX antenna diversity
+ * optimized for radio coexistence and a front end module
+ */
+  SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_ANTDIV_COEX_FEM,
+};
+
+/**
+ * PHY select contribution for IEEE802.15.4 stack event handler
+ *
+ * @param[in] stack_event event to handle
+ * @param[in] supplement optional event information
+ * @return Status code indicating success of the function call.
+ */
 sl_rail_util_ieee802154_stack_status_t sl_rail_util_ieee802154_phy_select_on_event(
   sl_rail_util_ieee802154_stack_event_t stack_event,
   uint32_t supplement);
+
+/**
+ * Get the active IEEE802.15.4 2.4Ghz radio configuration.
+ *
+ * @return Active IEEE802.15.4 2.4Ghz radio configuration
+ */
 sl_rail_util_radio_config_t sl_rail_util_get_active_radio_config(void);
+
+/**
+ * Configure IEEE802.15.4 2.4Ghz radio configuration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ */
 RAIL_Status_t sl_rail_util_plugin_config_2p4ghz_radio(RAIL_Handle_t railHandle);
 
-sl_rail_util_radio_config_t sl_rail_util_get_active_radio_config(void);
+/**
+ * @}
+ * end of IEEE802154_PHY_SELECT_API
+ */
 #endif // SL_RAIL_UTIL_IEEE802154_PHY_SELECT_H

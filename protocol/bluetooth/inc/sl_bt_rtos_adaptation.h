@@ -40,7 +40,14 @@
  *    function. The callbacks always come from a processing loop in an event
  *    task created for this purpose.
  *
- * 2. The stack will never internally obtain the @ref sl_bt_bluetooth_pend()
+ * 2. The stack uses @ref sli_bgapi_lock() and @ref sli_bgapi_unlock() to
+ *    synchronize the handling of individual BGAPI commands, and the application
+ *    must never directly call these. Individual BGAPI commands are safe to be
+ *    called from multiple threads without additional locking. See @ref
+ *    sl_bt_bluetooth_pend() for description of when an application needs to use
+ *    additional locking to guarantee atomicity across multiple commands.
+ *
+ * 3. The stack will never internally obtain the @ref sl_bt_bluetooth_pend()
  *    lock. It is safe for the application to obtain the lock also from within
  *    the sl_bt_on_event() callback.
  */
@@ -80,12 +87,33 @@ sl_status_t sl_bt_rtos_set_event_handled();
 
 /**
  * @brief Mutex functions for using Bluetooth from multiple tasks
+ *
+ * Starting from Gecko SDK v3.1.2, all BGAPI command functions have automatic
+ * locking to make them thread-safe. Using @ref sl_bt_bluetooth_pend() and @ref
+ * sl_bt_bluetooth_post() is therefore no longer required for individual calls
+ * to the BGAPI.
+ *
+ * The application only needs to use @ref sl_bt_bluetooth_pend() and @ref
+ * sl_bt_bluetooth_post() to protect sections of code where multiple commands
+ * need to be performed atomically in a thread-safe manner. This includes cases
+ * such as using @ref sl_bt_system_data_buffer_write() to write data to the
+ * system buffer followed by a call to @ref sl_bt_advertiser_set_long_data() to
+ * set that data to an advertiser set. To synchronize access to the shared
+ * system buffer, the application would need to lock by calling @ref
+ * sl_bt_bluetooth_pend() before @ref sl_bt_system_data_buffer_write(), and
+ * release the lock by calling @ref sl_bt_bluetooth_post() after @ref
+ * sl_bt_advertiser_set_long_data().
+ *
  * @return SL_STATUS_OK if mutex has been obtained
  */
 sl_status_t sl_bt_bluetooth_pend();
 
 /**
  * @brief Mutex functions for using Bluetooth from multiple tasks
+ *
+ * See @ref sl_bt_bluetooth_pend() for description of how an application needs
+ * to use the locking to guarantee thread-safety.
+ *
  * @return SL_STATUS_OK the mutex has been released
  */
 sl_status_t sl_bt_bluetooth_post();
@@ -106,6 +134,29 @@ sl_status_t sl_bt_rtos_init();
  * @return pointer to the Bluetooth event
  */
 const sl_bt_msg_t* sl_bt_rtos_get_event();
+
+/**
+ * @brief Lock the BGAPI for exclusive access.
+ *
+ * This function is used internally by the Bluetooth stack to lock the BGAPI
+ * and obtain exclusive access when starting to handle a BGAPI command. If the
+ * function is successful and returns SL_STATUS_OK, the stack will release the
+ * lock by calling @ref sli_bgapi_unlock().
+ *
+ * To avoid the risk of deadlocks, this function must never be called directly
+ * by the application.
+ *
+ * @return SL_STATUS_OK if the lock has been obtained, otherwise an error code
+ */
+sl_status_t sli_bgapi_lock();
+
+/**
+ * @brief Release the lock obtained by @ref sli_bgapi_lock
+ *
+ * To avoid the risk of deadlocks, this function must never be called directly
+ * by the application.
+ */
+void sli_bgapi_unlock();
 
 /** @} end bluetooth_rtos_adaptation */
 

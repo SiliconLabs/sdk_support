@@ -34,14 +34,12 @@
 
 #include "sli_crypto_transparent_functions.h"
 #include "crypto_management.h"
-// Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
-// interface header file when it becomes available.
-#include "psa/crypto_platform.h"
-#include "psa/crypto_sizes.h"
-#include "psa/crypto_struct.h"
+#include "psa/crypto.h"
 #include "em_crypto.h"
 #include "em_core.h"
 #include <string.h>
+
+#if defined(PSA_WANT_ALG_CMAC)
 
 // Magic value for CMAC calculation.
 // const_rb should be 0x87 according to the spec, but the implementation
@@ -49,19 +47,19 @@
 static const uint32_t cmac_const_rb[4] = { 0x00000000u, 0x00000000u,
                                            0x00000000u, 0xe1000000u };
 
-static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
-                                            uint32_t dataLengthBits,
+static psa_status_t sli_crypto_cmac_compute(const uint8_t *input,
+                                            uint32_t input_length,
                                             const uint8_t *key,
-                                            const uint32_t keyLength,
+                                            const uint32_t key_length,
                                             uint8_t *iv,
-                                            uint8_t *digest,
-                                            uint16_t digestLengthBits,
-                                            const bool encrypt);
+                                            uint8_t *mac,
+                                            uint16_t mac_length,
+                                            const bool generate);
 
 static psa_status_t sli_crypto_cmac_finalize(CRYPTO_TypeDef *crypto,
-                                             bool encrypt,
-                                             uint8_t *digest,
-                                             uint16_t digestLengthBits);
+                                             bool generate,
+                                             uint8_t *mac,
+                                             uint16_t mac_length);
 
 static psa_status_t sli_crypto_aes_crypt_cbc(const uint8_t *key_buffer,
                                              size_t key_buffer_size,
@@ -70,6 +68,21 @@ static psa_status_t sli_crypto_aes_crypt_cbc(const uint8_t *key_buffer,
                                              uint8_t iv[16],
                                              const uint8_t *input,
                                              uint8_t *output);
+
+static inline int mbedtls_psa_safer_memcmp(
+  const uint8_t *a, const uint8_t *b, size_t n)
+{
+  size_t i;
+  unsigned char diff = 0;
+
+  for ( i = 0; i < n; i++ ) {
+    diff |= a[i] ^ b[i];
+  }
+
+  return(diff);
+}
+
+#endif // PSA_WANT_ALG_CMAC
 
 psa_status_t sli_crypto_transparent_mac_compute(const psa_key_attributes_t *attributes,
                                                 const uint8_t *key_buffer,
@@ -81,6 +94,8 @@ psa_status_t sli_crypto_transparent_mac_compute(const psa_key_attributes_t *attr
                                                 size_t mac_size,
                                                 size_t *mac_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)
+
   if (attributes == NULL
       || key_buffer == NULL
       || input == NULL
@@ -113,23 +128,27 @@ psa_status_t sli_crypto_transparent_mac_compute(const psa_key_attributes_t *attr
   uint16_t digest_length;
   uint8_t tmp_iv[16];
 
-  switch (alg) {
+  switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
     case PSA_ALG_CMAC:
-      digest_length = (mac_size > PSA_BLOCK_CIPHER_BLOCK_SIZE(PSA_KEY_TYPE_AES))
-                      ? PSA_BLOCK_CIPHER_BLOCK_SIZE(PSA_KEY_TYPE_AES)
-                      : mac_size;
+      digest_length = PSA_MAC_TRUNCATED_LENGTH(alg);
+      if (digest_length == 0) {
+        digest_length = PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES);
+      }
+
+      if (mac_size < digest_length) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+      }
 
       // IV should always be zero when starting a new computation.
       memset(tmp_iv, 0, 16);
       status = sli_crypto_cmac_compute(input,
-                                       input_length * 8,
+                                       input_length,
                                        key_buffer,
                                        key_len,
                                        tmp_iv,
                                        mac,
-                                       digest_length * 8,
+                                       digest_length,
                                        true);
-
       *mac_length = digest_length;
       break;
     default:
@@ -137,6 +156,22 @@ psa_status_t sli_crypto_transparent_mac_compute(const psa_key_attributes_t *attr
   }
 
   return status;
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)mac;
+  (void)mac_size;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
 }
 
 psa_status_t sli_crypto_transparent_mac_sign_setup(sli_crypto_transparent_mac_operation_t *operation,
@@ -145,9 +180,11 @@ psa_status_t sli_crypto_transparent_mac_sign_setup(sli_crypto_transparent_mac_op
                                                    size_t key_buffer_size,
                                                    psa_algorithm_t alg)
 {
+#if defined(PSA_WANT_ALG_CMAC)
+
   if (operation == NULL
       || attributes == NULL
-      || key_buffer == NULL) {
+      || (key_buffer == NULL && key_buffer_size > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -159,22 +196,30 @@ psa_status_t sli_crypto_transparent_mac_sign_setup(sli_crypto_transparent_mac_op
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  switch (alg) {
+  if (!PSA_ALG_IS_MAC(alg)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  switch (PSA_ALG_FULL_LENGTH_MAC(alg)) {
     case PSA_ALG_CMAC:
-      operation->alg = alg;
+      operation->cipher_mac.alg = alg;
       break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  operation->key_len = psa_get_key_bits(attributes) / 8;
-  switch (operation->key_len) {
+  operation->cipher_mac.key_len = psa_get_key_bits(attributes) / 8;
+  if (operation->cipher_mac.key_len > key_buffer_size) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  switch (operation->cipher_mac.key_len) {
     case 16:
     case 32:
-      if (key_buffer_size != operation->key_len) {
+      if (key_buffer_size != operation->cipher_mac.key_len) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
-      memcpy(operation->key, key_buffer, operation->key_len);
+      memcpy(operation->cipher_mac.key, key_buffer, operation->cipher_mac.key_len);
       break;
     case 24:
       return PSA_ERROR_NOT_SUPPORTED;
@@ -183,12 +228,42 @@ psa_status_t sli_crypto_transparent_mac_sign_setup(sli_crypto_transparent_mac_op
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
+}
+
+psa_status_t sli_crypto_transparent_mac_verify_setup(sli_crypto_transparent_mac_operation_t *operation,
+                                                     const psa_key_attributes_t *attributes,
+                                                     const uint8_t *key_buffer,
+                                                     size_t key_buffer_size,
+                                                     psa_algorithm_t alg)
+{
+  // Since the PSA Crypto core exposes the verify functionality of the drivers without
+  // actually implementing the fallback to 'sign' when the driver doesn't support verify,
+  // we need to do this ourselves for the time being.
+  return sli_crypto_transparent_mac_sign_setup(operation,
+                                               attributes,
+                                               key_buffer,
+                                               key_buffer_size,
+                                               alg);
 }
 
 psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operation_t *operation,
                                                const uint8_t *input,
                                                size_t input_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)
+
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -196,7 +271,7 @@ psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operat
 
   psa_status_t status;
 
-  switch (operation->alg) {
+  switch (PSA_ALG_FULL_LENGTH_MAC(operation->cipher_mac.alg)) {
     case PSA_ALG_CMAC: {
       // The streaming update operation of CMAC is like doing CBC-MAC but
       // always keeping the last block as a plaintext.
@@ -206,27 +281,27 @@ psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operat
 
       // Add the beginning of the input data to last unprocessed block and hash
       // it if the input is big enough to cause a new last block to be made.
-      if ((operation->unprocessed_len > 0)
-          && (input_length > 16 - operation->unprocessed_len)) {
-        memcpy(&operation->unprocessed_block[operation->unprocessed_len],
+      if ((operation->cipher_mac.unprocessed_len > 0)
+          && (input_length > 16 - operation->cipher_mac.unprocessed_len)) {
+        memcpy(&operation->cipher_mac.unprocessed_block[operation->cipher_mac.unprocessed_len],
                input,
-               16 - operation->unprocessed_len);
+               16 - operation->cipher_mac.unprocessed_len);
 
-        status = sli_crypto_aes_crypt_cbc(operation->key,
-                                          operation->key_len,
+        status = sli_crypto_aes_crypt_cbc(operation->cipher_mac.key,
+                                          operation->cipher_mac.key_len,
                                           PSA_CRYPTO_DRIVER_ENCRYPT,
                                           16,
-                                          operation->iv,
-                                          operation->unprocessed_block,
-                                          operation->iv);
+                                          operation->cipher_mac.iv,
+                                          operation->cipher_mac.unprocessed_block,
+                                          operation->cipher_mac.iv);
 
         if (status != PSA_SUCCESS) {
           return PSA_ERROR_HARDWARE_FAILURE;
         }
 
-        input += 16 - operation->unprocessed_len;
-        input_length -= 16 - operation->unprocessed_len;
-        operation->unprocessed_len = 0;
+        input += 16 - operation->cipher_mac.unprocessed_len;
+        input_length -= 16 - operation->cipher_mac.unprocessed_len;
+        operation->cipher_mac.unprocessed_len = 0;
       }
 
       // Block count including last block
@@ -234,13 +309,13 @@ psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operat
 
       // Hash all full blocks except for the last one
       for (uint32_t i = 1; i < block_count; ++i) {
-        status = sli_crypto_aes_crypt_cbc(operation->key,
-                                          operation->key_len,
+        status = sli_crypto_aes_crypt_cbc(operation->cipher_mac.key,
+                                          operation->cipher_mac.key_len,
                                           PSA_CRYPTO_DRIVER_ENCRYPT,
                                           16,
-                                          operation->iv,
+                                          operation->cipher_mac.iv,
                                           input,
-                                          operation->iv);
+                                          operation->cipher_mac.iv);
 
         if (status != PSA_SUCCESS) {
           return PSA_ERROR_HARDWARE_FAILURE;
@@ -252,10 +327,10 @@ psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operat
 
       // Add remaining input data that wasn't aligned to a block
       if (input_length > 0) {
-        memcpy(&operation->unprocessed_block[operation->unprocessed_len],
+        memcpy(&operation->cipher_mac.unprocessed_block[operation->cipher_mac.unprocessed_len],
                input,
                input_length);
-        operation->unprocessed_len += input_length;
+        operation->cipher_mac.unprocessed_len += input_length;
       }
       break;
     }
@@ -264,6 +339,16 @@ psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operat
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
 }
 
 psa_status_t sli_crypto_transparent_mac_sign_finish(sli_crypto_transparent_mac_operation_t *operation,
@@ -271,6 +356,8 @@ psa_status_t sli_crypto_transparent_mac_sign_finish(sli_crypto_transparent_mac_o
                                                     size_t mac_size,
                                                     size_t *mac_length)
 {
+#if defined(PSA_WANT_ALG_CMAC)
+
   if (operation == NULL
       || mac == NULL
       || mac_size == 0
@@ -281,22 +368,27 @@ psa_status_t sli_crypto_transparent_mac_sign_finish(sli_crypto_transparent_mac_o
   psa_status_t status;
   uint16_t digest_length;
 
-  switch (operation->alg) {
+  switch (PSA_ALG_FULL_LENGTH_MAC(operation->cipher_mac.alg)) {
     case PSA_ALG_CMAC:
-      digest_length = (mac_size > PSA_BLOCK_CIPHER_BLOCK_SIZE(PSA_KEY_TYPE_AES))
-                      ? PSA_BLOCK_CIPHER_BLOCK_SIZE(PSA_KEY_TYPE_AES)
-                      : mac_size;
+      digest_length = PSA_MAC_TRUNCATED_LENGTH(operation->cipher_mac.alg);
+      if (digest_length == 0) {
+        digest_length = PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES);
+      }
+
+      if (mac_size < digest_length) {
+        return PSA_ERROR_BUFFER_TOO_SMALL;
+      }
 
       // Calling the cmac compute function with the input set to the last
       // block and the IV set to the current hash is equal to running the
       // finalize operation.
-      status = sli_crypto_cmac_compute(operation->unprocessed_block,
-                                       operation->unprocessed_len * 8,
-                                       operation->key,
-                                       operation->key_len,
-                                       operation->iv,
+      status = sli_crypto_cmac_compute(operation->cipher_mac.unprocessed_block,
+                                       operation->cipher_mac.unprocessed_len,
+                                       operation->cipher_mac.key,
+                                       operation->cipher_mac.key_len,
+                                       operation->cipher_mac.iv,
                                        mac,
-                                       digest_length * 8,
+                                       digest_length,
                                        true);
 
       if (status != PSA_SUCCESS) {
@@ -310,10 +402,74 @@ psa_status_t sli_crypto_transparent_mac_sign_finish(sli_crypto_transparent_mac_o
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)operation;
+  (void)mac;
+  (void)mac_size;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
+}
+
+psa_status_t sli_crypto_transparent_mac_verify_finish(sli_crypto_transparent_mac_operation_t *operation,
+                                                      const uint8_t *mac,
+                                                      size_t mac_length)
+{
+#if defined(PSA_WANT_ALG_CMAC)
+
+  if (operation == NULL
+      || mac == NULL
+      || mac_length == 0) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  uint16_t digest_length;
+
+  switch (PSA_ALG_FULL_LENGTH_MAC(operation->cipher_mac.alg)) {
+    case PSA_ALG_CMAC:
+      digest_length = PSA_MAC_TRUNCATED_LENGTH(operation->cipher_mac.alg);
+      if (digest_length == 0) {
+        digest_length = PSA_BLOCK_CIPHER_BLOCK_LENGTH(PSA_KEY_TYPE_AES);
+      }
+
+      if (mac_length != digest_length) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+
+      // Calling the cmac compute function with the input set to the last
+      // block and the IV set to the current hash is equal to running the
+      // finalize operation.
+      return sli_crypto_cmac_compute(operation->cipher_mac.unprocessed_block,
+                                     operation->cipher_mac.unprocessed_len,
+                                     operation->cipher_mac.key,
+                                     operation->cipher_mac.key_len,
+                                     operation->cipher_mac.iv,
+                                     (uint8_t*)mac,
+                                     mac_length,
+                                     false);
+    default:
+      return PSA_ERROR_BAD_STATE;
+  }
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)operation;
+  (void)mac;
+  (void)mac_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
 }
 
 psa_status_t sli_crypto_transparent_mac_abort(sli_crypto_transparent_mac_operation_t *operation)
 {
+#if defined(PSA_WANT_ALG_CMAC)
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -321,59 +477,66 @@ psa_status_t sli_crypto_transparent_mac_abort(sli_crypto_transparent_mac_operati
   // There's no state in hardware that we need to preserve, so zeroing out the context suffices.
   memset(operation, 0, sizeof(*operation));
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_CMAC
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CMAC
 }
+
+#if defined(PSA_WANT_ALG_CMAC)
 
 /**
  * @brief
- *  Function is an implementation of CMAC-AES128
- * @details
- *  Function assumes fixed key length of 128bit, digest of max 128bit.
+ *  Function is an implementation of CMAC-AES (128 or 256 bit key)
  *
- * @param[in] pData
- *  Pointer to data (message) Be careful: this memory should be allocated on
- *  block-size (128-bit) boundaries!
+ * @param[in] input
+ *  Pointer to data (message)
  *
- * @param[in] dataLengthBits
- *  length of actual data in bits
+ * @param[in] input_length
+ *  length of input buffer in bytes
  *
  * @param[in] key
  *  Pointer to key buffer for the AES algorithm.
- *  Has to be 128-bit or 256-bit.
+ *  Has to be 16 or 32 bytes long, for AES-128 and AES-256 respectively.
  *
- * @param[in] keyLength
- *   The length in bytes, of the @p pKey, i.e. the 'K' parameter in CCM.
- *
- * @param[in/out] digest
- *  128-bit (maximum) digest. If encrypting, the digest will be stored there.
- *  If verifying, the calculated digest will be compared to the one stored in
- *  this place.
- *  Warning: regardless of digestLengthBits, 128 bits will get written here.
+ * @param[in] key_length
+ *   The length of the key in bytes. Either 16 (AES-128) or 32 (AES-256).
  *
  * @param[in] iv
  *  128-bit initialization vector used in the CBC part of CMAC. Should be zero
  *  unless the call is used as a finalize operation of an unfinished digest, in
  *  which case it should be set to the current intermediate digest.
  *
- * @param[in] digestLengthBits
- *  Requested length of the message digest in bits. LSB's will be zeroed out.
+ * @param[in/out] mac
+ *  16-byte (maximum) MAC buffer. If generating, the MAC will be stored there.
+ *  If verifying, the calculated MAC will be compared to the one stored in
+ *  this buffer.
  *
- * @param[in] encrypt
- *  true - Generate hash
- *  false - Verify hash
+ * @param[in] mac_length
+ *  Requested length of the message digest in bytes. Can be at most a full-
+ *  length output, i.e. 16 bytes.
+ *
+ * @param[in] generate
+ *  true - Generate MAC
+ *  false - Verify MAC
  *
  * @return
  *   PSA_SUCCESS if success. Error code if failure.
  *   Encryption will always succeed.
  *   Decryption may fail if the authentication fails.
  */
-static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
-                                            uint32_t dataLengthBits,
+static psa_status_t sli_crypto_cmac_compute(const uint8_t *input,
+                                            uint32_t input_length,
                                             const uint8_t *key,
-                                            const uint32_t keyLength,
+                                            const uint32_t key_length,
                                             uint8_t *iv,
-                                            uint8_t *digest,
-                                            uint16_t digestLengthBits,
-                                            const bool encrypt)
+                                            uint8_t *mac,
+                                            uint16_t mac_length,
+                                            const bool generate)
 
 {
   CORE_DECLARE_IRQ_STATE;
@@ -381,17 +544,17 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
   uint32_t subKey[4];
   uint32_t lastBlock[4];
   uint8_t *lastBlockBytePtr = (uint8_t *)lastBlock;
-  uint32_t *dataPointer = (uint32_t *)pData;
-  uint8_t bitsToPad;
+  uint8_t bytesToPad;
   psa_status_t status;
+  size_t full_blocks_min_one =
+    (input_length > 0 ? (input_length - 1) / 16 : 0);
   CRYPTO_TypeDef *crypto = crypto_management_acquire();
 
   /* Check input arguments */
-  /* Data length is currectly resticted to be a multiple of 8 bits. */
-  if (dataLengthBits & 0x7
-      || digestLengthBits > 128
-      || digestLengthBits == 0
-      || key == NULL) {
+  if (mac_length > 16
+      || mac_length == 0
+      || key == NULL
+      || (key_length != 16U && key_length != 32U)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -402,6 +565,11 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
   crypto->SEQCTRL  = 0;
   crypto->SEQCTRLB = 0;
 
+  /* Zero out DDATA0 and DDATA2 */
+  CRYPTO_EXECUTE_2(crypto,
+                   CRYPTO_CMD_INSTR_CLR,
+                   CRYPTO_CMD_INSTR_DDATA0TODDATA2);
+
   /* Calculate subkeys */
   /* magic value in DATA1 */
   CRYPTO_DataWrite(&crypto->DATA1, cmac_const_rb);
@@ -409,13 +577,8 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
   /* Key in KeyBuf */
   CRYPTO_KeyBufWriteUnaligned(crypto,
                               key,
-                              (keyLength == 16U) ? cryptoKey128Bits
+                              (key_length == 16U) ? cryptoKey128Bits
                               : cryptoKey256Bits);
-
-  /* Zero out DATA0 */
-  for (i = 0; i < 4; i++) {
-    crypto->DATA0 = 0x00;
-  }
 
   CRYPTO_EXECUTE_17(crypto,
                     CRYPTO_CMD_INSTR_SELDATA0DATA1,
@@ -439,10 +602,10 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
   CRYPTO_InstructionSequenceWait(crypto);
 
   /* Prepare input message for algorithm */
-  bitsToPad = 128 - (dataLengthBits % 128);
+  bytesToPad = 16 - (input_length % 16);
 
   /* Determine which subKey we're going to use */
-  if (bitsToPad != 128 || dataLengthBits == 0) {
+  if (bytesToPad != 16 || input_length == 0) {
     /* Input is treated as last block being incomplete */
     /* So store SubKey 2 */
     CRYPTO_DataRead(&crypto->DATA0, subKey);
@@ -456,48 +619,23 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
 
   /* Copy the last block of data into our local copy because we need
      to change it */
-  if (dataLengthBits < 128) {
-    for (i = 0; i < 4; i++) {
-      lastBlock[i] = dataPointer[i];
-    }
-  } else {
-    for (i = 0; i < 4; i++) {
-      lastBlock[i] = dataPointer[((dataLengthBits - 1) / 128) * 4 + i];
-    }
-  }
+  memset(lastBlock, 0, sizeof(lastBlock));
+  memcpy(lastBlock,
+         &input[full_blocks_min_one * 16],
+         (input_length - (full_blocks_min_one * 16)));
 
-  if (bitsToPad != 128) {
+  if (bytesToPad != 16) {
     /* Input message needs to be padded */
-
-    /* Apply first one bit */
-    if ((bitsToPad % 8) == 0) {
-      lastBlockBytePtr[16 - (bitsToPad / 8)] = 0x80;
-      dataLengthBits += 8;
-      bitsToPad -= 8;
-    } else {
-      lastBlockBytePtr[16 - (bitsToPad / 8)] |= (1 << ((bitsToPad - 1) % 8));
-      dataLengthBits += bitsToPad % 8;
-      bitsToPad -= bitsToPad % 8;
+    lastBlockBytePtr[16 - bytesToPad] = 0x80;
+    if (bytesToPad > 1) {
+      memset(&lastBlockBytePtr[16 - bytesToPad + 1], 0x00, bytesToPad - 1);
     }
-
-    /* Apply zero-padding until block boundary */
-    while (bitsToPad > 0) {
-      lastBlockBytePtr[16 - (bitsToPad / 8)] = 0x00;
-      dataLengthBits += 8;
-      bitsToPad -= 8;
-    }
+  } else if (input_length == 0) {
+    /* No data: set the 'last block' to immediate termination */
+    memset(lastBlock, 0, sizeof(lastBlock));
+    lastBlockBytePtr[0] = 0x80;
   } else {
-    if (dataLengthBits == 0) {
-      /* Clear out the data */
-      for (i = 0; i < 4; i++) {
-        lastBlock[i] = 0x00000000;
-      }
-      /* Pad */
-      lastBlockBytePtr[0] = 0x80;
-      dataLengthBits = 128;
-    } else {
-      /* Input message was block-aligned, so no padding required */
-    }
+    /* Input message was block-aligned, so no padding required */
   }
   /* Store the XOR-ed version of the last block separate from the message */
   /* to avoid contamination of the input data */
@@ -508,47 +646,26 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
   /* Calculate hash */
   CORE_ENTER_CRITICAL();
 
-#if defined(MBEDTLS_INCLUDE_IO_MODE_DMA)
-  crypto->CTRL |= CRYPTO_CTRL_DMA0RSEL_DATA0;
-  crypto->SEQCTRL |= dataLengthBits / 8;
-#else
   crypto->SEQCTRL |= 16;
-#endif
 
   CRYPTO_KeyBufWriteUnaligned(crypto,
                               key,
-                              (keyLength == 16U) ? cryptoKey128Bits
+                              (key_length == 16U) ? cryptoKey128Bits
                               : cryptoKey256Bits);
 
   CRYPTO_DataWriteUnaligned(&crypto->DATA0, iv);
 
-#if defined(MBEDTLS_INCLUDE_IO_MODE_DMA)
-  CRYPTO_SEQ_LOAD_2(crypto,
-                    CRYPTO_CMD_INSTR_DMA0TODATAXOR,
-                    CRYPTO_CMD_INSTR_AESENC);
-#else
-  CRYPTO_SEQ_LOAD_1(crypto,
-                    CRYPTO_CMD_INSTR_AESENC);
-#endif
-
-#if defined(MBEDTLS_INCLUDE_IO_MODE_DMA)
-  CRYPTO_InstructionSequenceExecute(crypto);
-#endif
   /* Push all blocks except the last one */
-  for (i = 0; i < (dataLengthBits / 128) - 1; i++) {
-    CRYPTO_DataWriteUnaligned(&crypto->DATA0XOR, (uint8_t*)&(dataPointer[i * 4]));
-#if !defined(MBEDTLS_INCLUDE_IO_MODE_DMA)
-    CRYPTO_InstructionSequenceExecute(crypto);
-#endif
+  for (i = 0; i < full_blocks_min_one; i++) {
+    CRYPTO_DataWriteUnaligned(&crypto->DATA0XOR, &input[i * 16]);
+    CRYPTO_EXECUTE_1(crypto, CRYPTO_CMD_INSTR_AESENC);
   }
   /* Don't forget to push the last block as well! */
   CRYPTO_DataWrite(&crypto->DATA0XOR, lastBlock);
-#if !defined(MBEDTLS_INCLUDE_IO_MODE_DMA)
-  CRYPTO_InstructionSequenceExecute(crypto);
-#endif
+  CRYPTO_EXECUTE_1(crypto, CRYPTO_CMD_INSTR_AESENC);
   CRYPTO_InstructionSequenceWait(crypto);
 
-  status = sli_crypto_cmac_finalize(crypto, encrypt, digest, digestLengthBits);
+  status = sli_crypto_cmac_finalize(crypto, generate, mac, mac_length);
 
   CORE_EXIT_CRITICAL();
 
@@ -563,67 +680,43 @@ static psa_status_t sli_crypto_cmac_compute(const uint8_t *pData,
  * @brief
  *   Perform final CMAC processing.
  *
- * @param[in] encrypt
- *   True if encryption was requested. False if decryption was requested.
+ * @param[in] generate
+ *   True if MAC generation was requested.
+ *   False if MAC verification was requested.
  *
- * @param[in] digest
- *   Pointer to location where digest should be stored.
+ * @param[in/out] mac
+ *   Pointer to location where the calculated CMAC MAC should be stored when
+ *   encrypting, or where the to-be-verified MAC is located for verification.
  *
- * @param[in] digestLengthBits
- *   Length of digest in bits.
+ * @param[in] mac_length
+ *   Output length of the calculated MAC (in bytes).
  ******************************************************************************/
 static psa_status_t sli_crypto_cmac_finalize(CRYPTO_TypeDef *crypto,
-                                             bool encrypt,
-                                             uint8_t *digest,
-                                             uint16_t digestLengthBits)
+                                             bool generate,
+                                             uint8_t *mac,
+                                             uint16_t mac_length)
 {
-  int i;
+  uint32_t full_mac[4];
+  psa_status_t status;
 
-  /* If needed, verify */
-  if (encrypt) {
-    /* Read final hash/digest from CRYPTO. */
-    CRYPTO_DataReadUnaligned(&crypto->DATA0, digest);
-
-    /* mask away unneeded bits */
-    i = digestLengthBits;
-    while (i < 128) {
-      if (i % 8 == 0) {
-        /* mask away a full byte */
-        digest[i / 8] = 0;
-        i += 8;
-      } else {
-        /* mask away partial byte */
-        digest[i / 8] &= ~(1 << (7 - (i % 8)));
-        i++;
-      }
-    }
-  } else {
-    /* Get hash from CRYPTO unintrusively */
-    uint32_t hash128[4];
-    uint8_t *hash = (uint8_t*) hash128;
-
-    /* Read final hash/digest and compare it with expected. */
-    CRYPTO_DataRead(&crypto->DATA0, hash128);
-
-    /* Compare the full length of the digest */
-    i = 0;
-    while (i < digestLengthBits) {
-      if (digestLengthBits - i >= 8) {
-        /* If at least a full byte to go, use byte comparison */
-        if (hash[i / 8] != digest[i / 8]) {
-          return PSA_ERROR_INVALID_SIGNATURE;
-        }
-        i += 8;
-      } else {
-        /* If less then a byte to go, use bit comparison */
-        if ((hash[i / 8] & (1 << (7 - (i % 8)))) != (digest[i / 8] & (1 << (7 - (i % 8))))) {
-          return PSA_ERROR_INVALID_SIGNATURE;
-        }
-        i += 1;
-      }
-    }
+  if (mac_length > sizeof(full_mac)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
   }
-  return PSA_SUCCESS;
+
+  /* Read calculated MAC from CRYPTO. */
+  CRYPTO_DataRead(&crypto->DATA0, full_mac);
+
+  if (generate) {
+    /* copy requested output to passed buffer */
+    memcpy(mac, full_mac, mac_length);
+    status = PSA_SUCCESS;
+  } else {
+    /* Compare the MAC with the reference value in constant time */
+    status = mbedtls_psa_safer_memcmp((const uint8_t*)mac, (const uint8_t*)full_mac, mac_length) == 0 ? PSA_SUCCESS : PSA_ERROR_INVALID_SIGNATURE;
+  }
+
+  memset(full_mac, 0, sizeof(full_mac));
+  return status;
 }
 
 /*
@@ -705,5 +798,7 @@ static psa_status_t sli_crypto_aes_crypt_cbc(const uint8_t *key_buffer,
 
   return PSA_SUCCESS;
 }
+
+#endif // PSA_WANT_ALG_CMAC
 
 #endif // defined(CRYPTO_PRESENT)

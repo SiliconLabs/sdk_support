@@ -17,8 +17,6 @@ source:
     condition: [device_series_1]
   - path: platform/service/power_manager/src/sl_power_manager_hal_s2.c
     condition: [device_series_2]
-  - path: platform/service/power_manager/test/hostbased/power_manager_hal.c
-    condition: [win32]
   - path: platform/service/power_manager/src/sli_power_manager_private.h
 include:
   - path: platform/service/power_manager/inc

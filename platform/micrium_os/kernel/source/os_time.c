@@ -96,6 +96,7 @@ OS_RATE_HZ OSTimeTickRateHzGet(RTOS_ERR *p_err)
  *                       - RTOS_ERR_INVALID_ARG
  *                       - RTOS_ERR_OS_SCHED_LOCKED
  *                       - RTOS_ERR_NOT_READY
+ *                       - RTOS_ERR_INVALID_STATE
  *******************************************************************************************************/
 void OSTimeDly(OS_TICK  dly,
                OS_OPT   opt,
@@ -109,6 +110,9 @@ void OSTimeDly(OS_TICK  dly,
 
   //                                                               Not allowed to call from an ISR
   OS_ASSERT_DBG_ERR_SET((!CORE_InIrqContext()), *p_err, RTOS_ERR_ISR,; );
+
+  //                                                               Not allowed in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET((!CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE,; );
 
   //                                                               Make sure kernel is running.
   if (OSRunning != OS_STATE_OS_RUNNING) {
@@ -167,7 +171,7 @@ void OSTimeDly(OS_TICK  dly,
     }
 
     delay = (uint64_t)(((uint64_t)delay_ticks * (uint64_t)sl_sleeptimer_get_timer_frequency()) + (OSCfg_TickRate_Hz - 1u)) / OSCfg_TickRate_Hz;
-    
+
     CORE_ENTER_ATOMIC();
 
     status = sl_sleeptimer_start_timer(&OSTCBCurPtr->TimerHandle,

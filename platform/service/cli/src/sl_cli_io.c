@@ -34,16 +34,10 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <string.h>
-#if defined(SL_CLI_USE_STDIO)
-#else
 #include "sl_iostream.h"
-#endif
 
 int sli_cli_io_getchar(void)
 {
-#if defined(SL_CLI_USE_STDIO)
-  return getchar();
-#else
   char ch;
   sl_status_t status = sl_iostream_getchar(SL_IOSTREAM_STDIN, &ch);
   if (status != SL_STATUS_OK) {
@@ -51,21 +45,16 @@ int sli_cli_io_getchar(void)
   }
 
   return ch;
-#endif
 }
 
 int sli_cli_io_putchar(int ch)
 {
-#if defined(SL_CLI_USE_STDIO)
-  return putchar(ch);
-#else
   sl_status_t status = sl_iostream_putchar(SL_IOSTREAM_STDOUT, ch);
   if (status != SL_STATUS_OK) {
     return EOF;
   }
 
   return ch;
-#endif
 }
 
 int sli_cli_io_printf(const char *format, ...)

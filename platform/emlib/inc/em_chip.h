@@ -391,7 +391,6 @@ __STATIC_INLINE void CHIP_Init(void)
  * device and then performs a system reset. See the device-specific errata for
  * details.
  *****************************************************************************/
-
 __STATIC_INLINE void CHIP_Reset(void)
 {
 #if defined(_EFR_DEVICE) && defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)

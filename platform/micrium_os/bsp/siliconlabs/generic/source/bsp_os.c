@@ -53,7 +53,11 @@
 #include  <can/include/can_bus.h>
 #endif
 #if defined(RTOS_MODULE_FS_STORAGE_NOR_AVAIL)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100)              // Only GG11 has been tested with QSPI.
 #include  <fs/include/fs_nor_quad_spi.h>
+#elif defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+#include  <drivers/fs/include/fs_nor_spidrv.h>
+#endif
 #endif
 #if defined(RTOS_MODULE_IO_SD_AVAIL)
 #include  <io/include/sd.h>
@@ -120,10 +124,10 @@ BSP_HW_INFO_EXT(const SD_CARD_CTRLR_DRV_INFO, BSP_SD_SDHC_BSP_DrvInfo);
 #endif
 
 #if defined(RTOS_MODULE_FS_STORAGE_NOR_AVAIL)
-#if defined(_EFM32_GIANT_FAMILY)
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100)              // Only GG11 has been tested with QSPI.
 BSP_HW_INFO_EXT(const FS_NOR_QUAD_SPI_CTRLR_INFO, BSP_FS_NOR_MX25R_QuadSPI_HwInfo);
-#elif defined(_EFR32_MIGHTY_FAMILY)
-BSP_HW_INFO_EXT(const FS_NOR_QUAD_SPI_CTRLR_INFO, BSP_FS_NOR_MX25R_SPI_HwInfo);
+#elif defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+BSP_HW_INFO_EXT(const FS_NOR_SPIDRV_CTRLR_INFO, BSP_FS_NOR_MX25R_SPI_HwInfo);
 #endif
 #endif
 
@@ -301,10 +305,10 @@ void BSP_OS_Init(void)
 #endif
   //                                                               ----------- REGISTER MEMORY CONTROLLERS ------------
 #if defined(RTOS_MODULE_FS_STORAGE_NOR_AVAIL)
-  #if defined(_EFM32_GIANT_FAMILY)
+  #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100)
   FS_NOR_QUAD_SPI_HW_INFO_REG("nor0", &BSP_FS_NOR_MX25R_QuadSPI_HwInfo);
-  #elif defined(_EFR32_MIGHTY_FAMILY)
-  FS_NOR_QUAD_SPI_HW_INFO_REG("nor0", &BSP_FS_NOR_MX25R_SPI_HwInfo);
+  #elif defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_2)
+  FS_NOR_SPIDRV_HW_INFO_REG("nor0", &BSP_FS_NOR_MX25R_SPI_HwInfo);
   #endif
 #endif
   //                                                               ------------- REGISTER ENTROPY SOURCES -------------

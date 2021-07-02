@@ -59,17 +59,19 @@ extern "C" {
 typedef struct {
   psa_algorithm_t hash_type;          ///< Hash type
   uint32_t total[2];                  ///< number of bytes processed
-  uint8_t  state[32];                 ///< intermediate digest state
-  uint8_t  buffer[64];                ///< data block being processed
+  uint32_t state[8];                  ///< intermediate digest state
+  uint32_t buffer[16];                ///< data block being processed
 } sli_crypto_transparent_hash_operation_t;
 
-typedef struct {
-  psa_algorithm_t alg;
-  uint8_t key[32];
-  size_t key_len;
-  uint8_t iv[16];
-  uint8_t unprocessed_block[16];
-  size_t unprocessed_len;
+typedef union {
+  struct {
+    psa_algorithm_t alg;
+    uint8_t key[32];
+    size_t key_len;
+    uint8_t iv[16];
+    uint8_t unprocessed_block[16];
+    size_t unprocessed_len;
+  } cipher_mac;
 } sli_crypto_transparent_mac_operation_t;
 
 typedef struct {
@@ -89,6 +91,7 @@ typedef struct {
   CRYPTO_Data_TypeDef  ghash_key;        /*!< GHASH key (is a constant value
                                               which is faster to restore than
                                               to reconstruct each time). */
+  CRYPTO_Data_TypeDef  iv;               /*!< IV value */
 } sli_crypto_gcm_ctx;
 
 typedef struct {

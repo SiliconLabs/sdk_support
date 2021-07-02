@@ -1301,6 +1301,18 @@
                 <param datatype="uint16" name="client_config_flags" type="uint16"/>
             </returns>
         </command>
+        <command index="20" name="send_user_prepare_write_response" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+                <param datatype="characteristic" name="characteristic" type="uint16"/>
+                <param datatype="att_errorcode" name="att_errorcode" type="uint8"/>
+                <param datatype="uint16" name="offset" type="uint16"/>
+                <param datatype="uint8array" name="value" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="attribute_value">
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>

@@ -11,6 +11,7 @@ requires:
   - name: "btmesh_feature_proxy"
   - name: "btmesh_core"
   - name: "bluetooth_feature_gatt_server"
+  - name: "bluetooth_feature_dynamic_gattdb"
   - name: gatt_configuration
   
 provides:

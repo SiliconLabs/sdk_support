@@ -9,6 +9,7 @@ provides:
 requires:
   - name: power_manager_core
   - name: power_manager_handler
+    unless: [power_manager_custom_handler]
 documentation:
   docset: gecko-platform
-  document: service/doc/power_manager/overview
+  document: service/power_manager/overview

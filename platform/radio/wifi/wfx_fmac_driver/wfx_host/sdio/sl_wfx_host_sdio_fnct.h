@@ -43,56 +43,56 @@ void         sdio_fnct_init      (RTOS_ERR       *p_err);
  * Read a byte from sdio.
  *****************************************************************************/
 CPU_INT08U   sdio_fnct_rdbyte    (CPU_INT32U      reg_addr,
-                                        RTOS_ERR       *p_err);
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Write a byte from sdio.
  *****************************************************************************/
 void         sdio_fnct_wrbyte    (CPU_INT32U      reg_addr,
-                                        CPU_INT08U      byte,
-                                        RTOS_ERR       *p_err);
+                                  CPU_INT08U      byte,
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Read a buffer from sdio.
  *****************************************************************************/
 void         sdio_fnct_rd        (CPU_INT32U      reg_addr,
-                                        CPU_INT08U     *p_buf,
-                                        CPU_INT16U      buf_len,
-                                        CPU_BOOLEAN     fixed_addr,
-                                        RTOS_ERR       *p_err);
+                                  CPU_INT08U     *p_buf,
+                                  CPU_INT16U      buf_len,
+                                  CPU_BOOLEAN     fixed_addr,
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Write a buffer to sdio.
  *****************************************************************************/
 void         sdio_fnct_wr        (CPU_INT32U      reg_addr,
-                                        CPU_INT08U     *p_buf,
-                                        CPU_INT16U      buf_len,
-                                        CPU_BOOLEAN     fixed_addr,
-                                        RTOS_ERR       *p_err);
+                                  CPU_INT08U     *p_buf,
+                                  CPU_INT16U      buf_len,
+                                  CPU_BOOLEAN     fixed_addr,
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Read a block from sdio.
  *****************************************************************************/
 void         sdio_fnct_rdblk     (CPU_INT32U      reg_addr,
-                                        CPU_INT08U     *p_buf,
-                                        CPU_INT16U      blk_nbr,
-                                        CPU_BOOLEAN     fixed_addr,
-                                        RTOS_ERR       *p_err);
+                                  CPU_INT08U     *p_buf,
+                                  CPU_INT16U      blk_nbr,
+                                  CPU_BOOLEAN     fixed_addr,
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Write a block to sdio.
  *****************************************************************************/
 void         sdio_fnct_wrblk     (CPU_INT32U      reg_addr,
-                                        CPU_INT08U     *p_buf,
-                                        CPU_INT16U      blk_nbr,
-                                        CPU_BOOLEAN     fixed_addr,
-                                        RTOS_ERR       *p_err);
+                                  CPU_INT08U     *p_buf,
+                                  CPU_INT16U      blk_nbr,
+                                  CPU_BOOLEAN     fixed_addr,
+                                  RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Enable or disable sdio interrupt.
  *****************************************************************************/
 void         sdio_fnct_int_en  (CPU_BOOLEAN     enable,
-                                        RTOS_ERR       *p_err);
+                                RTOS_ERR       *p_err);
 
 /**************************************************************************//**
  * Register interrupt callback for sdio.

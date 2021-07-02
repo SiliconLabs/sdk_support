@@ -280,6 +280,7 @@ OS_OBJ_QTY OSMutexDel(OS_MUTEX *p_mutex,
  *                           - RTOS_ERR_ABORT
  *                           - RTOS_ERR_TIMEOUT
  *                           - RTOS_ERR_NOT_READY
+ *                           - RTOS_ERR_INVALID_STATE
  *
  * @note     (1) A mutex can be nested, so RTOS_ERR_IS_OWNER error can be used as an indicator that you
  *               are nesting the mutex. If the correct number of OSMutexPost() is done the mutex will
@@ -314,6 +315,10 @@ void OSMutexPend(OS_MUTEX *p_mutex,
 
   //                                                               Validate object type
   OS_ASSERT_DBG_ERR_SET((p_mutex->Type == OS_OBJ_TYPE_MUTEX), *p_err, RTOS_ERR_INVALID_TYPE,; );
+
+  //                                                               Not allowed to pend in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE,; );
 
   //                                                               Make sure kernel is running.
   if (OSRunning != OS_STATE_OS_RUNNING) {

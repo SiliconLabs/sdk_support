@@ -368,8 +368,8 @@ sl_status_t sl_wfx_secure_link_receive(sl_wfx_generic_message_t **network_rx_buf
     // Encrypted data length is Total bytes read - secure link header -  2 extra bytes read of CTRL register - 2 more bytes for message length in clear
     uint32_t decrypt_length = read_length - SL_WFX_SECURE_LINK_HEADER_SIZE - SL_WFX_SECURE_LINK_CCM_TAG_SIZE - SL_WFX_CONT_REGISTER_SIZE - 2;
     result = sl_wfx_host_decode_secure_link_data((uint8_t*)*network_rx_buffer + SL_WFX_SECURE_LINK_HEADER_SIZE + 2,
-                                               decrypt_length,
-                                               sl_wfx_context->secure_link_session_key);
+                                                 decrypt_length,
+                                                 sl_wfx_context->secure_link_session_key);
     SL_WFX_ERROR_CHECK(result);
 
     sl_wfx_context->secure_link_nonce.rx_packet_count = (sl_wfx_context->secure_link_nonce.rx_packet_count + 1) & ~0xC0000000;

@@ -50,32 +50,34 @@ extern "C" {
  ******************************************************************************/
 /** PCNT0 Counter register size. */
 #if defined(_EFM32_GECKO_FAMILY)
-#define PCNT0_CNT_SIZE    (8)   /* PCNT0 counter is  8 bits. */
+#define PCNT0_CNT_SIZE    (8)   /**< PCNT0 counter is  8 bits. */
 #else
-#define PCNT0_CNT_SIZE   (16)   /* PCNT0 counter is 16 bits. */
+#define PCNT0_CNT_SIZE   (16)   /**< PCNT0 counter is 16 bits. */
 #endif
 
 #ifdef PCNT1
 /** PCNT1 Counter register size. */
 #if defined(_SILICON_LABS_32B_SERIES_0)
-#define PCNT1_CNT_SIZE    (8)   /* PCNT1 counter is  8 bits. */
+#define PCNT1_CNT_SIZE    (8)   /**< PCNT1 counter is  8 bits. */
 #else
-#define PCNT1_CNT_SIZE   (16)   /* PCNT1 counter is  16 bits. */
+#define PCNT1_CNT_SIZE   (16)   /**< PCNT1 counter is  16 bits. */
 #endif
 #endif
 
 #ifdef PCNT2
 /** PCNT2 Counter register size. */
 #if defined(_SILICON_LABS_32B_SERIES_0)
-#define PCNT2_CNT_SIZE    (8)   /* PCNT2 counter is  8 bits. */
+#define PCNT2_CNT_SIZE    (8)   /**< PCNT2 counter is  8 bits. */
 #else
-#define PCNT2_CNT_SIZE   (16)   /* PCNT2 counter is  16 bits. */
+#define PCNT2_CNT_SIZE   (16)   /**< PCNT2 counter is  16 bits. */
 #endif
 #endif
 
 /* Define values that can be used in case some state/mode are not defined for some devices.*/
+/** PCNT mode disable. */
 #define PCNT_MODE_DISABLE   0xFF
-#define PCNT_CNT_EVEN_NONE  0xFF
+/** PCNT count event is none. */
+#define PCNT_CNT_EVENT_NONE  0xFF
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -151,13 +153,13 @@ typedef enum {
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
   pcntCntEventNone = _PCNT_CTRL_CNTEV_NONE
 #else
-  pcntCntEventNone = PCNT_CNT_EVEN_NONE
+  pcntCntEventNone = PCNT_CNT_EVENT_NONE
 #endif
 } PCNT_CntEvent_TypeDef;
 #endif
 
-#if defined(_PCNT_INPUT_MASK)
 /** PRS sources for @p s0PRS and @p s1PRS. */
+#if defined(_PCNT_INPUT_MASK)
 typedef enum {
   pcntPRSCh0 = 0,     /**< PRS channel 0. */
   pcntPRSCh1 = 1,     /**< PRS channel 1. */
@@ -274,47 +276,54 @@ typedef struct {
 #endif
 } PCNT_Init_TypeDef;
 
-/** Default configuration for PCNT initialization structure. */
+/** Default Debug. */
 #if defined(_SILICON_LABS_32B_SERIES_2)
 #define DEFAULT_DEBUG_HALT  true,
 #else
 #define DEFAULT_DEBUG_HALT
 #endif
 
-#define DEFAULT_MODE    pcntModeDisable,         /* Disabled by default. */
+/** Default Mode. */
+#define DEFAULT_MODE    pcntModeDisable,         /**< Disabled by default. */
 
+/** Default Hysteresis. */
 #if defined(PCNT_CTRL_HYST) || defined(_SILICON_LABS_32B_SERIES_2)
-#define DEFAULT_HYST    false,                   /* Hysteresis disabled. */
+#define DEFAULT_HYST    false,                   /**< Hysteresis disabled. */
 #else
 #define DEFAULT_HYST
 #endif
 
+/** Default counter direction*/
 #if defined(PCNT_CTRL_S1CDIR)
-#define DEFAULT_CDIR    true,                    /* Counter direction is given by CNTDIR. */
+#define DEFAULT_CDIR    true,                    /**< Counter direction is given by CNTDIR. */
 #else
 #define DEFAULT_CDIR
 #endif
 
+/** Default count event*/
 #if defined(_PCNT_CTRL_CNTEV_SHIFT)
-#define DEFAULT_CNTEV    pcntCntEventUp,         /* Regular counter counts up on upcount events. */
+#define DEFAULT_CNTEV    pcntCntEventUp,         /**< Regular counter counts up on upcount events. */
 #else
 #define DEFAULT_CNTEV
 #endif
 
+/** Default auxiliary count event. */
 #if defined(_PCNT_CTRL_AUXCNTEV_SHIFT)
-#define DEFAULT_AUXCNTEV    pcntCntEventNone,    /* Auxiliary counter doesn't respond to events. */
+#define DEFAULT_AUXCNTEV    pcntCntEventNone,    /**< Auxiliary counter doesn't respond to events. */
 #else
 #define DEFAULT_AUXCNTEV
 #endif
 
+/** Default selected PRS channel as S0IN and S1IN. */
 #if defined(_PCNT_INPUT_MASK)
-#define DEFAULT_PRS_CH      pcntPRSCh0,          /* PRS channel 0 selected as S0IN and as S1IN. */
+#define DEFAULT_PRS_CH      pcntPRSCh0,          /**< PRS channel 0 selected as S0IN and as S1IN. */
 #elif defined(_SILICON_LABS_32B_SERIES_2)
 #define DEFAULT_PRS_CH      0u,
 #else
 #define DEFAULT_PRS_CH
 #endif
 
+/** Default configuration for PCNT initialization structure. */
 #define PCNT_INIT_DEFAULT                                                       \
   {                                                                             \
     DEFAULT_MODE                          /* Default mode. */                   \
@@ -765,11 +774,14 @@ __STATIC_INLINE void PCNT_Sync(PCNT_TypeDef *pcnt, uint32_t mask)
  * @brief
  *   Start the main PCNT counter.
  *
- * @detail
+ * @details
  *   This function will send a start command to the PCNT peripheral. The PCNT
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref PCNT_Sync() function can be used to wait for the start command
  *   to be executed.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
  *
  * @note
  *   This function requires the PCNT to be enabled.
@@ -784,11 +796,14 @@ __STATIC_INLINE void PCNT_StartMainCnt(PCNT_TypeDef *pcnt)
  * @brief
  *   Stop the main PCNT counter.
  *
- * @detail
+ * @details
  *   This function will send a stop command to the PCNT peripheral. The PCNT
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref PCNT_Sync() function can be used to wait for the stop command
  *   to be executed.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
  *
  * @note
  *   This function requires the PCNT to be enabled.
@@ -803,11 +818,14 @@ __STATIC_INLINE void PCNT_StopMainCnt(PCNT_TypeDef *pcnt)
  * @brief
  *   Start the auxiliary PCNT counter.
  *
- * @detail
+ * @details
  *   This function will send a start command to the PCNT peripheral. The PCNT
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref PCNT_Sync() function can be used to wait for the start command
  *   to be executed.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
  *
  * @note
  *   This function requires the PCNT to be enabled.
@@ -822,11 +840,14 @@ __STATIC_INLINE void PCNT_StartAuxCnt(PCNT_TypeDef *pcnt)
  * @brief
  *   Stop the auxiliary PCNT counter.
  *
- * @detail
+ * @details
  *   This function will send a stop command to the PCNT peripheral. The PCNT
  *   peripheral will use some LF clock ticks before the command is executed.
  *   The @ref PCNT_Sync() function can be used to wait for the stop command
  *   to be executed.
+ *
+ * @param[in] pcnt
+ *   A pointer to the PCNT peripheral register block.
  *
  * @note
  *   This function requires the PCNT to be enabled.

@@ -611,13 +611,20 @@ sl_status_t sl_bt_system_hello();
  * If the Bluetooth on-demand start component is not included in the application
  * build, the Bluetooth stack is automatically started at UC initialization
  * time. In this configuration the on-demand start command is not available and
- * the command returns the error SL_STATUS_NOT_AVAILABLE. When the Bluetooth
- * on-demand start component is included in the application build, this command
- * is used by the application to start the Bluetooth stack when the application
- * needs it. This command allocates the resources and configures the Bluetooth
- * stack based on the configuration passed at UC initialization time. The
- * configured classes and stack features become available when the command has
- * successfully completed.
+ * the command returns the error SL_STATUS_NOT_AVAILABLE.
+ *
+ * When the Bluetooth on-demand start component is included in the application
+ * build, this command is used by the application to request starting the
+ * Bluetooth stack when the application needs it. If the command returns a
+ * success result, the stack starts to asynchronously allocate the resources and
+ * configure the Bluetooth stack based on the configuration passed at UC
+ * initialization time.
+ *
+ * Successful start of the stack is indicated by the @ref sl_bt_evt_system_boot
+ * event. The configured classes and Bluetooth stack features are available
+ * after the application has received the @ref sl_bt_evt_system_boot event. If
+ * starting the Bluetooth stack fails, the error is indicated to the application
+ * with the @ref sl_bt_evt_system_error event.
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -630,16 +637,17 @@ sl_status_t sl_bt_system_start_bluetooth();
  * If the Bluetooth on-demand start component is not included in the application
  * build, the Bluetooth stack is automatically started at UC initialization time
  * and never stopped. In this configuration the stop command is not available
- * and the command returns the error SL_STATUS_NOT_AVAILABLE. When the Bluetooth
- * on-demand start component is included in the application build, this command
- * is used by the application to stop the Bluetooth stack when the application
- * no longer needs it. This command gracefully restores Bluetooth to an idle
- * state by disconnecting any active connections and stopping any on-going
- * advertising and scanning. Any resources that were allocated when the stack
- * was started are freed when the stack is stopped. After this command the BGAPI
- * classes other than @ref sl_bt_system become unavailable. The application can
- * use the command @ref sl_bt_system_start_bluetooth in order to continue using
- * Bluetooth later.
+ * and the command returns the error SL_STATUS_NOT_AVAILABLE.
+ *
+ * When the Bluetooth on-demand start component is included in the application
+ * build, this command is used by the application to stop the Bluetooth stack
+ * when the application no longer needs it. This command gracefully restores
+ * Bluetooth to an idle state by disconnecting any active connections and
+ * stopping any on-going advertising and scanning. Any resources that were
+ * allocated when the stack was started are freed when the stack is stopped.
+ * After this command the BGAPI classes other than @ref sl_bt_system become
+ * unavailable. The application can use the command @ref
+ * sl_bt_system_start_bluetooth in order to continue using Bluetooth later.
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -4218,6 +4226,7 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 #define sl_bt_cmd_gatt_server_send_indication_id                     0x100a0020
 #define sl_bt_cmd_gatt_server_notify_all_id                          0x110a0020
 #define sl_bt_cmd_gatt_server_read_client_configuration_id           0x120a0020
+#define sl_bt_cmd_gatt_server_send_user_prepare_write_response_id    0x140a0020
 #define sl_bt_rsp_gatt_server_set_capabilities_id                    0x080a0020
 #define sl_bt_rsp_gatt_server_enable_capabilities_id                 0x0c0a0020
 #define sl_bt_rsp_gatt_server_disable_capabilities_id                0x0d0a0020
@@ -4235,6 +4244,7 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 #define sl_bt_rsp_gatt_server_send_indication_id                     0x100a0020
 #define sl_bt_rsp_gatt_server_notify_all_id                          0x110a0020
 #define sl_bt_rsp_gatt_server_read_client_configuration_id           0x120a0020
+#define sl_bt_rsp_gatt_server_send_user_prepare_write_response_id    0x140a0020
 
 /**
  * @brief Characteristic Client Configuration Flags
@@ -4348,11 +4358,17 @@ typedef struct sl_bt_evt_gatt_server_user_read_request_s sl_bt_evt_gatt_server_u
  * @ref sl_bt_gatt_att_opcode_t), the application needs to respond to this
  * request by using the @ref sl_bt_gatt_server_send_user_write_response command
  * within 30 seconds, otherwise further GATT transactions are not allowed by the
- * remote side. If the value of @p att_opcode is @ref
- * sl_bt_gatt_execute_write_request, it indicates that this is a queued prepare
- * write request received earlier and now the GATT server is processing the
- * execute write. The event @ref sl_bt_evt_gatt_server_execute_write_completed
- * will be emitted after all queued requests have been processed.
+ * remote side. If the @p att_opcode is @ref sl_bt_gatt_prepare_write_request,
+ * the application needs to respond to this request by using the @ref
+ * sl_bt_gatt_server_send_user_prepare_write_response command within 30 seconds,
+ * otherwise further GATT transactions are not allowed by the remote side. If
+ * the value of @p att_opcode is @ref sl_bt_gatt_execute_write_request, it
+ * indicates that there was one or more prepare writes earlier and now the GATT
+ * server is processing the execute write, the value of @p characteristic is set
+ * to 0 and should be ignored. The event @ref
+ * sl_bt_evt_gatt_server_execute_write_completed will be emitted after
+ * responding to @ref sl_bt_gatt_execute_write_request by using @ref
+ * sl_bt_gatt_server_send_user_write_response.
  */
 
 /** @brief Identifier of the user_write_request event */
@@ -4695,13 +4711,15 @@ sl_status_t sl_bt_gatt_server_send_user_read_response(uint8_t connection,
 /***************************************************************************//**
  *
  * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
- * parameter @p att_opcode in the event is @ref sl_bt_gatt_write_request (see
- * @ref sl_bt_gatt_att_opcode_t). The response needs to be sent within 30
- * seconds, otherwise no more GATT transactions are allowed by the remote side.
- * If attr_errorcode is set to 0, the ATT protocol's write response is sent to
- * indicate to the remote GATT client that the write operation was processed
- * successfully. Other values will cause the local GATT server to send an ATT
- * protocol error response.
+ * parameter @p att_opcode in the event is @ref sl_bt_gatt_write_request or @ref
+ * sl_bt_gatt_execute_write_request (see @ref sl_bt_gatt_att_opcode_t). The
+ * response needs to be sent within 30 seconds, otherwise no more GATT
+ * transactions are allowed by the remote side. When responding to @ref
+ * sl_bt_gatt_execute_write_request, the value of parameter @p characteristic is
+ * ignored. If attr_errorcode is set to 0, the ATT protocol's write response is
+ * sent to indicate to the remote GATT client that the write operation was
+ * processed successfully. Other values will cause the local GATT server to send
+ * an ATT protocol error response.
  *
  * @param[in] connection Connection handle
  * @param[in] characteristic GATT characteristic handle received in the @ref
@@ -4878,6 +4896,42 @@ sl_status_t sl_bt_gatt_server_notify_all(uint16_t characteristic,
 sl_status_t sl_bt_gatt_server_read_client_configuration(uint8_t connection,
                                                         uint16_t characteristic,
                                                         uint16_t *client_config_flags);
+
+/***************************************************************************//**
+ *
+ * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
+ * parameter @p att_opcode in the event is @ref sl_bt_gatt_prepare_write_request
+ * (see @ref sl_bt_gatt_att_opcode_t). The response needs to be sent within 30
+ * seconds, otherwise no more GATT transactions are allowed by the remote side.
+ * If @p att_errorcode is set to 0, the ATT protocol's prepare write response is
+ * sent to indicate to the remote GATT client that the write operation was
+ * processed successfully. Other values will cause the local GATT server to send
+ * an ATT protocol error response. The application should set values of
+ * parameters @p offset and @p value to identical values from the @ref
+ * sl_bt_evt_gatt_server_user_write_request event, the values will be verified
+ * on the client side in case the request is a reliable write (by Bluetooth Core
+ * Specification Volume 3, Part G, 4.9.5).
+ *
+ * @param[in] connection Connection handle
+ * @param[in] characteristic GATT characteristic handle. This value is normally
+ *   received from the gatt_characteristic event.
+ * @param[in] att_errorcode Attribute protocol error code
+ *     - <b>0:</b> No error
+ *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
+ *       Protocol, Error Codes table.
+ * @param[in] offset Value offset
+ * @param[in] value_len Array length
+ * @param[in] value Value
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connection,
+                                                               uint16_t characteristic,
+                                                               uint8_t att_errorcode,
+                                                               uint16_t offset,
+                                                               size_t value_len,
+                                                               const uint8_t* value);
 
 /** @} */ // end addtogroup sl_bt_gatt_server
 
@@ -5871,7 +5925,8 @@ sl_status_t sl_bt_sm_delete_bonding(uint8_t bonding);
 
 /***************************************************************************//**
  *
- * Delete all bonding information and whitelist from the persistent store.
+ * Delete all bonding information and whitelist from the persistent store. This
+ * will also delete device local identity resolving key (IRK).
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -7581,6 +7636,12 @@ bool sl_bt_event_pending(void);
  */
 uint32_t sl_bt_event_pending_len(void);
 
+
+/**
+ * Run the Bluetooth stack to process scheduled tasks. Events for user
+ * application may be generated as a result of this operation.
+ */
+void sl_bt_run();
 
 /**
  * Handle an API command in binary format.

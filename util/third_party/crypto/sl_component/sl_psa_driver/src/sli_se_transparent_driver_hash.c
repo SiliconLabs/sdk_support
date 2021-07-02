@@ -36,14 +36,28 @@
 #include "sli_se_transparent_types.h"
 #include "sli_se_transparent_functions.h"
 
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256) \
+  || defined(PSA_WANT_ALG_SHA_384) \
+  || defined(PSA_WANT_ALG_SHA_512)
+
 #include "sl_se_manager.h"
 #include "sl_se_manager_hash.h"
 
 #include <string.h>
 
+#endif // PSA_WANT_ALG_SHA_*
+
 psa_status_t sli_se_transparent_hash_setup(sli_se_transparent_hash_operation_t *operation,
                                            psa_algorithm_t alg)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -57,38 +71,48 @@ psa_status_t sli_se_transparent_hash_setup(sli_se_transparent_hash_operation_t *
   sl_status_t status = SL_STATUS_INVALID_PARAMETER;
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       operation->hash_type = SL_SE_HASH_SHA1;
       status = sl_se_hash_sha1_starts(&ephemeral_hash_ctx,
                                       &ephemeral_se_ctx,
                                       &(operation->streaming_contexts.sha1_context));
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       operation->hash_type = SL_SE_HASH_SHA224;
       status = sl_se_hash_sha224_starts(&ephemeral_hash_ctx,
                                         &ephemeral_se_ctx,
                                         &(operation->streaming_contexts.sha224_context));
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       operation->hash_type = SL_SE_HASH_SHA256;
       status = sl_se_hash_sha256_starts(&ephemeral_hash_ctx,
                                         &ephemeral_se_ctx,
                                         &(operation->streaming_contexts.sha256_context));
       break;
+#endif // PSA_WANT_ALG_SHA_256
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(PSA_WANT_ALG_SHA_384)
     case PSA_ALG_SHA_384:
       operation->hash_type = SL_SE_HASH_SHA384;
       status = sl_se_hash_sha384_starts(&ephemeral_hash_ctx,
                                         &ephemeral_se_ctx,
                                         &(operation->streaming_contexts.sha384_context));
       break;
+#endif // PSA_WANT_ALG_SHA_384
+#if defined(PSA_WANT_ALG_SHA_512)
     case PSA_ALG_SHA_512:
       operation->hash_type = SL_SE_HASH_SHA512;
       status = sl_se_hash_sha512_starts(&ephemeral_hash_ctx,
                                         &ephemeral_se_ctx,
                                         &(operation->streaming_contexts.sha512_context));
       break;
-#endif
+#endif // PSA_WANT_ALG_SHA_512
+#endif // VAULT
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -98,12 +122,27 @@ psa_status_t sli_se_transparent_hash_setup(sli_se_transparent_hash_operation_t *
   } else {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void) operation;
+  (void) alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_se_transparent_hash_update(sli_se_transparent_hash_operation_t *operation,
                                             const uint8_t *input,
                                             size_t input_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -129,6 +168,16 @@ psa_status_t sli_se_transparent_hash_update(sli_se_transparent_hash_operation_t 
   } else {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void) operation;
+  (void) input;
+  (void) input_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t *operation,
@@ -136,9 +185,15 @@ psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t 
                                             size_t hash_size,
                                             size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if (operation == NULL
-      || hash_length == NULL
-      || hash == NULL) {
+      || (hash == NULL && hash_size > 0)
+      || hash_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -162,45 +217,78 @@ psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t 
 
   if (status == SL_STATUS_OK) {
     switch (operation->hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
       case SL_SE_HASH_SHA1:
         *hash_length = 20;
         break;
-
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
       case SL_SE_HASH_SHA224:
         *hash_length = 28;
         break;
-
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
       case SL_SE_HASH_SHA256:
         *hash_length = 32;
         break;
-
+#endif // PSA_WANT_ALG_SHA_256
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(PSA_WANT_ALG_SHA_384)
       case SL_SE_HASH_SHA384:
         *hash_length = 48;
         break;
-
+#endif // PSA_WANT_ALG_SHA_384
+#if defined(PSA_WANT_ALG_SHA_512)
       case SL_SE_HASH_SHA512:
         *hash_length = 64;
         break;
-#endif
+#endif // PSA_WANT_ALG_SHA_512
+#endif // VAULT
 
       default:
         return PSA_ERROR_BAD_STATE;
     }
     return PSA_SUCCESS;
+  } else if ( status == SL_STATUS_INVALID_PARAMETER) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
   } else {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void) operation;
+  (void) hash;
+  (void) hash_size;
+  (void) hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_se_transparent_hash_abort(sli_se_transparent_hash_operation_t *operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if (operation != NULL) {
     // Accelerator does not keep state, so just zero out the context and we're good
     memset(operation, 0, sizeof(sli_se_transparent_hash_operation_t));
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void) operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
@@ -210,8 +298,14 @@ psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
                                              size_t hash_size,
                                              size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if ((input == NULL && input_length > 0)
-      || hash == NULL
+      || (hash == NULL && hash_size > 0)
       || hash_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -220,30 +314,45 @@ psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
   sl_se_command_context_t ephemeral_se_ctx;
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       hash_type = SL_SE_HASH_SHA1;
       *hash_length = 20;
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       hash_type = SL_SE_HASH_SHA224;
       *hash_length = 28;
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       hash_type = SL_SE_HASH_SHA256;
       *hash_length = 32;
       break;
+#endif // PSA_WANT_ALG_SHA_256
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+#if defined(PSA_WANT_ALG_SHA_384)
     case PSA_ALG_SHA_384:
       hash_type = SL_SE_HASH_SHA384;
       *hash_length = 48;
       break;
+#endif // PSA_WANT_ALG_SHA_384
+#if defined(PSA_WANT_ALG_SHA_512)
     case PSA_ALG_SHA_512:
       hash_type = SL_SE_HASH_SHA512;
       *hash_length = 64;
       break;
-#endif
+#endif // PSA_WANT_ALG_SHA_512
+#endif // VAULT
     default:
       return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  if (hash_size < *hash_length) {
+    *hash_length = 0;
+    return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
   sl_status_t status = sl_se_init_command_context(&ephemeral_se_ctx);
@@ -264,11 +373,30 @@ psa_status_t sli_se_transparent_hash_compute(psa_algorithm_t alg,
     *hash_length = 0;
     return PSA_ERROR_HARDWARE_FAILURE;
   }
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)hash;
+  (void)hash_size;
+  (void)hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_se_transparent_hash_clone(const sli_se_transparent_hash_operation_t *source_operation,
                                            sli_se_transparent_hash_operation_t *target_operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)                                        \
+  || defined(PSA_WANT_ALG_SHA_224)                                     \
+  || defined(PSA_WANT_ALG_SHA_256)                                     \
+  || ((defined(PSA_WANT_ALG_SHA_384) || defined(PSA_WANT_ALG_SHA_512)) \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
   if (source_operation == NULL
       || target_operation == NULL) {
     return PSA_ERROR_BAD_STATE;
@@ -289,6 +417,15 @@ psa_status_t sli_se_transparent_hash_clone(const sli_se_transparent_hash_operati
   *target_operation = *source_operation;
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void) source_operation;
+  (void) target_operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 #endif // defined(SEMAILBOX_PRESENT)

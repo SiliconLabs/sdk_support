@@ -50,10 +50,19 @@ extern "C" {
  ********************************   DEFINES   **********************************
  ******************************************************************************/
 
+/** Default Clock Prescaler. */
+#define LCD_DEFAULT_CLOCK_PRESCALER 64
 /** Default LCD Frame Rate Divisor. */
 #define LCD_DEFAULT_FRAME_RATE_DIV  4
 /** Default LCD Contrast. */
 #define LCD_DEFAULT_CONTRAST        15
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+/** Maximum common lines of LCD. */
+#define LCD_COM_LINES_MAX  4
+/** Maximum segment lines of LCD. */
+#define LCD_SEGMENT_LINES_MAX  20
+#endif
 
 /*******************************************************************************
  ********************************   ENUMS   ************************************
@@ -284,10 +293,13 @@ typedef enum {
 typedef enum {
   /** Disable charge redistribution. */
   lcdChargeRedistributionDisable    = LCD_DISPCTRL_CHGRDST_DISABLE,
-  /** Enable charge redistribution. */
+  /** Use 1 prescaled low frequency clock cycle for charge redistribution. */
   lcdChargeRedistributionEnable     = LCD_DISPCTRL_CHGRDST_ONE,
+  /** Use 2 prescaled low frequency clock cycle for charge redistribution. */
   lcdChargeRedistributionTwoCycle   = LCD_DISPCTRL_CHGRDST_TWO,
+  /** Use 3 prescaled low frequency clock cycle for charge redistribution. */
   lcdChargeRedistributionThreeCycle = LCD_DISPCTRL_CHGRDST_THREE,
+  /** Use 4 prescaled low frequency clock cycle for charge redistribution. */
   lcdChargeRedistributionFourCycle  = LCD_DISPCTRL_CHGRDST_FOUR
 } LCD_ChargeRedistribution_TypeDef;
 #endif
@@ -356,8 +368,14 @@ typedef struct {
   LCD_Mode_Typedef                      mode;
   /** Charge redistribution cycles. */
   LCD_ChargeRedistribution_TypeDef      chargeRedistribution;
+  /** Frame rate divider. */
   uint8_t                               frameRateDivider;
+  /** Contrast level. */
   int                                   contrastLevel;
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  /** Clock Prescaler. */
+  uint32_t                              clockPrescaler;
+#endif
 #endif
 } LCD_Init_TypeDef;
 
@@ -398,7 +416,8 @@ typedef struct {
     lcdModeStepDown,               \
     lcdChargeRedistributionEnable, \
     LCD_DEFAULT_FRAME_RATE_DIV,    \
-    LCD_DEFAULT_CONTRAST           \
+    LCD_DEFAULT_CONTRAST,          \
+    LCD_DEFAULT_CLOCK_PRESCALER    \
   }
 #endif
 

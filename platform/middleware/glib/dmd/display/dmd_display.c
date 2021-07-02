@@ -49,7 +49,7 @@ static DMD_DisplayGeometry dimensions;
    The dirty table contains one bit per row/line on the display which
    indicates whether the corresponding row/line is dirty (written to without
    having been updated on the display. */
-uint32_t dirtyRows[DISPLAY0_WIDTH / sizeof(uint32_t) / 8];
+uint32_t dirtyRows[(DISPLAY0_WIDTH + (sizeof(uint32_t) * 8 - 1)) / sizeof(uint32_t) / 8];
 
 /* To become API functions later. */
 EMSTATUS DMD_allocateFramebuffer(void **framebuffer);

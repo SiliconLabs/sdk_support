@@ -9,6 +9,7 @@ documentation:
   document: rail-util-callbacks
 requires:
   - name: rail_lib
+  - name: emlib_common
 provides:
   - name: rail_util_callbacks
 include:
@@ -16,5 +17,7 @@ include:
     file_list:
       - path: sl_rail_util_callbacks.h
       - path: sli_rail_util_callbacks.h
+config_file:
+  - path: "platform/radio/rail_lib/plugin/rail_util_callbacks/config/sl_rail_util_callbacks_config.h"
 template_file:
   - path: platform/radio/rail_lib/plugin/rail_util_callbacks/sl_rail_util_callbacks.c.jinja

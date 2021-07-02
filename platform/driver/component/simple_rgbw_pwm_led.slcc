@@ -21,25 +21,25 @@ description: >
 
   Selecting this component will also include the Simple LED Core component, which is 
   the implementation of the Simple RGBW PWM LED driver itself.
-category: "Platform|Driver"
-quality: "production"
+category: Platform|Driver|LED
+quality: production
+root_path: platform/driver/leddrv/
 instantiable:
   prefix: inst
 config_file:
-  - path: "platform/driver/leddrv/config/s0/sl_simple_rgbw_pwm_led_{{instance}}_config.h"
+  - path: "config/s0/sl_simple_rgbw_pwm_led_{{instance}}_config.h"
     file_id: simple_rgbw_pwm_led_config
     condition: [device_series_0]
-  - path: "platform/driver/leddrv/config/s1/sl_simple_rgbw_pwm_led_{{instance}}_config.h"
+  - path: "config/s1/sl_simple_rgbw_pwm_led_{{instance}}_config.h"
     file_id: simple_rgbw_pwm_led_config
     condition: [device_series_1]
-  - path: "platform/driver/leddrv/config/s2/sl_simple_rgbw_pwm_led_{{instance}}_config.h"
-    file_id: simple_rgbw_pwm_led_config
-    condition: [device_series_2]
 provides:
-  - name: "simple_rgbw_pwm_led"
+  - name: simple_rgbw_pwm_led
     allow_multiple: true
 requires:
   - name: simple_rgbw_pwm_led_core
+  - name: simple_rgbw_pwm_led_s2
+    condition: [device_series_2]
 template_contribution:
   - name: simple_rgbw_pwm_led_instance
     value: "{{instance}}"

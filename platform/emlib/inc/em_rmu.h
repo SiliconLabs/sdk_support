@@ -53,16 +53,16 @@ extern "C" {
 /** RMU reset modes. */
 typedef enum {
 #if defined(_RMU_CTRL_PINRMODE_MASK)
-  rmuResetModeDisabled = _RMU_CTRL_PINRMODE_DISABLED,
-  rmuResetModeLimited  = _RMU_CTRL_PINRMODE_LIMITED,
-  rmuResetModeExtended = _RMU_CTRL_PINRMODE_EXTENDED,
-  rmuResetModeFull     = _RMU_CTRL_PINRMODE_FULL,
+  rmuResetModeDisabled = _RMU_CTRL_PINRMODE_DISABLED, /**< Reset mode disabled. */
+  rmuResetModeLimited  = _RMU_CTRL_PINRMODE_LIMITED,  /**< Reset mode limited. */
+  rmuResetModeExtended = _RMU_CTRL_PINRMODE_EXTENDED, /**< Reset mode extended. */
+  rmuResetModeFull     = _RMU_CTRL_PINRMODE_FULL,     /**< Reset mode full. */
 #elif defined(_EMU_RSTCTRL_MASK)
-  rmuResetModeDisabled = 0,
-  rmuResetModeEnabled  = 1,
+  rmuResetModeDisabled = 0, /**< Reset mode disabled. */
+  rmuResetModeEnabled  = 1, /**< Reset mode enabled. */
 #else
-  rmuResetModeClear    = 0,
-  rmuResetModeSet      = 1,
+  rmuResetModeClear    = 0, /**< Reset mode clear. */
+  rmuResetModeSet      = 1, /**< Reset mode set. */
 #endif
 } RMU_ResetMode_TypeDef;
 

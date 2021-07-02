@@ -165,7 +165,7 @@ sl_status_t sl_mic_get_n_samples(void *buffer, uint32_t n_frames);
  *
  * @param[in] n_frames
  *    The number of audio frames to receive before the callback is called.
- *    Maximum value limited by @ref DMADRV_MAX_XFER_COUNT.
+ *    Maximum value limited by DMADRV_MAX_XFER_COUNT.
  *
  * @param[in] callback
  *    Callback is called when n_frames in the sample buffer is ready.

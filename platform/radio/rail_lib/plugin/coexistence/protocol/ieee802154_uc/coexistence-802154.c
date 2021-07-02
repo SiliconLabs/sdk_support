@@ -16,13 +16,7 @@
  ******************************************************************************/
 #include "rail.h"
 #include "sl_status.h"
-#include "sl_rail_util_ieee802154_stack_event.h"
-#include "coexistence-802154.h"
-#include "coexistence-hal.h"
-
-#ifndef COEXISTENCE_HAL_SIMULATOR
-#include "ustimer.h"
-#endif
+#include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
 
 #ifdef RTOS
   #include "rtos/rtos.h"
@@ -338,7 +332,7 @@ static uint16_t getPseudoRandom(void)
 
 static void randomDelayCallback(uint16_t randomDelayMaskUs)
 {
-  USTIMER_Delay(getPseudoRandom() & randomDelayMaskUs);
+  RAIL_DelayUs(getPseudoRandom() & randomDelayMaskUs);
 }
 #endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
 
@@ -347,6 +341,7 @@ static void COEX_802154_Init(void)
   if (coexInitialized) {
     return;
   }
+  RAIL_ConfigMultiTimer(true);
 #if SL_RAIL_UTIL_COEX_REQ_BACKOFF
   COEX_SetRandomDelayCallback(&randomDelayCallback);
 #endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
@@ -981,12 +976,12 @@ const sl_rail_util_coex_pwm_args_t *sl_rail_util_coex_get_request_pwm_args(void)
 // RHO implementation is defined in coexistence-hal.c
 #elif COEX_RHO_SUPPORT
 
-bool halGetRadioHoldOff(void)
+bool sl_rail_util_coex_get_radio_holdoff(void)
 {
   return (COEX_GetOptions() & COEX_OPTION_RHO_ENABLED) != 0U;
 }
 
-sl_status_t halSetRadioHoldOff(bool enabled)
+sl_status_t sl_rail_util_coex_set_radio_holdoff(bool enabled)
 {
   return sl_rail_util_coex_set_bool(SL_RAIL_UTIL_COEX_OPT_RHO_ENABLED, enabled);
 }
@@ -1005,12 +1000,12 @@ void halStackRadioHoldOffPowerUp(void)
 
 // Stub RHO implementation
 
-bool halGetRadioHoldOff(void)
+bool sl_rail_util_coex_get_radio_holdoff(void)
 {
   return false;
 }
 
-sl_status_t halSetRadioHoldOff(bool enabled)
+sl_status_t sl_rail_util_coex_set_radio_holdoff(bool enabled)
 {
   UNUSED_VAR(enabled);
   return SL_STATUS_NOT_SUPPORTED;
@@ -1087,3 +1082,10 @@ sl_status_t sl_rail_util_coex_set_gpio_input_override(sl_rail_util_coex_gpio_ind
   return SL_STATUS_NOT_SUPPORTED;
 }
 #endif //SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT
+
+void sl_rail_util_coex_init(void)
+{
+#if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
+  sl_rail_util_coex_set_enable(true);
+#endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
+}

@@ -19,3 +19,10 @@ requires:
   - name: device_has_qspi
   - name: emlib_common
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efm32gg11/group-qspi
+      condition: [device_sdid_100]
+    - page: emlib/api/efm32gg12/group-qspi
+      condition: [device_sdid_106]

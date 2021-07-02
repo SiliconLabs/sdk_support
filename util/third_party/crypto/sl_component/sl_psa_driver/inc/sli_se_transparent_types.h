@@ -78,10 +78,23 @@ typedef struct {
   sli_se_driver_cipher_operation_t operation;
 } sli_se_transparent_cipher_operation_t;
 
-typedef struct {
-  uint8_t key[32];
-  size_t key_len;
-  sli_se_driver_mac_operation_t operation;
+typedef union {
+  struct {
+    sli_se_driver_mac_operation_t operation;
+    uint8_t key[32];
+    size_t key_len;
+  } cipher_mac;
+  #if defined(PSA_WANT_ALG_HMAC)
+  struct {
+    psa_algorithm_t alg;
+    sli_se_transparent_hash_operation_t hash_ctx;
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    uint8_t opad[128];
+    #else
+    uint8_t opad[64];
+    #endif
+  } hmac;
+  #endif /* PSA_WANT_ALG_HMAC */
 } sli_se_transparent_mac_operation_t;
 
 typedef struct {

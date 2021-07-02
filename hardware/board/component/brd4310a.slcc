@@ -44,7 +44,7 @@
 - tag:
   - board:pn:BRD4310
   - board:variant:A
-  - board:revision:A03
+  - board:revision:A04
   - board:device:bgm220sc12wga
   - hardware:has:vcom
   - hardware:has:pti

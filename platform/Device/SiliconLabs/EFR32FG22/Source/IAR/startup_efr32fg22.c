@@ -3,7 +3,7 @@
  * @brief CMSIS Compatible EFR32FG22 startup file in C for IAR EWARM
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,8 +31,25 @@
 #include <stdbool.h>
 #include "em_device.h"        /* The correct device header file. */
 
+#ifdef BOOTLOADER_ENABLE
+#include "api/btl_interface.h"
+
+#endif
+
 #pragma language=extended
 #pragma segment="CSTACK"
+
+#ifdef BOOTLOADER_ENABLE
+extern MainBootloaderTable_t mainStageTable;
+
+extern void SystemInit2(void);
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler Function Prototype
+ *----------------------------------------------------------------------------*/
+typedef void (*pFunc)(void);
+
+#endif
 
 /* IAR start function */
 extern void __iar_program_start(void);
@@ -45,6 +62,11 @@ extern unsigned char CSTACK$$Limit;
 __weak void Reset_Handler(void)
 {
   SystemInit();
+
+#ifdef BOOTLOADER_ENABLE
+  SystemInit2();
+#endif
+
   __iar_program_start();
 }
 
@@ -443,7 +465,11 @@ const tVectorEntry __vector_table[] = {
   { 0 },
   { 0 },
   { 0 },
+#ifdef BOOTLOADER_ENABLE
+  { (pFunc) & mainStageTable },
+#else
   { 0 },
+#endif
   { SVC_Handler },
   { DebugMon_Handler },
   { sl_app_properties },

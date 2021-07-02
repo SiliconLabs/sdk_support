@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs PSA Crypto Secure Element Driver cipher functions.
+ * @brief Silicon Labs PSA Crypto Secure Engine Driver cipher functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -98,11 +98,6 @@ psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t
 psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t *operation,
                                                 const psa_key_attributes_t *attributes,
                                                 psa_algorithm_t alg);
-
-psa_status_t sli_se_driver_cipher_generate_iv(sli_se_driver_cipher_operation_t *operation,
-                                              uint8_t *iv,
-                                              size_t iv_size,
-                                              size_t *iv_length);
 
 psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *operation,
                                          const uint8_t *iv,

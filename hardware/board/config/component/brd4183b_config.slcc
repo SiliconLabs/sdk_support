@@ -18,6 +18,60 @@
       file_id: board_control_config
     path: brd4183b_brd4001a/sl_board_control_config.h
   - override:
+      component: bootloader_euart_driver
+      file_id: btl_euart_driver_cfg
+    path: brd4183b_brd4001a/btl_euart_driver_cfg.h
+  - override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+    path: brd4183b_brd4001a/btl_gpio_activation_cfg.h
+  - override:
+      component: bootloader_spi_master_driver
+      file_id: btl_spi_master_driver_cfg
+    path: brd4183b_brd4001a/btl_spi_master_driver_cfg.h
+  - override:
+      component: bootloader_uart_driver
+      file_id: btl_uart_driver_cfg
+    path: brd4183b_brd4001a/btl_uart_driver_cfg.h
+  - override:
+      component: cpc_primary_driver_uart
+      file_id: cpc_drv_uart_primary_config
+      instance: vcom
+    path: brd4183b_brd4001a/sl_cpc_drv_uart_primary_vcom_config.h
+  - override:
+      component: cpc_primary_driver_uart
+      file_id: cpc_drv_uart_primary_config
+      instance: exp
+    path: brd4183b_brd4001a/sl_cpc_drv_uart_primary_exp_config.h
+  - override:
+      component: cpc_secondary_driver_uart
+      file_id: cpc_drv_uart_secondary_config
+      instance: vcom
+    path: brd4183b_brd4001a/sl_cpc_drv_uart_secondary_vcom_config.h
+  - override:
+      component: cpc_secondary_driver_uart
+      file_id: cpc_drv_uart_secondary_config
+      instance: exp
+    path: brd4183b_brd4001a/sl_cpc_drv_uart_secondary_exp_config.h
+  - override:
+      component: device_init_hfxo
+      file_id: device_init_hfxo_config
+    path: brd4183b_brd4001a/sl_device_init_hfxo_config.h
+  - override:
+      component: device_init_lfxo
+      file_id: device_init_lfxo_config
+    path: brd4183b_brd4001a/sl_device_init_lfxo_config.h
+  - override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: vcom
+    path: brd4183b_brd4001a/sl_iostream_eusart_vcom_config.h
+  - override:
+      component: iostream_eusart
+      file_id: iostream_eusart_config
+      instance: exp
+    path: brd4183b_brd4001a/sl_iostream_eusart_exp_config.h
+  - override:
       component: iostream_usart
       file_id: iostream_usart_config
       instance: vcom
@@ -27,6 +81,15 @@
       file_id: iostream_usart_config
       instance: exp
     path: brd4183b_brd4001a/sl_iostream_usart_exp_config.h
+  - override:
+      component: mx25_flash_shutdown_usart
+      file_id: mx25_flash_shutdown_usart_config
+    path: brd4183b_brd4001a/sl_mx25_flash_shutdown_usart_config.h
+  - override:
+      component: pwm
+      file_id: pwm_config
+      instance: led0
+    path: brd4183b_brd4001a/sl_pwm_init_led0_config.h
   - override:
       component: rail_util_pa
       file_id: rail_util_pa_config
@@ -66,29 +129,37 @@
       instance: exp
     path: brd4183b_brd4001a/sl_uartdrv_usart_exp_config.h
   - override:
-      component: pwm
-      file_id: pwm_config
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: brd4183b_brd4001a/iot_flash_cfg_msc.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: spiflash
+    path: brd4183b_brd4001a/iot_flash_cfg_spiflash.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
       instance: led0
-    path: brd4183b_brd4001a/sl_pwm_init_led0_config.h
+    path: brd4183b_brd4001a/iot_pwm_cfg_led0.h
   - override:
-      component: device_init_hfxo
-      file_id: device_init_hfxo_config
-    path: brd4183b_brd4001a/sl_device_init_hfxo_config.h
-  - override:
-      component: device_init_lfxo
-      file_id: device_init_lfxo_config
-    path: brd4183b_brd4001a/sl_device_init_lfxo_config.h
-  - override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
-      instance: vcom
-    path: brd4183b_brd4001a/sl_iostream_eusart_vcom_config.h
-  - override:
-      component: iostream_eusart
-      file_id: iostream_eusart_config
+      component: iot_pwm
+      file_id: iot_pwm_cfg
       instance: exp
-    path: brd4183b_brd4001a/sl_iostream_eusart_exp_config.h
+    path: brd4183b_brd4001a/iot_pwm_cfg_exp.h
   - override:
-      component: mx25_flash_shutdown_usart
-      file_id: mx25_flash_shutdown_usart_config
-    path: brd4183b_brd4001a/sl_mx25_flash_shutdown_usart_config.h
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: vcom
+    path: brd4183b_brd4001a/iot_uart_cfg_vcom.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: exp
+    path: brd4183b_brd4001a/iot_uart_cfg_exp.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: loopback
+    path: brd4183b_brd4001a/iot_uart_cfg_loopback.h

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -42,9 +42,9 @@
  *
  * @brief
  *   Random number generators
- *
  * @details
- *   API for getting randomness from the Secure Element True Random Number
+ *
+ *   API for getting randomness from the Secure Engine True Random Number
  *   Generator (TRNG).
  *
  * @{

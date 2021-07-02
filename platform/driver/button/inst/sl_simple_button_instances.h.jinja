@@ -23,6 +23,10 @@
 {% for inst in simple_button_instance -%}
 extern const sl_button_t sl_button_{{ inst | lower }};
 {% endfor %}
+extern const sl_button_t *sl_simple_button_array[];
+
+#define SL_SIMPLE_BUTTON_COUNT {{ simple_button_instance | length }}
+#define SL_SIMPLE_BUTTON_INSTANCE(n) (sl_simple_button_array[n])
 
 void sl_simple_button_init_instances(void);
 void sl_simple_button_poll_instances(void);

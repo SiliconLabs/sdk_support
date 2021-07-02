@@ -93,6 +93,8 @@ typedef struct {
   uint8_t friend_max_subs_list;
   /** maximum deferred send queue for app layer */
   uint8_t app_send_max_queue;
+  /** Size of RAM cache for persistent keys stored under ITS */
+  uint16_t its_key_cache;
 } mesh_memory_config_t;
 
 #endif

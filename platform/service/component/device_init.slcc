@@ -4,7 +4,7 @@ package: platform
 description: >
   Device initialization wrapper. Depends on specific device initialization
   components depending on the selected hardware.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 provides:
@@ -22,7 +22,7 @@ requires:
     condition: [hardware_board_has_lfxo]
   - name: device_init_clocks
   - name: device_init_emu
-  - name: device_init_nvic 
+  - name: device_init_nvic
   - name: board_control
     condition: [hardware_board]
 recommends:

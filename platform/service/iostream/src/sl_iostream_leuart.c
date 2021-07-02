@@ -128,9 +128,6 @@ sl_status_t sl_iostream_leuart_init(sl_iostream_uart_t *iostream_uart,
   leuart_context->leuart->ROUTE = LEUART_ROUTE_RXPEN | LEUART_ROUTE_TXPEN | leuart_config->location;
 #endif
 
-  // Clear previous RX interrupts
-  LEUART_IntClear(leuart_context->leuart, LEUART_IF_RXDATAV);
-
   // Enable RX interrupts
   LEUART_IntEnable(leuart_context->leuart, LEUART_IF_RXDATAV);
 
@@ -188,9 +185,14 @@ static sl_status_t leuart_tx(void *context,
 
   LEUART_Tx(leuart_context->leuart, (uint8_t)c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   // Enable TX interrupts
   LEUART_IntEnable(leuart_context->leuart, LEUART_IF_TXC);
+#endif
+
+#if defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  /* Wait until transmit buffer is empty */
+  while (!(LEUART_StatusGet(leuart_context->leuart) & LEUART_STATUS_TXBL)) ;
 #endif
 
   return SL_STATUS_OK;

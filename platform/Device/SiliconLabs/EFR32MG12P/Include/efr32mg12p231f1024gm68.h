@@ -4,7 +4,7 @@
  *        for EFR32MG12P231F1024GM68
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -2052,4 +2052,5 @@ typedef enum IRQn{
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* EFR32MG12P231F1024GM68_H */

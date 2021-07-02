@@ -14,6 +14,7 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_slwrb4190a
   - name: hardware_board_has_spiflash
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
@@ -45,7 +46,7 @@
 - tag:
   - board:pn:BRD4190
   - board:variant:A
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32mg12p232f1024gm48
   - hardware:has:vcom
   - hardware:has:pti

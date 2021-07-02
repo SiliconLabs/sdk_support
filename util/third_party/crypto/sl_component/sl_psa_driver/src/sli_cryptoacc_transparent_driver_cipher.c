@@ -34,13 +34,14 @@
 
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
+#include "sli_psa_driver_common.h"
 #include "cryptoacc_management.h"
 // Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
 // interface header file when it becomes available.
 #include "psa/crypto_platform.h"
 #include "psa/crypto_sizes.h"
 #include "psa/crypto_struct.h"
-#include "mbedtls/entropy_poll.h"
+#include "psa/crypto_extra.h"
 #include "cryptolib_def.h"
 #include "sx_errors.h"
 #include "sx_aes.h"
@@ -97,17 +98,35 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
                                                       size_t output_size,
                                                       size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   psa_status_t status = PSA_ERROR_GENERIC_ERROR;
   uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-  int trng_ret = -1;
   block_t key;
-  block_t iv_block;
   block_t data_in;
   block_t data_out;
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#if defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)
+  uint8_t tmp_buf[16] = { 0 };
+#endif
+#if defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)
+  block_t iv_block;
   uint8_t iv_buf[AES_IV_SIZE];
-  uint8_t tmp_buf[16];
-  size_t iv_length;
-
+#endif
+#endif // MBEDTLS_PSA_CRYPTO_C
   // Argument check
   if (key_buffer == NULL
       || key_buffer_size == 0
@@ -122,11 +141,13 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
   // Check key type and size.
   switch (alg) {
     case PSA_ALG_ECB_NO_PADDING:
+#if defined(MBEDTLS_PSA_CRYPTO_C)
     case PSA_ALG_CTR:
     case PSA_ALG_CFB:
     case PSA_ALG_OFB:
     case PSA_ALG_CBC_NO_PADDING:
     case PSA_ALG_CBC_PKCS7:
+#endif /* MBEDTLS_PSA_CRYPTO_C */
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
@@ -159,6 +180,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
 
   // Encrypt.
   switch (alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING: {
       // Check buffer sizes.
       if (output_size < input_length) {
@@ -190,6 +212,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       *output_length = input_length;
       break;
     }
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR: {
       // Check buffer sizes.
       if (output_size < AES_IV_SIZE + input_length) {
@@ -197,9 +222,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       }
 
       // Generate nonce.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, AES_IV_SIZE, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      status = psa_generate_random(iv_buf, AES_IV_SIZE);
+      if (status != PSA_SUCCESS) {
+        return status;
       }
 
       key = block_t_convert(key_buffer, key_buffer_size);
@@ -228,6 +253,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       *output_length = AES_IV_SIZE + input_length;
       break;
     }
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB: {
       // Check buffer sizes.
       if (output_size < AES_IV_SIZE + input_length) {
@@ -235,9 +262,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, AES_IV_SIZE, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      status = psa_generate_random(iv_buf, AES_IV_SIZE);
+      if (status != PSA_SUCCESS) {
+        return status;
       }
 
       // Copy final input bytes before they are overwritten (in case of overlap with output buffer).
@@ -302,6 +329,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       *output_length = AES_IV_SIZE + input_length;
       break;
     }
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB: {
       uint8_t final_block[16];
 
@@ -311,9 +340,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, AES_IV_SIZE, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      status = psa_generate_random(iv_buf, AES_IV_SIZE);
+      if (status != PSA_SUCCESS) {
+        return status;
       }
 
       // Copy final input bytes before they are overwritten (in case of overlap with output buffer).
@@ -380,6 +409,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       *output_length = AES_IV_SIZE + input_length;
       break;
     }
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_NO_PADDING:
       // We cannot do CBC without padding on non-block sizes.
       if (input_length % 16 != 0) {
@@ -401,9 +432,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, AES_IV_SIZE, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      status = psa_generate_random(iv_buf, AES_IV_SIZE);
+      if (status != PSA_SUCCESS) {
+        return status;
       }
 
       // Copy IV to tmp buf in order to avoid overwriting it with intermediate IV.
@@ -479,11 +510,29 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       }
       break;
     }
+#endif // PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING
+#endif /* MBEDTLS_PSA_CRYPTO_C */
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 /** Decrypt a message using a symmetric cipher.
@@ -534,13 +583,33 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
                                                       size_t output_size,
                                                       size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   psa_status_t status = PSA_ERROR_GENERIC_ERROR;
   uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
   block_t key;
-  block_t iv_block;
   block_t data_in;
   block_t data_out;
+
+#if defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)
+  block_t iv_block;
+#endif
+#if defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)
   uint8_t tmp_buf[16];
+#endif
 
   // Argument check
   if (key_buffer == NULL
@@ -592,6 +661,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
   }
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING: {
       // Check buffer sizes.
       if (output_size < input_length) {
@@ -623,6 +693,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       *output_length = input_length;
       break;
     }
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR: {
       // Check buffer sizes.
       if (output_size < input_length - AES_IV_SIZE) {
@@ -652,6 +724,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       *output_length = input_length - AES_IV_SIZE;
       break;
     }
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB: {
       // Check buffer sizes.
       if (output_size < input_length - AES_IV_SIZE) {
@@ -714,6 +788,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       *output_length = input_length - AES_IV_SIZE;
       break;
     }
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB: {
       // Check buffer sizes.
       if (output_size < input_length - AES_IV_SIZE) {
@@ -778,6 +854,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       *output_length = input_length - AES_IV_SIZE;
       break;
     }
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_NO_PADDING:
     // fall through
     case PSA_ALG_CBC_PKCS7: {
@@ -880,11 +958,28 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       }
       break;
     }
+#endif // PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_encrypt_setup(sli_cryptoacc_transparent_cipher_operation_t *operation,
@@ -893,6 +988,14 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt_setup(sli_cryptoacc_transp
                                                             size_t key_buffer_size,
                                                             psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -906,16 +1009,28 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt_setup(sli_cryptoacc_transp
 
   // Validate combination of key and algorithm.
   switch (alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
     case PSA_ALG_CBC_NO_PADDING:
+#endif // PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
-      if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_NOT_SUPPORTED;
-      }
-      break;
+#endif // PSA_WANT_ALG_CBC_PKCS7
+    if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
+    break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -948,6 +1063,18 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt_setup(sli_cryptoacc_transp
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_decrypt_setup(sli_cryptoacc_transparent_cipher_operation_t *operation,
@@ -956,6 +1083,14 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt_setup(sli_cryptoacc_transp
                                                             size_t key_buffer_size,
                                                             psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL || attributes == NULL || key_buffer == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -969,16 +1104,28 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt_setup(sli_cryptoacc_transp
 
   // Validate combination of key and algorithm.
   switch (alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
     case PSA_ALG_CBC_NO_PADDING:
+#endif // PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
-      if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
-      break;
+#endif // PSA_WANT_ALG_CBC_PKCS7
+    if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
+    break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -1011,46 +1158,31 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt_setup(sli_cryptoacc_transp
   }
 
   return PSA_SUCCESS;
-}
 
-psa_status_t sli_cryptoacc_transparent_cipher_generate_iv(sli_cryptoacc_transparent_cipher_operation_t *operation,
-                                                          uint8_t *iv,
-                                                          size_t iv_size,
-                                                          size_t *iv_length)
-{
-  if (operation == NULL || iv == NULL || iv_length == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 
-  // Generate & output random IV (output because application may want to record and/or transmit IV).
-  if (operation->iv_len != 0) {
-    // IV was set previously.
-    return PSA_ERROR_BAD_STATE;
-  }
+  (void)operation;
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
 
-  if (operation->key_len == 0) {
-    // context hasn't been properly initialised.
-    return PSA_ERROR_BAD_STATE;
-  }
+  return PSA_ERROR_NOT_SUPPORTED;
 
-  // Same IV size for all modes except GCM.
-  if (iv_size < AES_IV_SIZE) {
-    return PSA_ERROR_BUFFER_TOO_SMALL;
-  }
-
-  // Generate IV.
-  int trng_ret = mbedtls_hardware_poll(NULL, iv, AES_IV_SIZE, iv_length);
-  if (trng_ret != 0) {
-    return PSA_ERROR_HARDWARE_FAILURE;
-  }
-
-  return sli_cryptoacc_transparent_cipher_set_iv(operation, iv, *iv_length);
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_set_iv(sli_cryptoacc_transparent_cipher_operation_t *operation,
                                                      const uint8_t *iv,
                                                      size_t iv_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)       \
+  && (defined(PSA_WANT_ALG_CTR)           \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation == NULL || iv == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -1073,6 +1205,16 @@ psa_status_t sli_cryptoacc_transparent_cipher_set_iv(sli_cryptoacc_transparent_c
 
   memcpy(operation->iv, iv, iv_length);
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)iv;
+  (void)iv_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_cipher_operation_t *operation,
@@ -1082,19 +1224,25 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                      size_t output_size,
                                                      size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   psa_status_t status = PSA_ERROR_GENERIC_ERROR;
   uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
   block_t key;
-  block_t iv_block;
   block_t data_in;
   block_t data_out;
-  block_t tmp_iv_block;
   uint8_t tmp_buf[16];
 
   // Argument check.
   if (operation == NULL
-      || input == NULL
-      || output == NULL
+      || (input == NULL && input_length > 0)
+      || (output == NULL && output_size > 0)
       || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -1104,6 +1252,19 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
       && (operation->iv_len == 0)) {
     return PSA_ERROR_BAD_STATE;
   }
+
+#if defined(PSA_WANT_ALG_CTR)  \
+  || defined(PSA_WANT_ALG_CFB) \
+  || defined(PSA_WANT_ALG_OFB)
+  block_t tmp_iv_block = block_t_convert(tmp_buf, 16);
+#endif
+#if defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)
+  block_t iv_block = block_t_convert(operation->iv, operation->iv_len);
+#endif
 
   // Figure out whether the operation is on a lagging or forward-looking cipher
   // Lagging: needs a full block of input data before being able to output
@@ -1128,6 +1289,10 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
   size_t actual_output_length = 0;
   *output_length = 0;
 
+  if ( input_length == 0 ) {
+    return PSA_SUCCESS;
+  }
+
   // We need to cache (not return) the whole last block for decryption with
   // padding, otherwise it won't be possible to remove a potential padding block
   // during finish.
@@ -1139,24 +1304,27 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
     if (cache_full_block
         && bytes_to_boundary == 16
         && operation->processed_length > 0) {
-      // Don't overwrite the streaming block if it's currently full.
-    } else {
-      if (input_length < bytes_to_boundary) {
-        memcpy(&operation->streaming_block[operation->processed_length % 16],
-               input,
-               input_length);
-        operation->processed_length += input_length;
-        *output_length = actual_output_length;
-        return PSA_SUCCESS;
-      }
+      // Don't overwrite the streaming block yet if it's currently full.
+    } else if (input_length < bytes_to_boundary) {
+      memcpy(&operation->streaming_block[operation->processed_length % 16],
+             input,
+             input_length);
+      operation->processed_length += input_length;
+      *output_length = actual_output_length;
+      return PSA_SUCCESS;
     }
-  }
 
-  // Early failure if output buffer is too small. Failing here prevents messing
-  // with the context, such that operation can be retried with larger output buffer
-  if (lagging) {
-    size_t output_blocks = ((input_length + operation->processed_length) / 16) - (operation->processed_length / 16);
-    if (output_size < output_blocks) {
+    // We know we'll be computing at least the completed streaming block
+    size_t output_blocks = 1;
+    // plus however many full blocks are left over after filling the stream buffer
+    output_blocks += (input_length - bytes_to_boundary) / 16;
+    // If we're caching and the sum of already-input and to-be-input data
+    // ends up at a block boundary, we won't be outputting the last block
+    if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
+      output_blocks -= 1;
+    }
+
+    if (output_size < (output_blocks * 16)) {
       return PSA_ERROR_BUFFER_TOO_SMALL;
     }
   } else {
@@ -1182,8 +1350,6 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
   }
 
   key = block_t_convert(operation->key, operation->key_len);
-  iv_block = block_t_convert(operation->iv, operation->iv_len);
-  tmp_iv_block = block_t_convert(tmp_buf, 16);
 
   if (bytes_to_boundary != 16) {
     // Read in up to full streaming input block.
@@ -1200,11 +1366,14 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
     }
     if (operation->direction == ENC) {
       switch (operation->alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
         case PSA_ALG_ECB_NO_PADDING:
           sx_ret = sx_aes_ecb_encrypt((const block_t*)&key,
                                       (const block_t*)&data_in,
                                       &data_out);
           break;
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
         case PSA_ALG_CTR:
           sx_ret = sx_aes_ctr_encrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1212,6 +1381,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
         case PSA_ALG_CFB:
           sx_ret = sx_aes_cfb_encrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1219,6 +1390,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
         case PSA_ALG_OFB:
           sx_ret = sx_aes_ofb_encrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1226,6 +1399,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
         case PSA_ALG_CBC_NO_PADDING:
           sx_ret = sx_aes_cbc_encrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1233,6 +1408,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &iv_block);
           break;
+#endif // PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
         case PSA_ALG_CBC_PKCS7:
           if (cache_full_block && (bytes_to_boundary == input_length)) {
             // Don't process the streaming block if there is no more input data
@@ -1245,14 +1422,20 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                &iv_block);
           }
           break;
+#endif // PSA_WANT_ALG_CBC_PKCS7
+        default:
+          return PSA_ERROR_BAD_STATE;
       }
     } else {
       switch (operation->alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
         case PSA_ALG_ECB_NO_PADDING:
           sx_ret = sx_aes_ecb_decrypt((const block_t*)&key,
                                       (const block_t*)&data_in,
                                       &data_out);
           break;
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
         case PSA_ALG_CTR:
           sx_ret = sx_aes_ctr_decrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1260,6 +1443,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
         case PSA_ALG_CFB:
           sx_ret = sx_aes_cfb_decrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1267,6 +1452,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
         case PSA_ALG_OFB:
           sx_ret = sx_aes_ofb_decrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1274,6 +1461,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &tmp_iv_block);
           break;
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING)
         case PSA_ALG_CBC_NO_PADDING:
           sx_ret = sx_aes_cbc_decrypt_update((const block_t*)&key,
                                              (const block_t*)&data_in,
@@ -1281,6 +1470,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                              (const block_t*)&iv_block,
                                              &iv_block);
           break;
+#endif // PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
         case PSA_ALG_CBC_PKCS7:
           if (cache_full_block && (bytes_to_boundary == input_length)) {
             // Don't process the streaming block if there is no more input data
@@ -1293,6 +1484,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                &iv_block);
           }
           break;
+#endif // PSA_WANT_ALG_CBC_PKCS7
+        default:
+          return PSA_ERROR_BAD_STATE;
       }
     }
     status = cryptoacc_management_release();
@@ -1359,11 +1553,14 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
 
       if (operation->direction == ENC) {
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
           case PSA_ALG_ECB_NO_PADDING:
             sx_ret = sx_aes_ecb_encrypt((const block_t*)&key,
                                         (const block_t*)&data_in,
                                         &data_out);
             break;
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
           case PSA_ALG_CTR:
             sx_ret = sx_aes_ctr_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1371,6 +1568,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
           case PSA_ALG_CFB:
             sx_ret = sx_aes_cfb_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1378,6 +1577,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
           case PSA_ALG_OFB:
             sx_ret = sx_aes_ofb_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1385,6 +1586,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
           case PSA_ALG_CBC_NO_PADDING:
           // fall through
           case PSA_ALG_CBC_PKCS7:
@@ -1394,14 +1597,20 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CBC_NO_PADDING || PSA_WANT_ALG_CBC_PKCS7
+          default:
+            return PSA_ERROR_BAD_STATE;
         }
       } else {
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING)
           case PSA_ALG_ECB_NO_PADDING:
             sx_ret = sx_aes_ecb_decrypt((const block_t*)&key,
                                         (const block_t*)&data_in,
                                         &data_out);
             break;
+#endif // PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR)
           case PSA_ALG_CTR:
             sx_ret = sx_aes_ctr_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1409,6 +1618,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
           case PSA_ALG_CFB:
             sx_ret = sx_aes_cfb_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1416,6 +1627,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
           case PSA_ALG_OFB:
             sx_ret = sx_aes_ofb_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1423,6 +1636,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_ALG_CBC_NO_PADDING) || defined(PSA_WANT_ALG_CBC_PKCS7)
           case PSA_ALG_CBC_NO_PADDING:
           // fall through
           case PSA_ALG_CBC_PKCS7:
@@ -1432,6 +1647,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &iv_block);
             break;
+#endif // PSA_WANT_ALG_CBC_NO_PADDING || PSA_WANT_ALG_CBC_PKCS7
+          default:
+            return PSA_ERROR_BAD_STATE;
         }
       }
       status = cryptoacc_management_release();
@@ -1451,6 +1669,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
   // Process final block.
   if (input_length > 0) {
     if (!lagging) {
+#if defined(PSA_WANT_ALG_CTR) || defined(PSA_WANT_ALG_CFB) || defined(PSA_WANT_ALG_OFB)
       data_in = block_t_convert(input, 16);
       data_out = block_t_convert(operation->streaming_block, 16);
 
@@ -1460,6 +1679,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
       }
       if (operation->direction == ENC) {
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_CTR)
           case PSA_ALG_CTR:
             sx_ret = sx_aes_ctr_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1467,6 +1687,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
           case PSA_ALG_CFB:
             sx_ret = sx_aes_cfb_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1474,6 +1696,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
           case PSA_ALG_OFB:
             sx_ret = sx_aes_ofb_encrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1481,9 +1705,13 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_OFB
+          default:
+            return PSA_ERROR_BAD_STATE;
         }
       } else {
         switch (operation->alg) {
+#if defined(PSA_WANT_ALG_CTR)
           case PSA_ALG_CTR:
             sx_ret = sx_aes_ctr_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1491,6 +1719,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_ALG_CFB)
           case PSA_ALG_CFB:
             sx_ret = sx_aes_cfb_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1498,6 +1728,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_ALG_OFB)
           case PSA_ALG_OFB:
             sx_ret = sx_aes_ofb_decrypt_update((const block_t*)&key,
                                                (const block_t*)&data_in,
@@ -1505,6 +1737,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
                                                (const block_t*)&iv_block,
                                                &tmp_iv_block);
             break;
+#endif // PSA_WANT_ALG_OFB
+          default:
+            return PSA_ERROR_BAD_STATE;
         }
       }
       status = cryptoacc_management_release();
@@ -1519,6 +1754,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
 
       actual_output_length += input_length;
       operation->processed_length += input_length;
+#else
+      return PSA_ERROR_BAD_STATE;
+#endif // PSA_WANT_ALG_CTR || PSA_WANT_ALG_CFB || PSA_WANT_ALG_OFB
     } else {
       if ((input_length >= 16 && !cache_full_block)
           || (input_length > 16 && cache_full_block)) {
@@ -1534,6 +1772,19 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
 
   *output_length = actual_output_length;
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_cipher_operation_t *operation,
@@ -1541,12 +1792,23 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
                                                      size_t output_size,
                                                      size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   psa_status_t status = PSA_ERROR_GENERIC_ERROR;
+
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
   uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
   block_t key;
   block_t iv_block;
   block_t data_in;
   block_t data_out;
+#endif // PSA_WANT_ALG_CBC_PKCS7
 
   // Argument check.
   if (operation == NULL) {
@@ -1555,6 +1817,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
   }
 
   switch (operation->alg) {
+#if defined(PSA_WANT_ALG_ECB_NO_PADDING) || defined(PSA_WANT_ALG_CBC_NO_PADDING)
     // Blocksize-only modes without padding.
     case PSA_ALG_ECB_NO_PADDING:
     case PSA_ALG_CBC_NO_PADDING:
@@ -1566,6 +1829,8 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
       }
       *output_length = 0;
       break;
+#endif // PSA_WANT_ALG_ECB_NO_PADDING || PSA_WANT_ALG_CBC_NO_PADDING
+#if defined(PSA_WANT_ALG_CTR) || defined(PSA_WANT_ALG_CFB) || defined(PSA_WANT_ALG_OFB)
     // Stream cipher modes.
     case PSA_ALG_CTR:
     case PSA_ALG_CFB:
@@ -1573,14 +1838,13 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
       status = PSA_SUCCESS;
       *output_length = 0;
       break;
+#endif // PSA_WANT_ALG_*FB
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
     // Padding mode.
     case PSA_ALG_CBC_PKCS7:
-      if (output == NULL
+      if ((output == NULL && output_size > 0)
           || output_length == NULL) {
         return PSA_ERROR_INVALID_ARGUMENT;
-      }
-      if (output_size < 16) {
-        return PSA_ERROR_BUFFER_TOO_SMALL;
       }
 
       key = block_t_convert(operation->key, operation->key_len);
@@ -1594,6 +1858,13 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
       }
 
       if (operation->direction == ENC) {
+        if (output_size < 16) {
+          status = cryptoacc_management_release();
+          if (status == PSA_SUCCESS) {
+            status = PSA_ERROR_BUFFER_TOO_SMALL;
+          }
+          break;
+        }
         size_t padding_bytes = 16 - (operation->processed_length % 16);
         memset(&operation->streaming_block[16 - padding_bytes],
                padding_bytes,
@@ -1638,6 +1909,11 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
         size_t invalid_padding = 0;
         size_t padding_bytes = out_buf[15];
 
+        if (output_size < 16 - padding_bytes) {
+          status = PSA_ERROR_BUFFER_TOO_SMALL;
+          break;
+        }
+
         // Check that the last padding byte is valid (in the range 0x1 to 0x10).
         // Note that the below checks are valid for both partial block padding
         // and complete padding blocks.
@@ -1664,10 +1940,16 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
         }
       }
       break;
+#endif // PSA_WANT_ALG_CBC_PKCS7
     default:
       status = PSA_ERROR_BAD_STATE;
       break;
   }
+
+#if !defined(PSA_WANT_ALG_CBC_PKCS7)
+  (void)output;
+  (void)output_size;
+#endif // PSA_WANT_ALG_CBC_PKCS7
 
   if (status != PSA_SUCCESS) {
     *output_length = 0;
@@ -1677,16 +1959,43 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
   memset(operation, 0, sizeof(sli_cryptoacc_transparent_cipher_operation_t));
 
   return status;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
+
+  (void)operation;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_cryptoacc_transparent_cipher_abort(sli_cryptoacc_transparent_cipher_operation_t *operation)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
+
   if (operation != NULL) {
     // Wipe context.
     memset(operation, 0, sizeof(*operation));
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_AES
 }
 
 #endif // defined(CRYPTOACC_PRESENT)

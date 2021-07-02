@@ -51,7 +51,7 @@ void halInternalEnableWatchDog(void)
   CMU_OscillatorEnable(cmuOsc_LFRCO, true, true);
 #endif
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   CMU_ClockEnable(cmuClock_WDOG0, true);
 #endif
 

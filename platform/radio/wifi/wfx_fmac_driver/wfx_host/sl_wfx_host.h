@@ -17,7 +17,7 @@
 #define SL_WFX_HOST_H
 
 #ifndef SL_CATALOG_WFX_BOARD_PRESENT
-#error "WFX Board component (BRD8022A or BRD8023A) not installed"
+#warning "WFX Board component (BRD8022A, BRD8023A, or BRD4321A) not installed"
 #endif
 
 #include "sl_wfx.h"
@@ -50,6 +50,21 @@ typedef struct __attribute__((__packed__)) scan_result_list_s {
   uint16_t rcpi;
 } scan_result_list_t;
 
+/* Packet Queue */
+typedef struct sl_wfx_packet_queue_item_t{
+  struct sl_wfx_packet_queue_item_t *next;
+  sl_wfx_interface_t interface;
+  uint32_t data_length;
+  sl_wfx_send_frame_req_t buffer;
+}sl_wfx_packet_queue_item_t;
+
+/* Packet Queue */
+typedef struct {
+  sl_wfx_packet_queue_item_t *head_ptr;
+  sl_wfx_packet_queue_item_t *tail_ptr;
+}sl_wfx_packet_queue_t;
+
 extern OS_SEM wfx_wakeup_sem;
+extern OS_SEM wfx_init_sem;
 
 #endif

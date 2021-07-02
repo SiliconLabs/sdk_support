@@ -45,21 +45,9 @@
 #include "mbedtls/cmac.h"
 #include "mbedtls/platform_util.h"
 #include "mbedtls/error.h"
+#include "mbedtls/platform.h"
 
 #include <string.h>
-
-
-#if defined(MBEDTLS_PLATFORM_C)
-#include "mbedtls/platform.h"
-#else
-#include <stdlib.h>
-#define mbedtls_calloc     calloc
-#define mbedtls_free       free
-#if defined(MBEDTLS_SELF_TEST)
-#include <stdio.h>
-#define mbedtls_printf     printf
-#endif /* MBEDTLS_SELF_TEST */
-#endif /* MBEDTLS_PLATFORM_C */
 
 #if !defined(MBEDTLS_CMAC_ALT) || defined(MBEDTLS_SELF_TEST)
 
@@ -420,7 +408,7 @@ exit:
  */
 int mbedtls_aes_cmac_prf_128( const unsigned char *key, size_t key_length,
                               const unsigned char *input, size_t in_len,
-                              unsigned char *output )
+                              unsigned char output[16] )
 {
     int ret = MBEDTLS_ERR_ERROR_CORRUPTION_DETECTED;
     const mbedtls_cipher_info_t *cipher_info;
@@ -543,9 +531,6 @@ static const unsigned char aes_128_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
     }
 };
 
-#if defined(SILABS_SUPPORT) \
-    && (defined(CRYPTO_PRESENT) || defined(AES_PRESENT))
-#else
 /* CMAC-AES192 Test Data */
 static const unsigned char aes_192_key[24] = {
     0x8e, 0x73, 0xb0, 0xf7,     0xda, 0x0e, 0x64, 0x52,
@@ -586,12 +571,7 @@ static const unsigned char aes_192_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
         0x4d, 0x77, 0x58, 0x96,     0x59, 0xf3, 0x9a, 0x11
     }
 };
-#endif /* SILABS_SUPPORT && (CRYPTO_PRESENT || AES_PRESENT) */
 
-#if defined(SILABS_SUPPORT) \
-    && defined(AES_PRESENT) \
-    && !defined(AES_CTRL_AES256)
-#else
 /* CMAC-AES256 Test Data */
 static const unsigned char aes_256_key[32] = {
     0x60, 0x3d, 0xeb, 0x10,     0x15, 0xca, 0x71, 0xbe,
@@ -633,14 +613,9 @@ static const unsigned char aes_256_expected_result[NB_CMAC_TESTS_PER_KEY][MBEDTL
         0x69, 0x6a, 0x2c, 0x05,     0x6c, 0x31, 0x54, 0x10
     }
 };
-#endif /* MBEDTLS_AES_C && AES_PRESENT && !AES_CTRL_AES256 */
-
 #endif /* MBEDTLS_AES_C */
 
-#if defined(MBEDTLS_DES_C) \
-    && (defined(SILABS_SUPPORT) && defined(MBEDTLS_CMAC_ALT))
-    /* 3DES not supported by the ALT implementation provided by Silabs */
-#elif defined(MBEDTLS_DES_C)
+#if defined(MBEDTLS_DES_C)
 /* Truncation point of message for 3DES CMAC tests  */
 static const unsigned int des3_message_lengths[NB_CMAC_TESTS_PER_KEY] = {
     0,
@@ -725,7 +700,7 @@ static const unsigned char des3_3key_expected_result[NB_CMAC_TESTS_PER_KEY][MBED
     }
 };
 
-#endif /* MBEDTLS_DES_C && SILABS_SUPPORT && MBEDTLS_CMAC_ALT */
+#endif /* MBEDTLS_DES_C */
 
 #if defined(MBEDTLS_AES_C)
 /* AES AES-CMAC-PRF-128 Test Data */
@@ -806,6 +781,18 @@ static int cmac_test_subkeys( int verbose,
         if( ( ret = mbedtls_cipher_setkey( &ctx, key, keybits,
                                        MBEDTLS_ENCRYPT ) ) != 0 )
         {
+            /* When CMAC is implemented by an alternative implementation, or
+             * the underlying primitive itself is implemented alternatively,
+             * AES-192 may be unavailable. This should not cause the selftest
+             * function to fail. */
+            if( ( ret == MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED ||
+                  ret == MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE ) &&
+                  cipher_type == MBEDTLS_CIPHER_AES_192_ECB ) {
+                if( verbose != 0 )
+                    mbedtls_printf( "skipped\n" );
+                goto next_test;
+            }
+
             if( verbose != 0 )
                 mbedtls_printf( "test execution failed\n" );
 
@@ -833,6 +820,7 @@ static int cmac_test_subkeys( int verbose,
         if( verbose != 0 )
             mbedtls_printf( "passed\n" );
 
+next_test:
         mbedtls_cipher_free( &ctx );
     }
 
@@ -877,6 +865,19 @@ static int cmac_test_wth_cipher( int verbose,
         if( ( ret = mbedtls_cipher_cmac( cipher_info, key, keybits, messages,
                                          message_lengths[i], output ) ) != 0 )
         {
+            /* When CMAC is implemented by an alternative implementation, or
+             * the underlying primitive itself is implemented alternatively,
+             * AES-192 and/or 3DES may be unavailable. This should not cause
+             * the selftest function to fail. */
+            if( ( ret == MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED ||
+                  ret == MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE ) &&
+                ( cipher_type == MBEDTLS_CIPHER_AES_192_ECB ||
+                  cipher_type == MBEDTLS_CIPHER_DES_EDE3_ECB ) ) {
+                if( verbose != 0 )
+                    mbedtls_printf( "skipped\n" );
+                continue;
+            }
+
             if( verbose != 0 )
                 mbedtls_printf( "failed\n" );
             goto exit;
@@ -960,14 +961,6 @@ int mbedtls_cmac_self_test( int verbose )
     }
 
     /* AES-192 */
-
-    /* Cipher with 192 bit key is not supported by the ALT implementation
-     * provided by Silabs on Series-1 devices
-     */
-#if defined(SILABS_SUPPORT) \
-    && (defined(CRYPTO_PRESENT) || defined(AES_PRESENT))
-    mbedtls_printf( "  CMAC with AES-192 skipped\n" );
-#else
     if( ( ret = cmac_test_subkeys( verbose,
                                    "AES 192",
                                    aes_192_key,
@@ -993,13 +986,7 @@ int mbedtls_cmac_self_test( int verbose )
     {
         return( ret );
     }
-#endif /* SILABS_SUPPORT && (CRYPTO_PRESENT || AES_PRESENT) */
 
-#if defined(SILABS_SUPPORT) \
-    && defined(AES_PRESENT) \
-    && !defined(AES_CTRL_AES256)
-    mbedtls_printf( "  CMAC with AES-256 skipped\n" );
-#else
     /* AES-256 */
     if( ( ret = cmac_test_subkeys( verbose,
                                    "AES 256",
@@ -1026,15 +1013,9 @@ int mbedtls_cmac_self_test( int verbose )
     {
         return( ret );
     }
-#endif
-#endif /* MBEDTLS_AES_C && AES_PRESENT && !AES_CTRL_AES256 */
+#endif /* MBEDTLS_AES_C */
 
-#if defined(MBEDTLS_DES_C) \
-    && (defined(SILABS_SUPPORT) && defined(MBEDTLS_CMAC_ALT))
-    /* 3DES not supported by the ALT implementation provided by Silabs
-     */
-    mbedtls_printf( "  CMAC with 3DES skipped\n" );
-#elif defined(MBEDTLS_DES_C)
+#if defined(MBEDTLS_DES_C)
     /* 3DES 2 key */
     if( ( ret = cmac_test_subkeys( verbose,
                                    "3DES 2 key",
@@ -1088,7 +1069,7 @@ int mbedtls_cmac_self_test( int verbose )
     {
         return( ret );
     }
-#endif /* MBEDTLS_DES_C && SILABS_SUPPORT && MBEDTLS_CMAC_ALT */
+#endif /* MBEDTLS_DES_C */
 
 #if defined(MBEDTLS_AES_C)
     if( ( ret = test_aes128_cmac_prf( verbose ) ) != 0 )

@@ -3,7 +3,7 @@
  * @brief EFR32FG23 GPIO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -251,7 +251,7 @@ typedef struct {
   GPIO_EUSARTROUTE_TypeDef  EUSARTROUTE[3U];         /**< eusart0 DBUS config registers                      */
   GPIO_FRCROUTE_TypeDef     FRCROUTE;                /**< frc DBUS config registers                          */
   GPIO_I2CROUTE_TypeDef     I2CROUTE[2U];            /**< i2c0 DBUS config registers                         */
-  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE;            /**< keypad DBUS config registers                       */
+  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE;            /**< keyscan DBUS config registers                      */
   GPIO_LESENSEROUTE_TypeDef LESENSEROUTE;            /**< lesense DBUS config registers                      */
   GPIO_LETIMERROUTE_TypeDef LETIMERROUTE;            /**< letimer DBUS config registers                      */
   GPIO_MODEMROUTE_TypeDef   MODEMROUTE;              /**< modem DBUS config registers                        */
@@ -302,7 +302,7 @@ typedef struct {
   GPIO_EUSARTROUTE_TypeDef  EUSARTROUTE_SET[3U];     /**< eusart0 DBUS config registers                      */
   GPIO_FRCROUTE_TypeDef     FRCROUTE_SET;            /**< frc DBUS config registers                          */
   GPIO_I2CROUTE_TypeDef     I2CROUTE_SET[2U];        /**< i2c0 DBUS config registers                         */
-  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_SET;        /**< keypad DBUS config registers                       */
+  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_SET;        /**< keyscan DBUS config registers                      */
   GPIO_LESENSEROUTE_TypeDef LESENSEROUTE_SET;        /**< lesense DBUS config registers                      */
   GPIO_LETIMERROUTE_TypeDef LETIMERROUTE_SET;        /**< letimer DBUS config registers                      */
   GPIO_MODEMROUTE_TypeDef   MODEMROUTE_SET;          /**< modem DBUS config registers                        */
@@ -353,7 +353,7 @@ typedef struct {
   GPIO_EUSARTROUTE_TypeDef  EUSARTROUTE_CLR[3U];     /**< eusart0 DBUS config registers                      */
   GPIO_FRCROUTE_TypeDef     FRCROUTE_CLR;            /**< frc DBUS config registers                          */
   GPIO_I2CROUTE_TypeDef     I2CROUTE_CLR[2U];        /**< i2c0 DBUS config registers                         */
-  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_CLR;        /**< keypad DBUS config registers                       */
+  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_CLR;        /**< keyscan DBUS config registers                      */
   GPIO_LESENSEROUTE_TypeDef LESENSEROUTE_CLR;        /**< lesense DBUS config registers                      */
   GPIO_LETIMERROUTE_TypeDef LETIMERROUTE_CLR;        /**< letimer DBUS config registers                      */
   GPIO_MODEMROUTE_TypeDef   MODEMROUTE_CLR;          /**< modem DBUS config registers                        */
@@ -404,7 +404,7 @@ typedef struct {
   GPIO_EUSARTROUTE_TypeDef  EUSARTROUTE_TGL[3U];     /**< eusart0 DBUS config registers                      */
   GPIO_FRCROUTE_TypeDef     FRCROUTE_TGL;            /**< frc DBUS config registers                          */
   GPIO_I2CROUTE_TypeDef     I2CROUTE_TGL[2U];        /**< i2c0 DBUS config registers                         */
-  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_TGL;        /**< keypad DBUS config registers                       */
+  GPIO_KEYSCANROUTE_TypeDef KEYSCANROUTE_TGL;        /**< keyscan DBUS config registers                      */
   GPIO_LESENSEROUTE_TypeDef LESENSEROUTE_TGL;        /**< lesense DBUS config registers                      */
   GPIO_LETIMERROUTE_TypeDef LETIMERROUTE_TGL;        /**< letimer DBUS config registers                      */
   GPIO_MODEMROUTE_TypeDef   MODEMROUTE_TGL;          /**< modem DBUS config registers                        */

@@ -10,6 +10,7 @@ source:
   - path: util/third_party/crypto/mbedtls/library/oid.c
   - path: util/third_party/crypto/mbedtls/library/pk.c
   - path: util/third_party/crypto/mbedtls/library/pkparse.c
+  - path: util/third_party/crypto/mbedtls/library/pkwrite.c
   - path: util/third_party/crypto/mbedtls/library/pk_wrap.c
   - path: util/third_party/crypto/mbedtls/library/x509.c
   - path: util/third_party/crypto/mbedtls/library/x509_create.c
@@ -19,43 +20,61 @@ source:
   - path: util/third_party/crypto/mbedtls/library/x509write_crt.c
   - path: util/third_party/crypto/mbedtls/library/x509write_csr.c
   - path: util/third_party/crypto/mbedtls/library/des.c
-  - path: util/third_party/crypto/mbedtls/library/rsa.c
-  - path: util/third_party/crypto/mbedtls/library/rsa_internal.c
-include:
-  - path: util/third_party/crypto/mbedtls/include
-    file_list:
-      - path: mbedtls/oid.h
-      - path: mbedtls/pk.h
-      - path: mbedtls/pk_internal.h
-      - path: mbedtls/x509.h
-      - path: mbedtls/x509_crl.h
-      - path: mbedtls/x509_crt.h
-      - path: mbedtls/x509_csr.h
-      - path: mbedtls/des.h
-      - path: mbedtls/rsa.h
 provides:
   - name: mbedtls_x509
 requires:
-  - name: mbedtls_mpi
+  - name: mbedtls_ecc
+  - name: mbedtls_ecdsa
+    condition: [psa_crypto_ecdsa]
+  - name: mbedtls_ecc_secp192r1
+    condition: [psa_crypto_ecc_secp192r1]
+  - name: mbedtls_ecc_secp224r1
+    condition: [psa_crypto_ecc_secp224r1]
+  - name: mbedtls_ecc_secp256r1
+    condition: [psa_crypto_ecc_secp256r1]
+  - name: mbedtls_ecc_secp384r1
+    condition: [psa_crypto_ecc_secp384r1]
+  - name: mbedtls_ecc_secp521r1
+    condition: [psa_crypto_ecc_secp521r1]
+  - name: mbedtls_ecc_curve25519
+    condition: [psa_crypto_ecc_curve25519]
+  - name: mbedtls_sha1
+    condition: [psa_crypto_sha1]
+  - name: mbedtls_sha256
+    condition: [psa_crypto_sha224]
+  - name: mbedtls_sha256
+    condition: [psa_crypto_sha256]
+  - name: mbedtls_sha512
+    condition: [psa_crypto_sha384]
+  - name: mbedtls_sha512
+    condition: [psa_crypto_sha512]
   - name: mbedtls_asn1
-  - name: mbedtls_pem
   - name: mbedtls_hash
+  - name: mbedtls_pem
   - name: mbedtls_core
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_X509_USE_C
   - name: mbedtls_config
+    value: MBEDTLS_X509_CREATE_C
+  - name: mbedtls_config
     value: MBEDTLS_X509_CRT_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_X509_CRT_WRITE_C
   - name: mbedtls_config
     value: MBEDTLS_X509_CRL_PARSE_C
   - name: mbedtls_config
     value: MBEDTLS_X509_CSR_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_X509_CSR_WRITE_C
   - name: mbedtls_config
     value: MBEDTLS_OID_C
   - name: mbedtls_config
     value: MBEDTLS_PK_C
   - name: mbedtls_config
     value: MBEDTLS_PK_PARSE_C
+  - name: mbedtls_config
+    value: MBEDTLS_PK_WRITE_C
 documentation:
   docset: mbed-tls
   document: group-x509-module

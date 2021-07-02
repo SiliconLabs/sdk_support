@@ -185,6 +185,8 @@ extern "C" {
 
 #endif // !defined(__GNUC__)
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
 /** @brief
  *    Macro for marking deprecated functions
  *
@@ -200,6 +202,14 @@ extern "C" {
 #else
 #define SL_DEPRECATED_API_SDK_3_0 __attribute__ ((deprecated))
 #endif
+
+#ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_2
+#define SL_DEPRECATED_API_SDK_3_2
+#else
+#define SL_DEPRECATED_API_SDK_3_2 __attribute__ ((deprecated))
+#endif
+
+/** @endcond */
 
 /***************************************************************************//**
  * @brief

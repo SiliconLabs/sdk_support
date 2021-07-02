@@ -79,7 +79,7 @@ __STATIC_INLINE
 sl_status_t se_manager_osal_init_completion(se_manager_osal_completion_t *p_comp)
 {
   *p_comp = 0;
-  return (0);
+  return SL_STATUS_OK;
 }
 
 /// Free a completion object.
@@ -87,7 +87,7 @@ __STATIC_INLINE
 sl_status_t se_manager_osal_free_completion(se_manager_osal_completion_t *p_comp)
 {
   *p_comp = 0;
-  return (0);
+  return SL_STATUS_OK;
 }
 
 /// Wait for completion event.
@@ -118,7 +118,7 @@ se_manager_osal_wait_completion(se_manager_osal_completion_t *p_comp, int ticks)
     }
   }
 
-  return(ret);
+  return ret;
 }
 
 /// Signal completion event.
@@ -126,7 +126,7 @@ __STATIC_INLINE
 sl_status_t se_manager_osal_complete(se_manager_osal_completion_t* p_comp)
 {
   *p_comp = 1;
-  return (0);
+  return SL_STATUS_OK;
 }
 
 #ifdef __cplusplus

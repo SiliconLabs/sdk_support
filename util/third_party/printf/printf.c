@@ -35,6 +35,12 @@
 
 #include "printf.h"
 
+// __copy__ attribute was introduced in GCC9
+#if defined(__GNUC__) && __GNUC__ >= 9
+#define __copy(symbol) __attribute__((__copy__(symbol)))
+#else
+#define __copy(symbol)
+#endif
 
 // define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the
 // printf_config.h header file
@@ -891,7 +897,7 @@ int snprintf(char* buffer, size_t count, const char* format, ...)
 
 
 #if (defined(__GNUC__) && !defined(__clang__))
-int sniprintf (char *, size_t, const char *, ...) __attribute__ ((__alias__("snprintf")));
+int sniprintf (char *, size_t, const char *, ...) __copy(snprintf) __attribute__ ((__alias__("snprintf")));
 int puts(const char* s)
 {
   // handle calls to printf("..."); here

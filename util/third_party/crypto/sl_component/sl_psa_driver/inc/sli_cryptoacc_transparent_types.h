@@ -74,15 +74,22 @@ typedef struct {
   size_t processed_length;            ///< Number of bytes processed
 } sli_cryptoacc_transparent_cipher_operation_t;
 
-typedef struct {
-  psa_algorithm_t alg;                     ///< MAC type
-  uint8_t key[32];                         ///< key buffer
-  block_t key_sxblk;                       ///< SX block descriptor for key buffer
-  size_t  key_len;                         ///< key length
-  uint8_t current_block[16];               ///< current and potentially last block
-  size_t  current_block_len;               ///< current number of bytes in current block
-  uint8_t cmac_ctx[BLK_CIPHER_CTX_SIZE];   ///< CMAC state context
-  block_t cmac_ctx_sxblk;                  ///< SX block descriptor for CMAC state context
+typedef union {
+  struct {
+    psa_algorithm_t alg;                    ///< MAC type
+    uint8_t key[32];                        ///< key buffer
+    size_t  key_len;                        ///< key length
+    uint8_t current_block[16];              ///< current and potentially last block
+    size_t  current_block_len;              ///< current number of bytes in current block
+    uint8_t cmac_ctx[BLK_CIPHER_CTX_SIZE];  ///< CMAC state context
+  } cipher_mac;
+  #if defined(PSA_WANT_ALG_HMAC)
+  struct {
+    psa_algorithm_t alg;                    ///< HMAC type
+    sli_cryptoacc_transparent_hash_operation_t hash_ctx;  ///< Hash context for multipart HMAC
+    uint8_t opad[64];                       ///< opad for use during finalisation
+  } hmac;
+  #endif
 } sli_cryptoacc_transparent_mac_operation_t;
 
 typedef struct { // Will possibly require an update once multi-part is implemented.

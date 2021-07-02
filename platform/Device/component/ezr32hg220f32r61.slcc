@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EZR32HG220F32R61
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EZR32HG/Source/system_ezr32hg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EZR32HG/Source/IAR/startup_ezr32hg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EZR32HG/Source/GCC/startup_ezr32hg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EZR32HG/Source/ARM/startup_ezr32hg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: ezr32hg220f32r61.h
@@ -59,6 +69,8 @@
     - path: ezr32hg_wdog.h
     - path: system_ezr32hg.h
     path: platform/Device/SiliconLabs/EZR32HG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: ezr32hg220f32r61
   - name: device
@@ -133,7 +145,6 @@
     value: 2048
 - tag:
   - device:opn:ezr32hg220f32r61g
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: ezr32hg220f32r61g

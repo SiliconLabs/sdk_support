@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager key handling.
+ * @brief Silicon Labs Secure Engine Manager key handling.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -50,7 +50,7 @@ extern "C" {
 /***************************************************************************//**
  * \addtogroup sl_se_manager_key_handling Key handling
  *
- * \brief Secure Element key handling API.
+ * \brief Secure Engine key handling API.
  *
  * \details
  *   API for using cryptographic keys with the SE. Contains functionality to

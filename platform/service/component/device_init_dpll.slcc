@@ -4,7 +4,7 @@ package: platform
 description: >
   Device init for DPLL configures and enables the phase-lock loop for the main
   HFRCO oscillator, using HFXO, LFXO or CLKIN0 as the reference clock.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:
@@ -17,6 +17,9 @@ config_file:
   - path: config/s2/sdid210/sl_device_init_dpll_config.h
     file_id: device_init_dpll_config
     condition: [device_sdid_210]
+  - path: config/s2/sdid215/sl_device_init_dpll_config.h
+    file_id: device_init_dpll_config
+    condition: [device_sdid_215]
 include:
   - path: inc
     file_list:

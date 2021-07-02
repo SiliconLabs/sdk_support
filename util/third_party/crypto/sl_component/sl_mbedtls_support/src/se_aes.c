@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief AES abstraction based on Secure Element
+ * @brief AES abstraction based on Secure Engine
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -30,8 +30,8 @@
 
 /*
  * This file includes alternative plugin implementations of various
- * functions in aes.c using the Secure Element accelerator incorporated
- * in Series-2 devices with Secure Element from Silicon Laboratories.
+ * functions in aes.c using the Secure Engine accelerator incorporated
+ * in Series-2 devices with Secure Engine from Silicon Laboratories.
  */
 
 /**
@@ -55,7 +55,6 @@
 #if defined(SEMAILBOX_PRESENT)
 
 #include "em_se.h"
-#include "em_core.h"
 #include "se_management.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
@@ -138,8 +137,10 @@ int mbedtls_aes_xts_setkey_enc(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
@@ -165,11 +166,14 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
-  AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(key != NULL);
+  if (ctx == NULL || key == NULL) {
+    return MBEDTLS_ERR_AES_BAD_INPUT_DATA;
+  }
 
   ret = mbedtls_aes_xts_decode_keys(key, keybits, &key1, &key1bits,
                                     &key2, &key2bits);
@@ -186,51 +190,6 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
   /* Set crypt key for decryption. */
   return mbedtls_aes_setkey_dec(&ctx->crypt, key1, key1bits);
 }
-
-#if defined(MBEDTLS_CIPHER_MODE_OFB)
-/*
- * AES-OFB (Output Feedback Mode) buffer encryption/decryption
- */
-int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
-                          size_t length,
-                          size_t *iv_off,
-                          unsigned char iv[16],
-                          const unsigned char *input,
-                          unsigned char *output)
-{
-  int ret = 0;
-  size_t n;
-
-  AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(iv_off != NULL);
-  AES_VALIDATE_RET(iv != NULL);
-  AES_VALIDATE_RET(input != NULL);
-  AES_VALIDATE_RET(output != NULL);
-
-  n = *iv_off;
-
-  if ( n > 15 ) {
-    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
-  }
-
-  while ( length-- ) {
-    if ( n == 0 ) {
-      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
-      if ( ret != 0 ) {
-        goto exit;
-      }
-    }
-    *output++ =  *input++ ^ iv[n];
-
-    n = (n + 1) & 0x0F;
-  }
-
-  *iv_off = n;
-
-  exit:
-  return(ret);
-}
-#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 /* Endianess with 64 bits values */
 #ifndef GET_UINT64_LE
@@ -626,13 +585,16 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
       }
 
       if ( command_status != SE_RESPONSE_OK ) {
-        return (int)command_status;
+        goto exit;
       }
 
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Need to update the IV but don't have a full block of input to pass to the SE
-          mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+          int status = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+          if (status != 0) {
+            return status;
+          }
         }
         /* Save remainder to iv */
         if ( mode == MBEDTLS_AES_ENCRYPT ) {
@@ -652,6 +614,7 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
     *iv_off = n;
   }
 
+  exit:
   if ( command_status == SE_RESPONSE_OK ) {
     return 0;
   } else {
@@ -774,13 +737,19 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       }
 
       if ( command_status != SE_RESPONSE_OK ) {
-        return (int)command_status;
+        goto exit;
       }
 
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Get a new stream block
-          mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, nonce_counter, stream_block);
+          int status = mbedtls_aes_crypt_ecb(ctx,
+                                             MBEDTLS_AES_ENCRYPT,
+                                             nonce_counter,
+                                             stream_block);
+          if (status != 0) {
+            return status;
+          }
           // increment nonce counter...
           for (size_t i = 0; i < 16; i++) {
             nonce_counter[15 - i] = nonce_counter[15 - i] + 1;
@@ -801,6 +770,7 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
     *nc_off = n;
   }
 
+  exit:
   if ( command_status == SE_RESPONSE_OK ) {
     return 0;
   } else {
@@ -808,6 +778,51 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
   }
 }
 #endif /* MBEDTLS_CIPHER_MODE_CTR */
+
+#if defined(MBEDTLS_CIPHER_MODE_OFB)
+/*
+ * AES-OFB (Output Feedback Mode) buffer encryption/decryption
+ */
+int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
+                          size_t length,
+                          size_t *iv_off,
+                          unsigned char iv[16],
+                          const unsigned char *input,
+                          unsigned char *output)
+{
+  int ret = 0;
+  size_t n;
+
+  AES_VALIDATE_RET(ctx != NULL);
+  AES_VALIDATE_RET(iv_off != NULL);
+  AES_VALIDATE_RET(iv != NULL);
+  AES_VALIDATE_RET(input != NULL);
+  AES_VALIDATE_RET(output != NULL);
+
+  n = *iv_off;
+
+  if ( n > 15 ) {
+    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
+  }
+
+  while ( length-- ) {
+    if ( n == 0 ) {
+      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+      if ( ret != 0 ) {
+        goto exit;
+      }
+    }
+    *output++ =  *input++ ^ iv[n];
+
+    n = (n + 1) & 0x0F;
+  }
+
+  *iv_off = n;
+
+  exit:
+  return(ret);
+}
+#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 #endif /* SEMAILBOX_PRESENT */
 

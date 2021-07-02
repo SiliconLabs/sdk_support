@@ -47,6 +47,7 @@ uint32_t dataReqLatencyUs = 0U;
 
 void ieee802154Enable(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
@@ -59,7 +60,8 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
     // RX in time
     .txToRx = 192 - 10,
     .rxSearchTimeout = 0,
-    .txToRxSearchTimeout = 0
+    .txToRxSearchTimeout = 0,
+    .txToTx = 0,
   };
 
   RAIL_IEEE802154_Config_t config = {
@@ -94,8 +96,8 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
     return;
   }
 
-  uint16_t timing = sl_cli_get_argument_uint16(args, 1);
-  if (timing > 13000) {
+  RAIL_TransitionTime_t timing = (RAIL_TransitionTime_t)sl_cli_get_argument_uint16(args, 1);
+  if (timing > RAIL_MAXIMUM_TRANSITION_US) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x21, "Invalid idle timing.");
     return;
   } else {
@@ -103,17 +105,17 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
     config.timings.idleToRx = timing;
   }
 
-  timing = sl_cli_get_argument_uint16(args, 2);
-  if (timing > 13000) {
+  timing = (RAIL_TransitionTime_t)sl_cli_get_argument_uint16(args, 2);
+  if (timing > RAIL_MAXIMUM_TRANSITION_US) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x22, "Invalid turnaround timing");
     return;
   } else {
     config.timings.rxToTx = timing;
-    config.timings.txToRx = timing - 10;
+    config.timings.txToRx = timing - 10U;
   }
 
-  timing = sl_cli_get_argument_uint16(args, 3);
-  config.ackConfig.ackTimeout = timing;
+  timing = (RAIL_TransitionTime_t)sl_cli_get_argument_uint16(args, 3);
+  config.ackConfig.ackTimeout = (uint16_t)timing;
 
   if (sl_cli_get_argument_count(args) >= 5) {
     setFpByDefault = !!(sl_cli_get_argument_uint8(args, 4));
@@ -163,6 +165,7 @@ static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
 
 void config2p4Ghz802154(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status;
   uint8_t ieee802154Config = 0U;
 
@@ -193,6 +196,7 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
 
 void config863Mhz802154(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
@@ -211,6 +215,7 @@ void config863Mhz802154(sl_cli_command_arg_t *args)
 
 void config915Mhz802154(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
@@ -229,6 +234,7 @@ void config915Mhz802154(sl_cli_command_arg_t *args)
 
 void ieee802154AcceptFrames(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint8_t framesEnable = 0;
   bool commandFrame = !!sl_cli_get_argument_uint8(args, 0);
   bool ackFrame = !!sl_cli_get_argument_uint8(args, 1);
@@ -277,6 +283,7 @@ void ieee802154AcceptFrames(sl_cli_command_arg_t *args)
 
 void ieee802154SetPromiscuousMode(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   bool promiscuous = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_SetPromiscuousMode(railHandle, promiscuous);
   if (status != RAIL_STATUS_NO_ERROR) {
@@ -289,6 +296,7 @@ void ieee802154SetPromiscuousMode(sl_cli_command_arg_t *args)
 
 void ieee802154SetPanCoordinator(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   bool panCoord = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_Status_t status = RAIL_IEEE802154_SetPanCoordinator(railHandle, panCoord);
   if (status != RAIL_STATUS_NO_ERROR) {
@@ -301,6 +309,7 @@ void ieee802154SetPanCoordinator(sl_cli_command_arg_t *args)
 
 void ieee802154SetPanId(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint16_t panId = sl_cli_get_argument_uint16(args, 0);
   uint8_t index = (sl_cli_get_argument_count(args) >= 2) ? sl_cli_get_argument_uint8(args, 1) : 0;
   RAIL_Status_t status = RAIL_IEEE802154_SetPanId(railHandle, panId, index);
@@ -309,6 +318,7 @@ void ieee802154SetPanId(sl_cli_command_arg_t *args)
 
 void ieee802154SetShortAddress(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint16_t shortAddr = sl_cli_get_argument_uint16(args, 0);
   uint8_t index = (sl_cli_get_argument_count(args) >= 2) ? sl_cli_get_argument_uint8(args, 1) : 0;
   RAIL_Status_t status = RAIL_IEEE802154_SetShortAddress(railHandle,
@@ -319,6 +329,7 @@ void ieee802154SetShortAddress(sl_cli_command_arg_t *args)
 
 void ieee802154SetLongAddress(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint8_t longAddr[8];
   for (int i = 0; i < 8; i++) {
     longAddr[i] = sl_cli_get_argument_uint8(args, i);
@@ -369,6 +380,7 @@ void ieee802154SetAddresses(sl_cli_command_arg_t *args)
     }
     argCount++;
   }
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status = RAIL_IEEE802154_SetAddresses(railHandle, &addresses);
   responsePrint(sl_cli_get_command_string(args, 0), "802.15.4Addresses:%s", getStatusMessage(status));
 }
@@ -382,6 +394,7 @@ void ieee802154SetDataReqLatency(sl_cli_command_arg_t *args)
 void ieee802154SetE(sl_cli_command_arg_t *args)
 {
   RAIL_IEEE802154_EOptions_t options = (RAIL_IEEE802154_EOptions_t) sl_cli_get_argument_uint32(args, 0);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status = RAIL_IEEE802154_ConfigEOptions(railHandle,
                                                         RAIL_IEEE802154_E_OPTIONS_ALL,
                                                         options);
@@ -402,6 +415,7 @@ void ieee802154SetE(sl_cli_command_arg_t *args)
 void ieee802154SetG(sl_cli_command_arg_t *args)
 {
   RAIL_IEEE802154_GOptions_t options = (RAIL_IEEE802154_GOptions_t) sl_cli_get_argument_uint32(args, 0);
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status = RAIL_IEEE802154_ConfigGOptions(railHandle,
                                                         RAIL_IEEE802154_G_OPTIONS_ALL,
                                                         options);
@@ -422,6 +436,7 @@ void ieee802154SetFpMode(sl_cli_command_arg_t *args)
   bool earlyFp = !!sl_cli_get_argument_uint8(args, 0);
   bool dataFp = !!sl_cli_get_argument_uint8(args, 1);
 
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t earlyStatus = RAIL_IEEE802154_EnableEarlyFramePending(railHandle, earlyFp);
   const char *earlyDisplay;
   if (earlyStatus != RAIL_STATUS_NO_ERROR) {

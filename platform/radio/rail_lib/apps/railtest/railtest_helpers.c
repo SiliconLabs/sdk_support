@@ -193,11 +193,12 @@ void printRailAppEvents(void)
                     &railtestEvent->rxPacket);
       } else if (railtestEvent->type == BEAM_PACKET) {
         // Now print the most recent packet we may have received in Z-Wave mode
-        responsePrint("ZWaveBeamFrame", "nodeId:0x%x,channelHopIdx:%d,lrBeam:%s,lrBeamTxPower:%d",
+        responsePrint("ZWaveBeamFrame", "nodeId:0x%x,channelHopIdx:%d,lrBeam:%s,lrBeamTxPower:%d,beamRssi:%d",
                       railtestEvent->beamPacket.nodeId, railtestEvent->beamPacket.channelIndex,
                       (railtestEvent->beamPacket.lrBeamTxPower == RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID)
                       ? "No" : "Yes",
-                      railtestEvent->beamPacket.lrBeamTxPower);
+                      railtestEvent->beamPacket.lrBeamTxPower,
+                      railtestEvent->beamPacket.beamRssi);
       } else if (railtestEvent->type == RAIL_EVENT) {
         printRailEvents(&railtestEvent->railEvent);
       } else if (railtestEvent->type == MULTITIMER) {

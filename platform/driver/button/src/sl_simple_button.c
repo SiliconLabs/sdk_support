@@ -34,7 +34,7 @@ static const uint16_t check_press = (uint16_t)(0xffff << SL_SIMPLE_BUTTON_DEBOUN
 static const uint16_t check_release = (uint16_t)(~(0x1 << SL_SIMPLE_BUTTON_DEBOUNCE_BITS));
 static const uint16_t debounce_window = (uint16_t)(0xffff << (SL_SIMPLE_BUTTON_DEBOUNCE_BITS + 1));
 
-extern const sl_button_t *simple_button_array[];
+extern const sl_button_t *sl_simple_button_array[];
 extern const uint8_t simple_button_count;
 
 /***************************************************************************//**
@@ -49,10 +49,10 @@ extern const uint8_t simple_button_count;
 static void sli_simple_button_on_change(uint8_t interrupt_no)
 {
   for (uint8_t i = 0; i < simple_button_count; i++) {
-    sl_simple_button_context_t *ctxt = ((sl_simple_button_context_t *)simple_button_array[i]->context);
+    sl_simple_button_context_t *ctxt = ((sl_simple_button_context_t *)sl_simple_button_array[i]->context);
     if ( (ctxt->pin == interrupt_no) && (ctxt->state != SL_SIMPLE_BUTTON_DISABLED) ) {
       ctxt->state = ((bool)GPIO_PinInGet(ctxt->port, ctxt->pin) == SL_SIMPLE_BUTTON_POLARITY);
-      sl_button_on_change(simple_button_array[i]);
+      sl_button_on_change(sl_simple_button_array[i]);
       break;
     }
   }

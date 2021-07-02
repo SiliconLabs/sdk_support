@@ -599,4 +599,7 @@ static void wipeAndRestartSpi(void)
 
   // Initialize a SPI driver instance
   SPIDRV_Init(spiHandle, &initData);
+
+  // Set the handle state to idle in case it was transferring before we arrived here
+  spiHandle->state = spidrvStateIdle;
 }

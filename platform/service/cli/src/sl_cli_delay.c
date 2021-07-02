@@ -37,7 +37,6 @@
 #include "sli_cli_arguments.h"
 #include "sl_cli_delay.h"
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "sl_system_kernel.h"
 #include "cmsis_os2.h"
 #else
 #include "sl_sleeptimer.h"

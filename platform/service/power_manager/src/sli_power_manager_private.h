@@ -31,6 +31,22 @@
 #include "sl_power_manager.h"
 #include "sl_slist.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+
+#if defined(SL_CATALOG_EMLIB_CORE_DEBUG_CONFIG_PRESENT)
+#include "emlib_core_debug_config.h"
+#endif
+
+#if !defined(SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING)
+#define SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING   0
+#endif
+
+#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
+#include "sl_cycle_counter.h"
+#endif
+
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
@@ -67,10 +83,6 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em);
 
 void sli_power_manager_debug_init(void);
 
-void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
-                                                bool                  add,
-                                                const char            *name);
-
 /*******************************************************************************
  * Returns if the high frequency (ex. HFXO) is enabled or not.
  *
@@ -95,3 +107,12 @@ uint32_t sli_power_manager_get_wakeup_process_time_overhead(void);
  * Converts microseconds time in sleeptimer ticks.
  ******************************************************************************/
 uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
+
+#if defined(EMU_VSCALE_PRESENT)
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ ******************************************************************************/
+void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
+#endif

@@ -75,8 +75,16 @@ const BootloaderStorageImplementationInformation_t * getDeviceInfo(void)
 static bool verifyAddressRange(uint32_t address,
                                uint32_t length)
 {
-  // Flash starts at 0, and is FLASH_SIZE large
-  if ((address + length) <= FLASH_SIZE) {
+  // Flash starts at FLASH_BASE, and is FLASH_SIZE large
+  if ((length > FLASH_SIZE)
+#if (FLASH_BASE > 0x0UL)
+     || (address < FLASH_BASE)
+#endif
+     || (address > FLASH_BASE + FLASH_SIZE)) {
+    return false;
+  }
+
+  if ((address + length) <= FLASH_BASE + FLASH_SIZE) {
     return true;
   } else {
     return false;

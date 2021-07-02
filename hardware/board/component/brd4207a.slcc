@@ -14,7 +14,14 @@
   - name: hardware_board
   - name: hardware_board_rb
   - name: hardware_board_from_stk
+  - name: hardware_board_from_slwrb4207a
   - name: hardware_board_from_slwstk6050b
+  - name: hardware_board_supports_rf_band_868
+  - name: hardware_board_supports_rf_band_914
+  - name: hardware_board_supports_rf_band_924
+  - name: hardware_board_supports_3_rf_bands
+  - name: hardware_board_default_rf_band
+  - name: hardware_board_default_rf_band_868
 - recommends:
   - id: brd4001a
   - id: iostream_usart

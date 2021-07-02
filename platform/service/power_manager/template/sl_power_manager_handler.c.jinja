@@ -85,9 +85,10 @@ bool sl_power_manager_sleep_on_isr_exit(void)
   bool force_wakeup = false;
    
   // This function allow the power manager to return into sleep, if the latest timer 
-  // to expire was power manager's internal one used to restore HFXO on time. 
+  // to expire was power manager's internal one used to restore HFXO on time or 
+  // the HFXO interrupt. 
   // Most of the time we want to get back to sleep until the next event occurs.
-  sleep = sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire();
+  sleep = sl_power_manager_is_latest_wakeup_internal();
 {% for handler in power_manager_handler %}
 {%- if handler['event'] == "sleep_on_isr_exit" %}
   answer = {{ handler['handler'] }}();

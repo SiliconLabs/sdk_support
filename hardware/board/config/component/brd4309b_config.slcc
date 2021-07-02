@@ -18,6 +18,38 @@
       file_id: board_control_config
     path: brd4309b_brd4001a/sl_board_control_config.h
   - override:
+      component: bootloader_ezsp_gpio_activation
+      file_id: ezsp_gpio_activation_cfg
+    path: brd4309b_brd4001a/btl_ezsp_gpio_activation_cfg.h
+  - override:
+      component: bootloader_gpio_activation
+      file_id: btl_gpio_activation_cfg
+    path: brd4309b_brd4001a/btl_gpio_activation_cfg.h
+  - override:
+      component: bootloader_uart_driver
+      file_id: btl_uart_driver_cfg
+    path: brd4309b_brd4001a/btl_uart_driver_cfg.h
+  - override:
+      component: cpc_primary_driver_uart
+      file_id: cpc_drv_uart_primary_config
+      instance: vcom
+    path: brd4309b_brd4001a/sl_cpc_drv_uart_primary_vcom_config.h
+  - override:
+      component: cpc_primary_driver_uart
+      file_id: cpc_drv_uart_primary_config
+      instance: exp
+    path: brd4309b_brd4001a/sl_cpc_drv_uart_primary_exp_config.h
+  - override:
+      component: cpc_secondary_driver_uart
+      file_id: cpc_drv_uart_secondary_config
+      instance: vcom
+    path: brd4309b_brd4001a/sl_cpc_drv_uart_secondary_vcom_config.h
+  - override:
+      component: cpc_secondary_driver_uart
+      file_id: cpc_drv_uart_secondary_config
+      instance: exp
+    path: brd4309b_brd4001a/sl_cpc_drv_uart_secondary_exp_config.h
+  - override:
       component: iostream_usart
       file_id: iostream_usart_config
       instance: vcom
@@ -27,6 +59,20 @@
       file_id: iostream_usart_config
       instance: exp
     path: brd4309b_brd4001a/sl_iostream_usart_exp_config.h
+  - override:
+      component: pwm
+      file_id: pwm_config
+      instance: led0
+    path: brd4309b_brd4001a/sl_pwm_init_led0_config.h
+  - override:
+      component: pwm
+      file_id: pwm_config
+      instance: led1
+    path: brd4309b_brd4001a/sl_pwm_init_led1_config.h
+  - override:
+      component: rail_util_pti
+      file_id: rail_util_pti_config
+    path: brd4309b_brd4001a/sl_rail_util_pti_config.h
   - override:
       component: simple_button
       file_id: simple_button_config
@@ -38,20 +84,6 @@
       instance: btn1
     path: brd4309b_brd4001a/sl_simple_button_btn1_config.h
   - override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: vcom
-    path: brd4309b_brd4001a/sl_uartdrv_usart_vcom_config.h
-  - override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: exp
-    path: brd4309b_brd4001a/sl_uartdrv_usart_exp_config.h
-  - override:
-      component: rail_util_pti
-      file_id: rail_util_pti_config
-    path: brd4309b_brd4001a/sl_rail_util_pti_config.h
-  - override:
       component: simple_led
       file_id: simple_led_config
       instance: led0
@@ -62,12 +94,47 @@
       instance: led1
     path: brd4309b_brd4001a/sl_simple_led_led1_config.h
   - override:
-      component: pwm
-      file_id: pwm_config
-      instance: led0
-    path: brd4309b_brd4001a/sl_pwm_init_led0_config.h
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: vcom
+    path: brd4309b_brd4001a/sl_uartdrv_usart_vcom_config.h
   - override:
-      component: pwm
-      file_id: pwm_config
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: exp
+    path: brd4309b_brd4001a/sl_uartdrv_usart_exp_config.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: brd4309b_brd4001a/iot_flash_cfg_msc.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
+      instance: led0
+    path: brd4309b_brd4001a/iot_pwm_cfg_led0.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
       instance: led1
-    path: brd4309b_brd4001a/sl_pwm_init_led1_config.h
+    path: brd4309b_brd4001a/iot_pwm_cfg_led1.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
+      instance: exp
+    path: brd4309b_brd4001a/iot_pwm_cfg_exp.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: vcom
+    path: brd4309b_brd4001a/iot_uart_cfg_vcom.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: exp
+    path: brd4309b_brd4001a/iot_uart_cfg_exp.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: loopback
+    path: brd4309b_brd4001a/iot_uart_cfg_loopback.h

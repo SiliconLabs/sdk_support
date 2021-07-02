@@ -120,6 +120,10 @@ static int mbedtls_grp_to_psa_attr(mbedtls_ecp_group_id id,
       attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 224);
       break;
+    case MBEDTLS_ECP_DP_SECP256K1:
+      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_K1);
+      psa_set_key_bits(attr, 256);
+      break;
 #endif
     case MBEDTLS_ECP_DP_SECP256R1:
       attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);

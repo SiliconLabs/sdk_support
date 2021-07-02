@@ -95,10 +95,10 @@ typedef enum {
   || defined(_WDOG_CFG_WARNSEL_MASK)
 /** Select watchdog warning timeout period as percentage of timeout. */
 typedef enum {
-  wdogWarnDisable   = 0,
-  wdogWarnTime25pct = 1,
-  wdogWarnTime50pct = 2,
-  wdogWarnTime75pct = 3,
+  wdogWarnDisable   = 0, /**< Watchdog warning period is disabled. */
+  wdogWarnTime25pct = 1, /**< Watchdog warning period is 25% of the timeout. */
+  wdogWarnTime50pct = 2, /**< Watchdog warning period is 50% of the timeout. */
+  wdogWarnTime75pct = 3, /**< Watchdog warning period is 75% of the timeout. */
 } WDOG_WarnSel_TypeDef;
 #endif
 
@@ -106,14 +106,14 @@ typedef enum {
   || defined(_WDOG_CFG_WINSEL_MASK)
 /**  Select watchdog illegal window limit. */
 typedef enum {
-  wdogIllegalWindowDisable     = 0,
-  wdogIllegalWindowTime12_5pct = 1,
-  wdogIllegalWindowTime25_0pct = 2,
-  wdogIllegalWindowTime37_5pct = 3,
-  wdogIllegalWindowTime50_0pct = 4,
-  wdogIllegalWindowTime62_5pct = 5,
-  wdogIllegalWindowTime75_0pct = 6,
-  wdogIllegalWindowTime87_5pct = 7,
+  wdogIllegalWindowDisable     = 0, /**< Watchdog illegal window disabled. */
+  wdogIllegalWindowTime12_5pct = 1, /**< Window timeout is 12.5% of the timeout. */
+  wdogIllegalWindowTime25_0pct = 2, /**< Window timeout is 25% of the timeout. */
+  wdogIllegalWindowTime37_5pct = 3, /**< Window timeout is 37.5% of the timeout. */
+  wdogIllegalWindowTime50_0pct = 4, /**< Window timeout is 50% of the timeout. */
+  wdogIllegalWindowTime62_5pct = 5, /**< Window timeout is 62.5% of the timeout. */
+  wdogIllegalWindowTime75_0pct = 6, /**< Window timeout is 75% of the timeout. */
+  wdogIllegalWindowTime87_5pct = 7, /**< Window timeout is 87.5% of the timeout. */
 } WDOG_WinSel_TypeDef;
 #endif
 

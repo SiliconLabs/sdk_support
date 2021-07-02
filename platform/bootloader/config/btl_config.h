@@ -58,17 +58,28 @@ MISRAC_ENABLE
 #if defined(BTL_UPGRADE_LOCATION_BASE)
 // BTL_UPGRADE_LOCATION_BASE is fixed on Series-1 devices.
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
-// The upgrade location needs to fit upgrades of up to 42k
+
+// The upgrade location needs to fit upgrades of up to 48k
 #if ((BTL_UPGRADE_LOCATION_BASE + 0x0000C000UL) > FLASH_SIZE) \
   || (BTL_UPGRADE_LOCATION_BASE % FLASH_PAGE_SIZE)
 #error "Invalid bootloader upgrade base address"
 #endif
+
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+
 // The upgrade location needs to fit upgrades of up to 24k
 #if ((BTL_UPGRADE_LOCATION_BASE + 0x00006000UL) > FLASH_SIZE) \
   || (BTL_UPGRADE_LOCATION_BASE % FLASH_PAGE_SIZE)
 #error "Invalid bootloader upgrade base address"
 #endif
+
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+// The upgrade location needs to fit upgrades of up to 96k
+#if ((BTL_UPGRADE_LOCATION_BASE + 0x00018000UL) > FLASH_SIZE) \
+  || (BTL_UPGRADE_LOCATION_BASE % FLASH_PAGE_SIZE)
+#error "Invalid bootloader upgrade base address"
+#endif
+
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)

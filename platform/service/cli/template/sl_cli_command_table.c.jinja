@@ -80,6 +80,45 @@ extern "C" {{ '{' }}
  *           - type: additional
  *             help: "More text"
  *
+ * For subgroups, an optional unique id can be used to allow a particular name to
+ * be used more than once. In the following case, from the command line the
+ * following commands are available:
+ *
+ * >  root_1 shell status
+ * >  root_2 shell status
+ *
+ *     - name: cli_group            # Register a group
+ *       value:
+ *         name: root_1             # Group name
+ *
+ *     - name: cli_group            # Register a group
+ *       value:
+ *         name: root_2             # Group name
+ *
+ *    - name: cli_group             # Register a group
+ *       value:
+ *         name: shell              # Group name
+ *         id: shell_root_1         # Optional unique id for group
+ *         group: root_1            # Add group to root_1 group
+ *
+ *    - name: cli_group             # Register a group
+ *       value:
+ *         name: shell              # Group name
+ *         id: shell_root_2         # Optional unique id for group
+ *         group: root_2            # Add group to root_1 group
+ *
+ *    - name: cli_command           # Register a command
+ *       value:
+ *         name: status
+ *         handler: status_1
+ *         group: shell_root_1      # id of subgroup
+ *
+ *    - name: cli_command           # Register a command
+ *       value:
+ *         name: status
+ *         handler: status_2
+ *         group: shell_root_2      # id of subgroup
+ *
  ******************************************************************************/
 
 {# Input validation -#}
@@ -140,25 +179,29 @@ static const sl_cli_command_info_t cli_cmd_{{command.group|replace("-","_hyphen_
 
 // Create group command tables and structs if cli_groups given
 // in template. Group name is suffixed with _group_table for tables
-// and group commands are cli_cmd_( group name )_group
+// and group commands are cli_cmd_grp_( group name )
 {# Recursively loop through the groups. The lowest group in the hierarchy
    must be handled first, so the loop first digs down to find the lowest
    group, and generates for that group first, then proceeds upwards -#}
 {%- set already_handled = [] -%}
 {%- for group in cli_group if group.name recursive -%}
+{#- For subgroups, use id if set, otherwise use name.
+    For root level groups, always use name -#}
+{%- set group_name = (group.id or group.name if group.group) or group.name -%}
 {# Check if any other group reference this group #}
 {%- set outer_loop = loop -%}
 {%- for sub_group in cli_group if sub_group.group -%}
-  {%- if sub_group.group == group.name -%}
-    {%- if sub_group.name not in already_handled and sub_group.name -%}
+  {%- set sub_group_name = sub_group.id or sub_group.name -%}
+  {%- if sub_group.group == group_name -%}
+    {%- if sub_group_name not in already_handled and sub_group_name -%}
       {{ outer_loop([sub_group]) }}
     {%- endif -%}
   {%- endif -%}
 {%- endfor -%}
-{%- if group.name not in already_handled -%}
+{%- if group_name not in already_handled -%}
 {# Group table -#}
-static const sl_cli_command_entry_t {{ group.name|replace("-","_hyphen_") }}_group_table[] = {{ '{' }}
-{%- for command in cli_command if command.group == group.name %}
+static const sl_cli_command_entry_t {{ group_name|replace("-","_hyphen_") }}_group_table[] = {{ '{' }}
+{%- for command in cli_command if command.group == group_name %}
   {{ '{' }} "{{ command.name }}", &cli_cmd_{{command.group|replace("-","_hyphen_")}}_{{ command.name|replace("-","_hyphen_") }}, false {{ '}' }},
   {%- if command.shortcuts %}
   {%- for shortcut in command.shortcuts %}
@@ -166,20 +209,21 @@ static const sl_cli_command_entry_t {{ group.name|replace("-","_hyphen_") }}_gro
   {%- endfor %}
   {%- endif %}
 {%- endfor %}
-{%- for sub_group in cli_group if sub_group.group == group.name %}
-  {{ '{' }} "{{ sub_group.name }}", &cli_cmd_{{ sub_group.name|replace("-","_hyphen_") }}_group, false {{ '}' }},
+{%- for sub_group in cli_group if sub_group.group == group_name %}
+  {%- set sub_group_name = sub_group.id or sub_group.name %}
+  {{ '{' }} "{{ sub_group.name }}", &cli_cmd_grp_{{ sub_group_name|replace("-","_hyphen_") }}, false {{ '}' }},
   {%- if sub_group.shortcuts %}
   {%- for shortcut in sub_group.shortcuts %}
-  {{ '{' }} "{{ shortcut.name }}", &cli_cmd_{{ sub_group.name|replace("-","_hyphen_") }}_group, true {{ '}' }},
+  {{ '{' }} "{{ shortcut.name }}", &cli_cmd_grp_{{ sub_group_name|replace("-","_hyphen_") }}, true {{ '}' }},
   {%- endfor %}
   {%- endif %}
 {%- endfor %}
   {{ '{' }} NULL, NULL, false {{ '}' }},
 {{ '}' }};
 {#- Group command #}
-static const sl_cli_command_info_t cli_cmd_{{ group.name|replace("-","_hyphen_") }}_group = \
-  SL_CLI_COMMAND_GROUP({{ group.name|replace("-","_hyphen_") }}_group_table, {% if group.help -%} "{{ group.help }}" {%- else -%} "" {%- endif %});
-{% if already_handled.append(group.name) -%}
+static const sl_cli_command_info_t cli_cmd_grp_{{ group_name|replace("-","_hyphen_") }} = \
+  SL_CLI_COMMAND_GROUP({{ group_name|replace("-","_hyphen_") }}_group_table, {% if group.help -%} "{{ group.help }}" {%- else -%} "" {%- endif %});
+{% if already_handled.append(group_name) -%}
 {# This block does nothin, it only exists to perform the appending to
    already_handled. Could be done cleaner with 'do' statement, if that
    extension is enabled #}
@@ -198,11 +242,12 @@ const sl_cli_command_entry_t sl_cli_default_command_table[] = {{ '{' }}
   {%- endfor %}
   {%- endif %}
 {%- endfor %}
+{#- Note that only group.name will be used at root level.  group.id will be silently ignored -#}
 {%- for group in cli_group  if not group.group %}
-  {{ '{' }} "{{ group.name }}", &cli_cmd_{{ group.name|replace("-","_hyphen_") }}_group, false {{ '}' }},
+  {{ '{' }} "{{ group.name }}", &cli_cmd_grp_{{ group.name|replace("-","_hyphen_") }}, false {{ '}' }},
   {%- if group.shortcuts %}
   {%- for shortcut in group.shortcuts %}
-  {{ '{' }} "{{ shortcut.name }}", &cli_cmd_{{ group.name|replace("-","_hyphen_") }}_group, true {{ '}' }},
+  {{ '{' }} "{{ shortcut.name }}", &cli_cmd_grp_{{ group.name|replace("-","_hyphen_") }}, true {{ '}' }},
   {%- endfor %}
   {%- endif %}
 {%- endfor %}

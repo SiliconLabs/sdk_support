@@ -41,12 +41,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup peripheral
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SYSRTC
+ * @addtogroup sysrtc
  * @{
  ******************************************************************************/
 
@@ -54,12 +49,17 @@ extern "C" {
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
 
+/// Minimum compare channels for SYSRTC group.
 #define SYSRTC_GROUP_MIN_CHANNEL_COMPARE  1u
+/// Maximum compare channels for SYSRTC group.
 #define SYSRTC_GROUP_MAX_CHANNEL_COMPARE  2u
 
+/// Minimum capture channels for SYSRTC group.
 #define SYSRTC_GROUP_MIN_CHANNEL_CAPTURE  0u
+/// Maximum capture channels for SYSRTC group.
 #define SYSRTC_GROUP_MAX_CHANNEL_CAPTURE  1u
 
+/// Sysrtc group number.
 #ifdef _SILICON_LABS_32B_SERIES_2
 #if !defined(SYSRTC_GROUP_NUMBER)
 #define SYSRTC_GROUP_NUMBER   1u
@@ -417,8 +417,7 @@ void sl_sysrtc_set_group_compare_channel_value(uint8_t group_number,
  ******************************************************************************/
 uint32_t sl_sysrtc_get_group_capture_channel_value(uint8_t group_number);
 
-/** @} (end addtogroup SYSRTC) */
-/** @} (end addtogroup peripheral) */
+/** @} (end addtogroup sysrtc) */
 
 #ifdef __cplusplus
 }

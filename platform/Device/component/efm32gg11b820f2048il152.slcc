@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32GG11B820F2048IL152
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32GG11B/Source/system_efm32gg11b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32GG11B/Source/IAR/startup_efm32gg11b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32GG11B/Source/GCC/startup_efm32gg11b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32GG11B/Source/ARM/startup_efm32gg11b.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32gg11b820f2048il152.h
@@ -83,6 +93,8 @@
     - path: em_device.h
     - path: system_efm32gg11b.h
     path: platform/Device/SiliconLabs/EFM32GG11B/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32gg11b820f2048il152
   - name: device
@@ -181,6 +193,8 @@
   - name: device_has_wtimer2
   - name: device_has_wtimer3
   - name: device_has_bootloader_flash
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
 - requires:
@@ -218,7 +232,6 @@
     value: 2048
 - tag:
   - device:opn:efm32gg11b820f2048il152
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32gg11b820f2048il152

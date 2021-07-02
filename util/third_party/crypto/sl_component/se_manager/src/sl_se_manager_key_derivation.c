@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -39,7 +39,7 @@
 #include <string.h>
 
 /***************************************************************************//**
- * \addtogroup sl_se Secure Element Manager API
+ * \addtogroup sl_se Secure Engine Manager API
  * @{
  ******************************************************************************/
 

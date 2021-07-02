@@ -31,9 +31,6 @@
 #ifndef EM_GPIO_H
 #define EM_GPIO_H
 
-#if defined(__ICCARM__)
-#pragma system_include //TODO: Remove when this file has been MISRA-ized
-#endif
 #include "em_device.h"
 #if defined(GPIO_COUNT) && (GPIO_COUNT > 0)
 
@@ -64,17 +61,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0xF77F
-#define _GPIO_PORT_B_PIN_MASK 0x79F8
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0x01FF
-#define _GPIO_PORT_E_PIN_MASK 0xFFF0
-#define _GPIO_PORT_F_PIN_MASK 0x003F
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xF77FUL
+#define _GPIO_PORT_B_PIN_MASK 0x79F8UL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0x01FFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFF0UL
+#define _GPIO_PORT_F_PIN_MASK 0x003FUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_EFM32_HAPPY_FAMILY)
 
@@ -90,17 +87,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0x0707
-#define _GPIO_PORT_B_PIN_MASK 0x6980
-#define _GPIO_PORT_C_PIN_MASK 0xEF1F
-#define _GPIO_PORT_D_PIN_MASK 0x00F0
-#define _GPIO_PORT_E_PIN_MASK 0x3C00
-#define _GPIO_PORT_F_PIN_MASK 0x003F
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0x0707UL
+#define _GPIO_PORT_B_PIN_MASK 0x6980UL
+#define _GPIO_PORT_C_PIN_MASK 0xEF1FUL
+#define _GPIO_PORT_D_PIN_MASK 0x00F0UL
+#define _GPIO_PORT_E_PIN_MASK 0x3C00UL
+#define _GPIO_PORT_F_PIN_MASK 0x003FUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_32B_SERIES_0) \
   && (defined(_EFM32_GIANT_FAMILY) || defined(_EFM32_WONDER_FAMILY))
@@ -117,17 +114,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0xFFFF
-#define _GPIO_PORT_B_PIN_MASK 0xFFFF
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0xFFFF
-#define _GPIO_PORT_E_PIN_MASK 0xFFFF
-#define _GPIO_PORT_F_PIN_MASK 0x1FFF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_B_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_F_PIN_MASK 0x1FFFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_EFM32_GECKO_FAMILY)
 
@@ -143,17 +140,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0xFFFF
-#define _GPIO_PORT_B_PIN_MASK 0xFFFF
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0xFFFF
-#define _GPIO_PORT_E_PIN_MASK 0xFFFF
-#define _GPIO_PORT_F_PIN_MASK 0x03FF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_B_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_F_PIN_MASK 0x03FFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) && defined(_EFR_DEVICE)
 
@@ -169,17 +166,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0x003F
-#define _GPIO_PORT_B_PIN_MASK 0xF800
-#define _GPIO_PORT_C_PIN_MASK 0x0FC0
-#define _GPIO_PORT_D_PIN_MASK 0xFE00
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0x00FF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0x003FUL
+#define _GPIO_PORT_B_PIN_MASK 0xF800UL
+#define _GPIO_PORT_C_PIN_MASK 0x0FC0UL
+#define _GPIO_PORT_D_PIN_MASK 0xFE00UL
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0x00FFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80) && defined(_EFM_DEVICE)
 
@@ -195,17 +192,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0x003F
-#define _GPIO_PORT_B_PIN_MASK 0xF800
-#define _GPIO_PORT_C_PIN_MASK 0x0FC0
-#define _GPIO_PORT_D_PIN_MASK 0xFE00
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0x00FF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0x003FUL
+#define _GPIO_PORT_B_PIN_MASK 0xF800UL
+#define _GPIO_PORT_C_PIN_MASK 0x0FC0UL
+#define _GPIO_PORT_D_PIN_MASK 0xFE00UL
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0x00FFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_84)
 
@@ -221,17 +218,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 2
 #define _GPIO_PORT_K_PIN_COUNT 3
 
-#define _GPIO_PORT_A_PIN_MASK 0x03FF
-#define _GPIO_PORT_B_PIN_MASK 0xFFC0
-#define _GPIO_PORT_C_PIN_MASK 0x0FFF
-#define _GPIO_PORT_D_PIN_MASK 0xFF00
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0xFFFF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x000F
-#define _GPIO_PORT_J_PIN_MASK 0xC000
-#define _GPIO_PORT_K_PIN_MASK 0x0007
+#define _GPIO_PORT_A_PIN_MASK 0x03FFUL
+#define _GPIO_PORT_B_PIN_MASK 0xFFC0UL
+#define _GPIO_PORT_C_PIN_MASK 0x0FFFUL
+#define _GPIO_PORT_D_PIN_MASK 0xFF00UL
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x000FUL
+#define _GPIO_PORT_J_PIN_MASK 0xC000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0007UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_89)
 
@@ -247,17 +244,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0x003F
-#define _GPIO_PORT_B_PIN_MASK 0xF800
-#define _GPIO_PORT_C_PIN_MASK 0x0FC0
-#define _GPIO_PORT_D_PIN_MASK 0xFE00
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0x00FF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0x003FUL
+#define _GPIO_PORT_B_PIN_MASK 0xF800UL
+#define _GPIO_PORT_C_PIN_MASK 0x0FC0UL
+#define _GPIO_PORT_D_PIN_MASK 0xFE00UL
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0x00FFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined (_SILICON_LABS_GECKO_INTERNAL_SDID_106)
 #define _GPIO_PORT_A_PIN_COUNT 16
@@ -272,17 +269,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0xFFFF
-#define _GPIO_PORT_B_PIN_MASK 0xFFFF
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0xFFFF
-#define _GPIO_PORT_E_PIN_MASK 0xFFFF
-#define _GPIO_PORT_F_PIN_MASK 0x7FFF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_B_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_F_PIN_MASK 0x7FFFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_32B_SERIES_1) && defined(_EFM32_GIANT_FAMILY)
 
@@ -298,17 +295,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT  0
 #define _GPIO_PORT_K_PIN_COUNT  0
 
-#define _GPIO_PORT_A_PIN_MASK 0xFFFF
-#define _GPIO_PORT_B_PIN_MASK 0xFFFF
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0xFFFF
-#define _GPIO_PORT_E_PIN_MASK 0xFFFF
-#define _GPIO_PORT_F_PIN_MASK 0xFFFF
-#define _GPIO_PORT_G_PIN_MASK 0xFFFF
-#define _GPIO_PORT_H_PIN_MASK 0xFFFF
-#define _GPIO_PORT_I_PIN_MASK 0xFFFF
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_B_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_F_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_G_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_H_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_I_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_95)
 
@@ -324,17 +321,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0x003F
-#define _GPIO_PORT_B_PIN_MASK 0xF800
-#define _GPIO_PORT_C_PIN_MASK 0x0FC0
-#define _GPIO_PORT_D_PIN_MASK 0xFE00
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0x00FF
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0x003FUL
+#define _GPIO_PORT_B_PIN_MASK 0xF800UL
+#define _GPIO_PORT_C_PIN_MASK 0x0FC0UL
+#define _GPIO_PORT_D_PIN_MASK 0xFE00UL
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0x00FFUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_103)
 
@@ -350,17 +347,17 @@ extern "C" {
 #define _GPIO_PORT_J_PIN_COUNT 0
 #define _GPIO_PORT_K_PIN_COUNT 0
 
-#define _GPIO_PORT_A_PIN_MASK 0xF77F
-#define _GPIO_PORT_B_PIN_MASK 0x79F8
-#define _GPIO_PORT_C_PIN_MASK 0xFFFF
-#define _GPIO_PORT_D_PIN_MASK 0x01FF
-#define _GPIO_PORT_E_PIN_MASK 0xFFF0
-#define _GPIO_PORT_F_PIN_MASK 0x003F
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_A_PIN_MASK 0xF77FUL
+#define _GPIO_PORT_B_PIN_MASK 0x79F8UL
+#define _GPIO_PORT_C_PIN_MASK 0xFFFFUL
+#define _GPIO_PORT_D_PIN_MASK 0x01FFUL
+#define _GPIO_PORT_E_PIN_MASK 0xFFF0UL
+#define _GPIO_PORT_F_PIN_MASK 0x003FUL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #elif defined (_SILICON_LABS_32B_SERIES_2)
 
@@ -380,13 +377,13 @@ extern "C" {
 #define _GPIO_PORT_B_PIN_MASK (GPIO_PB_MASK)
 #define _GPIO_PORT_C_PIN_MASK (GPIO_PC_MASK)
 #define _GPIO_PORT_D_PIN_MASK (GPIO_PD_MASK)
-#define _GPIO_PORT_E_PIN_MASK 0x0000
-#define _GPIO_PORT_F_PIN_MASK 0x0000
-#define _GPIO_PORT_G_PIN_MASK 0x0000
-#define _GPIO_PORT_H_PIN_MASK 0x0000
-#define _GPIO_PORT_I_PIN_MASK 0x0000
-#define _GPIO_PORT_J_PIN_MASK 0x0000
-#define _GPIO_PORT_K_PIN_MASK 0x0000
+#define _GPIO_PORT_E_PIN_MASK 0x0000UL
+#define _GPIO_PORT_F_PIN_MASK 0x0000UL
+#define _GPIO_PORT_G_PIN_MASK 0x0000UL
+#define _GPIO_PORT_H_PIN_MASK 0x0000UL
+#define _GPIO_PORT_I_PIN_MASK 0x0000UL
+#define _GPIO_PORT_J_PIN_MASK 0x0000UL
+#define _GPIO_PORT_K_PIN_MASK 0x0000UL
 
 #else
 #warning "Port and pin masks are not defined for this family."
@@ -406,23 +403,23 @@ extern "C" {
     : (port) == 10 ? _GPIO_PORT_K_PIN_COUNT \
     : 0)
 
-#define _GPIO_PORT_MASK(port) (            \
-    (port) == 0  ? _GPIO_PORT_A_PIN_MASK   \
-    : (port) == 1  ? _GPIO_PORT_B_PIN_MASK \
-    : (port) == 2  ? _GPIO_PORT_C_PIN_MASK \
-    : (port) == 3  ? _GPIO_PORT_D_PIN_MASK \
-    : (port) == 4  ? _GPIO_PORT_E_PIN_MASK \
-    : (port) == 5  ? _GPIO_PORT_F_PIN_MASK \
-    : (port) == 6  ? _GPIO_PORT_G_PIN_MASK \
-    : (port) == 7  ? _GPIO_PORT_H_PIN_MASK \
-    : (port) == 8  ? _GPIO_PORT_I_PIN_MASK \
-    : (port) == 9  ? _GPIO_PORT_J_PIN_MASK \
-    : (port) == 10 ? _GPIO_PORT_K_PIN_MASK \
-    : 0)
+#define _GPIO_PORT_MASK(port) (                 \
+    ((int)port) == 0  ? _GPIO_PORT_A_PIN_MASK   \
+    : ((int)port) == 1  ? _GPIO_PORT_B_PIN_MASK \
+    : ((int)port) == 2  ? _GPIO_PORT_C_PIN_MASK \
+    : ((int)port) == 3  ? _GPIO_PORT_D_PIN_MASK \
+    : ((int)port) == 4  ? _GPIO_PORT_E_PIN_MASK \
+    : ((int)port) == 5  ? _GPIO_PORT_F_PIN_MASK \
+    : ((int)port) == 6  ? _GPIO_PORT_G_PIN_MASK \
+    : ((int)port) == 7  ? _GPIO_PORT_H_PIN_MASK \
+    : ((int)port) == 8  ? _GPIO_PORT_I_PIN_MASK \
+    : ((int)port) == 9  ? _GPIO_PORT_J_PIN_MASK \
+    : ((int)port) == 10 ? _GPIO_PORT_K_PIN_MASK \
+    : 0UL)
 
 /** Validation of port and pin. */
-#define GPIO_PORT_VALID(port)          (_GPIO_PORT_MASK(port) )
-#define GPIO_PORT_PIN_VALID(port, pin) (((_GPIO_PORT_MASK(port)) >> (pin)) & 0x1)
+#define GPIO_PORT_VALID(port)          (_GPIO_PORT_MASK(port) != 0x0UL)
+#define GPIO_PORT_PIN_VALID(port, pin) ((((_GPIO_PORT_MASK(port)) >> (pin)) & 0x1UL) == 0x1UL)
 
 #if defined(_GPIO_EXTIPINSELL_MASK)
 /** Validation of interrupt number and pin. */
@@ -627,12 +624,14 @@ void GPIO_DbgLocationSet(unsigned int location);
  ******************************************************************************/
 __STATIC_INLINE void GPIO_DbgSWDClkEnable(bool enable)
 {
+  unsigned int bit = enable ? 0x1UL : 0x0UL;
+
 #if defined(_GPIO_ROUTE_SWCLKPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWCLKPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWCLKPEN_SHIFT, bit);
 #elif defined(_GPIO_ROUTEPEN_SWCLKTCKPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWCLKTCKPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWCLKTCKPEN_SHIFT, bit);
 #elif defined(_GPIO_DBGROUTEPEN_SWCLKTCKPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->DBGROUTEPEN), _GPIO_DBGROUTEPEN_SWCLKTCKPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->DBGROUTEPEN), _GPIO_DBGROUTEPEN_SWCLKTCKPEN_SHIFT, bit);
 #else
 #warning "ROUTE enable for SWCLK pin is not defined."
 #endif
@@ -652,12 +651,14 @@ __STATIC_INLINE void GPIO_DbgSWDClkEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void GPIO_DbgSWDIOEnable(bool enable)
 {
+  unsigned int bit = enable ? 0x1UL : 0x0UL;
+
 #if defined(_GPIO_ROUTE_SWDIOPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWDIOPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWDIOPEN_SHIFT, bit);
 #elif defined(_GPIO_ROUTEPEN_SWDIOTMSPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWDIOTMSPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWDIOTMSPEN_SHIFT, bit);
 #elif defined(_GPIO_DBGROUTEPEN_SWDIOTMSPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->DBGROUTEPEN), _GPIO_DBGROUTEPEN_SWDIOTMSPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->DBGROUTEPEN), _GPIO_DBGROUTEPEN_SWDIOTMSPEN_SHIFT, bit);
 #else
 #warning "ROUTE enable for SWDIO pin is not defined."
 #endif
@@ -680,12 +681,14 @@ __STATIC_INLINE void GPIO_DbgSWDIOEnable(bool enable)
  ******************************************************************************/
 __STATIC_INLINE void GPIO_DbgSWOEnable(bool enable)
 {
+  unsigned int bit = enable ? 0x1UL : 0x0UL;
+
 #if defined(_GPIO_ROUTE_SWOPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWOPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTE), _GPIO_ROUTE_SWOPEN_SHIFT, bit);
 #elif defined(_GPIO_ROUTEPEN_SWVPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWVPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->ROUTEPEN), _GPIO_ROUTEPEN_SWVPEN_SHIFT, bit);
 #elif defined(_GPIO_TRACEROUTEPEN_SWVPEN_MASK)
-  BUS_RegBitWrite(&(GPIO->TRACEROUTEPEN), _GPIO_TRACEROUTEPEN_SWVPEN_SHIFT, enable);
+  BUS_RegBitWrite(&(GPIO->TRACEROUTEPEN), _GPIO_TRACEROUTEPEN_SWVPEN_SHIFT, bit);
 #else
 #warning "ROUTE enable for SWO/SWV pin is not defined."
 #endif
@@ -711,7 +714,7 @@ void GPIO_DriveStrengthSet(GPIO_Port_TypeDef port, GPIO_DriveStrength_TypeDef st
  *****************************************************************************/
 __STATIC_INLINE void GPIO_EM4DisablePinWakeup(uint32_t pinmask)
 {
-  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0);
+  EFM_ASSERT((pinmask & ~_GPIO_EM4WUEN_MASK) == 0UL);
 
   GPIO->EM4WUEN &= ~pinmask;
 }
@@ -992,11 +995,11 @@ __STATIC_INLINE void GPIO_PinOutClear(GPIO_Port_TypeDef port, unsigned int pin)
 {
   EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 #if defined(_GPIO_P_DOUTCLR_MASK)
-  GPIO->P[port].DOUTCLR = 1 << pin;
+  GPIO->P[port].DOUTCLR = 1UL << pin;
 #elif defined(GPIO_HAS_SET_CLEAR)
-  GPIO->P_CLR[port].DOUT = 1 << pin;
+  GPIO->P_CLR[port].DOUT = 1UL << pin;
 #else
-  BUS_RegMaskedClear(&GPIO->P[port].DOUT, 1 << pin);
+  BUS_RegMaskedClear(&GPIO->P[port].DOUT, 1UL << pin);
 #endif
 }
 
@@ -1039,11 +1042,11 @@ __STATIC_INLINE void GPIO_PinOutSet(GPIO_Port_TypeDef port, unsigned int pin)
 {
   EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 #if defined(_GPIO_P_DOUTSET_MASK)
-  GPIO->P[port].DOUTSET = 1 << pin;
+  GPIO->P[port].DOUTSET = 1UL << pin;
 #elif defined(GPIO_HAS_SET_CLEAR)
-  GPIO->P_SET[port].DOUT = 1 << pin;
+  GPIO->P_SET[port].DOUT = 1UL << pin;
 #else
-  BUS_RegMaskedSet(&GPIO->P[port].DOUT, 1 << pin);
+  BUS_RegMaskedSet(&GPIO->P[port].DOUT, 1UL << pin);
 #endif
 }
 
@@ -1067,11 +1070,11 @@ __STATIC_INLINE void GPIO_PinOutToggle(GPIO_Port_TypeDef port, unsigned int pin)
   EFM_ASSERT(GPIO_PORT_PIN_VALID(port, pin));
 
 #if defined (_GPIO_P_DOUTTGL_MASK)
-  GPIO->P[port].DOUTTGL = 1 << pin;
+  GPIO->P[port].DOUTTGL = 1UL << pin;
 #elif defined(GPIO_HAS_SET_CLEAR)
-  GPIO->P_TGL[port].DOUT = 1 << pin;
+  GPIO->P_TGL[port].DOUT = 1UL << pin;
 #else
-  GPIO->P[port].DOUT ^= 1 << pin;
+  GPIO->P[port].DOUT ^= 1UL << pin;
 #endif
 }
 

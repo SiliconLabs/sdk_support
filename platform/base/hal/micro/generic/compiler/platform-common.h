@@ -289,12 +289,12 @@ void halCommonMemPGMCopy(void* dest, const void PGM_NO_CONST *source, uint16_t b
 /**
  * @brief Returns the low byte of the 16-bit value \c n as an \c uint8_t.
  */
-#define LOW_BYTE(n)                     ((uint8_t)((n) & 0xFF))
+#define LOW_BYTE(n)                     ((uint8_t)(n))
 
 /**
  * @brief Returns the high byte of the 16-bit value \c n as an \c uint8_t.
  */
-#define HIGH_BYTE(n)                    ((uint8_t)(LOW_BYTE((n) >> 8)))
+#define HIGH_BYTE(n)                    LOW_BYTE((n) >> 8)
 
 /**
  * @brief Returns the value built from the two \c uint8_t
@@ -302,7 +302,7 @@ void halCommonMemPGMCopy(void* dest, const void PGM_NO_CONST *source, uint16_t b
  */
 #define HIGH_LOW_TO_INT(high, low) (        \
     ((uint16_t) (((uint16_t) (high)) << 8)) \
-    + ((uint16_t) ((low) & 0xFF))           \
+    + ((uint16_t) ((low) & 0xFFu))          \
     )
 
 /**
@@ -312,13 +312,13 @@ void halCommonMemPGMCopy(void* dest, const void PGM_NO_CONST *source, uint16_t b
     (((uint32_t) (byte3)) << 24)                      \
     + (((uint32_t) (byte2)) << 16)                    \
     + (((uint32_t) (byte1)) << 8)                     \
-    + ((uint32_t) ((byte0) & 0xFF))                   \
+    + ((uint32_t) ((byte0) & 0xFFu))                  \
     )
 
 /**
  * @brief Returns the low byte of the 32-bit value \c n as an \c uint8_t.
  */
-#define BYTE_0(n)                    ((uint8_t)((n) & 0xFF))
+#define BYTE_0(n)                    ((uint8_t)(n))
 
 /**
  * @brief Returns the second byte of the 32-bit value \c n as an \c uint8_t.

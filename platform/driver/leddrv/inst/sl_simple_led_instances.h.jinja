@@ -19,10 +19,14 @@
 #define SL_SIMPLE_LED_INSTANCES_H
 
 #include "sl_simple_led.h"
- 
+
 {% for inst in simple_led_instance -%}
 extern const sl_led_t sl_led_{{ inst | lower }};
 {% endfor %}
+extern const sl_led_t *sl_simple_led_array[];
+
+#define SL_SIMPLE_LED_COUNT {{ simple_led_instance | length }}
+#define SL_SIMPLE_LED_INSTANCE(n) (sl_simple_led_array[n])
 
 void sl_simple_led_init_instances(void);
 

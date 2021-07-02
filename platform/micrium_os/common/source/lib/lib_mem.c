@@ -1960,7 +1960,7 @@ static void Mem_DynPoolCreateInternal(const CPU_CHAR *p_name,
     CPU_SIZE_T i;
     CPU_SIZE_T blk_size_align;
     CPU_SIZE_T blk_align_worst;
-    CPU_SIZE_T blk_init_tot_size;
+    CPU_INT64U blk_init_tot_size;
     CPU_ADDR   blk_next_addr;
 
     if (DEF_BIT_IS_CLR(p_pool->Opt, MEM_DYN_POOL_OPT_HW) == DEF_YES) {
@@ -1971,17 +1971,19 @@ static void Mem_DynPoolCreateInternal(const CPU_CHAR *p_name,
 
     blk_size_align = MATH_ROUND_INC_UP_PWR2(blk_size_real,
                                             blk_align_worst);
-    blk_init_tot_size = blk_size_align * blk_qty_init;
+    blk_init_tot_size = (CPU_INT64U)blk_size_align * (CPU_INT64U)blk_qty_init;
+    RTOS_ASSERT_DBG_ERR_SET((blk_init_tot_size <= DEF_INT_32U_MAX_VAL),*p_err, RTOS_ERR_INVALID_ARG,; );
 
     //                                                             Remove extra space added to last blk because of blk align.
     blk_init_tot_size -= (blk_size_align - blk_size_real);
     if (DEF_BIT_IS_SET(p_pool->Opt, MEM_DYN_POOL_OPT_HW) == DEF_YES) {
-      blk_init_tot_size = MATH_ROUND_INC_UP_PWR2(blk_init_tot_size, p_seg->PaddingAlign);
+      blk_init_tot_size = MATH_ROUND_INC_UP_PWR2(blk_init_tot_size, (CPU_INT64U)p_seg->PaddingAlign);
+      RTOS_ASSERT_DBG_ERR_SET((blk_init_tot_size <= DEF_INT_32U_MAX_VAL),*p_err, RTOS_ERR_INVALID_ARG,; );
     }
 
     p_blks = (CPU_INT08U *)Mem_SegAllocInternal(p_name,         // Alloc initial blks.
                                                 p_seg,
-                                                blk_init_tot_size,
+                                                (CPU_SIZE_T)blk_init_tot_size,
                                                 blk_align_worst,
                                                 LIB_MEM_PADDING_ALIGN_NONE,
                                                 DEF_NULL,

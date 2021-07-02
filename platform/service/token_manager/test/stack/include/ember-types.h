@@ -58,7 +58,7 @@ typedef uint16_t EmberPanId;
  * @brief A distinguished network ID that will never be assigned
  * to any node.  Used to indicate the absence of a node ID.
  */
-#define EMBER_NULL_NODE_ID                0xFFFF
+#define EMBER_NULL_NODE_ID                0xFFFFu
 
 /** @brief Broadcast address. */
 #define EMBER_BROADCAST_ADDRESS           0xFFFF
@@ -686,7 +686,7 @@ typedef uint8_t EmberStatus;
 typedef uint16_t Buffer;
 typedef uint16_t EmberMessageBuffer;
 
-#define NULL_BUFFER 0x0000
+#define NULL_BUFFER 0x0000u
 
 typedef struct {
   EmberNodeId destination;

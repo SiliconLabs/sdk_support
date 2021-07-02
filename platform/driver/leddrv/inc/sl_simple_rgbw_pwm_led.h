@@ -37,24 +37,25 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-#define SL_SIMPLE_RGBW_PWM_LED_POLARITY_ACTIVE_HIGH 0U
-#define SL_SIMPLE_RGBW_PWM_LED_POLARITY_ACTIVE_LOW  1U
+#define SL_SIMPLE_RGBW_PWM_LED_POLARITY_ACTIVE_HIGH 0U  ///< LED Active polarity High
+#define SL_SIMPLE_RGBW_PWM_LED_POLARITY_ACTIVE_LOW  1U  ///< LED Active polarity Low
 
-#define SL_SIMPLE_RGBW_PWM_LED_COLOR_R              0U
-#define SL_SIMPLE_RGBW_PWM_LED_COLOR_G              1U
-#define SL_SIMPLE_RGBW_PWM_LED_COLOR_B              2U
-#define SL_SIMPLE_RGBW_PWM_LED_COLOR_W              3U
+#define SL_SIMPLE_RGBW_PWM_LED_COLOR_R              0U  ///< LED Red
+#define SL_SIMPLE_RGBW_PWM_LED_COLOR_G              1U  ///< LED Green
+#define SL_SIMPLE_RGBW_PWM_LED_COLOR_B              2U  ///< LED Blue
+#define SL_SIMPLE_RGBW_PWM_LED_COLOR_W              3U  ///< LED White
 
-#define SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF            0U
+#define SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF            0U  ///< LED off value
 
-#define SL_SIMPLE_RGBW_PWM_LED_NUM_CC_REQUIRED      4U // Number of Timer Capture Channels required (1 for each RGBW color)
+#define SL_SIMPLE_RGBW_PWM_LED_NUM_CC_REQUIRED      4U  ///< Number of Timer Capture Channels required (1 for each RGBW color)
 
 /*******************************************************************************
  *****************************   DATA TYPES   **********************************
  ******************************************************************************/
 
-typedef uint8_t sl_simple_rgbw_pwm_led_polarity_t;
+typedef uint8_t sl_simple_rgbw_pwm_led_polarity_t;    ///< LED GPIO polarities (active high/low)
 
+/// A Simple RGBW LED context
 typedef struct {
   /* Config parameters */
   GPIO_Port_TypeDef                 port[4];      ///< Red, Green, Blue and White GPIO ports
@@ -70,10 +71,11 @@ typedef struct {
   sl_led_state_t                    state;        ///< Current state (ON/OFF)
 } sl_simple_rgbw_pwm_led_context_t;
 
+/// A Simple RGBW LED PWM instance
 typedef struct {
   sl_led_t       led_common;                      ///< Inherit from the Common LED Driver
-  void           (*set_rgbw_color)(void *context, uint16_t red, uint16_t green, uint16_t blue, uint16_t white);
-  void           (*get_rgbw_color)(void *context, uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *white);
+  void           (*set_rgbw_color)(void *context, uint16_t red, uint16_t green, uint16_t blue, uint16_t white);     ///< member function to set RGBW
+  void           (*get_rgbw_color)(void *context, uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *white); ///< member function to get RGBW
 } sl_led_rgbw_pwm_t;
 
 /*******************************************************************************
@@ -168,15 +170,25 @@ void sl_simple_rgbw_pwm_led_get_color(void *led_handle, uint16_t *red, uint16_t 
  ****************   API extensions to the Common LED Driver   ******************
  ******************************************************************************/
 
-void sl_led_set_rgbw_color(const sl_led_rgbw_pwm_t *led_handle, uint16_t red, uint16_t green, uint16_t blue, uint16_t white);
+void sl_led_set_rgbw_color(const sl_led_rgbw_pwm_t *led_handle,   ///< LED Instance handle
+                           uint16_t red,                          ///< LED red intensity
+                           uint16_t green,                        ///< LED green intensity
+                           uint16_t blue,                         ///< LED blue intensity
+                           uint16_t white                         ///< LED white intensity
+                           ); ///< LED set RGBW color
 
-void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t *led_handle, uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *white);
+void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t * led_handle,    ///< LED Instance handle
+                           uint16_t * red,                          ///< LED red intensity
+                           uint16_t * green,                        ///< LED green intensity
+                           uint16_t * blue,                         ///< LED blue intensity
+                           uint16_t * white                         ///< LED white intensity
+                           ); ///< LED get RGBW setting
 
 /** @} (end group simple_rgbw_pwm_led) */
 /** @} (end group led) */
 
 // ******** THE REST OF THE FILE IS DOCUMENTATION ONLY !***********************
-/// @addtogroup simple_rgbw_pwm_led RGBW PWM LED Driver
+/// @addtogroup simple_rgbw_pwm_led Simple RGBW PWM LED Driver
 /// @{
 ///
 ///   @details

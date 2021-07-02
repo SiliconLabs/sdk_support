@@ -33,13 +33,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
+
 #include "rail.h"
 #include "rail_ieee802154.h"
 #include "rail_mfm.h"
 #include "rail_zwave.h"
 #include "sl_rail_util_init.h"
 #include "sl_rail_util_protocol.h"
-#include "sl_rail_util_ant_div.h"
+#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
+  #include "sl_rail_util_ant_div.h"
+#endif
 #include "buffer_pool_allocator_config.h"
 
 #include "em_chip.h"
@@ -59,9 +65,6 @@
 #include "railapp_rmr.h"
 #endif
 
-#if defined(SL_COMPONENT_CATALOG_PRESENT)
-  #include "sl_component_catalog.h"
-#endif
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   #include "sl_power_manager.h"
 #endif
@@ -114,6 +117,7 @@ RAIL_RadioState_t rxSuccessTransition = RAIL_RF_STATE_IDLE;
 #endif
 uint8_t logLevel = PERIPHERAL_ENABLE | ASYNC_RESPONSE;
 int32_t txCount = 0;
+int32_t txRepeatCount = 0;
 uint32_t continuousTransferPeriod = SL_RAIL_TEST_CONTINUOUS_TRANSFER_PERIOD;
 bool enableRandomTxDelay = false;
 uint32_t txAfterRxDelay = 0;
@@ -318,8 +322,10 @@ void sl_rail_test_internal_app_init(void)
   appHalInit();
 
   // Initialize txOptions & rxOptions
+#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
   sl_rail_util_ant_div_init_tx_options(&txOptions);
   sl_rail_util_ant_div_init_rx_options(&rxOptions);
+#endif
 
   // Make sure the response printer mirrors the default printingEnabled state
   responsePrintEnable(printingEnabled);
@@ -329,8 +335,7 @@ void sl_rail_test_internal_app_init(void)
   responsePrint("reset", "App:%s,Built:%s", SL_RAIL_TEST_APP_NAME, buildDateTime);
 
   // Set TX FIFO, and verify that the size is correct
-  uint16_t fifoSize = RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, SL_RAIL_TEST_TX_BUFFER_SIZE);
-  if (fifoSize != SL_RAIL_TEST_TX_BUFFER_SIZE) {
+  if (configureTxFifo() != RAIL_STATUS_NO_ERROR) {
     while (1) ;
   }
 
@@ -403,6 +408,24 @@ void sl_rail_test_internal_app_init(void)
   receiveModeEnabled = true;
 }
 
+volatile uint16_t rxDataSourceEventState = RX_DATA_SOURCE_EVENT_STATE_CHECKED;
+
+static void checkRxDataSource(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+  CORE_ENTER_CRITICAL();
+  if (rxDataSourceEventState >= RX_DATA_SOURCE_EVENT_STATE_SUSPENDED) {
+    RAIL_ConfigEvents(railHandle, RAIL_EVENT_RX_FIFO_ALMOST_FULL,
+                      RAIL_EVENT_RX_FIFO_ALMOST_FULL);
+    // Separate calls each of which uses fast-path code in library
+    RAIL_ConfigEvents(railHandle, (RAIL_EVENT_RX_FIFO_OVERFLOW
+                                   | RAIL_EVENT_RX_FIFO_FULL),
+                      (RAIL_EVENT_RX_FIFO_OVERFLOW | RAIL_EVENT_RX_FIFO_FULL));
+  }
+  rxDataSourceEventState = RX_DATA_SOURCE_EVENT_STATE_CHECKED;
+  CORE_EXIT_CRITICAL();
+}
+
 // Function called from sl_system_process_action within the main super loop.
 void sl_rail_test_internal_app_process_action(void)
 {
@@ -428,6 +451,8 @@ void sl_rail_test_internal_app_process_action(void)
   printAckTimeout();
 
   heldRxProcess();
+
+  checkRxDataSource();
 }
 
 /******************************************************************************
@@ -528,9 +553,11 @@ void sl_rail_util_on_assert_failed(RAIL_Handle_t railHandle, uint32_t errorCode)
     errorMessage = railErrorMessages[errorCode];
   }
   // Print a message about the assert that triggered
+  extern volatile int RAIL_AssertLineNumber;
   responsePrint("assert",
-                "code:%d,message:%s",
+                "code:%d,line:%d,message:%s",
                 errorCode,
+                RAIL_AssertLineNumber,
                 errorMessage);
   // Reset the chip since an assert is a fatal error
   NVIC_SystemReset();
@@ -576,6 +603,14 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
       counters.dataRequests++;
       RAILCb_IEEE802154_DataRequestCommand(railHandle);
     }
+#if RAIL_FEAT_ZWAVE_SUPPORTED
+    else if (RAIL_ZWAVE_IsEnabled(railHandle)) {
+      RAILCb_ZWAVE_LrAckData(railHandle);
+    }
+#endif //RAIL_FEAT_ZWAVE_SUPPORTED
+    else {
+      // Other protocols ignore this event
+    }
   }
 #if RAIL_FEAT_ZWAVE_SUPPORTED
   if (events & RAIL_EVENT_ZWAVE_BEAM) {
@@ -586,6 +621,7 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   }
 #endif //RAIL_FEAT_ZWAVE_SUPPORTED
   if (events & RAIL_EVENT_RX_FIFO_ALMOST_FULL) {
+    counters.rxFifoAlmostFull++;
     RAILCb_RxFifoAlmostFull(railHandle);
   }
   if (events & RAIL_EVENT_RX_FIFO_FULL) {
@@ -609,7 +645,12 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     }
     if (events & RAIL_EVENT_RX_FIFO_OVERFLOW) {
       counters.rxOfEvent++;
-      RAILCb_RxPacketAborted(railHandle);
+      if (railDataConfig.rxSource == RX_PACKET_DATA) {
+        RAILCb_RxPacketAborted(railHandle);
+      } else {
+        // Treat similar to RX_FIFO_ALMOST_FULL: consume RX data
+        RAILCb_RxFifoAlmostFull(railHandle);
+      }
     }
     if (events & RAIL_EVENT_RX_ADDRESS_FILTERED) {
       counters.addrFilterEvent++;
@@ -672,12 +713,29 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     (void) RAIL_GetTxTimePreambleStart(railHandle, RAIL_TX_STARTED_BYTES,
                                        &txStartTime);
   }
+  if (events & RAIL_EVENT_TX_FIFO_ALMOST_EMPTY) {
+    RAILCb_TxFifoAlmostEmpty(railHandle);
+  }
+  // Process TX success before any failures in case an auto-repeat fails
+  if (events & RAIL_EVENT_TX_PACKET_SENT) {
+    counters.userTx++;
+    if (txRepeatCount > 0) {
+      // Defer calling RAILCb_TxPacketSent() to last of auto-repeat transmits
+      internalTransmitCounter++;
+      if (txRepeatCount != RAIL_TX_REPEAT_INFINITE_ITERATIONS) {
+        txRepeatCount--;
+      }
+    } else {
+      RAILCb_TxPacketSent(railHandle, false);
+    }
+  }
   if (events & (RAIL_EVENT_TX_ABORTED
                 | RAIL_EVENT_TX_BLOCKED
                 | RAIL_EVENT_TX_UNDERFLOW
                 | RAIL_EVENT_TX_CHANNEL_BUSY
                 | RAIL_EVENT_TX_SCHEDULED_TX_MISSED)) {
     lastTxStatus = events;
+    txRepeatCount = 0;
     newTxError = true;
     failPackets++;
     scheduleNextTx();
@@ -694,8 +752,11 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     }
   }
   // Put this here too so that we do these things twice
-  // in the case that an ack and a non ack failure have
-  // been queued up
+  // in the case that an ack and a non ack have completed
+  if (events & RAIL_EVENT_TXACK_PACKET_SENT) {
+    counters.ackTx++;
+    RAILCb_TxPacketSent(railHandle, true);
+  }
   if (events & (RAIL_EVENT_TXACK_ABORTED
                 | RAIL_EVENT_TXACK_BLOCKED
                 | RAIL_EVENT_TXACK_UNDERFLOW)) {
@@ -713,17 +774,6 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
     if (events & RAIL_EVENT_TXACK_UNDERFLOW) {
       counters.ackTxUnderflow++;
     }
-  }
-  if (events & RAIL_EVENT_TX_FIFO_ALMOST_EMPTY) {
-    RAILCb_TxFifoAlmostEmpty(railHandle);
-  }
-  if (events & RAIL_EVENT_TX_PACKET_SENT) {
-    counters.userTx++;
-    RAILCb_TxPacketSent(railHandle, false);
-  }
-  if (events & RAIL_EVENT_TXACK_PACKET_SENT) {
-    counters.ackTx++;
-    RAILCb_TxPacketSent(railHandle, true);
   }
   if (events & RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE) {
     RAILCb_RxChannelHoppingComplete(railHandle);
@@ -871,7 +921,15 @@ RAIL_Status_t chooseTxType(void)
   // Invalidate the previous TX's start time
   txStartTime = 0U;
   if (currentAppMode() == TX_SCHEDULED || currentAppMode() == SCHTX_AFTER_RX) {
-    return RAIL_StartScheduledTx(railHandle, channel, txOptions, &nextPacketTxTime, NULL);
+    if (txType == TX_TYPE_CSMA) {
+      return RAIL_StartScheduledCcaCsmaTx(railHandle, channel, txOptions, &nextPacketTxTime,
+                                          csmaConfig, NULL);
+    } else if (txType == TX_TYPE_LBT) {
+      return RAIL_StartScheduledCcaLbtTx(railHandle, channel, txOptions, &nextPacketTxTime,
+                                         lbtConfig, NULL);
+    } else {
+      return RAIL_StartScheduledTx(railHandle, channel, txOptions, &nextPacketTxTime, NULL);
+    }
   } else if (txType == TX_TYPE_LBT) {
     return RAIL_StartCcaLbtTx(railHandle, channel, txOptions, lbtConfig, NULL);
   } else if (txType == TX_TYPE_CSMA) {
@@ -908,6 +966,7 @@ void sendPacketIfPending(void)
       scheduleNextTx(); // No callback will fire, so fake it
     } else if (currentAppMode() == TX_CANCEL) {
       usDelay(txCancelDelay);
+      txRepeatCount = 0;
       if (txCancelMode == RAIL_STOP_MODES_NONE) {
         RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
       } else {
@@ -1110,4 +1169,13 @@ char *handleToString(RAIL_Handle_t railHandle)
 {
   (void)railHandle;
   return "r";//for RAILtest vs MP configuration
+}
+
+RAIL_Status_t configureTxFifo(void)
+{
+  uint16_t fifoSize = RAIL_SetTxFifo(railHandle, txFifo.fifo, 0, SL_RAIL_TEST_TX_BUFFER_SIZE);
+  if (fifoSize != SL_RAIL_TEST_TX_BUFFER_SIZE) {
+    return RAIL_STATUS_INVALID_PARAMETER;
+  }
+  return RAIL_STATUS_NO_ERROR;
 }

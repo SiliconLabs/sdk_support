@@ -6,7 +6,7 @@ xsi:schemaLocation="http://www.silabs.com/ss/ContentItem.ecore file:/C:/Users/CA
   <contentItemData
     priority="5"
     category="API References"
-    itemURI="https://doc.micrium.com/display/OSUM50900/IO+API"
+    itemURI="https://docs.silabs.com/micrium/latest/micrium-io-api/"
     label="IO API Reference"
     description="API Reference for Micrium OS IO"
   ></contentItemData>

@@ -134,14 +134,15 @@ if( isdefinedsymbol(NULL_BTL) ) {
 define symbol APPRO_BOTTOM          = HEADER_TOP + 1;
 define symbol APPRO_TOP             = MFB_TOP;
 define region APPRO_region          = mem:[from APPRO_BOTTOM to APPRO_TOP];
-define block APPRO_block with fixed order { ro section .intvec, 
-                                            ro section .textrw_init, 
+define block APPRO_block with fixed order { ro section .intvec,
+                                            ro section .textrw_init,
                                             ro section .gatt_header,
                                             ro section .gatt_data,
                                             ro section .text,
-                                            ro section CODE, 
+                                            ro section CODE,
                                             ro section .rodata,
                                             ro section .data_init,
+                                            ro section .init_array,
                                             ro section .iar.init_table,
                                             ro section __DLIB_PERTHREAD_init };
 "APP ro": place at start of APPRO_region { block APPRO_block };

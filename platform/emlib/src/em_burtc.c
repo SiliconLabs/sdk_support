@@ -62,10 +62,10 @@ __STATIC_INLINE uint32_t divToLog2(uint32_t div)
   uint32_t log2;
 
   /* Prescaler accepts an argument of 128 or less, valid values being 2^n. */
-  EFM_ASSERT((div > 0) && (div <= 32768));
+  EFM_ASSERT((div > 0UL) && (div <= 32768UL));
 
   /* Count leading zeroes and "reverse" result, Cortex-M3 intrinsic. */
-  log2 = (31 - __CLZ(div));
+  log2 = (31UL - __CLZ(div));
 
   return log2;
 }
@@ -203,10 +203,10 @@ void BURTC_Init(const BURTC_Init_TypeDef *burtcInit)
 #endif
 
   BURTC->CFG = (presc << _BURTC_CFG_CNTPRESC_SHIFT)
-               | ((burtcInit->compare0Top ? 1U : 0U) << _BURTC_CFG_COMPTOP_SHIFT)
-               | ((burtcInit->debugRun ? 1U : 0U) << _BURTC_CFG_DEBUGRUN_SHIFT);
-  BURTC->EM4WUEN = ((burtcInit->em4comp ? 1U : 0U) << _BURTC_EM4WUEN_COMPEM4WUEN_SHIFT)
-                   | ((burtcInit->em4overflow ? 1U : 0U) << _BURTC_EM4WUEN_OFEM4WUEN_SHIFT);
+               | ((burtcInit->compare0Top ? 1UL : 0UL) << _BURTC_CFG_COMPTOP_SHIFT)
+               | ((burtcInit->debugRun ? 1UL : 0UL) << _BURTC_CFG_DEBUGRUN_SHIFT);
+  BURTC->EM4WUEN = ((burtcInit->em4comp ? 1UL : 0UL) << _BURTC_EM4WUEN_COMPEM4WUEN_SHIFT)
+                   | ((burtcInit->em4overflow ? 1UL : 0UL) << _BURTC_EM4WUEN_OFEM4WUEN_SHIFT);
   BURTC->EN_SET = BURTC_EN_EN;
   if (burtcInit->start) {
     BURTC_Start();

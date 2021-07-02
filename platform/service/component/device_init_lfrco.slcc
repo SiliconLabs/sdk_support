@@ -3,13 +3,16 @@ label: "Device Init: LFRCO"
 package: platform
 description: >
   Device init for LFRCO configures the precision mode of the low-frequency RC oscillator.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:
   - path: config/s2/sl_device_init_lfrco_config.h
     file_id: device_init_lfrco_config
     condition: [device_sdid_205]
+  - path: config/s2/sl_device_init_lfrco_config.h
+    file_id: device_init_lfrco_config
+    condition: [device_sdid_215]
 include:
   - path: inc
     file_list:

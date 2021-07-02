@@ -1,10 +1,10 @@
 id: device_init_core
-label: Device Init
+label: Chip Initialization
 package: platform
 description: >
   This initialization configures the device to a state as similar to later 
   revisions as possible to improve software compatibility with newer parts.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 provides:
   - name: device_init_core

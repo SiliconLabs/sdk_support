@@ -30,7 +30,7 @@
 #ifndef SLEEP_H
 #define SLEEP_H
 
-#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_1
+#ifndef SL_SUPRESS_DEPRECATION_WARNINGS_SDK_3_2
 #warning "The sleep driver is deprecated and marked for removal in a later release. Please use the power_manager service instead."
 #endif
 

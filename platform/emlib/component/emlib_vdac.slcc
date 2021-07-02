@@ -29,5 +29,13 @@ documentation:
       condition: [device_sdid_89]
     - page: emlib/api/efr32xg14/group-vdac
       condition: [device_sdid_95]
+    - page: emlib/api/efm32gg11/group-vdac
+      condition: [device_sdid_100]
+    - page: emlib/api/efm32tg11/group-vdac
+      condition: [device_sdid_103]
+    - page: emlib/api/efm32gg12/group-vdac
+      condition: [device_sdid_106]
     - page: emlib/api/efr32xg23/group-vdac
       condition: [device_sdid_210]
+    - page: emlib/api/efr32xg24/group-vdac
+      condition: [device_sdid_215]

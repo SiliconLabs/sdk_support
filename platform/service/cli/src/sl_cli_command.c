@@ -343,8 +343,10 @@ int sl_cli_command_find_matches(sl_cli_handle_t handle,
                                 int *input_length,
                                 int *input_position)
 {
+  int len;
   int original_input_buffer_len = strlen(handle->input_buffer);
   char *token_v[SL_CLI_MAX_INPUT_ARGUMENTS];
+  char *buf;
   int token_c;
 
   *input_length = 0;
@@ -424,10 +426,14 @@ int sl_cli_command_find_matches(sl_cli_handle_t handle,
 
     // The tokenizer will replace all spaces with '\0' in the input buffer,
     // these need to be converted back to spaces
-    for (int j = 0; j < original_input_buffer_len; j++) {
-      if (handle->input_buffer[j] == '\0') {
-        handle->input_buffer[j] = ' ';
+    buf = handle->input_buffer;
+    len = original_input_buffer_len;
+    while (len > 0) {
+      if (*buf == '\0') {
+        *buf = ' ';
       }
+      buf++;
+      len--;
     }
   }
 
@@ -469,6 +475,7 @@ static const sl_cli_command_entry_t *scan_entry(const sl_cli_command_entry_t *cm
     if (group) {
       *help_flag = true;
       cmd_entry = cmd_entry_in;
+      *found = true;
     } else {
       cmd_entry = NULL;
     }

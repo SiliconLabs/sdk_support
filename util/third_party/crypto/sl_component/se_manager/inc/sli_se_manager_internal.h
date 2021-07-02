@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager internal API.
+ * @brief Silicon Labs Secure Engine Manager internal API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -49,7 +49,7 @@ extern "C" {
 // -------------------------------
 // SE status codes
 
-/// Response status codes for the Secure Element
+/// Response status codes for the Secure Engine
 #define SLI_SE_RESPONSE_MASK                    0x000F0000UL
 /// Command executed successfully or signature was successfully validated.
 #define SLI_SE_RESPONSE_OK                      0x00000000UL
@@ -94,8 +94,6 @@ extern "C" {
 #define SLI_SE_COMMAND_CHECK_HOST_IMAGE         0x43050001UL
 #define SLI_SE_COMMAND_APPLY_HOST_IMAGE         0x43060001UL
 #define SLI_SE_COMMAND_STATUS_HOST_IMAGE        0x43070000UL
-
-#define SLI_SE_COMMAND_UPGRADE_STATUS_CLEAR     0x430B0000UL
 
 #define SLI_SE_COMMAND_READ_OTP                 0xFE040000UL
 
@@ -149,8 +147,10 @@ extern "C" {
   #define SLI_SE_COMMAND_DBG_LOCK_STATUS          0x43110000UL
   #define SLI_SE_COMMAND_DBG_SET_RESTRICTIONS     0x43120000UL
   #define SLI_SE_COMMAND_PROTECTED_REGISTER       0x43210000UL
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+// SLI_SE_COMMAND_STATUS_READ_RSTCAUSE is only available on xG21 devices (series-2-config-1)
   #define SLI_SE_COMMAND_STATUS_READ_RSTCAUSE     0x43220000UL
-
+#endif
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
     #define SLI_SE_COMMAND_READ_USER_CERT_SIZE      0x43FA0000UL
     #define SLI_SE_COMMAND_READ_USER_CERT           0x43FB0000UL
@@ -173,7 +173,7 @@ extern "C" {
   #define SLI_SE_COMMAND_INIT_AES_128_KEY         0xFF0B0001UL
 #endif // SEMAILBOX_PRESENT
 
-// Commands limited to SE Vault devices
+// Commands limited to SE Vault High devices
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
     #define SLI_SE_COMMAND_WRAP_KEY                 0x01000000UL
     #define SLI_SE_COMMAND_UNWRAP_KEY               0x01020000UL
@@ -273,6 +273,15 @@ extern "C" {
 // lower the error probability further when using purposely
 // small or large scalars, for example during testing.
   #define SLI_SE_MAX_POINT_MULT_RETRIES   3U
+#endif
+
+// EFR32xG23+ doesn't require padding of curve elements or other keys
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
+  && (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  #define SLI_SE_KEY_PADDING_REQUIRED
+  #define SLI_SE_P521_PADDING_BYTES 2
+#else
+  #define SLI_SE_P521_PADDING_BYTES 0
 #endif
 
 // -------------------------------

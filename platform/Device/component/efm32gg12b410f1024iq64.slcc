@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32GG12B410F1024IQ64
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32GG12B/Source/system_efm32gg12b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32GG12B/Source/IAR/startup_efm32gg12b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32GG12B/Source/GCC/startup_efm32gg12b.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32GG12B/Source/ARM/startup_efm32gg12b.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32gg12b410f1024iq64.h
@@ -83,6 +93,8 @@
     - path: em_device.h
     - path: system_efm32gg12b.h
     path: platform/Device/SiliconLabs/EFM32GG12B/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32gg12b410f1024iq64
   - name: device
@@ -172,6 +184,8 @@
   - name: device_has_wtimer0
   - name: device_has_wtimer1
   - name: device_has_bootloader_flash
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
 - requires:
@@ -209,7 +223,6 @@
     value: 2048
 - tag:
   - device:opn:efm32gg12b410f1024iq64
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32gg12b410f1024iq64

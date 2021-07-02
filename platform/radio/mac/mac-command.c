@@ -17,6 +17,7 @@
 
 #include PLATFORM_HEADER
 #include "buffer_manager/buffer-management.h"
+#include "buffer_manager/legacy-packet-buffer.h"
 #include "sl_status.h"
 
 #include "stack/core/ember-stack.h"
@@ -155,10 +156,11 @@ PacketHeader sl_mac_make_command(uint8_t command,
                        ? EMBER_MAC_INFO_FRAME_PENDING_MASK : 0)
                     | ((macFrameControl & EMBER_MAC_HEADER_FC_ACK_REQUEST_BIT)
                        ? EMBER_MAC_INFO_OUTGOING_FRAME_PENDING : 0));
-    returnHeader = sl_mac_make_raw_message(headerLength,
-                                           emGetBufferPointer(header),
+    returnHeader = sl_mac_make_raw_message(NULL_BUFFER,
                                            macInfoFlags,
                                            NWK_INDEX);
+
+    emberAppendToLinkedBuffers(returnHeader, emGetBufferPointer(header), emGetBufferLength(header));
     emSetPayloadLink(returnHeader, payloadBuffer);
   }
 
@@ -438,15 +440,14 @@ Buffer sl_mac_make_beacon(uint8_t mac_index,
 
   PacketHeader beacon = NULL_BUFFER;
 
-  beacon = sl_mac_make_raw_message(finger - beacon_header,
-                                   beacon_header,
+  beacon = sl_mac_make_raw_message(NULL_BUFFER,
                                    macInfoFlags,
                                    NWK_INDEX);
 
   if (beacon == NULL_BUFFER) {
     return beacon;
   }
-
+  emberAppendToLinkedBuffers(beacon, beacon_header, (finger - beacon_header));
   emSetPayloadLink(beacon, beacon_payload);
 
   return beacon;
@@ -478,7 +479,8 @@ Buffer sl_mac_make_enhanced_beacon(uint8_t mac_index,
 
   uint8_t macInfoFlags = (EMBER_MAC_INFO_TYPE_MAC_COMMAND);
 
-  beacon = sl_mac_make_raw_message(size, NULL, macInfoFlags, NWK_INDEX);
+  beacon = sl_mac_make_raw_message(NULL_BUFFER, macInfoFlags, NWK_INDEX);
+  emberExtendLinkedBuffer(beacon, size);
 
   if (beacon == NULL_BUFFER) {
     return beacon;

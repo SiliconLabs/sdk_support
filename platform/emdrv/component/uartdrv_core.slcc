@@ -36,6 +36,8 @@ requires:
   - name: "sleeptimer"
     condition:
       - "power_manager"
+  - name: "status"
+    condition: [uartdrv_instance]      
 include:
   - path: "inc"
     file_list:

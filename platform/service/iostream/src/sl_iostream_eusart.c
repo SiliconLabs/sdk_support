@@ -150,7 +150,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     CMU_ClockEnable(cmuClock_EM23GRPACLK, true);
     CMU_ClockSelectSet(eusart_config->clock, cmuSelect_EM23GRPACLK);
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
     CMU_ClockEnable(cmuClock_LFRCO, true);
     CMU_ClockSelectSet(eusart_config->clock, cmuSelect_LFRCO);
 #else
@@ -161,7 +162,8 @@ sl_status_t sl_iostream_eusart_init(sl_iostream_uart_t *iostream_uart,
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     CMU_ClockEnable(cmuClock_EM01GRPACLK, true);
     CMU_ClockSelectSet(eusart_config->clock, cmuSelect_EM01GRPACLK);
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) \
+    || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
     CMU_ClockSelectSet(cmuClock_EM01GRPCCLK, cmuSelect_HFRCODPLL);
     if (eusart_config->clock == cmuClock_EUSART0) {
       CMU_ClockSelectSet(cmuClock_EUSART0CLK, cmuSelect_EM01GRPCCLK);
@@ -307,9 +309,14 @@ static sl_status_t eusart_tx(void *context,
 
   EUSART_Tx(eusart_context->eusart, c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   // Enable TX interrupts
   EUSART_IntEnable(eusart_context->eusart, EUSART_IF_TXC);
+#endif
+
+#if defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+/* Wait until transmit buffer is empty */
+  while (!(EUSART_StatusGet(eusart_context->eusart) & EUSART_STATUS_TXFL)) ;
 #endif
 
   return SL_STATUS_OK;

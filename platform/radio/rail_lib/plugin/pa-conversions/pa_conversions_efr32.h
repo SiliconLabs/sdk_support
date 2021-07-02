@@ -47,6 +47,16 @@
 #endif
 #endif
 
+#ifdef HAL_CONFIG
+#include "hal-config.h"
+#ifdef HAL_PA_CURVE_HEADER
+#ifdef SL_RAIL_UTIL_PA_CURVE_HEADER
+#undef SL_RAIL_UTIL_PA_CURVE_HEADER
+#endif
+#define SL_RAIL_UTIL_PA_CURVE_HEADER HAL_PA_CURVE_HEADER
+#endif
+#endif
+
 #ifdef SL_RAIL_UTIL_PA_CURVE_HEADER
 #include SL_RAIL_UTIL_PA_CURVE_HEADER
 #else
@@ -99,10 +109,8 @@ RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *con
  * @param[in] mode PA mode whose curves are needed.
  * @return RAIL_TxPowerCurves_t that should be used for conversion functions.
  *
- * @note: The chip specific input values of
- * \ref RAIL_TX_POWER_MODE_2P4GIG_HIGHEST and
- * \ref RAIL_TX_POWER_MODE_SUBGIG_HIGHEST don't correlate to a specific PA in
- * this function and will therefore result in a return value of NULL.
+ * @note: If the mode is not supported by the the chip,
+ * then NULL will be returned.
  */
 RAIL_TxPowerCurves_t const * RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode);
 

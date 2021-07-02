@@ -46,9 +46,6 @@ void autoAckConfig(sl_cli_command_arg_t *args)
     return;
   }
 
-  uint16_t timing;
-  RAIL_Status_t status;
-
   if (memcmp(sl_cli_get_argument_string(args, 0), "idle", 4) == 0) {
     config.rxTransitions.success = RAIL_RF_STATE_IDLE;
     config.txTransitions.success = RAIL_RF_STATE_IDLE;
@@ -60,10 +57,12 @@ void autoAckConfig(sl_cli_command_arg_t *args)
     return;
   }
 
-  RAIL_StateTiming_t timings = { 0 };
+  RAIL_Status_t status;
+  RAIL_TransitionTime_t timing;
+  RAIL_StateTiming_t timings = { 0U, };
 
-  timing = sl_cli_get_argument_uint16(args, 1);
-  if (timing > 13000) {
+  timing = (RAIL_TransitionTime_t)sl_cli_get_argument_uint16(args, 1);
+  if (timing > RAIL_MAXIMUM_TRANSITION_US) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x21, "Invalid idle timing.");
     return;
   } else {
@@ -71,8 +70,8 @@ void autoAckConfig(sl_cli_command_arg_t *args)
     timings.idleToRx = timing;
   }
 
-  timing = sl_cli_get_argument_uint16(args, 2);
-  if (timing > 13000) {
+  timing = (RAIL_TransitionTime_t)sl_cli_get_argument_uint16(args, 2);
+  if (timing > RAIL_MAXIMUM_TRANSITION_US) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x22, "Invalid turnaround timing");
     return;
   } else {
@@ -80,9 +79,9 @@ void autoAckConfig(sl_cli_command_arg_t *args)
     // Make txToRx a little lower than desired. See documentation
     // on RAIL_ConfigAutoAck.
     if (timing > 10) {
-      timings.txToRx = timing - 10;
+      timings.txToRx = timing - 10U;
     } else {
-      timings.txToRx = 0;
+      timings.txToRx = 0U;
     }
   }
 
@@ -97,9 +96,9 @@ void autoAckConfig(sl_cli_command_arg_t *args)
     responsePrint(sl_cli_get_command_string(args, 0),
                   "rxDefaultState:%s,"
                   "txDefaultState:%s,"
-                  "idleTiming:%d,"
-                  "turnaroundTime:%d,"
-                  "ackTimeout:%d",
+                  "idleTiming:%u,"
+                  "turnaroundTime:%u,"
+                  "ackTimeout:%u",
                   getRfStateName(config.rxTransitions.success),
                   getRfStateName(config.txTransitions.success),
                   timings.idleToTx,

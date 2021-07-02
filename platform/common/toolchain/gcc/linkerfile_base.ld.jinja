@@ -72,6 +72,11 @@
 {%- set app_flash_size = app_flash_end - app_flash_start %}
 {%- set app_ram_size = app_ram_end - app_ram_start %}
 
+{%- set rtt = 0 %}
+{% if linker_rtt_section is defined %}
+{%-   set rtt = 1 %}
+{% endif %}
+
 MEMORY
 {
   FLASH   (rx)  : ORIGIN = 0x{{ '%0x' % app_flash_start }}, LENGTH = 0x{{ '%0x' % app_flash_size }}
@@ -208,6 +213,9 @@ SECTIONS
   {
     . = ALIGN(4);
     __bss_start__ = .;
+{%- if rtt == 1 %}
+    *(SEGGER_RTT)
+{%- endif %}
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
@@ -244,7 +252,4 @@ SECTIONS
   linker_nvm_begin = linker_nvm_end - SIZEOF(.nvm);
   linker_nvm_size = SIZEOF(.nvm);
   __nvm3Base = linker_nvm_begin;
-
-  ASSERT( (ORIGIN(FLASH) + LENGTH(FLASH)) >= (__etext + SIZEOF(.data)), "FLASH memory overflowed !")
-  ASSERT( (ORIGIN(RAM) + LENGTH(RAM)) >= (__HeapBase + SIZEOF(.heap)), "RAM memory overflowed !")
 }

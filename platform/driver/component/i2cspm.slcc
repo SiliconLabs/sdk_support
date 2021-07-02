@@ -1,6 +1,6 @@
 id: i2cspm
-package: "platform"
-label: "I2CSPM"
+package: platform
+label: I2CSPM
 description: >
   This is an I2C Simple Polled Master driver that supports master mode with
   a single bus-master only. It blocks while waiting for the transfer to 
@@ -21,11 +21,11 @@ description: >
 
   Selecting this component will also include the I2CSPM Core component, which is 
   the implementation of the I2CSPM driver itself.
-category: "Platform|Driver"
-quality: "production"
-root_path: "platform/driver/i2cspm"
+category: Platform|Driver|I2C
+quality: production
+root_path: platform/driver/i2cspm
 instantiable:
-  prefix: "inst"
+  prefix: inst
 config_file:
   - path: "config/s0/sl_i2cspm_{{instance}}_config.h"
     file_id: i2cspm_config
@@ -37,12 +37,12 @@ config_file:
     file_id: i2cspm_config
     condition: [device_series_2]
 provides:
-  - name: "i2cspm"
+  - name: i2cspm
     allow_multiple: true
 requires:
-  - name: "i2cspm_core"
+  - name: i2cspm_core
 template_contribution:
-  - name: "i2cspm_instances"
+  - name: i2cspm_instances
     value: "{{instance}}"
 documentation:
     docset: gecko-platform

@@ -64,7 +64,7 @@ __STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
 
 /***************************************************************************//**
  * @brief
- *   Unregisters user callback for given pin interrupt number.
+ *   Unregister user callback for a given pin interrupt number.
  *
  * @details
  *   Use this function to unregister a callback.

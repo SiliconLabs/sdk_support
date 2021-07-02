@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -35,7 +35,7 @@
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXYGEN)
 
 /***************************************************************************//**
- * @addtogroup sl_se_manager Secure Element Manager
+ * @addtogroup sl_se_manager Secure Engine Manager
  *
  * @note The APIs are thread-safe.
  *
@@ -46,7 +46,7 @@
  * @addtogroup sl_se_manager_core Core
  *
  * @brief
- *   Secure Element Manager Core API
+ *   Secure Engine Manager Core API
  *
  * @details
  *   API for initialization of SE Manager and SE command context with yield
@@ -199,14 +199,14 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 #endif // SL_SE_MANAGER_H
 
 // THE REST OF THE FILE IS DOCUMENTATION ONLY
-/// @addtogroup sl_se_manager Secure Element Manager API
-/// @brief Silicon Labs Secure Element Manager
+/// @addtogroup sl_se_manager Secure Engine Manager API
+/// @brief Silicon Labs Secure Engine Manager
 /// @{
 ///
 /// @details
 /// # Introduction
 ///
-/// The Secure Element (SE) Manager provides thread-safe APIs for the Secure Element's mailbox interface.
+/// The Secure Engine (SE) Manager provides thread-safe APIs for the Secure Engine's mailbox interface.
 /// The SE Manager will use the SE hardware peripherals to accelerate cryptographic operations.
 ///
 /// # Functionality
@@ -359,7 +359,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 ///
 /// ## Tamper
 ///
-/// The Secure Element (SE) tamper module connects a number of hardware and software-driven tamper signals to a set of configurable hardware and software responses.
+/// The Secure Engine (SE) tamper module connects a number of hardware and software-driven tamper signals to a set of configurable hardware and software responses.
 /// This can be used to program the device to automatically respond to external events that could signal that someone is trying to tamper with the device,
 /// and very rapidly remove secrets stored in the SE. The available tamper signals range from signals based on failed authentication and secure boot to specialized glitch detectors.
 /// When any of these signals fire, the tamper block can be configured to trigger several different responses,
@@ -431,7 +431,7 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 ///
 /// ## RTOS Mode and Multi-Thread Safety
 ///
-/// The SE Manager supports multi-thread safe APIs for MicriumOS and FreeRTOS.
+/// The SE Manager supports multi-thread safe APIs for MicriumOS and FreeRTOS interfacing with CMSIS RTOS2 APIs.
 ///
 /// For MicriumOS support the user application must define the compile time option SL_CATALOG_MICRIUMOS_KERNEL_PRESENT.
 /// For FreeRTOS support the user application must define the compile time option SL_CATALOG_FREERTOS_KERNEL_PRESENT.
@@ -440,12 +440,11 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 /// Applications created using Simplicity Studio 5 need to include the header file called _sl_component_catalog.h_ which will include a macro define for one of the abovementioned RTOSes if present.
 ///
 /// In the cases with SL_CATALOG_MICRIUMOS_KERNEL_PRESENT or SL_CATALOG_FREERTOS_KERNEL_PRESENT defined (RTOS-mode), the SE Manager will be configured with threading and yield support.
-/// Configure ::sl_se_command_context_t with ::sl_se_set_yield to yield the CPU core when the SE Manager is waiting for the Secure Element to complete a mailbox command.
+/// Configure ::sl_se_command_context_t with ::sl_se_set_yield to yield the CPU core when the SE Manager is waiting for the Secure Engine to complete a mailbox command.
 ///
-/// For threading support the SE Manager applies an SE lock mechanism (_mutex_ in MicriumOS and _semaphore_ in FreeRTOS)
-/// to protect the Secure Element Mailbox interface from being accessed by more than one thread,
-/// ensuring multi-thread safety. For yielding the CPU core while waiting for the SE,
-/// the SE Manager APIs that invoke SE mailbox commands will wait on a semaphore which is signaled in the ISR that handles the SE mailbox completion interrupt.
+/// For threading support the SE Manager applies an SE lock mechanism to protect the Secure Engine Mailbox interface from being accessed by more than one thread,
+/// ensuring multi-thread safety. For yielding the CPU core while waiting for the SE, the SE Manager APIs that invoke
+/// SE mailbox commands will wait on a semaphore which is signaled in the ISR that handles the SE mailbox completion interrupt.
 /// Hence other threads may run on the CPU core while the SE is processing the mailbox command.
 ///
 /// @} (end addtogroup sl_se_manager)

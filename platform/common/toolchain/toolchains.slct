@@ -47,6 +47,10 @@ schema:
       - disabled
   gcc_compiler_option:
     type: str
+  gcc_c_compiler_option:
+    type: str
+  gcc_c++_compiler_option:
+    type: str
   gcc_linker_option:
     type: str
   iar_compiler_option:
@@ -66,10 +70,9 @@ exporter:
         action: append
         value: "-x assembler-with-cpp"
 
-      - tool: makefile.arm.gcc.linker
-        option: misc
-        action: append
-        value: "-Xlinker -Map=$(OUTPUT_DIR)/$(PROJECTNAME).map"
+      - tool: linker
+        option: generateMapFile
+        value: true
 
       - tool: compiler
         option: c_standard
@@ -241,6 +244,32 @@ exporter:
           value: "{{value}}"
         - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
           option: com.silabs.gnu.c.compiler.option.misc.otherlist
+          action: append
+          value: "{{value}}"
+        - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base
+          option: com.silabs.gnu.cpp.compiler.option.misc.otherlist
+          action: append
+          value: "{{value}}"
+      gcc_c_compiler_option:
+        - tool: makefile.arm.gcc.compiler.c
+          option: misc
+          action: append
+          value: "{{value}}"
+        - tool: makefile.host.gcc.compiler.c
+          option: misc
+          action: append
+          value: "{{value}}"
+        - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.c.compiler.base
+          option: com.silabs.gnu.c.compiler.option.misc.otherlist
+          action: append
+          value: "{{value}}"
+      gcc_c++_compiler_option:
+        - tool: makefile.arm.gcc.compiler.cpp
+          option: misc
+          action: append
+          value: "{{value}}"
+        - tool: makefile.host.gcc.compiler.cpp
+          option: misc
           action: append
           value: "{{value}}"
         - tool: com.silabs.ide.si32.gcc.cdt.managedbuild.tool.gnu.cpp.compiler.base

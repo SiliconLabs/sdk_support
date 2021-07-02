@@ -1,7 +1,7 @@
 id: sl_system_process_action
 label: System Process Action
 package: platform
-category: Services|Runtime|System Setup
+category: Services|System Setup
 quality: production
 root_path: platform/service/system
 source:

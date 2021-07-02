@@ -582,13 +582,15 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   RAIL_EVENT_RX_DUTY_CYCLE_RX_END_SHIFT = RAIL_EVENT_RX_CHANNEL_HOPPING_COMPLETE_SHIFT,
   /** Shift position of \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND bit */
   RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND_SHIFT,
-  /** Shift position of \ref RAIL_EVENT_ZWAVE_BEAM bit */
-  RAIL_EVENT_ZWAVE_BEAM_SHIFT = RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND_SHIFT,
-
+  /** Shift position of \ref RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND_SHIFT bit */
+  RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND_SHIFT = RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND_SHIFT,
   // TX Event Bit Shifts
 
   /** Shift position of \ref RAIL_EVENT_MFM_TX_BUFFER_DONE bit */
   RAIL_EVENT_MFM_TX_BUFFER_DONE_SHIFT = RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_ZWAVE_BEAM bit */
+  RAIL_EVENT_ZWAVE_BEAM_SHIFT,
+
   /** Shift position of \ref RAIL_EVENT_TX_FIFO_ALMOST_EMPTY bit */
   RAIL_EVENT_TX_FIFO_ALMOST_EMPTY_SHIFT,
   /** Shift position of \ref RAIL_EVENT_TX_PACKET_SENT bit */
@@ -738,7 +740,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_RX_FRAME_ERROR (1ULL << RAIL_EVENT_RX_FRAME_ERROR_SHIFT)
 
 /**
- * Occurs coincident to a receive packet completion event in which the
+ * When using \ref RAIL_RxDataSource_t::RX_PACKET_DATA this event
+ * occurs coincident to a receive packet completion event in which the
  * receive FIFO or any supplemental packet metadata FIFO (see \ref
  * Data_Management) are full and further packet reception is jeopardized.
  *
@@ -747,11 +750,18 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * as possible. This event may may be posted multiple times with subsequent
  * receive completion events if the FIFO(s) remain full, and should also
  * occur coincident with \ref RAIL_EVENT_RX_FIFO_OVERFLOW.
+ *
+ * When not using \ref RAIL_RxDataSource_t::RX_PACKET_DATA this event
+ * is not tied to packet completion and will occur coincident with
+ * \ref RAIL_EVENT_RX_FIFO_OVERFLOW when the receive FIFO has filled and
+ * overflowed. The application should consume receive FIFO data via
+ * \ref RAIL_ReadRxFifo() as soon as possible to minimize lost raw data.
  */
 #define RAIL_EVENT_RX_FIFO_FULL (1ULL << RAIL_EVENT_RX_FIFO_FULL_SHIFT)
 
 /**
- * Occurs when a receive is aborted with \ref RAIL_RX_PACKET_ABORT_OVERFLOW
+ * When using \ref RAIL_RxDataSource_t::RX_PACKET_DATA this event
+ * occurs when a receive is aborted with \ref RAIL_RX_PACKET_ABORT_OVERFLOW
  * due to overflowing the receive FIFO or any supplemental packet metadata
  * FIFO (see \ref Data_Management).
  *
@@ -759,6 +769,12 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * the receive FIFO(s) have been fully processed (drained and released
  * or reset). It is not guaranteed that a \ref RAIL_EVENT_RX_FIFO_FULL
  * will precede this event, but both events should be coincident.
+ *
+ * When not using \ref RAIL_RxDataSource_t::RX_PACKET_DATA this event
+ * is not tied to packet completion and will occur coincident with
+ * \ref RAIL_EVENT_RX_FIFO_FULL when the receive FIFO has filled and
+ * overflowed. The application should consume receive FIFO data via
+ * \ref RAIL_ReadRxFifo() as soon as possible to minimize lost raw data.
  */
 #define RAIL_EVENT_RX_FIFO_OVERFLOW (1ULL << RAIL_EVENT_RX_FIFO_OVERFLOW_SHIFT)
 
@@ -932,6 +948,16 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
 #define RAIL_EVENT_MFM_TX_BUFFER_DONE (1ULL << RAIL_EVENT_MFM_TX_BUFFER_DONE_SHIFT)
 
 /**
+ * Indicate a request for populating Z-Wave LR ACK packet.
+ * This event only occurs if the RAIL Z-Wave functionality is enabled.
+ *
+ * Following this event, the application must call \ref RAIL_ZWAVE_SetLrAckData()
+ * to populate noise floor, TX power and receive rssi fields of the Z-Wave
+ * Long Range ACK packet.
+ */
+#define RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND (1ULL << RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND_SHIFT)
+
+/**
  * The mask representing all events that determine the end of a received
  * packet.
  *
@@ -994,7 +1020,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * This can happen due to calling RAIL_Idle() or due to a scheduler
  * preemption.
  *
- * @note The TX FIFO is left in an indeterminate state and should be
+ * @note The Transmit FIFO is left in an indeterminate state and should be
  *    reset prior to reuse for sending a new packet. Contrast this
  *    with \ref RAIL_EVENT_TX_BLOCKED.
  */
@@ -1013,9 +1039,9 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * Occurs when a transmit is blocked from occurring because
  * RAIL_EnableTxHoldOff() was called.
  *
- * @note Since the transmit never started, the TX FIFO remains intact after
- *   this event -- no packet data was consumed from it. Contrast this with
- *   \ref RAIL_EVENT_TX_ABORTED.
+ * @note Since the transmit never started, the Transmit FIFO remains intact
+ *   after this event -- no packet data was consumed from it. Contrast this
+ *   with \ref RAIL_EVENT_TX_ABORTED.
  */
 #define RAIL_EVENT_TX_BLOCKED (1ULL << RAIL_EVENT_TX_BLOCKED_SHIFT)
 
@@ -1034,6 +1060,10 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * transmitted packet specifying an unintended length based on the current
  * radio configuration or due to RAIL_WriteTxFifo() calls not keeping up with
  * the transmit rate if the entire packet isn't loaded at once.
+ *
+ * @note The Transmit FIFO is left in an indeterminate state and should be
+ *    reset prior to reuse for sending a new packet. Contrast this
+ *    with \ref RAIL_EVENT_TX_BLOCKED.
  */
 #define RAIL_EVENT_TX_UNDERFLOW (1ULL << RAIL_EVENT_TX_UNDERFLOW_SHIFT)
 
@@ -1065,8 +1095,8 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * This event can only happen after calling RAIL_StartCcaCsmaTx() or
  * RAIL_StartCcaLbtTx().
  *
- * @note Since the transmit never started, the TX FIFO remains intact after
- *   this event -- no packet data was consumed from it.
+ * @note Since the transmit never started, the Transmit FIFO remains intact
+ *   after this event -- no packet data was consumed from it.
  */
 #define RAIL_EVENT_TX_CHANNEL_BUSY (1ULL << RAIL_EVENT_TX_CHANNEL_BUSY_SHIFT)
 
@@ -1115,6 +1145,9 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  *
  * This can occur if the radio is put to sleep and not woken up with enough time
  * to configure the scheduled transmit event.
+ *
+ * @note Since the transmit never started, the Transmit FIFO remains intact
+ *   after this event -- no packet data was consumed from it.
  */
 #define RAIL_EVENT_TX_SCHEDULED_TX_MISSED (1ULL << RAIL_EVENT_TX_SCHEDULED_TX_MISSED_SHIFT)
 
@@ -1159,7 +1192,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * This event will occur in dynamic multiprotocol scenarios each
  * time a protocol is shutting down. When it does occur, it will be
  * the only event passed to RAIL_Config_t::eventsCallback. Therefore,
- * in order to optimize protocol switch time, this event should be handled
+ * to optimize protocol switch time, this event should be handled
  * among the first in that callback, and then the application can return
  * immediately.
  *
@@ -1188,7 +1221,7 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * The exact status can be found with RAIL_GetSchedulerStatus().
  * See \ref RAIL_SchedulerStatus_t for more details. When this event
  * does occur, it will be the only event passed to RAIL_Config_t::eventsCallback.
- * Therefore in order to optimize protocol switch time, this event should
+ * Therefore, to optimize protocol switch time, this event should
  * be handled among the first in that callback, and then the application
  * can return immediately.
  *
@@ -1252,7 +1285,7 @@ typedef int16_t RAIL_TxPower_t;
 
 /** The maximum power in deci-dBm the curve supports */
 #define RAIL_TX_POWER_CURVE_DEFAULT_MAX ((RAIL_TxPower_t)200)
-/** The increment step in deci-dBm for calculating powerlevel*/
+/** The increment step in deci-dBm for calculating power level*/
 #define RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT ((RAIL_TxPower_t)40)
 
 /// mV are used for all TX power voltage values.
@@ -1671,16 +1704,22 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
  */
 RAIL_ENUM(RAIL_TxDataSource_t) {
   TX_PACKET_DATA, /**< Uses the frame hardware to packetize data. */
+  /** A count of the choices in this enumeration. */
+  RAIL_TX_DATA_SOURCE_COUNT // Must be last
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define TX_PACKET_DATA ((RAIL_TxDataSource_t) TX_PACKET_DATA)
+#define TX_PACKET_DATA            ((RAIL_TxDataSource_t) TX_PACKET_DATA)
+#define RAIL_TX_DATA_SOURCE_COUNT ((RAIL_TxDataSource_t) RAIL_TX_DATA_SOURCE_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @enum RAIL_RxDataSource_t
  * @brief Receive data sources supported by RAIL.
+ *
+ * @note Data sources other than \ref RX_PACKET_DATA require use of
+ *   \ref RAIL_DataMethod_t::FIFO_MODE.
  */
 RAIL_ENUM(RAIL_RxDataSource_t) {
   RX_PACKET_DATA, /**< Uses the frame hardware to packetize data. */
@@ -1689,14 +1728,17 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
                           demodulator. */
   RX_IQDATA_FILTMSB, /**< Gets highest 16 bits of I/Q data provided to the
                          demodulator. */
+  /** A count of the choices in this enumeration. */
+  RAIL_RX_DATA_SOURCE_COUNT // Must be last
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RX_PACKET_DATA    ((RAIL_RxDataSource_t) RX_PACKET_DATA)
-#define RX_DEMOD_DATA     ((RAIL_RxDataSource_t) RX_DEMOD_DATA)
-#define RX_IQDATA_FILTLSB ((RAIL_RxDataSource_t) RX_IQDATA_FILTLSB)
-#define RX_IQDATA_FILTMSB ((RAIL_RxDataSource_t) RX_IQDATA_FILTMSB)
+#define RX_PACKET_DATA            ((RAIL_RxDataSource_t) RX_PACKET_DATA)
+#define RX_DEMOD_DATA             ((RAIL_RxDataSource_t) RX_DEMOD_DATA)
+#define RX_IQDATA_FILTLSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTLSB)
+#define RX_IQDATA_FILTMSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTMSB)
+#define RAIL_RX_DATA_SOURCE_COUNT ((RAIL_RxDataSource_t) RAIL_RX_DATA_SOURCE_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -1719,12 +1761,15 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
 RAIL_ENUM(RAIL_DataMethod_t) {
   PACKET_MODE, /**< Packet-based data method. */
   FIFO_MODE, /**< FIFO-based data method. */
+  /** A count of the choices in this enumeration. */
+  RAIL_DATA_METHOD_COUNT // Must be last
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define PACKET_MODE ((RAIL_DataMethod_t) PACKET_MODE)
-#define FIFO_MODE   ((RAIL_DataMethod_t) FIFO_MODE)
+#define PACKET_MODE            ((RAIL_DataMethod_t) PACKET_MODE)
+#define FIFO_MODE              ((RAIL_DataMethod_t) FIFO_MODE)
+#define RAIL_DATA_METHOD_COUNT ((RAIL_DataMethod_t) RAIL_DATA_METHOD_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -1808,24 +1853,24 @@ typedef struct RAIL_StateTransitions {
  * The three radio state bits \ref RAIL_RF_STATE_DETAIL_IDLE_STATE, \ref
  * RAIL_RF_STATE_DETAIL_RX_STATE, and \ref RAIL_RF_STATE_DETAIL_TX_STATE
  * comprise a set of mutually exclusive core radio states. Only one (or none)
- * of these bits can be set at a time; otherwise the value is invalid.
+ * of these bits can be set at a time. Otherwise, the value is invalid.
  *
  * The precise meaning of each of these three core bits, when set, depends on
  * the value of the two bits \ref RAIL_RF_STATE_DETAIL_TRANSITION and \ref
  * RAIL_RF_STATE_DETAIL_ACTIVE. When \ref RAIL_RF_STATE_DETAIL_TRANSITION is
  * set, the radio is transitioning into the core radio state corresponding
- * to the set state bit; when clear, the radio is already in the core
+ * to the set state bit. When it is clear, the radio is already in the core
  * radio state that corresponds to the set state bit. When \ref
  * RAIL_RF_STATE_DETAIL_ACTIVE is set, the radio is actively transmitting or
- * receiving; when clear, the radio is not actively transmitting or receiving.
+ * receiving. When it is clear, the radio is not actively transmitting or receiving.
  * This bit will always be clear when \ref RAIL_RF_STATE_DETAIL_IDLE_STATE is
- * set, and will always be set when \ref RAIL_RF_STATE_DETAIL_TX_STATE is set;
- * otherwise the value is invalid.
+ * set, and will always be set when \ref RAIL_RF_STATE_DETAIL_TX_STATE is set.
+ * Otherwise, the value is invalid.
  *
  * The bit \ref RAIL_RF_STATE_DETAIL_NO_FRAMES is set if the radio is currently
  * operating with frame detection disabled, and clear otherwise. The bit \ref
  * RAIL_RF_STATE_DETAIL_LBT_SHIFT is set if an LBT/CSMA operation
- * (e.g. performing CCA) is currently ongoing, and clear otherwise.
+ * (e.g., performing CCA) is currently ongoing, and clear otherwise.
  */
 RAIL_ENUM(RAIL_RadioStateDetail_t) {
   /** Shift position of \ref RAIL_RF_STATE_DETAIL_IDLE_STATE bit */
@@ -1858,57 +1903,12 @@ RAIL_ENUM(RAIL_RadioStateDetail_t) {
 #define RAIL_RF_STATE_DETAIL_ACTIVE (1U << RAIL_RF_STATE_DETAIL_ACTIVE_SHIFT)
 /** Radio has frame detect disabled. */
 #define RAIL_RF_STATE_DETAIL_NO_FRAMES (1U << RAIL_RF_STATE_DETAIL_NO_FRAMES_SHIFT)
-/** LBT/CSMA operation is currently onging. */
+/** LBT/CSMA operation is currently ongoing. */
 #define RAIL_RF_STATE_DETAIL_LBT (1U << RAIL_RF_STATE_DETAIL_LBT_SHIFT)
 /** Mask for core radio state bits. */
 #define RAIL_RF_STATE_DETAIL_CORE_STATE_MASK (RAIL_RF_STATE_DETAIL_IDLE_STATE \
                                               | RAIL_RF_STATE_DETAIL_RX_STATE \
                                               | RAIL_RF_STATE_DETAIL_TX_STATE)
-
-/**
- * @def RAIL_MINIMUM_TRANSITION_US
- * @brief The minimum value for a consistent RAIL transition
- * @note Transitions may need to be slower than this when using longer
- *   \ref RAIL_TxPowerConfig_t::rampTime values
- */
-#define RAIL_MINIMUM_TRANSITION_US (100U)
-
-/**
- * @def RAIL_MAXIMUM_TRANSITION_US
- * @brief The maximum value for a consistent RAIL transition
- */
-#define RAIL_MAXIMUM_TRANSITION_US (13000U)
-
-/**
- * @struct RAIL_StateTiming_t
- * @brief A timing configuration structure for the RAIL State Machine.
- *
- * Configure the timings of the radio state transitions for common situations.
- * All of the listed timings are in us. Transitions from an active radio state
- * to idle are not configurable, and will always happen as fast as possible.
- * All timing values cannot exceed \ref RAIL_MAXIMUM_TRANSITION_US.
- *
- * For idleToRx, idleToTx, rxToTx, and txToRx, a value of 0 for the transition
- * time means that the specified transition should happen as fast as possible,
- * even if the timing cannot be as consistent. Otherwise, the timing value
- * cannot be below \ref RAIL_MINIMUM_TRANSITION_US.
- *
- * For idleToTx and rxToTx, setting a longer \ref RAIL_TxPowerConfig_t::rampTime
- * may result in a larger minimum value.
- *
- * For rxSearchTimeout and txToRxSearchTimeout, there is no minimum value. A
- * value of 0 disables the feature, functioning as an infinite timeout.
- */
-typedef struct RAIL_StateTiming {
-  uint16_t idleToRx; /**< Transition time from IDLE to RX. */
-  uint16_t txToRx; /**< Transition time from TX to RX. */
-  uint16_t idleToTx; /**< Transition time from IDLE to RX. */
-  uint16_t rxToTx; /**< Transition time from RX to TX. */
-  uint16_t rxSearchTimeout; /**< Length of time the radio will search for a
-                                 packet when coming from idle. */
-  uint16_t txToRxSearchTimeout; /**< Length of time the radio will search for a
-                                     packet when coming from TX. */
-} RAIL_StateTiming_t;
 
 /**
  * @enum RAIL_IdleMode_t
@@ -1952,6 +1952,90 @@ RAIL_ENUM(RAIL_IdleMode_t) {
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of group State_Transitions
+
+/******************************************************************************
+ * TX Channel Hopping
+ *****************************************************************************/
+/**
+ * @addtogroup Tx_Channel_Hopping TX Channel Hopping
+ * @{
+ */
+
+/**
+ * @struct RAIL_TxChannelHoppingConfigEntry_t
+ * @brief Structure that represents one of the channels that is part of a
+ *   \ref RAIL_TxChannelHoppingConfig_t sequence of channels used in
+ *   channel hopping.
+ */
+typedef struct RAIL_TxChannelHoppingConfigEntry {
+  /**
+   * The channel number to be used for this entry in the channel hopping
+   * sequence. If this is an invalid channel for the current PHY, the
+   * call to \ref RAIL_SetNextTxRepeat() will fail.
+   */
+  uint16_t channel;
+  /**
+   * Pad bytes reserved for future use and currently ignored.
+   */
+  uint8_t reserved[2];
+  /**
+   * Idle time in microseconds to wait before transmitting on the channel
+   * indicated by this entry.
+   */
+  uint32_t delay;
+} RAIL_TxChannelHoppingConfigEntry_t;
+
+/**
+ * @struct RAIL_TxChannelHoppingConfig_t
+ * @brief Wrapper struct that will contain the sequence of
+ *   \ref RAIL_TxChannelHoppingConfigEntry_t that represents the channel
+ *   sequence to use during TX Channel Hopping.
+ */
+typedef struct RAIL_TxChannelHoppingConfig {
+  /**
+   * Pointer to contiguous global read-write memory that will be used
+   * by RAIL to store channel hopping information throughout its operation.
+   * It need not be initialized and applications should never write
+   * data anywhere in this buffer.
+   *
+   * @note the size of this buffer must be at least as large as
+   * 3 + 30 * numberOfChannels, plus the sum of the sizes of the
+   * radioConfigDeltaAdd's of the required channels, plus the size of the
+   * radioConfigDeltaSubtract. In the case that one channel
+   * appears two or more times in your channel sequence
+   * (e.g., 1, 2, 3, 2), you must account for the radio configuration
+   * size that number of times (i.e., need to count channel 2's
+   * radio configuration size twice for the given example). The overall
+   * 3 words and 30 words per channel needed in this buffer are
+   * for internal use to the library.
+   */
+  uint32_t *buffer;
+  /**
+   * This parameter must be set to the length of the buffer array. This way,
+   * during configuration, the software can confirm it's writing within the
+   * range of the buffer. The configuration API will return an error
+   * if bufferLength is insufficient.
+   */
+  uint16_t bufferLength;
+  /**
+   * The number of channels in the channel hopping sequence, which is the
+   * number of elements in the array that entries points to.
+   */
+  uint8_t numberOfChannels;
+  /**
+   * Pad byte reserved for future use and currently ignored.
+   */
+  uint8_t reserved;
+  /**
+   * A pointer to the first element of an array of \ref
+   * RAIL_TxChannelHoppingConfigEntry_t that represents the channels
+   * used during channel hopping. The length of this array must be
+   * numberOfChannels.
+   */
+  RAIL_TxChannelHoppingConfigEntry_t *entries;
+} RAIL_TxChannelHoppingConfig_t;
+
+/** @} */ // end of group Tx_Channel_Hopping
 
 /******************************************************************************
  * TX/RX Configuration Structures
@@ -2002,6 +2086,8 @@ RAIL_ENUM_GENERIC(RAIL_TxOptions_t, uint32_t) {
   RAIL_TX_OPTION_CCA_PEAK_RSSI_SHIFT,
   /** Shift position of \ref RAIL_TX_OPTION_CCA_ONLY bit */
   RAIL_TX_OPTION_CCA_ONLY_SHIFT,
+  /** Shift position of \ref RAIL_TX_OPTION_RESEND bit */
+  RAIL_TX_OPTION_RESEND_SHIFT,
   /** A count of the choices in this enumeration. */
   RAIL_TX_OPTIONS_COUNT // Must be last
 };
@@ -2023,13 +2109,13 @@ RAIL_ENUM_GENERIC(RAIL_TxOptions_t, uint32_t) {
  */
 #define RAIL_TX_OPTION_REMOVE_CRC (1UL << RAIL_TX_OPTION_REMOVE_CRC_SHIFT)
 /**
- * An option to select which sync word to send (0 or 1). Note that this does
- * not set the actual sync words, it just picks which of the two will be
- * sent with the packet.
- * This setting is valid only if \ref RAIL_RX_OPTION_ENABLE_DUALSYNC is set.
- * Setting to 0 will transmit on SYNC1.
- * Setting to 1 will transmit on SYNC2 if \ref RAIL_RX_OPTION_ENABLE_DUALSYNC
- * is in effect.
+ * An option to select which sync word to send (0 or 1). This does not set the
+ * actual sync words, it just picks which of the two will be sent with the
+ * outgoing packet. Setting to 0 will transmit on SYNC1. Setting to 1 will
+ * transmit on SYNC2.
+ *
+ * @note There are a few special radio configurations (e.g. BLE Viterbi) that do
+ * not support transmitting different sync words.
  */
 #define RAIL_TX_OPTION_SYNC_WORD_ID (1UL << RAIL_TX_OPTION_SYNC_WORD_ID_SHIFT)
 /**
@@ -2085,6 +2171,23 @@ RAIL_ENUM_GENERIC(RAIL_TxOptions_t, uint32_t) {
  * when that reception (including any AutoACK response) is complete.
  */
 #define RAIL_TX_OPTION_CCA_ONLY (1UL << RAIL_TX_OPTION_CCA_ONLY_SHIFT)
+
+/**
+ * An option to resend packet at the beginning of the Transmit FIFO.
+ *
+ * The packet to be resent must have been previously provided by
+ * \ref RAIL_SetTxFifo() or \ref RAIL_WriteTxFifo() passing true for
+ * the latter's reset parameter. It works by setting the
+ * transmit FIFO's read offset to the beginning of the FIFO while
+ * leaving its write offset intact. For this to work,
+ * \ref RAIL_DataConfig_t::txMethod must be RAIL_DataMethod_t::PACKET_MODE
+ * (i.e., the packet can't exceed the Transmit FIFO's size), otherwise
+ * undefined behavior will result.
+ *
+ * This option can also be used with \ref RAIL_SetNextTxRepeat() to cause
+ * the repeated packet(s) to all be the same as the first.
+ */
+#define RAIL_TX_OPTION_RESEND (1UL << RAIL_TX_OPTION_RESEND_SHIFT)
 
 /** A value representing all possible options. */
 #define RAIL_TX_OPTIONS_ALL 0xFFFFFFFFUL
@@ -2246,6 +2349,17 @@ typedef struct RAIL_CsmaConfig {
   /**
    * The minimum (starting) exponent for CSMA random backoff (2^exp - 1).
    * It can range from 0 to \ref RAIL_MAX_CSMA_EXPONENT.
+   *
+   * @warning On EFR32, due to a hardware limitation, this can only be 0
+   *   if \ref csmaMaxBoExp is also 0 specifying a non-random fixed backoff.
+   *   \ref RAIL_STATUS_INVALID_PARAMETER will result otherwise.
+   *   If you really want CSMA's first iteration to have no backoff prior to
+   *   CCA, with subsequent iterations having random backoff as the exponent
+   *   is increased, you must do a fixed backoff of 0 operation first
+   *   (\ref csmaMinBoExp = 0, \ref csmaMaxBoExp = 0, \ref ccaBackoff = 0,
+   *   \ref csmaTries = 1), and if that fails (\ref RAIL_EVENT_TX_CHANNEL_BUSY),
+   *   follow up with a random backoff operation starting at \ref csmaMinBoExp
+   *   = 1 for the remaining iterations.
    */
   uint8_t  csmaMinBoExp;
   /**
@@ -2601,7 +2715,7 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  * sync word(s) are received, but not what each of the sync words actually are.
  * This feature may not be available on some combinations of chips, PHYs, and
  * protocols. Use the compile time symbol RAIL_SUPPORTS_DUAL_SYNC_WORDS or
- * the runtume call RAIL_SupportsDualSyncWords() to check whether the
+ * the runtime call RAIL_SupportsDualSyncWords() to check whether the
  * platform supports this feature. Also, DUALSYNC may be incompatible
  * with certain radio configurations. In these cases, setting this bit will
  * be ignored. See the data sheet or support team for more details.
@@ -2715,8 +2829,8 @@ typedef struct RAIL_ScheduleRxConfig {
    * this API, if you specify a \ref RAIL_TIME_DELAY, it is relative to the
    * start time if given and relative to now if none is specified. Also, using
    * \ref RAIL_TIME_DISABLED means that this window will not end unless you
-   * explicitly call RAIL_RfIdle() or add an end event through a future update
-   * to this configuration.
+   * explicitly call \ref RAIL_Idle() or add an end event through a future
+   * update to this configuration.
    */
   RAIL_TimeMode_t endMode;
   /**
@@ -2990,10 +3104,10 @@ typedef struct RAIL_RxPacketDetails {
    * was used to receive the packet. Most radio configurations do not have
    * this ability and the subPhyId is set to 0.
    *
-   * Currently this field is used by the BLE Coded PHY and the BLE Simulscan PHY.
-   * In that case a value of 0 marks a 500 kbps packet, a value of 1 marks a 125
+   * Currently, this field is used by the BLE Coded PHY and the BLE Simulscan PHY.
+   * In that case, a value of 0 marks a 500 kbps packet, a value of 1 marks a 125
    * kbps packet, and a value of 2 marks a 1 Mbps packet.
-   * Also see \ref RAIL_BLE_ConfigPhyCoded and \ref RAIL_BLE_ConfigPhySimulscan.
+   * Also, see \ref RAIL_BLE_ConfigPhyCoded and \ref RAIL_BLE_ConfigPhySimulscan.
    *
    * It is always available.
    */
@@ -3311,7 +3425,7 @@ RAIL_ENUM(RAIL_RxChannelHoppingMode_t) {
    */
   RAIL_RX_CHANNEL_HOPPING_MODE_VT,
   /**
-   * This is the transmit channel used for auto-ack if the regular channel,
+   * This is the transmit channel used for auto-ACK if the regular channel,
    * specified in RAIL_RxChannelHoppingConfigEntry::parameter, is
    * optimized for RX which may degrade some TX performance
    */
@@ -3384,8 +3498,7 @@ RAIL_ENUM(RAIL_RxChannelHoppingMode_t) {
 
 /**
  * @enum RAIL_RxChannelHoppingDelayMode_t
- * @brief Modes by which RAIL_RxChannelHoppingConfigEntry_t::delay
- * timing can be applied to the time gap between channels.
+ * @brief Deprecated enum. Set only to RAIL_RX_CHANNEL_DELAY_MODE_STATIC
  */
 RAIL_ENUM(RAIL_RxChannelHoppingDelayMode_t) {
   /**
@@ -3499,7 +3612,7 @@ RAIL_ENUM(RAIL_RxChannelHoppingOptions_t) {
 ///   } else {
 ///     suspendRx(delay);
 ///   }
-///   onStartRx(); // resume receive after delay (on new channel if hoppping)
+///   onStartRx(); // resume receive after delay (on new channel if hopping)
 /// }
 ///
 /// void onStartRx(void) // called upon entry to receive
@@ -3606,10 +3719,10 @@ typedef struct RAIL_RxChannelHoppingConfigEntry {
   /**
    * The channel number to be used for this entry in the channel hopping
    * sequence. If this is an invalid channel for the current phy, the
-   * call to RAIL_ConfigRxChannelHopping will fail.
+   * call to \ref RAIL_ConfigRxChannelHopping() will fail.
    */
   uint16_t channel;
-  /** The mode by which RAIL determines when to hop to the next channel. */
+  /** Deprecated field. Set to RAIL_RX_CHANNEL_HOPPING_DELAY_MODE_STATIC. */
   RAIL_RxChannelHoppingMode_t mode;
   // Unnamed 'uint8_t reserved1[1]' pad byte field here.
   /**
@@ -3676,7 +3789,10 @@ typedef struct RAIL_RxChannelHoppingConfig {
    * if bufferLength is insufficient.
    */
   uint16_t bufferLength;
-  /** The number of channels that is in the channel hopping sequence. */
+  /**
+   * The number of channels in the channel hopping sequence, which is the
+   * number of elements in the array that entries points to.
+   */
   uint8_t numberOfChannels;
   /**
    * A pointer to the first element of an array of \ref
@@ -3842,16 +3958,146 @@ typedef struct RAIL_VerifyConfig {
 
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
-/**
- * @}
- * end of RAIL_API
- */
+/** @} */ // end of RAIL_API
 
 #ifdef __cplusplus
 }
 #endif
 
-// Include appropriate chip-specific types and APIs *after* common types.
+// Include appropriate chip-specific types and APIs *after* common types, and
+// *before* types that require chip-specific abstractions.
 #include "rail_chip_specific.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/**
+ * @addtogroup RAIL_API
+ * @{
+ */
+
+/**
+ * @addtogroup State_Transitions
+ * @{
+ */
+
+/**
+ * @def RAIL_TRANSITION_TIME_KEEP
+ * @brief A value to use in \ref RAIL_StateTiming_t fields when
+ *   calling \ref RAIL_SetStateTiming() to keep that timing
+ *   parameter at it current setting.
+ */
+#define RAIL_TRANSITION_TIME_KEEP ((RAIL_TransitionTime_t) -1)
+
+/**
+ * @struct RAIL_StateTiming_t
+ * @brief A timing configuration structure for the RAIL State Machine.
+ *
+ * Configure the timings of the radio state transitions for common situations.
+ * All of the listed timings are in microseconds. Transitions from an active
+ * radio state to idle are not configurable, and will always happen as fast
+ * as possible.
+ * No timing value can exceed \ref RAIL_MAXIMUM_TRANSITION_US.
+ * Use \ref RAIL_TRANSITION_TIME_KEEP to keep an existing setting.
+ *
+ * For idleToRx, idleToTx, rxToTx, txToRx, and txToTx a value of 0 for the
+ * transition time means that the specified transition should happen as fast
+ * as possible, even if the timing cannot be as consistent. Otherwise, the
+ * timing value cannot be below \ref RAIL_MINIMUM_TRANSITION_US.
+ *
+ * For idleToTx, rxToTx, and txToTx setting a longer \ref
+ * RAIL_TxPowerConfig_t::rampTime may result in a larger minimum value.
+ *
+ * For rxSearchTimeout and txToRxSearchTimeout, there is no minimum value. A
+ * value of 0 disables the feature, functioning as an infinite timeout.
+ */
+typedef struct RAIL_StateTiming {
+  RAIL_TransitionTime_t idleToRx; /**< Transition time from IDLE to RX. */
+  RAIL_TransitionTime_t txToRx; /**< Transition time from TX to RX. */
+  RAIL_TransitionTime_t idleToTx; /**< Transition time from IDLE to RX. */
+  RAIL_TransitionTime_t rxToTx; /**< Transition time from RX packet to TX. */
+  RAIL_TransitionTime_t rxSearchTimeout; /**< Length of time the radio will search for a
+                                            packet when coming from idle or RX. */
+  RAIL_TransitionTime_t txToRxSearchTimeout; /**< Length of time the radio will search for a
+                                                packet when coming from TX. */
+  RAIL_TransitionTime_t txToTx; /**< Transition time from TX packet to TX. */
+} RAIL_StateTiming_t;
+
+/** @} */ // end of group State_Transitions
+
+/**
+ * @addtogroup Transmit
+ * @{
+ */
+
+/**
+ * @enum RAIL_TxRepeatOptions_t
+ * @brief Transmit repeat options, in reality a bitmask.
+ */
+RAIL_ENUM_GENERIC(RAIL_TxRepeatOptions_t, uint16_t) {
+  /** Shift position of \ref RAIL_TX_REPEAT_OPTION_HOP bit */
+  RAIL_TX_REPEAT_OPTION_HOP_SHIFT = 0,
+};
+
+/** A value representing no repeat options enabled. */
+#define RAIL_TX_REPEAT_OPTIONS_NONE 0U
+/** All repeat options disabled by default. */
+#define RAIL_TX_REPEAT_OPTIONS_DEFAULT RAIL_TX_REPEAT_OPTIONS_NONE
+/**
+ * An option to configure whether or not to channel-hop before each
+ * repeated transmit.
+ */
+#define RAIL_TX_REPEAT_OPTION_HOP (1U << RAIL_TX_REPEAT_OPTION_HOP_SHIFT)
+
+/// @struct RAIL_TxRepeatConfig_t
+/// @brief A configuration structure for repeated transmits
+///
+/// @note The PA will always be ramped down and up in between transmits so
+/// there will always be some minimum delay between transmits depending on the
+/// ramp time configuration.
+typedef struct RAIL_TxRepeatConfig {
+  /**
+   * The number of repeated transmits to run. A total of (iterations + 1)
+   * transmits will go on-air in the absence of errors.
+   */
+  uint16_t iterations;
+  /**
+   * Repeat option(s) to apply.
+   */
+  RAIL_TxRepeatOptions_t repeatOptions;
+  /**
+   * Per-repeat delay or hopping configuration, depending on repeatOptions.
+   */
+  union {
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is not set, specifies
+     * the delay time between each repeated transmit. Specify \ref
+     * RAIL_TRANSITION_TIME_KEEP to use the current \ref
+     * RAIL_StateTiming_t::txToTx transition time setting.
+     */
+    RAIL_TransitionTime_t delay;
+    /**
+     * When \ref RAIL_TX_REPEAT_OPTION_HOP is set, this specifies
+     * the channel hopping configuration to use when hopping between
+     * repeated transmits. Per-hop delays are configured within each
+     * \ref RAIL_TxChannelHoppingConfigEntry_t::delay rather than
+     * this union's delay field.
+     */
+    RAIL_TxChannelHoppingConfig_t channelHopping;
+  } delayOrHop;
+} RAIL_TxRepeatConfig_t;
+
+/// RAIL_TxRepeatConfig_t::iterations initializer configuring infinite
+/// repeated transmissions.
+#define RAIL_TX_REPEAT_INFINITE_ITERATIONS (0xFFFFU)
+
+/** @} */ // end of group Transmit
+
+/** @} */ // end of RAIL_API
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // __RAIL_TYPES_H__

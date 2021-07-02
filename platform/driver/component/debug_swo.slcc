@@ -10,6 +10,10 @@ description: >
   If the Services->Runtime->System Setup->System Init component is included in
   a project, the driver will be initialized automatically during the
   sl_system_init() call in main.c.
+
+  Note: This software component can be used to enable code correlation profiling.
+  For proper operation, enable interrupt event trace and Program Counter samples
+  in the component configuration.
 category: Platform|Driver
 quality: production
 root_path: platform/driver/debug

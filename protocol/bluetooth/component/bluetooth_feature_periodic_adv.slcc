@@ -11,6 +11,8 @@ requires:
 provides:
   - name: "bluetooth_feature_periodic_adv"
 template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_periodic_adv
   - name: bluetooth_stack_init
     value:
       function: "sl_bt_init_periodic_advertising"

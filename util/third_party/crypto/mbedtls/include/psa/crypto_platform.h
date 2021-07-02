@@ -53,9 +53,6 @@
 #define inline __inline
 #endif
 
-/* Integral type representing a key handle. */
-typedef uint16_t psa_key_handle_t;
-
 #if defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
 
 /* Building for the PSA Crypto service on a PSA platform, a key owner is a PSA
@@ -83,5 +80,20 @@ static inline int mbedtls_key_owner_id_equal( mbedtls_key_owner_id_t id1,
 }
 
 #endif /* MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER */
+
+#if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
+/** The type of the context passed to mbedtls_psa_external_get_random().
+ *
+ * Mbed TLS initializes the context to all-bits-zero before calling
+ * mbedtls_psa_external_get_random() for the first time.
+ *
+ * The definition of this type in the Mbed TLS source code is for
+ * demonstration purposes. Implementers of mbedtls_psa_external_get_random()
+ * are expected to replace it with a custom definition.
+ */
+typedef struct {
+    uintptr_t opaque[2];
+} mbedtls_psa_external_random_context_t;
+#endif /* MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG */
 
 #endif /* PSA_CRYPTO_PLATFORM_H */

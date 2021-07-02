@@ -3,7 +3,7 @@ label: "Device Init: HFXO"
 package: platform
 description: >
   Device initialization for HFXO - High Frequency Crystal Oscillator
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:
@@ -70,6 +70,9 @@ config_file:
     file_id: device_init_hfxo_config
   - path: config/s2/sdid210/sl_device_init_hfxo_config.h
     condition: [device_sdid_210]
+    file_id: device_init_hfxo_config
+  - path: config/s2/sdid215/sl_device_init_hfxo_config.h
+    condition: [device_sdid_215]
     file_id: device_init_hfxo_config
 include:
   - path: inc

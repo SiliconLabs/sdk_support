@@ -36,8 +36,9 @@
 #include "rail.h"
 #include "railapp_antenna.h"
 
-#include "sl_rail_util_ant_div.h"
-#include "sl_rail_util_rf_path.h"
+#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
+  #include "sl_rail_util_ant_div.h"
+#endif
 
 extern RAIL_Handle_t railHandle;
 RAIL_AntennaConfig_t halAntennaConfig;
@@ -72,14 +73,16 @@ RAIL_Status_t RAILAPP_SetAntDiv(RAILAPP_AntennaSel_t antSel)
  ******************************************************************************/
 void RAILAPP_SetRfPath(RAIL_AntennaSel_t rfPath)
 {
- #ifdef  _SILICON_LABS_32B_SERIES_2
+#ifdef  _SILICON_LABS_32B_SERIES_2
   /* Antenna internal RF Path to use */
+#if defined(SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT)
   sl_rail_util_ant_div_get_antenna_config(&halAntennaConfig);
+#endif
   halAntennaConfig.defaultPath = rfPath;
   RAIL_ConfigAntenna(railHandle, &halAntennaConfig);
- #else//!_SILICON_LABS_32B_SERIES_2 */
+#else//!_SILICON_LABS_32B_SERIES_2 */
   (void) rfPath;
- #endif//_SILICON_LABS_32B_SERIES_2 */
+#endif//_SILICON_LABS_32B_SERIES_2 */
 }
 
 #ifdef CLI_INTERFACE

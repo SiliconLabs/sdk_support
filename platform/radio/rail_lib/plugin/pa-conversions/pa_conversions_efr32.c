@@ -59,18 +59,14 @@ const RAIL_TxPowerCurves_t *RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode)
   if (mode >= RAIL_TX_POWER_MODE_NONE) {
     return NULL;
   }
-
-  // Check for *_HIGHEST invalid Tx power modes on series 2 chips
-#if defined(RAIL_TX_POWER_MODE_2P4GIG_HIGHEST)
-  if (mode == RAIL_TX_POWER_MODE_2P4GIG_HIGHEST) {
+  RAIL_Handle_t railHandle = RAIL_EFR32_HANDLE;
+  RAIL_TxPowerLevel_t maxPowerLevel, minPowerLevel;
+  if (RAIL_SupportsTxPowerModeAlt(railHandle,
+                                  &mode,
+                                  &maxPowerLevel,
+                                  &minPowerLevel) == false) {
     return NULL;
   }
-#endif // RAIL_TX_POWER_MODE_2P4GIG_HIGHEST
-#if defined(RAIL_TX_POWER_MODE_SUBGIG_HIGHEST)
-  if (mode == RAIL_TX_POWER_MODE_SUBGIG_HIGHEST) {
-    return NULL;
-  }
-#endif // RAIL_TX_POWER_MODE_SUBGIG_HIGHEST
 
   RAIL_TxPowerCurveAlt_t const *curve =
     powerCurvesState.curves[mode].conversion.powerCurve;
@@ -314,6 +310,10 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     // We 1-index low power PA power levels, but of course arrays are 0 indexed
     powerLevel -= SL_MAX(modeInfo->min, PA_CONVERSION_MINIMUM_PWRLVL);
 
+    //If the index calculation above underflowed, then provide the lowest array index.
+    if (powerLevel > (modeInfo->max - modeInfo->min)) {
+      powerLevel = 0U;
+    }
     return modeInfo->conversion.mappingTable[powerLevel];
   } else {
 #if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LAS_32B_SERIES_2_CONFIG_1)
@@ -344,7 +344,7 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     // Hard code the extremes (i.e. don't use the curve fit) in order
     // to make it clear that we are reaching the extent of the chip's
     // capabilities
-    if (powerLevel <= powerCurve->minPower) {
+    if (powerLevel <= modeInfo->min) {
       return powerCurve->minPower;
     } else if (powerLevel >= modeInfo->max) {
       return powerCurve->maxPower;
@@ -354,6 +354,17 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     // Figure out which parameter to use based on the power level
     uint8_t x;
     uint8_t upperBound = modeInfo->segments - 1U;
+
+    // If the first curve segment starts with RAIL_TX_POWER_LEVEL_INVALID,
+    // then it is an additional curve segment that stores maxpower and increment
+    // (in deci-dBm) used to generate the curves.
+    // The extra info segment is present only if the curves were generated using
+    // values other than default - RAIL_TX_POWER_CURVE_DEFAULT_MAX and
+    // RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT.
+    if ((powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
+      upperBound -= 1U;
+    }
+
     for (x = 0; x < upperBound; x++) {
       if (powerParams[x + 1U].maxPowerLevel < powerLevel) {
         break;
@@ -404,7 +415,7 @@ RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
 // This macro is defined when Silicon Labs builds curves into the library as WEAK
 // to ensure it can be overriden by customer versions of these functions. It
 // should *not* be defined in a customer build.
-#if !defined(RAIL_PA_CONVERSIONS_WEAK)
+#if !defined(RAIL_PA_CONVERSIONS_WEAK) && !defined(HAL_CONFIG)
 
 #include "sl_rail_util_pa_config.h"
 

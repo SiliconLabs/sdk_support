@@ -67,6 +67,7 @@ static uint8_t debugDataBuffer[MAX_DEBUG_BYTES];
  */
 void setFrequency(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint32_t newFrequency = sl_cli_get_argument_uint32(args, 0);
 
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
@@ -108,6 +109,7 @@ char * lookupDebugModeString(uint32_t debugMode)
  */
 void setDebugMode(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint32_t debugMode;
 
   debugMode = sl_cli_get_argument_uint32(args, 0);
@@ -208,6 +210,7 @@ void txCancel(sl_cli_command_arg_t *args)
 void startThermistorMeasurement(sl_cli_command_arg_t *args)
 {
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status = RAIL_StartThermistorMeasurement(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
     responsePrint(sl_cli_get_command_string(args, 0), "Thermistor measurement:Started.");
@@ -225,6 +228,7 @@ void getThermistorImpedance(sl_cli_command_arg_t *args)
 #if RAIL_FEAT_EXTERNAL_THERMISTOR
   RAIL_Status_t status;
   uint32_t thermistorResistance;
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   status = RAIL_GetThermistorImpedance(railHandle, &thermistorResistance);
   if (status == RAIL_STATUS_NO_ERROR) {
     responsePrint(sl_cli_get_command_string(args, 0), "Thermistor Measurement: %u Ohms", thermistorResistance);
@@ -540,6 +544,7 @@ void printRxErrors(sl_cli_command_arg_t *args)
 
 void printRxFreqOffsets(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   printRxFreqOffsetData = !!sl_cli_get_argument_uint8(args, 0);
 
   if (printRxFreqOffsetData) {
@@ -570,6 +575,7 @@ void getAppMode(sl_cli_command_arg_t *args)
 
 void getRadioState(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   responsePrint(sl_cli_get_command_string(args, 0), "radioState:%s,radioStateDetail:%s",
                 getRfStateName(RAIL_GetRadioState(railHandle)),
                 getRfStateDetailName(RAIL_GetRadioStateDetail(railHandle), debugPrintBuffer));
@@ -615,6 +621,8 @@ void verifyRadio(sl_cli_command_arg_t *args)
   uint32_t timeBefore;
   uint32_t timeAfter;
   RAIL_Status_t retVal;
+
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
 
   // Only run RAIL_ConfigVerification when we have to.
   if (verifyFirstTime

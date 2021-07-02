@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "sl_power_manager.h"
 #include "sl_power_manager_config.h"
 #include "sl_power_manager_debug.h"
 #include "sli_power_manager_private.h"
@@ -89,31 +90,6 @@ void sli_power_manager_debug_init(void)
 }
 
 /***************************************************************************//**
- * Log energy mode (EM) requirement
- *
- * @param em    Energy mode added or removed.
- *
- * @param add   Add (true) or remove (false) the requirement.
- *
- * @param name  Module name that adds or removes the requirement.
- *
- * @note Requirements on EM0 are not logged because the power manager needs to
- *       add a requirement at the startup and the kernel will remove the
- *       requirement. Since the module that can add EM0 requirements is not the
- *       same as the one that will remove it, it has been decided that the
- *       requirement on EM0 will not be logged. EM0 is only required by the
- *       kernel and the super loop to execute the code.
- ******************************************************************************/
-void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
-                                                bool                  add,
-                                                const char            *name)
-{
-  if (em != SL_POWER_MANAGER_EM0) {
-    power_manager_log_add_requirement(&power_manager_debug_requirement_em_table[em - 1], add, name);
-  }
-}
-
-/***************************************************************************//**
  * Log requirement to a list
  *
  * @param p_list  List where to push or remove the requirement.
@@ -162,3 +138,28 @@ static void power_manager_log_add_requirement(sl_slist_node_t **p_list,
   }
 }
 #endif // SL_POWER_MANAGER_DEBUG
+
+#undef sli_power_manager_debug_log_em_requirement
+/***************************************************************************//**
+ * Log energy mode (EM) requirement
+ *
+ * @param em    Energy mode added or removed.
+ *
+ * @param add   Add (true) or remove (false) the requirement.
+ *
+ * @param name  Module name that adds or removes the requirement.
+ ******************************************************************************/
+void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
+                                                bool                  add,
+                                                const char            *name)
+{
+#if (SL_POWER_MANAGER_DEBUG == 1)
+  if (em != SL_POWER_MANAGER_EM0) {
+    power_manager_log_add_requirement(&power_manager_debug_requirement_em_table[em - 1], add, name);
+  }
+#else
+  (void)em;
+  (void)add;
+  (void)name;
+#endif
+}

@@ -6,14 +6,22 @@
 - quality: production
 - define:
   - name: EFR32BG21B020F768IM32
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFR32BG21/Source/system_efr32bg21.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFR32BG21/Source/IAR/startup_efr32bg21.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFR32BG21/Source/GCC/startup_efr32bg21.c
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efr32bg21b020f768im32.h
@@ -65,6 +73,8 @@
     - path: em_device.h
     - path: system_efr32bg21.h
     path: platform/Device/SiliconLabs/EFR32BG21/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efr32bg21b020f768im32
   - name: device
@@ -141,6 +151,8 @@
   - name: device_has_wdog
   - name: device_has_wdog0
   - name: device_has_wdog1
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -183,7 +195,6 @@
     value: 2048
 - tag:
   - device:opn:efr32bg21b020f768im32
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efr32bg21b020f768im32

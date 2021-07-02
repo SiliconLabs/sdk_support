@@ -5,11 +5,8 @@ package: platform
 category: Platform|Radio
 quality: production
 requires:
-  - name: device
-  - name: emlib_common
   - name: emlib_gpio
-  - name: emlib_cmu
-  - name: emlib_prs
+  - name: rail_lib
 provides:
   - name: rail_util_aox
 documentation:

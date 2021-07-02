@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32ZG222F8
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32ZG/Source/system_efm32zg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32ZG/Source/IAR/startup_efm32zg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32ZG/Source/GCC/startup_efm32zg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32ZG/Source/ARM/startup_efm32zg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32zg222f8.h
@@ -55,6 +65,8 @@
     - path: em_device.h
     - path: system_efm32zg.h
     path: platform/Device/SiliconLabs/EFM32ZG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32zg222f8
   - name: device
@@ -126,7 +138,6 @@
     value: 128
 - tag:
   - device:opn:efm32zg222f8
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32zg222f8

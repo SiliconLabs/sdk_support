@@ -345,6 +345,9 @@ typedef struct UARTDRV_HandleData{
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_CATALOG_KERNEL_PRESENT)
   sl_power_manager_on_isr_exit_t sleep;         // Sleep state on isr return
 #endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  sl_sleeptimer_timer_handle_t   delayedTxTimer;// A timer to wait for the last byte out
+#endif
   /// @endcond
 } UARTDRV_HandleData_t;
 

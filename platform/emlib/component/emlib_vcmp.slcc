@@ -19,3 +19,18 @@ requires:
   - name: device_has_vcmp
   - name: emlib_common
   - name: cmsis_core
+documentation:
+  docset: gecko-platform
+  document:
+    - page: emlib/api/efm32g/group-vcmp
+      condition: [device_sdid_71]
+    - page: emlib/api/efm32gg/group-vcmp
+      condition: [device_sdid_72]
+    - page: emlib/api/efm32tg/group-vcmp
+      condition: [device_sdid_73]
+    - page: emlib/api/efm32lg/group-vcmp
+      condition: [device_sdid_74]
+    - page: emlib/api/efm32zg/group-vcmp
+      condition: [device_sdid_76]
+    - page: emlib/api/efm32hg/group-vcmp
+      condition: [device_sdid_77]

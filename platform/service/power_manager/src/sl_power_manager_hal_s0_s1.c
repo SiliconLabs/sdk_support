@@ -123,27 +123,31 @@ static bool is_dpll_used = false;
 // Time in ticks required for the general wake-up process.
 static uint32_t process_wakeup_overhead_tick = 0;
 
+#if defined(EMU_VSCALE_PRESENT)
+static bool is_fast_wakeup_enabled = true;
+#endif
+
 /***************************************************************************//**
  * Do some hardware initialization if necessary.
  ******************************************************************************/
 void sli_power_manager_init_hardware(void)
 {
-  EMU_EM23Init_TypeDef em23_init = EMU_EM23INIT_DEFAULT;
-
   // Initializes EMU (voltage scaling in EM2/3)
 #if defined(EMU_VSCALE_PRESENT)
   EMU_EM01Init_TypeDef em01_init = EMU_EM01INIT_DEFAULT;
 
   EMU_EM01Init(&em01_init);
 
+#if defined(SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP)
 #if (SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP == 0)
-  em23_init.vScaleEM23Voltage = emuVScaleEM23_LowPower;
+  sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(false);
 #else
-  em23_init.vScaleEM23Voltage = emuVScaleEM23_FastWakeup;
+  sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(true);
+#endif
+#else
+  sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(false);
 #endif
 #endif
-
-  EMU_EM23Init(&em23_init);
 
   is_hf_x_oscillator_used = (CMU->STATUS & _CMU_STATUS_HFXOENS_MASK) == _CMU_STATUS_HFXOENS_MASK;
 #if defined(_CMU_DPLLCTRL_MASK)
@@ -161,18 +165,49 @@ void sli_power_manager_init_hardware(void)
   if (is_dpll_used) {
     uint32_t freq = CMU_ClockFreqGet(cmuClock_HF);
     freq = freq * (((CMU->HFPRESC & _CMU_HFPRESC_PRESC_MASK) >> _CMU_HFPRESC_PRESC_SHIFT) + 1);
-    // Add DPLL Locking delay
-    process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(DPLL_LOCKING_DELAY_US_FUNCTION((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_N_MASK) >> _CMU_DPLLCTRL1_N_SHIFT, freq));
+    if (freq > 0) { // Avoid division by 0
+      // Add DPLL Locking delay
+      process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(DPLL_LOCKING_DELAY_US_FUNCTION((CMU->DPLLCTRL1 & _CMU_DPLLCTRL1_N_MASK) >> _CMU_DPLLCTRL1_N_SHIFT, freq));
+    }
   }
 #endif
 
-  // Calculate and add other wake-up delays in ticks
-#if defined(EMU_VSCALE_PRESENT) && (SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP == 0)
-  // Add Voltage scaling delay if applicable
-  process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(EM2_WAKEUP_VSCALE_OVERHEAD_US);
-#endif
   process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(EM2_WAKEUP_PROCESS_TIME_OVERHEAD_US);
 }
+
+#if defined(EMU_VSCALE_PRESENT)
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3.
+ ******************************************************************************/
+void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
+{
+  if (enable == is_fast_wakeup_enabled) {
+    return;
+  }
+
+  EMU_EM23Init_TypeDef em23_init = EMU_EM23INIT_DEFAULT;
+
+  // Enable/disable EMU voltage scaling in EM2/3
+  if (enable) {
+    em23_init.vScaleEM23Voltage = emuVScaleEM23_FastWakeup;
+  } else {
+    em23_init.vScaleEM23Voltage = emuVScaleEM23_LowPower;
+  }
+
+  EMU_EM23Init(&em23_init);
+
+  // Calculate and add voltage scaling wake-up delays in ticks
+  if (enable) {
+    // Remove voltage scaling delay if it was added before
+    process_wakeup_overhead_tick -= sli_power_manager_convert_delay_us_to_tick(EM2_WAKEUP_VSCALE_OVERHEAD_US);
+  } else {
+    // Add voltage scaling delay if it was not added before
+    process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(EM2_WAKEUP_VSCALE_OVERHEAD_US);
+  }
+
+  is_fast_wakeup_enabled = enable;
+}
+#endif
 
 /***************************************************************************//**
  * Save the CMU HF clock select state, oscillator enable, and voltage scaling.
@@ -287,7 +322,15 @@ void sli_power_manager_apply_em(sl_power_manager_em_t em)
   // Perform required actions according to energy mode
   switch (em) {
     case SL_POWER_MANAGER_EM1:
+#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
+      // when measuring interrupt disabled time, we don't
+      // want to count the time spent in sleep
+      sl_cycle_counter_pause();
+#endif
       EMU_EnterEM1();
+#if (SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING == 1)
+      sl_cycle_counter_resume();
+#endif
       break;
 
     case SL_POWER_MANAGER_EM2:

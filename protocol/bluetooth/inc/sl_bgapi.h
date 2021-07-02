@@ -125,23 +125,6 @@ typedef struct {
 /** @brief Internal function prototype for BGAPI command handlers */
 typedef void (*sl_bgapi_handler)(const void*);
 
-#if !defined _MSC_VER && !defined __APPLE__
-/* Don't define under MSVC and OSX */
-
-#ifndef memcpy
-void * memcpy(void *OUT, const void *IN, size_t N);
-#endif
-#ifndef memcmp
-int  memcmp(const void *S1, const void *S2, size_t N);
-#endif
-#ifndef memset
-void * memset(void *DST, int c, size_t LENGTH);
-#endif
-#ifndef memmove
-void * memmove(void *DST, const void *src, size_t LENGTH);
-#endif
-#endif
-
 typedef enum sl_bgapi_msg_types {
   sl_bgapi_msg_type_cmd = 0x00,
   sl_bgapi_msg_type_rsp = 0x00,

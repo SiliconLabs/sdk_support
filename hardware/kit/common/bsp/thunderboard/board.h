@@ -98,10 +98,6 @@ uint32_t BOARD_i2cBusSelect        (uint8_t select);
 uint8_t  BOARD_pushButtonGetState  (void);
 void     BOARD_pushButtonEnableIRQ (bool enable);
 
-#ifdef BSP_TBSENSE
-  #include "board_4160.h"
-#endif
-
 #ifdef BSP_TBSENSE2
   #include "board_4166.h"
 #endif

@@ -62,84 +62,22 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Structs and typedefs
 
-// Upper limit to not allocate too much memory
-#define SLI_SE_KEY_DERIVATION_MAX_INPUT_SIZE  128
-
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  #define SLI_SE_MAX_PADDED_ECP_PRIVATE_KEY_SIZE \
-  (PSA_BITS_TO_BYTES(521)                        \
-   + sli_se_get_padding(PSA_BITS_TO_BYTES(521)))
+  #define SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE (PSA_BITS_TO_BYTES(521))
 #else
-  #define SLI_SE_MAX_PADDED_ECP_PRIVATE_KEY_SIZE \
-  (PSA_BITS_TO_BYTES(256)                        \
-   + sli_se_get_padding(PSA_BITS_TO_BYTES(256)))
+  #define SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE (PSA_BITS_TO_BYTES(256))
 #endif
 
+#define SLI_SE_MAX_ECP_PUBLIC_KEY_SIZE    (SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE * 2)
+
+#define SLI_SE_MAX_PADDED_ECP_PRIVATE_KEY_SIZE \
+  (SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE             \
+   + sli_se_get_padding(SLI_SE_MAX_ECP_PRIVATE_KEY_SIZE))
 #define SLI_SE_MAX_PADDED_ECP_PUBLIC_KEY_SIZE \
   (SLI_SE_MAX_PADDED_ECP_PRIVATE_KEY_SIZE * 2)
 
-typedef struct {
-  size_t capacity;
-  psa_algorithm_t derivation_algo;
-  sl_se_hash_type_t hash_algo;
-  sl_se_key_descriptor_t key_in;
-  uint8_t *key_buffer;
-  size_t key_buffer_size;
-  uint8_t *salt;
-  size_t salt_len;
-  uint8_t *info;
-  size_t info_len;
-} sli_se_driver_key_derivation_operation_t;
-
-typedef sli_se_driver_key_derivation_operation_t
-  sli_se_transparent_key_derivation_operation_t;
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
-typedef sli_se_driver_key_derivation_operation_t
-  sli_se_opaque_key_derivation_operation_t;
-#endif
-
 // -----------------------------------------------------------------------------
 // Function declarations
-
-psa_status_t sli_se_driver_key_derivation_setup(
-  sli_se_driver_key_derivation_operation_t *operation,
-  psa_algorithm_t alg);
-
-psa_status_t sli_se_driver_key_derivation_set_capacity(
-  sli_se_driver_key_derivation_operation_t *operation,
-  size_t capacity);
-
-psa_status_t sli_se_driver_key_derivation_input_bytes(
-  sli_se_driver_key_derivation_operation_t *operation,
-  psa_key_derivation_step_t step,
-  const uint8_t *data,
-  size_t data_length);
-
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
-  || defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
-psa_status_t sli_se_driver_key_derivation_input_key(
-  sli_se_driver_key_derivation_operation_t *operation,
-  psa_key_derivation_step_t step,
-  const psa_key_attributes_t *attributes,
-  const uint8_t *key_buffer,
-  size_t key_buffer_size);
-#endif
-
-psa_status_t sli_se_driver_key_derivation_output_key(
-  const psa_key_attributes_t *attributes,
-  sli_se_driver_key_derivation_operation_t *operation,
-  uint8_t *key_buffer,
-  size_t key_buffer_size,
-  size_t *key_buffer_length);
-
-psa_status_t sli_se_driver_key_derivation_output_bytes(
-  sli_se_driver_key_derivation_operation_t *operation,
-  uint8_t *output,
-  size_t output_length);
-
-psa_status_t sli_se_driver_key_derivation_abort(
-  sli_se_driver_key_derivation_operation_t *operation);
 
 psa_status_t sli_se_driver_key_agreement(
   psa_algorithm_t alg,

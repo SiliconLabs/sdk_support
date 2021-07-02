@@ -17,7 +17,7 @@
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
 - recommends:
-  - id: iostream_usart
+  - id: iostream_uart
     instance:
     - vcom
   - id: simple_led

@@ -2,39 +2,35 @@ id: mbedtls_entropy_default
 package: platform
 label: Mbed TLS Support for Default Hardware Entropy Source
 description: >-
-  This component provides support for using entropy gathered from the default
-  hardware entropy source on Silicon Labs devices.
+  This component provides support for using entropy gathered from an
+  entropy source present on Silicon Labs devices. Depending on the device's
+  capabilities, this can be either a hardware (TRNG, Radio or ADC) source, or a
+  device-unique seed in non-volatile storage.
 category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto
-source:
-  - path: sl_component/sl_alt/source/sl_entropy.c
 provides:
-  - name: mbedtls_entropy_source
-    allow_multiple: true
   - name: mbedtls_entropy_default
 requires:
-  - name: device
-  - name: rail_lib
-    condition: [device_sdid_80, device_has_radio]
-  - name: rail_lib
-    condition: [device_sdid_89, device_has_radio]
-  - name: rail_lib
-    condition: [device_sdid_95, device_has_radio]
-  - name: se_manager
-    condition: [device_has_semailbox]
-  - name: cryptoacc_library
-    condition: [device_has_cryptoacc]
-template_contribution:
-  - name: mbedtls_config
-    value: MBEDTLS_ENTROPY_HARDWARE_ALT
-    condition: [device_series_1, device_has_radio]
-  - name: mbedtls_config
-    value: MBEDTLS_ENTROPY_HARDWARE_ALT
-    condition: [device_series_1, device_has_trng]
-  - name: mbedtls_config
-    value: MBEDTLS_ENTROPY_HARDWARE_ALT
+  # Require a default entropy source if we don't require one indirectly
+  - name: mbedtls_entropy_source
+  # Require actual hardware sources as long as we have them
+  - name: mbedtls_entropy_hardware
     condition: [device_series_2]
+  - name: mbedtls_entropy_hardware
+    condition: [device_sdid_84]
+  - name: mbedtls_entropy_hardware
+    condition: [device_sdid_100]
+  - name: mbedtls_entropy_hardware
+    condition: [device_sdid_103]
+  - name: mbedtls_entropy_hardware
+    condition: [device_sdid_106]
+  - name: mbedtls_entropy_hardware
+    condition: [rail_lib]
+recommends:
+  # recommend NV seed for resolution instead of ADC, since ADC
+  # requires taking ownership of the ADC peripheral
+  - id: mbedtls_entropy_nvseed
 documentation:
   docset: mbed-tls
   document: group-rng-module

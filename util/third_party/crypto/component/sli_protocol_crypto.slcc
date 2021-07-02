@@ -25,10 +25,16 @@ provides:
   - name: sli_protocol_crypto
 requires:
   - name: device
+  - name: status
   - name: emlib_core
   - name: emlib_crypto
     condition: [device_has_crypto]
   - name: psa_driver
     condition: [device_has_crypto]
   - name: se_manager
+    condition: [device_has_radioaes]
+  - name: psa_crypto_trng
+    condition: [device_has_radioaes]
+define:
+  - name: SLI_RADIOAES_REQUIRES_MASKING
     condition: [device_has_radioaes]

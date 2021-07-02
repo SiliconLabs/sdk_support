@@ -522,9 +522,6 @@ void OPAMP_Enable(
   EFM_ASSERT(init->startupDly <= (_VDAC_OPA_TIMER_STARTUPDLY_MASK
                                   >> _VDAC_OPA_TIMER_STARTUPDLY_SHIFT));
   EFM_ASSERT((init->outPen & ~_VDAC_OPA_OUT_ALTOUTPADEN_MASK) == 0);
-  EFM_ASSERT(!((init->gain3xEn == true)
-               && ((init->negSel == opaNegSelResTap)
-                   || (init->posSel == opaPosSelResTap))));
   EFM_ASSERT((init->drvStr == opaDrvStrLowerAccLowStr)
              || (init->drvStr == opaDrvStrLowAccLowStr)
              || (init->drvStr == opaDrvStrHighAccHighStr)

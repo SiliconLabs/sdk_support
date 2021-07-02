@@ -13,7 +13,7 @@
  *
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -95,4 +95,5 @@
 #else
 #error "em_device.h: PART NUMBER undefined"
 #endif
+
 #endif /* EM_DEVICE_H */

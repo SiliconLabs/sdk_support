@@ -148,21 +148,32 @@ static void packetMode_RxPacketReceived(RAIL_Handle_t railHandle)
 RAIL_RxPacketHandle_t processRxPacket(RAIL_Handle_t railHandle,
                                       RAIL_RxPacketHandle_t packetHandle)
 {
+  RAIL_Status_t status;
+  RAIL_RxPacketDetails_t details;
   RAIL_RxPacketInfo_t packetInfo;
   packetHandle = RAIL_GetRxPacketInfo(railHandle, packetHandle, &packetInfo);
   if (packetHandle == RAIL_RX_PACKET_HANDLE_INVALID) {
     return packetHandle;
+  }
+  if (packetInfo.packetStatus == RAIL_RX_PACKET_READY_CRC_ERROR) {
+    counters.receiveCrcErrDrop++; // counters.receive still counts such too
   }
   uint16_t length = packetInfo.packetBytes;
   void *rxPacketMemoryHandle = memoryAllocate(sizeof(RailAppEvent_t) + length);
   RailAppEvent_t *rxPacket = (RailAppEvent_t *)memoryPtrFromHandle(rxPacketMemoryHandle);
   uint8_t *rxPacketData = (uint8_t *)&rxPacket[1];
 
+  // Read the appended info into our packet structure
+  status = RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle, &details);
+  if (status == RAIL_STATUS_NO_ERROR) {
+    if (details.subPhyId < RAIL_BLE_RX_SUBPHY_COUNT) {
+      counters.subPhyCount[details.subPhyId]++;
+    }
+  }
   // Count packets that we received but had no memory to store
   if (rxPacket == NULL) {
     counters.noRxBuffer++;
   } else {
-    RAIL_Status_t status;
     rxPacket->type = RX_PACKET;
     rxPacket->rxPacket.dataPtr = rxPacketData;
     rxPacket->rxPacket.packetStatus = packetInfo.packetStatus;
@@ -171,10 +182,8 @@ RAIL_RxPacketHandle_t processRxPacket(RAIL_Handle_t railHandle,
     rxPacket->rxPacket.filterMask = packetInfo.filterMask;
     rxPacket->rxPacket.dataLength = length;
     rxPacket->rxPacket.freqOffset = getRxFreqOffset();
+    rxPacket->rxPacket.appendedInfo = details;
 
-    // Read the appended info into our packet structure
-    status = RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle,
-                                        &rxPacket->rxPacket.appendedInfo);
     if (status == RAIL_STATUS_NO_ERROR) {
       // Note that this does not take into account CRC bytes unless
       // RAIL_RX_OPTION_STORE_CRC is used
@@ -279,34 +288,44 @@ static void fifoMode_RxPacketReceived(void)
       = RAIL_GetRxPacketInfo(railHandle, RAIL_RX_PACKET_HANDLE_OLDEST,
                              &packetInfo);
     // assert(packetHandle != NULL);
-    if ((rxLengthCount > 0)
-        && (printRxErrorPackets
-            || (packetInfo.packetStatus == RAIL_RX_PACKET_READY_CRC_ERROR)
-            || (packetInfo.packetStatus == RAIL_RX_PACKET_READY_SUCCESS))) {
-      // Keep and display this frame
-      rxFifoPacketData->rxPacket.packetStatus = packetInfo.packetStatus;
-      rxFifoPacketData->rxPacket.filterMask = packetInfo.filterMask;
-
+    if (packetInfo.packetStatus == RAIL_RX_PACKET_READY_CRC_ERROR) {
+      counters.receiveCrcErrDrop++; // counters.receive still counts such too
+    }
+    if (printRxErrorPackets
+        || (packetInfo.packetStatus == RAIL_RX_PACKET_READY_CRC_ERROR)
+        || (packetInfo.packetStatus == RAIL_RX_PACKET_READY_SUCCESS)) {
       // Read the rest of the bytes out of the fifo
       bytesRead = RAIL_ReadRxFifo(railHandle, currentRxFifoPacketPtr, rxLengthCount);
       rxLengthCount -= bytesRead;
-      currentRxFifoPacketPtr += bytesRead;
-
-      // Configure how many bytes were received
-      rxFifoPacketData->rxPacket.dataLength = rxLengthTarget;
-
-      // Get the appended info details
-      if (RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle,
-                                     &rxFifoPacketData->rxPacket.appendedInfo)
-          != RAIL_STATUS_NO_ERROR) {
-        // assert(false);
-        memset(&rxFifoPacketData->rxPacket.appendedInfo, 0, sizeof(rxFifoPacketData->rxPacket.appendedInfo));
+      if (currentRxFifoPacketPtr != NULL) {
+        currentRxFifoPacketPtr += bytesRead;
       }
-      // Note that this does not take into account CRC bytes unless
-      // RAIL_RX_OPTION_STORE_CRC is used
-      rxFifoPacketData->rxPacket.appendedInfo.timeReceived.totalPacketBytes = rxLengthTarget;
-      RAIL_GetRxTimeSyncWordEndAlt(railHandle, &rxFifoPacketData->rxPacket.appendedInfo);
-      queueAdd(&railAppEventQueue, rxFifoPacketHandle);
+
+      if (rxFifoPacketData != NULL) {
+        // Keep and display this frame
+        rxFifoPacketData->rxPacket.packetStatus = packetInfo.packetStatus;
+        rxFifoPacketData->rxPacket.filterMask = packetInfo.filterMask;
+
+        // Configure how many bytes were received
+        rxFifoPacketData->rxPacket.dataLength = rxLengthTarget;
+
+        // Get the appended info details
+        if (RAIL_GetRxPacketDetailsAlt(railHandle, packetHandle,
+                                       &rxFifoPacketData->rxPacket.appendedInfo)
+            != RAIL_STATUS_NO_ERROR) {
+          // assert(false);
+          memset(&rxFifoPacketData->rxPacket.appendedInfo, 0, sizeof(rxFifoPacketData->rxPacket.appendedInfo));
+        } else {
+          if (rxFifoPacketData->rxPacket.appendedInfo.subPhyId < RAIL_BLE_RX_SUBPHY_COUNT) {
+            counters.subPhyCount[rxFifoPacketData->rxPacket.appendedInfo.subPhyId]++;
+          }
+        }
+        // Note that this does not take into account CRC bytes unless
+        // RAIL_RX_OPTION_STORE_CRC is used
+        rxFifoPacketData->rxPacket.appendedInfo.timeReceived.totalPacketBytes = rxLengthTarget;
+        RAIL_GetRxTimeSyncWordEndAlt(railHandle, &rxFifoPacketData->rxPacket.appendedInfo);
+        queueAdd(&railAppEventQueue, rxFifoPacketHandle);
+      }
     } else {
       // Toss this frame and any of its data accumlated so far
       memoryFree(rxFifoPacketHandle);
@@ -322,17 +341,19 @@ static void fifoMode_RxPacketReceived(void)
  */
 void rxFifoPrep(void)
 {
-  // Don't allocate memory to save incoming data in BER mode.
+  // Don't allocate memory to save incoming data in BER mode
+  // or non-packet-data sources
   if ((railDataConfig.rxMethod == FIFO_MODE)
+      && (railDataConfig.rxSource == RX_PACKET_DATA)
       && (currentAppMode() != BER)
       && !rxFifoManual) {
+    rxLengthCount = rxLengthTarget;
     rxFifoPacketHandle = memoryAllocate(sizeof(RailAppEvent_t) + rxLengthTarget);
     rxFifoPacketData = (RailAppEvent_t *)memoryPtrFromHandle(rxFifoPacketHandle);
     if (rxFifoPacketData == NULL) {
-      rxLengthCount = 0;
+      currentRxFifoPacketPtr = NULL;
       counters.noRxBuffer++;
     } else {
-      rxLengthCount = rxLengthTarget;
       uint8_t *rxPacketData = (uint8_t *)&rxFifoPacketData[1];
       rxFifoPacketData->type = RX_PACKET;
       rxFifoPacketData->rxPacket.dataPtr = rxPacketData;
@@ -517,20 +538,35 @@ static void packetSource_RxFifoAlmostFull(uint16_t bytesAvailable)
     bytesRead = (rxLengthCount > bytesAvailable) ? bytesAvailable : rxLengthCount;
     bytesRead = RAIL_ReadRxFifo(railHandle, currentRxFifoPacketPtr, bytesRead);
     rxLengthCount -= bytesRead;
-    currentRxFifoPacketPtr += bytesRead;
+    if (currentRxFifoPacketPtr != NULL) {
+      currentRxFifoPacketPtr += bytesRead;
+    }
   }
 }
 
 void RAILCb_RxFifoAlmostFull(RAIL_Handle_t railHandle)
 {
   uint16_t bytesAvailable = RAIL_GetRxFifoBytesAvailable(railHandle);
-  counters.rxFifoAlmostFull++;
 
   if (berTestModeEnabled) {
     berSource_RxFifoAlmostFull(bytesAvailable);
   } else if (RAIL_BLE_IsEnabled(railHandle)) {
     RAIL_ConfigEvents(railHandle, RAIL_EVENT_RX_FIFO_ALMOST_FULL,
                       RAIL_EVENTS_NONE); // Disable this event
+  } else if (railDataConfig.rxSource != RX_PACKET_DATA) {
+    // Just consume (flush) the data
+    counters.rxRawSourceBytes += RAIL_ReadRxFifo(railHandle, NULL, bytesAvailable);
+    rxDataSourceEventState++;
+    if (rxDataSourceEventState >= RX_DATA_SOURCE_EVENT_STATE_SUSPENDED) {
+      // Temporarily disable RX_FIFO events to let main-line code run
+      // in case these events are so frequent nothing gets done.
+      RAIL_ConfigEvents(railHandle, RAIL_EVENT_RX_FIFO_ALMOST_FULL,
+                        RAIL_EVENTS_NONE);
+      // Separate calls each of which uses fast-path code in library
+      RAIL_ConfigEvents(railHandle, (RAIL_EVENT_RX_FIFO_OVERFLOW
+                                     | RAIL_EVENT_RX_FIFO_FULL),
+                        RAIL_EVENTS_NONE);
+    }
   } else {
     packetSource_RxFifoAlmostFull(bytesAvailable);
   }

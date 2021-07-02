@@ -82,7 +82,7 @@
 #define BSP_EXTFLASH_CS_PORT                          (gpioPortC)
 
 #define BSP_EXTFLASH_INTERNAL                         (0)
-#define BSP_EXTFLASH_USART                            (HAL_SPI_PORT_USART1)
+#define BSP_EXTFLASH_USART                            (HAL_SPI_PORT_USART0)
 #define BSP_EXTFLASH_MOSI_PIN                         (1U)
 #define BSP_EXTFLASH_MOSI_PORT                        (gpioPortC)
 

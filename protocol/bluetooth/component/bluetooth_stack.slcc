@@ -23,8 +23,12 @@ include:
       - path: "sl_bt_types.h"
       - path: "sl_bt_version.h"
       - path: "sl_bt_mbedtls_context.h"
+        condition:
+          - "device_series_1"
 source:
   - path: "src/sl_bt_mbedtls_context.c"
+    condition:
+      - "device_series_1"
 template_file:
   - path: "src/sl_bluetooth.c.jinja"
   - path: "src/sl_bluetooth.h.jinja"
@@ -260,6 +264,7 @@ template_contribution:
       event: stack_process_action
       include: "sl_bluetooth.h"
       handler: "sl_bt_step"
+    priority: 9
   - name: bluetooth_stack_init
     value:
       function: "sl_bt_init_coex_hal"
@@ -267,6 +272,12 @@ template_contribution:
     priority: 10
     condition:
       - "rail_util_coex"
+  - name: psa_key_slots
+    value:
+      name: psa_key_slots_bluetooth_stack
+      count: 2
+    condition:
+      - psa_crypto
 requires:
   - name: "sleeptimer"
   - name: "rail_lib"
@@ -276,12 +287,30 @@ requires:
     condition:
       - "nvm3"
   - name: "device_supports_bluetooth"
-  - name: "mbedtls_ccm"
   - name: "mbedtls_ecdh"
+    condition:
+      - "device_series_1"
   - name: "mbedtls_ecc"
+    condition:
+      - "device_series_1"
   - name: "mbedtls_ecc_secp256r1"
-  - name: "mbedtls_cmac"
+    condition:
+      - "device_series_1"
   - name: "mbedtls_random"
+    condition:
+      - "device_series_1"
+  - name: "mbedtls_cmac"
+    condition:
+      - "device_series_1"
+  - name: "psa_crypto"
+    condition:
+      - "device_series_2"
+  - name: "psa_crypto_ecdh"
+    condition:
+      - "device_series_2"
+  - name: "psa_its"
+    condition:
+      - "device_series_2"
   - name: "sli_protocol_crypto"
   - name: "component_catalog"
   - name: "power_manager"

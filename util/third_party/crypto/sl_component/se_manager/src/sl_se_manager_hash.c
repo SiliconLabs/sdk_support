@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -38,7 +38,7 @@
 #include <string.h>
 
 /***************************************************************************//**
- * \addtogroup sl_se Secure Element Manager API
+ * \addtogroup sl_se Secure Engine Manager API
  * @{
  ******************************************************************************/
 
@@ -584,26 +584,60 @@ sl_status_t sl_se_hash(sl_se_command_context_t *cmd_ctx,
                        uint8_t* digest,
                        size_t digest_len)
 {
-  sl_status_t status;
-  sl_se_hash_streaming_context_t hash_ctx;
-  union hash_type_ctx_u {
-    sl_se_sha1_streaming_context_t   sha1_ctx;
-    sl_se_sha224_streaming_context_t sha224_ctx;
-    sl_se_sha256_streaming_context_t sha256_ctx;
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    sl_se_sha384_streaming_context_t sha384_ctx;
-    sl_se_sha512_streaming_context_t sha512_ctx;
-#endif
-  } hash_type_ctx;
-
-  status = sl_se_hash_starts(&hash_ctx, cmd_ctx, hash_type, &hash_type_ctx);
-  if (status == SL_STATUS_OK) {
-    status = sl_se_hash_update(&hash_ctx, message, message_size);
-    if (status == SL_STATUS_OK) {
-      status = sl_se_hash_finish(&hash_ctx, digest, digest_len);
-    }
+  if (cmd_ctx == NULL
+      || digest == NULL
+      || (message == NULL
+          && message_size != 0)) {
+    return SL_STATUS_INVALID_PARAMETER;
   }
-  return status;
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+  uint32_t command_word = SE_COMMAND_HASH;
+  uint32_t digest_size = 0;
+
+  switch (hash_type) {
+    case SL_SE_HASH_SHA1:
+      command_word |= SE_COMMAND_OPTION_HASH_SHA1;
+      digest_size = 20;
+      break;
+    case SL_SE_HASH_SHA224:
+      command_word |= SE_COMMAND_OPTION_HASH_SHA224;
+      digest_size = 28;
+      break;
+    case SL_SE_HASH_SHA256:
+      command_word |= SE_COMMAND_OPTION_HASH_SHA256;
+      digest_size = 32;
+      break;
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    case SL_SE_HASH_SHA384:
+      command_word |= SE_COMMAND_OPTION_HASH_SHA384;
+      digest_size = 48;
+      break;
+    case SL_SE_HASH_SHA512:
+      digest_size = 64;
+      command_word |= SE_COMMAND_OPTION_HASH_SHA512;
+      break;
+#endif
+    default:
+      return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if ( digest_len < digest_size ) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sli_se_command_init(cmd_ctx, command_word);
+
+  SE_addParameter(se_cmd, message_size);
+
+  SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT(message, message_size);
+  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(digest, digest_size);
+
+  SE_addDataInput(se_cmd, &data_in);
+  SE_addDataOutput(se_cmd, &data_out);
+
+  // Execute and wait
+  return sli_se_execute_and_wait(cmd_ctx);
 }
 
 /** @} (end addtogroup sl_se) */

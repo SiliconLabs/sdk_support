@@ -6,7 +6,7 @@ category: Services|IO Stream
 quality: production
 provides:
   - name: iostream_usart_core
-  - name: iostream_transport
+  - name: iostream_transport_core
     allow_multiple: true
 root_path: platform/service/iostream
 include:
@@ -29,7 +29,7 @@ template_contribution:
       - device_family_efm32tg11b
 requires:
   - name: iostream
-  - name: iostream_uart
+  - name: iostream_uart_common
   - name: status
   - name: emlib_cmu
   - name: emlib_gpio

@@ -100,6 +100,21 @@ __STATIC_INLINE void sli_power_manager_remove_hf_clock_settings_preservation_req
  ******************************************************************************/
 __WEAK void sli_power_manager_set_high_accuracy_hf_clock_as_used(void);
 
+/***************************************************************************//**
+ * Gets the wake-up restore process time.
+ * If we are not in the context of a deepsleep and therefore don't need to
+ * do a restore, the return value is 0.
+ *
+ *
+ * @return   Wake-up restore process time.
+ ******************************************************************************/
+uint32_t sli_power_manager_get_restore_delay(void);
+
+/***************************************************************************//**
+ * Initiates the wake-up restore process.
+ ******************************************************************************/
+void sli_power_manager_initiate_restore(void);
+
 #ifdef __cplusplus
 }
 #endif

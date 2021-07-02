@@ -367,7 +367,7 @@ sl_status_t sl_mac_radio_receive_mac_header_callback(uint8_t mac_index,
                                       macInfoFlags,
                                       state->current_nwk);
   } else {
-    header = sl_mac_make_raw_message(0, NULL, macInfoFlags, state->current_nwk);
+    header = sl_mac_make_raw_message(NULL_BUFFER, macInfoFlags, state->current_nwk);
   }
 
   if (header == NULL_BUFFER) {

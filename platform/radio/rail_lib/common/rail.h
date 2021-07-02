@@ -51,7 +51,7 @@ extern "C" {
 
 /**
  * @defgroup Protocol_Specific Protocol-specific
- * @brief Protocol-specific RAIL APIs
+ * @brief Protocol-Specific RAIL APIs
  */
 
 /******************************************************************************
@@ -85,7 +85,7 @@ void RAIL_GetVersion(RAIL_Version_t *version, bool verbose);
  *
  * To use this API, the application must initialize the DMA engine
  * on the chip and allocate a DMA channel. This channel will be used
- * periodically to copy memory more efficiently. This API should be called
+ * periodically to copy memory more efficiently. Call this function
  * before RAIL_Init to have the most benefit. If the application needs
  * to take back control of the DMA channel that RAIL is using, this API may be
  * called with a channel of RAIL_DMA_INVALID to tell RAIL to stop using DMA.
@@ -109,7 +109,7 @@ RAIL_Status_t RAIL_UseDma(uint8_t channel);
  * @return Handle for initialized rail instance or NULL if an
  *   invalid value was passed in the railCfg.
  *
- * @note This function should be called only once per protocol. If called
+ * @note Call this function only once per protocol. If called
  *   again, it will do nothing and return NULL.
  */
 RAIL_Handle_t RAIL_Init(RAIL_Config_t *railCfg,
@@ -125,25 +125,6 @@ RAIL_Handle_t RAIL_Init(RAIL_Config_t *railCfg,
  * can use RAIL_IsInitialized() to determine whether RAIL has been initialized or not.
  */
 bool RAIL_IsInitialized(void);
-
-/**
- * Blocking delay routine for a specified number of microseconds.
- *
- * @param[in] microseconds Delay duration in microseconds.
- * @return Status code indicating success of the function call.
- *
- * This RAIL API should only be used for short blocking delays because it has less overhead
- * than calling RAIL_GetTime() in a loop.
- * @note
- * Passing large delay values may give unpredictable results or trigger
- * the Watchdog Reset.
- * \n Also, this function will start the clocks required for the RAIL timebase if they
- * are not running, except between \ref RAIL_Sleep() and \ref RAIL_Wake()
- * where the timer must remain stopped.
- * \n Interrupts are not disabled during the delay, so the delay may be longer if an
- * interrupt extends beyond the delay duration.
- */
-RAIL_Status_t RAIL_DelayUs(RAIL_Time_t microseconds);
 
 /**
  * Collect entropy from the radio if available.
@@ -225,7 +206,7 @@ RAIL_Status_t RAIL_GetPtiConfig(RAIL_Handle_t railHandle,
  * @param[in] enable PTI is enabled if true; disable if false.
  * @return RAIL status indicating success of the function call.
  *
- * Similar to having only one PTI configuration per chip,
+ * Similarly to having only one PTI configuration per chip,
  * PTI can only be enabled or disabled for all protocols. It cannot
  * be individually set to enabled and disabled per protocol
  * (unless the application switches it when
@@ -250,7 +231,7 @@ RAIL_Status_t RAIL_EnablePti(RAIL_Handle_t railHandle,
  *
  * @note This function cannot be called unless the radio is currently in the
  * \ref RAIL_RF_STATE_IDLE or \ref RAIL_RF_STATE_INACTIVE states. For this
- * reason this function should be called early on before starting radio
+ * reason, call this function early on before starting radio
  * operations and not changed later.
  */
 RAIL_Status_t RAIL_SetPtiProtocol(RAIL_Handle_t railHandle,
@@ -344,8 +325,8 @@ RAIL_Status_t RAIL_GetRfPath(RAIL_Handle_t railHandle, RAIL_AntennaSel_t *rfPath
  * @return Status code indicating success of the function call.
  *
  * The configuration passed into this function should be auto-generated
- * and not manually created or edited. By default, this function should not be
- * called in RAIL 2.x and later unless instructed by Silicon Labs because it
+ * and not manually created or edited. By default, do not call this function
+ * in RAIL 2.x and later unless instructed by Silicon Labs because it
  * may bypass updating certain RAIL state. In RAIL 2.x and later, the
  * RAIL_ConfigChannels function applies the default radio configuration
  * automatically.
@@ -614,7 +595,7 @@ RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
 /// {
 ///   // Initialize RAIL ...
 ///
-///   // Setup a timer for 1ms from now
+///   // Set up a timer for 1 ms from now
 ///   RAIL_SetTimer(railHandle, 1000, RAIL_TIME_RELATIVE, &timerCb);
 ///
 ///   // Run main loop
@@ -623,9 +604,9 @@ RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
 /// @endcode
 ///
 /// If multiple software timers are needed to be run off of the one available
-/// hardware timer you can enable a software multiplexing layer within RAIL
+/// hardware timer, you can enable a software multiplexing layer within RAIL
 /// using the \ref RAIL_ConfigMultiTimer() function. This will allow you to
-/// setup as many timers as you want using the RAIL_*MultiTimer() functions. See
+/// set up as many timers as you want using the RAIL_*MultiTimer() functions. See
 /// the example below for using the multitimer functionality.
 ///
 /// @code{.c}
@@ -650,7 +631,7 @@ RAIL_Status_t RAIL_ConfigSyncWords(RAIL_Handle_t railHandle,
 ///
 ///   RAIL_ConfigMultiTimer(true);
 ///
-///   // Setup one timer for 1ms from now and one at time 2000000 in the RAIL
+///   // Set up one timer for 1 ms from now and one at time 2000000 in the RAIL
 ///   // timebase
 ///   RAIL_SetMultiTimer(&tmr1, 1000, RAIL_TIME_RELATIVE, &timerCb, NULL);
 ///   RAIL_SetMultiTimer(&tmr2, 2000000, RAIL_TIME_ABSOLUTE, &timerCb, NULL);
@@ -676,12 +657,38 @@ RAIL_Time_t RAIL_GetTime(void);
 /**
  * Set the current RAIL time.
  *
+ * @warning Use this API only for testing purposes or in
+ *   very limited circumstances during RAIL Timer Synchronization.
+ *   Undefined behavior can result by calling it in multiprotocol or
+ *   when the radio is not idle or timed events are active. Applications
+ *   using \ref RAIL_GetTime() may not be designed for discontinuous
+ *   changes to the RAIL time base.
+ *
  * @param[in] time Set the RAIL timebase to this value in microseconds.
  * @return Status code indicating the success of the function call.
  *
  * Sets the current time in the RAIL timebase in microseconds.
  */
 RAIL_Status_t RAIL_SetTime(RAIL_Time_t time);
+
+/**
+ * Blocking delay routine for a specified number of microseconds.
+ *
+ * @param[in] microseconds Delay duration in microseconds.
+ * @return Status code indicating success of the function call.
+ *
+ * Use this RAIL API only for short blocking delays because it has less overhead
+ * than calling RAIL_GetTime() in a loop.
+ * @note
+ * Passing large delay values may give unpredictable results or trigger
+ * the Watchdog Reset.
+ * \n Also, this function will start the clocks required for the RAIL timebase if they
+ * are not running, except between \ref RAIL_Sleep() and \ref RAIL_Wake()
+ * where the timer must remain stopped.
+ * \n Interrupts are not disabled during the delay, so the delay may be longer if an
+ * interrupt extends beyond the delay duration.
+ */
+RAIL_Status_t RAIL_DelayUs(RAIL_Time_t microseconds);
 
 /**
  * Schedule a timer to expire using the RAIL timebase.
@@ -768,7 +775,7 @@ bool RAIL_IsTimerRunning(RAIL_Handle_t railHandle);
  * @note This function must be called before calling \ref RAIL_SetMultiTimer.
  *       This function is a no-op on multiprotocol as this layer is already used
  *       under the hood.
- *       It should not be called while the RAIL timer is running.
+ *       Do not call this function while the RAIL timer is running.
  *       Call \ref RAIL_IsTimerRunning before enabling/disabling the multitimer.
  *       If the multitimer is not needed, do not call this function to
  *       allow the multitimer code to be dead stripped. If the multitimer is
@@ -866,14 +873,14 @@ RAIL_Time_t RAIL_GetMultiTimer(RAIL_MultiTimer_t *tmr,
  * Sleep APIs
  *****************************************************************************/
 /// @addtogroup Sleep
-/// @brief Functionality to help when putting the system to an EM2/EM3/EM4 sleep
+/// @brief These APIs help when putting the system to an EM2/EM3/EM4 sleep
 /// states where the high frequency clock is disabled.
 /// @{
 ///
 /// The RAIL library has its own timebase and the ability to schedule operations
 /// into the future. When going to any power mode that disables the HF clock
-/// used for the radio (EM2/EM3/EM4) it is important that this timebase is
-/// synchronized to a running LFCLK and the chip is set to wakeup before the
+/// used for the radio (EM2/EM3/EM4), it is important that this timebase is
+/// synchronized to a running LFCLK and the chip is set to wake up before the
 /// next scheduled event.
 /// If RAIL has not been configured to use the power manager,
 /// \ref RAIL_Sleep and \ref RAIL_Wake must be called for performing this
@@ -888,18 +895,18 @@ RAIL_Time_t RAIL_GetMultiTimer(RAIL_MultiTimer_t *tmr,
 ///
 /// <b>Sleep with timer synchronization:</b>
 ///
-/// When sleeping with timer synchronization you must first get the required
+/// When sleeping with timer synchronization, you must first get the required
 /// LFCLK up and running and leave it running across sleep so that the high
 /// frequency clock that drives the RAIL time base can be synchronized to it.
-/// The \ref RAIL_Sleep() API will also setup a wake event on the timer to wake
+/// The \ref RAIL_Sleep() API will also set up a wake event on the timer to wake
 /// up wakeupTime before the next timer event so that it can run successfully.
 /// See the \ref efr32_main sections on Low-Frequency Clocks and RAIL Timer
 /// Synchronization for more setup details.
 ///
-/// This is useful for scenarios where you want to maintain packet timestamps
+/// This is useful when maintaining packet timestamps
 /// across sleep or use the scheduled RX/TX APIs while sleeping in between. It
-/// does take more time and code to do this synchronization so if your
-/// application does not need this it should be avoided.
+/// does take more time and code to do the synchronization. If your
+/// application does not need this, it should be avoided.
 ///
 /// Example (without Power Manager):
 /// @code{.c}
@@ -990,17 +997,17 @@ RAIL_Time_t RAIL_GetMultiTimer(RAIL_MultiTimer_t *tmr,
 /// sl_power_manager_sleep() in the main loop ensures that the device sleeps
 /// until the scheduled operation is due.
 /// Upon completion, each instantaneous or scheduled RX/TX operation will
-/// indicate radio busy to the power manager, to allow the application to
+/// indicate radio busy to the power manager to allow the application to
 /// service the RAIL event and perform subsequent operations before going to
-/// sleep. Thus it is important that the application idle the radio by either
+/// sleep. Therefore, it is important that the application idle the radio by either
 /// calling \ref RAIL_Idle or \ref RAIL_YieldRadio.
-/// If the radio transitions to RX after an RX or TX operation then one must
+/// If the radio transitions to RX after an RX or TX operation,
 /// always call \ref RAIL_Idle in order transition to a lower sleep state.
-/// If the radio transitions to idle after an RX or TX operation then
+/// If the radio transitions to idle after an RX or TX operation,
 /// \ref RAIL_YieldRadio should suffice in indicating to the power manager
 /// that the radio is no longer busy and the device can sleep.
 ///
-/// Following example shows scheduling periodic TX on getting a TX completion
+/// The following example shows scheduling periodic TX on getting a TX completion
 /// event:
 /// @code{.c}
 /// void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events) {
@@ -1030,11 +1037,11 @@ RAIL_Time_t RAIL_GetMultiTimer(RAIL_MultiTimer_t *tmr,
 ///
 /// <b>Sleep without timer synchronization:</b>
 ///
-/// When sleeping without timer synchronization you are free to enable only the
-/// LFCLK's and wake sources required by the application. RAIL will not attempt
+/// When sleeping without timer synchronization, you are free to enable only the
+/// LFCLKs and wake sources required by the application. RAIL will not attempt
 /// to configure any wake events and may miss anything that occurs over sleep.
 ///
-/// This is useful for scenarios where your application does not care about
+/// This is useful when your application does not care about
 /// packet timestamps or scheduling operations accurately over sleep.
 ///
 /// Example (without Power Manager):
@@ -1205,7 +1212,7 @@ RAIL_Status_t RAIL_Wake(RAIL_Time_t elapsedTime);
  *
  * @return Status code indicating success of the function call.
  *
- * @note This function should be called only when the application is built
+ * @note Call this function only when the application is built
  * and initialized with Power Manager plugin.
  * RAIL will perform timer synchronization, upon transitioning from EM2 or lower
  * to EM1 or higher energy mode or vice-versa, in the Power Manager EM
@@ -1377,7 +1384,10 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
 /// fixed-size packet metadata FIFO that limits the number of packets
 /// RAIL and applications can hold onto for deferred processing.
 /// See chip-specific documentation, such as \ref efr32_main, for more
-/// information.
+/// information. Note that when using multiprotocol the receive FIFO is reset
+/// prior to a protocol switch so held packets will be lost if not processed
+/// before then.
+///
 /// While \ref RAIL_EVENT_RX_FIFO_ALMOST_FULL occurs solely based on the
 /// state of the receive FIFO used for packet data, both
 /// \ref RAIL_EVENT_RX_FIFO_FULL and \ref RAIL_EVENT_RX_FIFO_OVERFLOW
@@ -1457,8 +1467,8 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
 /// //   RAIL_EVENT_RX_PACKET_RECEIVED
 /// @endcode
 ///
-/// On receive, an application can use multiple data sources that
-/// are only compatible with \ref RAIL_DataMethod_t::FIFO_MODE. All that differs
+/// On receive, an application can use a different \ref RAIL_RxDataSource_t that
+/// is only compatible with \ref RAIL_DataMethod_t::FIFO_MODE. All that differs
 /// from the FIFO mode example above is the RAIL_DataConfig_t::rxSource setting.
 /// IQ data samples are taken at the hardware's oversample rate and the amount
 /// of data can easily overwhelm the CPU processing time. The sample rate
@@ -1503,7 +1513,8 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
  * This function configures how RAIL manages data. The application can
  * configure RAIL to receive data in a packet-based or FIFO-based manner.
  * \ref RAIL_DataMethod_t::FIFO_MODE is necessary to receive packets larger
- * than the radio's receive FIFO.
+ * than the radio's receive FIFO. It is also required for receive data
+ * sources other than \ref RAIL_RxDataSource_t::RX_PACKET_DATA.
  *
  * Generally with \ref RAIL_DataMethod_t::FIFO_MODE, the application sets
  * appropriate FIFO thresholds via RAIL_SetTxFifoThreshold() and
@@ -1520,8 +1531,8 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
  * \ref RAIL_EVENT_RX_FIFO_ALMOST_FULL or \ref RAIL_EVENT_TX_FIFO_ALMOST_EMPTY
  * events.
  *
- * When \ref RAIL_DataConfig_t.rxMethod is set to \ref
- * RAIL_DataMethod_t.FIFO_MODE, the radio won't drop packet data of
+ * When \ref RAIL_DataConfig_t::rxMethod is set to \ref
+ * RAIL_DataMethod_t::FIFO_MODE, the radio won't drop packet data of
  * aborted or CRC error packets, but will present it to the application
  * to deal with accordingly. On completion of erroneous packets, the
  * \ref RAIL_Config_t::eventsCallback with \ref RAIL_EVENT_RX_PACKET_ABORTED,
@@ -1534,8 +1545,8 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
  * one of these packet completion events or the application can explicitly
  * flush it by calling RAIL_ReleaseRxPacket().
  *
- * When \ref RAIL_DataConfig_t.rxMethod is set to \ref
- * RAIL_DataMethod_t.PACKET_MODE, the radio will roll back (drop) all packet
+ * When \ref RAIL_DataConfig_t::rxMethod is set to \ref
+ * RAIL_DataMethod_t::PACKET_MODE, the radio will roll back (drop) all packet
  * data associated with aborted packets including those with CRC errors
  * (unless configured to ignore CRC errors via the
  * \ref RAIL_RX_OPTION_IGNORE_CRC_ERRORS RX option). The application will
@@ -1597,7 +1608,7 @@ uint16_t RAIL_WriteTxFifo(RAIL_Handle_t railHandle,
  * This function sets the memory location for the transmit FIFO. It
  * must be called at least once before any transmit operations occur.
  *
- * The FIFO size can be determined by the return value of this function. The
+ * FIFO size can be determined by the return value of this function. The
  * chosen size is determined based on the available FIFO sizes supported by the
  * hardware. Similarly, some hardware has stricter FIFO alignment requirements;
  * 32-bit alignment provides the maximum portability across all RAIL platforms.
@@ -1656,7 +1667,7 @@ uint16_t RAIL_SetTxFifo(RAIL_Handle_t railHandle,
  *   not unnecessarily consume RAM resources in your application,
  *   implement \ref RAILCb_SetupRxFifo() to call this function.
  *
- * The FIFO size can be determined by the return value of this function. The
+ * FIFO size can be determined by the return value of this function. The
  * chosen size is determined based on the available FIFO sizes supported by the
  * hardware. Similarly, some hardware has stricter FIFO alignment requirements;
  * 32-bit alignment provides the maximum portability across all RAIL platforms.
@@ -1830,7 +1841,7 @@ void RAIL_ResetFifo(RAIL_Handle_t railHandle, bool txFifo, bool rxFifo);
 
 /**
  * Get the number of bytes used in the receive FIFO.
- * This function should only be used in RX \ref RAIL_DataMethod_t::FIFO_MODE.
+ * Only use this function in RX \ref RAIL_DataMethod_t::FIFO_MODE.
  * Apps should use RAIL_GetRxPacketInfo() instead.
  *
  * @param[in] railHandle A RAIL instance handle.
@@ -1907,7 +1918,8 @@ RAIL_Status_t RAIL_GetRxTransitions(RAIL_Handle_t railHandle,
  *
  * This function fails if unsupported transitions are passed in or if the
  * radio is currently in the TX state. Success and error can each transition
- * to RX or IDLE.
+ * to RX or IDLE. For the ability to run repeated transmits, see
+ * \ref RAIL_SetNextTxRepeat.
  */
 RAIL_Status_t RAIL_SetTxTransitions(RAIL_Handle_t railHandle,
                                     const RAIL_StateTransitions_t *transitions);
@@ -1919,10 +1931,61 @@ RAIL_Status_t RAIL_SetTxTransitions(RAIL_Handle_t railHandle,
  * @param[out] transitions The state transitions that apply after transmission.
  * @return Status code indicating a success of the function call.
  *
- * Retrieves the current state transitions after TX and stores them in the transitions argument.
+ * Retrieves the current state transitions after TX and stores them in the
+ * transitions argument.
  */
 RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
                                     RAIL_StateTransitions_t *transitions);
+
+/**
+ * Set up automatic repeated transmits after the next transmit.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] repeatConfig The configuration structure for repeated transmits.
+ * @return Status code indicating a success of the function call.
+ *
+ * Repeated transmits will occur after an application-initiated transmit caused
+ * by calling one of the \ref Packet_TX APIs. The repetition will only occur
+ * after the first application-initiated transmit after this function is
+ * called. Future repeated transmits must be requested by calling this function
+ * again.
+ *
+ * Each repeated transmit that occurs will have full \ref PTI information, and
+ * will receive events such as \ref RAIL_EVENT_TX_PACKET_SENT as normal.
+ *
+ * If a TX error occurs during the repetition, the process will abort and the
+ * TX error transition from \ref RAIL_SetTxTransitions will be used. If the
+ * repetition completes successfully, then the TX success transition from
+ * \ref RAIL_SetTxTransitions will be used.
+ *
+ * Any call to \ref RAIL_Idle or \ref RAIL_StopTx will clear the pending
+ * repeated transmits. The state will also be cleared by another call to this
+ * function. To clear the repeated transmits before they've started without
+ * stopping other radio actions, call this function with a \ref
+ * RAIL_TxRepeatConfig_t::iterations count of 0. A DMP switch will clear this
+ * state only if the initial transmit triggering the repeated transmits has
+ * started.
+ *
+ * The application is responsible for populating the transmit data to be used
+ * by the repeated transmits via \ref RAIL_SetTxFifo or \ref RAIL_WriteTxFifo.
+ * Data will be transmitted from the Transmit FIFO. If the Transmit FIFO does
+ * not have sufficient data to transmit, a TX error will be caused and a \ref
+ * RAIL_EVENT_TX_UNDERFLOW will occur. In order to avoid an underflow, the
+ * application should queue data to be transmitted as early as possible.
+ * Consider using \ref RAIL_TX_OPTION_RESEND if the same packet data is to
+ * be repeated: then the Transmit FIFO only needs to be set/written once.
+ *
+ * This function will fail to configure the repetition if a transmit of any
+ * kind is ongoing, including during the time between an initial transmit and
+ * the end of a previously-configured repetition.
+ *
+ * @note This feature/API is not supported on the EFR32XG1 family of chips.
+ *        Use the compile time symbol \ref RAIL_SUPPORTS_TX_TO_TX or the runtime
+ *        call \ref RAIL_SupportsTxToTx() to check whether the platform supports
+ *        this feature.
+ */
+RAIL_Status_t RAIL_SetNextTxRepeat(RAIL_Handle_t railHandle,
+                                   const RAIL_TxRepeatConfig_t *repeatConfig);
 
 /**
  * Configure RAIL automatic state transition timing.
@@ -1998,7 +2061,7 @@ RAIL_RadioState_t RAIL_GetRadioState(RAIL_Handle_t railHandle);
  * otherwise, this bit will be clear. If frame detection is disabled, \ref
  * RAIL_RF_STATE_DETAIL_NO_FRAMES in the returned state bitmask will be set;
  * otherwise, this bit will be clear. If the radio is performing an LBT/CSMA
- * operation (e.g. a backoff period) \ref RAIL_RF_STATE_DETAIL_LBT in the
+ * operation (e.g., a backoff period) \ref RAIL_RF_STATE_DETAIL_LBT in the
  * returned state bitmask will be set; otherwise, this bit will be clear.
  *
  * For the most part, the more detailed radio states returned by this API
@@ -2184,7 +2247,7 @@ RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
 /// @{
 
 /**
- * Initialize TxPower Settings.
+ * Initialize TX power settings.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] config An instance which contains desired initial settings
@@ -2193,10 +2256,10 @@ RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
  *
  * These settings include the selection between the multiple TX amplifiers,
  * voltage supplied to the TX power amplifier, and ramp times. This must
- * be called before any transmit occurs, or \ref RAIL_SetTxPower is called.
+ * be called before any transmit occurs or \ref RAIL_SetTxPower is called.
  * While this function should always be called during initialization,
  * it can also be called any time if these settings need to change to adapt
- * to a different application/protocol. This API will also reset TX Power to
+ * to a different application/protocol. This API also resets TX power to
  * \ref RAIL_TX_POWER_LEVEL_INVALID, so \ref RAIL_SetTxPower must be called
  * afterwards.
  *
@@ -2204,7 +2267,7 @@ RAIL_RadioStateDetail_t RAIL_GetRadioStateDetail(RAIL_Handle_t railHandle);
  * This API attempts to get as close as possible to the requested settings. The
  * following "RAIL_Get..." API can be used to determine what values were set. A
  * change in \ref RAIL_TxPowerConfig_t::rampTime may affect the minimum timings
- * that can be acheived in \ref RAIL_StateTiming_t::idleToTx and
+ * that can be achieved in \ref RAIL_StateTiming_t::idleToTx and
  * \ref RAIL_StateTiming_t::rxToTx. Call \ref RAIL_SetStateTiming() again to
  * check whether these times have changed.
  */
@@ -2222,8 +2285,8 @@ RAIL_Status_t RAIL_ConfigTxPower(RAIL_Handle_t railHandle,
  * successful.
  *
  * Note that this API does not return the current TX power, which is separately
- * managed by the \ref RAIL_GetTxPower / \ref RAIL_SetTxPower APIs. This API
- * should be used to determine which values were set as a result of
+ * managed by the \ref RAIL_GetTxPower / \ref RAIL_SetTxPower APIs. Use this API
+ * to determine which values were set as a result of
  * \ref RAIL_ConfigTxPower.
  */
 RAIL_Status_t RAIL_GetTxPowerConfig(RAIL_Handle_t railHandle,
@@ -2356,7 +2419,7 @@ void RAIL_VerifyTxPowerCurves(const struct RAIL_TxPowerCurvesConfigAlt *config);
 ///   power was successful.
 ///
 /// This is a utility function for user convenience. Normally, to set TX
-/// power in dBm, the user would have to do the following:
+/// power in dBm, do the following:
 ///
 /// @code{.c}
 /// RAIL_TxPower_t power = 100; // 100 deci-dBm, 10 dBm
@@ -2382,7 +2445,7 @@ RAIL_Status_t RAIL_SetTxPowerDbm(RAIL_Handle_t railHandle,
 /// @return The current output power in deci-dBm.
 ///
 /// This is a utility function for user convenience. Normally, to get TX
-/// power in dBm, the user would have to do the following:
+/// power in dBm, do the following:
 ///
 /// @code{.c}
 /// RAIL_TxPowerLevel_t powerLevel = RAIL_GetTxPower(railHandle);
@@ -2404,7 +2467,7 @@ RAIL_TxPower_t RAIL_GetTxPowerDbm(RAIL_Handle_t railHandle);
 /**
  * Enable automatic switching between PAs internally to the RAIL library.
  * While PA Automode is enabled, the PA will be chosen and set automatically whenever
- * \ref RAIL_SetTxPowerDbm is called, or whenever powers are coerced automatically,
+ * \ref RAIL_SetTxPowerDbm is called or whenever powers are coerced automatically,
  * internally to the RAIL library during a channel change. While PA Auto Mode
  * is enabled, users cannot call \ref RAIL_ConfigTxPower or
  * \ref RAIL_SetTxPower. When entering auto mode, \ref RAIL_SetTxPowerDbm must
@@ -2415,8 +2478,8 @@ RAIL_TxPower_t RAIL_GetTxPowerDbm(RAIL_Handle_t railHandle);
  *
  * @note: Power conversion curves must be initialized before calling this function.
  * That is, \ref RAIL_ConvertDbmToRaw and \ref RAIL_ConvertRawToDbm most both be
- * able to operate properly in order for PA Auto Mode to function correctly.
- * See the PA Conversions plugin or AN1127 for more details on that.
+ * able to operate properly to ensure that PA Auto Mode functions correctly.
+ * See the PA Conversions plugin or AN1127 for more details.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Enable or disable PA Auto Mode.
@@ -2433,7 +2496,7 @@ RAIL_Status_t RAIL_EnablePaAutoMode(RAIL_Handle_t railHandle, bool enable);
 bool RAIL_IsPaAutoModeEnabled(RAIL_Handle_t railHandle);
 
 /**
- * Callback that is used to decide which PA and power level should be
+ * Callback that decides which PA and power level should be
  * used while in PA auto mode.
  *
  * @param[in] railHandle A RAIL instance handle.
@@ -2454,6 +2517,11 @@ bool RAIL_IsPaAutoModeEnabled(RAIL_Handle_t railHandle);
  *
  * Whatever values mode and powerLevel point to when this function return
  * will be applied to the PA hardware and used for transmits.
+ * @note The mode and power level provided by this function depends on the
+ * RAIL_PaAutoModeConfig provided for the chip. The RAIL_PaAutoModeConfig
+ * definition for a chip should tend to all the bands supported by the chip and
+ * cover the full range of power to find a valid entry for requested power
+ * for a specific band.
  */
 RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
                                         RAIL_TxPower_t *power,
@@ -2462,8 +2530,17 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
 
 /** @} */ // end of group PA
 
+/// @addtogroup Packet_TX Packet Transmit
+/// @brief APIs which initiate a packet transmission in RAIL
+///
+/// When using any of these functions, the data to be transmitted must have been
+/// previously written to the Transmit FIFO via \ref RAIL_SetTxFifo() and/or
+/// \ref RAIL_WriteTxFifo().
+///
+/// @{
+
 /**
- * Start a non-blocking transmit.
+ * Start a transmit.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] channel Define the channel to transmit on.
@@ -2475,9 +2552,9 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
  *   initiated, transmit completion or failure will be reported by a later
  *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
  *
- * Will begin transmission of the payload previously loaded via
- * \ref RAIL_WriteTxFifo() immediately, or right after a packet currently being
- * received is completed.
+ * The transmit process will begin immediately or as soon as a packet being
+ * received has finished. The data to be transmitted must have been previously
+ * established via \ref RAIL_SetTxFifo() and/or \ref RAIL_WriteTxFifo().
  *
  * Returns an error if a previous transmit is still in progress.
  * If changing channels, any ongoing packet reception is aborted.
@@ -2489,20 +2566,6 @@ RAIL_Status_t RAIL_StartTx(RAIL_Handle_t railHandle,
                            uint16_t channel,
                            RAIL_TxOptions_t options,
                            const RAIL_SchedulerInfo_t *schedulerInfo);
-
-/**
- * Stop an active or pending transmit.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] mode Configure the types of transmits to stop.
- * @return \ref RAIL_STATUS_NO_ERROR if the transmit was successfully
- *   canceled.
- *   Returns \ref RAIL_STATUS_INVALID_STATE if the requested
- *                transmit mode cannot be stopped.
- *
- * @note This function will stop an auto-ACK in active transmit.
- */
-RAIL_Status_t RAIL_StopTx(RAIL_Handle_t railHandle, RAIL_StopMode_t mode);
 
 /**
  * Schedule sending a packet.
@@ -2519,8 +2582,9 @@ RAIL_Status_t RAIL_StopTx(RAIL_Handle_t railHandle, RAIL_StopMode_t mode);
  *   initiated, a transmit completion or failure will be reported by a later
  *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
  *
- * Will begin transmission of the payload previously loaded via
- * \ref RAIL_WriteTxFifo() at the scheduled time.
+ * The transmit process will begin at the scheduled time. The data to be
+ * transmitted must have been previously established via \ref RAIL_SetTxFifo()
+ * and/or \ref RAIL_WriteTxFifo().
  * The time (in microseconds) and whether that time is absolute or
  * relative is specified using the \ref RAIL_ScheduleTxConfig_t structure.
  * What to do if a scheduled transmit fires in
@@ -2539,13 +2603,15 @@ RAIL_Status_t RAIL_StartScheduledTx(RAIL_Handle_t railHandle,
                                     const RAIL_SchedulerInfo_t *schedulerInfo);
 
 /**
- * Start a non-blocking Transmit using CSMA.
+ * Start a transmit using CSMA.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] channel Define the channel to transmit on.
  * @param[in] options TX options to be applied to this transmit only.
  * @param[in] csmaConfig A pointer to the RAIL_CsmaConfig_t structure
  *   describing the CSMA parameters to use for this transmit.
+ *   \n In multiprotocol this must point to global or heap storage that remains
+ *   valid after the API returns until the transmit is actually started.
  * @param[in] schedulerInfo Information to allow the radio scheduler to place
  *   this transmit appropriately. This is only used in multiprotocol version of
  *   RAIL and may be set to NULL in all other versions.
@@ -2553,10 +2619,10 @@ RAIL_Status_t RAIL_StartScheduledTx(RAIL_Handle_t railHandle,
  *   initiated, a transmit completion or failure will be reported by a later
  *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
  *
- * Perform the Carrier Sense Multiple Access (CSMA) algorithm and, if
+ * Perform the Carrier Sense Multiple Access (CSMA) algorithm, and if
  * the channel is deemed clear (RSSI below the specified threshold), it will
- * commence transmission of the payload previously loaded via
- * RAIL_WriteTxFifo().
+ * commence transmission. The data to be transmitted must have been previously
+ * established via \ref RAIL_SetTxFifo() and/or \ref RAIL_WriteTxFifo().
  * Packets can be received during CSMA backoff periods if receive is active
  * throughout the CSMA process. This will happen either by starting the CSMA
  * process while receive is already active, or if the csmaBackoff time in
@@ -2582,13 +2648,15 @@ RAIL_Status_t RAIL_StartCcaCsmaTx(RAIL_Handle_t railHandle,
                                   const RAIL_SchedulerInfo_t *schedulerInfo);
 
 /**
- * Start a non-blocking Transmit using LBT.
+ * Start a transmit using LBT.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] channel Define the channel to transmit on.
  * @param[in] options TX options to be applied to this transmit only.
  * @param[in] lbtConfig A pointer to the RAIL_LbtConfig_t structure
  *   describing the LBT parameters to use for this transmit.
+ *   \n In multiprotocol this must point to global or heap storage that remains
+ *   valid after the API returns until the transmit is actually started.
  * @param[in] schedulerInfo Information to allow the radio scheduler to place
  *   this transmit appropriately. This is only used in multiprotocol version of
  *   RAIL and may be set to NULL in all other versions.
@@ -2596,9 +2664,10 @@ RAIL_Status_t RAIL_StartCcaCsmaTx(RAIL_Handle_t railHandle,
  *   initiated, a transmit completion or failure will be reported by a later
  *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
  *
- * Performs the Listen Before Talk (LBT) algorithm and, if the channel
+ * Performs the Listen Before Talk (LBT) algorithm, and if the channel
  * is deemed clear (RSSI below the specified threshold), it will commence
- * transmission of the payload previously loaded via RAIL_WriteTxFifo().
+ * transmission. The data to be transmitted must have been previously established
+ * via \ref RAIL_SetTxFifo() and/or \ref RAIL_WriteTxFifo().
  * Packets can be received during LBT backoff periods if receive is active
  * throughout the LBT process. This will happen either by starting the LBT
  * process while receive is already active, or if the lbtBackoff time in
@@ -2622,6 +2691,128 @@ RAIL_Status_t RAIL_StartCcaLbtTx(RAIL_Handle_t railHandle,
                                  RAIL_TxOptions_t options,
                                  const RAIL_LbtConfig_t *lbtConfig,
                                  const RAIL_SchedulerInfo_t *schedulerInfo);
+
+/**
+ * Schedule a transmit using CSMA.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] channel Define the channel to transmit on.
+ * @param[in] options TX options to be applied to this transmit only.
+ * @param[in] scheduleTxConfig A pointer to the \ref RAIL_ScheduleTxConfig_t
+ *   structure describing the CSMA parameters to use for this transmit.
+ * @param[in] csmaConfig A pointer to the \ref RAIL_CsmaConfig_t structure
+ *   describing the CSMA parameters to use for this transmit.
+ *   \n In multiprotocol this must point to global or heap storage that remains
+ *   valid after the API returns until the transmit is actually started.
+ * @param[in] schedulerInfo Information to allow the radio scheduler to place
+ *   this transmit appropriately. This is only used in multiprotocol version of
+ *   RAIL and may be set to NULL in all other versions.
+ * @return Status code indicating success of the function call. If successfully
+ *   initiated, a transmit completion or failure will be reported by a later
+ *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
+ *
+ * Internally, the RAIL library needs a PRS channel for this feature.
+ * It will allocate an available PRS channel to use and hold onto that
+ * channel for future use. If no PRS channel is available, the function
+ * returns with \ref RAIL_STATUS_INVALID_CALL.
+ *
+ * Perform the Carrier Sense Multiple Access (CSMA) algorithm at the scheduled time,
+ * and if the channel is deemed clear (RSSI below the specified threshold), it will
+ * commence transmission. The data to be transmitted must have been previously
+ * established via \ref RAIL_SetTxFifo() and/or \ref RAIL_WriteTxFifo().
+ * Packets can be received during CSMA backoff periods if receive is active
+ * throughout the CSMA process. This will happen either by starting the CSMA
+ * process while receive is already active, or if the csmaBackoff time in
+ * the \ref RAIL_CsmaConfig_t is less than the idleToRx time (set by
+ * RAIL_SetStateTiming()). If the csmaBackoff time is greater than the
+ * idleToRx time, receive will only be active during CSMA's clear channel
+ * assessments.
+ *
+ * If the CSMA algorithm deems the channel busy, the \ref RAIL_Config_t::eventsCallback
+ * occurs with \ref RAIL_EVENT_TX_CHANNEL_BUSY, and the contents
+ * of the transmit FIFO remain intact.
+ *
+ * Returns an error if a previous transmit is still in progress.
+ * If changing channels, any ongoing packet reception is aborted.
+ *
+ * In multiprotocol, ensure that the radio is properly yielded after this
+ * operation completes. See \ref rail_radio_scheduler_yield for more details.
+ */
+RAIL_Status_t RAIL_StartScheduledCcaCsmaTx(RAIL_Handle_t railHandle,
+                                           uint16_t channel,
+                                           RAIL_TxOptions_t options,
+                                           const RAIL_ScheduleTxConfig_t *scheduleTxConfig,
+                                           const RAIL_CsmaConfig_t *csmaConfig,
+                                           const RAIL_SchedulerInfo_t *schedulerInfo);
+
+/**
+ * Schedule a transmit using LBT.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] channel Define the channel to transmit on.
+ * @param[in] options TX options to be applied to this transmit only.
+ * @param[in] scheduleTxConfig A pointer to the \ref RAIL_ScheduleTxConfig_t
+ *   structure describing the CSMA parameters to use for this transmit.
+ * @param[in] lbtConfig A pointer to the \ref RAIL_LbtConfig_t structure
+ *   describing the LBT parameters to use for this transmit.
+ *   \n In multiprotocol this must point to global or heap storage that remains
+ *   valid after the API returns until the transmit is actually started.
+ * @param[in] schedulerInfo Information to allow the radio scheduler to place
+ *   this transmit appropriately. This is only used in multiprotocol version of
+ *   RAIL and may be set to NULL in all other versions.
+ * @return Status code indicating success of the function call. If successfully
+ *   initiated, a transmit completion or failure will be reported by a later
+ *   \ref RAIL_Config_t::eventsCallback with the appropriate \ref RAIL_Events_t.
+ *
+ * Internally, the RAIL library needs a PRS channel for this feature.
+ * It will allocate an available PRS channel to use and hold onto that
+ * channel for future use. If no PRS channel is available, the function
+ * returns with \ref RAIL_STATUS_INVALID_CALL.
+ *
+ * Performs the Listen Before Talk (LBT) algorithm at the scheduled time,
+ * and if the channel is deemed clear (RSSI below the specified threshold), it will
+ * commence transmission. The data to be transmitted must have been previously
+ * established via \ref RAIL_SetTxFifo() and/or \ref RAIL_WriteTxFifo().
+ * Packets can be received during LBT backoff periods if receive is active
+ * throughout the LBT process. This will happen either by starting the LBT
+ * process while receive is already active, or if the lbtBackoff time in
+ * the \ref RAIL_LbtConfig_t is less than the idleToRx time (set by
+ * RAIL_SetStateTiming()). If the lbtBackoff time is greater than the
+ * idleToRx time, receive will only be active during LBT's clear channel
+ * assessments.
+ *
+ * If the LBT algorithm deems the channel busy, the \ref RAIL_Config_t::eventsCallback
+ * occurs with \ref RAIL_EVENT_TX_CHANNEL_BUSY, and the contents of the transmit
+ * FIFO remain intact.
+ *
+ * Returns an error if a previous transmit is still in progress.
+ * If changing channels, any ongoing packet reception is aborted.
+ *
+ * In multiprotocol, ensure that the radio is properly yielded after this
+ * operation completes. See \ref rail_radio_scheduler_yield for more details.
+ */
+RAIL_Status_t RAIL_StartScheduledCcaLbtTx(RAIL_Handle_t railHandle,
+                                          uint16_t channel,
+                                          RAIL_TxOptions_t options,
+                                          const RAIL_ScheduleTxConfig_t *scheduleTxConfig,
+                                          const RAIL_LbtConfig_t *lbtConfig,
+                                          const RAIL_SchedulerInfo_t *schedulerInfo);
+
+/** @} */ // end of group Packet_TX
+
+/**
+ * Stop an active or pending transmit.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] mode Configure the types of transmits to stop.
+ * @return \ref RAIL_STATUS_NO_ERROR if the transmit was successfully
+ *   canceled.
+ *   Returns \ref RAIL_STATUS_INVALID_STATE if the requested
+ *                transmit mode cannot be stopped.
+ *
+ * @note This function will stop an auto-ACK in active transmit.
+ */
+RAIL_Status_t RAIL_StopTx(RAIL_Handle_t railHandle, RAIL_StopMode_t mode);
 
 /**
  * Set the CCA threshold in dBm.
@@ -3414,6 +3605,11 @@ RAIL_Status_t RAIL_GetRxTimeFrameEndAlt(RAIL_Handle_t railHandle,
  * @return The packet handle for the packet associated with the callback,
  *   \ref RAIL_RX_PACKET_HANDLE_INVALID if no such packet yet exists or
  *   railHandle is not active.
+ *
+ * @note When using multiprotocol the receive FIFO is reset during protocol
+ * switches so any packets held with \ref RAIL_HoldRxPacket() will be lost. It
+ * is best to avoid using this in DMP or to at least reset any internal held
+ * packet information when the \ref RAIL_EVENT_CONFIG_UNSCHEDULED occurs.
  */
 RAIL_RxPacketHandle_t RAIL_HoldRxPacket(RAIL_Handle_t railHandle);
 
@@ -3482,8 +3678,8 @@ RAIL_Status_t RAIL_ReleaseRxPacket(RAIL_Handle_t railHandle,
  * Gets the current RSSI value. This value represents the current energy of the
  * channel. It can change rapidly and will be low if no RF energy is
  * in the current channel. The function from the value reported to dBm is an
- * offset dependent on the PHY and the PCB layout. Users should characterize the
- * RSSI received on their hardware and apply an offset in the application to
+ * offset dependent on the PHY and the PCB layout. Characterize the
+ * RSSI received on your hardware and apply an offset in the application to
  * account for board and PHY parameters. When 'wait' is false, the radio needs
  * to be currently in RX and have been in there for a sufficient amount of time
  * for a fresh RSSI value to be read and returned. Otherwise the RSSI is
@@ -3530,8 +3726,8 @@ int16_t RAIL_GetRssi(RAIL_Handle_t railHandle, bool wait);
  * Gets the current RSSI value. This value represents the current energy of the
  * channel. It can change rapidly, and will be low if no RF energy is
  * in the current channel. The function from the value reported to dBm is an
- * offset dependent on the PHY and the PCB layout. Users should characterize the
- * RSSI received on their hardware and apply an offset in the application to
+ * offset dependent on the PHY and the PCB layout. Characterize the
+ * RSSI received on your hardware and apply an offset in the application to
  * account for board and PHY parameters. If a value of \ref RAIL_GET_RSSI_NO_WAIT
  * is given for waitTimeout, the radio needs to be currently in RX and have been
  * in there for a sufficient amount of time for a fresh RSSI value to be read and
@@ -3615,7 +3811,7 @@ bool RAIL_IsAverageRssiReady(RAIL_Handle_t railHandle);
  *   quarter dBm,dbm*4.
  *
  * Gets the hardware RSSI average after issuing RAIL_StartAverageRssi.
- * It should be used after \ref RAIL_StartAverageRssi.
+ * Use after \ref RAIL_StartAverageRssi.
  */
 int16_t RAIL_GetAverageRssi(RAIL_Handle_t railHandle);
 
@@ -3631,8 +3827,8 @@ int16_t RAIL_GetAverageRssi(RAIL_Handle_t railHandle);
  *   enough to cause the RSSI readings to underflow or overflow.
  *
  * Adds an offset to the RSSI in dBm. This offset affects all functionality that
- * depends on RSSI values, such as CCA functions. The offset should not be
- * modified dynamically during the RX of a packet. This function
+ * depends on RSSI values, such as CCA functions. Do not modify the offset
+ * dynamically during packet reception. This function
  * can only be called while the radio is off, or in the case of multiprotocol,
  * on an inactive protocol.
  *
@@ -3643,7 +3839,7 @@ int16_t RAIL_GetAverageRssi(RAIL_Handle_t railHandle);
  *  underflow or overflow. If that happens, the RSSI value returned by
  *  \ref RAIL_GetRssi, \ref RAIL_GetAverageRssi,
  *  \ref RAIL_GetChannelHoppingRssi etc. will be \ref RAIL_RSSI_LOWEST or
- *  \ref RAIL_RSSI_HIGHEST, repectively.
+ *  \ref RAIL_RSSI_HIGHEST, respectively.
  */
 RAIL_Status_t RAIL_SetRssiOffset(RAIL_Handle_t railHandle, int8_t rssiOffset);
 
@@ -3837,7 +4033,7 @@ RAIL_Status_t RAIL_SetAddressFilterAddress(RAIL_Handle_t railHandle,
  *
  * @note This feature/API is not supported on the EFR32XG1 family of chips
  *       or the EFR32XG21. Use the compile time symbol \ref
- *       RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK or the runtume call \ref
+ *       RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK or the runtime call \ref
  *       RAIL_SupportsAddrFilterAddressBitMask() to check whether the platform
  *       supports this feature.
  */
@@ -3870,7 +4066,7 @@ RAIL_Status_t RAIL_EnableAddressFilterAddress(RAIL_Handle_t railHandle,
 /// @addtogroup Auto_Ack Auto-ACK
 /// @brief APIs for configuring auto-ACK functionality
 ///
-/// These APIs are used to configure the radio for automatic acknowledgment
+/// These APIs configure the radio for automatic acknowledgment
 /// features. Auto-ACK inherently changes how the underlying state machine
 /// behaves so users should not modify RAIL_SetRxTransitions() and
 /// RAIL_SetTxTransitions() while using auto-ACK features.
@@ -4006,7 +4202,8 @@ RAIL_Status_t RAIL_EnableAddressFilterAddress(RAIL_Handle_t railHandle,
 /// in \ref RAIL_AutoAckConfig_t. When disabling, the "ackTimeout" field
 /// isn't used.
 ///
-/// @note Auto-ACKing may not be enabled while RX Channel Hopping is enabled.
+/// @note Auto-ACKing may not be enabled while RX Channel Hopping is enabled,
+///   or when BLE is enabled.
 ///
 RAIL_Status_t RAIL_ConfigAutoAck(RAIL_Handle_t railHandle,
                                  const RAIL_AutoAckConfig_t *config);
@@ -4077,23 +4274,23 @@ void RAIL_PauseTxAutoAck(RAIL_Handle_t railHandle, bool pause);
 bool RAIL_IsTxAutoAckPaused(RAIL_Handle_t railHandle);
 
 /**
- * Modify the upcoming ACK to use the TX FIFO.
+ * Modify the upcoming ACK to use the Transmit FIFO.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @return Status code indicating success of the function call. The call will
  *   fail if it is too late to modify the outgoing ACK.
  *
- * This function allows the application to use the normal TX FIFO as the data
- * source for the upcoming ACK. The ACK modification to use the TX FIFO only
- * applies to one ACK transmission.
+ * This function allows the application to use the normal Transmit FIFO as
+ * the data source for the upcoming ACK. The ACK modification to use the
+ * Transmit FIFO only applies to one ACK transmission.
  *
  * This function only returns true if the following conditions are met:
  *   - Radio has not already decided to use the ACK buffer AND
  *   - Radio is either looking for sync, receiving the packet after sync, or in
  *     the Rx2Tx turnaround before the ACK is sent.
  *
- * @note The TX FIFO must not be used for AutoACK when IEEE 802.15.4, Z-Wave,
- *   or BLE protocols are active.
+ * @note The Transmit FIFO must not be used for AutoACK when IEEE 802.15.4,
+ *   Z-Wave, or BLE protocols are active.
  */
 RAIL_Status_t RAIL_UseTxFifoForAutoAck(RAIL_Handle_t railHandle);
 
@@ -4135,7 +4332,7 @@ bool RAIL_IsAutoAckWaitingForAck(RAIL_Handle_t railHandle);
 /// @brief APIs for calibrating the radio
 /// @{
 ///
-/// These APIs can be used to calibrate the radio. The RAIL library
+/// These APIs calibrate the radio. The RAIL library
 /// determines which calibrations are necessary. Calibrations can
 /// be enabled/disabled with the RAIL_CalMask_t parameter.
 ///
@@ -4264,7 +4461,7 @@ RAIL_CalMask_t RAIL_GetPendingCal(RAIL_Handle_t railHandle);
  * Enabling will ensure that the PA power remains constant chip-to-chip.
  * By default, this feature is disabled after reset.
  *
- * @note This function should be called before \ref RAIL_ConfigTxPower() if this
+ * @note Call this function before \ref RAIL_ConfigTxPower() if this
  *   feature is desired.
  */
 void RAIL_EnablePaCal(bool enable);
@@ -4320,60 +4517,59 @@ RAIL_Time_t RAIL_StartRfSense(RAIL_Handle_t railHandle,
                               RAIL_Time_t senseTime,
                               RAIL_RfSense_CallbackPtr_t cb);
 
-/**
- * Start/stop the RF Sense functionality in Selective(OOK Based) Mode for use
- * during low-energy sleep modes.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] config \ref RAIL_RfSenseSelectiveOokConfig_t holds the RFSENSE
- * configuration for Selective(OOK) mode.
- * @return Status code indicating success of the function call.
- *
- * Some chips support Selective RF energy detection (OOK mode) where the
- * user can program the chip to look for a particular sync word pattern
- * (1byte - 4bytes) sent using OOK and wake only when that is detected.
- * See chip-specific documentation for more details.
- *
- * The following code gives an example of how to use RF Sense functionality
- * in Selective(OOK Based) Mode.
- * @code{.c}
- *
- * // Syncword Length in bytes, 1-4 bytes.
- * #define NUMSYNCWORDBYTES (2U)
- * // Syncword Value.
- * #define SYNCWORD         (0xB16FU)
- *
- * // Configure the transmitting node for sending the wakeup packet.
- * RAIL_Idle(railHandle, RAIL_IDLE_ABORT, true);
- * RAIL_ConfigRfSenseSelectiveOokWakeupPhy(railHandle);
- * RAIL_SetRfSenseSelectiveOokWakeupPayload(railHandle, NUMSYNCWORDBYTES, SYNCWORD);
- * RAIL_StartTx(railHandle, channel, RAIL_TX_OPTIONS_DEFAULT, NULL);
- *
- * // Configure the receiving node (EFR32XG22) for RF Sense.
- * RAIL_RfSenseSelectiveOokConfig_t config = {
- *   .band = rfBand,
- *   .syncWordNumBytes = NUMSYNCWORDBYTES,
- *   .syncWord = SYNCWORD,
- *   .cb = &RAILCb_SensedRf
- * };
- * RAIL_StartSelectiveOokRfSense(railHandle, &config);
- *
- * @endcode
- *
- * @note After RF energy has been sensed, the RF Sense is automatically
- *   disabled and \ref RAIL_StartSelectiveOokRfSense() must be called again to
- *   reactivate. If RF energy has not been sensed and to manually disable
- *   RF Sense, \ref RAIL_StartSelectiveOokRfSense() must be called with band
- *   specified as \ref RAIL_RFSENSE_OFF or with
- *   \ref RAIL_RfSenseSelectiveOokConfig_t as NULL.
- *
- * @note Packet reception is not guaranteed to work correctly once RF Sense is
- *   enabled. To be safe, an application should turn this on only after idling
- *   the radio to stop receive and turn it off before attempting to restart
- *   receive. Since EM4 sleep causes the chip to come up through the reset
- *   vector any wake from EM4 must also shut off RF Sense to ensure proper
- *   receive functionality.
- */
+/// Start/stop the RF Sense functionality in Selective(OOK Based) Mode for use
+/// during low-energy sleep modes.
+///
+/// @param[in] railHandle A RAIL instance handle.
+/// @param[in] config \ref RAIL_RfSenseSelectiveOokConfig_t holds the RFSENSE
+/// configuration for Selective(OOK) mode.
+/// @return Status code indicating success of the function call.
+///
+/// Some chips support Selective RF energy detection (OOK mode) where the
+/// user can program the chip to look for a particular sync word pattern
+/// (1byte - 4bytes) sent using OOK and wake only when that is detected.
+/// See chip-specific documentation for more details.
+///
+/// The following code gives an example of how to use RF Sense functionality
+/// in Selective(OOK Based) Mode.
+/// @code{.c}
+///
+/// // Syncword Length in bytes, 1-4 bytes.
+/// #define NUMSYNCWORDBYTES (2U)
+/// // Syncword Value.
+/// #define SYNCWORD         (0xB16FU)
+///
+/// // Configure the transmitting node for sending the wakeup packet.
+/// RAIL_Idle(railHandle, RAIL_IDLE_ABORT, true);
+/// RAIL_ConfigRfSenseSelectiveOokWakeupPhy(railHandle);
+/// RAIL_SetRfSenseSelectiveOokWakeupPayload(railHandle, NUMSYNCWORDBYTES, SYNCWORD);
+/// RAIL_StartTx(railHandle, channel, RAIL_TX_OPTIONS_DEFAULT, NULL);
+///
+/// // Configure the receiving node (EFR32XG22) for RF Sense.
+/// RAIL_RfSenseSelectiveOokConfig_t config = {
+///  .band = rfBand,
+///   .syncWordNumBytes = NUMSYNCWORDBYTES,
+///  .syncWord = SYNCWORD,
+///   .cb = &RAILCb_SensedRf
+/// };
+/// RAIL_StartSelectiveOokRfSense(railHandle, &config);
+///
+/// @endcode
+///
+/// @note After RF energy has been sensed, the RF Sense is automatically
+///   disabled and \ref RAIL_StartSelectiveOokRfSense() must be called again to
+///   reactivate. If RF energy has not been sensed and to manually disable
+///  RF Sense, \ref RAIL_StartSelectiveOokRfSense() must be called with band
+///   specified as \ref RAIL_RFSENSE_OFF or with
+///   \ref RAIL_RfSenseSelectiveOokConfig_t as NULL.
+///
+/// @note Packet reception is not guaranteed to work correctly once RF Sense is
+///   enabled. To be safe, an application should turn this on only after idling
+///   the radio to stop receive and turn it off before attempting to restart
+///   receive. Since EM4 sleep causes the chip to come up through the reset
+///   vector any wake from EM4 must also shut off RF Sense to ensure proper
+///   receive functionality.
+///
 RAIL_Status_t RAIL_StartSelectiveOokRfSense(RAIL_Handle_t railHandle,
                                             RAIL_RfSenseSelectiveOokConfig_t *config);
 
@@ -4496,7 +4692,7 @@ bool RAIL_IsRfSensed(RAIL_Handle_t railHandle);
  * @return Status code indicating success of the function call.
  *
  * Configure Channel Hopping channels, conditions, and parameters. This
- * API must be called before RAIL_EnableChannelHopping. This API must
+ * API must be called before \ref RAIL_EnableRxChannelHopping(). This API must
  * never be called while the radio is on with RX Duty Cycle or Channel
  * Hopping enabled.
  *
@@ -4514,7 +4710,7 @@ RAIL_Status_t RAIL_ConfigRxChannelHopping(RAIL_Handle_t railHandle,
                                           RAIL_RxChannelHoppingConfig_t *config);
 
 /**
- * Enable RX Channel Hopping.
+ * Enable RX channel hopping.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] enable Enable (true) or disable (false) RX Channel Hopping.
@@ -4531,7 +4727,7 @@ RAIL_Status_t RAIL_ConfigRxChannelHopping(RAIL_Handle_t railHandle,
  *
  * @note This feature/API is not supported on the EFR32XG1 family of chips.
  *       Use the compile time symbol \ref RAIL_SUPPORTS_CHANNEL_HOPPING or
- *       the runtume call \ref RAIL_SupportsChannelHopping() to check whether
+ *       the runtime call \ref RAIL_SupportsChannelHopping() to check whether
  *       the platform supports this feature.
  *
  * @note This feature/API is currently not supported in multiprotocol.
@@ -4562,6 +4758,15 @@ RAIL_Status_t RAIL_EnableRxChannelHopping(RAIL_Handle_t railHandle,
  *
  * @note \ref RAIL_ConfigRxChannelHopping must be called successfully
  *       before this API is called.
+ *
+ * @note When the Z-Wave protocol is active, it is expected that after
+ *       \ref RAIL_ConfigRxChannelHopping is called successfully on EFR32XG1
+ *       family of chips, running \ref RAIL_GetChannelHoppingRssi() on a 40kbps
+ *       PHY will not work well. Plan to use the 9.6kbps PHY for estimating
+ *       channel noise instead. On EFR32XG2 family of chips, running
+ *       \ref RAIL_GetChannelHoppingRssi() on the 9.6kbps PHY returns the RSSI
+ *       measurement of the 40kpbs PHY. This is because the 9.6kbps PHY has
+ *       trouble with RSSI measurements on EFR32XG2 family of chips.
  */
 int16_t RAIL_GetChannelHoppingRssi(RAIL_Handle_t railHandle,
                                    uint8_t channelIndex);
@@ -4748,8 +4953,8 @@ RAIL_Status_t RAIL_SetTaskPriority(RAIL_Handle_t railHandle,
 RAIL_Time_t RAIL_GetTransitionTime(void);
 
 /**
- * Set time needed to switch between protocols. This API should
- * only be called once, before any protocol is initialized via
+ * Set time needed to switch between protocols. Call this API
+ * only once, before any protocol is initialized via
  * \ref RAIL_Init(). Changing this value during normal operation
  * can result in improper scheduling behavior.
  *
@@ -4768,27 +4973,34 @@ void RAIL_SetTransitionTime(RAIL_Time_t transitionTime);
  * @{
  */
 
-/**
- * Enable or disable direct mode for RAIL.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] enable Whether or not to enable direct mode.
- * @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
- *
- * @warning This API configures fixed pins for TX data in, RX data out,
- *   and RX clock out. There should be more control over these pins in the
- *   future but they are currently fixed. Also, this API is not safe to
- *   use in a true multiprotocol app.
- *
- * In this mode, packets are output and input directly to the radio via GPIO
- * and RAIL packet handling is ignored. On the EFR32, the DIN pin in TX is
- * EFR32_PC10, which corresponds to EXP_HEADER15/WSTKP12, and the DOUT pin in
- * RX is EFR32_PC11, which corresponds to EXP_HEADER16/WSTKP13.
- *
- * @note This feature is only available on certain chips.
- *   \ref RAIL_SupportsDirectMode() can be used to check if a particular
- *   chip supports this feature or not.
- */
+/// Enable or disable direct mode for RAIL.
+///
+/// @param[in] railHandle A RAIL instance handle.
+/// @param[in] enable Whether or not to enable direct mode.
+/// @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
+///
+/// @warning This API configures fixed pins for TX data in, RX data out,
+///   and RX clock out. There should be more control over these pins in the
+///   future but they are currently fixed. Also, this API is not safe to
+///   use in a true multiprotocol app. On EFR32xG23 and later platforms,
+///   it is recommended to reset the RX buffer before calling this API since
+///   the RX buffer has to be 32-bit aligned. If the buffer is <b>not</b>
+///   reset but is 32-bit aligned, capture is performed on the remaining space available.
+///   If the buffer is <b>not</b> reset and is <b>not</b> 32-bit aligned, then
+///   RAIL_EnableDirectMode() returns \ref RAIL_STATUS_INVALID_STATE.
+/// @code{.c}
+/// // Reset RX buffer (EFR32xG23 and later platforms)
+/// RAIL_ResetFifo(railHandle, false, true);
+/// @endcode
+///
+/// In this mode, packets are output and input directly to the radio via GPIO
+/// and RAIL packet handling is ignored. On the EFR32, the DIN pin in TX is
+/// EFR32_PC10, which corresponds to EXP_HEADER15/WSTKP12, and the DOUT pin in
+/// RX is EFR32_PC11, which corresponds to EXP_HEADER16/WSTKP13.
+///
+/// @note This feature is only available on certain chips.
+///   \ref RAIL_SupportsDirectMode() can be used to check if a particular
+///   chip supports this feature or not.
 RAIL_Status_t RAIL_EnableDirectMode(RAIL_Handle_t railHandle,
                                     bool enable);
 
@@ -4810,7 +5022,7 @@ RAIL_Status_t RAIL_EnableDirectMode(RAIL_Handle_t railHandle,
  *   peripheral timing.
  * @note On EFR32xG2 series devices, this API sets CTUNEXIANA and internally
  *   CTUNEXOANA = CTUNEXIANA + delta where delta is set or changed by
- *   \ref RAIL_SetTuneDelta.  The default delta may not be 0 on some devices.
+ *   \ref RAIL_SetTuneDelta. The default delta may not be 0 on some devices.
  */
 RAIL_Status_t RAIL_SetTune(RAIL_Handle_t railHandle, uint32_t tune);
 
@@ -4834,7 +5046,7 @@ uint32_t RAIL_GetTune(RAIL_Handle_t railHandle);
  * @return Status code indicating success of the function call.
  *
  * Set the CTUNEXOANA delta for \ref RAIL_SetTune to use on EFR32xG2 series devices:
- * CTUNEXOANA = CTUNEXIANA + delta.  This function does not change CTUNE values;
+ * CTUNEXOANA = CTUNEXIANA + delta. This function does not change CTUNE values;
  * call \ref RAIL_SetTune to put a new delta into effect.
  *
  */
@@ -4907,7 +5119,7 @@ RAIL_Status_t RAIL_StartTxStream(RAIL_Handle_t railHandle,
                                  RAIL_StreamMode_t mode);
 
 /**
- * Start transmitting a stream on a certain channel, with ability to select
+ * Start transmitting a stream on a certain channel with the ability to select
  * an antenna.
  *
  * @param[in] railHandle A RAIL instance handle.
@@ -4944,7 +5156,7 @@ RAIL_Status_t RAIL_StopTxStream(RAIL_Handle_t railHandle);
  * of the packet.
  *
  * This function is only useful for radio configurations that specify an
- * infinite preamble. It should only be called after \ref RAIL_EVENT_TX_STARTED
+ * infinite preamble. Call this API only after \ref RAIL_EVENT_TX_STARTED
  * has occurred and the radio is transmitting.
  *
  * @param[in] railHandle A RAIL instance handle.
@@ -5107,10 +5319,10 @@ void RAILCb_AssertFailed(RAIL_Handle_t railHandle,
  */
 
 /**
- * Start a Thermistor measurement. To get the thermistor impedance call the
+ * Start a Thermistor measurement. To get the Thermistor impedance, call the
  * function \ref RAIL_GetThermistorImpedance. On the EFR32xG22, this function
  * reconfigures GPIO_THMSW_EN_PIN located in GPIO_THMSW_EN_PORT. To locate this
- * pin refer to the datasheet or appropriate header files of the device. For
+ * pin, refer to the data sheet or appropriate header files of the device. For
  * proper operation, \ref RAIL_Init must be called before using this function.
  *
  * @note This function is not designed for safe usage in multiprotocol

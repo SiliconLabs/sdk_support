@@ -81,8 +81,77 @@ typedef uint32_t ecc_bigint_t[ECC_BIGINT_SIZE_IN_32BIT_WORDS];
 
 #define SLCL_ECP_CHK(f) do { if ( (ret = (f) ) != 0 ) { goto cleanup; } } while ( 0 )
 
-#if defined(MBEDTLS_ECP_NORMALIZE_JAC_MANY_ALT) || defined(MBEDTLS_ECP_NORMALIZE_JAC_ALT)
 #define MPI_TO_BIGINT(bigint, mpi) mpitobigint((bigint), (mpi));
+
+/**
+ * \brief           Indicate if the Elliptic Curve Point module extension can
+ *                  handle the group.
+ *
+ * \param grp       The pointer to the elliptic curve group that will be the
+ *                  basis of the cryptographic computations.
+ *
+ * \return          Non-zero if successful.
+ */
+unsigned char mbedtls_internal_ecp_grp_capable(const mbedtls_ecp_group *grp)
+{
+  switch ( grp->id ) {
+#if defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED)
+    case MBEDTLS_ECP_DP_SECP192R1:
+      return(true);
+#endif /* MBEDTLS_ECP_DP_SECP192R1_ENABLED */
+
+#if defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED)
+    case MBEDTLS_ECP_DP_SECP224R1:
+      return(true);
+#endif /* MBEDTLS_ECP_DP_SECP224R1_ENABLED */
+
+#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
+    case MBEDTLS_ECP_DP_SECP256R1:
+      return(true);
+#endif /* MBEDTLS_ECP_DP_SECP256R1_ENABLED */
+
+    default:
+      return(false);
+  }
+}
+
+/**
+ * \brief           Initialise the Elliptic Curve Point module extension.
+ *
+ *                  If mbedtls_internal_ecp_grp_capable returns true for a
+ *                  group, this function has to be able to initialise the
+ *                  module for it.
+ *
+ *                  This module can be a driver to a crypto hardware
+ *                  accelerator, for which this could be an initialise function.
+ *
+ * \param grp       The pointer to the group the module needs to be
+ *                  initialised for.
+ *
+ * \return          0 if successful.
+ */
+int mbedtls_internal_ecp_init(const mbedtls_ecp_group *grp)
+{
+  /* Crypto operations are atomic, so no need to setup any context here */
+  (void) grp;
+  return 0;
+}
+
+/**
+ * \brief           Frees and deallocates the Elliptic Curve Point module
+ *                  extension.
+ *
+ * \param grp       The pointer to the group the module was initialised for.
+ */
+void mbedtls_internal_ecp_free(const mbedtls_ecp_group *grp)
+{
+  /* Crypto operations are atomic, so no need to free any context here */
+  (void) grp;
+}
+
+#if defined(MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED)
+
+#if defined(MBEDTLS_ECP_NORMALIZE_JAC_MANY_ALT) || defined(MBEDTLS_ECP_NORMALIZE_JAC_ALT)
 
 /***************************************************************************//**
  * @brief
@@ -559,72 +628,6 @@ __STATIC_INLINE int ecp_crypto_ddata_read(CRYPTO_DDataReg_TypeDef  ddataReg,
   return(ret);
 }
 
-/**
- * \brief           Indicate if the Elliptic Curve Point module extension can
- *                  handle the group.
- *
- * \param grp       The pointer to the elliptic curve group that will be the
- *                  basis of the cryptographic computations.
- *
- * \return          Non-zero if successful.
- */
-unsigned char mbedtls_internal_ecp_grp_capable(const mbedtls_ecp_group *grp)
-{
-  switch ( grp->id ) {
-#if defined(MBEDTLS_ECP_DP_SECP192R1_ENABLED)
-    case MBEDTLS_ECP_DP_SECP192R1:
-      return(true);
-#endif /* MBEDTLS_ECP_DP_SECP192R1_ENABLED */
-
-#if defined(MBEDTLS_ECP_DP_SECP224R1_ENABLED)
-    case MBEDTLS_ECP_DP_SECP224R1:
-      return(true);
-#endif /* MBEDTLS_ECP_DP_SECP224R1_ENABLED */
-
-#if defined(MBEDTLS_ECP_DP_SECP256R1_ENABLED)
-    case MBEDTLS_ECP_DP_SECP256R1:
-      return(true);
-#endif /* MBEDTLS_ECP_DP_SECP256R1_ENABLED */
-
-    default:
-      return(false);
-  }
-}
-
-/**
- * \brief           Initialise the Elliptic Curve Point module extension.
- *
- *                  If mbedtls_internal_ecp_grp_capable returns true for a
- *                  group, this function has to be able to initialise the
- *                  module for it.
- *
- *                  This module can be a driver to a crypto hardware
- *                  accelerator, for which this could be an initialise function.
- *
- * \param grp       The pointer to the group the module needs to be
- *                  initialised for.
- *
- * \return          0 if successful.
- */
-int mbedtls_internal_ecp_init(const mbedtls_ecp_group *grp)
-{
-  /* Crypto operations are atomic, so no need to setup any context here */
-  (void) grp;
-  return 0;
-}
-
-/**
- * \brief           Frees and deallocates the Elliptic Curve Point module
- *                  extension.
- *
- * \param grp       The pointer to the group the module was initialised for.
- */
-void mbedtls_internal_ecp_free(const mbedtls_ecp_group *grp)
-{
-  /* Crypto operations are atomic, so no need to free any context here */
-  (void) grp;
-}
-
 #if defined(MBEDTLS_ECP_RANDOMIZE_JAC_ALT)
 /**
  * \brief           Randomize jacobian coordinates:
@@ -647,7 +650,7 @@ int mbedtls_internal_ecp_randomize_jac(const mbedtls_ecp_group *grp,
                                        void *p_rng)
 {
   int ret;
-  ecc_bigint_t l;
+  ecc_bigint_t l = { 0 };
   CORE_DECLARE_IRQ_STATE;
   CRYPTO_TypeDef *crypto;
   int count = 0;
@@ -1104,10 +1107,7 @@ int mbedtls_internal_ecp_add_mixed(const mbedtls_ecp_group *grp,
                    CRYPTO_CMD_INSTR_MSUB);
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ret = ecp_crypto_ddata_read(&crypto->DDATA0, &R->X);
-  if ( ret != 0 ) {
-    goto cleanup;
-  }
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &R->X));
 
   CRYPTO_EXECUTE_7(crypto,
                    CRYPTO_CMD_INSTR_DDATA0TODDATA1,
@@ -1135,10 +1135,7 @@ int mbedtls_internal_ecp_add_mixed(const mbedtls_ecp_group *grp,
                    );
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ret = ecp_crypto_ddata_read(&crypto->DDATA0, &R->Y);
-  if ( ret != 0 ) {
-    goto cleanup;
-  }
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &R->Y));
 
   cleanup:
   crypto_management_release(crypto);
@@ -1251,10 +1248,7 @@ int mbedtls_internal_ecp_double_jac(const mbedtls_ecp_group *grp,
                    CRYPTO_CMD_INSTR_MADD);
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ret = ecp_crypto_ddata_read(&crypto->DDATA0, &R->Z);
-  if ( ret != 0 ) {
-    goto cleanup;
-  }
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &R->Z));
 
   CRYPTO_EXECUTE_5(crypto,
                    CRYPTO_CMD_INSTR_DDATA2TODDATA1,
@@ -1395,10 +1389,7 @@ int mbedtls_internal_ecp_double_jac(const mbedtls_ecp_group *grp,
                    CRYPTO_CMD_INSTR_MSUB);
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ret = ecp_crypto_ddata_read(&crypto->DDATA0, &R->X);
-  if ( ret != 0 ) {
-    goto cleanup;
-  }
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &R->X));
 
   CRYPTO_EXECUTE_7(crypto,
                    CRYPTO_CMD_INSTR_DDATA0TODDATA4,
@@ -1470,10 +1461,7 @@ int mbedtls_internal_ecp_double_jac(const mbedtls_ecp_group *grp,
                    );
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ret = ecp_crypto_ddata_read(&crypto->DDATA0, &R->Y);
-  if ( ret != 0 ) {
-    goto cleanup;
-  }
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &R->Y));
 
   cleanup:
   crypto_management_release(crypto);
@@ -1624,8 +1612,8 @@ int mbedtls_internal_ecp_normalize_jac_many(const mbedtls_ecp_group *grp,
                      CRYPTO_CMD_INSTR_MMUL);
     CRYPTO_InstructionSequenceWait(crypto);
 
-    ecp_crypto_ddata_read(&crypto->DDATA0, &T[i]->Y);
-    ecp_crypto_ddata_read(&crypto->DDATA3, &T[i]->X);
+    SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &T[i]->Y));
+    SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA3, &T[i]->X));
 
     /*
      * Post-precessing: reclaim some memory by shrinking coordinates
@@ -1745,8 +1733,8 @@ int mbedtls_internal_ecp_normalize_jac(const mbedtls_ecp_group *grp,
                    CRYPTO_CMD_INSTR_MMUL);
   CRYPTO_InstructionSequenceWait(crypto);
 
-  ecp_crypto_ddata_read(&crypto->DDATA0, &pt->Y);
-  ecp_crypto_ddata_read(&crypto->DDATA3, &pt->X);
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA0, &pt->Y));
+  SLCL_ECP_CHK(ecp_crypto_ddata_read(&crypto->DDATA3, &pt->X));
 
   crypto_management_release(crypto);
 
@@ -1759,6 +1747,8 @@ int mbedtls_internal_ecp_normalize_jac(const mbedtls_ecp_group *grp,
   return(ret);
 }
 #endif /* MBEDTLS_ECP_NORMALIZE_JAC_ALT */
+
+#endif /* MBEDTLS_ECP_SHORT_WEIERSTRASS_ENABLED */
 
 #endif /* #if defined( MBEDTLS_ECP_INTERNAL_ALT ) */
 

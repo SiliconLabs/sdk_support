@@ -51,7 +51,6 @@
 #include "sx_errors.h"
 #include "cryptolib_def.h"
 #include "mbedtls/ccm.h"
-#include "mbedtls/aes.h"
 #include <string.h>
 
 #define CCM_VALIDATE_RET(cond) \
@@ -178,12 +177,12 @@ int mbedtls_ccm_encrypt_and_tag(mbedtls_ccm_context *ctx, size_t length,
   }
   sx_ret = sx_aes_ccm_encrypt((const block_t *)&key, (const block_t *)&data_in, &data_out,
                               (const block_t *)&nonce, &tag_block, (const block_t *)&aad_block);
-  cryptoacc_management_release();
+  status = cryptoacc_management_release();
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return MBEDTLS_ERR_CCM_BAD_INPUT;
   } else {
-    return 0;
+    return status;
   }
 }
 
@@ -256,10 +255,10 @@ int mbedtls_ccm_auth_decrypt(mbedtls_ccm_context *ctx, size_t length,
   }
   sx_ret = sx_aes_ccm_decrypt_verify((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                      (const block_t *)&nonce, (const block_t *)&tag_block, (const block_t *)&aad_block);
-  cryptoacc_management_release();
+  status = cryptoacc_management_release();
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
-    return 0;
+    return status;
   } else if ( sx_ret == CRYPTOLIB_INVALID_SIGN_ERR ) {
     memset(output, 0, length);
     return MBEDTLS_ERR_CCM_AUTH_FAILED;

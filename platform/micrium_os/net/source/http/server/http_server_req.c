@@ -1554,6 +1554,10 @@ static void HTTPsReq_HdrParse(HTTPs_INSTANCE *p_instance,
 
                         //                                         Boundary located after '='.
                         p_val = Str_Char_N(p_val, len, ASCII_CHAR_EQUALS_SIGN);
+                        if (p_val == DEF_NULL) {
+                          *p_err = HTTPs_ERR_REQ_FORMAT_INVALID;
+                          return;
+                        }
                         p_val++;                                // Remove space before boundary val.
                         p_val = HTTP_StrGraphSrchFirst(p_val,
                                                        len);

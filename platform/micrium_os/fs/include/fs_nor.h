@@ -250,28 +250,6 @@ typedef struct fs_nor_parallel_bsp_api {
     }                                                                                      \
   } while (0);
 
-#define  FS_NOR_QUAD_SPI_ON_SPI_BUS_HW_INFO_REG(p_name, p_part_info, p_ctrlr_name, cs_func) \
-  do {                                                                                      \
-    if (((FS_NOR_PART_INFO *)(p_part_info))->PhyApiPtr != DEF_NULL) {                       \
-      static const struct quad_spi_to_spi_ctrlr_info _ctrlr_adapter_hw_info = {             \
-        .CtrlrInfo.DrvApiPtr = &QuadSPI_SpiCtrlrAdapterApi,                                 \
-        .CtrlrInfo.BaseAddr = 0u,                                                           \
-        .CtrlrInfo.AligReq = 0u,                                                            \
-        .SpiCtrlrNamePtr = p_ctrlr_name,                                                    \
-        .ChipSel = cs_func };                                                               \
-                                                                                            \
-      static const struct fs_nor_quad_spi_pm_item _pm_item = {                              \
-        .NorPmItem.MediaPmItem.PmItem.StrID = p_name,                                       \
-        .NorPmItem.MediaPmItem.PmItem.Type = PLATFORM_MGR_ITEM_TYPE_HW_INFO_FS_NOR,         \
-        .NorPmItem.MediaPmItem.MediaApiPtr = &FS_NOR_MediaApi,                              \
-        .NorPmItem.PartInfoPtr = (const struct fs_nor_part_info *)(p_part_info),            \
-        .QuadSpiCtrlrInfoPtr = &_ctrlr_adapter_hw_info,                                     \
-        .ChipSelID = cs_func                                                                \
-      };                                                                                    \
-      PlatformMgrItemInitAdd((PLATFORM_MGR_ITEM *)&_pm_item.NorPmItem.MediaPmItem.PmItem);  \
-    }                                                                                       \
-  } while (0);
-
 #define  FS_NOR_SPI_HW_INFO_REG(p_name, p_part_info, p_ctrlr_name, cs_func)                \
   do {                                                                                     \
     if (((FS_NOR_PART_INFO *)(p_part_info))->PhyApiPtr != DEF_NULL) {                      \
@@ -282,6 +260,20 @@ typedef struct fs_nor_parallel_bsp_api {
         .NorPmItem.PartInfoPtr = (const struct fs_nor_part_info *)(p_part_info),           \
         .SpiCtrlrNamePtr = p_ctrlr_name,                                                   \
         .ChipSel = cs_func                                                                 \
+      };                                                                                   \
+      PlatformMgrItemInitAdd((PLATFORM_MGR_ITEM *)&_pm_item.NorPmItem.MediaPmItem.PmItem); \
+    }                                                                                      \
+  } while (0);
+
+#define  FS_NOR_SPIDRV_HW_INFO_REG(p_name, p_hw_info)                                      \
+  do {                                                                                     \
+    if (((FS_NOR_QUAD_SPI_HW_INFO *)(p_hw_info))->CtrlrHwInfoPtr != DEF_NULL) {            \
+      static const struct fs_nor_quad_spi_pm_item _pm_item = {                             \
+        .NorPmItem.MediaPmItem.PmItem.StrID = p_name,                                      \
+        .NorPmItem.MediaPmItem.PmItem.Type = PLATFORM_MGR_ITEM_TYPE_HW_INFO_FS_NOR,        \
+        .NorPmItem.MediaPmItem.MediaApiPtr = &FS_NOR_MediaApi,                             \
+        .NorPmItem.PartInfoPtr = (const  FS_NOR_PART_INFO *)(p_hw_info),                   \
+        .HwInfoPtr = (FS_NOR_QUAD_SPI_HW_INFO *)(p_hw_info)                                \
       };                                                                                   \
       PlatformMgrItemInitAdd((PLATFORM_MGR_ITEM *)&_pm_item.NorPmItem.MediaPmItem.PmItem); \
     }                                                                                      \

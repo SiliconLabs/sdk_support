@@ -107,6 +107,9 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_BUS_ERROR = 59,
   RAIL_ASSERT_INVALID_FILTERING_CONFIG = 60,
   RAIL_ASSERT_RETIMING_CONFIG = 61,
+  RAIL_ASSERT_FAILED_TX_CRC_CONFIG = 62,
+  RAIL_ASSERT_INVALID_PA_OPERATION = 63,
+  RAIL_ASSERT_SEQ_INVALID_PA_SELECTED = 64,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -172,6 +175,9 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_BUS_ERROR                                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_BUS_ERROR)
 #define RAIL_ASSERT_INVALID_FILTERING_CONFIG                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_FILTERING_CONFIG)
 #define RAIL_ASSERT_RETIMING_CONFIG                            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_RETIMING_CONFIG)
+#define RAIL_ASSERT_FAILED_TX_CRC_CONFIG                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TX_CRC_CONFIG)
+#define RAIL_ASSERT_INVALID_PA_OPERATION                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_PA_OPERATION)
+#define RAIL_ASSERT_SEQ_INVALID_PA_SELECTED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_INVALID_PA_SELECTED)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -261,6 +267,9 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*59*/ "Bus fault",                                                                \
     /*60*/ "The current radio config cannot be used with packet filtering",            \
     /*61*/ "Retiming configuration error",                                             \
+    /*62*/ "TX CRC configuration is corrupt",                                          \
+    /*63*/ "The current PA config does not allow for this operation",                  \
+    /*64*/ "The sequencer selected an invalid PA",                                     \
 }
 
 /**

@@ -6,14 +6,22 @@
 - quality: production
 - define:
   - name: EFR32FG22C121F512GM40
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFR32FG22/Source/system_efr32fg22.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFR32FG22/Source/IAR/startup_efr32fg22.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFR32FG22/Source/GCC/startup_efr32fg22.c
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efr32fg22c121f512gm40.h
@@ -68,6 +76,8 @@
     - path: em_device.h
     - path: system_efr32fg22.h
     path: platform/Device/SiliconLabs/EFR32FG22/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efr32fg22c121f512gm40
   - name: device
@@ -145,6 +155,8 @@
   - name: device_has_usart1
   - name: device_has_wdog
   - name: device_has_wdog0
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -185,7 +197,6 @@
     value: 2048
 - tag:
   - device:opn:efr32fg22c121f512gm40
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efr32fg22c121f512gm40

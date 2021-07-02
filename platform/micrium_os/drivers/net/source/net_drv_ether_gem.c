@@ -36,6 +36,9 @@
  ********************************************************************************************************
  *******************************************************************************************************/
 
+// Define module name for Power Manager debug feature
+#define CURRENT_MODULE_NAME    "MICRIUM_ETHERNET_DRIVER"
+
 #include  <drivers/net/include/net_drv_ether.h>
 
 #include  <net/include/net.h>

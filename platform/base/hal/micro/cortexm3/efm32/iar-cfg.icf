@@ -29,7 +29,11 @@ define memory mem with size = 4G;
 define symbol RAM_BOTTOM          = 0x20000000;
 define symbol RAM_TOP             = RAM_BOTTOM + TRUE_RAM_SIZE - 1;
 
-define symbol MFB_BOTTOM          = 0x00000000;
+// Default MFB_BOTTOM to 0x00000000
+if( !isdefinedsymbol(MFB_BOTTOM) ) {
+  define symbol MFB_BOTTOM        = 0x00000000 ;
+}
+
 define symbol MFB_TOP             = MFB_BOTTOM + FLASH_SIZE-1;
 
 // Default bootloader size is hardcoded to 16 kB -- also see memmap.h

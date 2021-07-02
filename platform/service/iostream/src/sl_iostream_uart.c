@@ -27,6 +27,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+// Define module name for Power Manager debug feature
+#define CURRENT_MODULE_NAME    "IOSTREAM_UART"
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
@@ -354,7 +356,10 @@ void sli_uart_push_rxd_data(void *context,
   }
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   {
-    EFM_ASSERT(osSemaphoreRelease(uart_context->read_signal) == osOK);
+    osKernelState_t state = osKernelGetState();
+    if ((state == osKernelRunning) || (state == osKernelLocked)) {
+      EFM_ASSERT(osSemaphoreRelease(uart_context->read_signal) == osOK);
+    }
   }
 #elif defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   uart_context->sleep = SL_POWER_MANAGER_WAKEUP;
@@ -493,7 +498,7 @@ static sl_status_t uart_write(void *context,
     }
   }
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   sl_power_manager_add_em_requirement(uart_context->tx_em);
   uart_context->tx_idle = false;
 #endif

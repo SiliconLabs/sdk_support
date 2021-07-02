@@ -63,6 +63,51 @@ extern "C" {
  * Defines *
  ******************************************************************************/
 
+// -----------------------------------------------------------------------------
+// Macros
+
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
+  && (defined(PSA_WANT_ECC_SECP_R1_192)                                        \
+  || (defined(PSA_WANT_ECC_SECP_R1_224)                                        \
+  && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1))                            \
+  || defined(PSA_WANT_ECC_SECP_R1_256))                                        \
+  || ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+  &&  (defined(PSA_WANT_ECC_SECP_R1_384)                                       \
+  || defined(PSA_WANT_ECC_SECP_R1_521)))
+  #define SLI_PSA_WANT_ECC_SECP
+#endif
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
+  && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+  &&  (defined(PSA_WANT_ECC_MONTGOMERY_255)                                    \
+  || defined(PSA_WANT_ECC_MONTGOMERY_448)))
+  #define SLI_PSA_WANT_ECC_MONTGOMERY
+#endif
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)                                   \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY))                                \
+  && ((_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+  && defined(PSA_WANT_ECC_TWISTED_EDWARDS_255))
+  #define SLI_PSA_WANT_ECC_TWISTED_EDWARDS
+#endif
+
+#if defined(SLI_PSA_WANT_ECC_SECP)        \
+  || defined(SLI_PSA_WANT_ECC_MONTGOMERY) \
+  || defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+  #define SLI_PSA_WANT_ECC
+#endif
+
+#if defined(SLI_PSA_WANT_ECC) && defined(PSA_WANT_ALG_ECDH) && defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)
+  #define SLI_PSA_WANT_ALG_ECDH
+#endif
+
+#if defined(PSA_WANT_ALG_ECDSA) && defined(SLI_PSA_WANT_ECC_SECP)
+  #define SLI_PSA_WANT_ALG_ECDSA
+#endif
+#if defined(PSA_WANT_ALG_EDDSA) && defined(SLI_PSA_WANT_ECC_TWISTED_EDWARDS)
+  #define SLI_PSA_WANT_ALG_EDDSA
+#endif
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /// Max available curve size
   #define SLI_SE_MAX_CURVE_SIZE   (521)
@@ -94,6 +139,14 @@ extern "C" {
  * @returns the number of padding bytes required
  */
 #define sli_se_word_align(size)   ((size + 3) & ~3)
+
+/**
+ * The oldest firmware revision with support for checking the validity
+ * of public ECC keys. Also see \ref SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2 and
+ * \ref SL_SE_ASSUME_FW_AT_LEAST_1_2_2 */
+#if !defined(SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION)
+#define SLI_SE_OLDEST_VERSION_WITH_PUBLIC_KEY_VALIDATION (0x00010202U)
+#endif
 
 /*******************************************************************************
  * Static inlines *
@@ -219,7 +272,8 @@ void sli_se_key_descriptor_set_plaintext(sl_se_key_descriptor_t *key_desc,
 __STATIC_INLINE uint32_t sli_se_has_format_byte(psa_key_type_t key_type)
 {
   if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
-    if (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) != PSA_ECC_FAMILY_MONTGOMERY) {
+    if ((PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) != PSA_ECC_FAMILY_MONTGOMERY)
+        && (PSA_KEY_TYPE_ECC_GET_FAMILY(key_type) != PSA_ECC_FAMILY_TWISTED_EDWARDS)) {
       return 1U;
     }
   }
@@ -348,6 +402,22 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
                                         const uint8_t *data,
                                         size_t data_length,
                                         size_t *bits);
+
+#if !defined(SL_SE_ASSUME_FW_AT_LEAST_1_2_2) \
+  && defined(MBEDTLS_ECP_C)                  \
+  && defined(MBEDTLS_PSA_CRYPTO_C)           \
+  && defined(SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2)
+psa_status_t sli_se_driver_validate_pubkey_with_fallback(psa_key_type_t key_type,
+                                                         size_t key_bits,
+                                                         const uint8_t *data,
+                                                         size_t data_length);
+#endif // Software fallback for SE < 1.2.2
+
+#if defined(PSA_WANT_ALG_EDDSA)
+// Some SE versions have issues with EdDSA public key reconstruction
+psa_status_t sli_se_check_eddsa_errata(const psa_key_attributes_t* attributes,
+                                       sl_se_command_context_t* cmd_ctx);
+#endif // PSA_WANT_ALG_EDDSA
 
 #endif // SEMAILBOX_PRESENT
 

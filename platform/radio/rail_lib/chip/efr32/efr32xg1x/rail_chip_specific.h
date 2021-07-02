@@ -30,10 +30,10 @@
  ******************************************************************************/
 
 #ifndef __RAIL_CHIP_SPECIFIC_H_
-#ifndef __RAIL_TYPES_H__
+#if !defined(__RAIL_TYPES_H__) && !defined(DOXYGEN_SHOULD_SKIP_THIS)
 #warning rail_chip_specific.h should only be included by rail_types.h
 #include "rail_types.h" // Force rail_chip_specific.h only within rail_types.h
-#endif
+#else // __RAIL_TYPES_H__
 /// Include guard
 #define __RAIL_CHIP_SPECIFIC_H_
 
@@ -42,16 +42,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-// -----------------------------------------------------------------------------
-// Multiprotocol
-// -----------------------------------------------------------------------------
-
-/**
- * @def TRANSITION_TIME_US
- * @brief Time it takes to take care of protocol switching.
- */
-#define TRANSITION_TIME_US 430
 
 /**
  * @addtogroup General_EFR32XG1 EFR32xG1
@@ -65,28 +55,28 @@ extern "C" {
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state for the EFR32XG1 series.
  */
-#define EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state for the EFR32XG12 series.
  */
-#define EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state for the EFR32XG13 series.
  */
-#define EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 /**
  * @def EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
  * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
  *   RAIL multiprotocol internal state for the EFR32XG14 series.
  */
-#define EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 26
+#define EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
 
 #if (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
 #define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
@@ -134,21 +124,21 @@ typedef struct RAILSched_Config {
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG12 series.
  */
-#define EFR32XG12_RAIL_STATE_UINT32_BUFFER_SIZE 90
+#define EFR32XG12_RAIL_STATE_UINT32_BUFFER_SIZE 94
 
 /**
  * @def EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG13 series.
  */
-#define EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE 90
+#define EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE 94
 
 /**
  * @def EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE
  * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
  *   internal state for the EFR32XG14 series.
  */
-#define EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE 90
+#define EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE 94
 
 #if (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
 #define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG1_RAIL_STATE_UINT32_BUFFER_SIZE
@@ -211,12 +201,21 @@ typedef struct RAIL_Config {
 
 /** @} */ // end of group General_EFR32XG1
 
+// -----------------------------------------------------------------------------
+// Multiprotocol
+// -----------------------------------------------------------------------------
 /**
  * @addtogroup Multiprotocol_EFR32 EFR32
  * @{
  * @brief EFR32-specific multiprotocol support defines
  * @ingroup Multiprotocol
  */
+
+/**
+ * @def TRANSITION_TIME_US
+ * @brief Time it takes to take care of protocol switching.
+ */
+#define TRANSITION_TIME_US 430
 
 /**
  * A placeholder for a chip-specific RAIL handle. Using NULL as a RAIL handle is
@@ -386,7 +385,7 @@ RAIL_Status_t RAIL_ApplyIrCalibration(RAIL_Handle_t railHandle,
                                       uint32_t imageRejection);
 
 /**
- * Applies a given image rejection calibration value.
+ * Apply a given image rejection calibration value.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in] imageRejection Pointer to the image rejection value to apply.
@@ -435,7 +434,7 @@ RAIL_Status_t RAIL_CalibrateIr(RAIL_Handle_t railHandle,
                                uint32_t *imageRejection);
 
 /**
- * Runs the image rejection calibration.
+ * Run the image rejection calibration.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[out] imageRejection Pointer to the image rejection result.
@@ -673,17 +672,17 @@ typedef uint8_t RAIL_TxPowerLevel_t;
  */
 #define RAIL_TX_POWER_LEVEL_MAX (254U)
 
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_LP_MAX      RAIL_TX_POWER_LEVEL_2P4_LP_MAX
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_HP_MAX      RAIL_TX_POWER_LEVEL_2P4_HP_MAX
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_MAX  RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_LP_MIN      RAIL_TX_POWER_LEVEL_2P4_LP_MIN
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_HP_MIN      RAIL_TX_POWER_LEVEL_2P4_HP_MIN
-/** Backwards compatability define */
+/** Backwards compatibility define */
 #define RAIL_TX_POWER_LEVEL_SUBGIG_MIN  RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN
 
 /**
@@ -840,10 +839,10 @@ typedef struct RAIL_PtiConfig {
 // Retiming
 // -----------------------------------------------------------------------------
 /**
- * @addtogroup Retiming_EFR32 EFR32
+ * @addtogroup Retiming_EFR32 Retiming
  * @{
  * @brief EFR32-specific retiming capability.
- * @ingroup Retiming
+ * @ingroup RAIL_API
  *
  * The EFR product families have many digital and analog modules that can run
  * in parallel with a radio. Such combinations can result in interference and
@@ -915,6 +914,49 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 
 /** @} */ // end of group Retiming_EFR32
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// -----------------------------------------------------------------------------
+// Notch filter
+// -----------------------------------------------------------------------------
+/**
+ * @addtogroup Notch_EFR32 Notch Filter
+ * @{
+ * @brief EFR32-specific notch capability.
+ * @ingroup RAIL_API
+ *
+ * Many wireless protocols operate on similar RF frequency bands.
+ * The EFR product families have the ability to reduce interference
+ * from undesired RF signal operating in the same frequency band.
+ * Note that this feature is not supported on EFR32XG1 devices
+ */
+/**
+ * @struct RAIL_NotchConfig_t
+ * @brief RAIL Notch filter configuration.
+ *
+ * This structure describes the undesired RF interferencer
+ */
+typedef struct RAIL_NotchConfig {
+/** undesired interferer center frequency in Hz.
+    setting it to 0 will disable this feature.*/
+  uint32_t interfererFreqHz;
+/** undesired interferer frequency bandwidth in Hz*/
+  uint32_t interfererBwHz;
+} RAIL_NotchConfig_t;
+
+/**
+ * Configure RAIL Notch filter
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] pNotchConfig Pointer to Notch filter configuration.
+ * @return A status code indicating success of the function call.
+ *
+ */
+RAIL_Status_t RAIL_ConfigNotch(RAIL_Handle_t railHandle,
+                               const RAIL_NotchConfig_t *pNotchConfig);
+
+/** @} */  // end of group Notch_EFR32
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
 /******************************************************************************
  * RX Channel Hopping
  *****************************************************************************/
@@ -954,6 +996,12 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 
 /** @} */ // end of group Sleep
 
+/**
+ * @addtogroup Data_Management_EFR32 EFR32
+ * @{
+ * @ingroup Data_Management
+ */
+
 /// Fixed-width type indicating the needed alignment for RX and TX FIFOs. Note
 /// that docs.silabs.com will incorrectly indicate that this is always a
 /// uint8_t, but it does vary across RAIL platforms.
@@ -962,8 +1010,48 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 /// Alignment that is needed for the RX and TX FIFOs.
 #define RAIL_FIFO_ALIGNMENT (sizeof(RAIL_FIFO_ALIGNMENT_TYPE))
 
+/** @} */ // end of group Data_Management_EFR32
+
+/**
+ * @addtogroup State_Transitions_EFR32 EFR32
+ * @{
+ * @ingroup State_Transitions
+ */
+
+/**
+ * @def RAIL_MINIMUM_TRANSITION_US
+ * @brief The minimum value for a consistent RAIL transition
+ * @note Transitions may need to be slower than this when using longer
+ *   \ref RAIL_TxPowerConfig_t::rampTime values
+ */
+#define RAIL_MINIMUM_TRANSITION_US (100U)
+
+/**
+ * @def RAIL_MAXIMUM_TRANSITION_US
+ * @brief The maximum value for a consistent RAIL transition
+ */
+#if     (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+#define RAIL_MAXIMUM_TRANSITION_US (13000U)
+#else//!(_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+#define RAIL_MAXIMUM_TRANSITION_US (1000000U)
+#endif//(_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+
+/**
+ * @typedef RAIL_TransitionTime_t
+ * @brief Suitable type for the supported transition time range.
+ */
+#if     (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+typedef uint16_t RAIL_TransitionTime_t;
+#else//!(_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+typedef uint32_t RAIL_TransitionTime_t;
+#endif//(_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+
+/** @} */ // end of group State_Transitions_EFR32
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // __RAIL_TYPES_H__
+
+#endif // __RAIL_CHIP_SPECIFIC_H_

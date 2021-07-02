@@ -113,6 +113,31 @@
 // <i> Define the Access Layer TX Queue size.
 #define SL_BTMESH_CONFIG_APP_TXQ_SIZE       (5)
 
+// <o SL_BTMESH_CONFIG_SEQNUM_WRITE_INTERVAL_EXP> Element sequence number write interval exponent <0-23>
+// <i> Default: 16
+// <i> Each network PDU originating from a device must be sent with an increasing sequence number.
+// <i> To achieve this also when the device is reset or powered off, the latest sequence numbers are stored
+// <i> on flash from time to time as defined by this setting. The setting defines the sequence number writing
+// <i> interval as a power of two exponent. E.g., a value of 10 would mean 1024 (2 to the 10th power).
+// <i> To avoid excessive flash wear, the interval should be relatively high on a device that generates
+// <i> a lot of traffic, and it can be set relatively low on a device that generates little traffic.
+#define SL_BTMESH_CONFIG_SEQNUM_WRITE_INTERVAL_EXP       (16)
+
+// <o SL_BTMESH_CONFIG_ITS_KEY_CACHE_SIZE> Size of RAM cache for persistent keys stored within PSA ITS <0-544>
+// <i> Default: 16
+// <i> When PSA ITS (internal trusted storage) is used to store the
+// Mesh encryption keys a RAM cache should be set up to increase
+// runtime performance. The size of the cache should be set according
+// to the expected use of application and device keys. For a node, it
+// can be set to the number of application keys times two (to
+// accommodate both key variants during a key refresh) ; for a
+// Provisioner, it should be set to the number of application keys
+// times two (to accommodate both key variants during a key refresh)
+// plus a fraction of the expected number of device keys that will be
+// stored. For devices that do not use PSA ITS the setting is ignored.
+
+#define SL_BTMESH_CONFIG_ITS_KEY_CACHE_SIZE       (4)
+
 // </h> End Mesh Bluetooth Stack Configuration
 
 #endif // SL_BTMESH_CONFIG_H

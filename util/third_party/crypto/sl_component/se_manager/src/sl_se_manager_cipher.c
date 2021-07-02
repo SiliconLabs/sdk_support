@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -1127,8 +1127,8 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
     }
 
     {
-      iv_in = (SE_DataTransfer_t)SE_DATATRANSFER_DEFAULT(iv, iv_len);
-      add_in = (SE_DataTransfer_t)SE_DATATRANSFER_DEFAULT(add, add_len);
+      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
       SE_DataTransfer_t ctx_out =
         SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx_enc, sizeof(gcm_ctx->se_ctx_enc));
 
@@ -1156,8 +1156,8 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
 
     // Do decryption if requested
     if (gcm_ctx->mode == SL_SE_DECRYPT) {
-      iv_in = (SE_DataTransfer_t)SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-      add_in = (SE_DataTransfer_t)SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
+      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
       SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx_dec,
                                                           sizeof(gcm_ctx->se_ctx_dec));
 

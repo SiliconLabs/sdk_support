@@ -58,7 +58,6 @@ RAIL_TX_POWER_LEVEL_INVALID =  255
 API_MAX_POWER_DEFAULT  = 20
 API_INCREMENT_DEFAULT = 4
 NUM_SEGMENTS_DEFAULT = 8
-API_MAX_POWER = API_MAX_POWER_DEFAULT
 API_MIN_POWER = -50
 enablePlotting = False
 
@@ -160,8 +159,8 @@ def AdjustMaxValues(curveSegments):
 
   return curveSegments
 
-def FitCharData(csvFile, increment=4):
-  fitResult = ProcessCharDataAndFindPoly(csvFile, increment)
+def FitCharData(csvFile, increment=4, maxpwr=20):
+  fitResult = ProcessCharDataAndFindPoly(csvFile, increment , maxpwr)
 
   cStr = ""
   cStr += '\nRAIL_TxPowerCurveSegment_t[] C Structure\n'
@@ -169,12 +168,12 @@ def FitCharData(csvFile, increment=4):
   cStr += '\n'
   return '\n' + cStr
 
-def ProcessCharDataAndFindPoly(filename, increment=4):
-  data = ReadAndProcessCharData(filename)
-  polys = CalcPowerPolys(data.pwrlvls, data.outpwrs, increment)
+def ProcessCharDataAndFindPoly(filename, increment=4 , maxpwr=20):
+  data = ReadAndProcessCharData(filename, maxpwr)
+  polys = CalcPowerPolys(data.pwrlvls, data.outpwrs, increment, maxpwr)
   return polys
 
-def ReadAndProcessCharData(filename):
+def ReadAndProcessCharData(filename, maxpwr=20):
   chardata = numpy.loadtxt(filename, delimiter=',')
   pwrlvls = []
   outpwrs = []
@@ -188,9 +187,9 @@ def ReadAndProcessCharData(filename):
     if maxpower == None or avgpower > maxpower:
       maxpower = avgpower
 
-  if maxpower > API_MAX_POWER:
+  if maxpower > maxpwr:
     for x in range(0, len(pwrlvls)):
-      outpwrs[x] -= (maxpower - API_MAX_POWER)
+      outpwrs[x] -= (maxpower - maxpwr)
 
   return PaData(pwrlvls, outpwrs, maxpower)
 
@@ -213,21 +212,21 @@ class CurveSegment():
             and self.slope == other.slope \
             and self.intercept == other.intercept)
 
-def CalcPowerPolys(yAxisValues, powers, increment):
+def CalcPowerPolys(yAxisValues, powers, increment, maxpwr):
   global NUM_SEGMENTS_DEFAULT
   polylist = []
-  pwr = API_MAX_POWER
+  pwr = maxpwr
   numberOfSegments = NUM_SEGMENTS_DEFAULT
-  #Add extra segment to store API_MAX_POWER and increment
+  #Add extra segment to store maxpwr and increment
   
-  if (API_MAX_POWER != API_MAX_POWER_DEFAULT) or (increment != API_INCREMENT_DEFAULT):
+  if (maxpwr != API_MAX_POWER_DEFAULT) or (increment != API_INCREMENT_DEFAULT):
     numberOfSegments = numberOfSegments+1 
   
   for x in range(0, numberOfSegments):
     
     if x == 0 and numberOfSegments != NUM_SEGMENTS_DEFAULT :
       polylist.append(RAIL_TX_POWER_LEVEL_INVALID)
-      polylist.append(API_MAX_POWER)
+      polylist.append(maxpwr)
       polylist.append(increment)
       continue
     
@@ -281,9 +280,7 @@ def main():
                       help="Pass this option to enable plotting the curve \
                       fit for visual inspection")
   a = parser.parse_args()
-  if a.maxPower : 
-    global API_MAX_POWER
-    API_MAX_POWER = a.maxPower
+
   # Only use matplotlib if we're graphing results
   enablePlotting = a.plot
   if enablePlotting and 'plt' not in globals():
@@ -291,7 +288,7 @@ def main():
     return 1
 
   # Compute the fit and output the result
-  output = FitCharData(a.csvFile, round(a.increment,1))
+  output = FitCharData(a.csvFile, round(a.increment,1), a.maxPower)
   if a.output == None:
     print(output)
   else:

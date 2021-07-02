@@ -28,3 +28,5 @@ documentation:
       condition: [device_sdid_205]
     - page: emlib/api/efr32xg23/group-se
       condition: [device_sdid_210]
+    - page: emlib/api/efr32xg24/group-se
+      condition: [device_sdid_215]

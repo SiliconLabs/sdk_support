@@ -33,6 +33,7 @@ include:
       - path: "sl_btmesh_compatibility_macros.h"
       - path: "sl_btmesh_capi_types.h"
       - path: "sl_btmesh_memory_config.h"
+      - path: "sl_btmesh_model_specification_defs.h"
       - path: "sl_btmesh_generic_model_capi_types.h"
         condition:
           - "btmesh_generic_model"
@@ -201,7 +202,7 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_efr32mg22"
-#EFR32MG22
+#MGM22
   - path: "lib/EFR32MG22/GCC/libbluetooth_mesh.a"
     condition:
       - "toolchain_gcc"
@@ -210,6 +211,24 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_mgm22"
+#EFR32MG24
+  - path: "lib/EFR32MG24/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg24"
+  - path: "lib/EFR32MG24/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg24"
+#MGM24
+  - path: "lib/EFR32MG24/GCC/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm24"
+  - path: "lib/EFR32MG24/IAR/libbluetooth_mesh.a"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm24"
 template_contribution:
   - name: component_catalog
     value: btmesh
@@ -248,10 +267,7 @@ requires:
   - name: "rail_lib"
   - name: "nvm3_lib"
   - name: "nvm3_default"
-  - name: "mbedtls_ccm"
-  - name: "mbedtls_ecdh"
-  - name: "mbedtls_ecc"
-  - name: "mbedtls_random"
+  - name: "btmesh_crypto"
   - name: "device_supports_bluetooth"
   - name: "btmesh_feature_health_server"
   - name: "dcd_configuration"

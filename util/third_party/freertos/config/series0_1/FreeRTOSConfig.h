@@ -28,17 +28,18 @@
 #define FREERTOS_CONFIG_H
 
 /*-----------------------------------------------------------
- * Application specific definitions.
- *
- * These definitions should be adjusted for your particular hardware and
- * application requirements.
- *
- * THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
- * FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
- *
- * See http://www.freertos.org/a00110.html
- *----------------------------------------------------------*/
+* Application specific definitions.
+*
+* These definitions should be adjusted for your particular hardware and
+* application requirements.
+*
+* THESE PARAMETERS ARE DESCRIBED WITHIN THE 'CONFIGURATION' SECTION OF THE
+* FreeRTOS API DOCUMENTATION AVAILABLE ON THE FreeRTOS.org WEB SITE.
+*
+* See http://www.freertos.org/a00110.html
+*----------------------------------------------------------*/
 
+#if !defined(__IAR_SYSTEMS_ASM__)
 #if (defined(__ARMCC_VERSION) || defined(__GNUC__) || defined(__ICCARM__))
 #include <stdint.h>
 
@@ -46,21 +47,20 @@
 #include CMSIS_device_header
 #endif
 
-#if !defined(__IAR_SYSTEMS_ASM__) // Skip em_assert.h in IAR assembler files
 #include "em_assert.h"
 #include "em_device.h"
-#endif
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
 #include "sl_component_catalog.h"
+#endif
 #endif
 
 //-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
 
 //  <o>Minimal stack size [words] <0-65535>
 //  <i> Stack for idle task and default task stack in words.
-//  <i> Default: 140
-#define configMINIMAL_STACK_SIZE                140
+//  <i> Default: 160
+#define configMINIMAL_STACK_SIZE                160
 
 //  <o>Total heap size [bytes] <0-0xFFFFFFFF>
 //  <i> Heap memory size in bytes.
@@ -74,8 +74,8 @@
 
 //  <o>Timer task stack depth [words] <0-65535>
 //  <i> Stack for timer task in words.
-//  <i> Default: 140
-#define configTIMER_TASK_STACK_DEPTH            140
+//  <i> Default: 160
+#define configTIMER_TASK_STACK_DEPTH            160
 
 //  <o>Timer task priority <0-56>
 //  <i> Timer task priority.
@@ -138,58 +138,6 @@
 //  <i> The queue registry is used by kernel aware debuggers to locate queue and semaphore structures and display associated text names.
 //  <i> Default: 10
 #define configQUEUE_REGISTRY_SIZE               10
-
-// <h>Event Recorder configuration
-//  <i> Initialize and setup Event Recorder level filtering.
-//  <i> Settings have no effect when Event Recorder is not present.
-
-//  <q>Initialize Event Recorder
-//  <i> Initialize Event Recorder before FreeRTOS kernel start.
-//  <i> Default: 1
-#define configEVR_INITIALIZE                    1
-
-//  <e>Setup recording level filter
-//  <i> Enable configuration of FreeRTOS events recording level
-//  <i> Default: 1
-#define configEVR_SETUP_LEVEL                   1
-
-//  <o>Tasks functions
-//  <i> Define event recording level bitmask for events generated from Tasks functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_TASKS                   0x05
-
-//  <o>Queue functions
-//  <i> Define event recording level bitmask for events generated from Queue functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_QUEUE                   0x05
-
-//  <o>Timer functions
-//  <i> Define event recording level bitmask for events generated from Timer functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_TIMERS                  0x05
-
-//  <o>Event Groups functions
-//  <i> Define event recording level bitmask for events generated from Event Groups functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_EVENTGROUPS             0x05
-
-//  <o>Heap functions
-//  <i> Define event recording level bitmask for events generated from Heap functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_HEAP                    0x05
-
-//  <o>Stream Buffer functions
-//  <i> Define event recording level bitmask for events generated from Stream Buffer functions.
-//  <i> Default: 0x05
-//    <0x00=>Off <0x01=>Errors <0x05=>Errors + Operation <0x0F=>All
-#define configEVR_LEVEL_STREAMBUFFER            0x05
-//  </e>
-// </h>
 
 // <h> Port Specific Features
 // <i> Enable and configure port specific features.
@@ -263,11 +211,6 @@
 /* Ensure Cortex-M port compatibility. */
 #define SysTick_Handler                         xPortSysTickHandler
 
-#if (defined(__ARMCC_VERSION) || defined(__GNUC__) || defined(__ICCARM__))
-/* Include debug event definitions */
-#include "freertos_evr.h"
-#endif
-
 /* Implement FreeRTOS configASSERT as emlib assert. */
 #define configASSERT(x)                               EFM_ASSERT(x)
 
@@ -303,10 +246,17 @@
 
 /* Thread local storage pointers used by the SDK */
 #ifndef configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS
-	#define configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS 0
+  #define configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS 0
 #endif
 
-#define configNUM_THREAD_LOCAL_STORAGE_POINTERS (configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS + \
-                                                 configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS )
+/* PRINT_STRING implementation. iostream_retarget_stdio or third party
+   printf should be added if this is used */
+#define configPRINT_STRING(X)                       printf(X)
 
+#define configNUM_THREAD_LOCAL_STORAGE_POINTERS (configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS \
+                                                 + configNUM_SDK_THREAD_LOCAL_STORAGE_POINTERS)
+
+//#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT)
+//#include "SEGGER_SYSVIEW_FreeRTOS.h"
+//#endif
 #endif /* FREERTOS_CONFIG_H */

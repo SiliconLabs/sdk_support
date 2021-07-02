@@ -144,7 +144,7 @@ static inline uint32_t uint32_identity(uint32_t x)
   return x;
 }
 
-#ifdef BIG_ENDIAN
+#ifdef SL_WFX_BIG_ENDIAN
 #define sl_wfx_htobe16(x) uint16_identity(x)
 #define sl_wfx_htole16(x) bswap_16(x)
 #define sl_wfx_htobe32(x) uint32_identity(x)

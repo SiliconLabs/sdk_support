@@ -23,6 +23,16 @@ requires:
     condition: [device_sdid_200]
 provides:
   - name: efp_driver_core
+template_file:
+  - path: "hardware/driver/efp/inst/sl_efp_instances.c.jinja"
+  - path: "hardware/driver/efp/inst/sl_efp_instances.h.jinja"
+template_contribution:
+  - name: event_handler
+    condition: [efp_driver]
+    value:
+      event: driver_init
+      include: "sl_efp_instances.h"
+      handler: sl_efp_init_instances
 documentation:
     docset: gecko-platform
     document: hardware-driver/api/group-sl-efp

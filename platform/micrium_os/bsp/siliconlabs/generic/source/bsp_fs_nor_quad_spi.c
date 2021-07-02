@@ -26,7 +26,7 @@
 #include  <em_device.h>
 
 #if (defined(RTOS_MODULE_FS_AVAIL) && defined(RTOS_MODULE_FS_STORAGE_NOR_AVAIL) \
-  && defined(_EFM32_GIANT_FAMILY))
+  && defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100))            // Only GG11 has been tested with QSPI.
 
 /********************************************************************************************************
  ********************************************************************************************************

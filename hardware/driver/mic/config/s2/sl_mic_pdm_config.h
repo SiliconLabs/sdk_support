@@ -20,7 +20,7 @@
 
 // <<< Use Configuration Wizard in Context Menu
 // <h> MIC PDM config
-// <o> PDM down sampling rate <3..73>
+// <o> PDM down sampling rate <3-73>
 // <i> Defines the ratio between PDM reference clock and the sampling frequency
 #define SL_MIC_PDM_DSR           32
 // </h> end MIC_PDM config

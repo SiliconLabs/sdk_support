@@ -273,7 +273,7 @@ static int ecjpake_zkp_read( const mbedtls_md_info_t *md_info,
 
     r_len = *(*p)++;
 
-    if( end < *p || (size_t)( end - *p ) < r_len )
+    if( end < *p || (size_t)( end - *p ) < r_len || r_len == 0 )
     {
         ret = MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
         goto cleanup;
@@ -965,6 +965,7 @@ static int ecjpake_test_load( mbedtls_ecjpake_context *ctx,
 cleanup:
     return( ret );
 }
+
 #endif /* ! MBEDTLS_ECJPAKE_ALT */
 
 /* For tests we don't need a secure RNG;
@@ -1063,6 +1064,11 @@ int mbedtls_ecjpake_self_test( int verbose )
         mbedtls_printf( "passed\n" );
 
 #if !defined(MBEDTLS_ECJPAKE_ALT)
+    /* 'reference handshake' tests can only be run against implementations
+     * for which we have 100% control over how the random ephemeral keys
+     * are generated. This is only the case for the internal mbed TLS
+     * implementation, so these tests are skipped in case the internal
+     * implementation is swapped out for an alternative one. */
     if( verbose != 0 )
         mbedtls_printf( "  ECJPAKE test #2 (reference handshake): " );
 

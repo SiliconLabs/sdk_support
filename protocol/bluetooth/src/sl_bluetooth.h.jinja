@@ -8,7 +8,7 @@
 {%- endif %}
 #include "sl_bt_api.h"
 {%- if bluetooth_api_ncp_host is not defined %}
-{%- if btmesh_feature_proxy_server is defined %}
+{%- if btmesh_stack is defined %}
 #include "sl_btmesh.h"
 
 #define SL_BT_COMPONENT_ADVERTISERS ({{ bluetooth_advertisers | sum(attribute='count')}} + SL_BTMESH_COMPONENT_ADVERTISERS)

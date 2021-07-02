@@ -40,6 +40,14 @@ plugin(core) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../build/lib/libbootloader_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../build/lib/libbootloader_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../build/lib/libbootloader_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../build/lib/libbootloader_efm32jg1b_gcc.a
   }
@@ -77,6 +85,14 @@ plugin(core) {
               efm32~series[2]~device_configuration[2]+iar) {
     file=../build/lib/libbootloader_efx32xg22_iar.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../build/lib/libbootloader_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../build/lib/libbootloader_efx32xg24_iar.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../build/lib/libbootloader_efm32jg1b_iar.a
   }
@@ -94,7 +110,7 @@ plugin(core) {
   }
 
   setup(macros) {
-    BTL_APP_SPACE_SIZE=(FLASH_SIZE - BTL_APPLICATION_BASE)
+    BTL_APP_SPACE_SIZE=((FLASH_BASE + FLASH_SIZE) - BTL_APPLICATION_BASE)
     -DBOOTLOADER_VERSION_MAIN_CUSTOMER=0
   }
 
@@ -261,6 +277,14 @@ plugin(parser) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../../build/lib/libparser_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../../build/lib/libparser_efm32jg1b_gcc.a
   }
@@ -297,6 +321,14 @@ plugin(parser) {
   precompiled(efr32~series[2]~device_configuration[2]+iar,\
               efm32~series[2]~device_configuration[2]+iar) {
     file=../../build/lib/libparser_efx32xg22_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser_efx32xg24_iar.a
   }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../../build/lib/libparser_efm32jg1b_iar.a
@@ -352,6 +384,14 @@ plugin(parser-eblv2) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../../build/lib/libparser-eblv2_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser-eblv2_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../../build/lib/libparser-eblv2_efm32jg1b_gcc.a
   }
@@ -388,6 +428,14 @@ plugin(parser-eblv2) {
   precompiled(efr32~series[2]~device_configuration[2]+iar,\
               efm32~series[2]~device_configuration[2]+iar) {
     file=../../build/lib/libparser-eblv2_efx32xg22_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser-eblv2_efx32xg24_iar.a
   }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../../build/lib/libparser-eblv2_efm32jg1b_iar.a
@@ -448,6 +496,14 @@ plugin(parser-noenc) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../../build/lib/libparser-noenc_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../../build/lib/libparser-noenc_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../../build/lib/libparser-noenc_efm32jg1b_gcc.a
   }
@@ -484,6 +540,14 @@ plugin(parser-noenc) {
   precompiled(efr32~series[2]~device_configuration[2]+iar,\
               efm32~series[2]~device_configuration[2]+iar) {
     file=../../build/lib/libparser-noenc_efx32xg22_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../../build/lib/libparser-noenc_efx32xg24_iar.a
   }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../../build/lib/libparser-noenc_efm32jg1b_iar.a
@@ -716,10 +780,26 @@ plugin(se-manager) {
   root=$CRYPTO/sl_component/se_manager/src
 
   # Files that are released in source
-  (efr32~series[2]~device_configuration[1]): sl_se_manager.c
-  (efr32~series[2]~device_configuration[1]): sl_se_manager_key_handling.c
-  (efr32~series[2]~device_configuration[1]): sl_se_manager_cipher.c
-  (efr32~series[2]~device_configuration[1]): sl_se_manager_hash.c
+  (efr32~series[2]~device_configuration[1],\
+   efr32~series[2]~device_configuration[3],\
+   efm32~series[2]~device_configuration[3],\
+   efr32~series[2]~device_configuration[4],\
+   efm32~series[2]~device_configuration[4]): sl_se_manager.c
+  (efr32~series[2]~device_configuration[1],\
+   efr32~series[2]~device_configuration[3],\
+   efm32~series[2]~device_configuration[3],\
+   efr32~series[2]~device_configuration[4],\
+   efm32~series[2]~device_configuration[4]): sl_se_manager_key_handling.c
+  (efr32~series[2]~device_configuration[1],\
+   efr32~series[2]~device_configuration[3],\
+   efm32~series[2]~device_configuration[3],\
+   efr32~series[2]~device_configuration[4],\
+   efm32~series[2]~device_configuration[4]): sl_se_manager_cipher.c
+  (efr32~series[2]~device_configuration[1],\
+   efr32~series[2]~device_configuration[3],\
+   efm32~series[2]~device_configuration[3],\
+   efr32~series[2]~device_configuration[4],\
+   efm32~series[2]~device_configuration[4]): sl_se_manager_hash.c
 
   setup(additionalFiles) {
     PATH(ABSOLUTE):$CRYPTO/sl_component/se_manager/inc
@@ -827,6 +907,14 @@ plugin(storage-common) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../../build/lib/libstorage_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../../build/lib/libstorage_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../../build/lib/libstorage_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../../build/lib/libstorage_efm32jg1b_gcc.a
   }
@@ -863,6 +951,14 @@ plugin(storage-common) {
   precompiled(efr32~series[2]~device_configuration[2]+iar,\
               efm32~series[2]~device_configuration[2]+iar) {
     file=../../build/lib/libstorage_efx32xg22_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../../build/lib/libstorage_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../../build/lib/libstorage_efx32xg24_iar.a
   }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../../build/lib/libstorage_efm32jg1b_iar.a
@@ -924,6 +1020,14 @@ plugin(storage-common-single) {
               efm32~series[2]~device_configuration[2]+gcc) {
     file=../../build/lib/libstorage-single_efx32xg22_gcc.a
   }
+  precompiled(efr32~series[2]~device_configuration[3]+gcc,\
+              efm32~series[2]~device_configuration[3]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg23_gcc.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+gcc,\
+              efm32~series[2]~device_configuration[4]+gcc) {
+    file=../../build/lib/libstorage-single_efx32xg24_gcc.a
+  }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+gcc) {
     file=../../build/lib/libstorage-single_efm32jg1b_gcc.a
   }
@@ -960,6 +1064,14 @@ plugin(storage-common-single) {
   precompiled(efr32~series[2]~device_configuration[2]+iar,\
               efm32~series[2]~device_configuration[2]+iar) {
     file=../../build/lib/libstorage-single_efx32xg22_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[3]+iar,\
+              efm32~series[2]~device_configuration[3]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg23_iar.a
+  }
+  precompiled(efr32~series[2]~device_configuration[4]+iar,\
+              efm32~series[2]~device_configuration[4]+iar) {
+    file=../../build/lib/libstorage-single_efx32xg24_iar.a
   }
   precompiled(efm32~family[J]~series[1]~device_configuration[1]+iar) {
     file=../../build/lib/libstorage-single_efm32jg1b_iar.a

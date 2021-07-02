@@ -30,12 +30,16 @@
 #ifndef SL_MEMORY_H
 #define SL_MEMORY_H
 
+#include "sl_memory_region.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * @addtogroup linker
  * @{
  ******************************************************************************/
-
-#include "sl_memory_region.h"
 
 /***************************************************************************//**
  * @brief
@@ -56,5 +60,9 @@ sl_memory_region_t sl_memory_get_stack_region(void);
 sl_memory_region_t sl_memory_get_heap_region(void);
 
 /** @} end linker */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_MEMORY_H

@@ -8,6 +8,8 @@ def validate(project):
         project.error('RTC peripheral is not available on the selected target.', project.target_for_defines("SL_SLEEPTIMER_PERIPHERAL"))
     elif sleeptimer_peripheral.value() == 'SL_SLEEPTIMER_PERIPHERAL_PRORTC' and project.is_provided("device_has_prortc") == 0:
         project.error('PRORTC peripheral is not available on the selected target.', project.target_for_defines("SL_SLEEPTIMER_PERIPHERAL"))
+    elif sleeptimer_peripheral.value() == 'SL_SLEEPTIMER_PERIPHERAL_SYSRTC' and project.is_provided("device_has_sysrtc") == 0:
+        project.error('SYSRTC peripheral is not available on the selected target.', project.target_for_defines("SL_SLEEPTIMER_PERIPHERAL"))        
     elif sleeptimer_peripheral.value() == 'SL_SLEEPTIMER_PERIPHERAL_BURTC':
         if project.is_provided("device_has_burtc") == 0:
             project.error('BURTC peripheral is not available on the selected target.', project.target_for_defines("SL_SLEEPTIMER_PERIPHERAL"))

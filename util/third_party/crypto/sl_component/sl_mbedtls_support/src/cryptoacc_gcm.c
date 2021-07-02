@@ -58,6 +58,7 @@
 #include "cryptoacc_management.h"
 #include "mbedtls/gcm.h"
 #include "mbedtls/aes.h"
+#include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
 #include "sx_aes.h"
 #include "sx_math.h"
@@ -75,6 +76,36 @@
 static void mbedtls_zeroize(void *v, size_t n)
 {
   volatile unsigned char *p = v; while ( n-- ) *p++ = 0;
+}
+
+static int sli_validate_gcm_params(size_t tag_len,
+                                   size_t iv_len,
+                                   size_t add_len)
+{
+  // NOTE: tag lengths != 16 byte are only supported as of SE FW v1.2.0.
+  //   Earlier firmware versions will return an error trying to verify non-16-byte
+  //   tags using this function.
+  if ( tag_len < 4 || tag_len > 16 || iv_len == 0 ) {
+    return (MBEDTLS_ERR_GCM_BAD_INPUT);
+  }
+
+  /* AD are limited to 2^64 bits, so 2^61 bytes. Since the length of AAD is
+   * limited by the mbedtls API to a size_t, length checking only needs to be
+   * done on 64-bit platforms. */
+#if SIZE_MAX > 0xFFFFFFFFUL
+  if (add_len >> 61 != 0) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
+#else
+  (void) add_len;
+#endif /* 64-bit size_t */
+
+  /* Library does not support non-12-byte IVs */
+  if (iv_len != AES_IV_GCM_SIZE) {
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  }
+
+  return 0;
 }
 
 /*
@@ -126,10 +157,9 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   GCM_VALIDATE_RET(iv != NULL);
   GCM_VALIDATE_RET(add_len == 0 || add != NULL);
 
-  if ( (iv_len != AES_IV_GCM_SIZE)
-       ||/* AD are limited to 2^64 bits, so 2^61 bytes */
-       ( (uint64_t) add_len) >> 61 != 0 ) {
-    return(MBEDTLS_ERR_GCM_BAD_INPUT);
+  status = sli_validate_gcm_params(16, iv_len, add_len);
+  if (status) {
+    return status;
   }
 
   /* Store input in context data structure. */
@@ -156,9 +186,11 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
       sx_ret = sx_aes_gcm_decrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
                                        (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
     }
-    cryptoacc_management_release();
+    status = cryptoacc_management_release();
 
-    if (sx_ret != CRYPTOLIB_SUCCESS) {
+    if (sx_ret == CRYPTOLIB_SUCCESS) {
+      return status;
+    } else {
       return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
     }
   }
@@ -217,7 +249,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
       sx_ret = sx_aes_gcm_decrypt_init((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                        (const block_t *)&nonce, &hw_ctx, (const block_t *)&dummy);
     }
-    cryptoacc_management_release();
+    status = cryptoacc_management_release();
   } else {
     status = cryptoacc_management_acquire();
     if (status != 0) {
@@ -231,15 +263,15 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
       sx_ret = sx_aes_gcm_decrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                          (const block_t *)&hw_ctx, &hw_ctx);
     }
-    cryptoacc_management_release();
+    status = cryptoacc_management_release();
   }
 
   ctx->len += length;
 
-  if (sx_ret != CRYPTOLIB_SUCCESS) {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+  if (sx_ret == CRYPTOLIB_SUCCESS) {
+    return status;
   } else {
-    return 0;
+    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
   }
 }
 
@@ -259,6 +291,11 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
 
   GCM_VALIDATE_RET(ctx != NULL);
   GCM_VALIDATE_RET(tag != NULL);
+
+  status = sli_validate_gcm_params(tag_len, 12, 16);
+  if (status) {
+    return status;
+  }
 
   if (ctx->add_len == 0 && ctx->len == 0) {
     /* If there were no data and additional authentcation data then
@@ -289,14 +326,14 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
       sx_ret = sx_aes_gcm_decrypt_final((const block_t *)&key, (const block_t *)&dummy, &dummy,
                                         (const block_t *)&hw_ctx, &_tag, (const block_t *)&lena_lenc_blk);
     }
-    cryptoacc_management_release();
+    status = cryptoacc_management_release();
 
     if (sx_ret != CRYPTOLIB_SUCCESS) {
       return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
     }
 
     memcpy(tag, tagbuf, tag_len);
-    return(0);
+    return(status);
   }
 }
 
@@ -330,11 +367,9 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   GCM_VALIDATE_RET(length == 0 || output != NULL);
   GCM_VALIDATE_RET(tag != NULL);
 
-  if (   /* IV length is required to be 96 bits for CRYPTOACC.*/
-    (iv_len != AES_IV_GCM_SIZE)
-    /* AD are limited to 2^64 bits, so 2^61 bytes */
-    || ( ( (uint64_t) add_len) >> 61 != 0) ) {
-    return(MBEDTLS_ERR_GCM_BAD_INPUT);
+  status = sli_validate_gcm_params(tag_len, iv_len, add_len);
+  if (status) {
+    return status;
   }
 
   key = block_t_convert(ctx->key, ctx->keybits / 8);
@@ -356,7 +391,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
     sx_ret = sx_aes_gcm_decrypt((const block_t *)&key, (const block_t *)&data_in, &data_out,
                                 (const block_t *)&nonce, &_tag, (const block_t *)&aad);
   }
-  cryptoacc_management_release();
+  status = cryptoacc_management_release();
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     mbedtls_zeroize(output, length);
@@ -364,7 +399,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   }
 
   memcpy(tag, tagbuf, tag_len);
-  return(0);
+  return(status);
 }
 
 int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
@@ -396,11 +431,9 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
   GCM_VALIDATE_RET(length == 0 || input != NULL);
   GCM_VALIDATE_RET(length == 0 || output != NULL);
 
-  if (   /* IV length is required to be 96 bits for CRYPTOACC.*/
-    (iv_len != AES_IV_GCM_SIZE)
-    /* AD are limited to 2^64 bits, so 2^61 bytes */
-    || ( ( (uint64_t) add_len) >> 61 != 0) ) {
-    return(MBEDTLS_ERR_GCM_BAD_INPUT);
+  status = sli_validate_gcm_params(tag_len, iv_len, add_len);
+  if (status) {
+    return status;
   }
 
   key = block_t_convert(ctx->key, ctx->keybits / 8);
@@ -417,11 +450,11 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
   /* Execute GCM operation */
   sx_ret = sx_aes_gcm_decrypt((const block_t *)&key, (const block_t *)&data_in, &data_out,
                               (const block_t *)&nonce, &_tag, (const block_t *)&aad);
-  cryptoacc_management_release();
+  status = cryptoacc_management_release();
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
     if (memcmp_time_cst((uint8_t*)tag, tagbuf, tag_len) == 0) {
-      return(0);
+      return(status);
     } else {
       mbedtls_zeroize(output, length);
       return(MBEDTLS_ERR_GCM_AUTH_FAILED);

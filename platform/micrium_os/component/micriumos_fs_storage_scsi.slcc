@@ -1,24 +1,24 @@
-id: "micriumos_fs_storage_scsi"
-package: "micrium-fsxx"
-description: "Micrium OS File System SCSI Storage"
+id: micriumos_fs_storage_scsi
+package: micrium-fsxx
+description: Micrium OS File System SCSI Storage
 category: Services|File System|Storage
-quality: "production"
-component_root_path: "platform/micrium_os/fs"
+quality: production
+component_root_path: platform/micrium_os/fs
 source:
-  - path: "source/storage/scsi/fs_scsi.c"
+  - path: source/storage/scsi/fs_scsi.c
 include:
-  - path: "source"
+  - path: source
     file_list:
-      - path: "storage/scsi/fs_scsi_priv.h"
-  - path: "include"
+      - path: storage/scsi/fs_scsi_priv.h
+  - path: include
     file_list:
-      - path: "fs_scsi.h"
+      - path: fs_scsi.h
 template_contribution:
-  - name: "micriumos_component_avails"
-    value: "FS_STORAGE_SCSI"
+  - name: micriumos_component_avails
+    value: FS_STORAGE_SCSI
 provides:
-  - name: "fs_storage_scsi"
-  - name: "fs_storage"
+  - name: fs_storage_scsi
+  - name: fs_storage
     allow_multiple: true
 requires:
-  - name: "fs"
+  - name: fs

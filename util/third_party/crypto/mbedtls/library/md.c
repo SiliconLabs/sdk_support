@@ -1,5 +1,5 @@
 /**
- * \file mbedtls_md.c
+ * \file md.c
  *
  * \brief Generic message digest wrapper for mbed TLS
  *
@@ -134,7 +134,7 @@ const mbedtls_md_info_t mbedtls_sha512_info = {
 /*
  * Reminder: update profiles in x509_crt.c when adding a new hash!
  */
-static const int supported_digests[] = {
+static const mbedtls_md_type_t supported_digests[] = {
 
 #if defined(MBEDTLS_SHA512_C)
         MBEDTLS_MD_SHA512,
@@ -171,7 +171,7 @@ static const int supported_digests[] = {
         MBEDTLS_MD_NONE
 };
 
-const int *mbedtls_md_list( void )
+const mbedtls_md_type_t *mbedtls_md_list( void )
 {
     return( supported_digests );
 }

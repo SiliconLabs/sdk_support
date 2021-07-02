@@ -7,6 +7,8 @@ quality: "production"
 root_path: "protocol/bluetooth"
 include: []
 source: []
+requires:
+  - name: device_supports_bluetooth
 library:
 #EFR32BG1B
   - path: "lib/EFR32BG1B/GCC/binapploader.o"

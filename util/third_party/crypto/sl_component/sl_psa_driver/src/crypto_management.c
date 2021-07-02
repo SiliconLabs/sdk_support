@@ -31,14 +31,21 @@
 #include "crypto_management.h"
 #include "em_core.h"
 #include "em_bus.h"
+#include "em_assert.h"
 
 #if defined(CRYPTO_PRESENT)
 
 #if defined(MBEDTLS_THREADING_C)
 #include "mbedtls/threading.h"
-static mbedtls_threading_mutex_t    crypto_locks[CRYPTO_COUNT];
+
+static mbedtls_threading_mutex_t    crypto_locks[CRYPTO_COUNT] = { 0 };
 static volatile bool                crypto_locks_initialized = false;
 static unsigned int                 acquire_count = 0U;
+
+#if defined(SL_THREADING_ALT)
+  #include "cmsis_os2.h"
+#endif
+
 #endif /* MBEDTLS_THREADING_C */
 
 /* Conversion macro for compatibility with the 5.3.x release of the Gecko SDK */
@@ -128,6 +135,49 @@ static inline int crypto_management_index_by_device(CRYPTO_TypeDef *device)
   return -1;
 }
 
+#if defined(MBEDTLS_THREADING_C)
+static bool crypto_management_initialize_mutex(void)
+{
+#if !defined(SL_THREADING_ALT)
+  /* Initialize mutexes if that hasn't happened yet */
+  CORE_DECLARE_IRQ_STATE;
+#endif
+
+  /* Initialize mutexes if that hasn't happened yet */
+  if ( !crypto_locks_initialized ) {
+#if defined(SL_THREADING_ALT)
+    int32_t kernel_lock_state = 0;
+    osKernelState_t kernel_state = osKernelGetState();
+    if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+      kernel_lock_state = osKernelLock();
+      if (kernel_lock_state < 0) {
+        return false;
+      }
+    }
+#else
+    CORE_ENTER_CRITICAL();
+#endif
+    if ( !crypto_locks_initialized ) {
+      for ( int i = 0; i < CRYPTO_COUNT; i++ ) {
+        mbedtls_mutex_init(&crypto_locks[i]);
+      }
+      crypto_locks_initialized = true;
+    }
+#if defined(SL_THREADING_ALT)
+    if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
+      if (osKernelRestoreLock(kernel_lock_state) < 0) {
+        return false;
+      }
+    }
+#else
+    CORE_EXIT_CRITICAL();
+#endif
+  }
+
+  return true;
+}
+#endif
+
 /* Use bitband for clock enable/disable operations, such that they are atomic */
 #define CRYPTO_CLOCK_ENABLE(clk)  BUS_RegBitWrite(& (CMU->HFBUSCLKEN0), (clk), 1)
 #define CRYPTO_CLOCK_DISABLE(clk) BUS_RegBitWrite(& (CMU->HFBUSCLKEN0), (clk), 0)
@@ -140,20 +190,8 @@ CRYPTO_TypeDef *crypto_management_acquire(void)
 
 #if defined(MBEDTLS_THREADING_C)
   unsigned int devno = 0;
-
-  /* Initialize mutexes if that hasn't happened yet */
-  CORE_DECLARE_IRQ_STATE;
-
-  if ( !crypto_locks_initialized ) {
-    CORE_ENTER_CRITICAL();
-    if ( !crypto_locks_initialized ) {
-      for ( int i = 0; i < CRYPTO_COUNT; i++ ) {
-        mbedtls_mutex_init(&crypto_locks[i]);
-      }
-      crypto_locks_initialized = true;
-    }
-    CORE_EXIT_CRITICAL();
-  }
+  bool mutex_initialized = crypto_management_initialize_mutex();
+  EFM_ASSERT(mutex_initialized);
 
 /* Wrapping this in SL_THREADING_ALT pending non-blocking mutex in official
  * threading API. */
@@ -193,19 +231,8 @@ CRYPTO_TypeDef *crypto_management_acquire_default(void)
   CRYPTO_TypeDef *device = NULL;
 
 #if defined(MBEDTLS_THREADING_C)
-  /* Initialize mutexes if that hasn't happened yet */
-  CORE_DECLARE_IRQ_STATE;
-
-  if ( !crypto_locks_initialized ) {
-    CORE_ENTER_CRITICAL();
-    if ( !crypto_locks_initialized ) {
-      for ( int i = 0; i < CRYPTO_COUNT; i++ ) {
-        mbedtls_mutex_init(&crypto_locks[i]);
-      }
-      crypto_locks_initialized = true;
-    }
-    CORE_EXIT_CRITICAL();
-  }
+  bool mutex_initialized = crypto_management_initialize_mutex();
+  EFM_ASSERT(mutex_initialized);
 
   mbedtls_mutex_lock(&crypto_locks[0]);
   device = crypto_devices[0].device;

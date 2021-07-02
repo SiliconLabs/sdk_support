@@ -15,6 +15,7 @@ requires:
   - name: emlib_gpio
   - name: udelay
   - name: device
+  - name: device_has_eusart
 include:
   - path: inc/sl_mx25_flash_shutdown_eusart
     file_list:

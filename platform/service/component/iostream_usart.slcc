@@ -20,6 +20,8 @@ config_file:
 provides:
   - name: iostream_usart
     allow_multiple: true
+  - name: iostream_transport
+    allow_multiple: true
 requires:
   - name: iostream_usart_core
 template_contribution:

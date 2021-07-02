@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs PSA Crypto Secure Element Driver MAC functions.
+ * @brief Silicon Labs PSA Crypto Secure Engine Driver MAC functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -54,6 +54,9 @@ extern "C" {
 // header file when it becomes available.
 #include "psa/crypto_driver_common.h"
 
+#include "sl_se_manager.h"
+#include "sl_se_manager_cipher.h"
+
 // -----------------------------------------------------------------------------
 // Types
 
@@ -67,14 +70,26 @@ typedef struct {
       uint8_t streaming_block[16];
       size_t processed_length;
     } cbcmac;
+    #if defined(PSA_WANT_ALG_HMAC)
+    struct {
+      #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+      uint8_t hmac_result[64];
+      #else
+      uint8_t hmac_result[32];
+      #endif
+      size_t hmac_len;
+    } hmac;
+    #endif
   } ctx;
 } sli_se_driver_mac_operation_t;
 
 // -----------------------------------------------------------------------------
 // Functions
 
+#if defined(PSA_WANT_ALG_HMAC)
 sl_se_hash_type_t sli_se_hash_type_from_psa_hmac_alg(psa_algorithm_t alg,
                                                      size_t *length);
+#endif
 
 psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
                                        psa_algorithm_t alg,

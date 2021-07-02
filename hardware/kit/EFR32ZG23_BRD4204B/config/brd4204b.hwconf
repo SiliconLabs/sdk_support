@@ -17,7 +17,7 @@
     <property object="DefaultMode" propertyId="mode.diagramLocation" value="100, 100"/>
 
     <property object="EXTFLASH" propertyId="EXTFLASH.BSP_EXTFLASH_CS.PIN" value="PC04"/>
-    <property object="EXTFLASH" propertyId="EXTFLASH.BSP_EXTFLASH_USART.MOD" value="USART1"/>
+    <property object="EXTFLASH" propertyId="EXTFLASH.BSP_EXTFLASH_USART.MOD" value="USART0"/>
 
     <property object="I2C0" propertyId="I2C.BSP_I2C_SCL.PIN" value="PC05"/>
     <property object="I2C0" propertyId="I2C.BSP_I2C_SDA.PIN" value="PC07"/>
@@ -37,35 +37,32 @@
     <property object="PTI" propertyId="PTI.BSP_PTI_DFRAME.PIN" value="PD05"/>
     <property object="PTI" propertyId="PTI.BSP_PTI_DOUT.PIN" value="PD04"/>
 
-    <property object="SERIAL" propertyId="SERIAL.BSP_SERIAL_APP_PORT.MOD" value="USART0"/>
+    <property object="SERIAL" propertyId="SERIAL.BSP_SERIAL_APP_PORT.MOD" value="EUSART0"/>
 
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_CS.PIN" value="PC08"/>
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_ENABLE.PIN" value="PC09"/>
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN.PIN" value="PC06"/>
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN4.PIN" value="PC06"/>
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_EXTCOMIN_CHANNEL.ENUM" value="4"/>
-    <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_USART.MOD" value="USART1"/>
+    <property object="SPIDISPLAY" propertyId="SPIDISPLAY.BSP_SPIDISPLAY_USART.MOD" value="USART0"/>
     <property object="SPIDISPLAY" propertyId="SPIDISPLAY.HAL_SPIDISPLAY_EXTCOMIN_USE_PRS.BOOL" value="1"/>
 
-    <!-- <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_NHOSTINT.PIN" value="PB00"/> -->
-    <!-- <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_NWAKE.PIN" value="PB01"/> -->
-    <!-- <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_USART_PORT.MOD" value="USART0"/> -->
+    <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_NHOSTINT.PIN" value="PA05"/>
+    <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_NWAKE.PIN" value="PD02"/>
+    <property object="SPINCP" propertyId="SPINCP.BSP_SPINCP_USART_PORT.MOD" value="USART0"/>
 
     <property object="UARTNCP" propertyId="UARTNCP.BSP_UARTNCP_USART_PORT.MOD" value="USART0"/>
 
     <property object="EUSART0" propertyId="EUSART.BSP_EUSART_RX.PIN" value="PA09"/>
     <property object="EUSART0" propertyId="EUSART.BSP_EUSART_TX.PIN" value="PA08"/>
+    <property object="EUSART0" propertyId="EUSART.BSP_EUSART_CTS.PIN" value="PA10"/>
+    <property object="EUSART0" propertyId="EUSART.BSP_EUSART_RTS.PIN" value="PA00"/>
 
-    <property object="USART0" propertyId="USART.BSP_USART_TX.PIN" value="PA08"/>
-    <property object="USART0" propertyId="USART.BSP_USART_RX.PIN" value="PA09"/>
-    <property object="USART0" propertyId="USART.BSP_USART_CTS.PIN" value="PA10"/>
-    <property object="USART0" propertyId="USART.BSP_USART_RTS.PIN" value="PA00"/>
-
-    <property object="USART1" propertyId="USART.BSP_USART_MOSI.PIN" value="PC01"/>
-    <property object="USART1" propertyId="USART.BSP_USART_MISO.PIN" value="PC02"/>
-    <property object="USART1" propertyId="USART.BSP_USART_CLK.PIN" value="PC03"/>
-    <property object="USART1" propertyId="USART.BSP_USART_CS.PIN" value="PC00"/>
-    <property object="USART1" propertyId="USART.hal_usart_mode.ENUM" value="spi"/>
+    <property object="USART0" propertyId="USART.BSP_USART_MOSI.PIN" value="PC01"/>
+    <property object="USART0" propertyId="USART.BSP_USART_MISO.PIN" value="PC02"/>
+    <property object="USART0" propertyId="USART.BSP_USART_CLK.PIN" value="PC03"/>
+    <property object="USART0" propertyId="USART.BSP_USART_CS.PIN" value="PC00"/>
+    <property object="USART0" propertyId="USART.hal_usart_mode.ENUM" value="spi"/>
 
     <property object="VCOM" propertyId="VCOM.BSP_VCOM_ENABLE.PIN" value="PB00"/>
   </mode>

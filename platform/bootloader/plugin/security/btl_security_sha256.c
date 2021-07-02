@@ -28,9 +28,11 @@
  */
 void btl_initSha256(void *ctx)
 {
-#if defined(_CMU_CLKEN1_MASK)
+#if defined(_CMU_CLKEN1_MASK) && defined(CRYPTOACC_PRESENT)
   CMU->CLKEN1_SET = CMU_CLKEN1_CRYPTOACC;
   CMU->CRYPTOACCCLKCTRL_SET = CMU_CRYPTOACCCLKCTRL_AESEN;
+#elif defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
 
   Sha256Context_t *context = (Sha256Context_t *)ctx;

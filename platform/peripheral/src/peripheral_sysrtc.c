@@ -35,12 +35,7 @@
 #include "stddef.h"
 
 /***************************************************************************//**
- * @addtogroup peripheral
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup SYSRTC
+ * @addtogroup sysrtc SYSRTC - System Real Time Counter
  * @brief System Real Time Counter (SYSRTC) Peripheral API
  * @details
  *  This module contains functions to control the SYSRTC peripheral of Silicon
@@ -1000,6 +995,5 @@ uint32_t sl_sysrtc_get_group_capture_channel_value(uint8_t group_number)
   }
 }
 
-/** @} (end addtogroup SYSRTC) */
-/** @} (end addtogroup peripheral) */
+/** @} (end addtogroup sysrtc) */
 #endif /* defined(SYSRTC_COUNT) && (SYSRTC_COUNT > 0) */

@@ -71,6 +71,7 @@ extern const sx_ecc_curve_t sx_ecc_curve_p224;
 extern const sx_ecc_curve_t sx_ecc_curve_p256;
 extern const sx_ecc_curve_t sx_ecc_curve_p384;
 extern const sx_ecc_curve_t sx_ecc_curve_p521;
+extern const sx_ecc_curve_t sx_ecc_curve_p256k1;
 extern const sx_ecc_curve_t sx_ecc_curve_b163;
 extern const sx_ecc_curve_t sx_ecc_curve_b233;
 extern const sx_ecc_curve_t sx_ecc_curve_b283;

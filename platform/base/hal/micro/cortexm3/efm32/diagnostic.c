@@ -389,6 +389,81 @@ static PGM_P PGM intActiveBits[] =
   "DCDC_IRQn",              // B61
   "EUART0_RX_IRQn",         // B62
   "EUART0_TX_IRQn",         // B63
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  "SMU_SECURE_IRQn",        // B0
+  "SMU_PRIVILEGED_IRQn",    // B1
+  "SMU_NS_PRIVILEGED_IRQn", // B2
+  "EMU_IRQn",               // B3
+  "TIMER0_IRQn",            // B4
+  "TIMER1_IRQn",            // B5
+  "TIMER2_IRQn",            // B6
+  "TIMER3_IRQn",            // B7
+  "TIMER4_IRQn",            // B8
+  "USART0_RX_IRQn",         // B9
+  "USART0_TX_IRQn",         // B10
+  "EUSART0_RX_IRQn",        // B11
+  "EUSART0_TX_IRQn",        // B12
+  "EUSART1_RX_IRQn",        // B13
+  "EUSART1_TX_IRQn",        // B14
+  "MVP_IRQn",               // B15
+  "ICACHE0_IRQn",           // B16
+  "BURTC_IRQn",             // B17
+  "LETIMER0_IRQn",          // B18
+  "SYSCFG_IRQn",            // B19
+  "MPAHBRAM_IRQn",          // B20
+  "LDMA_IRQn",              // B21
+  "LFXO_IRQn",              // B22
+  "LFRCO_IRQn",             // B23
+  "ULFRCO_IRQn",            // B24
+  "GPIO_ODD_IRQn",          // B25
+  "GPIO_EVEN_IRQn",         // B26
+  "I2C0_IRQn",              // B27
+  "I2C1_IRQn",              // B28
+  "EMUDG_IRQn",             // B29
+  "AGC_IRQn",               // B30
+  "BUFC_IRQn",              // B31
+  "FRC_PRI_IRQn",           // B32
+  "FRC_IRQn",               // B33
+  "MODEM_IRQn",             // B34
+  "PROTIMER_IRQn",          // B35
+  "RAC_RSM_IRQn",           // B36
+  "RAC_SEQ_IRQn",           // B37
+  "HOSTMAILBOX_IRQn",       // B38
+  "SYNTH_IRQn",             // B39
+  "ACMP0_IRQn",             // B40
+  "ACMP1_IRQn",             // B41
+  "WDOG0_IRQn",             // B42
+  "WDOG1_IRQn",             // B43
+  "HFXO0_IRQn",             // B44
+  "HFRCO0_IRQn",            // B45
+  "HFRCOEM23_IRQn",         // B46
+  "CMU_IRQn",               // B47
+  "AES_IRQn",               // B48
+  "IADC_IRQn",              // B49
+  "MSC_IRQn",               // B50
+  "DPLL0_IRQn",             // B51
+  "EMUEFP_IRQn",            // B52
+  "DCDC_IRQn",              // B53
+  "PCNT0_IRQn",             // B54
+  "SW0_IRQn",               // B55
+  "SW1_IRQn",               // B56
+  "SW2_IRQn",               // B57
+  "SW3_IRQn",               // B58
+  "KERNEL0_IRQn",           // B59
+  "KERNEL1_IRQn",           // B60
+  "FPUEXH_IRQn",            // B61
+  "SETAMPERHOST_IRQn",      // B62
+  "SEMBRX_IRQn",            // B63
+  "SEMBTX_IRQn",            // B64
+  "SYSRTC_APP_IRQn",        // B65
+  "SYSRTC_SEQ_IRQn",        // B66
+  "KEYSCAN_IRQn",           // B67
+  "RFECA0_IRQn",            // B68
+  "RFECA1_IRQn",            // B69
+  "VDAC0_IRQn",             // B70
+  "VDAC1_IRQn",             // B71
+  "AHB2AHB0_IRQn",          // B72
+  "AHB2AHB1_IRQn"           // B73
   #endif
 #elif defined (CORTEXM3_EFM32_MICRO)
   "DMA",            // B0

@@ -23,6 +23,9 @@
   - name: hardware_board_default_rf_band_2400
 - recommends:
   - id: brd4001a
+  - id: iostream_usart
+    instance:
+    - vcom
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_button

@@ -502,6 +502,97 @@ RAIL_Status_t RAIL_IEEE802154_Deinit(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_IsEnabled(RAIL_Handle_t railHandle);
 
 /**
+ * @enum RAIL_IEEE802154_PtiRadioConfig_t
+ * @brief 802.15.4 PTI radio configuration mode
+ */
+RAIL_ENUM(RAIL_IEEE802154_PtiRadioConfig_t) {
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ = 0x00U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration
+   * with RX antenna diversity support.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV = 0x01U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration
+   * optimized for radio coexistence.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_COEX = 0x02U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration with
+   * RX antenna diversity support optimized for radio coexistence.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV_COEX = 0x03U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration
+   * optimized for front end modules.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_FEM = 0x08U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration
+   * with RX antenna diversity support optimized for
+   * front end modules.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_FEM_ANTDIV = 0x09U,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration
+   * optimized for radio coexistence and front end modules.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_FEM_COEX = 0x0AU,
+  /**
+   * Built-in 2.4Ghz 802.15.4 radio configuration with
+   * RX antenna diversity support optimized for radio coexistence
+   * and front end modules.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_FEM_ANTDIV_COEX = 0x0BU,
+  /**
+   * Built-in 863MHz GB868 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868 = 0x85U,
+  /**
+   * Built-in 915MHz GB868 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_GB868 = 0x86U,
+  /**
+   * External 915MHz Zigbee R23 802.15.4 NA radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT = 0x97U,
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV  ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_COEX ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_COEX)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV_COEX  ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_2P4GHZ_ANTDIV_COEX)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868 ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_GB868  ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_GB868)
+#define RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT ((RAIL_IEEE802154_PtiRadioConfig_t) RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Return IEEE802.15.4 PTI radio config.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return PTI (Packet Trace Information) radio config id.
+ */
+RAIL_IEEE802154_PtiRadioConfig_t RAIL_IEEE802154_GetPtiRadioConfig(RAIL_Handle_t railHandle);
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Set IEEE802.15.4 PTI radio config (for Silicon Labs internal use only).
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] ptiRadioConfig PTI (Packet Trace Information) radio config ID.
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_IEEE802154_SetPtiRadioConfig(RAIL_Handle_t railHandle,
+                                                RAIL_IEEE802154_PtiRadioConfig_t ptiRadioConfigId);
+#endif
+
+/**
  * Configure the RAIL Address Filter for 802.15.4 filtering.
  *
  * @param[in] railHandle A handle of RAIL instance.
@@ -628,11 +719,6 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_EOptions_t, uint32_t) {
  * Enabling this feature additionally allows Frame Version 2 (802.15.4E-2012 /
  * 802.15.4-2015) packets to be accepted and passed to the application.
  *
- * @note If 802.15.4 MAC-level encryption is used with Frame Version 2
- *   frames, RAIL_IEEE802154_EnableEarlyFramePending() should also be
- *   called otherwise data polls may not be recognized to trigger \ref
- *   RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND events.
- *
  * @note Enabling this feature also automatically enables \ref
  *   RAIL_IEEE802154_E_OPTION_ENH_ACK on platforms that support
  *   that feature.
@@ -651,15 +737,35 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_EOptions_t, uint32_t) {
  * the platform supports this feature or not.
  *
  * When enabled, only an Enhanced ACK is expected in response to a transmitted
- * ACK-requesting 802.15.4E Frame Version 2 frame, and when such a frame is
- * received, the application is expected to generate the Enhanced ACK
- * while processing \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND and
- * call \ref RAIL_IEEE802154_WriteEnhAck() in time for that Enhanced ACK to
- * be sent. For this to work properly, the application should enable both
- * \ref RAIL_IEEE802154_EnableEarlyFramePending() and
- * \ref RAIL_IEEE802154_EnableDataFramePending(), and use
- * \ref RAIL_GetRxIncomingPacketInfo() to determine whether an Enhanced ACK
- * is needed along the contents of that ACK packet.
+ * ACK-requesting 802.15.4E Version 2 frame. RAIL only knows how to construct
+ * 802.15.4 Immediate ACKs but not Enhanced ACKs.
+ *
+ * This option causes \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND to be
+ * issued for ACK-requesting Version 2 MAC Command frames, Data frames
+ * (if \ref RAIL_IEEE802154_EnableDataFramePending() is enabled), and
+ * Multipurpose Frames (if \ref RAIL_IEEE802154_ACCEPT_MULTIPURPOSE_FRAMES
+ * is enabled).
+ *
+ * The application is expected to handle this event by calling \ref
+ * RAIL_GetRxIncomingPacketInfo() and parsing the partly-received incoming
+ * frame to determine the type of ACK needed:
+ * - If an Immediate ACK, determine Frame Pending needs based on the packet
+ *   type and addressing information and call \ref
+ *   RAIL_IEEE802154_ToggleFramePending() if necessary;
+ * - If an Enhanced ACK, generate the complete payload of the Enhanced ACK
+ *   including any Frame Pending information and call \ref
+ *   RAIL_IEEE802154_WriteEnhAck() in time for that Enhanced ACK to
+ *   be sent. If not called in time, \ref RAIL_EVENT_TXACK_UNDERFLOW will
+ *   likely result.
+ *   Note that if 802.15.4 MAC-level encryption is used with Version 2
+ *   frames, the application should decrypt the MAC Command byte in a
+ *   MAC Command frame to determine whether it is a Data Request or other
+ *   MAC Command.
+ *
+ * An application can also enable \ref
+ * RAIL_IEEE802154_EnableEarlyFramePending() if the protocol doesn't
+ * need to examine the MAC Command byte of MAC Command frames but can
+ * infer it to be a Data Request.
  *
  * On 802.15.4E GB868 platforms that lack this support, legacy Immediate ACKs
  * are sent/expected for received/transmitted ACK-requesting 802.15.4E Frame
@@ -824,22 +930,33 @@ RAIL_Status_t RAIL_IEEE802154_AcceptFrames(RAIL_Handle_t railHandle,
 
 /**
  * Enable early Frame Pending lookup event notification
- * (RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND).
+ * (\ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND).
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] enable True to enable, false to disable.
  * @return A status code indicating success of the function call.
  *
- * Normally RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered after
- * receiving the entire MAC header for a MAC command and the MAC
- * command byte indicating the packet is a data request. Enabling this
- * feature causes this event to be triggered earlier, right after receiving
- * the source address information in the MAC header, allowing for more time
- * to perform the lookup and call \ref RAIL_IEEE802154_ToggleFramePending()
- * to update the Frame Pending bit in the outgoing ACK for the incoming frame.
- * This feature is also necessary for handling 802.15.4 MAC-encrypted
- * frames where the MAC Command byte is encrypted (MAC Frame Version 2) --
- * see \ref RAIL_IEEE802154_ConfigEOptions().
+ * Normally \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered after
+ * receiving the entire MAC header and MAC command byte for an ACK-requesting
+ * MAC command frame. Version 0/1 frames also require that command to be a
+ * Data Request for this event to occur.
+ * Enabling this feature causes this event to be triggered earlier to allow for
+ * more time to determine the type of ACK needed (Immediate or Enhanced) and/or
+ * perform frame pending lookup to influence the outgoing ACK by using /ref
+ * RAIL_IEEE802154_WriteEnhAck() or \ref RAIL_IEEE802154_ToggleFramePending().
+ *
+ * For Frame Version 0/1 packets, and for Frame Version 2 packets when \ref
+ * RAIL_IEEE802154_E_OPTION_ENH_ACK is not in use, "early" means right
+ * after receiving the source address information in the MAC header.
+ *
+ * For Frame Version 2 packets when \ref RAIL_IEEE802154_E_OPTION_ENH_ACK
+ * is in use, "early" means right after receiving any Auxiliary Security
+ * header which follows the source address information in the MAC header.
+ *
+ * This feature is useful when the protocol knows an ACK-requesting MAC
+ * Command must be a data poll without needing to receive the MAC Command
+ * byte, giving it a bit more time to adjust Frame Pending or generate an
+ * Enhanced ACK.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
  * currently enabled, or on platforms that do not support this feature.
@@ -851,18 +968,20 @@ RAIL_Status_t RAIL_IEEE802154_EnableEarlyFramePending(RAIL_Handle_t railHandle,
 
 /**
  * Enable Frame Pending lookup event notification
- * (RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND) for MAC Data frames.
+ * (\ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND) for MAC Data frames.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[in] enable True to enable, false to disable.
  * @return A status code indicating success of the function call.
  *
- * Normally RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered only
- * for MAC command frames whose MAC command byte indicates the packet is
- * a data request. Enabling this feature causes this event to also be
- * triggered for MAC data frames right after receiving the source
- * address information in the MAC header -- necessary to support the
- * Thread Basil-Hayden Enhanced Frame Pending feature.
+ * Normally \ref RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND is triggered only
+ * for ACK-requesting MAC command frames.
+ * Enabling this feature causes this event to also be triggered for MAC data
+ * frames, at the same point in the packet as \ref
+ * RAIL_IEEE802154_EnableEarlyFramePending() would trigger.
+ * This feature is necessary to support the Thread Basil-Hayden Enhanced
+ * Frame Pending feature in Version 0/1 frames, and to support Version 2
+ * Data frames which require an Enhanced ACK.
  *
  * This function will fail if 802.15.4 hardware acceleration is not
  * currently enabled. This setting may be changed at any time when

@@ -6,10 +6,7 @@ category: Platform|Radio
 quality: production
 requires:
   - name: device
-  - name: emlib_common
-  - name: emlib_gpio
-  - name: emlib_cmu
-  - name: emlib_prs
+  - name: rail_lib
 provides:
   - name: rail_util_rf_path
 documentation:
@@ -26,6 +23,11 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
+  - path: platform/radio/rail_lib/plugin/rail_util_rf_path/config/efr32xg24/sl_rail_util_rf_path_config.h
+    file_id: rail_util_rf_path_config
+    condition:
+      - device_series_2
+      - device_sdid_215
 include:
   - path: platform/radio/rail_lib/plugin/rail_util_rf_path
     file_list:

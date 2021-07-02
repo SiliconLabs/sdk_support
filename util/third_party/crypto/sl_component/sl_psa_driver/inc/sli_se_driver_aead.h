@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs PSA Crypto Secure Element Driver AEAD functions.
+ * @brief Silicon Labs PSA Crypto Secure Engine Driver AEAD functions.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>

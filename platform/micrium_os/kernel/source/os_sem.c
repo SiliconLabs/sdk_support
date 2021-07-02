@@ -265,6 +265,7 @@ OS_OBJ_QTY OSSemDel(OS_SEM   *p_sem,
  *                           - RTOS_ERR_ABORT
  *                           - RTOS_ERR_TIMEOUT
  *                           - RTOS_ERR_NOT_READY
+ *                           - RTOS_ERR_INVALID_STATE
  *
  * @return   The current value of the semaphore counter, or 0 if not available.
  *******************************************************************************************************/
@@ -286,8 +287,8 @@ OS_SEM_CTR OSSemPend(OS_SEM   *p_sem,
   OS_TRACE_SEM_PEND_ENTER(p_sem, timeout, opt, p_ts);
 
   //                                                               Not allowed to call from an ISR
-  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING) ||
-                         !(CORE_InIrqContext())), *p_err, RTOS_ERR_ISR, 0u);
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !(CORE_InIrqContext())), *p_err, RTOS_ERR_ISR, 0u);
 
   //                                                               Validate 'p_sem'
   OS_ASSERT_DBG_ERR_SET((p_sem != DEF_NULL), *p_err, RTOS_ERR_NULL_PTR, 0u);
@@ -298,6 +299,10 @@ OS_SEM_CTR OSSemPend(OS_SEM   *p_sem,
 
   //                                                               Validate object type
   OS_ASSERT_DBG_ERR_SET((p_sem->Type == OS_OBJ_TYPE_SEM), *p_err, RTOS_ERR_INVALID_TYPE, 0u);
+
+  //                                                               Not allowed to pend in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE, 0u);
 
   //                                                               Make sure kernel is running.
   if (OSRunning != OS_STATE_OS_RUNNING) {

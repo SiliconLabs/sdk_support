@@ -38,6 +38,7 @@ sl_status_t sl_device_init_lfxo(void)
 
   lfxoInit.mode = SL_DEVICE_INIT_LFXO_MODE;
   lfxoInit.boost = SL_DEVICE_INIT_LFXO_BOOST;
+  lfxoInit.timeout = SL_DEVICE_INIT_LFXO_TIMEOUT;
 
   CMU_LFXOInit(&lfxoInit);
   CMU_LFXOPrecisionSet(SL_DEVICE_INIT_LFXO_PRECISION);

@@ -40,6 +40,15 @@
  ******************************************************************************/
 
 /*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+#define _GPIOINT_IF_EVEN_MASK ((_GPIO_IF_MASK) & 0x55555555UL)
+#define _GPIOINT_IF_ODD_MASK  ((_GPIO_IF_MASK) & 0xAAAAAAAAUL)
+
+/*******************************************************************************
  ********************************   MACROS   ***********************************
  ******************************************************************************/
 
@@ -47,10 +56,8 @@
  *******************************   STRUCTS   ***********************************
  ******************************************************************************/
 
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-
 typedef struct {
-  /* Pin interrupt number in range of 0 to 15 */
+  /* Pin interrupt number in range of 0 to 31 */
   uint32_t intNo;
 
   /* Pointer to the callback function */
@@ -62,7 +69,7 @@ typedef struct {
  ******************************************************************************/
 
 /* Array of user callbacks. One for each pin interrupt number. */
-static GPIOINT_IrqCallbackPtr_t gpioCallbacks[16] = { 0 };
+static GPIOINT_IrqCallbackPtr_t gpioCallbacks[32] = { 0 };
 
 /*******************************************************************************
  ******************************   PROTOTYPES   *********************************
@@ -82,10 +89,14 @@ static void GPIOINT_IRQDispatcher(uint32_t iflags);
  ******************************************************************************/
 void GPIOINT_Init(void)
 {
-  NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
-  NVIC_EnableIRQ(GPIO_ODD_IRQn);
-  NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
-  NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+  if (CORE_NvicIRQDisabled(GPIO_ODD_IRQn)) {
+    NVIC_ClearPendingIRQ(GPIO_ODD_IRQn);
+    NVIC_EnableIRQ(GPIO_ODD_IRQn);
+  }
+  if (CORE_NvicIRQDisabled(GPIO_EVEN_IRQn)) {
+    NVIC_ClearPendingIRQ(GPIO_EVEN_IRQn);
+    NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+  }
 }
 
 /***************************************************************************//**
@@ -118,7 +129,7 @@ void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPt
  *   Function calls users callback for registered pin interrupts.
  *
  * @details
- *   This function is called when GPIO interrupts are handled by the dispatcher.
+ *   This function is called when GPIO interrupts are handled by the IRQHandlers.
  *   Function gets even or odd interrupt flags and calls user callback
  *   registered for that pin. Function iterates on flags starting from MSB.
  *
@@ -136,7 +147,7 @@ static void GPIOINT_IRQDispatcher(uint32_t iflags)
     irqIdx = SL_CTZ(iflags);
 
     /* clear flag*/
-    iflags &= ~(1 << irqIdx);
+    iflags &= ~(1UL << irqIdx);
 
     callback = gpioCallbacks[irqIdx];
     if (callback) {
@@ -157,7 +168,7 @@ void GPIO_EVEN_IRQHandler(void)
   uint32_t iflags;
 
   /* Get all even interrupts. */
-  iflags = GPIO_IntGetEnabled() & 0x00005555;
+  iflags = GPIO_IntGetEnabled() & _GPIOINT_IF_EVEN_MASK;
 
   /* Clean only even interrupts. */
   GPIO_IntClear(iflags);
@@ -176,7 +187,7 @@ void GPIO_ODD_IRQHandler(void)
   uint32_t iflags;
 
   /* Get all odd interrupts. */
-  iflags = GPIO_IntGetEnabled() & 0x0000AAAA;
+  iflags = GPIO_IntGetEnabled() & _GPIOINT_IF_ODD_MASK;
 
   /* Clean only odd interrupts. */
   GPIO_IntClear(iflags);
@@ -206,7 +217,7 @@ void GPIO_ODD_IRQHandler(void)
 ///   EFM32/EZR32/EFR32 has two GPIO interrupts lines, Odd and Even. If more
 ///   than two interrupts are used then interrupt routine must dispatch from a callback
 ///   register. This module provides small dispatcher for both GPIO interrupts enabling
-///   handling of up to 16 GPIO pin interrupts.
+///   handling of up to 32 GPIO pin interrupts.
 ///
 ///   It is up to the user to configure and enable interrupt on given pin. This can be done
 ///   using the GPIO library (emlib). This module handles the dispatch register and clearing of

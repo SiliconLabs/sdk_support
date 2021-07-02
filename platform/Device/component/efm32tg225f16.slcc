@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32TG225F16
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32TG/Source/system_efm32tg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32TG/Source/IAR/startup_efm32tg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32TG/Source/GCC/startup_efm32tg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32TG/Source/ARM/startup_efm32tg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32tg225f16.h
@@ -61,6 +71,8 @@
     - path: em_device.h
     - path: system_efm32tg.h
     path: platform/Device/SiliconLabs/EFM32TG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32tg225f16
   - name: device
@@ -109,6 +121,7 @@
   - name: device_has_usart1
   - name: device_has_vcmp
   - name: device_has_wdog
+  - name: device_has_dwt
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -138,7 +151,6 @@
     value: 256
 - tag:
   - device:opn:efm32tg225f16
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32tg225f16

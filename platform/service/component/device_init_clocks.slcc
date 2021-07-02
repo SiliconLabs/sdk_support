@@ -3,7 +3,7 @@ label: "Device Init: Clocks"
 package: platform
 description: >
   Device initialization for clock tree
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 include:

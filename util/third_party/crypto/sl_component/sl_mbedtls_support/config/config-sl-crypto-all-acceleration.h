@@ -284,6 +284,13 @@
 //#undef MBEDTLS_ECP_DP_BP512R1_ENABLED
 //#undef MBEDTLS_SHA512_C
 
+#if defined(MBEDTLS_PLATFORM_NV_SEED_ALT)
+// Provide the NV seed function signatures since we have no specific header for them
+#include <stddef.h>
+int sli_nv_seed_read(unsigned char *buf, size_t buf_len);
+int sli_nv_seed_write(unsigned char *buf, size_t buf_len);
+#endif /* MBEDTLS_PLATFORM_NV_SEED_ALT */
+
 #include "mbedtls/config_psa.h"
 
 #include "mbedtls/check_config.h"

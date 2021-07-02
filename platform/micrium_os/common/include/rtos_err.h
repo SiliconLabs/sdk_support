@@ -440,7 +440,7 @@ RTOS_ERR_DECLARE (RTOS_ERR_CANOPEN_SDO_ERR_SUB_IX, "Sub-index does not exist.")
 RTOS_ERR_DECLARE (RTOS_ERR_CANOPEN_SDO_ERR_RANGE, "Value range of parameter exceeded .")
 
 #ifndef  RTOS_ERR_STR_MODULE
-}RTOS_ERR_CODE;
+} RTOS_ERR_CODE;
 #endif
 
 /****************************************************************************************************//**

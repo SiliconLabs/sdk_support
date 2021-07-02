@@ -780,15 +780,15 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
     case RTOS_ERR_SEG_OVF:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPoolMemSpaceCtr);
-      break;
+      goto exit;
 
     case RTOS_ERR_POOL_EMPTY:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPoolEmptyCtr);
-      break;
+      goto exit;
 
     default:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPoolLibGetCtr);
-      break;
+      goto exit;
   }
 
   //                                                               ----------------- ACQUIRE BUF BLK ------------------
@@ -800,15 +800,15 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
     case RTOS_ERR_SEG_OVF:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrBufPoolMemSpaceCtr);
-      break;
+      goto exit_free_conn;
 
     case RTOS_ERR_POOL_EMPTY:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrBufPoolEmptyCtr);
-      break;
+      goto exit_free_conn;
 
     default:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrBufPoolLibGetCtr);
-      break;
+      goto exit_free_conn;
   }
 
   //                                                               ----------------- ACQUIRE PATH BLK -----------------
@@ -820,15 +820,15 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
     case RTOS_ERR_SEG_OVF:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPathPoolMemSpaceCtr);
-      break;
+      goto exit_free_buf;
 
     case RTOS_ERR_POOL_EMPTY:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPathPoolEmptyCtr);
-      break;
+      goto exit_free_buf;
 
     default:
       HTTPs_ERR_INC(p_ctr_err->Conn_ErrPathPoolLibGetCtr);
-      break;
+      goto exit_free_buf;
   }
 
 #if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
@@ -841,15 +841,15 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
     case RTOS_ERR_SEG_OVF:
       HTTPs_ERR_INC(p_ctr_err->Host_ErrPoolMemSpaceCtr);
-      break;
+      goto exit_free_path;
 
     case RTOS_ERR_POOL_EMPTY:
       HTTPs_ERR_INC(p_ctr_err->Host_ErrPoolEmptyCtr);
-      break;
+      goto exit_free_path;
 
     default:
       HTTPs_ERR_INC(p_ctr_err->Host_ErrPoolLibGetCtr);
-      break;
+      goto exit_free_path;
   }
 #endif
 
@@ -866,83 +866,15 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
 
         case RTOS_ERR_SEG_OVF:
           HTTPs_ERR_INC(p_ctr_err->Req_ErrFormBoundaryPoolMemSpaceCtr);
-          break;
+          goto exit_free_host;
 
         case RTOS_ERR_POOL_EMPTY:
           HTTPs_ERR_INC(p_ctr_err->Req_ErrFormBoundaryPoolEmptyCtr);
-          break;
+          goto exit_free_host;
 
         default:
           HTTPs_ERR_INC(p_ctr_err->Req_ErrFormBoundaryPoolLibGetCtr);
-          break;
-      }
-    }
-  }
-#endif
-
-  if (p_conn == DEF_NULL) {
-    Mem_DynPoolBlkFree(&p_instance->PoolConn,                   // Release conn previously acquired.
-                       p_conn,
-                       &local_err);
-    RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
-  }
-
-  if (p_conn->BufPtr == DEF_NULL) {
-    Mem_DynPoolBlkFree(&p_instance->PoolBuf,                    // Release buf previously acquired.
-                       p_conn->BufPtr,
-                       &local_err);
-    RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
-  }
-
-  if (p_conn->PathPtr == DEF_NULL) {
-    Mem_DynPoolBlkFree(&p_instance->PoolPath,                   // Release path previously acquired.
-                       p_conn->PathPtr,
-                       &local_err);
-    RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
-  }
-
-#if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
-  if (p_conn->HostPtr == DEF_NULL) {
-    Mem_DynPoolBlkFree(&p_instance->PoolHost,                   // Release host previously acquired.
-                       p_conn->HostPtr,
-                       &local_err);
-    RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
-  }
-#endif
-
-#if ((HTTPs_CFG_FORM_EN == DEF_ENABLED) \
-  && (HTTPs_CFG_FORM_MULTIPART_EN == DEF_ENABLED))
-  if (p_cfg->FormCfgPtr != DEF_NULL) {
-    if (p_cfg->FormCfgPtr->MultipartEn == DEF_ENABLED) {
-      if (p_conn->FormBoundaryPtr == DEF_NULL) {
-        Mem_DynPoolBlkFree(&p_instance->PoolFormBoundary,         // Release host previously acquired.
-                           p_conn->FormBoundaryPtr,
-                           &local_err);
-        RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
-      }
-    }
-  }
-#endif
-
-  //                                                               If unable to acquire all the blks, exit
-  if (p_conn == DEF_NULL
-      || p_conn->BufPtr == DEF_NULL
-      || p_conn->PathPtr == DEF_NULL) {
-    goto exit;
-  }
-
-#if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
-  if (p_conn->HostPtr == DEF_NULL) {
-    goto exit;
-  }
-#endif
-
-#if ((HTTPs_CFG_FORM_EN == DEF_ENABLED) \
-  && (HTTPs_CFG_FORM_MULTIPART_EN == DEF_ENABLED))
-  if (p_cfg->FormCfgPtr != DEF_NULL) {
-    if (p_cfg->FormCfgPtr->MultipartEn == DEF_ENABLED) {
-      if (p_conn->FormBoundaryPtr == DEF_NULL) {
-        goto exit;
+          goto exit_free_host;
       }
     }
   }
@@ -1006,6 +938,38 @@ HTTPs_CONN *HTTPsMem_ConnGet(HTTPs_INSTANCE *p_instance,
   p_instance->ConnActiveCtr++;
 
   HTTPs_STATS_INC(p_ctr_stats->Conn_StatAcquiredCtr);
+
+  goto exit;
+
+exit_free_host:
+#if (HTTPs_CFG_ABSOLUTE_URI_EN == DEF_ENABLED)
+  Mem_DynPoolBlkFree(&p_instance->PoolHost,                   // Release host previously acquired.
+                     p_conn->HostPtr,
+                     &local_err);
+  RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
+  p_conn->HostPtr = DEF_NULL;
+#endif
+
+exit_free_path:
+  Mem_DynPoolBlkFree(&p_instance->PoolPath,                   // Release path previously acquired.
+                     p_conn->PathPtr,
+                     &local_err);
+  RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
+  p_conn->PathPtr = DEF_NULL;
+
+exit_free_buf:
+  Mem_DynPoolBlkFree(&p_instance->PoolBuf,                    // Release buf previously acquired.
+                     p_conn->BufPtr,
+                     &local_err);
+  RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
+  p_conn->BufPtr = DEF_NULL;
+
+exit_free_conn:
+  Mem_DynPoolBlkFree(&p_instance->PoolConn,                   // Release conn previously acquired.
+                     p_conn,
+                     &local_err);
+  RTOS_ASSERT_CRITICAL((RTOS_ERR_CODE_GET(local_err) == RTOS_ERR_NONE), RTOS_ERR_ASSERT_CRITICAL_FAIL, DEF_NULL);
+  p_conn = DEF_NULL;
 
 exit:
   return (p_conn);

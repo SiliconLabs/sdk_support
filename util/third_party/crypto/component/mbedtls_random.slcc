@@ -8,6 +8,7 @@ category: Platform|Security
 quality: production
 source:
   - path: util/third_party/crypto/mbedtls/library/entropy.c
+  - path: util/third_party/crypto/mbedtls/library/entropy_poll.c
   - path: util/third_party/crypto/mbedtls/library/ctr_drbg.c
   - path: util/third_party/crypto/mbedtls/library/hmac_drbg.c
 include:
@@ -23,14 +24,7 @@ requires:
   - name: mbedtls_aes
   - name: mbedtls_sha256
   - name: mbedtls_core
-  - name: mbedtls_entropy_adc
-    condition: [device_series_1, device_has_adc]
   - name: mbedtls_entropy_default
-    condition: [device_has_radio]
-  - name: mbedtls_entropy_default
-    condition: [device_has_trng]
-  - name: mbedtls_entropy_default
-    condition: [device_series_2]
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ENTROPY_C
@@ -40,13 +34,10 @@ template_contribution:
     value: "MBEDTLS_ENTROPY_MAX_SOURCES  2"
   - name: mbedtls_config
     value: MBEDTLS_NO_PLATFORM_ENTROPY
+    condition:
+      - device_cortexm
   - name: mbedtls_config
     value: MBEDTLS_CTR_DRBG_C
-  # Special handling of TRNG is needed in the config file
-  # because of TRNG errata for EFR32xG13 and EFR32xG14
-  - name: mbedtls_trng_enable
-    value: 1
-    condition: [device_has_trng]
 documentation:
   docset: mbed-tls
   document: group-rng-module

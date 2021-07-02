@@ -38,7 +38,7 @@ extern "C" {
 #endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-/// @addtogroup MFM Multi-level Frequency Modulation
+/// @addtogroup MFM Multi-Level Frequency Modulation
 /// @ingroup Protocol_Specific
 /// @brief MFM configuration routines
 /// Note that this feature is only supported on EFR32xG23 devices.
@@ -64,7 +64,7 @@ extern "C" {
 /// // Main RAIL_EVENT callback
 /// static void RAILCb_Event(RAIL_Handle_t railHandle, RAIL_Events_t events)
 /// {
-///   // Increment tx counter
+///   // Increment TX counter
 ///   if (events & RAIL_EVENT_MFM_BUF_DONE) {
 ///     if (RAIL_MFM_IsEnabled(railHandle)) {
 ///         txCount++;
@@ -215,7 +215,7 @@ RAIL_Status_t RAIL_MFM_Init(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_MFM_Deinit(RAIL_Handle_t railHandle);
 
 /**
- * Returns whether MFM hardware acceleration is currently enabled.
+ * Return whether MFM hardware acceleration is currently enabled.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @return True if MFM hardware acceleration was enabled to start with

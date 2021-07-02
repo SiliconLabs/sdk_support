@@ -48,7 +48,8 @@
 #define SL_POWER_MANAGER_LOWEST_EM_ALLOWED   2
 
 // <q SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP> Enable fast wakeup (disable voltage scaling in EM2/3 mode)
-// <i> Enable or disable volatage scaling in EM2/3 modes (when available). This decreases wakeup time by about 30 us.
+// <i> Enable or disable voltage scaling in EM2/3 modes (when available). This decreases wakeup time by about 30 us.
+// <i> Deprecated. It is replaced by the function sl_power_manager_em23_voltage_scaling_enable_fast_wakeup()
 // <i> Default: 0
 #define SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP   0
 

@@ -14,6 +14,8 @@ config_file:
 provides:
   - name: iostream_eusart
     allow_multiple: true
+  - name: iostream_transport
+    allow_multiple: true
 requires:
   - name: iostream_eusart_core
 template_contribution:
@@ -32,7 +34,7 @@ template_contribution:
     value:
       event: sleep_on_isr_exit
       include: sl_iostream_init_eusart_instances.h
-      handler: "sl_iostream_eusart_{{instance}}_sleep_on_isr_exit"         
+      handler: "sl_iostream_eusart_{{instance}}_sleep_on_isr_exit"
 documentation:
     docset: gecko-platform
     document: service/api/group-iostream-eusart

@@ -4,7 +4,7 @@ package: platform
 description: >
   Device init for HFRCO configures the frequency band of the main HFRCO oscillator. 
   This oscillator can be used for the core and high-frequency peripherals, as configured by clock init.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:

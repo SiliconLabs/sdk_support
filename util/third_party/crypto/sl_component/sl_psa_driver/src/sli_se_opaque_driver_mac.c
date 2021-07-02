@@ -40,8 +40,22 @@
 #include "sli_se_driver_key_management.h"
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
+#include "sli_se_manager_internal.h"
 
 #include <string.h>
+
+static inline int mbedtls_psa_safer_memcmp(
+  const uint8_t *a, const uint8_t *b, size_t n)
+{
+  size_t i;
+  unsigned char diff = 0;
+
+  for ( i = 0; i < n; i++ ) {
+    diff |= a[i] ^ b[i];
+  }
+
+  return(diff);
+}
 
 psa_status_t sli_se_opaque_mac_compute(const psa_key_attributes_t *attributes,
                                        const uint8_t *key_buffer,
@@ -117,9 +131,36 @@ psa_status_t sli_se_opaque_mac_sign_setup(sli_se_opaque_mac_operation_t *operati
   // start by resetting context
   memset(operation, 0, sizeof(*operation));
 
-  psa_status = sli_se_driver_mac_sign_setup(&(operation->operation),
-                                            attributes,
-                                            alg);
+  // Add support for one-shot HMAC through the multipart interface
+  #if defined(PSA_WANT_ALG_HMAC)
+  if (PSA_ALG_IS_HMAC(alg)) {
+    // SEMAILBOX does not support multipart HMAC. Construct it from hashing instead.
+    // Check key type and output size
+    if (psa_get_key_type(attributes) != PSA_KEY_TYPE_HMAC) {
+      // For HMAC, key type is strictly enforced
+      return PSA_ERROR_INVALID_ARGUMENT;
+    }
+
+    size_t output_size = 0;
+    sl_se_hash_type_t hash = sli_se_hash_type_from_psa_hmac_alg(alg, &output_size);
+
+    if (hash == SL_SE_HASH_NONE) {
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    if (output_size > sizeof(operation->operation.ctx.hmac.hmac_result)) {
+      return PSA_ERROR_NOT_SUPPORTED;
+    }
+
+    operation->operation.alg = alg;
+    psa_status = PSA_SUCCESS;
+  } else
+  #endif
+  {
+    psa_status = sli_se_driver_mac_sign_setup(&(operation->operation),
+                                              attributes,
+                                              alg);
+  }
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
   }
@@ -132,20 +173,37 @@ psa_status_t sli_se_opaque_mac_sign_setup(sli_se_opaque_mac_operation_t *operati
     return psa_status;
   }
 
+  size_t padding = 0;
   operation->key_len = psa_get_key_bits(attributes) / 8;
-  switch (operation->key_len) {
-    case 16: // Fallthrough
-    case 24: // Fallthrough
-    case 32:
-      break;
-    default:
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
+  padding = sli_se_get_padding(operation->key_len);
+  #endif
+
+  #if defined(PSA_WANT_ALG_HMAC)
+  if (PSA_ALG_IS_HMAC(alg)) {
+    if (operation->key_len < sizeof(uint32_t) || (operation->key_len + padding) > sizeof(operation->key) - SLI_SE_WRAPPED_KEY_OVERHEAD) {
       return PSA_ERROR_INVALID_ARGUMENT;
+    }
+  } else
+  #endif
+  {
+    switch (operation->key_len) {
+      case 16: // Fallthrough
+      case 24: // Fallthrough
+      case 32:
+        break;
+      default:
+        return PSA_ERROR_INVALID_ARGUMENT;
+    }
   }
 
-  if (operation->key_desc.storage.location.buffer.size < SLI_SE_WRAPPED_KEY_OVERHEAD + operation->key_len) {
+  if (operation->key_desc.storage.location.buffer.size < (SLI_SE_WRAPPED_KEY_OVERHEAD + operation->key_len + padding)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
-  memcpy(operation->key, operation->key_desc.storage.location.buffer.pointer, SLI_SE_WRAPPED_KEY_OVERHEAD + operation->key_len);
+
+  memcpy(operation->key,
+         operation->key_desc.storage.location.buffer.pointer,
+         SLI_SE_WRAPPED_KEY_OVERHEAD + operation->key_len + padding);
 
   // Point key_descriptor at internal copy of key
   operation->key_desc.storage.location.buffer.pointer = operation->key;
@@ -159,15 +217,14 @@ psa_status_t sli_se_opaque_mac_verify_setup(sli_se_opaque_mac_operation_t *opera
                                             size_t key_buffer_size,
                                             psa_algorithm_t alg)
 {
-  // There's no point in providing this functionality, since we'd do the same as the PSA core
-  // either way: compute through mac_compute, and constant-time compare on the provided vs
-  // calculated mac.
-  (void)operation;
-  (void)attributes;
-  (void)key_buffer;
-  (void)key_buffer_size;
-  (void)alg;
-  return PSA_ERROR_NOT_SUPPORTED;
+  // Since the PSA Crypto core exposes the verify functionality of the drivers without
+  // actually implementing the fallback to 'sign' when the driver doesn't support verify,
+  // we need to do this ourselves for the time being.
+  return sli_se_opaque_mac_sign_setup(operation,
+                                      attributes,
+                                      key_buffer,
+                                      key_buffer_size,
+                                      alg);
 }
 
 psa_status_t sli_se_opaque_mac_update(sli_se_opaque_mac_operation_t *operation,
@@ -178,6 +235,22 @@ psa_status_t sli_se_opaque_mac_update(sli_se_opaque_mac_operation_t *operation,
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
+
+  #if defined(PSA_WANT_ALG_HMAC)
+  if (PSA_ALG_IS_HMAC(operation->operation.alg)) {
+    if ( operation->operation.ctx.hmac.hmac_len > 0 ) {
+      return PSA_ERROR_BAD_STATE;
+    }
+
+    return sli_se_driver_mac_compute(&(operation->key_desc),
+                                     operation->operation.alg,
+                                     input,
+                                     input_length,
+                                     operation->operation.ctx.hmac.hmac_result,
+                                     sizeof(operation->operation.ctx.hmac.hmac_result),
+                                     &operation->operation.ctx.hmac.hmac_len);
+  }
+  #endif
 
   return sli_se_driver_mac_update(&(operation->operation),
                                   &(operation->key_desc),
@@ -197,6 +270,22 @@ psa_status_t sli_se_opaque_mac_sign_finish(sli_se_opaque_mac_operation_t *operat
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  #if defined(PSA_WANT_ALG_HMAC)
+  if (PSA_ALG_IS_HMAC(operation->operation.alg)) {
+    if ( operation->operation.ctx.hmac.hmac_len == 0 ) {
+      return PSA_ERROR_BAD_STATE;
+    }
+
+    if ( mac_size < operation->operation.ctx.hmac.hmac_len ) {
+      return PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    memcpy(mac, operation->operation.ctx.hmac.hmac_result, operation->operation.ctx.hmac.hmac_len);
+    *mac_length = operation->operation.ctx.hmac.hmac_len;
+    return PSA_SUCCESS;
+  }
+  #endif
+
   return sli_se_driver_mac_sign_finish(&(operation->operation),
                                        &(operation->key_desc),
                                        mac,
@@ -208,13 +297,31 @@ psa_status_t sli_se_opaque_mac_verify_finish(sli_se_opaque_mac_operation_t *oper
                                              const uint8_t *mac,
                                              size_t mac_length)
 {
-  // There's no point in providing this functionality, since we'd do the same as the PSA core
-  // either way: compute through mac_compute, and constant-time compare on the provided vs
-  // calculated mac.
-  (void)operation;
-  (void)mac;
-  (void)mac_length;
-  return PSA_ERROR_NOT_SUPPORTED;
+  // Since the PSA Crypto core exposes the verify functionality of the drivers without
+  // actually implementing the fallback to 'sign' when the driver doesn't support verify,
+  // we need to do this ourselves for the time being.
+  uint8_t calculated_mac[PSA_MAC_MAX_SIZE] = { 0 };
+  size_t calculated_length = PSA_MAC_MAX_SIZE;
+
+  psa_status_t status = sli_se_opaque_mac_sign_finish(
+    operation,
+    calculated_mac, sizeof(calculated_mac), &calculated_length);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  if (mac_length > sizeof(calculated_mac)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  if (mbedtls_psa_safer_memcmp(mac, calculated_mac, mac_length)) {
+    status = PSA_ERROR_INVALID_SIGNATURE;
+  } else {
+    status = PSA_SUCCESS;
+  }
+
+  memset(calculated_mac, 0, sizeof(calculated_mac));
+  return status;
 }
 
 psa_status_t sli_se_opaque_mac_abort(sli_se_opaque_mac_operation_t *operation)

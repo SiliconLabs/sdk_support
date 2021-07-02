@@ -138,8 +138,10 @@ int mbedtls_aes_xts_setkey_enc(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
@@ -165,8 +167,10 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
                                unsigned int keybits)
 {
   int ret;
-  const unsigned char *key1, *key2;
-  unsigned int key1bits, key2bits;
+  const unsigned char *key1 = NULL;
+  const unsigned char *key2 = NULL;
+  unsigned int key1bits = 0;
+  unsigned int key2bits = 0;
 
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
@@ -186,51 +190,6 @@ int mbedtls_aes_xts_setkey_dec(mbedtls_aes_xts_context *ctx,
   /* Set crypt key for decryption. */
   return mbedtls_aes_setkey_dec(&ctx->crypt, key1, key1bits);
 }
-
-#if defined(MBEDTLS_CIPHER_MODE_OFB)
-/*
- * AES-OFB (Output Feedback Mode) buffer encryption/decryption
- */
-int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
-                          size_t length,
-                          size_t *iv_off,
-                          unsigned char iv[16],
-                          const unsigned char *input,
-                          unsigned char *output)
-{
-  int ret = 0;
-  size_t n;
-
-  AES_VALIDATE_RET(ctx != NULL);
-  AES_VALIDATE_RET(iv_off != NULL);
-  AES_VALIDATE_RET(iv != NULL);
-  AES_VALIDATE_RET(input != NULL);
-  AES_VALIDATE_RET(output != NULL);
-
-  n = *iv_off;
-
-  if ( n > 15 ) {
-    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
-  }
-
-  while ( length-- ) {
-    if ( n == 0 ) {
-      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
-      if ( ret != 0 ) {
-        goto exit;
-      }
-    }
-    *output++ =  *input++ ^ iv[n];
-
-    n = (n + 1) & 0x0F;
-  }
-
-  *iv_off = n;
-
-  exit:
-  return(ret);
-}
-#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 /* Endianess with 64 bits values */
 #ifndef GET_UINT64_LE
@@ -477,7 +436,10 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   } else {
     sx_ret = sx_aes_ecb_decrypt((const block_t*)&key, (const block_t*)&data_in, &data_out);
   }
-  cryptoacc_management_release();
+
+  if (cryptoacc_management_release() != PSA_SUCCESS) {
+    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+  }
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
@@ -539,7 +501,10 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   } else {
     sx_ret = sx_aes_cbc_decrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
   }
-  cryptoacc_management_release();
+
+  if (cryptoacc_management_release() != PSA_SUCCESS) {
+    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+  }
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
@@ -621,7 +586,10 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
         } else {
           sx_ret = sx_aes_cfb_decrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
         }
-        cryptoacc_management_release();
+
+        if (cryptoacc_management_release() != PSA_SUCCESS) {
+          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+        }
 
         if (sx_ret != CRYPTOLIB_SUCCESS) {
           return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
@@ -633,7 +601,10 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Need to update the IV but don't have a full block of input to pass to the SE
-          mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+          int ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+          if (ret != 0) {
+            return ret;
+          }
         }
         /* Save remainder to iv */
         if ( mode == MBEDTLS_AES_ENCRYPT ) {
@@ -765,7 +736,10 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
         }
         // AES-CTR uses the only AES encrypt operation (for both encryption and decryption)
         sx_ret = sx_aes_ctr_encrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
-        cryptoacc_management_release();
+
+        if (cryptoacc_management_release() != PSA_SUCCESS) {
+          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+        }
 
         if (sx_ret != CRYPTOLIB_SUCCESS) {
           return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
@@ -777,8 +751,11 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
       while ( length - processed > 0 ) {
         if ( n == 0 ) {
           // Get a new stream block
-          mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT,
-                                nonce_counter, stream_block);
+          status = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT,
+                                         nonce_counter, stream_block);
+          if (status != 0) {
+            return status;
+          }
           // increment nonce counter...
           for (size_t i = 0; i < 16; i++) {
             nonce_counter[15 - i] = nonce_counter[15 - i] + 1;
@@ -802,6 +779,51 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
   return 0;
 }
 #endif /* MBEDTLS_CIPHER_MODE_CTR */
+
+#if defined(MBEDTLS_CIPHER_MODE_OFB)
+/*
+ * AES-OFB (Output Feedback Mode) buffer encryption/decryption
+ */
+int mbedtls_aes_crypt_ofb(mbedtls_aes_context *ctx,
+                          size_t length,
+                          size_t *iv_off,
+                          unsigned char iv[16],
+                          const unsigned char *input,
+                          unsigned char *output)
+{
+  int ret = 0;
+  size_t n;
+
+  AES_VALIDATE_RET(ctx != NULL);
+  AES_VALIDATE_RET(iv_off != NULL);
+  AES_VALIDATE_RET(iv != NULL);
+  AES_VALIDATE_RET(input != NULL);
+  AES_VALIDATE_RET(output != NULL);
+
+  n = *iv_off;
+
+  if ( n > 15 ) {
+    return(MBEDTLS_ERR_AES_BAD_INPUT_DATA);
+  }
+
+  while ( length-- ) {
+    if ( n == 0 ) {
+      ret = mbedtls_aes_crypt_ecb(ctx, MBEDTLS_AES_ENCRYPT, iv, iv);
+      if ( ret != 0 ) {
+        goto exit;
+      }
+    }
+    *output++ =  *input++ ^ iv[n];
+
+    n = (n + 1) & 0x0F;
+  }
+
+  *iv_off = n;
+
+  exit:
+  return(ret);
+}
+#endif /* MBEDTLS_CIPHER_MODE_OFB */
 
 #endif /* MBEDTLS_AES_ALT */
 

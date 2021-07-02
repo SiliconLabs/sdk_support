@@ -218,7 +218,8 @@ static void ecdsa_restart_det_free( mbedtls_ecdsa_restart_det_ctx *ctx )
 #endif /* MBEDTLS_ECP_RESTARTABLE */
 
 #if defined(MBEDTLS_ECDSA_DETERMINISTIC) || \
-    !defined(MBEDTLS_ECDSA_SIGN_ALT) || !defined(MBEDTLS_ECDSA_VERIFY_ALT)
+    !defined(MBEDTLS_ECDSA_SIGN_ALT)     || \
+    !defined(MBEDTLS_ECDSA_VERIFY_ALT)
 /*
  * Derive a suitable integer for group grp from a buffer of length len
  * SEC1 4.1.3 step 5 aka SEC1 4.1.4 step 3
@@ -241,7 +242,7 @@ static int derive_mpi( const mbedtls_ecp_group *grp, mbedtls_mpi *x,
 cleanup:
     return( ret );
 }
-#endif /* MBEDTLS_ECDSA_DETERMINISTIC */
+#endif /* ECDSA_DETERMINISTIC || !ECDSA_SIGN_ALT || !ECDSA_VERIFY_ALT */
 
 #if !defined(MBEDTLS_ECDSA_SIGN_ALT)
 /*
@@ -769,9 +770,10 @@ int mbedtls_ecdsa_write_signature_restartable( mbedtls_ecdsa_context *ctx,
                                                  p_rng, rs_ctx ) );
 #else
     (void) md_alg;
-    (void) rs_ctx;
 
 #if defined(MBEDTLS_ECDSA_SIGN_ALT)
+    (void) rs_ctx;
+
     MBEDTLS_MPI_CHK( mbedtls_ecdsa_sign( &ctx->grp, &r, &s, &ctx->d,
                          hash, hlen, f_rng, p_rng ) );
 #else
@@ -868,8 +870,8 @@ int mbedtls_ecdsa_read_signature_restartable( mbedtls_ecdsa_context *ctx,
 
     if( p + len != end )
     {
-        ret = MBEDTLS_ERR_ECP_BAD_INPUT_DATA +
-              MBEDTLS_ERR_ASN1_LENGTH_MISMATCH;
+        ret = MBEDTLS_ERROR_ADD( MBEDTLS_ERR_ECP_BAD_INPUT_DATA,
+              MBEDTLS_ERR_ASN1_LENGTH_MISMATCH );
         goto cleanup;
     }
 
@@ -881,6 +883,7 @@ int mbedtls_ecdsa_read_signature_restartable( mbedtls_ecdsa_context *ctx,
     }
 #if defined(MBEDTLS_ECDSA_VERIFY_ALT)
     (void) rs_ctx;
+
     if( ( ret = mbedtls_ecdsa_verify( &ctx->grp, hash, hlen,
                                       &ctx->Q, &r, &s ) ) != 0 )
         goto cleanup;

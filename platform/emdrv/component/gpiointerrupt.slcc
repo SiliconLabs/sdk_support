@@ -16,6 +16,12 @@ provides:
 requires:
   - name: "emlib_gpio"
   - name: "ecode"
+template_contribution:
+  - name: event_handler
+    value:
+      event: driver_init
+      include: "gpiointerrupt.h"
+      handler: "GPIOINT_Init"
 documentation:
     docset: gecko-platform
     document: driver/api/group-gpioint

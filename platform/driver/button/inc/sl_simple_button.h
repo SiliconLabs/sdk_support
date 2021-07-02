@@ -35,29 +35,30 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-#define SL_SIMPLE_BUTTON_MODE_POLL               0U
-#define SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE  1U
-#define SL_SIMPLE_BUTTON_MODE_INTERRUPT          2U
+#define SL_SIMPLE_BUTTON_MODE_POLL               0U   ///< BUTTON input capture using polling
+#define SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE  1U   ///< BUTTON input capture using polling and debouncing
+#define SL_SIMPLE_BUTTON_MODE_INTERRUPT          2U   ///< BUTTON input capture using interrupt
 
-#define SL_SIMPLE_BUTTON_DISABLED                2U
-#define SL_SIMPLE_BUTTON_PRESSED                 1U
-#define SL_SIMPLE_BUTTON_RELEASED                0U
+#define SL_SIMPLE_BUTTON_DISABLED                2U   ///< BUTTON state is disabled
+#define SL_SIMPLE_BUTTON_PRESSED                 1U   ///< BUTTON state is pressed
+#define SL_SIMPLE_BUTTON_RELEASED                0U   ///< BUTTON state is released
 
-#define SL_SIMPLE_BUTTON_GET_STATE(context) (sl_simple_button_get_state((context)))
-#define SL_SIMPLE_BUTTON_GET_PORT(context)  (((sl_simple_button_context_t *)(context))->port)
-#define SL_SIMPLE_BUTTON_GET_PIN(context)   (((sl_simple_button_context_t *)(context))->pin)
-#define SL_SIMPLE_BUTTON_GET_MODE(context)  (((sl_simple_button_context_t *)(context))->mode)
+#define SL_SIMPLE_BUTTON_GET_STATE(context) (sl_simple_button_get_state((context)))             ///< BUTTON member function to get state
+#define SL_SIMPLE_BUTTON_GET_PORT(context)  (((sl_simple_button_context_t *)(context))->port)   ///< BUTTON member function to get port
+#define SL_SIMPLE_BUTTON_GET_PIN(context)   (((sl_simple_button_context_t *)(context))->pin)    ///< BUTTON member function to get pin
+#define SL_SIMPLE_BUTTON_GET_MODE(context)  (((sl_simple_button_context_t *)(context))->mode)   ///< BUTTON member function to get mode
 
 /*******************************************************************************
  *****************************   DATA TYPES   *********************************
  ******************************************************************************/
 
+/// A Simple BUTTON instance
 typedef struct {
-  sl_button_state_t     state;          /* Current button state */
-  uint16_t              history;        /* History of button states */
-  GPIO_Port_TypeDef     port;           /* Button port */
-  uint8_t               pin;            /* Button pin */
-  sl_button_mode_t      mode;           /* Mode of operation */
+  sl_button_state_t     state;          ///< Current button state
+  uint16_t              history;        ///< History of button states
+  GPIO_Port_TypeDef     port;           ///< Button port
+  uint8_t               pin;            ///< Button pin
+  sl_button_mode_t      mode;           ///< Mode of operation */
 } sl_simple_button_context_t;
 
 /*******************************************************************************
@@ -157,8 +158,8 @@ void sl_simple_button_disable(void *context);
 ///  .poll = sl_simple_button_poll_step,
 ///};
 ///
-///const sl_button_t *simple_button_array[] = {&sl_button_inst0};
-///const uint8_t simple_button_count = sizeof(simple_button_array) / sizeof(simple_button_array[0]);
+///const sl_button_t *sl_simple_button_array[] = {&sl_button_inst0};
+///const uint8_t simple_button_count = 1;
 ///
 ///void sl_simple_button_init_instances(void)
 ///{

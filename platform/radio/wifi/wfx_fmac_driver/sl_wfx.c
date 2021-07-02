@@ -622,6 +622,8 @@ sl_status_t sl_wfx_send_scan_command(uint16_t               scan_mode,
   uint8_t                      *scan_params_copy_pointer = NULL;
   sl_wfx_start_scan_req_body_t *scan_request             = NULL;
   sl_wfx_start_scan_cnf_t      *reply                    = NULL;
+  sl_wfx_ssid_def_t             temp_ssid_list[2];
+  uint8_t                       i;
   uint32_t scan_params_length   = channel_list_count + (ssid_list_count * sizeof(sl_wfx_ssid_def_t) ) + ie_data_length + SL_WFX_BSSID_SIZE;
   uint32_t request_total_length = SL_WFX_ROUND_UP_EVEN(sizeof(sl_wfx_start_scan_req_t) + scan_params_length);
 
@@ -646,9 +648,11 @@ sl_status_t sl_wfx_send_scan_command(uint16_t               scan_mode,
   }
 
   // Write SSID list
-  if (ssid_list_count > 0) {
-    memcpy(scan_params_copy_pointer, ssid_list, ssid_list_count * sizeof(sl_wfx_ssid_def_t) );
-    scan_params_copy_pointer += ssid_list_count * sizeof(sl_wfx_ssid_def_t);
+  for (i = 0; i < ssid_list_count; i++) {
+    memcpy(&temp_ssid_list[i], ssid_list + i, sizeof(sl_wfx_ssid_def_t));
+    temp_ssid_list[i].ssid_length = sl_wfx_htole32(temp_ssid_list[i].ssid_length);
+    memcpy(scan_params_copy_pointer, &temp_ssid_list[i], sizeof(sl_wfx_ssid_def_t));
+    scan_params_copy_pointer += sizeof(sl_wfx_ssid_def_t);
   }
 
   // Write IE
@@ -756,12 +760,13 @@ sl_status_t sl_wfx_disconnect_ap_client_command(const sl_wfx_mac_address_t *clie
  * @note the power mode has to be set once the connection with the AP is
  * established
  *****************************************************************************/
-sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, uint16_t interval)
+sl_status_t sl_wfx_set_power_mode(sl_wfx_pm_mode_t mode, sl_wfx_pm_poll_t strategy, uint16_t interval)
 {
   sl_wfx_set_pm_mode_req_body_t payload;
 
-  payload.power_mode      = sl_wfx_htole16(mode);
-  payload.listen_interval = sl_wfx_htole16(interval);
+  payload.power_mode       = mode;
+  payload.polling_strategy = strategy;
+  payload.listen_interval  = sl_wfx_htole16(interval);
 
   return sl_wfx_send_command(SL_WFX_SET_PM_MODE_REQ_ID, &payload, sizeof(payload), SL_WFX_STA_INTERFACE, NULL);
 }
@@ -2179,8 +2184,6 @@ static sl_status_t sl_wfx_download_run_firmware(void)
   SL_WFX_ERROR_CHECK(result);
 
   error_handler:
-  sl_wfx_host_deinit();
-
   return result;
 }
 

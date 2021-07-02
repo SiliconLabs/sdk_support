@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFR32MG12P433F1024GL125
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFR32MG12P/Source/system_efr32mg12p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFR32MG12P/Source/IAR/startup_efr32mg12p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFR32MG12P/Source/GCC/startup_efr32mg12p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFR32MG12P/Source/ARM/startup_efr32mg12p.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efr32mg12p433f1024gl125.h
@@ -69,6 +79,8 @@
     - path: em_device.h
     - path: system_efr32mg12p.h
     path: platform/Device/SiliconLabs/EFR32MG12P/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efr32mg12p433f1024gl125
   - name: device
@@ -139,6 +151,8 @@
   - name: device_has_wtimer0
   - name: device_has_wtimer1
   - name: device_has_bootloader_flash
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -186,7 +200,6 @@
     value: 2048
 - tag:
   - device:opn:efr32mg12p433f1024gl125
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efr32mg12p433f1024gl125

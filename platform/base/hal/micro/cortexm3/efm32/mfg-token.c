@@ -165,7 +165,7 @@ static void flashWriteSE(uint32_t realAddress, void *data, uint32_t len)
   #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 1)
     #define FLASHWRITE(realAddress, data, len) \
   (flashWriteSE((realAddress), (data), (len)))
-  #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+  #elif (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
     #define FLASHWRITE(realAddress, data, len) \
   (flashWrite((realAddress), (data), (len)))
   #else

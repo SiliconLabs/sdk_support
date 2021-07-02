@@ -3,7 +3,7 @@
  * @brief Threading primitive implementation for mbed TLS
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -40,16 +40,17 @@
  * \addtogroup sl_crypto_threading Threading Primitives
  * \brief Threading primitive implementation for mbed TLS
  *
- * This file contains the glue logic between the mbed TLS threading API and
- * two RTOS'es supported, being Micrium OS and FreeRTOS.
- * In order to enable support for Micrium OS the user must make sure
- * SL_CATALOG_MICRIUMOS_KERNEL_PRESENT is defined.
- * In order to enable support for FreeRTOS the user must make sure
+ * This file contains the glue logic between the mbed TLS threading API
+ * and CMSIS RTOS2 API.
+ *
+ * In order to enable support for Micrium OS backend
+ * the user must make sure SL_CATALOG_MICRIUMOS_KERNEL_PRESENT is defined.
+ * In order to enable support for FreeRTOS backend the user must make sure
  * SL_CATALOG_FREERTOS_KERNEL_PRESENT is defined.
- * For UC based applications the sl_component_catalog.h file should include
- * one of the above in order to determine the presence of a specific RTOS.
- * For non-UC based applications the application must explicitly define
- * one of the above in order to specify the presence of a specific RTOS.
+ *
+ * Applications created using Simplicity Studio 5 the sl_component_catalog.h
+ * file will define one of the above in order to declare the presence
+ * of a specific RTOS.
  *
  * \note
  * In order to use the Silicon Labs Hardware Acceleration plugins in
@@ -60,24 +61,29 @@
  ******************************************************************************/
 
 #include "mbedtls/threading.h"
+
 #if defined(MBEDTLS_THREADING_ALT) && defined(MBEDTLS_THREADING_C)
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
+  #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT)
+#if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
 
-#define SL_THREADING_ALT
-
+#include "cmsis_os2.h"
 #include "em_assert.h"
-#include <kernel/include/os.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef OS_MUTEX mbedtls_threading_mutex_t;
+#define SL_THREADING_ALT
+
+/// SE manager mutex definition for CMSIS RTOS2.
+typedef struct mbedtls_threading_mutex {
+  osMutexAttr_t mutex_attr;
+  osMutexId_t   mutex_ID;
+} mbedtls_threading_mutex_t;
 
 /**
  * \brief          Initialize a given mutex
@@ -86,9 +92,12 @@ typedef OS_MUTEX mbedtls_threading_mutex_t;
  */
 static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
 {
-  RTOS_ERR err;
-  OSMutexCreate(mutex, "dynamic", &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
+  if (mutex == NULL) {
+    return;
+  }
+
+  mutex->mutex_ID = osMutexNew(&mutex->mutex_attr);
+  EFM_ASSERT(mutex->mutex_ID != NULL);
 }
 
 /**
@@ -98,9 +107,12 @@ static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
  */
 static inline void THREADING_FreeMutex(mbedtls_threading_mutex_t *mutex)
 {
-  RTOS_ERR err;
-  OSMutexDel(mutex, OS_OPT_DEL_ALWAYS, &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
+  if (mutex == NULL) {
+    return;
+  }
+
+  osStatus_t status = osMutexDelete(mutex->mutex_ID);
+  EFM_ASSERT(status == osOK);
 }
 
 /**
@@ -112,14 +124,15 @@ static inline void THREADING_FreeMutex(mbedtls_threading_mutex_t *mutex)
  */
 static inline int THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex)
 {
-  RTOS_ERR err;
-  OSMutexPend(mutex,
-              0,
-              OS_OPT_PEND_BLOCKING,
-              NULL,
-              &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+  if (mutex == NULL) {
+    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+  }
+
+  osStatus_t status = osOK;
+  if (osKernelGetState() == osKernelRunning) {
+    status = osMutexAcquire(mutex->mutex_ID, osWaitForever);
+  }
+  return (status == osOK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
 }
 
 /**
@@ -131,13 +144,15 @@ static inline int THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex)
  */
 static inline int THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mutex)
 {
-  RTOS_ERR err;
-  OSMutexPend(mutex,
-              0,
-              OS_OPT_PEND_NON_BLOCKING,
-              NULL,
-              &err);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+  if (mutex == NULL) {
+    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+  }
+
+  osStatus_t status = osOK;
+  if (osKernelGetState() == osKernelRunning) {
+    status = osMutexAcquire(mutex->mutex_ID, 0u);
+  }
+  return (status == osOK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
 }
 
 /**
@@ -149,73 +164,22 @@ static inline int THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mute
  */
 static inline int THREADING_GiveMutex(mbedtls_threading_mutex_t *mutex)
 {
-  RTOS_ERR err;
-  OSMutexPost(mutex, OS_OPT_POST_NONE, &err);
-  EFM_ASSERT(err.Code == RTOS_ERR_NONE);
-  return (err.Code == RTOS_ERR_NONE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
+  if (mutex == NULL) {
+    return MBEDTLS_ERR_THREADING_BAD_INPUT_DATA;
+  }
+
+  osStatus_t status = osOK;
+  if (osKernelGetState() == osKernelRunning) {
+    status = osMutexRelease(mutex->mutex_ID);
+  }
+  return (status == osOK ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
 }
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* SL_CATALOG_MICRIUMOS_KERNEL_PRESENT */
-
-#if defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)
-
-#define SL_THREADING_ALT
-
-#include "em_assert.h"
-#include "FreeRTOS.h"
-#include "semphr.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-typedef StaticSemaphore_t mbedtls_threading_mutex_t;
-
-static inline void THREADING_InitMutex(mbedtls_threading_mutex_t *mutex)
-{
-  SemaphoreHandle_t handle = xSemaphoreCreateMutexStatic(mutex);
-
-  // Sanity check that the returned handle is equal to the mutex address, as
-  // it should be by design. This means that we don't have to explicitly store
-  // the handle, but can rather derive it from the mutex directly instead.
-  EFM_ASSERT(handle == (SemaphoreHandle_t)mutex);
-}
-
-static inline void THREADING_FreeMutex(mbedtls_threading_mutex_t *mutex)
-{
-  vSemaphoreDelete((SemaphoreHandle_t)mutex);
-}
-
-static inline int THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex)
-{
-  BaseType_t status =
-    xSemaphoreTake((SemaphoreHandle_t)mutex, (TickType_t) portMAX_DELAY);
-  return (status == pdTRUE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-static inline int THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mutex)
-{
-  BaseType_t status =
-    xSemaphoreTake((SemaphoreHandle_t)mutex, (TickType_t) 0);
-  return (status == pdTRUE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-static inline int THREADING_GiveMutex(mbedtls_threading_mutex_t *mutex)
-{
-  BaseType_t status = xSemaphoreGive((SemaphoreHandle_t)mutex);
-  EFM_ASSERT(status == pdTRUE);
-  return (status == pdTRUE ? 0 : MBEDTLS_ERR_THREADING_MUTEX_ERROR);
-}
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* SL_CATALOG_FREERTOS_KERNEL_PRESENT */
+#endif // SL_CATALOG_MICRIUMOS_KERNEL_PRESENT || SL_CATALOG_FREERTOS_KERNEL_PRESENT
 
 #ifdef __cplusplus
 extern "C" {

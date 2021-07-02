@@ -96,6 +96,13 @@ sli_se_opaque_export_public_key(const psa_key_attributes_t *attributes,
                                 uint8_t *data,
                                 size_t data_size,
                                 size_t *data_length);
+
+psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
+                                           psa_key_attributes_t *attributes,
+                                           uint8_t *key_buffer,
+                                           size_t key_buffer_size,
+                                           size_t *key_buffer_length);
+
 psa_status_t sli_se_opaque_mac_compute(const psa_key_attributes_t *attributes,
                                        const uint8_t *key_buffer,
                                        size_t key_buffer_size,
@@ -142,53 +149,24 @@ psa_status_t sli_se_opaque_mac_verify_finish(sli_se_opaque_mac_operation_t *oper
 
 psa_status_t sli_se_opaque_mac_abort(sli_se_opaque_mac_operation_t *operation);
 
-psa_status_t sli_se_opaque_key_derivation_setup(
-  sli_se_opaque_key_derivation_operation_t *operation,
-  psa_algorithm_t alg);
+psa_status_t sli_se_opaque_sign_message(const psa_key_attributes_t *attributes,
+                                        const uint8_t *key_buffer,
+                                        size_t key_buffer_size,
+                                        psa_algorithm_t alg,
+                                        const uint8_t *input,
+                                        size_t input_length,
+                                        uint8_t *signature,
+                                        size_t signature_size,
+                                        size_t *signature_length);
 
-psa_status_t sli_se_opaque_key_derivation_set_capacity(
-  sli_se_opaque_key_derivation_operation_t *operation,
-  size_t capacity);
-
-psa_status_t sli_se_opaque_key_derivation_input_bytes(
-  sli_se_opaque_key_derivation_operation_t *operation,
-  psa_key_derivation_step_t step,
-  const uint8_t *data,
-  size_t data_length);
-
-psa_status_t sli_se_opaque_key_derivation_input_key(
-  sli_se_opaque_key_derivation_operation_t *operation,
-  psa_key_derivation_step_t step,
-  const psa_key_attributes_t *attributes,
-  const uint8_t *key_buffer,
-  size_t key_buffer_size);
-
-psa_status_t sli_se_opaque_key_derivation_output_key(
-  const psa_key_attributes_t *attributes,
-  sli_se_opaque_key_derivation_operation_t *operation,
-  uint8_t *key_buffer,
-  size_t key_buffer_size,
-  size_t *key_buffer_length);
-
-psa_status_t sli_se_opaque_key_derivation_output_bytes(
-  sli_se_opaque_key_derivation_operation_t *operation,
-  uint8_t *output,
-  size_t output_length);
-
-psa_status_t sli_se_opaque_key_derivation_abort(
-  sli_se_opaque_key_derivation_operation_t *operation);
-
-psa_status_t sli_se_opaque_key_derivation_oneshot(
-  psa_algorithm_t alg,
-  const psa_key_attributes_t *secret_key_attributes,
-  const uint8_t *secret_key_buffer,
-  size_t secret_key_size,
-  const psa_key_derivation_input_buffer_t *input_array,
-  size_t input_count,
-  const psa_key_attributes_t *output_key_attributes,
-  uint8_t *output_key_buffer,
-  size_t output_key_size,
-  size_t *output_key_length);
+psa_status_t sli_se_opaque_verify_message(const psa_key_attributes_t *attributes,
+                                          const uint8_t *key_buffer,
+                                          size_t key_buffer_size,
+                                          psa_algorithm_t alg,
+                                          const uint8_t *input,
+                                          size_t input_length,
+                                          const uint8_t *signature,
+                                          size_t signature_length);
 
 psa_status_t sli_se_opaque_sign_hash(const psa_key_attributes_t *attributes,
                                      const uint8_t *key_buffer,
@@ -332,11 +310,6 @@ psa_status_t sli_se_opaque_cipher_decrypt_setup(sli_se_opaque_cipher_operation_t
                                                 const uint8_t *key_buffer,
                                                 size_t key_buffer_size,
                                                 psa_algorithm_t alg);
-
-psa_status_t sli_se_opaque_cipher_generate_iv(sli_se_opaque_cipher_operation_t *operation,
-                                              uint8_t *iv,
-                                              size_t iv_size,
-                                              size_t *iv_length);
 
 psa_status_t sli_se_opaque_cipher_set_iv(sli_se_opaque_cipher_operation_t *operation,
                                          const uint8_t *iv,

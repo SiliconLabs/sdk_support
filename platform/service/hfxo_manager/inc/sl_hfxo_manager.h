@@ -30,6 +30,47 @@
 
 /***************************************************************************//**
  * @addtogroup hfxo_manager HFXO Manager
+ * @brief HFXO Manager
+ * @details
+ * ## Overview
+ *
+ * HFXO Manager is a platform service module intended to manage the High
+ * Frequency Crystal Oscillator (HFXO) module and offer related functionalities
+ * and services.
+ * For the moment, this module is only supported on Silicon Labs series 2
+ * devices.
+ * Among others, it handles the HFXO startup failures. This is to support
+ * sleepy crystals (crystals where the ESR value could change unexpectedly up
+ * to 5 times its value during the startup). In case of a failure during the
+ * HFXO startup, the HFXO Manager will retry the startup process with more
+ * aggressive settings (sleepy crystal settings) to try waking up the crystal
+ * from its sleepy state so that the ESR value can fall back to normal values.
+ * Once the crystal is out of its sleepy state, the module will put back the
+ * normal settings ensuring the right oscillation frequency. This feature can
+ * be enabled/disabled via the configuration define
+ * SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT.
+ * The module catches startup failures through interrupts using the HFXO
+ * interrupt handler. If your application also needs the HFXO interrupt
+ * handler, the configuration define SL_HFXO_MANAGER_CUSTOM_HFXO_IRQ_HANDLER
+ * can be used to remove the HFXO interrupt handler definition from the HFXO
+ * Manager so that it can be defined in your application. In that case, your
+ * definition of the HFXO Interrupt Handler will need to call the
+ * sl_hfxo_manager_irq_handler() function so that HFXO Manager can continue
+ * to work properly.
+ * The HFXO Manager is also required by the Power Manager module for some
+ * internal features and therefore becomes mandatory every time the Power
+ * Manager is present.
+ *
+ *
+ * ## Initialization
+ *
+ * Two functions are required to initialize the module.
+ * sl_hfxo_manager_init_hardware() is to initialize the HFXO interrupts and
+ * must therefore be called before any other HFXO initialization functions like
+ * the emlib CMU_HFXOInit() or device_init function sl_device_init_hfxo().
+ * The second initialization function sl_hfxo_manager_init() is required for
+ * internal use and needs to be called before going to sleep.
+ *
  * @{
  ******************************************************************************/
 
@@ -45,7 +86,7 @@ extern "C" {
 
 /// @brief Sleepy Crystal settings
 typedef struct sl_hfxo_manager_sleepy_xtal_settings {
-  uint32_t ana_ctune;         ///<Tuning Capacitance values for XI and XO during startup intermediate and steady stages
+  uint32_t ana_ctune;         ///< Tuning Capacitance values for XI and XO during startup intermediate and steady stages
   uint32_t core_bias_current; ///< Core Bias current value during all stages
 } sl_hfxo_manager_sleepy_xtal_settings_t;
 

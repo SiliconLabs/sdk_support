@@ -34,7 +34,7 @@
 #endif // defined(BOOTLOADER_ROLLBACK_PROTECTION)
 
 #if defined(BOOTLOADER_SUPPORT_CERTIFICATES)
-#if !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200) && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
+#if !defined(_SILICON_LABS_32B_SERIES_2)
 #error "Certificate not supported"
 #endif
 #endif // defined(BOOTLOADER_SUPPORT_CERTIFICATES)

@@ -15,6 +15,7 @@
  *
  ******************************************************************************/
 #include "sl_memlcd.h"
+#include "sl_memlcd_display.h"
 #include "sl_sleeptimer.h"
 #include "sl_udelay.h"
 #include "em_gpio.h"
@@ -38,6 +39,11 @@
 static sl_sleeptimer_timer_handle_t extcomin_timer;
 
 static void extcomin_toggle(sl_sleeptimer_timer_handle_t *handle, void *data);
+#endif
+
+#if defined(SL_MEMLCD_LPM013M126A)
+/** Utility function to reverse bits for the LPM013M126A. */
+static uint8_t reverse_bits(uint8_t data);
 #endif
 
 /** Memory lcd instance. This variable will be initialized in the
@@ -169,8 +175,10 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   const uint8_t *p = data;
   uint16_t cmd;
   int row_len;
+#if defined(SL_MEMLCD_LPM013M126A)
+  uint8_t reversed_row;
+#endif
 
-  /* The memory LCD row address starts on 1 instead of 0. */
   row_len = (device->width * device->bpp) / 8;
   row_start++;
 
@@ -180,8 +188,19 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   /* SCS setup time */
   sl_udelay_wait(device->setup_us);
 
+#if defined(SL_MEMLCD_LPM013M126A)
+  /* LPM013M126A uses MSB first for the row */
+  reversed_row = reverse_bits((uint8_t)row_start);
+
+  /* Send update command and first line address */
+  /* CMD_UPDATE is only 6 bits and the address line is 10 bits
+     but the first two bits of address are always 00 so this works */
+  cmd = CMD_UPDATE | (reversed_row << 8);
+#else
   /* Send update command and first line address */
   cmd = CMD_UPDATE | (row_start << 8);
+#endif
+
   sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
 
   /* Get start address to draw from */
@@ -193,7 +212,17 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
     if (i == row_count - 1) {
       cmd = 0xffff;
     } else {
+#if defined(SL_MEMLCD_LPM013M126A)
+  /* LPM013M126A uses MSB first for the row */
+  reversed_row = reverse_bits((uint8_t)row_start + i + 1);
+
+  /* Send update command and line address */
+  /* CMD_UPDATE is only 6 bits and the address line is 10 bits
+     but the first two bits of address are always 00 so this works */
+      cmd = 0x3f | (reversed_row << 8);
+#else
       cmd = 0xff | ((row_start + i + 1) << 8);
+#endif
     }
     sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
   }
@@ -234,4 +263,25 @@ static void extcomin_toggle(sl_sleeptimer_timer_handle_t *handle, void *data)
 
   GPIO_PinOutToggle(SL_MEMLCD_EXTCOMIN_PORT, SL_MEMLCD_EXTCOMIN_PIN);
 }
+
+#if defined(SL_MEMLCD_LPM013M126A)
+/**************************************************************************//**
+ * @brief
+ *   Reverse the bits of a unit8_t to make the transform from LSB to MSB and
+ *   vice-versa.
+ *****************************************************************************/
+static uint8_t reverse_bits(uint8_t data)
+{
+    // Ex: data = 0b01101100 ==> data = 0b11000110
+    data = ((data & 0xF0) >> 4) | ((data & 0x0F) << 4);
+
+    // Ex: data = 0b11000110 ==> data = 0b00111001
+    data = ((data & 0xCC) >> 2) | ((data & 0x33) << 2);
+
+    // Ex: data = 0b00111001 ==> data = 0b00110110
+    data = ((data & 0xAA) >> 1) | ((data & 0x55) << 1);
+
+    return data;
+}
+#endif // SL_MEMLCD_LPM013M126A
 #endif

@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFR32MG1P132F256IM32
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFR32MG1P/Source/system_efr32mg1p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFR32MG1P/Source/IAR/startup_efr32mg1p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFR32MG1P/Source/GCC/startup_efr32mg1p.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFR32MG1P/Source/ARM/startup_efr32mg1p.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efr32mg1p132f256im32.h
@@ -59,6 +69,8 @@
     - path: em_device.h
     - path: system_efr32mg1p.h
     path: platform/Device/SiliconLabs/EFR32MG1P/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efr32mg1p132f256im32
   - name: device
@@ -109,6 +121,8 @@
   - name: device_has_usart1
   - name: device_has_wdog
   - name: device_has_wdog0
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -152,7 +166,6 @@
     value: 2048
 - tag:
   - device:opn:efr32mg1p132f256im32
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efr32mg1p132f256im32

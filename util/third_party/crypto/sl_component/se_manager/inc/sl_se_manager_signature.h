@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -87,10 +87,12 @@ extern "C" {
  *   Pointer to sl_se_key_descriptor_t structure.
  *
  * @param[in] hash_alg
- *   Which hashing algorithm to use.
+ *   Which hashing algorithm to use. Ignored for EdDSA keys, since EdDSA always
+ *   uses SHA-512 for Ed25519 and SHA-3 for Ed448.
  *
  * @param[in] hashed_message
- *   The input message is a message digest.
+ *   The input message is a message digest. Ignored for EdDSA keys, and treated
+ *   as false.
  *
  * @param[in] message
  *   The message to be used to compute the signature.
@@ -139,10 +141,12 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
  *   Pointer to sl_se_key_descriptor_t structure.
  *
  * @param[in] hash_alg
- *   Which hashing algorithm to use.
+ *   Which hashing algorithm to use. Ignored for EdDSA keys, since EdDSA always
+ *   uses SHA-512 for Ed25519 and SHA-3 for Ed448.
  *
  * @param[in] hashed_message
- *   The input message is a message digest.
+ *   The input message is a message digest. Ignored for EdDSA keys, and treated
+ *   as false.
  *
  * @param[in] message
  *   The message to be used to compute signatures.

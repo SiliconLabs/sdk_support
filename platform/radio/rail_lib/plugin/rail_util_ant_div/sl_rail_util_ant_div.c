@@ -23,8 +23,34 @@
 #include "sl_rail_util_rf_path_config.h"
 #endif //defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
 
+// The existence of Antenna GPIO location information on EFR32XG1 series
+// parts enables use of the more flexible RAIL scheme va. legacy GPIO scheme
+// for Tx-only diversity. However, the EFR32XG2 series doesn't use locations
+// so the HAL configurator doesn't provide any. But EFR32XG2 does have RfPath
+// selection, and SL_RAIL_UTIL_ANT_DIV_ANT0_LOC is used for that.
+// On EFR32XG1 series, default location(s) to -1 to select legacy GPIO scheme.
+// On EFR32XG2 series, default location(s) to 1 to select RAIL scheme RfPath 1;
+// to force use of legacy GPIO scheme (because their GPIO choice for Tx-only
+// diversity isn't supported by the radio), user must define each respective
+// SL_RAIL_UTIL_ANT_DIV_[N]SEL_LOC as -1 in their HAL config include.
+#ifdef  _SILICON_LABS_32B_SERIES_2
+  #define ANTENNA_UNSPECIFIED_LOC  1 // Location to use RAIL scheme on RfPath 1
+#else//!_SILICON_LABS_32B_SERIES_2
+  #define ANTENNA_UNSPECIFIED_LOC -1 // Dummy location to select legacy GPIO scheme
+#endif//_SILICON_LABS_32B_SERIES_2
+
+// Determine scheme to use based on platform, PHY, debug, and GPIO location(s):
+#if (!defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)                                          \
+  && (((defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)) \
+  && (!defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || (SL_RAIL_UTIL_ANT_DIV_ANT0_LOC >= 0))     \
+  && (!defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT) || (SL_RAIL_UTIL_ANT_DIV_ANT1_LOC >= 0)))))
+  #define ANTENNA_USE_RAIL_SCHEME 1
+#else
+  #define ANTENNA_USE_RAIL_SCHEME 0
+#endif
+
 #define RX_ANTENNA_SUPPORT (SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT \
-                            || (ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED))
+                            || (SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED))
 
 #if defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)
 #define SL_RAIL_UTIL_ANT_DIV_ENABLE 1
@@ -54,28 +80,28 @@
 
 sl_status_t sl_rail_util_ant_div_init(void)
 {
- #if     (SL_RAIL_UTIL_ANT_DIV_ENABLE || defined(_SILICON_LABS_32B_SERIES_2))
+ #if ANTENNA_USE_RAIL_SCHEME
   RAIL_AntennaConfig_t antennaConfig = { false, }; // Zero out structure
   sl_rail_util_ant_div_get_antenna_config(&antennaConfig);
   if (RAIL_ConfigAntenna(RAIL_EFR32_HANDLE, &antennaConfig)
       != RAIL_STATUS_NO_ERROR) {
     return SL_STATUS_NOT_SUPPORTED;
   }
-  return sl_rail_util_ant_div_set_antenna_mode(ANTENNA_TX_DEFAULT_MODE);
- #else//!(SL_RAIL_UTIL_ANT_DIV_ENABLE || defined(_SILICON_LABS_32B_SERIES_2))
+  return sl_rail_util_ant_div_set_tx_antenna_mode(SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE);
+ #else//!ANTENNA_USE_RAIL_SCHEME
   return SL_STATUS_OK;
- #endif//(SL_RAIL_UTIL_ANT_DIV_ENABLE || defined(_SILICON_LABS_32B_SERIES_2))
+ #endif//ANTENNA_USE_RAIL_SCHEME
 }
 
 #if     (defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT))
 
-static sl_rail_util_antenna_mode_t txAntennaMode = ANTENNA_TX_DEFAULT_MODE;
+static sl_rail_util_antenna_mode_t txAntennaMode = SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE;
 // Default to first antenna
 static sl_rail_util_antenna_selection_t txAntennaSelection = SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1;
-static sl_rail_util_antenna_mode_t rxAntennaMode = ANTENNA_RX_DEFAULT_MODE;
+static sl_rail_util_antenna_mode_t rxAntennaMode = SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE;
 
 // Rx Antenna Diversity
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_rx_mode(void)
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_rx_antenna_mode(void)
 {
   return rxAntennaMode;
 }
@@ -151,14 +177,17 @@ static sl_status_t radioConfigRxAntenna(sl_rail_util_antenna_mode_t mode)
 
 sl_status_t sl_rail_util_ant_div_update_antenna_config(void)
 {
-  return radioConfigRxAntenna(sl_rail_util_ant_div_get_antenna_rx_mode());
+  return radioConfigRxAntenna(sl_rail_util_ant_div_get_rx_antenna_mode());
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna_rx_mode(sl_rail_util_antenna_mode_t mode)
+sl_status_t sl_rail_util_ant_div_set_rx_antenna_mode(sl_rail_util_antenna_mode_t mode)
 {
  #if RX_ANTENNA_SUPPORT
-  // Tell RAIL what Rx antenna mode to use, if we can
-  sl_status_t status = radioConfigRxAntenna(mode);
+  sl_status_t status  = SL_STATUS_NOT_SUPPORTED;
+  if (mode <= SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY) {
+    // Tell RAIL what Rx antenna mode to use, if we can
+    status = radioConfigRxAntenna(mode);
+  }
   if (status == SL_STATUS_OK) {
     rxAntennaMode = mode;
   }
@@ -198,17 +227,17 @@ static void selectTxAntenna(sl_rail_util_antenna_selection_t txAntenna)
  #endif//ANTENNA_USE_RAIL_SCHEME
 }
 
-sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_antenna_selected(void)
+sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_tx_antenna_selected(void)
 {
   return txAntennaSelection;
 }
 
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_mode(void)
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_tx_antenna_mode(void)
 {
   return txAntennaMode;
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna_mode(sl_rail_util_antenna_mode_t mode)
+sl_status_t sl_rail_util_ant_div_set_tx_antenna_mode(sl_rail_util_antenna_mode_t mode)
 {
   sl_status_t status = SL_STATUS_OK;
 
@@ -236,7 +265,7 @@ sl_status_t sl_rail_util_ant_div_set_antenna_mode(sl_rail_util_antenna_mode_t mo
   return status;
 }
 
-sl_status_t sl_rail_util_ant_div_toggle_antenna(void)
+sl_status_t sl_rail_util_ant_div_toggle_tx_antenna(void)
 {
   if (txAntennaMode == SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY) {
     selectTxAntenna(txAntennaSelection ^ SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1 ^ SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA2);
@@ -245,12 +274,12 @@ sl_status_t sl_rail_util_ant_div_toggle_antenna(void)
   return SL_STATUS_NOT_SUPPORTED;
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna(sl_rail_util_antenna_selection_t txAntenna)
+sl_status_t sl_rail_util_ant_div_set_tx_antenna(sl_rail_util_antenna_selection_t txAntenna)
 {
   if (txAntenna == txAntennaSelection) { // Already selected!
     return SL_STATUS_OK;
   }
-  return sl_rail_util_ant_div_toggle_antenna();
+  return sl_rail_util_ant_div_toggle_tx_antenna();
 }
 
 void sl_rail_util_ant_div_init_rx_options(RAIL_RxOptions_t *rxOptions)
@@ -283,7 +312,7 @@ void sl_rail_util_ant_div_init_tx_options(RAIL_TxOptions_t *txOptions)
 #endif
 }
 
-#define ANTDIV_RX_PHY_DEFAULT_ENABLED (ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
+#define ANTDIV_RX_PHY_DEFAULT_ENABLED (SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
 
 #if SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT
 #define antDivRxPhySelected (rxAntennaMode == SL_RAIL_UTIL_ANTENNA_MODE_DIVERSITY)
@@ -299,41 +328,37 @@ bool sl_rail_util_ant_div_get_phy_select(void)
 }
 #else//!(defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT))
 
-#warning "Define either SL_RAIL_UTIL_ANT_DIV_ANT0_PORT or SL_RAIL_UTIL_ANT_DIV_ANT1_PORT to enable antenna diversity"
-
-// Stubs in case someone insists on referencing them
-
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_rx_mode(void)
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_rx_antenna_mode(void)
 {
   return SL_RAIL_UTIL_ANTENNA_MODE_DISABLED;
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna_rx_mode(sl_rail_util_antenna_mode_t mode)
+sl_status_t sl_rail_util_ant_div_set_rx_antenna_mode(sl_rail_util_antenna_mode_t mode)
 {
   return ((mode == SL_RAIL_UTIL_ANTENNA_MODE_DISABLED) ? SL_STATUS_OK : SL_STATUS_NOT_SUPPORTED);
 }
 
-sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_antenna_selected(void)
+sl_rail_util_antenna_selection_t sl_rail_util_ant_div_get_tx_antenna_selected(void)
 {
   return SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1;
 }
 
-sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_antenna_mode(void)
+sl_rail_util_antenna_mode_t sl_rail_util_ant_div_get_tx_antenna_mode(void)
 {
   return SL_RAIL_UTIL_ANTENNA_MODE_ENABLE1;
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna_mode(sl_rail_util_antenna_mode_t mode)
+sl_status_t sl_rail_util_ant_div_set_tx_antenna_mode(sl_rail_util_antenna_mode_t mode)
 {
   return ((mode == SL_RAIL_UTIL_ANTENNA_MODE_ENABLE1) ? SL_STATUS_OK : SL_STATUS_NOT_SUPPORTED);
 }
 
-sl_status_t sl_rail_util_ant_div_toggle_antenna(void)
+sl_status_t sl_rail_util_ant_div_toggle_tx_antenna(void)
 {
   return SL_STATUS_NOT_SUPPORTED;
 }
 
-sl_status_t sl_rail_util_ant_div_set_antenna(sl_rail_util_antenna_selection_t txAntenna)
+sl_status_t sl_rail_util_ant_div_set_tx_antenna(sl_rail_util_antenna_selection_t txAntenna)
 {
   return ((txAntenna == SL_RAIL_UTIL_ANTENNA_SELECT_ANTENNA1)
           ? SL_STATUS_OK : SL_STATUS_NOT_SUPPORTED);

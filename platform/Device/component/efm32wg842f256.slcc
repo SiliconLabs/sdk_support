@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32WG842F256
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32WG/Source/system_efm32wg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32WG/Source/IAR/startup_efm32wg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32WG/Source/GCC/startup_efm32wg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32WG/Source/ARM/startup_efm32wg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32wg842f256.h
@@ -71,6 +81,8 @@
     - path: em_device.h
     - path: system_efm32wg.h
     path: platform/Device/SiliconLabs/EFM32WG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32wg842f256
   - name: device
@@ -131,6 +143,7 @@
   - name: device_has_usart2
   - name: device_has_vcmp
   - name: device_has_wdog
+  - name: device_has_dwt
   - name: device_has_fpu
   - name: device_has_mpu
 - requires:
@@ -166,7 +179,6 @@
     value: 2048
 - tag:
   - device:opn:efm32wg842f256
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32wg842f256

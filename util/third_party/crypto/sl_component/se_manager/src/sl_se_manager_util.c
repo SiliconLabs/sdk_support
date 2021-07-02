@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -205,21 +205,6 @@ sl_status_t sl_se_apply_host_image(sl_se_command_context_t *cmd_ctx,
 
   SE_addParameter(se_cmd, (uint32_t)image_addr);
   SE_addParameter(se_cmd, size);
-
-  return sli_se_execute_and_wait(cmd_ctx);
-}
-
-/***************************************************************************//**
- * Clear Host firmware upgrade status.
- ******************************************************************************/
-sl_status_t sl_se_upgrade_status_clear(sl_se_command_context_t *cmd_ctx)
-{
-  if (cmd_ctx == NULL) {
-    return SL_STATUS_INVALID_PARAMETER;
-  }
-
-  // SE command structures
-  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_UPGRADE_STATUS_CLEAR);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -939,6 +924,7 @@ sl_status_t sl_se_get_otp_version(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
 /***************************************************************************//**
  * Read the EMU->RSTCAUSE after a tamper reset. This function should be called
  * if EMU->RSTCAUSE has been cleared upon boot.
@@ -958,6 +944,7 @@ sl_status_t sl_se_get_reset_cause(sl_se_command_context_t *cmd_ctx,
   SE_addDataOutput(se_cmd, &out_data);
   return sli_se_execute_and_wait(cmd_ctx);
 }
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG_1
 
 /***************************************************************************//**
  * Enables the secure debug functionality.
@@ -1189,6 +1176,11 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
 
   // SE command structures
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_READ_USER_CERT | se_cert_type);
+
+#if  _SILICON_LABS_32B_SERIES_2_CONFIG > 2
+  // One parameter is required, but has no effect
+  SE_addParameter(se_cmd, 0);
+#endif //
 
   SE_DataTransfer_t out_data = SE_DATATRANSFER_DEFAULT(cert, num_bytes);
   SE_addDataOutput(se_cmd, &out_data);

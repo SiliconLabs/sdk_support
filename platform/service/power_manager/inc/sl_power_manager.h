@@ -31,12 +31,16 @@
 #ifndef SL_POWER_MANAGER_H
 #define SL_POWER_MANAGER_H
 
+#ifndef SL_POWER_MANAGER_DEBUG
+#include "sl_power_manager_config.h"
+#endif
 #include "em_device.h"
 #include "em_core.h"
 #include "sl_slist.h"
 #include "sl_status.h"
 #include "sl_sleeptimer.h"
 #include "sl_enum.h"
+#include "em_emu.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -255,11 +259,24 @@ SL_ENUM(sl_power_manager_on_isr_exit_t) {
 };
 
 // -----------------------------------------------------------------------------
-// Prototypes
-
+// Internal Prototypes only to be used by the Power Manager module
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
-                                             bool  add,
-                                             const char *name);
+                                             bool  add);
+
+// To make sure that we are able to optimize out the string argument when the
+// debug feature is disable, we use a pre-processor macro resulting in a no-op.
+// We also make sure to always have a definition for the function regardless if
+// the debug feature is enable or not for binary compatibility.
+#if (SL_POWER_MANAGER_DEBUG == 1)
+void sli_power_manager_debug_log_em_requirement(sl_power_manager_em_t em,
+                                                bool                  add,
+                                                const char            *name);
+#else
+#define sli_power_manager_debug_log_em_requirement(em, add, name) /* no-op */
+#endif
+
+// -----------------------------------------------------------------------------
+// Prototypes
 
 /***************************************************************************//**
  * Initialize Power Manager module.
@@ -304,7 +321,13 @@ void sl_power_manager_sleep(void);
  ******************************************************************************/
 __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t em)
 {
-  sli_power_manager_update_em_requirement(em, true, (const char *)CURRENT_MODULE_NAME);
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+  sli_power_manager_update_em_requirement(em, true);
+
+  sli_power_manager_debug_log_em_requirement(em, true, (const char *)CURRENT_MODULE_NAME);
+  CORE_EXIT_CRITICAL();
 }
 
 /***************************************************************************//**
@@ -316,7 +339,13 @@ __STATIC_INLINE void sl_power_manager_add_em_requirement(sl_power_manager_em_t e
  ******************************************************************************/
 __STATIC_INLINE void sl_power_manager_remove_em_requirement(sl_power_manager_em_t em)
 {
-  sli_power_manager_update_em_requirement(em, false, (const char *)CURRENT_MODULE_NAME);
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+  sli_power_manager_update_em_requirement(em, false);
+
+  sli_power_manager_debug_log_em_requirement(em, false, (const char *)CURRENT_MODULE_NAME);
+  CORE_EXIT_CRITICAL();
 }
 
 /***************************************************************************//**
@@ -431,6 +460,25 @@ uint32_t sl_power_manager_schedule_wakeup_get_minimum_offtime_tick(void);
  *        minimum off-time.
  ******************************************************************************/
 void sl_power_manager_schedule_wakeup_set_minimum_offtime_tick(uint32_t minimum_offtime_tick);
+
+#if defined(EMU_VSCALE_PRESENT)
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ ******************************************************************************/
+void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
+#endif
+
+/**************************************************************************//**
+ * Determines if the HFXO interrupt was part of the last wake-up and/or if
+ * the HFXO early wakeup expired during the last ISR
+ * and if it was the only timer to expire in that period.
+ *
+ * @return true if power manager sleep can return to sleep,
+ *         false otherwise.
+ *****************************************************************************/
+bool sl_power_manager_is_latest_wakeup_internal(void);
 
 /** @} (end addtogroup power_manager) */
 

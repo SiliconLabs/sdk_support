@@ -259,7 +259,7 @@ RAIL_ENUM(RAIL_ZWAVE_Baud_t) {
   RAIL_ZWAVE_BAUD_40K,      /**< 40kbps baudrate*/
   RAIL_ZWAVE_BAUD_100K,     /**< 100kbps baudrate*/
   RAIL_ZWAVE_LR,            /**< Long Range PHY*/
-  RAIL_ZWAVE_ENERGY_DETECT = RAIL_ZWAVE_LR, /**< Energy detection phy*/
+  RAIL_ZWAVE_ENERGY_DETECT = RAIL_ZWAVE_LR, /**< Energy detection PHY*/
   RAIL_ZWAVE_BAUD_INVALID   /**< Sentinel value for invalid baud rate*/
 };
 
@@ -337,10 +337,23 @@ RAIL_ENUM(RAIL_ZWAVE_RegionId_t) {
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
- * Invalid Beam Tx Power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
- * is called after receving a regular non long range beam.
+ * Invalid Beam TX power value returned when \ref RAIL_ZWAVE_GetLrBeamTxPower
+ * is called after receiving a regular non long range beam.
  */
 #define RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID  (0xFFU)
+
+/**
+ * @struct RAIL_ZWAVE_LrAckData_t
+ * @brief Configuration structure for Z-Wave Long Range ACK.
+ */
+typedef struct RAIL_ZWAVE_LrAckData {
+  /// Radio noise level measured on the channel the frame is transmitted on.
+  int8_t noiseFloorDbm;
+  /// Transmit power used to transmit the ongoing Z-Wave Long Range ACK.
+  int8_t txPowerDbm;
+  /// Signal strength measured while receiving the Z-Wave Long Range frame.
+  int8_t receiveRssiDbm;
+} RAIL_ZWAVE_LrAckData_t;
 
 /**
  * @struct RAIL_ZWAVE_BeamRxConfig_t
@@ -514,22 +527,22 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamChannelIndex(RAIL_Handle_t railHandle,
                                              uint8_t *pChannelIndex);
 
 /**
- * Get the Tx power used to transmit the long range beam frame.
+ * Get the TX power used to transmit the long range beam frame.
  *
  * @param[in] railHandle A handle of RAIL instance.
  * @param[out] pLrBeamTxPower An application provided pointer to a uint8_t to
- *   populate the Tx Power of the received long range beam. This will be set
- *   to \ref RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID if this API is called after
- *   receiving a regular non long range beam.
+ *   be populated with the TX power of the latest long range beam. This will
+ *   be set to \ref RAIL_ZWAVE_LR_BEAM_TX_POWER_INVALID if this API is called
+ *   after receiving a regular non long range beam.
  * @return Status code indicating success of the function call. This function
  *   will return \ref RAIL_STATUS_INVALID_STATE if called after receiving a
  *   regular non long range beam.
  *
  * @note This is best called while handling the \ref RAIL_EVENT_ZWAVE_BEAM
- *   event; if multiple beams are received only the most recent beam's
- *   Tx Power is provided.
+ *   event; if multiple beams are received only the most recent long range
+ *   beam's TX power is provided.
  *
- * @note The following table shows long range beam Tx power value to dBm
+ * @note The following table shows long range beam TX power value to dBm
  *  value mapping:
  *
  * <table>
@@ -555,6 +568,22 @@ RAIL_Status_t RAIL_ZWAVE_GetBeamChannelIndex(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_ZWAVE_GetLrBeamTxPower(RAIL_Handle_t railHandle,
                                           uint8_t *pLrBeamTxPower);
 
+/**
+ * Get the RSSI of the received beam frame.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[out] pBeamRssi An application provided pointer to a int8_t to
+ *   be populated with the latest beam's RSSI, in dBm.
+ * @return Status code indicating success of the function call. This function
+ *  will return \ref RAIL_STATUS_INVALID_STATE if called without ever
+ *  having received a beam.
+ *
+ * @note This is best called while handling the \ref RAIL_EVENT_ZWAVE_BEAM
+ *   event; if multiple beams are received only the most recent beam's
+ *   RSSI is provided.
+ */
+RAIL_Status_t RAIL_ZWAVE_GetBeamRssi(RAIL_Handle_t railHandle,
+                                     int8_t *pBeamRssi);
 /**
  * Set the Raw Low Power settings.
  *
@@ -674,17 +703,43 @@ RAIL_Status_t RAIL_ZWAVE_ReceiveBeam(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_ZWAVE_ConfigBeamRx(RAIL_Handle_t railHandle, RAIL_ZWAVE_BeamRxConfig_t *config);
 
 /**
+ * Set the default Rx beam configuration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *
+ * @note This function resets any changes made to the beam configuration via
+ *  \ref RAIL_ZWAVE_ConfigBeamRx and the default beam configuration will be in effect
+ *  on subsequent call(s) to \ref RAIL_ZWAVE_ReceiveBeam.
+ */
+RAIL_Status_t RAIL_ZWAVE_SetDefaultRxBeamConfig(RAIL_Handle_t railHandle);
+
+/**
+ * Get the current Rx beam configuration.
+ *
+ * @param[out] pConfig A pointer to \ref RAIL_ZWAVE_BeamRxConfig_t to be
+ *   populated with the current beam configuration.
+ * @return A status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_ZWAVE_GetRxBeamConfig(RAIL_ZWAVE_BeamRxConfig_t *pConfig);
+
+/**
  * Configure the channel hop timings for use in Z-Wave Rx channel hop configuration.
  * This function should not be used without direct instruction by Silicon Labs.
  *
  * @param[in] railHandle A RAIL instance handle.
  * @param[in, out] config Configuration for Z-Wave Rx channel hopping.
- *   This structure must be allocated in application global read-write memory.
- *   RAIL will populate fields within or referenced by this structure during
- *   its operation.
+ * This structure must be allocated in application global read-write memory.
+ * RAIL will populate fields within or referenced by this structure during its
+ * operation. Be sure to allocate \ref RAIL_RxChannelHoppingConfigEntry_t
+ * entries[] for \ref RAIL_NUM_ZWAVE_CHANNELS. Be sure to set \ref
+ * RAIL_RxChannelHoppingConfig_t::numberOfChannels to the desired number of
+ * channels.
  * @return Status code indicating success of the function call.
  *
- * @note: Currently only supports Series-1 devices.
+ * @note: This API must be called before \ref RAIL_EnableRxChannelHopping(). This
+ * API must never be called while the radio is on with RX Duty Cycle or Channel
+ * Hopping enabled.
  */
 RAIL_Status_t RAIL_ZWAVE_ConfigRxChannelHopping(RAIL_Handle_t railHandle, RAIL_RxChannelHoppingConfig_t *config);
 
@@ -699,6 +754,26 @@ RAIL_Status_t RAIL_ZWAVE_ConfigRxChannelHopping(RAIL_Handle_t railHandle, RAIL_R
  * is returned.
  */
 RAIL_ZWAVE_RegionId_t RAIL_ZWAVE_GetRegion(RAIL_Handle_t railHandle);
+
+/**
+ * Write the AutoACK FIFO for the next outgoing Z-Wave Long Range ACK.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] pLrAckData An application provided pointer to a const
+ * \ref RAIL_ZWAVE_LrAckData_t to populate the noise floor, TX power and receive
+ * rssi bytes of the outgoing Z-Wave Long Range ACK packet.
+ * @return A status code indicating success of the function call.
+ *
+ * This function sets the AutoACK data to use in acknowledging the frame
+ * being received. It must only be called while processing the \ref
+ * RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND.
+ * This will return \ref RAIL_STATUS_INVALID_STATE if it is too late to
+ * write the outgoing ACK. When successful, the ackData will
+ * only be sent once. Subsequent packets needing an Z-Wave Long Range ACK will
+ * each need to call this function to write the ACK information.
+ */
+RAIL_Status_t RAIL_ZWAVE_SetLrAckData(RAIL_Handle_t railHandle,
+                                      const RAIL_ZWAVE_LrAckData_t *pLrAckData);
 
 /** EU-European Union, RAIL_ZWAVE_REGION_EU */
 extern const RAIL_ZWAVE_RegionConfig_t RAIL_ZWAVE_REGION_EU;

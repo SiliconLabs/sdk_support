@@ -1335,7 +1335,8 @@ static void packetReceivedCallback(void)
   RAIL_RxPacketDetails_t packetDetails;
   RAIL_RxPacketHandle_t packetHandle;
   Buffer rxPacketBuffer;
-  uint8_t *rxPacket;
+  uint8_t macHdr[EMBER_MAC_HEADER_SEQUENCE_NUMBER_OFFSET + 1];
+  uint8_t *rxPacket = macHdr;
   uint8_t appendedFlags = 0x00;
 
   packetHandle = RAIL_GetRxPacketInfo(connectRailHandle,
@@ -1364,29 +1365,12 @@ static void packetReceivedCallback(void)
                                              timestamp)
                    == RAIL_STATUS_NO_ERROR);
 
-  rxPacketBuffer = emAllocateAsyncBuffer(packetInfo.packetBytes
-                                         + EMBER_APPENDED_INFO_TOTAL_LENGTH);
-
-  if (rxPacketBuffer == NULL_BUFFER) {
-#ifdef EMBER_STACK_CONNECT
-    emCounterHandler(EMBER_COUNTER_MAC_DROP_IN_MEMORY, 1);
-#endif
-    LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_RX_PACKET, 0);
-    // We won't know what kind of packet it was so the best we can do
-    // is mark it corrupted in an out-of-memory situation.
-    (void) onPtaStackEvent(PTA_STACK_EVENT_RX_CORRUPTED,
-                           (uint32_t) isReceivingFrame());
-    return;
-  }
-
-  rxPacket = emGetBufferPointer(rxPacketBuffer);
-
-  // Read the packet out of RAIL queue.
+  // Peek at the MAC header and seq# for handling incoming ACKs specially
   LOWER_MAC_ASSERT(RAIL_PeekRxPacket(connectRailHandle,
                                      packetHandle,
-                                     rxPacket,
-                                     packetInfo.packetBytes,
-                                     0) == packetInfo.packetBytes);
+                                     macHdr,
+                                     sizeof(macHdr),
+                                     0) == sizeof(macHdr));
 
   if (sl_mac_flat_frame_type(rxPacket, true) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
     LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_RX_PACKET,
@@ -1399,8 +1383,15 @@ static void packetReceivedCallback(void)
     // check here for sanity purposes and discard any spurious ACK.
     if (emLowerMacState == EMBER_MAC_STATE_TX_WAITING_FOR_ACK
         && sl_mac_flat_sequence_number(rxPacket, true) == emMacOutgoingSequenceNumber) {
+      #ifndef EMBER_TEST
+      // limit the scope of this check, since it could only occure if
+      // mfglib 'promiscuous' receives go thru this code.
+      // This is not tested in simulation, and causes unncessary failure in scripted/unit tests
+      LOWER_MAC_ASSERT(packetDetails.isAck);
+      #endif
       LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_RX_PACKET,
-                                 (2 | ((uint64_t)sl_mac_flat_sequence_number(rxPacket) << 32)));
+                                 (2 | ((uint64_t)emMacOutgoingSequenceNumber << 32)));
+
       bool framePendingInAck = sl_mac_flat_frame_pending(rxPacket, true);
       (void) onPtaStackEvent(PTA_STACK_EVENT_TX_ACK_RECEIVED,
                              (uint32_t) framePendingInAck);
@@ -1422,8 +1413,36 @@ static void packetReceivedCallback(void)
       }
     }
 
+    // ACKs are not passed up the stack.
     return;
   }
+
+  rxPacketBuffer = emAllocateAsyncBuffer(packetInfo.packetBytes
+                                         + EMBER_APPENDED_INFO_TOTAL_LENGTH);
+
+  if (rxPacketBuffer == NULL_BUFFER) {
+#ifdef EMBER_STACK_CONNECT
+    emCounterHandler(EMBER_COUNTER_MAC_DROP_IN_MEMORY, 1);
+#endif
+    LOWER_MAC_DEBUG_ADD_ACTION(LOWER_MAC_DEBUG_ACTION_RX_PACKET, 0);
+    // We won't know what kind of packet it was so the best we can do
+    // is mark it corrupted in an out-of-memory situation.
+    (void) onPtaStackEvent(PTA_STACK_EVENT_RX_CORRUPTED,
+                           (uint32_t) isReceivingFrame());
+    return;
+  }
+
+  rxPacket = emGetBufferPointer(rxPacketBuffer);
+   #ifdef UNIFIED_MAC_SCRIPTED_TEST
+  LOWER_MAC_ASSERT(RAIL_PeekRxPacket(connectRailHandle,
+                                     packetHandle,
+                                     rxPacket,
+                                     packetInfo.packetBytes,
+                                     0) == packetInfo.packetBytes);
+  #else
+  // Copy the packet out of RAIL FIFO.
+  RAIL_CopyRxPacket(rxPacket, &packetInfo);
+  #endif
 
   // Incoming frame requires an ACK.
   if (sl_mac_flat_ack_requested(rxPacket, true)) {
@@ -2391,7 +2410,11 @@ const uint32_t generated_phyInfo[] = {
   1UL,
   0x00618618, // 97.5238095238
   (uint32_t) NULL,
+#ifndef EMBER_TEST
   (uint32_t) generated_irCalConfig,
+#else
+  (uint32_t) NULL,
+#endif
 #ifdef RADIO_CONFIG_ENABLE_TIMING
   (uint32_t) &generated_timing,
 #else
@@ -2402,7 +2425,11 @@ const uint32_t generated_phyInfo[] = {
 const uint32_t generated[] = {
   0x01031FF0UL, 0x0037003FUL,
   /* 1FF4 */ 0x00000000UL,
+  #ifndef EMBER_TEST
   /* 1FF8 */ (uint32_t) generated_phyInfo,
+  #else
+  (uint32_t) NULL,
+  #endif
   0x00020004UL, 0x00157001UL,
   /* 0008 */ 0x0000007FUL,
   0x00020018UL, 0x00000000UL,

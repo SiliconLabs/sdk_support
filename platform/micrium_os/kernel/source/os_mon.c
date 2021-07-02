@@ -247,6 +247,7 @@ OS_OBJ_QTY OSMonDel(OS_MON   *p_mon,
  *                           - RTOS_ERR_ABORT
  *                           - RTOS_ERR_TIMEOUT
  *                           - RTOS_ERR_NOT_READY
+ *                           - RTOS_ERR_INVALID_STATE
  *******************************************************************************************************/
 void OSMonOp(OS_MON              *p_mon,
              OS_TICK             timeout,
@@ -278,6 +279,9 @@ void OSMonOp(OS_MON              *p_mon,
 
   //                                                               Validate object type
   OS_ASSERT_DBG_ERR_SET((p_mon->Type == OS_OBJ_TYPE_MON), *p_err, RTOS_ERR_INVALID_TYPE,; );
+
+  //                                                               Not allowed in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET((!CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE,; );
 
   sched = DEF_NO;
 

@@ -27,9 +27,11 @@
 // Initialize AES context variable
 void btl_initAesContext(void *ctx)
 {
-#if defined(_CMU_CLKEN1_MASK)
+#if defined(_CMU_CLKEN1_MASK) && defined(CRYPTOACC_PRESENT)
   CMU->CLKEN1_SET = CMU_CLKEN1_CRYPTOACC;
-  CMU->CRYPTOACCCLKCTRL |= CMU_CRYPTOACCCLKCTRL_AESEN;
+  CMU->CRYPTOACCCLKCTRL_SET = CMU_CRYPTOACCCLKCTRL_AESEN;
+#elif defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
 
   AesContext_t *context = (AesContext_t *)ctx;
@@ -78,9 +80,11 @@ void btl_initAesCcm(void          *ctx,
                     const uint8_t *key,
                     unsigned int  keySize)
 {
-#if defined(_CMU_CLKEN1_MASK)
+#if defined(_CMU_CLKEN1_MASK) && defined(CRYPTOACC_PRESENT)
   CMU->CLKEN1_SET = CMU_CLKEN1_CRYPTOACC;
   CMU->CRYPTOACCCLKCTRL_SET = CMU_CRYPTOACCCLKCTRL_AESEN;
+#elif defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
 #endif
 
   AesCtrContext_t *context = (AesCtrContext_t *)ctx;

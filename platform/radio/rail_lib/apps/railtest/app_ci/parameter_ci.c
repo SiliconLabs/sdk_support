@@ -75,6 +75,7 @@ void setChannel(sl_cli_command_arg_t *args)
 
 void setFreqOffset(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   static RAIL_FrequencyOffset_t currentFreqOffset = 0;
   if (sl_cli_get_argument_count(args) >= 1) {
     RAIL_FrequencyOffset_t freqOffset = sl_cli_get_argument_int32(args, 0);
@@ -140,6 +141,7 @@ void getPowerLimits(sl_cli_command_arg_t *args)
 
 void setPowerConfig(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_TxPowerConfig_t *txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
   // Make a backup of the TX Power Config before it's changed.
   RAIL_TxPowerConfig_t txPowerConfigBackup = {
@@ -232,6 +234,7 @@ void setPower(sl_cli_command_arg_t *args)
 
 void sweepTxPower(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   responsePrint(sl_cli_get_command_string(args, 0), "Sweeping:Started,Instructions:'q' to quit or 'enter' to continue.");
   RAIL_TxPowerConfig_t txPowerConfig;
 
@@ -306,6 +309,7 @@ void sweepTxPower(sl_cli_command_arg_t *args)
 
 void getCtune(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint32_t ctune = RAIL_GetTune(railHandle);
 #ifdef _SILICON_LABS_32B_SERIES_1
   responsePrint(sl_cli_get_command_string(args, 0), "CTUNE:0x%.3x", ctune);
@@ -319,6 +323,7 @@ void getCtune(sl_cli_command_arg_t *args)
 
 void setCtune(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
@@ -332,6 +337,7 @@ void setCtune(sl_cli_command_arg_t *args)
 
 void getCtuneDelta(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   int32_t delta = RAIL_GetTuneDelta(railHandle);
 
   responsePrint(sl_cli_get_command_string(args, 0), "CTuneDelta:%d", delta);
@@ -339,6 +345,7 @@ void getCtuneDelta(sl_cli_command_arg_t *args)
 
 void setCtuneDelta(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_SetTuneDelta(railHandle, sl_cli_get_argument_uint32(args, 0));
 
   // Read out and print the current CTUNE delta value
@@ -347,6 +354,7 @@ void setCtuneDelta(sl_cli_command_arg_t *args)
 
 void setPaCtune(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status;
   uint8_t txVal = sl_cli_get_argument_uint8(args, 0);
   uint8_t rxVal = sl_cli_get_argument_uint8(args, 1);
@@ -388,6 +396,7 @@ static int8_t stringToState(char *string, RAIL_RadioState_t *state)
 
 void setTxTransitions(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_RadioState_t states[2];
   if (stringToState(sl_cli_get_argument_string(args, 0), &states[0])
       || stringToState(sl_cli_get_argument_string(args, 1), &states[1])) {
@@ -406,6 +415,7 @@ void setTxTransitions(sl_cli_command_arg_t *args)
 
 void setRxTransitions(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
     return;
   }
@@ -428,6 +438,7 @@ void setRxTransitions(sl_cli_command_arg_t *args)
 
 void getRxTransitions(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_StateTransitions_t transitions;
   RAIL_Status_t ret = RAIL_GetRxTransitions(railHandle, &transitions);
 
@@ -442,6 +453,7 @@ void getRxTransitions(sl_cli_command_arg_t *args)
 
 void getTxTransitions(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_StateTransitions_t transitions;
   RAIL_Status_t ret = RAIL_GetTxTransitions(railHandle, &transitions);
 
@@ -456,18 +468,39 @@ void getTxTransitions(sl_cli_command_arg_t *args)
 
 void setTimings(sl_cli_command_arg_t *args)
 {
-  uint16_t timing[6] = { 0 };
-  for (int i = 0; i < sl_cli_get_argument_count(args); i++) {
-    timing[i] = sl_cli_get_argument_uint16(args, i);
-  }
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  RAIL_StateTiming_t timings =
-  { timing[0], timing[1], timing[2], timing[3], timing[4], timing[5] };
+  RAIL_StateTiming_t timings = {
+    .idleToRx = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 0),
+    .txToRx   = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 1),
+    .idleToTx = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 2),
+  };
+  switch (sl_cli_get_argument_count(args)) {
+    default:
+    case 7:
+      timings.txToTx = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 6);
+    // Fall through
+    case 6:
+      timings.txToRxSearchTimeout = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 5);
+    // Fall through
+    case 5:
+      timings.rxSearchTimeout = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 4);
+    // Fall through
+    case 4:
+      timings.rxToTx = (RAIL_TransitionTime_t)sl_cli_get_argument_int32(args, 3);
+    // Fall through
+    case 3: // .idleToTx not optional, already set above
+    case 2: // .txToRx   not optional, already set above
+    case 1: // .idleToRx not optional, already set above
+    case 0: // Should be impossible
+      break;
+  }
   if (!RAIL_SetStateTiming(railHandle, &timings)) {
-    responsePrint(sl_cli_get_command_string(args, 0), "IdleToRx:%u,RxToTx:%u,IdleToTx:%u,TxToRx:%u,"
-                                                      "RxSearch:%u,Tx2RxSearch:%u",
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "IdleToRx:%u,RxToTx:%u,IdleToTx:%u,TxToRx:%u,"
+                  "RxSearch:%u,Tx2RxSearch:%u,Tx2Tx:%u",
                   timings.idleToRx, timings.rxToTx, timings.idleToTx,
-                  timings.txToRx, timings.rxSearchTimeout, timings.txToRxSearchTimeout);
+                  timings.txToRx, timings.rxSearchTimeout,
+                  timings.txToRxSearchTimeout, timings.txToTx);
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x18, "Setting timings failed");
   }
@@ -475,6 +508,7 @@ void setTimings(sl_cli_command_arg_t *args)
 
 void setTxFifoThreshold(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (railDataConfig.txMethod != FIFO_MODE) {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x19, "Tx is not in FIFO mode");
     return;
@@ -487,6 +521,7 @@ void setTxFifoThreshold(sl_cli_command_arg_t *args)
 
 void setRxFifoThreshold(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint16_t rxFifoThreshold = sl_cli_get_argument_uint16(args, 0);
   rxFifoThreshold = RAIL_SetRxFifoThreshold(railHandle, rxFifoThreshold);
   responsePrint(sl_cli_get_command_string(args, 0), "RxFifoThreshold:%d", rxFifoThreshold);
@@ -494,6 +529,7 @@ void setRxFifoThreshold(sl_cli_command_arg_t *args)
 
 void setEventConfig(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Events_t eventMask = sl_cli_get_argument_uint32(args, 0);
   RAIL_Events_t eventConfig = sl_cli_get_argument_uint32(args, 1);
 
@@ -562,6 +598,7 @@ void configPaAutoMode(sl_cli_command_arg_t *args)
 
 void enablePaAutoMode(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   bool enable = !!sl_cli_get_argument_uint8(args, 0);
   RAIL_EnablePaAutoMode(railHandle, enable);
 
@@ -581,6 +618,7 @@ void enablePaAutoMode(sl_cli_command_arg_t *args)
 
 void setRetimeOption(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint32_t option = sl_cli_get_argument_uint8(args, 0);
   RAIL_RetimeOptions_t finalRetimeOption;
   RAIL_Status_t status;
@@ -605,5 +643,30 @@ void setRetimeOption(sl_cli_command_arg_t *args)
                   ((finalRetimeOption & RAIL_RETIME_OPTION_DCDC) != 0U) ? "Enabled" : "Disabled");
   } else {
     responsePrint(sl_cli_get_command_string(args, 0), "Status:%d", status);
+  }
+}
+
+void configNotch(sl_cli_command_arg_t *args)
+{
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+  RAIL_NotchConfig_t notchConfig = {
+    .interfererFreqHz = sl_cli_get_argument_uint8(args, 0),
+    .interfererBwHz = 0,
+  };
+
+  RAIL_Status_t status;
+
+  if (sl_cli_get_argument_count(args) > 1) {
+    notchConfig.interfererBwHz = sl_cli_get_argument_uint8(args, 1);
+  }
+
+  status = RAIL_ConfigNotch(railHandle, &notchConfig);
+
+  // Report the current enabled status
+  if (status == RAIL_STATUS_NO_ERROR) {
+    responsePrint(sl_cli_get_command_string(args, 0), "Successful");
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), (uint8_t)__LINE__,
+                       "Status: %d", status);
   }
 }

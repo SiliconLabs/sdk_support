@@ -36,47 +36,46 @@
 #include "mbedtls/platform.h"
 #include "sli_se_opaque_types.h"
 
+#include "string.h"
+
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
 
-static psa_status_t set_builtin_key_context(
-  uint8_t key_id,
-  psa_key_attributes_t *attributes,
-  uint8_t **p_key_buffer,
-  size_t *key_buffer_size)
+psa_status_t sli_se_opaque_get_builtin_key(psa_drv_slot_number_t slot_number,
+                                           psa_key_attributes_t *attributes,
+                                           uint8_t *key_buffer,
+                                           size_t key_buffer_size,
+                                           size_t *key_buffer_length)
 {
-  sli_se_opaque_key_context_header_t* header =
-    mbedtls_calloc(1, sizeof(sli_se_opaque_key_context_header_t) );
-  if ( header == NULL ) {
-    return(PSA_ERROR_INSUFFICIENT_MEMORY);
-  }
+  sli_se_opaque_key_context_header_t header;
+  memset(&header, 0, sizeof(header));
 
   // Set key type and permissions according to key ID
-  switch ( key_id ) {
+  switch ( slot_number ) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1) );
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_SIGN_HASH | PSA_KEY_USAGE_VERIFY_HASH);
-      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA_ANY);
+      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
     case SL_SE_KEY_SLOT_SE_ATTESTATION_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1) );
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_VERIFY_HASH);
-      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA_ANY);
+      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
     case SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1) );
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_VERIFY_HASH);
-      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA_ANY);
+      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
     case SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY:
       psa_set_key_bits(attributes, 256);
       psa_set_key_type(attributes, PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_ECC_FAMILY_SECP_R1) );
       psa_set_key_usage_flags(attributes, PSA_KEY_USAGE_VERIFY_HASH);
-      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA_ANY);
+      psa_set_key_algorithm(attributes, PSA_ALG_ECDSA(PSA_ALG_ANY_HASH));
       break;
     case SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY:
       psa_set_key_bits(attributes, 128);
@@ -85,60 +84,60 @@ static psa_status_t set_builtin_key_context(
       psa_set_key_algorithm(attributes, SL_SE_BUILTIN_KEY_AES128_ALG);
       break;
     default:
-      mbedtls_free(header);
       return(PSA_ERROR_DOES_NOT_EXIST);
   }
-
-  *p_key_buffer = (uint8_t*)header;
-  *key_buffer_size = sizeof(sli_se_opaque_key_context_header_t);
-
-  header->struct_version = SLI_SE_OPAQUE_KEY_CONTEXT_VERSION;
-  header->builtin_key_id = key_id;
 
   psa_set_key_lifetime(attributes,
                        PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
                          PSA_KEY_PERSISTENCE_READ_ONLY,
                          PSA_KEY_LOCATION_SLI_SE_OPAQUE) );
 
+  if (key_buffer_size < sizeof(sli_se_opaque_key_context_header_t)) {
+    return(PSA_ERROR_BUFFER_TOO_SMALL);
+  }
+
+  header.struct_version = SLI_SE_OPAQUE_KEY_CONTEXT_VERSION;
+  header.builtin_key_id = (uint8_t) slot_number;
+
+  memcpy(key_buffer, &header, sizeof(sli_se_opaque_key_context_header_t));
+  *key_buffer_length = sizeof(sli_se_opaque_key_context_header_t);
   return(PSA_SUCCESS);
 }
 
+#if !defined(PSA_CRYPTO_DRIVER_TEST)
 psa_status_t mbedtls_psa_platform_get_builtin_key(
-  psa_key_attributes_t *attributes,
-  uint8_t **p_key_buffer, size_t *key_buffer_size)
+  mbedtls_svc_key_id_t key_id,
+  psa_key_lifetime_t *lifetime,
+  psa_drv_slot_number_t *slot_number)
 {
-  switch ( psa_get_key_id(attributes) ) {
+  switch (MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key_id)) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     case SL_SE_BUILTIN_KEY_APPLICATION_ATTESTATION_ID:
-      return(set_builtin_key_context(SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY,
-                                     attributes,
-                                     p_key_buffer,
-                                     key_buffer_size) );
+      *slot_number = SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY;
+      break;
     case SL_SE_BUILTIN_KEY_SYSTEM_ATTESTATION_ID:
-      return(set_builtin_key_context(SL_SE_KEY_SLOT_SE_ATTESTATION_KEY,
-                                     attributes,
-                                     p_key_buffer,
-                                     key_buffer_size) );
+      *slot_number = SL_SE_KEY_SLOT_SE_ATTESTATION_KEY;
+      break;
 #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
     case SL_SE_BUILTIN_KEY_SECUREBOOT_ID:
-      return(set_builtin_key_context(SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY,
-                                     attributes,
-                                     p_key_buffer,
-                                     key_buffer_size) );
+      *slot_number = SL_SE_KEY_SLOT_APPLICATION_SECURE_BOOT_KEY;
+      break;
     case SL_SE_BUILTIN_KEY_SECUREDEBUG_ID:
-      return(set_builtin_key_context(SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY,
-                                     attributes,
-                                     p_key_buffer,
-                                     key_buffer_size) );
+      *slot_number = SL_SE_KEY_SLOT_APPLICATION_SECURE_DEBUG_KEY;
+      break;
     case SL_SE_BUILTIN_KEY_AES128_ID:
-      return(set_builtin_key_context(SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY,
-                                     attributes,
-                                     p_key_buffer,
-                                     key_buffer_size) );
+      *slot_number = SL_SE_KEY_SLOT_APPLICATION_AES_128_KEY;
+      break;
     default:
       return(PSA_ERROR_DOES_NOT_EXIST);
   }
+  *lifetime = PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(
+    PSA_KEY_PERSISTENCE_READ_ONLY,
+    PSA_KEY_LOCATION_SLI_SE_OPAQUE);
+  return(PSA_SUCCESS);
 }
+
+#endif /* !PSA_CRYPTO_DRIVER_TEST */
 
 #endif /* MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
 

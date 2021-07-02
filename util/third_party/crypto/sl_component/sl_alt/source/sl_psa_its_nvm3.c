@@ -40,43 +40,56 @@
 #if defined(MBEDTLS_PSA_CRYPTO_STORAGE_C) && !defined(MBEDTLS_PSA_ITS_FILE_C)
 
 #include "psa/internal_trusted_storage.h"
-
 #include "nvm3_default.h"
-
+#include "mbedtls/platform.h"
 #include <stdbool.h>
 #include <string.h>
 
 // -------------------------------------
 // Defines
 
-#define SL_ITS_META_MAGIC_V1    (0x05E175D1UL)
+#define SLI_PSA_ITS_META_MAGIC_V1   (0x05E175D1UL)
+#define SLI_PSA_ITS_META_MAGIC_V2   (0x5E175D10UL)
 
-#define SL_ITS_NVM3_RANGE_BASE  (0x83100UL)
-#define SL_ITS_NVM3_RANGE_SIZE  (0x00080UL)
+/* Allocated range of NVM3 IDs for PSA ITS usage */
+#define SLI_PSA_ITS_NVM3_RANGE_BASE  (0x83100UL)
+#define SLI_PSA_ITS_NVM3_RANGE_SIZE  (0x00400UL)
 
-#ifndef SL_ITS_MAX_FILES
-#define SL_ITS_MAX_FILES        SL_ITS_NVM3_RANGE_SIZE
+#ifndef SL_PSA_ITS_MAX_FILES
+#define SL_PSA_ITS_MAX_FILES    SLI_PSA_ITS_NVM3_RANGE_SIZE
 #endif
 
-#define SL_ITS_NVM3_RANGE_START SL_ITS_NVM3_RANGE_BASE
-#define SL_ITS_NVM3_RANGE_END   SL_ITS_NVM3_RANGE_START + SL_ITS_MAX_FILES
+#define SLI_PSA_ITS_NVM3_RANGE_START SLI_PSA_ITS_NVM3_RANGE_BASE
+#define SLI_PSA_ITS_NVM3_RANGE_END   SLI_PSA_ITS_NVM3_RANGE_START + SL_PSA_ITS_MAX_FILES
 
-#define SL_ITS_MAX_KEY_SIZE     (256)
+#define SLI_PSA_ITS_NVM3_INVALID_KEY (0)
+#define SLI_PSA_ITS_NVM3_UNKNOWN_KEY (1)
 
-#define SL_ITS_NVM3_INVALID_KEY (0)
-#define SL_ITS_NVM3_UNKNOWN_KEY (1)
-
-#if SL_ITS_MAX_FILES > SL_ITS_NVM3_RANGE_SIZE
+#if SL_PSA_ITS_MAX_FILES > SLI_PSA_ITS_NVM3_RANGE_SIZE
 #error "Trying to store more ITS files then our NVM3 range allows for"
 #endif
 
-#define SL_ITS_CACHE_INIT_CHUNK_SIZE 16
+#define SLI_PSA_ITS_CACHE_INIT_CHUNK_SIZE 16
+
+// Enable backwards-compatibility with keys stored with a v1 header unless disabled.
+#if !defined(SL_PSA_ITS_REMOVE_V1_HEADER_SUPPORT)
+#define SLI_PSA_ITS_SUPPORT_V1_FORMAT
+#endif
+
+// Internal error codes local to this compile unit
+#define SLI_PSA_ITS_ECODE_NO_VALID_HEADER (ECODE_EMDRV_NVM3_BASE - 1)
+#define SLI_PSA_ITS_ECODE_NEEDS_UPGRADE   (ECODE_EMDRV_NVM3_BASE - 2)
+
+// SLI_STATIC_TESTABLE is used to expose otherwise-static variables during internal testing.
+#if !defined(SLI_STATIC_TESTABLE)
+#define SLI_STATIC_TESTABLE static
+#endif
 
 // -------------------------------------
 // Local global static variables
 
-static bool nvm3_uid_set_cache_initialized = false;
-static uint32_t nvm3_uid_set_cache[(SL_ITS_MAX_FILES + 31) / 32] = { 0 };
+SLI_STATIC_TESTABLE bool nvm3_uid_set_cache_initialized = false;
+SLI_STATIC_TESTABLE uint32_t nvm3_uid_set_cache[(SL_PSA_ITS_MAX_FILES + 31) / 32] = { 0 };
 
 typedef struct {
   psa_storage_uid_t uid;
@@ -91,11 +104,21 @@ static previous_lookup_t previous_lookup = {
 // -------------------------------------
 // Structs
 
+#if defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT)
 typedef struct {
   uint32_t magic;
   psa_storage_uid_t uid;
   psa_storage_create_flags_t flags;
-} sl_its_file_meta_t;
+} sl_its_file_meta_v1_t;
+#endif /* SLI_ITS_SUPPORT_V1_FORMAT */
+
+// Due to alignment constraints on the 64-bit UID, the v2 header struct is
+// serialized to 16 bytes instead of the 24 bytes the v1 header compiles to.
+typedef struct {
+  uint32_t magic;
+  psa_storage_create_flags_t flags;
+  psa_storage_uid_t uid;
+} sl_its_file_meta_v2_t;
 
 // -------------------------------------
 // Local function prototypes
@@ -108,7 +131,7 @@ static nvm3_ObjectKey_t prepare_its_get_nvm3_id(psa_storage_uid_t uid);
 
 static inline void cache_set(nvm3_ObjectKey_t key)
 {
-  uint32_t i = key - SL_ITS_NVM3_RANGE_START;
+  uint32_t i = key - SLI_PSA_ITS_NVM3_RANGE_START;
   uint32_t bin = i / 32;
   uint32_t offset = i - 32 * bin;
   nvm3_uid_set_cache[bin] |= (1 << offset);
@@ -116,7 +139,7 @@ static inline void cache_set(nvm3_ObjectKey_t key)
 
 static inline void cache_clear(nvm3_ObjectKey_t key)
 {
-  uint32_t i = key - SL_ITS_NVM3_RANGE_START;
+  uint32_t i = key - SLI_PSA_ITS_NVM3_RANGE_START;
   uint32_t bin = i / 32;
   uint32_t offset = i - 32 * bin;
   nvm3_uid_set_cache[bin] ^= (1 << offset);
@@ -124,7 +147,7 @@ static inline void cache_clear(nvm3_ObjectKey_t key)
 
 static inline bool cache_lookup(nvm3_ObjectKey_t key)
 {
-  uint32_t i = key - SL_ITS_NVM3_RANGE_START;
+  uint32_t i = key - SLI_PSA_ITS_NVM3_RANGE_START;
   uint32_t bin = i / 32;
   uint32_t offset = i - 32 * bin;
   return (bool)(nvm3_uid_set_cache[bin] >> offset);
@@ -133,12 +156,14 @@ static inline bool cache_lookup(nvm3_ObjectKey_t key)
 static void init_cache()
 {
   size_t num_keys_referenced_by_nvm3;
-  nvm3_ObjectKey_t keys_referenced_by_nvm3[SL_ITS_CACHE_INIT_CHUNK_SIZE];
+  nvm3_ObjectKey_t keys_referenced_by_nvm3[SLI_PSA_ITS_CACHE_INIT_CHUNK_SIZE];
 
-  for (nvm3_ObjectKey_t range_start = SL_ITS_NVM3_RANGE_START; range_start < SL_ITS_NVM3_RANGE_END; range_start += SL_ITS_CACHE_INIT_CHUNK_SIZE) {
-    nvm3_ObjectKey_t range_end = range_start + SL_ITS_CACHE_INIT_CHUNK_SIZE;
-    if (range_end > SL_ITS_NVM3_RANGE_END) {
-      range_end = SL_ITS_NVM3_RANGE_END;
+  for (nvm3_ObjectKey_t range_start = SLI_PSA_ITS_NVM3_RANGE_START;
+       range_start < SLI_PSA_ITS_NVM3_RANGE_END;
+       range_start += SLI_PSA_ITS_CACHE_INIT_CHUNK_SIZE) {
+    nvm3_ObjectKey_t range_end = range_start + SLI_PSA_ITS_CACHE_INIT_CHUNK_SIZE;
+    if (range_end > SLI_PSA_ITS_NVM3_RANGE_END) {
+      range_end = SLI_PSA_ITS_NVM3_RANGE_END;
     }
 
     num_keys_referenced_by_nvm3 = nvm3_enumObjects(nvm3_defaultHandle,
@@ -155,16 +180,92 @@ static void init_cache()
   nvm3_uid_set_cache_initialized = true;
 }
 
+// Read the file metadata for a specific NVM3 ID
+static Ecode_t get_file_metadata(nvm3_ObjectKey_t key,
+                                 sl_its_file_meta_v2_t* metadata,
+                                 size_t* its_file_offset,
+                                 size_t* its_file_size)
+{
+  // Initialize output variables to safe default
+  if (its_file_offset != NULL) {
+    *its_file_offset = 0;
+  }
+  if (its_file_size != NULL) {
+    *its_file_size = 0;
+  }
+
+  Ecode_t status = nvm3_readPartialData(nvm3_defaultHandle,
+                                        key,
+                                        metadata,
+                                        0,
+                                        sizeof(sl_its_file_meta_v2_t));
+  if (status != ECODE_NVM3_OK) {
+    return status;
+  }
+
+#if defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT)
+  // Re-read in v1 header format and translate to the latest structure version
+  if (metadata->magic == SLI_PSA_ITS_META_MAGIC_V1) {
+    sl_its_file_meta_v1_t key_meta_v1;
+    status = nvm3_readPartialData(nvm3_defaultHandle,
+                                  key,
+                                  &key_meta_v1,
+                                  0,
+                                  sizeof(sl_its_file_meta_v1_t));
+
+    if (status != ECODE_NVM3_OK) {
+      return status;
+    }
+
+    metadata->flags = key_meta_v1.flags;
+    metadata->uid = key_meta_v1.uid;
+    metadata->magic = SLI_PSA_ITS_META_MAGIC_V2;
+
+    if (its_file_offset != NULL) {
+      *its_file_offset = sizeof(sl_its_file_meta_v1_t);
+    }
+
+    status = SLI_PSA_ITS_ECODE_NEEDS_UPGRADE;
+  } else
+#endif
+  {
+    if (its_file_offset != NULL) {
+      *its_file_offset = sizeof(sl_its_file_meta_v2_t);
+    }
+  }
+
+  if (metadata->magic != SLI_PSA_ITS_META_MAGIC_V2) {
+    // No valid header found in this object
+    return SLI_PSA_ITS_ECODE_NO_VALID_HEADER;
+  }
+
+  if (its_file_offset != NULL && its_file_size != NULL) {
+    // Calculate the ITS file size if requested
+    uint32_t obj_type;
+    Ecode_t info_status = nvm3_getObjectInfo(nvm3_defaultHandle,
+                                             key,
+                                             &obj_type,
+                                             its_file_size);
+    if (info_status != ECODE_NVM3_OK) {
+      return info_status;
+    }
+
+    *its_file_size = *its_file_size - *its_file_offset;
+  }
+
+  return status;
+}
+
 // Search through NVM3 for uid
 static nvm3_ObjectKey_t get_nvm3_id(psa_storage_uid_t uid, bool find_empty_slot)
 {
   Ecode_t status;
-  sl_its_file_meta_t key_meta;
+  sl_its_file_meta_v2_t key_meta;
 
   if (find_empty_slot) {
-    for (size_t i = 0; i < SL_ITS_MAX_FILES; i++) {
-      if (!cache_lookup(i + SL_ITS_NVM3_RANGE_START)) {
-        return i + SL_ITS_NVM3_RANGE_START;
+    for (size_t i = 0; i < SL_PSA_ITS_MAX_FILES; i++) {
+      if (!cache_lookup(i + SLI_PSA_ITS_NVM3_RANGE_START)) {
+        return i + SLI_PSA_ITS_NVM3_RANGE_START;
       }
     }
   } else {
@@ -174,40 +275,41 @@ static nvm3_ObjectKey_t get_nvm3_id(psa_storage_uid_t uid, bool find_empty_slot)
       }
     }
 
-    for (size_t i = 0; i < SL_ITS_MAX_FILES; i++) {
-      if (!cache_lookup(i + SL_ITS_NVM3_RANGE_START)) {
+    for (size_t i = 0; i < SL_PSA_ITS_MAX_FILES; i++) {
+      if (!cache_lookup(i + SLI_PSA_ITS_NVM3_RANGE_START)) {
         continue;
       }
-      nvm3_ObjectKey_t object_id = i + SL_ITS_NVM3_RANGE_START;
+      nvm3_ObjectKey_t object_id = i + SLI_PSA_ITS_NVM3_RANGE_START;
 
-      status = nvm3_readPartialData(nvm3_defaultHandle, object_id, &key_meta, 0, sizeof(sl_its_file_meta_t));
+      status = get_file_metadata(object_id, &key_meta, NULL, NULL);
 
-      if (status != ECODE_NVM3_OK) {
-        continue;
+      if (status == ECODE_NVM3_OK
+          || status == SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
+        if (key_meta.uid == uid) {
+          previous_lookup.set = true;
+          previous_lookup.object_id = object_id;
+          previous_lookup.uid = uid;
+
+          return object_id;
+        } else {
+          continue;
+        }
       }
 
-      // ensure that the buffer stores an PSA ITS UID
-      if (key_meta.magic != SL_ITS_META_MAGIC_V1) {
+      if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER
+          || status == ECODE_NVM3_ERR_READ_DATA_SIZE) {
         // we don't expect any other data in our range then PSA ITS files.
-        // delete the file if the magic doesn't match
+        // delete the file if the magic doesn't match or the object on disk
+        // is too small to even have full metadata.
         status = nvm3_deleteObject(nvm3_defaultHandle, object_id);
         if (status != ECODE_NVM3_OK) {
-          return SL_ITS_NVM3_RANGE_END + 1U;
+          return SLI_PSA_ITS_NVM3_RANGE_END + 1U;
         }
-        continue;
-      }
-
-      if (key_meta.uid == uid) {
-        previous_lookup.set = true;
-        previous_lookup.object_id = object_id;
-        previous_lookup.uid = uid;
-
-        return object_id;
       }
     }
   }
 
-  return SL_ITS_NVM3_RANGE_END + 1U;
+  return SLI_PSA_ITS_NVM3_RANGE_END + 1U;
 }
 
 // Perform NVM3 open and fill the look-up table.
@@ -215,7 +317,7 @@ static nvm3_ObjectKey_t get_nvm3_id(psa_storage_uid_t uid, bool find_empty_slot)
 static nvm3_ObjectKey_t prepare_its_get_nvm3_id(psa_storage_uid_t uid)
 {
   if (nvm3_initDefault() != ECODE_NVM3_OK) {
-    return SL_ITS_NVM3_RANGE_END + 1U;
+    return SLI_PSA_ITS_NVM3_RANGE_END + 1U;
   }
 
   if (nvm3_uid_set_cache_initialized == false) {
@@ -251,10 +353,6 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
                          const void *p_data,
                          psa_storage_create_flags_t create_flags)
 {
-  if (data_length > SL_ITS_MAX_KEY_SIZE) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
   if ((data_length != 0U) && (p_data == NULL)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -265,75 +363,63 @@ psa_status_t psa_its_set(psa_storage_uid_t uid,
   }
 
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-
   Ecode_t status;
-  nvm3_ObjectKey_t empty_key_slot;
-  sl_its_file_meta_t* its_file_meta;
-  uint8_t key_buffer[SL_ITS_MAX_KEY_SIZE + sizeof(sl_its_file_meta_t)] = { 0 };
+  psa_status_t ret = PSA_SUCCESS;
+  sl_its_file_meta_v2_t* its_file_meta;
+  size_t its_file_size = data_length + sizeof(sl_its_file_meta_v2_t);
+  uint8_t *its_file_buffer = mbedtls_calloc(1, its_file_size);
+  if (its_file_buffer == NULL) {
+    return PSA_ERROR_INSUFFICIENT_MEMORY;
+  }
+  memset(its_file_buffer, 0, its_file_size);
 
-  if (nvm3_object_id > SL_ITS_NVM3_RANGE_END) {
-    // ITS UID was not found.
-    empty_key_slot = get_nvm3_id(0ULL, true);
+  its_file_meta = (sl_its_file_meta_v2_t *)its_file_buffer;
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+    // ITS UID was not found. Request a new.
+    nvm3_object_id = get_nvm3_id(0ULL, true);
 
-    if (empty_key_slot > SL_ITS_NVM3_RANGE_END) {
-      // The storage is full.
-      return PSA_ERROR_INSUFFICIENT_STORAGE;
-    }
-
-    its_file_meta = (sl_its_file_meta_t *)key_buffer;
-    its_file_meta->uid = uid;
-    its_file_meta->flags = create_flags;
-    its_file_meta->magic = SL_ITS_META_MAGIC_V1;
-
-    if (data_length != 0U) {
-      memcpy((uint8_t*)key_buffer + sizeof(sl_its_file_meta_t), ((uint8_t*)p_data), data_length);
-    }
-
-    status = nvm3_writeData(nvm3_defaultHandle,
-                            empty_key_slot,
-                            key_buffer,
-                            data_length + sizeof(sl_its_file_meta_t));
-
-    if (status == ECODE_NVM3_OK) {
-      // Power-loss might occur, however upon boot, the look-up table will be
-      // re-filled as long as the data has been successfully written to NVM3.
-      cache_set(empty_key_slot);
-      return PSA_SUCCESS;
+    if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+      // The storage is full, or an error was returned during cleanup.
+      ret = PSA_ERROR_INSUFFICIENT_STORAGE;
     } else {
-      return PSA_ERROR_STORAGE_FAILURE;
+      its_file_meta->uid = uid;
+      its_file_meta->magic = SLI_PSA_ITS_META_MAGIC_V2;
     }
-  }
+  } else {
+    // ITS UID was found. Read ITS meta data.
+    status = get_file_metadata(nvm3_object_id, its_file_meta, NULL, NULL);
 
-  status = nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, key_buffer, 0, sizeof(sl_its_file_meta_t));
-
-  if (status != ECODE_NVM3_OK) {
-    return PSA_ERROR_STORAGE_FAILURE;
-  }
-
-  its_file_meta = (sl_its_file_meta_t *)key_buffer;
-  if (its_file_meta->magic != SL_ITS_META_MAGIC_V1) {
-    // un-expected error at this point it should read an ITS object.
-    return PSA_ERROR_STORAGE_FAILURE;
-  }
-
-  if (its_file_meta->flags == PSA_STORAGE_FLAG_WRITE_ONCE) {
-    return PSA_ERROR_NOT_PERMITTED;
+    if (status != ECODE_NVM3_OK
+        && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
+      ret = PSA_ERROR_STORAGE_FAILURE;
+      goto exit;
+    } else {
+      if (its_file_meta->flags == PSA_STORAGE_FLAG_WRITE_ONCE) {
+        ret = PSA_ERROR_NOT_PERMITTED;
+        goto exit;
+      }
+    }
   }
 
   its_file_meta->flags = create_flags;
   if (data_length != 0U) {
-    memmove((uint8_t*)key_buffer + sizeof(sl_its_file_meta_t), ((uint8_t*)p_data), data_length);
+    memcpy(its_file_buffer + sizeof(sl_its_file_meta_v2_t), ((uint8_t*)p_data), data_length);
   }
-  status = nvm3_writeData(nvm3_defaultHandle,
-                          nvm3_object_id,
-                          key_buffer,
-                          data_length + sizeof(sl_its_file_meta_t));
+  status = nvm3_writeData(nvm3_defaultHandle, nvm3_object_id, its_file_buffer, its_file_size);
 
   if (status == ECODE_NVM3_OK) {
-    return PSA_SUCCESS;
+    // Power-loss might occur, however upon boot, the look-up table will be
+    // re-filled as long as the data has been successfully written to NVM3.
+    cache_set(nvm3_object_id);
   } else {
-    return PSA_ERROR_STORAGE_FAILURE;
+    ret = PSA_ERROR_STORAGE_FAILURE;
   }
+
+  exit:
+  // Clear and free key buffer before return.
+  memset(its_file_buffer, 0, its_file_size);
+  mbedtls_free(its_file_buffer);
+  return ret;
 }
 
 /**
@@ -362,10 +448,6 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
                          void *p_data,
                          size_t *p_data_length)
 {
-  if (data_length > SL_ITS_MAX_KEY_SIZE) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
   if ((data_length != 0U) && (p_data_length == NULL)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -380,52 +462,46 @@ psa_status_t psa_its_get(psa_storage_uid_t uid,
   }
 
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SL_ITS_NVM3_RANGE_END) {
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
     return PSA_ERROR_DOES_NOT_EXIST;
   }
 
   Ecode_t status;
-  sl_its_file_meta_t its_file_meta;
-  size_t key_obj_size;
+  sl_its_file_meta_v2_t its_file_meta;
+  size_t its_file_size = 0;
+  size_t its_file_offset = 0;
 
-  status = nvm3_getObjectInfo(nvm3_defaultHandle, nvm3_object_id, NVM3_OBJECTTYPE_DATA, &key_obj_size);
-  status += nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, &its_file_meta, 0, sizeof(sl_its_file_meta_t));
-  if (status != ECODE_NVM3_OK) {
+  status = get_file_metadata(nvm3_object_id, &its_file_meta, &its_file_offset, &its_file_size);
+  if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
+    return PSA_ERROR_DOES_NOT_EXIST;
+  }
+  if (status != ECODE_NVM3_OK
+      && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
     return PSA_ERROR_STORAGE_FAILURE;
   }
 
-  if (key_obj_size < sizeof(sl_its_file_meta_t)) {
-    return PSA_ERROR_STORAGE_FAILURE;
-  }
-
-  key_obj_size = key_obj_size - sizeof(sl_its_file_meta_t);
   if (data_length != 0U) {
-    if ((data_offset >= key_obj_size) && (key_obj_size != 0U)) {
+    if ((data_offset >= its_file_size) && (its_file_size != 0U)) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
 
-    if ((key_obj_size == 0U) && (data_offset != 0U)) {
+    if ((its_file_size == 0U) && (data_offset != 0U)) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
   } else {
     // Allow the offset at the data size boundary if the requested amount of data is zero.
-    if (data_offset > key_obj_size) {
+    if (data_offset > its_file_size) {
       return PSA_ERROR_INVALID_ARGUMENT;
     }
   }
 
-  if (data_length > (key_obj_size - data_offset)) {
-    *p_data_length = key_obj_size - data_offset;
+  if (data_length > (its_file_size - data_offset)) {
+    *p_data_length = its_file_size - data_offset;
   } else {
     *p_data_length = data_length;
   }
 
-  // Ensure that the buffer stores an PSA ITS UID
-  if (its_file_meta.magic != SL_ITS_META_MAGIC_V1) {
-    return PSA_ERROR_DOES_NOT_EXIST;
-  }
-
-  status += nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, p_data, sizeof(sl_its_file_meta_t) + data_offset, *p_data_length);
+  status = nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, p_data, its_file_offset + data_offset, *p_data_length);
 
   if (status != ECODE_NVM3_OK) {
     return PSA_ERROR_STORAGE_FAILURE;
@@ -456,28 +532,26 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
   }
 
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SL_ITS_NVM3_RANGE_END) {
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
     return PSA_ERROR_DOES_NOT_EXIST;
   }
 
   Ecode_t status;
-  sl_its_file_meta_t its_file_meta;
-  size_t key_obj_size;
+  sl_its_file_meta_v2_t its_file_meta;
+  size_t its_file_size = 0;
+  size_t its_file_offset = 0;
 
-  status = nvm3_getObjectInfo(nvm3_defaultHandle, nvm3_object_id, NVM3_OBJECTTYPE_DATA, &key_obj_size);
-  status += nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, &its_file_meta, 0, sizeof(sl_its_file_meta_t));
-
-  if (status != ECODE_NVM3_OK) {
+  status = get_file_metadata(nvm3_object_id, &its_file_meta, &its_file_offset, &its_file_size);
+  if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
+    return PSA_ERROR_DOES_NOT_EXIST;
+  }
+  if (status != ECODE_NVM3_OK
+      && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
     return PSA_ERROR_STORAGE_FAILURE;
   }
 
-  // ensure that the buffer stores an PSA ITS UID
-  if (its_file_meta.magic != SL_ITS_META_MAGIC_V1) {
-    return PSA_ERROR_DOES_NOT_EXIST;
-  }
-
   p_info->flags = its_file_meta.flags;
-  p_info->size = key_obj_size - sizeof(sl_its_file_meta_t);
+  p_info->size = its_file_size;
   return PSA_SUCCESS;
 }
 
@@ -496,22 +570,20 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
 psa_status_t psa_its_remove(psa_storage_uid_t uid)
 {
   nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(uid);
-  if (nvm3_object_id > SL_ITS_NVM3_RANGE_END) {
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
     return PSA_ERROR_DOES_NOT_EXIST;
   }
 
   Ecode_t status;
-  sl_its_file_meta_t its_file_meta;
+  sl_its_file_meta_v2_t its_file_meta;
 
-  status = nvm3_readPartialData(nvm3_defaultHandle, nvm3_object_id, &its_file_meta, 0, sizeof(sl_its_file_meta_t));
-
-  if (status != ECODE_NVM3_OK) {
-    return PSA_ERROR_STORAGE_FAILURE;
-  }
-
-  // ensure that the buffer stores an PSA ITS UID
-  if (its_file_meta.magic != SL_ITS_META_MAGIC_V1) {
+  status = get_file_metadata(nvm3_object_id, &its_file_meta, NULL, NULL);
+  if (status == SLI_PSA_ITS_ECODE_NO_VALID_HEADER) {
     return PSA_ERROR_DOES_NOT_EXIST;
+  }
+  if (status != ECODE_NVM3_OK
+      && status != SLI_PSA_ITS_ECODE_NEEDS_UPGRADE) {
+    return PSA_ERROR_STORAGE_FAILURE;
   }
 
   if (its_file_meta.flags == PSA_STORAGE_FLAG_WRITE_ONCE) {

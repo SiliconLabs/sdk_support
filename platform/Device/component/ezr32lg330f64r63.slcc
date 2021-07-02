@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EZR32LG330F64R63
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EZR32LG/Source/system_ezr32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EZR32LG/Source/IAR/startup_ezr32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EZR32LG/Source/GCC/startup_ezr32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EZR32LG/Source/ARM/startup_ezr32lg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: ezr32lg330f64r63.h
@@ -69,6 +79,8 @@
     - path: ezr32lg_wdog.h
     - path: system_ezr32lg.h
     path: platform/Device/SiliconLabs/EZR32LG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: ezr32lg330f64r63
   - name: device
@@ -132,6 +144,7 @@
   - name: device_has_usb
   - name: device_has_vcmp
   - name: device_has_wdog
+  - name: device_has_dwt
   - name: device_has_mpu
 - requires:
   - name: cmsis_core
@@ -164,7 +177,6 @@
     value: 2048
 - tag:
   - device:opn:ezr32lg330f64r63g
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: ezr32lg330f64r63g

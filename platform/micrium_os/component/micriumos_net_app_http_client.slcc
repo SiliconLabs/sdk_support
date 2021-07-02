@@ -1,33 +1,33 @@
-id: "micriumos_net_app_http_client"
-label: "Network Suite: HTTP Client"
-package: "micrium-tcpx"
-description: "Micrium OS Network HTTP Client"
+id: micriumos_net_app_http_client
+label: Network Suite - HTTP Client
+package: micrium-tcpx
+description: Micrium OS Network HTTP Client
 category: Services|Network Suite|Applications
-quality: "production"
-component_root_path: "platform/micrium_os/net"
+quality: production
+component_root_path: platform/micrium_os/net
 config_file:
-  - path: "../cfg/http_client_cfg.h"
+  - path: ../cfg/http_client_cfg.h
 source:
-  - path: "source/http/client/http_client.c"
-  - path: "source/http/client/http_client_conn.c"
-  - path: "source/http/client/http_client_mem.c"
-  - path: "source/http/client/http_client_req.c"
-  - path: "source/http/client/http_client_resp.c"
-  - path: "source/http/client/http_client_sock.c"
-  - path: "source/http/client/http_client_task.c"
-  - path: "source/http/client/http_client_websock.c"
+  - path: source/http/client/http_client.c
+  - path: source/http/client/http_client_conn.c
+  - path: source/http/client/http_client_mem.c
+  - path: source/http/client/http_client_req.c
+  - path: source/http/client/http_client_resp.c
+  - path: source/http/client/http_client_sock.c
+  - path: source/http/client/http_client_task.c
+  - path: source/http/client/http_client_websock.c
 include:
-  - path: "source"
+  - path: source
     file_list:
-      - path: "http/client/http_client_priv.h"
-      - path: "http/client/http_client_websock_priv.h"
-  - path: "include"
+      - path: http/client/http_client_priv.h
+      - path: http/client/http_client_websock_priv.h
+  - path: include
     file_list:
-      - path: "http_client.h"
+      - path: http_client.h
 template_contribution:
-  - name: "micriumos_component_avails"
-    value: "NET_HTTP_CLIENT"
+  - name: micriumos_component_avails
+    value: NET_HTTP_CLIENT
 provides:
-  - name: "net_app_http_client"
+  - name: net_app_http_client
 requires:
-  - name: "net_app_http"
+  - name: net_app_http

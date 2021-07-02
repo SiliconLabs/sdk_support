@@ -214,8 +214,6 @@ void LETIMER_CompareSet(LETIMER_TypeDef *letimer,
                         unsigned int comp,
                         uint32_t value)
 {
-  volatile uint32_t *compReg;
-
   EFM_ASSERT(LETIMER_REF_VALID(letimer)
              && LETIMER_COMP_REG_VALID(comp)
              && ((value & ~(_LETIMER_COMP0_COMP0_MASK
@@ -225,25 +223,23 @@ void LETIMER_CompareSet(LETIMER_TypeDef *letimer,
   /* Initialize the selected compare value. */
   switch (comp) {
     case 0:
-      compReg  = &letimer->COMP0;
 #if defined(LETIMER_SYNCBUSY_COMP0)
       regSync(letimer, LETIMER_SYNCBUSY_COMP0);
 #endif
+      letimer->COMP0 = value;
       break;
 
     case 1:
-      compReg  = &letimer->COMP1;
 #if defined(LETIMER_SYNCBUSY_COMP1)
       regSync(letimer, LETIMER_SYNCBUSY_COMP1);
 #endif
+      letimer->COMP1 = value;
       break;
 
     default:
       /* An unknown compare register selected, abort. */
-      return;
+      break;
   }
-
-  *compReg = value;
 }
 
 /***************************************************************************//**
@@ -507,7 +503,6 @@ void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
                        unsigned int rep,
                        uint32_t value)
 {
-  volatile uint32_t *repReg;
   EFM_ASSERT(LETIMER_REF_VALID(letimer)
              && LETIMER_REP_REG_VALID(rep)
              && ((value & ~(_LETIMER_REP0_REP0_MASK
@@ -517,25 +512,23 @@ void LETIMER_RepeatSet(LETIMER_TypeDef *letimer,
   /* Initialize the selected compare value. */
   switch (rep) {
     case 0:
-      repReg = &(letimer->REP0);
 #if defined(LETIMER_SYNCBUSY_REP0)
       regSync(letimer, LETIMER_SYNCBUSY_REP0);
 #endif
+      letimer->REP0 = value;
       break;
 
     case 1:
-      repReg = &(letimer->REP1);
 #if defined(LETIMER_SYNCBUSY_REP1)
       regSync(letimer, LETIMER_SYNCBUSY_REP1);
 #endif
+      letimer->REP1 = value;
       break;
 
     default:
       /* An unknown compare register selected, abort. */
-      return;
+      break;
   }
-
-  *repReg = value;
 }
 
 /***************************************************************************//**

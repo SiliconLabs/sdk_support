@@ -90,9 +90,9 @@ void getStatus(sl_cli_command_arg_t *args)
                         "UserTxUnderflow:%u,"
                         "AckTxUnderflow:%u,"
                         "RxCount:%u,"
+                        "RxCrcErrDrop:%u,"
                         "SyncDetect:%u,"
-                        "NoRxBuffer:%u,"
-                        "RfSensed:%u",
+                        "NoRxBuffer:%u",
                         counters.userTx,
                         counters.ackTx,
                         counters.userTxAborted,
@@ -102,14 +102,16 @@ void getStatus(sl_cli_command_arg_t *args)
                         counters.userTxUnderflow,
                         counters.ackTxUnderflow,
                         counters.receive,
+                        counters.receiveCrcErrDrop,
                         counters.syncDetect,
-                        counters.noRxBuffer,
-                        counters.rfSensedEvent
+                        counters.noRxBuffer
                         );
-  responsePrintContinue("ackTimeout:%u,"
+  responsePrintContinue("RfSensed:%u,"
+                        "ackTimeout:%u,"
                         "ackTxFpSet:%u,"
                         "ackTxFpFail:%u,"
                         "ackTxFpAddrFail:%u",
+                        counters.rfSensedEvent,
                         counters.ackTimeout,
                         counters.ackTxFpSet,
                         counters.ackTxFpFail,
@@ -124,7 +126,9 @@ void getStatus(sl_cli_command_arg_t *args)
                         "RxFifoFull:%u,"
                         "RxOverflow:%u,"
                         "AddrFilt:%u,"
-                        "Aborted:%u",
+                        "Aborted:%u,"
+                        "RxBeams:%u,"
+                        "DataRequests:%u",
                         channel,
                         appModeNames(currentAppMode()),
                         counters.timingLost,
@@ -133,31 +137,42 @@ void getStatus(sl_cli_command_arg_t *args)
                         counters.rxFifoFull,
                         counters.rxOfEvent,
                         counters.addrFilterEvent,
-                        counters.rxFail
+                        counters.rxFail,
+                        counters.rxBeams,
+                        counters.dataRequests
                         );
-  responsePrintEnd("RxBeams:%u,"
-                   "DataRequests:%u,"
-                   "Calibrations:%u,"
+  // Avoid use of %ll long-long formats due to iffy printf library support
+  responsePrintEnd("Calibrations:%u,"
                    "TxChannelBusy:%u,"
                    "TxClear:%u,"
                    "TxCca:%u,"
                    "TxRetry:%u,"
                    "UserTxStarted:%u,"
-                   "PaProtect:%u",
-                   counters.rxBeams,
-                   counters.dataRequests,
+                   "PaProtect:%u,"
+                   "SubPhy0:%u,"
+                   "SubPhy1:%u,"
+                   "SubPhy2:%u,"
+                   "SubPhy3:%u,"
+                   "rxRawSourceBytes:0x%x%08x",
                    counters.calibrations,
                    counters.txChannelBusy,
                    counters.lbtSuccess,
                    counters.lbtStartCca,
                    counters.lbtRetry,
                    counters.userTxStarted,
-                   counters.paProtect
+                   counters.paProtect,
+                   counters.subPhyCount[0],
+                   counters.subPhyCount[1],
+                   counters.subPhyCount[2],
+                   counters.subPhyCount[3],
+                   (uint32_t)(counters.rxRawSourceBytes >> 32),
+                   (uint32_t)(counters.rxRawSourceBytes)
                    );
 }
 
 void fifoStatus(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   uint16_t spaceCount =  RAIL_GetTxFifoSpaceAvailable(railHandle);
   uint16_t byteCount = RAIL_GetRxFifoBytesAvailable(railHandle);
   responsePrint(sl_cli_get_command_string(args, 0),
@@ -198,6 +213,7 @@ void getVersion(sl_cli_command_arg_t *args)
 
 void setPtiProtocol(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   RAIL_Status_t status = RAIL_SetPtiProtocol(railHandle,
                                              (RAIL_PtiProtocol_t) sl_cli_get_argument_uint8(args, 0));
   responsePrint(sl_cli_get_command_string(args, 0), "Pti:%s", status ? "Error" : "Set");
@@ -317,6 +333,7 @@ void getRssiOffset(sl_cli_command_arg_t *args)
 }
 void sweepPower(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   int32_t lowPower = sl_cli_get_argument_int32(args, 0);
   int32_t hiPower = sl_cli_get_argument_int32(args, 1);
   int32_t period = sl_cli_get_argument_int32(args, 2);
@@ -339,6 +356,7 @@ void sweepPower(sl_cli_command_arg_t *args)
 
 void isRssiRdy(sl_cli_command_arg_t *args)
 {
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
   if (RAIL_IsAverageRssiReady(railHandle)) {
     responsePrint(sl_cli_get_command_string(args, 0), "isReady:True");
   } else {
@@ -645,6 +663,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_PROTOCOL_MFM",
                      RAIL_SUPPORTS_PROTOCOL_MFM ? "Yes" : "No",
                      RAIL_SupportsProtocolMfm(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_NOTCH",
+                     RAIL_SUPPORTS_NOTCH ? "Yes" : "No",
+                     RAIL_SupportsNotch(railHandle) ? "Yes" : "No");
 }
 
 void cliSeparatorHack(sl_cli_command_arg_t *args)

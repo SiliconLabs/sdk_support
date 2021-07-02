@@ -1377,6 +1377,12 @@ osMutexId_t  osMutexNew(const  osMutexAttr_t  *attr)
     return (osMutexId_t)0;
   }
 
+  if (attr->attr_bits & osMutexRecursive) {
+    p_mutex->recursive = DEF_TRUE;
+  } else {
+    p_mutex->recursive = DEF_FALSE;
+  }
+
   return (osMutexId_t)p_mutex;
 #else
   (void)attr;
@@ -1482,6 +1488,11 @@ osStatus_t  osMutexAcquire(osMutexId_t  mutex_id,
 
   switch (RTOS_ERR_CODE_GET(err)) {
     case RTOS_ERR_IS_OWNER:
+      if (p_mutex->recursive == DEF_FALSE) {
+        return osErrorResource;
+      }
+      return osOK;
+
     case RTOS_ERR_NONE:
       return osOK;
 
@@ -2189,7 +2200,7 @@ osThreadId_t  osThreadNew(osThreadFunc_t          func,
   stk_size_in_bytes -= (stk_size_in_bytes % CPU_CFG_STK_ALIGN_BYTES);
 
   OSTaskCreate(&p_thread->tcb, p_name, func, argument, prio, p_stk_base, 0,
-               stk_size_in_bytes / sizeof(CPU_STK), 1u, 0u, 0u,
+               stk_size_in_bytes / sizeof(CPU_STK), 0u, 0u, 0u,
                OS_OPT_TASK_STK_CHK | OS_OPT_TASK_STK_CLR | OS_OPT_TASK_SAVE_FP,
                &err);
 

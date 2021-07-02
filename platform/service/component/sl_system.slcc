@@ -1,7 +1,7 @@
 id: sl_system
 label: System Setup
 package: platform
-category: Services|Runtime|System Setup
+category: Services|System Setup
 quality: production
 provides:
   - name: sl_system

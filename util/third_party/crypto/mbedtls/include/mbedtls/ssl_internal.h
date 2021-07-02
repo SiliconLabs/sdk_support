@@ -275,26 +275,26 @@
 #endif
 
 #if defined(MBEDTLS_SSL_VARIABLE_BUFFER_LENGTH)
-static inline uint32_t mbedtls_ssl_get_output_buflen( const mbedtls_ssl_context *ctx )
+static inline size_t mbedtls_ssl_get_output_buflen( const mbedtls_ssl_context *ctx )
 {
 #if defined (MBEDTLS_SSL_DTLS_CONNECTION_ID)
-    return (uint32_t) mbedtls_ssl_get_output_max_frag_len( ctx )
+    return mbedtls_ssl_get_output_max_frag_len( ctx )
                + MBEDTLS_SSL_HEADER_LEN + MBEDTLS_SSL_PAYLOAD_OVERHEAD
                + MBEDTLS_SSL_CID_OUT_LEN_MAX;
 #else
-    return (uint32_t) mbedtls_ssl_get_output_max_frag_len( ctx )
+    return mbedtls_ssl_get_output_max_frag_len( ctx )
                + MBEDTLS_SSL_HEADER_LEN + MBEDTLS_SSL_PAYLOAD_OVERHEAD;
 #endif
 }
 
-static inline uint32_t mbedtls_ssl_get_input_buflen( const mbedtls_ssl_context *ctx )
+static inline size_t mbedtls_ssl_get_input_buflen( const mbedtls_ssl_context *ctx )
 {
 #if defined (MBEDTLS_SSL_DTLS_CONNECTION_ID)
-    return (uint32_t) mbedtls_ssl_get_input_max_frag_len( ctx )
+    return mbedtls_ssl_get_input_max_frag_len( ctx )
                + MBEDTLS_SSL_HEADER_LEN + MBEDTLS_SSL_PAYLOAD_OVERHEAD
                + MBEDTLS_SSL_CID_IN_LEN_MAX;
 #else
-    return (uint32_t) mbedtls_ssl_get_input_max_frag_len( ctx )
+    return mbedtls_ssl_get_input_max_frag_len( ctx )
                + MBEDTLS_SSL_HEADER_LEN + MBEDTLS_SSL_PAYLOAD_OVERHEAD;
 #endif
 }
@@ -448,7 +448,7 @@ struct mbedtls_ssl_handshake_params
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_key_type_t ecdh_psa_type;
     uint16_t ecdh_bits;
-    psa_key_handle_t ecdh_psa_privkey;
+    psa_key_id_t ecdh_psa_privkey;
     unsigned char ecdh_psa_peerkey[MBEDTLS_PSA_MAX_EC_PUBKEY_LENGTH];
     size_t ecdh_psa_peerkey_len;
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
@@ -467,7 +467,7 @@ struct mbedtls_ssl_handshake_params
 #endif
 #if defined(MBEDTLS_KEY_EXCHANGE_SOME_PSK_ENABLED)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
-    psa_key_handle_t psk_opaque;        /*!< Opaque PSK from the callback   */
+    psa_key_id_t psk_opaque;            /*!< Opaque PSK from the callback   */
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
     unsigned char *psk;                 /*!<  PSK from the callback         */
     size_t psk_len;                     /*!<  Length of PSK from callback   */
@@ -1066,16 +1066,16 @@ static inline int mbedtls_ssl_get_psk( const mbedtls_ssl_context *ssl,
  * 2. static PSK configured by \c mbedtls_ssl_conf_psk_opaque()
  * Return an opaque PSK
  */
-static inline psa_key_handle_t mbedtls_ssl_get_opaque_psk(
+static inline psa_key_id_t mbedtls_ssl_get_opaque_psk(
     const mbedtls_ssl_context *ssl )
 {
-    if( ssl->handshake->psk_opaque != 0 )
+    if( ! mbedtls_svc_key_id_is_null( ssl->handshake->psk_opaque ) )
         return( ssl->handshake->psk_opaque );
 
-    if( ssl->conf->psk_opaque != 0 )
+    if( ! mbedtls_svc_key_id_is_null( ssl->conf->psk_opaque ) )
         return( ssl->conf->psk_opaque );
 
-    return( 0 );
+    return( MBEDTLS_SVC_KEY_ID_INIT );
 }
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 

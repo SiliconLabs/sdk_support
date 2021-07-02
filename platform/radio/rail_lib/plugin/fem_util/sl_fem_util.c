@@ -45,6 +45,7 @@
   #include "em_cmu.h"
   #include "em_prs.h"
 
+#if SL_FEM_UTIL_RX_ENABLE == 1
   #ifdef _SILICON_LABS_32B_SERIES_1
     #if (!defined(SL_FEM_UTIL_RX_CHANNEL) \
   || !defined(SL_FEM_UTIL_RX_PORT)        \
@@ -59,14 +60,21 @@
       #error "SL_FEM_UTIL_RX_CHANNEL/PORT/PIN must be defined."
     #endif
   #endif //!_SILICON_LABS_32B_SERIES_1
+#endif // SL_FEM_UTIL_RX_ENABLE == 1
 
+#if SL_FEM_UTIL_TX_ENABLE == 1
 // if no separate CTX pin is defined, CRX is a combined RX-TX pin
-  #ifndef SL_FEM_UTIL_TX_CHANNEL
+  #if !defined(SL_FEM_UTIL_TX_CHANNEL) && (SL_FEM_UTIL_RX_ENABLE == 1)
     #define SL_FEM_UTIL_TX_PORT SL_FEM_UTIL_RX_PORT
     #define SL_FEM_UTIL_TX_PIN SL_FEM_UTIL_RX_PIN
-    #define SL_FEM_UTIL_TX_LOC SL_FEM_UTIL_RX_LOC
     #define SL_FEM_UTIL_TX_CHANNEL SL_FEM_UTIL_RX_CHANNEL
+    #if _SILICON_LABS_32B_SERIES_1
+      #define SL_FEM_UTIL_TX_LOC SL_FEM_UTIL_RX_LOC
+    #endif
+  #elif !defined(SL_FEM_UTIL_TX_CHANNEL)
+    #error "BSP_FEM_TX_CHANNEL must be defined."
   #endif
+#endif // SL_FEM_UTIL_TX_ENABLE == 1
 
   #if SL_FEM_UTIL_TX_ENABLE == 1 && SL_FEM_UTIL_RX_ENABLE == 1
     #if SL_FEM_UTIL_RX_CHANNEL == SL_FEM_UTIL_TX_CHANNEL
@@ -74,7 +82,7 @@
     #endif
   #endif
 
-  #if SL_FEM_UTIL_RX_ENABLE && defined(SL_FEM_UTIL_SLEEP_CHANNEL)
+  #if (SL_FEM_UTIL_RX_ENABLE == 1) && defined(SL_FEM_UTIL_SLEEP_CHANNEL)
     #if (SL_FEM_UTIL_RX_CHANNEL + 1) != SL_FEM_UTIL_SLEEP_CHANNEL
       #error "SL_FEM_UTIL_SLEEP_CHANNEL must immediately follow SL_FEM_UTIL_RX_CHANNEL"
     #endif
@@ -189,7 +197,7 @@ void sl_fem_util_init(void)
 #ifdef _SILICON_LABS_32B_SERIES_1
 // set up the CSD to be active whenever the PA or LNA are enabled
 // its signal is PA enable ORed with the RX channel's signal (LNA enable)
-#if SL_FEM_UTIL_RX_ENABLE
+#if SL_FEM_UTIL_RX_ENABLE == 1
   PRS->CH[SL_FEM_UTIL_SLEEP_CHANNEL].CTRL = PRS_RAC_PAEN | PRS_CH_CTRL_ORPREV;
 #else
   PRS->CH[SL_FEM_UTIL_SLEEP_CHANNEL].CTRL = PRS_RAC_PAEN;
@@ -224,7 +232,7 @@ void sl_fem_util_init(void)
 #else
 #error "No PRS setting defined for Source=RAC, Signal=PAEN"
 #endif //PRS_RACL_PAEN
-#if SL_FEM_UTIL_RX_ENABLE
+#if SL_FEM_UTIL_RX_ENABLE == 1
   PRS_Combine(SL_FEM_UTIL_SLEEP_CHANNEL,
               SL_FEM_UTIL_RX_CHANNEL,
               prsLogic_A_OR_B);

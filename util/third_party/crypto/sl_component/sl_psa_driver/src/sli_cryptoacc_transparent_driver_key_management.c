@@ -55,55 +55,81 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
                                                     size_t key_buffer_size,
                                                     size_t *key_length)
 {
+#if defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR) \
+  && (defined(PSA_WANT_ECC_SECP_R1_192)     \
+  || defined(PSA_WANT_ECC_SECP_R1_224)      \
+  || defined(PSA_WANT_ECC_SECP_R1_256)      \
+  || defined(PSA_WANT_ECC_SECP_K1_256))
+
   // Argument check.
   if (attributes == NULL
       || key_buffer == NULL
-      || key_buffer_size == 0) {
+      || key_buffer_size == 0
+      || key_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   psa_key_type_t key_type = psa_get_key_type(attributes);
-  psa_ecc_curve_t curve_type = PSA_KEY_TYPE_GET_CURVE(key_type);
+  psa_ecc_family_t curve_type = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
   size_t key_bits = psa_get_key_bits(attributes);
 
-  // Currently only supports secp{192, 224, 256}r1 curves. This check will also
-  // capture all non-ECC key types, as PSA_KEY_TYPE_GET_CURVE will return
-  // zero in those cases.
-  if (curve_type != PSA_ECC_CURVE_SECP_R1) {
+  // Check key type. PSA Crypto defines generate_key to be an invalid call with a key type
+  // of public key.
+  if (!PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // We currently only support R1 or K1
+  if (curve_type != PSA_ECC_FAMILY_SECP_R1 && curve_type != PSA_ECC_FAMILY_SECP_K1) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
   // Check sufficient buffer size.
-  if ((PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)
-       && key_buffer_size < PSA_BITS_TO_BYTES(key_bits))
-      || (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)
-          && key_buffer_size < PSA_BITS_TO_BYTES(key_bits) * 2 + 1)) {
+  if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-  // Always generate private key.
+  // Grab the correct order for the requested curve
   block_t n = NULL_blk;
   switch (key_bits) {
+#if defined(PSA_WANT_ECC_SECP_R1_192)
     case 192:
-      // The order n is stored as the second element in the curve-parameter tuple
-      // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-      // dependent on the length of the corresponding key.
-      n = block_t_convert(sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize),
-                          sx_ecc_curve_p192.bytesize);
+      if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+        // The order n is stored as the second element in the curve-parameter tuple
+        // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
+        // dependent on the length of the corresponding key.
+        n = block_t_convert(sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize),
+                            sx_ecc_curve_p192.bytesize);
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
       break;
+#endif // PSA_WANT_ECC_SECP_R1_192
+#if defined(PSA_WANT_ECC_SECP_R1_224)
     case 224:
-      // The order n is stored as the second element in the curve-parameter tuple
-      // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-      // dependent on the length of the corresponding key.
-      n = block_t_convert(sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize),
-                          sx_ecc_curve_p224.bytesize);
+      if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+        n = block_t_convert(sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize),
+                            sx_ecc_curve_p224.bytesize);
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
       break;
+#endif // PSA_WANT_ECC_SECP_R1_224
     case 256:
-      // The order n is stored as the second element in the curve-parameter tuple
-      // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-      // dependent on the length of the corresponding key.
-      n = block_t_convert(sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize),
-                          sx_ecc_curve_p256.bytesize);
+      switch (curve_type) {
+#if defined(PSA_WANT_ECC_SECP_R1_256)
+        case PSA_ECC_FAMILY_SECP_R1:
+          n = block_t_convert(sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize),
+                              sx_ecc_curve_p256.bytesize);
+          break;
+#endif // PSA_WANT_ECC_SECP_R1_256
+#if defined(PSA_WANT_ECC_SECP_K1_256)
+        case PSA_ECC_FAMILY_SECP_K1:
+          n = block_t_convert(sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize),
+                              sx_ecc_curve_p256k1.bytesize);
+          break;
+#endif // PSA_WANT_ECC_SECP_R1_256
+      }
       break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
@@ -130,49 +156,20 @@ psa_status_t sli_cryptoacc_transparent_generate_key(const psa_key_attributes_t *
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  // If public key is requested, get it by performing point multiplication of the private key.
-  if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
-    block_t *domain_ptr = NULL;
-    uint32_t curve_flags = 0;
-    switch (key_bits) {
-      case 192:
-        curve_flags = sx_ecc_curve_p192.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p192.params;
-        break;
-      case 224:
-        curve_flags = sx_ecc_curve_p224.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p224.params;
-        break;
-      case 256:
-        curve_flags = sx_ecc_curve_p256.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
-        break;
-    }
-
-    block_t pub = block_t_convert(key_buffer + 1, PSA_BITS_TO_BYTES(key_bits) * 2);
-
-    status = cryptoacc_management_acquire();
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    sx_ret = ecc_generate_public_key(*domain_ptr,
-                                     pub,
-                                     priv,
-                                     PSA_BITS_TO_BYTES(key_bits),
-                                     curve_flags);
-    status = cryptoacc_management_release();
-    if (sx_ret != CRYPTOLIB_SUCCESS
-        || status != PSA_SUCCESS) {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-
-    key_buffer[0] = 0x04;
-    *key_length = PSA_BITS_TO_BYTES(key_bits) * 2 + 1;
-  } else {
-    *key_length = PSA_BITS_TO_BYTES(key_bits);
-  }
+  *key_length = PSA_BITS_TO_BYTES(key_bits);
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_KEY_TYPE_ECC_KEY_PAIR  && PSA_WANT_ECC_*
+
+  (void) attributes;
+  (void) key_buffer;
+  (void) key_buffer_size;
+  (void) key_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif  // PSA_WANT_KEY_TYPE_ECC_KEY_PAIR  && PSA_WANT_ECC_*
 }
 
 psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attributes_t *attributes,
@@ -182,8 +179,16 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
                                                          size_t data_size,
                                                          size_t *data_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+  && (defined(PSA_WANT_ECC_SECP_R1_192)         \
+  || defined(PSA_WANT_ECC_SECP_R1_224)          \
+  || defined(PSA_WANT_ECC_SECP_R1_256)          \
+  || defined(PSA_WANT_ECC_SECP_K1_256))
+
   // Argument check.
-  if (key_buffer == NULL
+  if (attributes == NULL
+      || key_buffer == NULL
       || key_buffer_size == 0
       || data == NULL
       || data_size == 0
@@ -192,75 +197,127 @@ psa_status_t sli_cryptoacc_transparent_export_public_key(const psa_key_attribute
   }
 
   psa_key_type_t key_type = psa_get_key_type(attributes);
-  psa_ecc_curve_t curve_type = PSA_KEY_TYPE_GET_CURVE(key_type);
+  psa_ecc_family_t curve_type = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
   size_t key_bits = psa_get_key_bits(attributes);
 
+  // If the key is stored transparently and is already a public key,
+  // let the core handle it.
   if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
-    return PSA_ERROR_INVALID_ARGUMENT;
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  if (!PSA_KEY_TYPE_IS_ECC(key_type)) {
+    return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // We currently only support R1 or K1
+  if (curve_type != PSA_ECC_FAMILY_SECP_R1 && curve_type != PSA_ECC_FAMILY_SECP_K1) {
+    return PSA_ERROR_NOT_SUPPORTED;
   }
 
   if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  if (curve_type == PSA_ECC_CURVE_SECP_R1) {
-    // Check sufficient output buffer size.
-    if (data_size < PSA_BITS_TO_BYTES(key_bits) * 2 + 1) {
-      return PSA_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    block_t *domain_ptr = NULL;
-    uint32_t curve_flags = 0;
-    switch (key_bits) {
-      case 192:
-        curve_flags = sx_ecc_curve_p192.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p192.params;
-        break;
-      case 224:
-        curve_flags = sx_ecc_curve_p224.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p224.params;
-        break;
-      case 256:
-        curve_flags = sx_ecc_curve_p256.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
-        break;
-      default:
-        return PSA_ERROR_NOT_SUPPORTED;
-    }
-
-    block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
-    block_t pub = block_t_convert(data + 1, PSA_BITS_TO_BYTES(key_bits) * 2);
-
-    psa_status_t status = cryptoacc_management_acquire();
-    if (status != PSA_SUCCESS) {
-      return status;
-    }
-    uint32_t sx_ret = ecc_generate_public_key(*domain_ptr,
-                                              pub,
-                                              priv,
-                                              PSA_BITS_TO_BYTES(key_bits),
-                                              curve_flags);
-    status = cryptoacc_management_release();
-    if (sx_ret != CRYPTOLIB_SUCCESS
-        || status != PSA_SUCCESS) {
-      return PSA_ERROR_HARDWARE_FAILURE;
-    }
-
-    data[0] = 0x04;
-    *data_length = PSA_BITS_TO_BYTES(key_bits) * 2 + 1;
-  } else {
-    return PSA_ERROR_NOT_SUPPORTED;
+  // Check sufficient output buffer size.
+  if (data_size < PSA_BITS_TO_BYTES(key_bits) * 2 + 1) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
+  block_t *domain_ptr = NULL;
+  uint32_t curve_flags = 0;
+  switch (key_bits) {
+#if defined(PSA_WANT_ECC_SECP_R1_192)
+    case 192:
+      if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+        curve_flags = sx_ecc_curve_p192.pk_flags;
+        domain_ptr = (block_t*)&sx_ecc_curve_p192.params;
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
+#endif // PSA_WANT_ECC_SECP_R1_192
+#if defined(PSA_WANT_ECC_SECP_R1_224)
+    case 224:
+      if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+        curve_flags = sx_ecc_curve_p224.pk_flags;
+        domain_ptr = (block_t*)&sx_ecc_curve_p224.params;
+      } else {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
+#endif // PSA_WANT_ECC_SECP_R1_224
+    case 256:
+      switch (curve_type) {
+#if defined(PSA_WANT_ECC_SECP_R1_256)
+        case PSA_ECC_FAMILY_SECP_R1:
+          curve_flags = sx_ecc_curve_p256.pk_flags;
+          domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
+          break;
+#endif // PSA_WANT_ECC_SECP_R1_256
+#if defined(PSA_WANT_ECC_SECP_K1_256)
+        case PSA_ECC_FAMILY_SECP_K1:
+          curve_flags = sx_ecc_curve_p256k1.pk_flags;
+          domain_ptr = (block_t*)&sx_ecc_curve_p256k1.params;
+          break;
+#endif // PSA_WANT_ECC_SECP_K1_256
+      }
+      break;
+    default:
+      return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  block_t priv = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
+  block_t pub = block_t_convert(data + 1, PSA_BITS_TO_BYTES(key_bits) * 2);
+
+  psa_status_t status = cryptoacc_management_acquire();
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+  uint32_t sx_ret = ecc_generate_public_key(*domain_ptr,
+                                            pub,
+                                            priv,
+                                            PSA_BITS_TO_BYTES(key_bits),
+                                            curve_flags);
+  status = cryptoacc_management_release();
+  if (sx_ret != CRYPTOLIB_SUCCESS
+      || status != PSA_SUCCESS) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  data[0] = 0x04;
+  *data_length = PSA_BITS_TO_BYTES(key_bits) * 2 + 1;
+
   return PSA_SUCCESS;
+
+#else // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+
+  (void) attributes;
+  (void) key_buffer;
+  (void) key_buffer_size;
+  (void) data;
+  (void) data_size;
+  (void) data_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
 }
 
-psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *attributes,
-                                                    const uint8_t *data,
-                                                    size_t data_length,
-                                                    size_t *bits)
+psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *attributes,
+                                                  const uint8_t *data,
+                                                  size_t data_length,
+                                                  uint8_t *key_buffer,
+                                                  size_t key_buffer_size,
+                                                  size_t *key_buffer_length,
+                                                  size_t *bits)
 {
-  psa_status_t status = PSA_ERROR_CORRUPTION_DETECTED;
+#if (defined(PSA_WANT_KEY_TYPE_ECC_KEY_PAIR)    \
+  || defined(PSA_WANT_KEY_TYPE_ECC_PUBLIC_KEY)) \
+  && (defined(PSA_WANT_ECC_SECP_R1_192)         \
+  || defined(PSA_WANT_ECC_SECP_R1_224)          \
+  || defined(PSA_WANT_ECC_SECP_R1_256)          \
+  || defined(PSA_WANT_ECC_SECP_K1_256))
 
   // Argument check.
   if (attributes == NULL
@@ -270,42 +327,68 @@ psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
+  psa_status_t status;
   psa_key_type_t key_type = psa_get_key_type(attributes);
-  psa_ecc_curve_t curve_type = PSA_KEY_TYPE_GET_CURVE(key_type);
+  psa_ecc_family_t curve_type = PSA_KEY_TYPE_ECC_GET_FAMILY(key_type);
 
   // Transparent driver is not involved in validation of symmetric keys.
-  if (!PSA_KEY_TYPE_IS_ASYMMETRIC(key_type)) {
+  if (!PSA_KEY_TYPE_IS_ECC(key_type)) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  // Currently only supports secp{192, 224, 256}r1 curves.
-  if (curve_type != PSA_ECC_CURVE_SECP_R1) {
+  // We currently only support R1 or K1
+  if (curve_type != PSA_ECC_FAMILY_SECP_R1 && curve_type != PSA_ECC_FAMILY_SECP_K1) {
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) { // Private key.
-    // Determine key bit size.
-    *bits = data_length * 8;
-
     uint8_t *modulo_ptr = NULL;
+    *bits = psa_get_key_bits(attributes);
+
+    // Determine key bit-size
+    if (*bits == 0) {
+      *bits = data_length * 8;
+    } else {
+      if (PSA_BITS_TO_BYTES(*bits) != data_length) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+    }
+
     switch (*bits) {
+#if defined(PSA_WANT_ECC_SECP_R1_192)
       case 192:
-        // The order n is stored as the second element in the curve-parameter tuple
-        // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-        // dependent on the length of the corresponding key.
-        modulo_ptr = sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize);
+        if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+          // The order n is stored as the second element in the curve-parameter tuple
+          // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
+          // dependent on the length of the corresponding key.
+          modulo_ptr = sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize);
+        } else {
+          return PSA_ERROR_NOT_SUPPORTED;
+        }
         break;
+#endif // PSA_WANT_ECC_SECP_R1_192
+#if defined(PSA_WANT_ECC_SECP_R1_224)
       case 224:
-        // The order n is stored as the second element in the curve-parameter tuple
-        // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-        // dependent on the length of the corresponding key.
-        modulo_ptr = sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize);
+        if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+          modulo_ptr = sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize);
+        } else {
+          return PSA_ERROR_NOT_SUPPORTED;
+        }
         break;
+#endif // PSA_WANT_ECC_SECP_R1_224
       case 256:
-        // The order n is stored as the second element in the curve-parameter tuple
-        // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
-        // dependent on the length of the corresponding key.
-        modulo_ptr = sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize);
+        switch (curve_type) {
+#if defined(PSA_WANT_ECC_SECP_R1_256)
+          case PSA_ECC_FAMILY_SECP_R1:
+            modulo_ptr = sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize);
+            break;
+#endif // PSA_WANT_ECC_SECP_R1_256
+#if defined(PSA_WANT_ECC_SECP_K1_256)
+          case PSA_ECC_FAMILY_SECP_K1:
+            modulo_ptr = sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize);
+            break;
+#endif // PSA_WANT_ECC_SECP_K1_256
+        }
         break;
       default:
         return PSA_ERROR_NOT_SUPPORTED;
@@ -368,17 +451,41 @@ psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *
     *bits = (data_length - 1) * 8 / 2;
 
     switch (*bits) {
+#if defined(PSA_WANT_ECC_SECP_R1_192)
       case 192:
-        curve_flags = sx_ecc_curve_p192.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p192.params;
+        if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+          curve_flags = sx_ecc_curve_p192.pk_flags;
+          domain_ptr = (block_t*)&sx_ecc_curve_p192.params;
+        } else {
+          return PSA_ERROR_NOT_SUPPORTED;
+        }
         break;
+#endif // PSA_WANT_ECC_SECP_R1_192
+#if defined(PSA_WANT_ECC_SECP_R1_224)
       case 224:
-        curve_flags = sx_ecc_curve_p224.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p224.params;
+        if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
+          curve_flags = sx_ecc_curve_p224.pk_flags;
+          domain_ptr = (block_t*)&sx_ecc_curve_p224.params;
+        } else {
+          return PSA_ERROR_NOT_SUPPORTED;
+        }
         break;
+#endif // PSA_WANT_ECC_SECP_R1_224
       case 256:
-        curve_flags = sx_ecc_curve_p256.pk_flags;
-        domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
+        switch (curve_type) {
+#if defined(PSA_WANT_ECC_SECP_R1_256)
+          case PSA_ECC_FAMILY_SECP_R1:
+            curve_flags = sx_ecc_curve_p256.pk_flags;
+            domain_ptr = (block_t*)&sx_ecc_curve_p256.params;
+            break;
+#endif // PSA_WANT_ECC_SECP_R1_256
+#if defined(PSA_WANT_ECC_SECP_K1_256)
+          case PSA_ECC_FAMILY_SECP_K1:
+            curve_flags = sx_ecc_curve_p256k1.pk_flags;
+            domain_ptr = (block_t*)&sx_ecc_curve_p256k1.params;
+            break;
+#endif // PSA_WANT_ECC_SECP_K1_256
+        }
         break;
       default:
         return PSA_ERROR_NOT_SUPPORTED;
@@ -405,7 +512,30 @@ psa_status_t sli_cryptoacc_transparent_validate_key(const psa_key_attributes_t *
     }
   }
 
+  if ( status == PSA_SUCCESS ) {
+    if ( key_buffer_size >= data_length ) {
+      memcpy(key_buffer, data, data_length);
+      *key_buffer_length = data_length;
+    } else {
+      status = PSA_ERROR_BUFFER_TOO_SMALL;
+    }
+  }
+
   return status;
+
+#else // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
+
+  (void) attributes;
+  (void) data;
+  (void) data_length;
+  (void) key_buffer;
+  (void) key_buffer_size;
+  (void) key_buffer_length;
+  (void) bits;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_KEY_TYPE_ECC_* && PSA_WANT_ECC_*
 }
 
 #endif // defined(CRYPTOACC_PRESENT)

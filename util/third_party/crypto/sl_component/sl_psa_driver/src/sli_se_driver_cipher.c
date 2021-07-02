@@ -33,9 +33,8 @@
 #if defined(SEMAILBOX_PRESENT)
 
 #include "psa/crypto.h"
+#include "psa/crypto_extra.h"
 #include "sli_se_driver_cipher.h"
-#include "mbedtls/entropy_poll.h"
-
 #include "sl_se_manager.h"
 #include "sl_se_manager_cipher.h"
 #include "sl_se_manager_entropy.h"
@@ -43,6 +42,16 @@
 #include "sli_se_driver_key_management.h"
 
 #include <string.h>
+
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
 
 /**
  * @brief
@@ -89,18 +98,19 @@ validate_key_algorithm_match(psa_algorithm_t alg,
       }
       break;
     #if _SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT
-      // ChaCha20 is not supported yet. Tracked in CRDSW-8947
-      // case PSA_ALG_CHACHA20:
-      //   if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
-      //     return PSA_ERROR_INVALID_ARGUMENT;
-      //   }
-      //   break;
+    case PSA_ALG_STREAM_CIPHER:
+      if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
+        return PSA_ERROR_NOT_SUPPORTED;
+      }
+      break;
     #endif // VAULT
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
   return PSA_SUCCESS;
 }
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 
 /** Encrypt a message using a symmetric cipher.
  *
@@ -152,11 +162,44 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
-  int trng_ret = -1;
+#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                     \
+  || defined(PSA_WANT_ALG_CTR)                                                 \
+  || defined(PSA_WANT_ALG_CFB)                                                 \
+  || defined(PSA_WANT_ALG_OFB)                                                 \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                         \
+  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#if defined(PSA_WANT_KEY_TYPE_AES) \
+  && (defined(PSA_WANT_ALG_CTR)    \
+  || defined(PSA_WANT_ALG_CFB)     \
+  || defined(PSA_WANT_ALG_OFB))
   uint8_t tmp_buf[16] = { 0 };
+#endif
+#if ((defined(PSA_WANT_KEY_TYPE_AES)                                           \
+  && (defined(PSA_WANT_ALG_CTR)                                                \
+  || defined(PSA_WANT_ALG_CFB)                                                 \
+  || defined(PSA_WANT_ALG_OFB)                                                 \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
+  || defined(PSA_WANT_ALG_CBC_PKCS7))))                                        \
+  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
   uint8_t iv_buf[16] = { 0 };
+#endif
+#if (defined(PSA_WANT_KEY_TYPE_AES)       \
+  && (defined(PSA_WANT_ALG_CTR)           \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))
   uint8_t final_block[16] = { 0 };
-  size_t iv_length;
+#endif
+#endif // MBEDTLS_PSA_CRYPTO_C
 
   // Argument check
   if (key_buffer == NULL
@@ -211,6 +254,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   }
 
   switch (alg) {
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
       // Check buffer sizes
       if (output_size < input_length) {
@@ -229,8 +273,14 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                    input_length,
                                    input,
                                    output);
+      if (status != PSA_SUCCESS) {
+        goto exit;
+      }
       *output_length = input_length;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
       // Check buffer sizes
       if (output_size < input_length + 16) {
@@ -238,9 +288,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       }
 
       // Generate nonce.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, 16, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      psa_status = psa_generate_random(iv_buf, 16);
+      if (psa_status != PSA_SUCCESS) {
+        return psa_status;
       }
 
       // Write nonce to temporary buf to be used internally by sl_se_aes_crypt_ctr.
@@ -262,6 +312,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                      tmp_buf,
                                      input,
                                      &output[16]);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
       }
 
       // Encrypt final block if there is any.
@@ -274,6 +327,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                      tmp_buf,
                                      final_block,
                                      &output[16 + (input_length & ~0x0F)]);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
       }
 
       // Write IV to output.
@@ -281,6 +337,8 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length + 16;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
       // Check buffer sizes
       if (output_size < input_length + 16) {
@@ -288,9 +346,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, 16, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      psa_status = psa_generate_random(iv_buf, 16);
+      if (psa_status != PSA_SUCCESS) {
+        return psa_status;
       }
 
       // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cbf128.
@@ -312,6 +370,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                         tmp_buf,
                                         input,
                                         &output[16]);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
       }
 
       // Encrypt final block if there is any.
@@ -324,6 +385,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                         tmp_buf,
                                         final_block,
                                         &output[16 + (input_length & ~0x0F)]);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
       }
 
       // Write IV to output.
@@ -331,6 +395,8 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length + 16;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
     {
       // Check buffer sizes
@@ -339,9 +405,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, 16, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      psa_status = psa_generate_random(iv_buf, 16);
+      if (psa_status != PSA_SUCCESS) {
+        return psa_status;
       }
 
       // Write IV to temporary buf to be used internally by sl_se_aes_crypt_ecb.
@@ -379,6 +445,10 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       *output_length = input_length + 16;
     }
     break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_KEY_TYPE_AES)           \
+    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+    || defined(PSA_WANT_ALG_CBC_PKCS7))
     case PSA_ALG_CBC_NO_PADDING:
       // We cannot do CBC without padding on non-block sizes.
       if (input_length % 16 != 0) {
@@ -398,9 +468,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
       }
 
       // Generate IV.
-      trng_ret = mbedtls_hardware_poll(NULL, iv_buf, 16, &iv_length);
-      if (trng_ret != 0) {
-        return PSA_ERROR_HARDWARE_FAILURE;
+      psa_status = psa_generate_random(iv_buf, 16);
+      if (psa_status != PSA_SUCCESS) {
+        return psa_status;
       }
 
       // Store last block (if non-blocksize input-length) to temporary buffer to be used in padding.
@@ -449,41 +519,46 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         *output_length = 16 + input_length;
       }
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    case PSA_ALG_CHACHA20:
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
       // check buffer sizes
-      if (output_size < input_length + 16) {
+      if (output_size < input_length + 12) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
-      // generate IV and write to output
-      status = sl_se_get_random(&cmd_ctx, output, 12);
+      // generate IV to a temporary buffer, to avoid collision in case
+      // input and output buffers overlap.
+      status = sl_se_get_random(&cmd_ctx, &iv_buf[4], 12);
       if (status != SL_STATUS_OK) {
         goto exit;
       }
 
-      // set initial counter to 1 (preferred by RFC8439)
-      output[12] = 0;
-      output[13] = 0;
-      output[14] = 0;
-      output[15] = 1;
+      // PSA Crypto dictates that the initial counter for ChaCha20 starts
+      // at zero (unless using the multi-part API)
+      memset(iv_buf, 0, 4);
 
       status = sl_se_chacha20_crypt(&cmd_ctx,
                                     SL_SE_ENCRYPT,
                                     &key_desc,
                                     input_length,
-                                    &output[12],
-                                    output,
+                                    iv_buf,
+                                    &iv_buf[4],
                                     input,
-                                    &output[16]);
+                                    &output[12]);
 
-      *output_length = 16 + input_length;
+      // Prepend the generated IV
+      memcpy(output, &iv_buf[4], 12);
+      *output_length = 12 + input_length;
       break;
-#endif
+#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
+#endif // VAULT
+#endif // MBEDTLS_PSA_CRYPTO_C
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -501,6 +576,22 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   } else {
     return PSA_SUCCESS;
   }
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 /** Decrypt a message using a symmetric cipher.
@@ -551,8 +642,34 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
                                           size_t output_size,
                                           size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)                                           \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                    \
+  || defined(PSA_WANT_ALG_CTR)                                                \
+  || defined(PSA_WANT_ALG_CFB)                                                \
+  || defined(PSA_WANT_ALG_OFB)                                                \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                     \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                        \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
+#if defined(PSA_WANT_KEY_TYPE_AES)   \
+  && (defined(PSA_WANT_ALG_CTR)      \
+  || defined(PSA_WANT_ALG_CBC_PKCS7) \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING))
   uint8_t tmp_buf[16] = { 0 };
+#endif
+#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
+  && (defined(PSA_WANT_ALG_CTR)                                                \
+  || defined(PSA_WANT_ALG_OFB)                                                 \
+  || defined(PSA_WANT_ALG_CFB)                                                 \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)                                           \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)))                                    \
+  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
   uint8_t iv_buf[16] = { 0 };
+#endif
 
   // Argument check.
   if (key_buffer == NULL
@@ -608,6 +725,7 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   }
 
   switch (alg) {
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
       // Check buffer sizes.
       if (output_size < input_length) {
@@ -629,6 +747,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
       // Check buffer sizes.
       if (output_size < input_length - 16) {
@@ -649,6 +769,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length - 16;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
       // Check buffer sizes.
       if (output_size < input_length - 16) {
@@ -669,6 +791,8 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
 
       *output_length = input_length - 16;
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
     {
       // Check buffer sizes.
@@ -704,6 +828,10 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       *output_length = input_length - 16;
     }
     break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
+#if defined(PSA_WANT_KEY_TYPE_AES)           \
+    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+    || defined(PSA_WANT_ALG_CBC_PKCS7))
     case PSA_ALG_CBC_NO_PADDING:
       // We cannot do CBC without padding on non-block sizes.
       if (input_length % 16 != 0) {
@@ -783,34 +911,47 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
       }
       break;
     }
+#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    case PSA_ALG_CHACHA20:
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    case PSA_ALG_STREAM_CIPHER:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
       // check buffer sizes.
-      if (output_size < input_length - 16) {
+      if (output_size < input_length - 12) {
         return PSA_ERROR_BUFFER_TOO_SMALL;
       }
+
+      // PSA Crypto dictates that the initial counter for ChaCha20 starts
+      // at zero (unless using the multi-part API)
+      memset(iv_buf, 0, 4);
 
       status = sl_se_chacha20_crypt(&cmd_ctx,
                                     SL_SE_ENCRYPT,
                                     &key_desc,
                                     input_length,
-                                    &input[12],
+                                    iv_buf,
                                     input,
-                                    &input[16],
+                                    &input[12],
                                     output);
 
-      *output_length = input_length - 16;
+      *output_length = input_length - 12;
       break;
+#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
 #endif
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
 
+#if defined(PSA_WANT_KEY_TYPE_AES)   \
+  && (defined(PSA_WANT_ALG_OFB)      \
+  || defined(PSA_WANT_ALG_CBC_PKCS7) \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING))
   exit:
+#endif
+
   if (status != SL_STATUS_OK) {
     memset(output, 0, output_size);
     *output_length = 0;
@@ -823,12 +964,38 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   } else {
     return PSA_SUCCESS;
   }
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t *operation,
                                                 const psa_key_attributes_t *attributes,
                                                 psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   if (operation == NULL || attributes == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -842,12 +1009,32 @@ psa_status_t sli_se_driver_cipher_encrypt_setup(sli_se_driver_cipher_operation_t
 
   // Validate combination of key and algorithm
   return validate_key_algorithm_match(alg, attributes);
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)operation;
+  (void)attributes;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t *operation,
                                                 const psa_key_attributes_t *attributes,
                                                 psa_algorithm_t alg)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   if (operation == NULL || attributes == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -861,48 +1048,37 @@ psa_status_t sli_se_driver_cipher_decrypt_setup(sli_se_driver_cipher_operation_t
 
   // Validate combination of key and algorithm
   return validate_key_algorithm_match(alg, attributes);
-}
 
-psa_status_t sli_se_driver_cipher_generate_iv(sli_se_driver_cipher_operation_t *operation,
-                                              uint8_t *iv,
-                                              size_t iv_size,
-                                              size_t *iv_length)
-{
-  if (operation == NULL || iv == NULL || iv_length == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
+  #else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 
-  // Generate & output random IV (output because application may want to record and/or transmit IV)
-  if (operation->iv_len != 0) {
-    // IV was set previously
-    return PSA_ERROR_BAD_STATE;
-  }
+  (void)operation;
+  (void)attributes;
+  (void)alg;
 
-  // Todo: do any of the supported algorithms have a shorter IV length?
-  if (iv_size < 16) {
-    return PSA_ERROR_BUFFER_TOO_SMALL;
-  }
+  return PSA_ERROR_NOT_SUPPORTED;
 
-  int trng_ret = mbedtls_hardware_poll(NULL, iv, iv_size, iv_length);
-  if (trng_ret != 0) {
-    return PSA_ERROR_HARDWARE_FAILURE;
-  }
-
-  *iv_length = 16;
-
-  // Set generated IV as current IV
-  return sli_se_driver_cipher_set_iv(operation, iv, *iv_length);
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *operation,
                                          const uint8_t *iv,
                                          size_t iv_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)       \
+  && (defined(PSA_WANT_ALG_CTR)           \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))    \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   if (operation == NULL || iv == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   if (iv_length > sizeof(operation->iv)) {
+    // IV can't be larger than what our state can store
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -911,8 +1087,62 @@ psa_status_t sli_se_driver_cipher_set_iv(sli_se_driver_cipher_operation_t *opera
     return PSA_ERROR_BAD_STATE;
   }
 
-  memcpy(operation->iv, iv, iv_length);
+  switch (operation->alg) {
+    case PSA_ALG_ECB_NO_PADDING:
+      if (iv_length > 0) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      } else {
+        return PSA_SUCCESS;
+      }
+    case PSA_ALG_CTR:
+    case PSA_ALG_CFB:
+    case PSA_ALG_OFB:
+    case PSA_ALG_CBC_NO_PADDING:
+    case PSA_ALG_CBC_PKCS7:
+      if (iv_length != 16) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      memcpy(operation->iv, iv, iv_length);
+      break;
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    case PSA_ALG_STREAM_CIPHER:
+      // PSA Crypto supports multiple IV input lengths for ChaCha20
+      // refer to the doc for PSA_ALG_STREAM_CIPHER
+      if (iv_length == 12) {
+        // Set initial counter value to zero
+        memset(operation->iv, 0, 4);
+        memcpy(&operation->iv[4], iv, iv_length);
+      } else if (iv_length == 16) {
+        // Initial counter value is stored little-endian in the first four bytes
+        // This makes our lives easier: since this driver will only run on
+        // little-endian machines, we can just cast it to a uint32.
+        memcpy(operation->iv, iv, iv_length);
+      } else if (iv_length == 8) {
+        // "original" ChaCha20: 8-byte IV and 8-byte counter (which is initialised to 0)
+        // We currently don't support this format
+        return PSA_ERROR_NOT_SUPPORTED;
+      } else {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      break;
+    #endif
+    default:
+      return PSA_ERROR_BAD_STATE;
+  }
+
+  operation->iv_len = iv_length;
+
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)operation;
+  (void)iv;
+  (void)iv_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *operation,
@@ -922,12 +1152,22 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
                                          size_t output_size,
                                          size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)                                            \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING)                                     \
+  || defined(PSA_WANT_ALG_CTR)                                                 \
+  || defined(PSA_WANT_ALG_CFB)                                                 \
+  || defined(PSA_WANT_ALG_OFB)                                                 \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)                                      \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))                                         \
+  || ((defined(PSA_WANT_KEY_TYPE_CHACHA20)                                     \
+  && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)) \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   // Argument check
   if (operation == NULL
       || (input == NULL && input_length > 0)
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -962,6 +1202,11 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     case PSA_ALG_OFB:
       lagging = false;
       break;
+    #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    case PSA_ALG_STREAM_CIPHER:
+      lagging = false;
+      break;
+    #endif
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -989,10 +1234,17 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       }
     }
 
-    // Early failure if output buffer is too small. Failing here prevents messing
-    // with the context, such that operation can be retried with larger output buffer
-    size_t output_blocks = ((input_length + operation->processed_length) / 16) - (operation->processed_length / 16);
-    if (output_size < output_blocks) {
+    // We know we'll be computing and outputing at least the completed streaming block
+    size_t output_blocks = 1;
+    // plus however many full blocks are left over after filling the stream buffer
+    output_blocks += (input_length - bytes_to_boundary) / 16;
+    // If we're caching and the sum of already-input and to-be-input data
+    // ends up at a block boundary, we won't be outputting the last block
+    if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
+      output_blocks -= 1;
+    }
+
+    if (output_size < (output_blocks * 16)) {
       return PSA_ERROR_BUFFER_TOO_SMALL;
     }
   } else {
@@ -1027,6 +1279,7 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
   }
 
   switch (operation->alg) {
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_ECB_NO_PADDING)
     case PSA_ALG_ECB_NO_PADDING:
       // Read in up to full streaming input block
       if (bytes_to_boundary != 16) {
@@ -1073,7 +1326,12 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
       // What's left over in the input buffer will be cleaned up after switch-case
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_ECB_NO_PADDING
+#if defined(PSA_WANT_KEY_TYPE_AES)           \
+    && (defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+    || defined(PSA_WANT_ALG_CBC_PKCS7))
     case PSA_ALG_CBC_NO_PADDING:
+    // fall through
     case PSA_ALG_CBC_PKCS7:
       if (bytes_to_boundary != 16) {
         memcpy(&operation->streaming_block[operation->processed_length % 16],
@@ -1133,6 +1391,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
       // What's left over in the input buffer will be cleaned up after switch-case
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_CBC_PKCS7 || PSA_WANT_ALG_CBC_NO_PADDING)
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
     {
       uint32_t offset = operation->processed_length % 16;
@@ -1156,6 +1416,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       input_length -= input_length;
       break;
     }
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CTR
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
     {
       uint32_t offset = operation->processed_length % 16;
@@ -1178,6 +1440,8 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
       input_length -= input_length;
       break;
     }
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CFB
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
     {
       size_t data_length = input_length;
@@ -1200,13 +1464,95 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
         n = (n + 1) & 0x0F;
       }
-    }
 
       input += input_length;
       actual_output_length += input_length;
       operation->processed_length += input_length;
       input_length -= input_length;
       break;
+    }
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_OFB
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+#if defined(PSA_WANT_KEY_TYPE_CHACHA20) && defined(PSA_WANT_ALG_STREAM_CIPHER)
+    case PSA_ALG_STREAM_CIPHER:
+    {
+      // counter value is at the start of the IV buffer
+      uint32_t ctr_value = *((uint32_t*)operation->iv);
+
+      // If the counter would wrap, refuse the operation
+      if (ctr_value > (ctr_value + (input_length / 64))) {
+        return PSA_ERROR_BAD_STATE;
+      }
+
+      if (operation->processed_length % 64 != 0) {
+        // Perform partial block operation until block boundary or end of input
+        uint8_t chacha20_block[64] = { 0 };
+        size_t offset_in_block = operation->processed_length % sizeof(chacha20_block);
+        size_t length_in_block = input_length < (sizeof(chacha20_block) - offset_in_block) ? input_length : (sizeof(chacha20_block) - offset_in_block);
+        uint32_t counter_bytes = __REV(ctr_value);
+
+        // Retrieve streaming block
+        status = sl_se_chacha20_crypt(&cmd_ctx,
+                                      SL_SE_ENCRYPT,
+                                      key_desc,
+                                      sizeof(chacha20_block),
+                                      (const unsigned char*)&counter_bytes,
+                                      &operation->iv[4],
+                                      chacha20_block,
+                                      chacha20_block);
+
+        if (status != SL_STATUS_OK) {
+          goto exit;
+        }
+
+        // Calculate stream output
+        for (size_t i = 0; i < length_in_block; i++) {
+          output[i] = input[i] ^ chacha20_block[offset_in_block + i];
+        }
+
+        input += length_in_block;
+        actual_output_length += length_in_block;
+        operation->processed_length += length_in_block;
+        input_length -= length_in_block;
+
+        // Update the counter if the block is complete
+        if (offset_in_block + length_in_block == sizeof(chacha20_block)) {
+          ctr_value++;
+        }
+      }
+
+      if (input_length > 0) {
+        // Perform remainder of operation in a single call
+        uint32_t counter_bytes = __REV(ctr_value);
+
+        status = sl_se_chacha20_crypt(&cmd_ctx,
+                                      SL_SE_ENCRYPT,
+                                      key_desc,
+                                      input_length,
+                                      (const unsigned char*)&counter_bytes,
+                                      &operation->iv[4],
+                                      input,
+                                      &output[actual_output_length]);
+
+        if (status != SL_STATUS_OK) {
+          goto exit;
+        }
+
+        // Update the counter with the amount of full blocks processed
+        ctr_value += input_length / 64;
+
+        input += input_length;
+        actual_output_length += input_length;
+        operation->processed_length += input_length;
+        input_length -= input_length;
+      }
+
+      // Store the updated counter number to the IV buffer
+      *((uint32_t*)operation->iv) = ctr_value;
+      break;
+    }
+#endif // PSA_WANT_KEY_TYPE_CHACHA20 && PSA_WANT_ALG_STREAM_CIPHER
+#endif // VAULT
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -1240,6 +1586,19 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
     *output_length = actual_output_length;
     return PSA_SUCCESS;
   }
+
+#else // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_* && PSA_WANT_KEY_TYPE_*
 }
 
 psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *operation,
@@ -1247,11 +1606,21 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
                                          size_t output_size,
                                          size_t *output_length)
 {
+#if (defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CTR)             \
+  || defined(PSA_WANT_ALG_CFB)             \
+  || defined(PSA_WANT_ALG_OFB)             \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING)  \
+  || defined(PSA_WANT_ALG_CBC_PKCS7)))     \
+  || (defined(PSA_WANT_KEY_TYPE_CHACHA20)  \
+  && defined(PSA_WANT_ALG_STREAM_CIPHER))
+
   // Finalize cipher operation. This will only output data for algorithms which include padding.
   // This is currently only AES-CBC with PKCS#7.
 
   // Argument check
-  if (operation == NULL || output == NULL || output_length == NULL) {
+  if (operation == NULL || (output == NULL && output_size > 0) || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -1263,6 +1632,9 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
   }
 
   switch (operation->alg) {
+#if defined(PSA_WANT_KEY_TYPE_AES)           \
+    && (defined(PSA_WANT_ALG_ECB_NO_PADDING) \
+    || defined(PSA_WANT_ALG_CBC_NO_PADDING))
     case PSA_ALG_ECB_NO_PADDING:
     case PSA_ALG_CBC_NO_PADDING:
       // No-padding operations can't finish if they haven't processed block-size input
@@ -1273,14 +1645,10 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
         psa_status = PSA_SUCCESS;
       }
       break;
+#endif // PSA_WANT_KEY_TYPE_AES && (PSA_WANT_ALG_ECB_NO_PADDING || PSA_WANT_ALG_CBC_NO_PADDING)
+#if defined(PSA_WANT_KEY_TYPE_AES) && defined(PSA_WANT_ALG_CBC_PKCS7)
     case PSA_ALG_CBC_PKCS7:
     {
-      if (output == NULL
-          || output_size < 16
-          || output_length == NULL) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
-
       // Ephemeral contexts
       sl_se_command_context_t cmd_ctx = { 0 };
 
@@ -1292,6 +1660,10 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
 
       // Calculate padding, update, output final block
       if (operation->direction == SL_SE_ENCRYPT) {
+        if (output_size < 16) {
+          psa_status = PSA_ERROR_BUFFER_TOO_SMALL;
+          break;
+        }
         size_t padding_bytes = 16 - (operation->processed_length % 16);
         memset(&operation->streaming_block[16 - padding_bytes], padding_bytes, padding_bytes);
 
@@ -1338,6 +1710,11 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
         size_t invalid_padding = 0;
         size_t padding_bytes = out_buf[15];
 
+        if (output_size < 16 - padding_bytes) {
+          psa_status = PSA_ERROR_BUFFER_TOO_SMALL;
+          break;
+        }
+
         // Check that the last padding byte is valid (in the range 0x1 to 0x10).
         // Note that the below checks are valid for both partial block padding
         // and complete padding blocks.
@@ -1364,13 +1741,24 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
       }
     }
     break;
+#endif // PSA_WANT_KEY_TYPE_AES && PSA_WANT_ALG_CBC_PKCS7
+#if (defined(PSA_WANT_KEY_TYPE_AES)         \
+    && (defined(PSA_WANT_ALG_CFB)           \
+    || defined(PSA_WANT_ALG_OFB)            \
+    || defined(PSA_WANT_ALG_CTR)))          \
+    || (defined(PSA_WANT_KEY_TYPE_CHACHA20) \
+    && defined(PSA_WANT_ALG_STREAM_CIPHER))
     case PSA_ALG_CTR:
     case PSA_ALG_CFB:
     case PSA_ALG_OFB:
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    case PSA_ALG_STREAM_CIPHER:
+#endif // VAULT
       // Actual stream ciphers: nothing to do here.
       *output_length = 0;
       psa_status = PSA_SUCCESS;
       break;
+#endif
     default:
       psa_status = PSA_ERROR_BAD_STATE;
   }
@@ -1378,6 +1766,17 @@ psa_status_t sli_se_driver_cipher_finish(sli_se_driver_cipher_operation_t *opera
     *output_length = 0;
   }
   return psa_status;
+
+#else // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
+
+  (void)operation;
+  (void)output;
+  (void)output_size;
+  (void)output_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_AES && PSA_WANT_KEY_TYPE_*
 }
 
 #endif // defined(SEMAILBOX_PRESENT)

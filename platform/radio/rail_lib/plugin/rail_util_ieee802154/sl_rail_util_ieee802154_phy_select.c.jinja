@@ -40,15 +40,13 @@
 {%- endif %}
 {%- endfor %}
 
-extern RAIL_Handle_t emPhyRailHandle;
+{%- for entry in rail_util_ieee802154_phy_select_callbacks %}
+{%- if entry["include"] == empty and entry["update_active_radio_config"] != empty %}
+extern void {{ entry["update_active_radio_config"] }}(void);
+{%- endif %}
+{%- endfor %}
 
-// This is grody, but it beats making the PHY need to know about all
-// the PHYs.  Borrow from unreleased phy/phy.h:
-enum {
-  EMBER_RADIO_POWER_MODE_RX_ON,
-  EMBER_RADIO_POWER_MODE_OFF
-};
-typedef uint8_t RadioPowerMode;
+extern RAIL_Handle_t emPhyRailHandle;
 
 #define RUNTIME_PHY_SELECT (0 {%- for entry in rail_util_ieee802154_phy_select_callbacks %} {%- if entry["runtime_phy_select"] != empty %} || {{ entry["runtime_phy_select"]|upper }} {%- endif %} {%- endfor %})
 
@@ -118,7 +116,7 @@ sl_rail_util_radio_config_t sl_rail_util_get_active_radio_config(void)
   return active_radio_config;
 }
 
-#define ANT_DIV_PHY_DEFAULT_ENABLED (ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
+#define ANT_DIV_PHY_DEFAULT_ENABLED (SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE != SL_RAIL_UTIL_ANTENNA_MODE_DISABLED)
 #define SL_RAIL_UTIL_RADIO_CONFIG_154_2P4_DEFAULT_SUPPORTED                   \
   ((SL_RAIL_UTIL_ANT_DIV_RX_RUNTIME_PHY_SELECT || !ANT_DIV_PHY_DEFAULT_ENABLED) \
   && (SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT || !SL_RAIL_UTIL_COEX_PHY_ENABLED) \

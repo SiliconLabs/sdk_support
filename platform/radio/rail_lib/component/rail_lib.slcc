@@ -20,6 +20,7 @@ requires:
   - name: emlib_cmu
   - name: emlib_emu
   - name: emlib_system
+  - name: emlib_prs
   # Note: In the future, this fem_util dependency needs to be required by a more generic component.
   - name: fem_util
     condition:
@@ -36,8 +37,8 @@ requires:
   # Note: In the future, this rail_util_rf_path dependency needs to be required by a more generic component.
   - name: rail_util_rf_path
     condition:
-      - device_series_2
       - device_sdid_200 # efr32xg21 has a chip-internal rf path selection
+      - device_init
   - name: device_init_hfxo
     condition:
       - device_init # RAIL requires HFXO, but only require this specific implementation if device_init is in play.

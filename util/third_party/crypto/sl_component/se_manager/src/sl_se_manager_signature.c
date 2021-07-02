@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager API.
+ * @brief Silicon Labs Secure Engine Manager API.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -62,32 +62,39 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   SE_Command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_SIGN;
+#if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
+  if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
+      == SL_SE_KEY_TYPE_ECC_EDDSA) {
+    command_word = SLI_SE_COMMAND_EDDSA_SIGN;
+  } else
+#endif
+  {
+    if (hashed_message == false) {
+      switch (hash_alg) {
+        case SL_SE_HASH_SHA1:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA1;
+          break;
 
-  if (hashed_message == false) {
-    switch (hash_alg) {
-      case SL_SE_HASH_SHA1:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA1;
-        break;
+        case SL_SE_HASH_SHA224:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA224;
+          break;
 
-      case SL_SE_HASH_SHA224:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA224;
-        break;
-
-      case SL_SE_HASH_SHA256:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA256;
-        break;
+        case SL_SE_HASH_SHA256:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA256;
+          break;
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-      case SL_SE_HASH_SHA384:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA384;
-        break;
+        case SL_SE_HASH_SHA384:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA384;
+          break;
 
-      case SL_SE_HASH_SHA512:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA512;
-        break;
+        case SL_SE_HASH_SHA512:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA512;
+          break;
 #endif
-      default:
-        return SL_STATUS_INVALID_PARAMETER;
+        default:
+          return SL_STATUS_INVALID_PARAMETER;
+      }
     }
   }
 
@@ -108,7 +115,7 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
   #if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
   // EdDSA requires the message twice
   SE_DataTransfer_t repeated_message_buffer;
-  if (key->type == SL_SE_KEY_TYPE_ECC_EDDSA) {
+  if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
     repeated_message_buffer.next = (void*)SE_DATATRANSFER_STOP;
     repeated_message_buffer.data = (void*)message;
     repeated_message_buffer.length = message_len;
@@ -145,33 +152,40 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
   SE_Command_t *se_cmd = &cmd_ctx->command;
   sl_status_t status;
   uint32_t command_word = SLI_SE_COMMAND_SIGNATURE_VERIFY;
+#if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
+  if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
+      == SL_SE_KEY_TYPE_ECC_EDDSA) {
+    command_word = SLI_SE_COMMAND_EDDSA_VERIFY;
+  } else
+#endif
+  {
+    if (hashed_message == false) {
+      switch (hash_alg) {
+        case SL_SE_HASH_SHA1:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA1;
+          break;
 
-  if (hashed_message == false) {
-    switch (hash_alg) {
-      case SL_SE_HASH_SHA1:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA1;
-        break;
+        case SL_SE_HASH_SHA224:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA224;
+          break;
 
-      case SL_SE_HASH_SHA224:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA224;
-        break;
-
-      case SL_SE_HASH_SHA256:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA256;
-        break;
+        case SL_SE_HASH_SHA256:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA256;
+          break;
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-      case SL_SE_HASH_SHA384:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA384;
-        break;
+        case SL_SE_HASH_SHA384:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA384;
+          break;
 
-      case SL_SE_HASH_SHA512:
-        command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA512;
-        break;
+        case SL_SE_HASH_SHA512:
+          command_word |= SLI_SE_COMMAND_OPTION_HASH_SHA512;
+          break;
 
 #endif
-      default:
-        return SL_STATUS_INVALID_PARAMETER;
+        default:
+          return SL_STATUS_INVALID_PARAMETER;
+      }
     }
   }
 
@@ -192,7 +206,7 @@ sl_status_t sl_se_ecc_verify(sl_se_command_context_t *cmd_ctx,
                                                                signature_len);
 
   #if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
-  if (key->type == SL_SE_KEY_TYPE_ECC_EDDSA) {
+  if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
     SE_addDataInput(se_cmd, &signature_buffer);
     SE_addDataInput(se_cmd, &message_buffer);
   } else

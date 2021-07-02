@@ -17,11 +17,11 @@
 
 #include "sl_simple_led.h"
 #include "em_gpio.h"
-{% for inst in simple_led_instance %}
+{% for inst in simple_led_instance | sort -%}
 #include "sl_simple_led_{{ inst }}_config.h"
-{% endfor %}
+{% endfor -%}
 
-{% for inst in simple_led_instance %}
+{% for inst in simple_led_instance | sort %}
 sl_simple_led_context_t simple_{{ inst | lower }}_context = {
   .port = SL_SIMPLE_LED_{{ inst | upper }}_PORT,
   .pin = SL_SIMPLE_LED_{{ inst | upper }}_PIN,
@@ -36,11 +36,17 @@ const sl_led_t sl_led_{{ inst | lower }} = {
   .toggle = sl_simple_led_toggle,
   .get_state = sl_simple_led_get_state,
 };
-{% endfor %}
+{%- endfor %}
+
+const sl_led_t *sl_simple_led_array[] = {
+{%- for inst in simple_led_instance | sort %}
+  &sl_led_{{ inst | lower }}{% if not loop.last %},{% endif %}
+{%- endfor %}
+};
 
 void sl_simple_led_init_instances(void)
 {
-  {% for inst in simple_led_instance %}
+  {%- for inst in simple_led_instance %}
   sl_led_init(&sl_led_{{ inst | lower }});
-  {% endfor %}
+  {%- endfor %}
 }

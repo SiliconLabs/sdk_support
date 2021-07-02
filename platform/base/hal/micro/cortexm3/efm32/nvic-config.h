@@ -14,6 +14,7 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+
 #if !defined (CORTEXM3_EFR32)
   #include "em_device.h"
   #if defined (_SILICON_LABS_32B_SERIES_1_CONFIG_4)
@@ -28,6 +29,8 @@
     #define EFR32_SERIES2_CONFIG1_MICRO
   #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2)
     #define EFR32_SERIES2_CONFIG2_MICRO
+  #elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+    #define EFR32_SERIES2_CONFIG4_MICRO
   #endif
 #endif
 
@@ -41,6 +44,8 @@
   #include "efr32/nvic-config-series2-config1.h"
 #elif defined (EFR32_SERIES2_CONFIG2_MICRO)
   #include "efr32/nvic-config-series2-config2.h"
+#elif defined (EFR32_SERIES2_CONFIG4_MICRO)
+  #include "efr32/nvic-config-series2-config4.h"
 #else
   #include "efr32/nvic-config-series1-config1.h"
 #endif

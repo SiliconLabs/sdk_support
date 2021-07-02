@@ -7,8 +7,10 @@ quality: "production"
 root_path: "platform/service/iostream"
 provides:
   - name: "iostream_debug"
-  - name: "iostream_transport"
+  - name: "iostream_transport_core"
     allow_multiple: true
+  - name: "iostream_transport"
+    allow_multiple: true    
 requires:
   - name: "iostream"
   - name: "debug_swo"

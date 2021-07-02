@@ -30,13 +30,14 @@
  * @param msg_len Length of buffer
  * @param msg_used Return parameter for storing the length of serialized data
  *
- * @return Zero for success; less than zero in case an error occurred
+ * @return Zero for success; SL_STATUS_INVALID_PARAMETER for unknown type
+ * or incorrect data length
  */
-int mesh_lib_serialize_state(const struct mesh_generic_state *current,
-                             const struct mesh_generic_state *target,
-                             uint8_t *msg_buf,
-                             size_t msg_len,
-                             size_t *msg_used);
+sl_status_t mesh_lib_serialize_state(const struct mesh_generic_state *current,
+                                     const struct mesh_generic_state *target,
+                                     uint8_t *msg_buf,
+                                     size_t msg_len,
+                                     size_t *msg_used);
 
 /**
  * @brief Deserialize model state from a byte array
@@ -52,14 +53,15 @@ int mesh_lib_serialize_state(const struct mesh_generic_state *current,
  * @param msg_buf Buffer to read serialized state from
  * @param msg_len Length of buffer
  *
- * @return Zero for success; less than zero in case an error occurred
+ * @return Zero for success; SL_STATUS_INVALID_PARAMETER for unknown type
+ * or incorrect data length
  */
-int mesh_lib_deserialize_state(struct mesh_generic_state *current,
-                               struct mesh_generic_state *target,
-                               int *has_target,
-                               mesh_generic_state_t kind,
-                               const uint8_t *msg_buf,
-                               size_t msg_len);
+sl_status_t mesh_lib_deserialize_state(struct mesh_generic_state *current,
+                                       struct mesh_generic_state *target,
+                                       int *has_target,
+                                       mesh_generic_state_t kind,
+                                       const uint8_t *msg_buf,
+                                       size_t msg_len);
 
 /**
  * @brief Serialize model request to a byte array
@@ -72,12 +74,13 @@ int mesh_lib_deserialize_state(struct mesh_generic_state *current,
  * @param msg_len Length of buffer
  * @param msg_used Return parameter for storing the length of serialized data
  *
- * @return Zero for success; less than zero in case an error occurred
+ * @return Zero for success; SL_STATUS_INVALID_PARAMETER for unknown type
+ * or incorrect data length
  */
-int mesh_lib_serialize_request(const struct mesh_generic_request *req,
-                               uint8_t *msg_buf,
-                               size_t msg_len,
-                               size_t *msg_used);
+sl_status_t mesh_lib_serialize_request(const struct mesh_generic_request *req,
+                                       uint8_t *msg_buf,
+                                       size_t msg_len,
+                                       size_t *msg_used);
 
 /**
  * @brief Deserialize model request from a byte array
@@ -90,11 +93,12 @@ int mesh_lib_serialize_request(const struct mesh_generic_request *req,
  * @param msg_buf Buffer to read serialized state from
  * @param msg_len Length of buffer
  *
- * @return Zero for success; less than zero in case an error occurred
+ * @return Zero for success; SL_STATUS_INVALID_PARAMETER for unknown type
+ * or incorrect data length
  */
-int mesh_lib_deserialize_request(struct mesh_generic_request *req,
-                                 mesh_generic_request_t kind,
-                                 const uint8_t *msg_buf,
-                                 size_t msg_len);
+sl_status_t mesh_lib_deserialize_request(struct mesh_generic_request *req,
+                                         mesh_generic_request_t kind,
+                                         const uint8_t *msg_buf,
+                                         size_t msg_len);
 
 #endif // MESH_SERDESER_H

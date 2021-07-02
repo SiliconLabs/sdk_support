@@ -23,3 +23,5 @@ requires:
   - name: "bluetooth_feature_sm"
 provides:
   - name: "bluetooth_feature_default"
+ui_hints:
+  visibility: never

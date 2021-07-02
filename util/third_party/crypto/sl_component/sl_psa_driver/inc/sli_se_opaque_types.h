@@ -161,7 +161,11 @@ typedef struct {
 
 typedef struct {
   sl_se_key_descriptor_t key_desc;
+  #if defined(PSA_WANT_ALG_HMAC)
+  uint8_t key[SLI_SE_WRAPPED_KEY_OVERHEAD + 64];
+  #else
   uint8_t key[SLI_SE_WRAPPED_KEY_OVERHEAD + 32];
+  #endif
   size_t key_len;
   sli_se_driver_mac_operation_t operation;
 } sli_se_opaque_mac_operation_t;

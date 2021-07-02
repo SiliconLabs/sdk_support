@@ -1,8 +1,8 @@
 /***************************************************************************//**
- * @file
+ *
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -16,46 +16,47 @@
 #ifndef CSLIB_CONFIG_H
 #define CSLIB_CONFIG_H
 
-/**************************************************************************//**
- *
- * @addtogroup cslib_config CSLIB library functional configuration
- * @{
- *
- * @brief Functional configuration for CSLIB
- *
- * The definitions provided in this file act as defaults in the functional
- * configuration of the capacitive sensing firmware library.
- *
- *****************************************************************************/
+// <<< Use Configuration Wizard in Context Menu >>>
 
-/// @brief Sets the number of samples crossing active/inactive thresh. before touch is qualified/disqualified.
-/// @note Minimum value is 1, maximum value is 15.
+// <h>CSLIB settings
+
+// <o DEF_BUTTON_DEBOUNCE> Debounce <1-15>
+// <i> Sets the number of samples crossing active/inactive thresh. before touch is qualified/disqualified.
+// <i> Default: 2
 #define DEF_BUTTON_DEBOUNCE                       2
 
-/// @brief Sets the period of scanning in active mode.
-/// Actual scan frequency is determined by this setting and by @ref DEF_FREE_RUN_SETTING
-/// @note Minimum value is 1, maximum value is 5000.
+// <o DEF_ACTIVE_MODE_PERIOD> Scan period in active mode <1-5000>
+// <i> Sets the period of scanning in active mode.
+// <i> Actual scan frequency is determined by this setting and by DEF_FREE_RUN_SETTING
+// <i> Default: 100
 #define DEF_ACTIVE_MODE_PERIOD                    100
 
-/// @brief Sets the period of scanning when in sleep mode.
-/// @note Minimum value is 1, maximum value is 5000.
+// <o DEF_SLEEP_MODE_PERIOD> Scan period in sleep mode <1-5000>
+// <i> Sets the period of scanning in sleep mode.
+// <i> Default: 100
 #define DEF_SLEEP_MODE_PERIOD                     100
 
-/// @brief Number of sequential periods of scanning in active mode with no qualified
-/// touch detected before system enters sleep.
-/// @note Minimum value is 1, maximum value is 255
+// <o DEF_COUNTS_BEFORE_SLEEP> Delay before sleep <1-255>
+// <i> Number of sequential periods of scanning in active mode with no qualified
+// <i> touch detected before system enters sleep.
+// <i> Default: 100
 #define DEF_COUNTS_BEFORE_SLEEP                   100
 
-/// @brief Configures whether system does a single scan every @ref DEF_ACTIVE_MODE_PERIOD
-/// and then enters sleep for the remainder of the period (when cleared to 0),
-/// or if the system scans continuously (when set to 1).
-/// @note Set to 0 to disable free run mode, 1 to enable free run mode
+// <q DEF_FREE_RUN_SETTING> Free run setting
+// <i> Configures whether system does a single scan every DEF_ACTIVE_MODE_PERIOD
+// <i> and then enters sleep for the remainder of the period (when cleared to 0),
+// <i> or if the system scans continuously (when set to 1).
+// <i> Default: 0
 #define DEF_FREE_RUN_SETTING                      0
 
-/// @brief Set this to 1 to enable sleep mode sensing, set this to 0 to always remain in
-/// active mode
-/// @note Set to 1 to allow system to enter sleep mode scanning state, 0 otherwise.
+// <q DEF_SLEEP_MODE_ENABLE> Enable sleep mode
+// <i> Set this to 1 to enable sleep mode sensing, set this to 0 to always remain in
+// <i> active model
+// <i> Default: 1
 #define DEF_SLEEP_MODE_ENABLE                     1
 
-/** @} (end cslib_config) */
+// </h>
+
+// <<< end of configuration section >>>
+
 #endif // CSLIB_CONFIG_H

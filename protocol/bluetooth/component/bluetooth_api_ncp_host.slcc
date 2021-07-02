@@ -1,5 +1,5 @@
 id: bluetooth_api_ncp_host
-label: Bluetooth Stack NCP Host API and Adaptation
+label: NCP Host API and Adaptation
 package: Bluetooth
 description: >
   Bluetooth API for NCP host and the adaptation between host application and

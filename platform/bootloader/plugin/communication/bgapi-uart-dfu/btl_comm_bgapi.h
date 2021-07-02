@@ -62,7 +62,7 @@ SL_PACK_END()
 SL_PACK_START(1)
 typedef struct {
   uint8_t len;
-  uint8_t data[128];
+  uint8_t data[256];
 } SL_ATTRIBUTE_PACKED BgapiDataCmdDfuFlashUpload_t;
 SL_PACK_END()
 

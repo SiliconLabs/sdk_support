@@ -33,7 +33,6 @@
 #include "sl_component_catalog.h"
 #endif
 #if defined(SL_CATALOG_KERNEL_PRESENT)
-#include "sl_system_kernel.h"
 #include "cmsis_os2.h"
 #include "sl_cmsis_os2_common.h"
 #else

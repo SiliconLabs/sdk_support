@@ -23,6 +23,8 @@
 extern "C" {
 #endif
 
+#define SL_MEMLCD_LS013B7DH06             1
+
 #define SL_MEMLCD_DISPLAY_WIDTH           128
 #define SL_MEMLCD_DISPLAY_HEIGHT          128
 #define SL_MEMLCD_DISPLAY_BPP             3

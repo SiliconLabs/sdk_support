@@ -18,13 +18,15 @@
 #ifndef LEGACY_PACKET_BUFFER_H
 #define LEGACY_PACKET_BUFFER_H
 
+#include "sl_status.h"
+
 uint8_t *emberGetLinkedBuffersPointer(Buffer buffer, uint8_t index);
 
-EmberStatus emberReallyAppendToLinkedBuffers(EmberMessageBuffer *buffer,
+sl_status_t emberReallyAppendToLinkedBuffers(EmberMessageBuffer *buffer,
                                              uint8_t *contents,
                                              uint8_t length,
                                              bool reallyAppend);
-EmberStatus emberReallySetLinkedBuffersLength(Buffer *buffer,
+sl_status_t emberReallySetLinkedBuffersLength(Buffer *buffer,
                                               uint8_t newLength);
 
 uint8_t emberGetLinkedBuffersByte(Buffer buffer, uint8_t index);

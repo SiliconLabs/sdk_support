@@ -21,6 +21,7 @@ requires:
     condition: [brd2204a]
   - name: dmd_memlcd
   - name: glib
+  - name: rail_test_core
 provides:
   - name: rail_test_graphics
 documentation:

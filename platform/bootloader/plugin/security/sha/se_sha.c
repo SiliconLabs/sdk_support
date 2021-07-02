@@ -35,7 +35,6 @@
 #include "em_se.h"
 #include "plugin/security/sha/btl_sha256.h"
 #include "mbedtls/md.h"
-#include "se_management.h"
 
 int sha_x_process(SHA_Type_t algo,
                   uint8_t* state_in,
@@ -43,6 +42,10 @@ int sha_x_process(SHA_Type_t algo,
                   uint8_t* state_out,
                   uint32_t num_blocks)
 {
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
+#endif
+
   SE_Command_t command = SE_COMMAND_DEFAULT(SE_COMMAND_HASHUPDATE);
   SE_DataTransfer_t data_in = SE_DATATRANSFER_DEFAULT((void *)blockdata, 0);
   SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(state_in, 0);
@@ -66,17 +69,10 @@ int sha_x_process(SHA_Type_t algo,
   SE_addDataInput(&command, &data_in);
   SE_addDataOutput(&command, &iv_out);
 
-  int status = se_management_acquire();
-  if (status != 0) {
-    return status;
-  }
-
   SE_executeCommand(&command);
   SE_Response_t res = SE_readCommandResponse();
 
-  se_management_release();
-
-  if ( res == SE_RESPONSE_OK ) {
+  if (res == SE_RESPONSE_OK) {
     return 0;
   } else {
     return MBEDTLS_ERR_MD_HW_ACCEL_FAILED;

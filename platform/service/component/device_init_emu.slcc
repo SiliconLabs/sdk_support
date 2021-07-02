@@ -5,7 +5,7 @@ description: >
   Device initialization for the Energy Managament Unit (EMU). This component
   provides configuration for available EM4 voltage scaling levels, and EMU state
   and retention settings for devices which support these features.
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init
 config_file:

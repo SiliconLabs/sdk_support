@@ -141,6 +141,8 @@ extern "C" {
 #define sl_btmesh_cmd_node_get_local_dcd_id                              0x1f140028
 #define sl_btmesh_cmd_node_erase_mesh_nvm_id                             0x20140028
 #define sl_btmesh_cmd_node_power_off_id                                  0x21140028
+#define sl_btmesh_cmd_node_set_adv_phy_id                                0x22140028
+#define sl_btmesh_cmd_node_get_adv_phy_id                                0x23140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
 #define sl_btmesh_rsp_node_stop_unprov_beaconing_id                      0x16140028
@@ -174,9 +176,13 @@ extern "C" {
 #define sl_btmesh_rsp_node_get_local_dcd_id                              0x1f140028
 #define sl_btmesh_rsp_node_erase_mesh_nvm_id                             0x20140028
 #define sl_btmesh_rsp_node_power_off_id                                  0x21140028
+#define sl_btmesh_rsp_node_set_adv_phy_id                                0x22140028
+#define sl_btmesh_rsp_node_get_adv_phy_id                                0x23140028
 
 /**
- * @brief Supported OOB Authentication Method
+ * @brief Flags for supported OOB authentication methods during
+          provisioning, which use a bitmap so that multiple methods can
+          be supported.
  */
 typedef enum
 {
@@ -191,7 +197,7 @@ typedef enum
 } sl_btmesh_node_auth_method_flag_t;
 
 /**
- * @brief Supported Input OOB action
+ * @brief Flags for supported input OOB actions during provisioning, which use a bitmap so that multiple actions can be supported.
  */
 typedef enum
 {
@@ -207,7 +213,8 @@ typedef enum
 } sl_btmesh_node_oob_input_action_flag_t;
 
 /**
- * @brief Selected Input OOB action
+ * @brief Indicate the input OOB action selected by
+          the Provisioner during provisioning of the device.
  */
 typedef enum
 {
@@ -223,7 +230,7 @@ typedef enum
 } sl_btmesh_node_oob_input_action_t;
 
 /**
- * @brief Supported Output OOB Action
+ * @brief Flags for supported output OOB actions during provisioning, which use a bitmap so that multiple actions can be supported.
  */
 typedef enum
 {
@@ -243,7 +250,8 @@ typedef enum
 } sl_btmesh_node_oob_output_action_flag_t;
 
 /**
- * @brief Selected Output OOB Action
+ * @brief Indicate the output OOB action selected by
+          the Provisioner during provisioning of the device.
  */
 typedef enum
 {
@@ -258,7 +266,7 @@ typedef enum
 } sl_btmesh_node_oob_output_action_t;
 
 /**
- * @brief Key Type
+ * @brief Specify the type of a key in key manipulation commands.
  */
 typedef enum
 {
@@ -267,7 +275,7 @@ typedef enum
 } sl_btmesh_node_key_type_t;
 
 /**
- * @brief Configuration Model States
+ * @brief Specify the state to which a Configuration Client/Server command/event applies.
  */
 typedef enum
 {
@@ -923,7 +931,7 @@ sl_status_t sl_btmesh_node_get_rssi(int8_t *rssi);
  * Provide the stack with the input out-of-band authentication data which the
  * Provisioner is displaying.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Raw 16-byte array containing the authentication data.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -944,6 +952,11 @@ sl_status_t sl_btmesh_node_send_input_oob_request_response(size_t data_len,
  * automatically uses the UUID of the device, which does not need to be
  * explicitly specified when @ref sl_btmesh_node_start_unprov_beaconing is
  * started.
+ *
+ * If get uuid is used before @ref sl_btmesh_node_init, the uuid will be read
+ * from the nvme if it was manually set by @ref sl_btmesh_node_set_uuid. If get
+ * uuid is used without a prior @ref sl_btmesh_node_init or @ref
+ * sl_btmesh_node_set_uuid, SL_STATUS_BT_MESH_DOES_NOT_EXIST will be returned.
  *
  * @param[out] uuid The 16-byte UUID of the device
  *
@@ -1253,7 +1266,7 @@ sl_status_t sl_btmesh_node_get_element_address(uint16_t elem_index,
  * Provide the stack with static out-of-band authentication data, which the
  * stack requested.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Raw 16-byte array containing the authentication data
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -1419,6 +1432,8 @@ sl_status_t sl_btmesh_node_get_local_dcd(uint8_t page);
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> . Use @ref sl_btmesh_node_reset instead.
+ *
  * Delete all NVM keys and their corresponding values from the Bluetooth Mesh
  * specific NVM region.
  *
@@ -1426,7 +1441,7 @@ sl_status_t sl_btmesh_node_get_local_dcd(uint8_t page);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_node_erase_mesh_nvm();
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_node_erase_mesh_nvm();
 
 /***************************************************************************//**
  *
@@ -1438,6 +1453,40 @@ sl_status_t sl_btmesh_node_erase_mesh_nvm();
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_node_power_off();
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set PHY used for ADV traffic
+ *
+ * @param[in] phy   - 1: Primary and secondary channels are set to 1M
+ *     - 2: Primary channels are 1M, secondary channels are 2M
+ *     - 4: Primary and secondary channels are set to 125K Coded Phy (S=8)
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_adv_phy(uint8_t phy);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Get PHY used for ADV traffic
+ *
+ * @param[out] phy   - 1: Primary and secondary channels are set to 1M
+ *     - 2: Primary channels are 1M, secondary channels are 2M
+ *     - 4: Primary and secondary channels are set to 125K Coded Phy (S=8)
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_get_adv_phy(uint8_t *phy);
 
 /** @} */ // end addtogroup sl_btmesh_node
 
@@ -1455,6 +1504,7 @@ sl_status_t sl_btmesh_node_power_off();
  * <b>Initialization:</b>
  *   - @ref sl_btmesh_prov_init
  *   - @ref sl_btmesh_evt_prov_initialized
+ *   - @ref sl_btmesh_evt_prov_initialization_failed
  *
  * <b>Provisioning a node:</b>
  *   - @ref sl_btmesh_prov_scan_unprov_beacons : Scan for unprovisioned device
@@ -1584,8 +1634,8 @@ sl_status_t sl_btmesh_node_power_off();
 #define sl_btmesh_rsp_prov_test_identity_id                              0x48150028
 
 /**
- * @{ @name OOB Capabilities
- * @anchor sl_btmesh_prov_oob_capabilities
+ * @addtogroup sl_btmesh_prov_oob_capabilities OOB Capabilities
+ * @{
  *
  * OOB capability bitmask constants
  */
@@ -2014,11 +2064,94 @@ typedef struct sl_btmesh_evt_prov_key_refresh_complete_s sl_btmesh_evt_prov_key_
 
 /** @} */ // end addtogroup sl_btmesh_evt_prov_key_refresh_complete
 
+/**
+ * @addtogroup sl_btmesh_evt_prov_add_ddb_entry_complete sl_btmesh_evt_prov_add_ddb_entry_complete
+ * @{
+ * @brief Adding a DDB entry has been completed
+ *
+ * See the result code for operation status.
+ */
+
+/** @brief Identifier of the add_ddb_entry_complete event */
+#define sl_btmesh_evt_prov_add_ddb_entry_complete_id                     0x191500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the add_ddb_entry_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_prov_add_ddb_entry_complete_s
+{
+  uint16_t result; /**< Result code
+                          - <b>0:</b> success
+                          - <b>Non-zero:</b> an error has occurred */
+  uuid_128 uuid;   /**< UUID of the Device */
+});
+
+typedef struct sl_btmesh_evt_prov_add_ddb_entry_complete_s sl_btmesh_evt_prov_add_ddb_entry_complete_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_prov_add_ddb_entry_complete
+
+/**
+ * @addtogroup sl_btmesh_evt_prov_delete_ddb_entry_complete sl_btmesh_evt_prov_delete_ddb_entry_complete
+ * @{
+ * @brief Deleting a DDB entry has been completed
+ *
+ * See the result code for operation status.
+ */
+
+/** @brief Identifier of the delete_ddb_entry_complete event */
+#define sl_btmesh_evt_prov_delete_ddb_entry_complete_id                  0x1a1500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the delete_ddb_entry_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_prov_delete_ddb_entry_complete_s
+{
+  uint16_t result; /**< Result code
+                          - <b>0:</b> success
+                          - <b>Non-zero:</b> an error has occurred */
+  uuid_128 uuid;   /**< UUID of the Device */
+});
+
+typedef struct sl_btmesh_evt_prov_delete_ddb_entry_complete_s sl_btmesh_evt_prov_delete_ddb_entry_complete_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_prov_delete_ddb_entry_complete
+
+/**
+ * @addtogroup sl_btmesh_evt_prov_initialization_failed sl_btmesh_evt_prov_initialization_failed
+ * @{
+ * @brief Provisioner has not been initialized successfully and is not
+ * operational
+ *
+ * It is not possible to use the device as a Provisioner. See the result code
+ * for details.
+ */
+
+/** @brief Identifier of the initialization_failed event */
+#define sl_btmesh_evt_prov_initialization_failed_id                      0x1b1500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the initialization_failed event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_prov_initialization_failed_s
+{
+  uint16_t result; /**< Result code
+                          - <b>0:</b> success
+                          - <b>Non-zero:</b> an error has occurred */
+});
+
+typedef struct sl_btmesh_evt_prov_initialization_failed_s sl_btmesh_evt_prov_initialization_failed_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_prov_initialization_failed
+
 /***************************************************************************//**
  *
- * Initialize the Bluetooth mesh stack in the Provisioner role. When
- * initialization is complete, a @ref sl_btmesh_evt_prov_initialized will be
- * generated.
+ * Initialize the Bluetooth mesh stack in the Provisioner role. Note that the
+ * result code of this command only indicates that the request to initialize has
+ * been accepted for processing. When initialization is completed successfully,
+ * a @ref sl_btmesh_evt_prov_initialized will be generated. On failed
+ * initialization a @ref sl_btmesh_evt_prov_initialization_failed event will be
+ * generated. Note that the application must wait for an event to be generated
+ * before executing further BGAPI commands.
  *
  * This command must be issued before any other Bluetooth mesh stack commands.
  * Note that the Bluetooth mesh stack can be initialized either in the
@@ -2029,6 +2162,7 @@ typedef struct sl_btmesh_evt_prov_key_refresh_complete_s sl_btmesh_evt_prov_key_
  *
  * @b Events
  *   - @ref sl_btmesh_evt_prov_initialized
+ *   - @ref sl_btmesh_evt_prov_initialization_failed
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_init();
@@ -2188,7 +2322,7 @@ sl_status_t sl_btmesh_prov_set_device_address(uuid_128 uuid, uint16_t address);
  *
  * @param[in] netkey_index Index to use for network key. Allowed values are from
  *   0x000 to 0xfff.
- * @param[in] key_len Array length
+ * @param[in] key_len Length of data in @p key
  * @param[in] key Key value to use. Set to zero-length array to generate a
  *   random key.
  *
@@ -2215,7 +2349,7 @@ sl_status_t sl_btmesh_prov_create_network(uint16_t netkey_index,
  *   will be bound
  * @param[in] appkey_index Index to use for application key. Allowed values are
  *   from 0x000 to 0xfff.
- * @param[in] key_len Array length
+ * @param[in] key_len Length of data in @p key
  * @param[in] key Key value to use; set to zero-length array to generate random
  *   key.
  * @param[in] max_application_key_size Size of output buffer passed in @p
@@ -2240,7 +2374,7 @@ sl_status_t sl_btmesh_prov_create_appkey(uint16_t netkey_index,
  *
  * Respond to the prov_oob_pkey_request.
  *
- * @param[in] pkey_len Array length
+ * @param[in] pkey_len Length of data in @p pkey
  * @param[in] pkey Public Key read out-of-band
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -2253,7 +2387,7 @@ sl_status_t sl_btmesh_prov_send_oob_pkey_response(size_t pkey_len,
  *
  * Respond to the prov_oob_auth_request.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Output or static OOB data
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -2306,7 +2440,7 @@ sl_status_t sl_btmesh_prov_set_oob_requirements(uuid_128 uuid,
  *
  * @param[in] netkey_index Index of the network key to update
  * @param[in] num_appkeys Number of application keys to update; may be zero.
- * @param[in] appkey_indices_len Array length
+ * @param[in] appkey_indices_len Length of data in @p appkey_indices
  * @param[in] appkey_indices Indices of the application keys to update,
  *   represented as little endian two byte sequences. The array must contain
  *   num_appkeys indices and therefore 2*num_appkeys bytes total.
@@ -2381,23 +2515,33 @@ sl_status_t sl_btmesh_prov_get_ddb_entry(uuid_128 uuid,
 
 /***************************************************************************//**
  *
- * Delete the node information from the Provisioner database. This should be
- * followed by a @ref sl_btmesh_prov_start_key_refresh updating the keys of the
- * remaining nodes to make sure the deleted node is shut off from the network.
+ * Delete the node information from the Provisioner database. Note that a
+ * successful result from this command only means the command has been accepted
+ * for processing. The status of the actual operation will be returned in the
+ * following event; application should not make new BGAPI requests until the
+ * event is received. Note also that this should be followed by a @ref
+ * sl_btmesh_prov_start_key_refresh updating the keys of the remaining nodes to
+ * make sure the deleted node is shut off from the network.
  *
  * @param[in] uuid UUID of the node to delete
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_btmesh_evt_prov_delete_ddb_entry_complete
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_delete_ddb_entry(uuid_128 uuid);
 
 /***************************************************************************//**
  *
- * Add a new node entry to the Provisioner's device database. Note that the
- * device key, primary element address, and network key need to be deployed to
- * the node being added to ensure it's configurable. See @ref
- * sl_btmesh_node_set_provisioning_data command.
+ * Add a new node entry to the Provisioner's device database. Note that a
+ * successful result from this command only means the command has been accepted
+ * for processing. The status of the actual operation will be returned in the
+ * following event; application should not make new BGAPI requests until the
+ * event is received. Note also that the device key, primary element address,
+ * and network key need to be deployed to the node being added to ensure it's
+ * configurable. See @ref sl_btmesh_node_set_provisioning_data command.
  *
  * @param[in] uuid UUID of the node to add
  * @param[in] device_key Device key value for the node
@@ -2407,6 +2551,9 @@ sl_status_t sl_btmesh_prov_delete_ddb_entry(uuid_128 uuid);
  * @param[in] elements Number of elements the device has
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_btmesh_evt_prov_add_ddb_entry_complete
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_prov_add_ddb_entry(uuid_128 uuid,
@@ -2579,7 +2726,7 @@ sl_status_t sl_btmesh_prov_get_key_refresh_phase(uint16_t netkey_index,
  * @param[in] netkey_index Index of the network key identifying a key refresh
  *   procedure
  * @param[in] num_appkeys Number of application keys to update; may be zero.
- * @param[in] appkey_indices_len Array length
+ * @param[in] appkey_indices_len Length of data in @p appkey_indices
  * @param[in] appkey_indices Indices of the application keys to update,
  *   represented as little endian two byte sequences. The array must contain
  *   num_appkeys indices and therefore 2*num_appkeys bytes total.
@@ -2622,7 +2769,7 @@ sl_status_t sl_btmesh_prov_flush_key_refresh_state(uint16_t netkey_index);
  *
  * @param[in] address Mesh address of the node
  * @param[in] netkey_index Network key index of the node.
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Contents of the identity beacon.
  * @param[out] match   - 0: Identity record did not match
  *     - 1: Identity record match
@@ -2653,11 +2800,13 @@ sl_status_t sl_btmesh_prov_test_identity(uint16_t address,
 #define sl_btmesh_cmd_proxy_set_filter_type_id                           0x02180028
 #define sl_btmesh_cmd_proxy_allow_id                                     0x03180028
 #define sl_btmesh_cmd_proxy_deny_id                                      0x04180028
+#define sl_btmesh_cmd_proxy_optimisation_toggle_id                       0x05180028
 #define sl_btmesh_rsp_proxy_connect_id                                   0x00180028
 #define sl_btmesh_rsp_proxy_disconnect_id                                0x01180028
 #define sl_btmesh_rsp_proxy_set_filter_type_id                           0x02180028
 #define sl_btmesh_rsp_proxy_allow_id                                     0x03180028
 #define sl_btmesh_rsp_proxy_deny_id                                      0x04180028
+#define sl_btmesh_rsp_proxy_optimisation_toggle_id                       0x05180028
 
 /**
  * @addtogroup sl_btmesh_evt_proxy_connected sl_btmesh_evt_proxy_connected
@@ -2813,6 +2962,19 @@ sl_status_t sl_btmesh_proxy_deny(uint32_t handle,
                                  uint16_t netkey_index,
                                  uint16_t address);
 
+/***************************************************************************//**
+ *
+ * In case of unicast address, if proxy identified the destination, the message
+ * will be forwarded only to that node, otherwise to all. This functionality
+ * could be enabled or disabled with this function.
+ *
+ * @param[in] enable Non zero - enable, otherwise disable
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_proxy_optimisation_toggle(uint8_t enable);
+
 /** @} */ // end addtogroup sl_btmesh_proxy
 
 /**
@@ -2935,7 +3097,7 @@ typedef struct sl_btmesh_evt_vendor_model_receive_s sl_btmesh_evt_vendor_model_r
  * @param[in] opcode Message opcode
  * @param[in] final Indicates whether this payload chunk is the final one of the
  *   message or whether more will follow.
- * @param[in] payload_len Array length
+ * @param[in] payload_len Length of data in @p payload
  * @param[in] payload Payload data (either complete or partial; see final
  *   parameter).
  *
@@ -2978,7 +3140,7 @@ sl_status_t sl_btmesh_vendor_model_send(uint16_t destination_address,
  * @param[in] opcode Message opcode
  * @param[in] final Indicates whether this payload chunk is the final one of the
  *   message or whether more will follow.
- * @param[in] payload_len Array length
+ * @param[in] payload_len Length of data in @p payload
  * @param[in] payload Payload data (either complete or partial; see final
  *   parameter).
  *
@@ -3048,7 +3210,7 @@ sl_status_t sl_btmesh_vendor_model_publish(uint16_t elem_index,
  * @param[in] model_id Model ID of the model
  * @param[in] publish Indicates if the model is a publish model (non-zero) or
  *   not (zero).
- * @param[in] opcodes_len Array length
+ * @param[in] opcodes_len Length of data in @p opcodes
  * @param[in] opcodes Array of opcodes the model can handle
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -3580,6 +3742,7 @@ sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
 #define sl_btmesh_cmd_generic_client_init_property_id                    0x0d1e0028
 #define sl_btmesh_cmd_generic_client_init_lightness_id                   0x0e1e0028
 #define sl_btmesh_cmd_generic_client_init_ctl_id                         0x0f1e0028
+#define sl_btmesh_cmd_generic_client_init_hsl_id                         0x101e0028
 #define sl_btmesh_rsp_generic_client_get_id                              0x001e0028
 #define sl_btmesh_rsp_generic_client_set_id                              0x011e0028
 #define sl_btmesh_rsp_generic_client_publish_id                          0x021e0028
@@ -3596,10 +3759,11 @@ sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
 #define sl_btmesh_rsp_generic_client_init_property_id                    0x0d1e0028
 #define sl_btmesh_rsp_generic_client_init_lightness_id                   0x0e1e0028
 #define sl_btmesh_rsp_generic_client_init_ctl_id                         0x0f1e0028
+#define sl_btmesh_rsp_generic_client_init_hsl_id                         0x101e0028
 
 /**
- * @{ @name Generic Client Get State Types
- * @anchor sl_btmesh_generic_client_get_state_type
+ * @addtogroup sl_btmesh_generic_client_get_state_type Generic Client Get State Types
+ * @{
  *
  * Generic client get state type identifies the state which the client retrieves
  * from the remote server model.
@@ -3690,11 +3854,31 @@ sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
 /** Light lightness and color temperature get request. */
 #define SL_BTMESH_GENERIC_CLIENT_STATE_CTL_LIGHTNESS_TEMPERATURE 0x89      
 
+/** Light lightness, color hue, and color saturation current value get request.
+ * */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL                       0x8a      
+
+/** Light color hue get request */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL_HUE                   0x8b      
+
+/** Light color saturation get request */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL_SATURATION            0x8c      
+
+/** Light lightness, color hue, and color saturation default get request */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL_DEFAULT               0x8d      
+
+/** Light color hue and saturation range get request */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL_RANGE                 0x8e      
+
+/** Light lightness, color hue, and color saturation target value get request.
+ * */
+#define SL_BTMESH_GENERIC_CLIENT_STATE_HSL_TARGET                0x8f      
+
 /** @} */ // end Generic Client Get State Types
 
 /**
- * @{ @name Generic Client Set Request Types
- * @anchor sl_btmesh_generic_client_set_request_type
+ * @addtogroup sl_btmesh_generic_client_set_request_type Generic Client Set Request Types
+ * @{
  *
  * Generic client set request type identifies the state which the client
  * requests to be set to a new value on the remote server model.
@@ -3768,6 +3952,21 @@ sl_status_t sl_btmesh_health_server_send_test_response(uint16_t client_address,
 
 /** Light color temperature range set request */
 #define SL_BTMESH_GENERIC_CLIENT_REQUEST_CTL_RANGE           0x87      
+
+/** Light lightness, color hue, and color saturation set request */
+#define SL_BTMESH_GENERIC_CLIENT_REQUEST_HSL                 0x88      
+
+/** Light color hue set request */
+#define SL_BTMESH_GENERIC_CLIENT_REQUEST_HSL_HUE             0x89      
+
+/** Light color saturation set request */
+#define SL_BTMESH_GENERIC_CLIENT_REQUEST_HSL_SATURATION      0x8a      
+
+/** Light lightness, color hue, and color saturation default set request */
+#define SL_BTMESH_GENERIC_CLIENT_REQUEST_HSL_DEFAULT         0x8b      
+
+/** Light color hue and color saturation range set request */
+#define SL_BTMESH_GENERIC_CLIENT_REQUEST_HSL_RANGE           0x8c      
 
 /** @} */ // end Generic Client Set Request Types
 
@@ -3885,7 +4084,7 @@ sl_status_t sl_btmesh_generic_client_get(uint16_t server_address,
  *       transition and delay values are ignored.
  * @param[in] type Model-specific request type. See set request types list for
  *   details.
- * @param[in] parameters_len Array length
+ * @param[in] parameters_len Length of data in @p parameters
  * @param[in] parameters Message-specific set request parameters serialized into
  *   a byte array
  *
@@ -3943,7 +4142,7 @@ sl_status_t sl_btmesh_generic_client_set(uint16_t server_address,
  *       transition and delay values are ignored.
  * @param[in] type Model-specific request type. See set request types list for
  *   details.
- * @param[in] parameters_len Array length
+ * @param[in] parameters_len Length of data in @p parameters
  * @param[in] parameters Message-specific set request parameters serialized into
  *   a byte array
  *
@@ -3982,7 +4181,7 @@ sl_status_t sl_btmesh_generic_client_publish(uint16_t elem_index,
  * @param[in] appkey_index The application key index to use.
  * @param[in] type Model-specific state type, identifying the kind of state to
  *   retrieve. See get state types list for details.
- * @param[in] parameters_len Array length
+ * @param[in] parameters_len Length of data in @p parameters
  * @param[in] parameters Message-specific get request parameters serialized into
  *   a byte array
  *
@@ -4126,6 +4325,16 @@ sl_status_t sl_btmesh_generic_client_init_lightness();
  ******************************************************************************/
 sl_status_t sl_btmesh_generic_client_init_ctl();
 
+/***************************************************************************//**
+ *
+ * Initialize light HSL client models
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_generic_client_init_hsl();
+
 /** @} */ // end addtogroup sl_btmesh_generic_client
 
 /**
@@ -4207,6 +4416,7 @@ sl_status_t sl_btmesh_generic_client_init_ctl();
 #define sl_btmesh_cmd_generic_server_init_property_id                    0x0d1f0028
 #define sl_btmesh_cmd_generic_server_init_lightness_id                   0x0e1f0028
 #define sl_btmesh_cmd_generic_server_init_ctl_id                         0x0f1f0028
+#define sl_btmesh_cmd_generic_server_init_hsl_id                         0x101f0028
 #define sl_btmesh_rsp_generic_server_respond_id                          0x001f0028
 #define sl_btmesh_rsp_generic_server_update_id                           0x011f0028
 #define sl_btmesh_rsp_generic_server_publish_id                          0x021f0028
@@ -4222,6 +4432,7 @@ sl_status_t sl_btmesh_generic_client_init_ctl();
 #define sl_btmesh_rsp_generic_server_init_property_id                    0x0d1f0028
 #define sl_btmesh_rsp_generic_server_init_lightness_id                   0x0e1f0028
 #define sl_btmesh_rsp_generic_server_init_ctl_id                         0x0f1f0028
+#define sl_btmesh_rsp_generic_server_init_hsl_id                         0x101f0028
 
 /**
  * @addtogroup sl_btmesh_evt_generic_server_client_request sl_btmesh_evt_generic_server_client_request
@@ -4374,7 +4585,7 @@ typedef struct sl_btmesh_evt_generic_server_state_recall_s sl_btmesh_evt_generic
  *       non-relayed request.
  * @param[in] type Model-specific state type, identifying the kind of state to
  *   be updated. See get state types list for details.
- * @param[in] parameters_len Array length
+ * @param[in] parameters_len Length of data in @p parameters
  * @param[in] parameters Message-specific parameters serialized into a byte
  *   array
  *
@@ -4407,7 +4618,7 @@ sl_status_t sl_btmesh_generic_server_respond(uint16_t client_address,
  *   state change.
  * @param[in] type Model-specific state type, identifying the kind of state to
  *   be updated. See get state types list for details.
- * @param[in] parameters_len Array length
+ * @param[in] parameters_len Length of data in @p parameters
  * @param[in] parameters Message-specific parameters, serialized into a byte
  *   array
  *
@@ -4569,6 +4780,18 @@ sl_status_t sl_btmesh_generic_server_init_lightness();
  ******************************************************************************/
 sl_status_t sl_btmesh_generic_server_init_ctl();
 
+/***************************************************************************//**
+ *
+ * Initialize light HSL server models, light HSL hue server models, light HSL
+ * saturation server models, light HSL setup server models, and all models they
+ * extend
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_generic_server_init_hsl();
+
 /** @} */ // end addtogroup sl_btmesh_generic_server
 
 /**
@@ -4622,6 +4845,7 @@ sl_status_t sl_btmesh_generic_server_init_ctl();
 #define sl_btmesh_cmd_test_get_local_model_app_bindings_id               0x29220028
 #define sl_btmesh_cmd_test_get_replay_protection_list_entry_id           0x2a220028
 #define sl_btmesh_cmd_test_clear_replay_protection_list_entry_id         0x2b220028
+#define sl_btmesh_cmd_test_set_replay_protection_list_diagnostics_id     0x2c220028
 #define sl_btmesh_rsp_test_get_nettx_id                                  0x00220028
 #define sl_btmesh_rsp_test_set_nettx_id                                  0x01220028
 #define sl_btmesh_rsp_test_get_relay_id                                  0x02220028
@@ -4662,9 +4886,10 @@ sl_status_t sl_btmesh_generic_server_init_ctl();
 #define sl_btmesh_rsp_test_get_local_model_app_bindings_id               0x29220028
 #define sl_btmesh_rsp_test_get_replay_protection_list_entry_id           0x2a220028
 #define sl_btmesh_rsp_test_clear_replay_protection_list_entry_id         0x2b220028
+#define sl_btmesh_rsp_test_set_replay_protection_list_diagnostics_id     0x2c220028
 
 /**
- * @brief Key Type
+ * @brief Specify the type of a key in key manipulation commands.
  */
 typedef enum
 {
@@ -4694,6 +4919,87 @@ PACKSTRUCT( struct sl_btmesh_evt_test_local_heartbeat_subscription_complete_s
 typedef struct sl_btmesh_evt_test_local_heartbeat_subscription_complete_s sl_btmesh_evt_test_local_heartbeat_subscription_complete_t;
 
 /** @} */ // end addtogroup sl_btmesh_evt_test_local_heartbeat_subscription_complete
+
+/**
+ * @addtogroup sl_btmesh_evt_test_replay_protection_list_entry_set sl_btmesh_evt_test_replay_protection_list_entry_set
+ * @{
+ * @brief Indication that a replay protection list entry has been set
+ */
+
+/** @brief Identifier of the replay_protection_list_entry_set event */
+#define sl_btmesh_evt_test_replay_protection_list_entry_set_id           0x012200a8
+
+/***************************************************************************//**
+ * @brief Data structure of the replay_protection_list_entry_set event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_test_replay_protection_list_entry_set_s
+{
+  uint16_t address; /**< Source address for the replay protection list entry */
+  uint8_t  cancel;  /**< Nonzero when replay protection list update relates to a
+                         cancelled segmented reception */
+});
+
+typedef struct sl_btmesh_evt_test_replay_protection_list_entry_set_s sl_btmesh_evt_test_replay_protection_list_entry_set_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_test_replay_protection_list_entry_set
+
+/**
+ * @addtogroup sl_btmesh_evt_test_replay_protection_list_entry_cleared sl_btmesh_evt_test_replay_protection_list_entry_cleared
+ * @{
+ * @brief Indication that a replay protection list entry has been cleared
+ */
+
+/** @brief Identifier of the replay_protection_list_entry_cleared event */
+#define sl_btmesh_evt_test_replay_protection_list_entry_cleared_id       0x022200a8
+
+/***************************************************************************//**
+ * @brief Data structure of the replay_protection_list_entry_cleared event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_test_replay_protection_list_entry_cleared_s
+{
+  uint16_t address; /**< Source address for the replay protection list entry */
+});
+
+typedef struct sl_btmesh_evt_test_replay_protection_list_entry_cleared_s sl_btmesh_evt_test_replay_protection_list_entry_cleared_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_test_replay_protection_list_entry_cleared
+
+/**
+ * @addtogroup sl_btmesh_evt_test_replay_protection_list_saved sl_btmesh_evt_test_replay_protection_list_saved
+ * @{
+ * @brief Indication that replay protection list has been saved
+ */
+
+/** @brief Identifier of the replay_protection_list_saved event */
+#define sl_btmesh_evt_test_replay_protection_list_saved_id               0x032200a8
+
+/***************************************************************************//**
+ * @brief Data structure of the replay_protection_list_saved event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_test_replay_protection_list_saved_s
+{
+  uint16_t result;      /**< Result code
+                               - <b>0:</b> success
+                               - <b>Non-zero:</b> an error has occurred */
+  uint16_t saved_count; /**< Number of entries saved successfully */
+  uint16_t total_count; /**< Number of entries in the list in total */
+});
+
+typedef struct sl_btmesh_evt_test_replay_protection_list_saved_s sl_btmesh_evt_test_replay_protection_list_saved_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_test_replay_protection_list_saved
+
+/**
+ * @addtogroup sl_btmesh_evt_test_replay_protection_list_full sl_btmesh_evt_test_replay_protection_list_full
+ * @{
+ * @brief Indication that replay protection list is full when trying to process
+ * a message
+ */
+
+/** @brief Identifier of the replay_protection_list_full event */
+#define sl_btmesh_evt_test_replay_protection_list_full_id                0x042200a8
+
+/** @} */ // end addtogroup sl_btmesh_evt_test_replay_protection_list_full
 
 /***************************************************************************//**
  *
@@ -4950,7 +5256,7 @@ sl_status_t sl_btmesh_test_remove_local_model_sub(uint16_t elem_index,
  * @param[in] vendor_id Vendor ID for vendor-specific models. Use 0xffff for
  *   Bluetooth SIG models.
  * @param[in] model_id Model ID
- * @param[in] sub_address_len Array length
+ * @param[in] sub_address_len Length of data in @p sub_address
  * @param[in] sub_address The Label UUID to add to the subscription list. The
  *   array must be exactly 16 bytes long.
  *
@@ -4972,7 +5278,7 @@ sl_status_t sl_btmesh_test_add_local_model_sub_va(uint16_t elem_index,
  * @param[in] vendor_id Vendor ID for vendor-specific models. Use 0xffff for
  *   Bluetooth SIG models.
  * @param[in] model_id Model ID
- * @param[in] sub_address_len Array length
+ * @param[in] sub_address_len Length of data in @p sub_address
  * @param[in] sub_address The Label UUID to remove from the subscription list.
  *   The array must be exactly 16 bytes long.
  *
@@ -5081,7 +5387,7 @@ sl_status_t sl_btmesh_test_set_local_model_pub(uint16_t elem_index,
  * @param[in] retrans See documentation of @ref
  *   sl_btmesh_test_set_local_model_pub for details.
  * @param[in] credentials Friendship credentials flag
- * @param[in] pub_address_len Array length
+ * @param[in] pub_address_len Length of data in @p pub_address
  * @param[in] pub_address The Label UUID to publish to. The byte array must be
  *   exactly 16 bytes long.
  *
@@ -5256,7 +5562,7 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
  *
  * @param[in] id Enum @ref sl_btmesh_node_config_state_t. The State to modify
  * @param[in] netkey_index Network key index; ignored for node-wide states
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value The new value
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -5411,7 +5717,7 @@ sl_status_t sl_btmesh_test_prov_get_device_key(uint16_t address,
  * procedure results in all the preparation data being forgotten.
  *
  * @param[in] net_key New net key
- * @param[in] app_keys_len Array length
+ * @param[in] app_keys_len Length of data in @p app_keys
  * @param[in] app_keys list of new application keys, 16-bytes each
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -5536,6 +5842,19 @@ sl_status_t sl_btmesh_test_get_replay_protection_list_entry(uint16_t address,
  ******************************************************************************/
 sl_status_t sl_btmesh_test_clear_replay_protection_list_entry(uint16_t address);
 
+/***************************************************************************//**
+ *
+ * Enable or disable replay protection list diagnostic events. When enabled,
+ * events related to the replay protection list changes are generated.
+ *
+ * @param[in] enable Enable (nonzero) or disable (zero) diagnostic events for
+ *   replay protection list
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_replay_protection_list_diagnostics(uint8_t enable);
+
 /** @} */ // end addtogroup sl_btmesh_test
 
 /**
@@ -5563,7 +5882,7 @@ sl_status_t sl_btmesh_test_clear_replay_protection_list_entry(uint16_t address);
 #define sl_btmesh_rsp_lpn_config_id                                      0x06230028
 
 /**
- * @brief LPN Settings
+ * @brief Key values to identify LPN configurations
  */
 typedef enum
 {
@@ -8240,7 +8559,7 @@ typedef struct sl_btmesh_evt_sensor_server_publish_s sl_btmesh_evt_sensor_server
  * existing sensors are propagated to the the application.
  *
  * @param[in] elem_index Server model element index
- * @param[in] descriptors_len Array length
+ * @param[in] descriptors_len Length of data in @p descriptors
  * @param[in] descriptors @parblock
  *   Sensor Descriptor State structures submitted as a byte array
  *
@@ -8291,7 +8610,7 @@ sl_status_t sl_btmesh_sensor_server_deinit(uint16_t elem_index);
  * @param[in] elem_index Server model element index
  * @param[in] appkey_index The application key index to use.
  * @param[in] flags No flags defined currently
- * @param[in] descriptors_len Array length
+ * @param[in] descriptors_len Length of data in @p descriptors
  * @param[in] descriptors Serialized Sensor Descriptor states for all sensors
  *   within the element consisting one or more 8 bytes structures as follows:
  *     - Sensor Property ID: 16 bits
@@ -8320,7 +8639,7 @@ sl_status_t sl_btmesh_sensor_server_send_descriptor_status(uint16_t client_addre
  * @param[in] elem_index Setup Server model element index
  * @param[in] appkey_index The application key index to use
  * @param[in] flags No flags defined currently
- * @param[in] sensor_data_len Array length
+ * @param[in] sensor_data_len Length of data in @p sensor_data
  * @param[in] sensor_data @parblock
  *   Serialized Sensor Data consisting of one or more Sensor state for each
  *   sensor within the element. To simplify processing, the byte array is in TLV
@@ -8359,7 +8678,7 @@ sl_status_t sl_btmesh_sensor_server_send_status(uint16_t client_address,
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] sensor_data_len Array length
+ * @param[in] sensor_data_len Length of data in @p sensor_data
  * @param[in] sensor_data @parblock
  *   Byte array containing the serialized Sensor Series Column state in the
  *   following format:
@@ -8398,7 +8717,7 @@ sl_status_t sl_btmesh_sensor_server_send_column_status(uint16_t client_address,
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] sensor_data_len Array length
+ * @param[in] sensor_data_len Length of data in @p sensor_data
  * @param[in] sensor_data @parblock
  *   Byte array containing the serialized sequence of Sensor Series Column
  *   states in the following format:
@@ -8696,7 +9015,7 @@ typedef struct sl_btmesh_evt_sensor_setup_server_publish_s sl_btmesh_evt_sensor_
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] params_len Array length
+ * @param[in] params_len Length of data in @p params
  * @param[in] params Optional byte array containing the serialized Sensor
  *   Cadence state, excluding the property ID. If not empty, the state consists
  *   of the following fields:
@@ -8732,7 +9051,7 @@ sl_status_t sl_btmesh_sensor_setup_server_send_cadence_status(uint16_t client_ad
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] setting_ids_len Array length
+ * @param[in] setting_ids_len Length of data in @p setting_ids
  * @param[in] setting_ids Array of 16-bit Setting Property IDs of the settings
  *   the given sensor has
  *
@@ -8762,7 +9081,7 @@ sl_status_t sl_btmesh_sensor_setup_server_send_settings_status(uint16_t client_a
  *   for a specific device property, the value 0x0000 is prohibited.
  * @param[in] setting_id Sensor Setting Property ID field identifying the device
  *   property of a setting. Range: 0x0001 - 0xffff, 0x0000 is prohibited.
- * @param[in] raw_value_len Array length
+ * @param[in] raw_value_len Length of data in @p raw_value
  * @param[in] raw_value Sensor Setting raw value. Size and representation
  *   depends on the type defined by the Sensor Setting Property ID.
  *
@@ -9204,7 +9523,7 @@ sl_status_t sl_btmesh_sensor_client_get(uint16_t server_address,
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] column_id_len Array length
+ * @param[in] column_id_len Length of data in @p column_id
  * @param[in] column_id Raw value identifying a column
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -9230,7 +9549,7 @@ sl_status_t sl_btmesh_sensor_client_get_column(uint16_t server_address,
  * @param[in] flags No flags defined currently
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] column_ids_len Array length
+ * @param[in] column_ids_len Length of data in @p column_ids
  * @param[in] column_ids Raw values identifying starting and ending columns
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -9282,7 +9601,7 @@ sl_status_t sl_btmesh_sensor_client_get_cadence(uint16_t server_address,
  *   UNACKNOWLEDGED
  * @param[in] property_id Property ID for the sensor. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] params_len Array length
+ * @param[in] params_len Length of data in @p params
  * @param[in] params Byte array containing serialized fields of Sensor Cadence
  *   state, excluding the property ID
  *     - Fast Cadence Period Divisor, 7 bits
@@ -9372,7 +9691,7 @@ sl_status_t sl_btmesh_sensor_client_get_setting(uint16_t server_address,
  *   for a specific device property, the value 0x0000 is prohibited.
  * @param[in] setting_id Sensor Setting Property ID field identifying the device
  *   property of a setting. Range: 0x0001 - 0xffff, 0x0000 is prohibited.
- * @param[in] raw_value_len Array length
+ * @param[in] raw_value_len Length of data in @p raw_value
  * @param[in] raw_value Sensor Setting raw value. Size and representation
  *   depends on the type defined by the Sensor Setting Property ID.
  *
@@ -9731,7 +10050,7 @@ sl_status_t sl_btmesh_lc_client_get_property(uint16_t server_address,
  *   UNACKNOWLEDGED.
  * @param[in] property_id Property ID for the LC Server. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] params_len Array length
+ * @param[in] params_len Length of data in @p params
  * @param[in] params Byte array containing serialized fields of LC Property,
  *   excluding the property ID
  *
@@ -9796,7 +10115,7 @@ sl_status_t sl_btmesh_lc_client_set_property(uint16_t server_address,
 #define sl_btmesh_rsp_lc_server_get_lc_state_id                          0x094d0028
 
 /**
- * @brief LC States
+ * @brief These values define the possible states of Light Controller.
  */
 typedef enum
 {
@@ -9857,7 +10176,7 @@ typedef enum
 } sl_btmesh_lc_server_lc_state_t;
 
 /**
- * @brief LC Server optional events to  provide more information
+ * @brief These values identify optional diagnostic events that provide more information to the application about LC behavior.
  */
 typedef enum
 {
@@ -10359,7 +10678,7 @@ typedef struct sl_btmesh_evt_lc_setup_server_set_property_s sl_btmesh_evt_lc_set
  * @param[in] elem_index Client model element index
  * @param[in] property_id Property ID for the LC Server. Range: 0x0001 - 0x0ffff
  *   for a specific device property, the value 0x0000 is prohibited.
- * @param[in] params_len Array length
+ * @param[in] params_len Length of data in @p params
  * @param[in] params Byte array containing serialized fields of LC Property,
  *   excluding the property ID
  *
@@ -11740,7 +12059,7 @@ sl_status_t sl_btmesh_time_server_get_datetime(uint16_t elem_index,
 #define sl_btmesh_rsp_time_client_set_time_role_id                       0x09530028
 
 /**
- * @brief Time Roles
+ * @brief These values define the Time Role types used by the stack.
  */
 typedef enum
 {
@@ -12063,6 +12382,46 @@ sl_status_t sl_btmesh_time_client_set_time_role(uint16_t server_address,
 
 /** @} */ // end addtogroup sl_btmesh_time_client
 
+/**
+ * @addtogroup sl_btmesh_migration Bluetooth Mesh Key migration
+ * @{
+ *
+ * @brief Bluetooth Mesh Key migration
+ *
+ * These commands are meant for migration from older releases to 3.2 and later
+ * releases.
+ */
+
+/* Command and Response IDs */
+#define sl_btmesh_cmd_migration_migrate_keys_id                          0x01600028
+#define sl_btmesh_cmd_migration_migrate_ddb_id                           0x02600028
+#define sl_btmesh_rsp_migration_migrate_keys_id                          0x01600028
+#define sl_btmesh_rsp_migration_migrate_ddb_id                           0x02600028
+
+/***************************************************************************//**
+ *
+ * Ugrade keys from pre 3.2 release. Must be executed prior to to node or
+ * Provisioner initialization.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_migration_migrate_keys();
+
+/***************************************************************************//**
+ *
+ * Ugrade Device Database from pre 3.2 release. This command must be executed
+ * prior to provisioner initialization. Command may not be issued twice.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_migration_migrate_ddb();
+
+/** @} */ // end addtogroup sl_btmesh_migration
+
 
 /***************************************************************************//**
  * @addtogroup sl_btmesh_common_types BTMESH Common Types
@@ -12114,6 +12473,9 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_prov_key_refresh_phase_update_t                evt_prov_key_refresh_phase_update; /**< Data field for prov key_refresh_phase_update event*/
     sl_btmesh_evt_prov_key_refresh_node_update_t                 evt_prov_key_refresh_node_update; /**< Data field for prov key_refresh_node_update event*/
     sl_btmesh_evt_prov_key_refresh_complete_t                    evt_prov_key_refresh_complete; /**< Data field for prov key_refresh_complete event*/
+    sl_btmesh_evt_prov_add_ddb_entry_complete_t                  evt_prov_add_ddb_entry_complete; /**< Data field for prov add_ddb_entry_complete event*/
+    sl_btmesh_evt_prov_delete_ddb_entry_complete_t               evt_prov_delete_ddb_entry_complete; /**< Data field for prov delete_ddb_entry_complete event*/
+    sl_btmesh_evt_prov_initialization_failed_t                   evt_prov_initialization_failed; /**< Data field for prov initialization_failed event*/
     sl_btmesh_evt_proxy_connected_t                              evt_proxy_connected; /**< Data field for proxy connected event*/
     sl_btmesh_evt_proxy_disconnected_t                           evt_proxy_disconnected; /**< Data field for proxy disconnected event*/
     sl_btmesh_evt_proxy_filter_status_t                          evt_proxy_filter_status; /**< Data field for proxy filter_status event*/
@@ -12128,6 +12490,9 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_generic_server_state_changed_t                 evt_generic_server_state_changed; /**< Data field for generic_server state_changed event*/
     sl_btmesh_evt_generic_server_state_recall_t                  evt_generic_server_state_recall; /**< Data field for generic_server state_recall event*/
     sl_btmesh_evt_test_local_heartbeat_subscription_complete_t   evt_test_local_heartbeat_subscription_complete; /**< Data field for test local_heartbeat_subscription_complete event*/
+    sl_btmesh_evt_test_replay_protection_list_entry_set_t        evt_test_replay_protection_list_entry_set; /**< Data field for test replay_protection_list_entry_set event*/
+    sl_btmesh_evt_test_replay_protection_list_entry_cleared_t    evt_test_replay_protection_list_entry_cleared; /**< Data field for test replay_protection_list_entry_cleared event*/
+    sl_btmesh_evt_test_replay_protection_list_saved_t            evt_test_replay_protection_list_saved; /**< Data field for test replay_protection_list_saved event*/
     sl_btmesh_evt_lpn_friendship_established_t                   evt_lpn_friendship_established; /**< Data field for lpn friendship_established event*/
     sl_btmesh_evt_lpn_friendship_failed_t                        evt_lpn_friendship_failed; /**< Data field for lpn friendship_failed event*/
     sl_btmesh_evt_lpn_friendship_terminated_t                    evt_lpn_friendship_terminated; /**< Data field for lpn friendship_terminated event*/

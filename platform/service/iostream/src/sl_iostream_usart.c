@@ -195,7 +195,6 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
  #endif
 
   // Enable RX interrupts
-  USART_IntClear(config->usart, USART_IF_RXDATAV);
   USART_IntEnable(config->usart, USART_IF_RXDATAV);
 
   // Finally enable it
@@ -251,9 +250,14 @@ static sl_status_t usart_tx(void *context,
 
   USART_Tx(usart_context->usart, (uint8_t)c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   // Enable TX interrupts
   USART_IntEnable(usart_context->usart, USART_IF_TXC);
+#endif
+
+#if defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  /* Wait until transmit buffer is empty */
+  while (!(USART_StatusGet(usart_context->usart) & USART_STATUS_TXBL)) ;
 #endif
 
   return SL_STATUS_OK;

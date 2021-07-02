@@ -115,6 +115,10 @@ SL_WEAK void nvm3_lockEnd(void)
 /***************************************************************************//**
  * @details
  *  Disable execution from data area.
+ *
+ * @param[in]  address Start of memory range
+ *
+ * @param[in]  size Size of memory range.
  ******************************************************************************/
 void nvm3_lockDisableExecute(void *address, size_t size)
 {

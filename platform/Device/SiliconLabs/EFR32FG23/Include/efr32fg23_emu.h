@@ -3,7 +3,7 @@
  * @brief EFR32FG23 EMU register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -638,6 +638,11 @@ typedef struct {
 #define _EMU_RSTCAUSE_WDOG0_MASK                        0x8UL                                   /**< Bit mask for EMU_WDOG0                      */
 #define _EMU_RSTCAUSE_WDOG0_DEFAULT                     0x00000000UL                            /**< Mode DEFAULT for EMU_RSTCAUSE               */
 #define EMU_RSTCAUSE_WDOG0_DEFAULT                      (_EMU_RSTCAUSE_WDOG0_DEFAULT << 3)      /**< Shifted mode DEFAULT for EMU_RSTCAUSE       */
+#define EMU_RSTCAUSE_WDOG1                              (0x1UL << 4)                            /**< Watchdog 1 Reset                            */
+#define _EMU_RSTCAUSE_WDOG1_SHIFT                       4                                       /**< Shift value for EMU_WDOG1                   */
+#define _EMU_RSTCAUSE_WDOG1_MASK                        0x10UL                                  /**< Bit mask for EMU_WDOG1                      */
+#define _EMU_RSTCAUSE_WDOG1_DEFAULT                     0x00000000UL                            /**< Mode DEFAULT for EMU_RSTCAUSE               */
+#define EMU_RSTCAUSE_WDOG1_DEFAULT                      (_EMU_RSTCAUSE_WDOG1_DEFAULT << 4)      /**< Shifted mode DEFAULT for EMU_RSTCAUSE       */
 #define EMU_RSTCAUSE_LOCKUP                             (0x1UL << 5)                            /**< M33 Core Lockup Reset                       */
 #define _EMU_RSTCAUSE_LOCKUP_SHIFT                      5                                       /**< Shift value for EMU_LOCKUP                  */
 #define _EMU_RSTCAUSE_LOCKUP_MASK                       0x20UL                                  /**< Bit mask for EMU_LOCKUP                     */

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief AES-CCM abstraction based on Secure Element
+ * @brief AES-CCM abstraction based on Secure Engine
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -30,8 +30,8 @@
 
 /**
  * This file includes alternative plugin implementations of various
- * functions in ccm.c using the Secure Element accelerator incorporated
- * in Series-2 devices with Secure Element from Silicon Laboratories.
+ * functions in ccm.c using the Secure Engine accelerator incorporated
+ * in Series-2 devices with Secure Engine from Silicon Laboratories.
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
@@ -48,24 +48,18 @@
 #if defined(SEMAILBOX_PRESENT)
 
 #include "em_se.h"
-#include "em_core.h"
 #include "se_management.h"
 #include "mbedtls/ccm.h"
-#include "mbedtls/aes.h"
-#include "mbedtls/platform_util.h"
 #include <string.h>
-
-#define CCM_VALIDATE_RET(cond) \
-  MBEDTLS_INTERNAL_VALIDATE_RET(cond, MBEDTLS_ERR_CCM_BAD_INPUT)
-#define CCM_VALIDATE(cond) \
-  MBEDTLS_INTERNAL_VALIDATE(cond)
 
 /*
  * Initialize CCM context
  */
 void mbedtls_ccm_init(mbedtls_ccm_context *ctx)
 {
-  CCM_VALIDATE(ctx != NULL);
+  if (ctx == NULL) {
+    return;
+  }
 
   memset(ctx, 0, sizeof(mbedtls_ccm_context) );
 }
@@ -90,8 +84,9 @@ int mbedtls_ccm_setkey(mbedtls_ccm_context *ctx,
                        const unsigned char *key,
                        unsigned int keybits)
 {
-  CCM_VALIDATE_RET(ctx != NULL);
-  CCM_VALIDATE_RET(key != NULL);
+  if (ctx == NULL || key == NULL) {
+    return MBEDTLS_ERR_CCM_BAD_INPUT;
+  }
 
   memset(ctx, 0, sizeof(mbedtls_ccm_context) );
 
@@ -118,12 +113,14 @@ int mbedtls_ccm_encrypt_and_tag(mbedtls_ccm_context *ctx, size_t length,
 {
   unsigned char q;
 
-  CCM_VALIDATE_RET(ctx != NULL);
-  CCM_VALIDATE_RET(iv != NULL);
-  CCM_VALIDATE_RET(add_len == 0 || add != NULL);
-  CCM_VALIDATE_RET(length == 0 || input != NULL);
-  CCM_VALIDATE_RET(length == 0 || output != NULL);
-  CCM_VALIDATE_RET(tag_len == 0 || tag != NULL);
+  if (ctx == NULL
+      || iv == NULL
+      || (add_len > 0 && add == NULL)
+      || (length > 0 && input == NULL)
+      || (length > 0 && output == NULL)
+      || (tag_len > 0 && tag == NULL)) {
+    return MBEDTLS_ERR_CCM_BAD_INPUT;
+  }
 
   if ( tag_len == 0 ) {
     return MBEDTLS_ERR_CCM_BAD_INPUT;
@@ -204,12 +201,14 @@ int mbedtls_ccm_auth_decrypt(mbedtls_ccm_context *ctx, size_t length,
 {
   unsigned char q;
 
-  CCM_VALIDATE_RET(ctx != NULL);
-  CCM_VALIDATE_RET(iv != NULL);
-  CCM_VALIDATE_RET(add_len == 0 || add != NULL);
-  CCM_VALIDATE_RET(length == 0 || input != NULL);
-  CCM_VALIDATE_RET(length == 0 || output != NULL);
-  CCM_VALIDATE_RET(tag_len == 0 || tag != NULL);
+  if (ctx == NULL
+      || iv == NULL
+      || (add_len > 0 && add == NULL)
+      || (length > 0 && input == NULL)
+      || (length > 0 && output == NULL)
+      || (tag_len > 0 && tag == NULL)) {
+    return MBEDTLS_ERR_CCM_BAD_INPUT;
+  }
 
   if ( tag_len == 0 ) {
     return(MBEDTLS_ERR_CCM_BAD_INPUT);

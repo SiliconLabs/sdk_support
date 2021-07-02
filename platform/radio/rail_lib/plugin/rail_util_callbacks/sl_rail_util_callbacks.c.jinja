@@ -33,7 +33,21 @@
  
 #include "em_common.h"
 #include "rail.h"
-#include "sl_flex_assert.h"
+#include "sl_component_catalog.h"
+#ifdef SL_CATALOG_APP_ASSERT_PRESENT
+#include "app_assert.h"
+#define APP_ASSERT(expr, ...) app_assert(expr,__VA_ARGS__)
+#else
+ #define APP_ASSERT(expr, string ,rail_handle, error_code) \
+  (void)(rail_handle);         \
+  (void)(error_code);          \
+  do {                         \
+    if (!(expr)) {             \
+      while (1) ;              \
+    }                          \
+  } while (0)
+#endif
+#include "sl_rail_util_callbacks_config.h"
 
 {%- for entry in rail_util_callbacks %}
 {%- if entry["include"] != empty %}
@@ -52,6 +66,7 @@ void sl_rail_util_on_assert_failed(RAIL_Handle_t rail_handle,
              error_code);
 }
 
+#if SL_RAIL_UTIL_CALLBACKS_ASSERT_FAILED_OVERRIDE
 // Note: RAILCb_AssertFailed is called directly by the RAIL library when
 // needed, so maintain this exact function signature.
 void RAILCb_AssertFailed(RAIL_Handle_t rail_handle,
@@ -64,6 +79,7 @@ void RAILCb_AssertFailed(RAIL_Handle_t rail_handle,
 {%- endfor %}
   sl_rail_util_on_assert_failed(rail_handle, error_code);
 }
+#endif
 
 // Provide weak function called by callback sli_rail_util_on_rf_ready.
 SL_WEAK

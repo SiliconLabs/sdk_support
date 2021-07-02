@@ -39,6 +39,7 @@
  ******************************************************************************/
 
 #include "sl_status.h"
+#include "em_device.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -82,6 +83,25 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
                             unsigned int           keybits,
                             const unsigned char    input[16],
                             volatile unsigned char output[16]);
+
+#if defined(RADIOAES_PRESENT)
+/***************************************************************************//**
+ * @brief          AES-CMAC calculation optimized for radio
+ *
+ * @param key      AES key
+ * @param keybits  Must be 128 or 256
+ * @param input    Input buffer containing the message to be signed
+ * @param length   Amount of bytes in the input buffer
+ * @param output   16-byte output block for calculated CMAC
+ *
+ * @return         0 if successful, negative on error
+ ******************************************************************************/
+int sli_aes_cmac_radio(const unsigned char    *key,
+                       unsigned int           keybits,
+                       const unsigned char    *input,
+                       unsigned int           length,
+                       volatile unsigned char output[16]);
+#endif
 
 /***************************************************************************//**
  * @brief          CCM buffer authenticated decryption optimized for BLE

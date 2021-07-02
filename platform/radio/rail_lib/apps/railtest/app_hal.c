@@ -45,47 +45,33 @@
 #include "sl_component_catalog.h"
 
 #if defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
-#include "sl_rail_test_graphics.h"
+  #include "sl_rail_test_graphics.h"
 #endif
 
-#if defined(SL_CATALOG_LED0_PRESENT) || defined(SL_CATALOG_LED1_PRESENT)
+#if defined(SL_CATALOG_SIMPLE_LED_PRESENT)
 #include "sl_simple_led_instances.h"
 #endif
 
-#if defined(SL_CATALOG_LED0_PRESENT) && defined(SL_CATALOG_LED1_PRESENT)
-#define LED_NUM 2
-#elif defined(SL_CATALOG_LED0_PRESENT) || defined(SL_CATALOG_LED1_PRESENT)
-#define LED_NUM 1
-#else
-#define LED_NUM 0
-#endif
-
-#if defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT)
+#if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
 #include "sl_simple_button_instances.h"
 #endif
 
-#if defined(SL_CATALOG_BTN0_PRESENT) && defined(SL_CATALOG_BTN1_PRESENT)
-#define BUTTON_NUM 2
-#elif defined(SL_CATALOG_BTN0_PRESENT) || defined(SL_CATALOG_BTN1_PRESENT)
-#define BUTTON_NUM 1
-#else
-#define BUTTON_NUM 0
-#endif
-
 #if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
-#include "sl_iostream_usart_vcom_config.h"
+  #include "sl_iostream_usart_vcom_config.h"
 #endif
 
 volatile bool serEvent = false;
 // Used for wakeup from sleep
 volatile bool buttonWakeEvent = false;
 
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
 static void gpioSerialWakeupCallback(uint8_t pin)
 {
   if (pin == SL_IOSTREAM_USART_VCOM_RX_PIN) {
     serEvent = true;
   }
 }
+#endif
 
 /******************************************************************************
  * Application HAL Initialization
@@ -98,10 +84,12 @@ void appHalInit(void)
   GPIO_PinModeSet(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN, gpioModePushPull, 1);
 #endif // SL_RAIL_TEST_PER_PORT && SL_RAIL_TEST_PER_PIN
 
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
   // For 'sleep'
   GPIOINT_Init();
   GPIOINT_CallbackRegister(SL_IOSTREAM_USART_VCOM_RX_PIN, gpioSerialWakeupCallback);
-#endif
+#endif // SL_CATALOG_IOSTREAM_USART_PRESENT
+#endif // !SL_RAIL_UTIL_IC_SIMULATION_BUILD
 }
 
 void PeripheralDisable(void)
@@ -133,11 +121,13 @@ void usDelay(uint32_t microseconds)
 
 void serialWaitForTxIdle(void)
 {
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
   // Wait for the serial output to have completely cleared the UART
   // before sleeping.
   while ((USART_StatusGet(SL_IOSTREAM_USART_VCOM_PERIPHERAL)
           & USART_STATUS_TXIDLE) == 0) {
   }
+#endif
 }
 
 /******************************************************************************
@@ -188,78 +178,40 @@ void enableGraphics(void)
 #endif // defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
 
 // LED's
-#if (LED_NUM > 0)
-
-static sl_led_t const * const sl_leds[] = {
-#if defined(SL_CATALOG_LED0_PRESENT)
-  &sl_led_led0,
-#endif
-#if defined(SL_CATALOG_LED1_PRESENT)
-  &sl_led_led1
-#endif
-};
+#if (SL_SIMPLE_LED_COUNT > 0)
 
 void LedSet(int led)
 {
   // check passed argument
-  if ((led < 0) || (led > 1)) {
+  if ((led < 0) || (led >= SL_SIMPLE_LED_COUNT)) {
     return;
   }
 
   if (logLevel & PERIPHERAL_ENABLE) {
-#if (LED_NUM == 1)
-#if defined(SL_CATALOG_LED0_PRESENT)
-    if (led == 0) {
-      sl_led_turn_on(sl_leds[0]);
-    }
-#endif // SL_CATALOG_LED0_PRESENT
-#if defined(SL_CATALOG_LED1_PRESENT)
-    if (led == 1) {
-      sl_led_turn_on(sl_leds[0]);
-    }
-#endif // SL_CATALOG_LED1_PRESENT
-#else // !(LED_NUM == 1)
-    sl_led_turn_on(sl_leds[led]);
-#endif // (LED_NUM == 1)
+    sl_led_turn_on(SL_SIMPLE_LED_INSTANCE(led));
   }
 }
 
 void LedToggle(int led)
 {
   // check passed argument
-  if ((led < 0) || (led > 1)) {
+  if ((led < 0) || (led >= SL_SIMPLE_LED_COUNT)) {
     return;
   }
 
   if (logLevel & PERIPHERAL_ENABLE) {
-#if (LED_NUM == 1)
-#if defined(SL_CATALOG_LED0_PRESENT)
-    if (led == 0) {
-      sl_led_toggle(sl_leds[0]);
-    }
-#endif // SL_CATALOG_LED0_PRESENT
-#if defined(SL_CATALOG_LED1_PRESENT)
-    if (led == 1) {
-      sl_led_toggle(sl_leds[0]);
-    }
-#endif // SL_CATALOG_LED1_PRESENT
-#else // !(LED_NUM == 1)
-    sl_led_toggle(sl_leds[led]);
-#endif // (LED_NUM == 1)
+    sl_led_toggle(SL_SIMPLE_LED_INSTANCE(led));
   }
 }
 
 void LedsDisable(void)
 {
-#if defined(SL_CATALOG_LED0_PRESENT)
-  sl_led_turn_off(&sl_led_led0);
-#endif
-#if defined(SL_CATALOG_LED1_PRESENT)
-  sl_led_turn_off(&sl_led_led1);
-#endif
+  for (int i = 0; i < SL_SIMPLE_LED_COUNT; i++) {
+    sl_led_turn_off(SL_SIMPLE_LED_INSTANCE(i));
+  }
 }
 
-#else // !(LED_NUM > 0)
+#else // !(SL_SIMPLE_LED_COUNT > 0)
 
 void LedSet(int led)
 {
@@ -273,13 +225,10 @@ void LedsDisable(void)
 {
 }
 
-#endif // (LED_NUM > 0)
+#endif // (SL_SIMPLE_LED_COUNT > 0)
 
 // Buttons
-#if (BUTTON_NUM > 0)
-
-extern const sl_button_t *simple_button_array[];
-extern const uint8_t simple_button_count;
+#if (SL_SIMPLE_BUTTON_COUNT > 0)
 
 // Holds Enable/Disable status of the buttons on the board
 static bool initButtonStatus = true;
@@ -344,9 +293,9 @@ void sl_button_on_change(const sl_button_t *handle)
   if (initButtonStatus) {
     #define GET_TIME_IN_MS() (RAIL_GetTime() / 1000)
 
-    static uint32_t gpioTimeCapture[BUTTON_NUM];
+    static uint32_t gpioTimeCapture[SL_SIMPLE_BUTTON_COUNT];
     // Hold true if a Negative Edge is encountered for the button press
-    static bool gpioNegEdge[BUTTON_NUM];
+    static bool gpioNegEdge[SL_SIMPLE_BUTTON_COUNT];
 
     void(*gpioLongPress_arr[])(void) = {
     #if defined(SL_CATALOG_BTN0_PRESENT)
@@ -365,8 +314,8 @@ void sl_button_on_change(const sl_button_t *handle)
     #endif // SL_CATALOG_BTN1_PRESENT
     };
 
-    for (uint8_t i = 0; i < simple_button_count; i++) {
-      if (simple_button_array[i] == handle) {
+    for (uint8_t i = 0; i < SL_SIMPLE_BUTTON_COUNT; i++) {
+      if (SL_SIMPLE_BUTTON_INSTANCE(i) == handle) {
         if (sl_button_get_state(handle) == SL_SIMPLE_BUTTON_PRESSED) {
           // Negative Edge
           gpioTimeCapture[i] = GET_TIME_IN_MS();
@@ -390,7 +339,7 @@ void sl_button_on_change(const sl_button_t *handle)
   } // initButtonStatus
 }
 
-#else // !(BUTTON_NUM > 0)
+#else // !(SL_SIMPLE_BUTTON_COUNT > 0)
 
 void deinitButtons(void)
 {
@@ -399,4 +348,4 @@ void initButtons(void)
 {
 }
 
-#endif // (BUTTON_NUM > 0)
+#endif // (SL_SIMPLE_BUTTON_COUNT > 0)

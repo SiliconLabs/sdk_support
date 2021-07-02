@@ -3,7 +3,7 @@
  * @brief CMSIS Compatible EFR32FG23 startup file in C for IAR EWARM
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,8 +31,25 @@
 #include <stdbool.h>
 #include "em_device.h"        /* The correct device header file. */
 
+#ifdef BOOTLOADER_ENABLE
+#include "api/btl_interface.h"
+
+#endif
+
 #pragma language=extended
 #pragma segment="CSTACK"
+
+#ifdef BOOTLOADER_ENABLE
+extern MainBootloaderTable_t mainStageTable;
+
+extern void SystemInit2(void);
+
+/*----------------------------------------------------------------------------
+ * Exception / Interrupt Handler Function Prototype
+ *----------------------------------------------------------------------------*/
+typedef void (*pFunc)(void);
+
+#endif
 
 /* IAR start function */
 extern void __iar_program_start(void);
@@ -45,6 +62,11 @@ extern unsigned char CSTACK$$Limit;
 __weak void Reset_Handler(void)
 {
   SystemInit();
+
+#ifdef BOOTLOADER_ENABLE
+  SystemInit2();
+#endif
+
   __iar_program_start();
 }
 
@@ -332,7 +354,7 @@ __weak void WDOG1_IRQHandler(void)
   while (true) {
   }
 }
-__weak void SYXO0_IRQHandler(void)
+__weak void HFXO0_IRQHandler(void)
 {
   while (true) {
   }
@@ -503,7 +525,11 @@ const tVectorEntry __vector_table[] = {
   { 0 },
   { 0 },
   { 0 },
+#ifdef BOOTLOADER_ENABLE
+  { (pFunc) & mainStageTable },
+#else
   { 0 },
+#endif
   { SVC_Handler },
   { DebugMon_Handler },
   { sl_app_properties },
@@ -554,7 +580,7 @@ const tVectorEntry __vector_table[] = {
   { ACMP1_IRQHandler },             /* 26 - ACMP1 */
   { WDOG0_IRQHandler },             /* 27 - WDOG0 */
   { WDOG1_IRQHandler },             /* 28 - WDOG1 */
-  { SYXO0_IRQHandler },             /* 29 - SYXO0 */
+  { HFXO0_IRQHandler },             /* 29 - HFXO0 */
   { HFRCO0_IRQHandler },            /* 30 - HFRCO0 */
   { HFRCOEM23_IRQHandler },         /* 31 - HFRCOEM23 */
   { CMU_IRQHandler },               /* 32 - CMU */

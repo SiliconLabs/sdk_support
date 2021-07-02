@@ -1831,6 +1831,31 @@ sl_status_t sl_bt_gatt_server_read_client_configuration(uint8_t connection,
 
 }
 
+sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connection,
+                                                               uint16_t characteristic,
+                                                               uint8_t att_errorcode,
+                                                               uint16_t offset,
+                                                               size_t value_len,
+                                                               const uint8_t* value) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gatt_server_send_user_prepare_write_response.connection=connection;
+    cmd->data.cmd_gatt_server_send_user_prepare_write_response.characteristic=characteristic;
+    cmd->data.cmd_gatt_server_send_user_prepare_write_response.att_errorcode=att_errorcode;
+    cmd->data.cmd_gatt_server_send_user_prepare_write_response.offset=offset;
+    cmd->data.cmd_gatt_server_send_user_prepare_write_response.value.len=value_len;
+    memcpy(cmd->data.cmd_gatt_server_send_user_prepare_write_response.value.data,value,value_len);
+
+    cmd->header=sl_bt_cmd_gatt_server_send_user_prepare_write_response_id+(((7+value_len)&0xff)<<8)+(((7+value_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gatt_server_send_user_prepare_write_response.result;
+
+}
+
 sl_status_t sl_bt_nvm_save(uint16_t key,
                            size_t value_len,
                            const uint8_t* value) {

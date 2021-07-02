@@ -284,6 +284,7 @@ OS_OBJ_QTY OSFlagDel(OS_FLAG_GRP *p_grp,
  *                                 - RTOS_ERR_ABORT
  *                                 - RTOS_ERR_TIMEOUT
  *                                 - RTOS_ERR_NOT_READY
+ *                                 - RTOS_ERR_INVALID_STATE
  *
  * @return        The flags in the event flag group that made the task ready or, 0 if a timeout or an error
  *               occurred.
@@ -305,8 +306,12 @@ OS_FLAGS OSFlagPend(OS_FLAG_GRP *p_grp,
   OS_TRACE_FLAG_PEND_ENTER(p_grp, flags, timeout, opt, p_ts);
 
   //                                                               Not allowed to call from an ISR
-  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING) ||
-                         !(CORE_InIrqContext())), *p_err, RTOS_ERR_ISR, 0u);
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !(CORE_InIrqContext())), *p_err, RTOS_ERR_ISR, 0u);
+
+  //                                                               Not allowed to pend in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET(( (opt & OS_OPT_PEND_NON_BLOCKING)
+                          || !CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE, 0u);
 
   //                                                               Make sure kernel is running.
   if (OSRunning != OS_STATE_OS_RUNNING) {

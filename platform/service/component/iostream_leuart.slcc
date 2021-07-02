@@ -20,6 +20,8 @@ config_file:
 provides:
   - name: iostream_leuart
     allow_multiple: true
+  - name: iostream_transport
+    allow_multiple: true
 requires:
   - name: iostream_leuart_core
 template_contribution:

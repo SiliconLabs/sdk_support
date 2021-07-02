@@ -41,20 +41,19 @@
  * @{
  ******************************************************************************/
 
+///
+/// @brief Structure that represents the state of the RADIOAES peripheral
+/// (in scatter-gather mode).
+///
 typedef struct {
   uint32_t FETCHADDR;   ///< Fetcher Address
-#if defined(_AES_FETCHDESCR_MASK)
-  uint32_t FETCHDESCR;  ///< Fetcher Descriptor
-#endif
-  uint32_t FETCHLEN;    ///< Fetcher Length
-  uint32_t FETCHTAG;    ///< Fetcher Tag
   uint32_t PUSHADDR;    ///< Pusher Address
-#if defined(_AES_PUSHDESCR_MASK)
-  uint32_t PUSHDESCR;   ///< Pusher Descriptor
-#endif
-  uint32_t PUSHLEN;     ///< Pusher Length
-  uint32_t CTRL;        ///< Control register
 } sli_radioaes_state_t;
+
+#if defined(SLI_RADIOAES_REQUIRES_MASKING)
+/// Static variable containing the masking value for the RADIOAES
+extern uint32_t sli_radioaes_mask;
+#endif
 
 /***************************************************************************//**
  * @brief          Acquire RADIOAES access

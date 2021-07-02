@@ -30,8 +30,8 @@
 #define MX25_PORT_CS           gpioPortC
 #define MX25_PIN_CS            4
 
-#define MX25_USART             USART1
-#define MX25_USART_ROUTE       GPIO->USARTROUTE[1]
-#define MX25_USART_CLK         cmuClock_USART1
+#define MX25_USART             USART0
+#define MX25_USART_ROUTE       GPIO->USARTROUTE[0]
+#define MX25_USART_CLK         cmuClock_USART0
 
 #endif // MX25CONFIG_H

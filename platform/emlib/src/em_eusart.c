@@ -47,6 +47,14 @@
 #endif
 
 /*******************************************************************************
+ **************************   LOCAL VARIABLES   ********************************
+ ******************************************************************************/
+#if defined(EUSART_DALICFG_DALIEN)
+static uint8_t dali_tx_nb_packets[EUSART_COUNT];
+static uint8_t dali_rx_nb_packets[EUSART_COUNT];
+#endif /* EUSART_DALICFG_DALIEN */
+
+/*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
 
@@ -54,7 +62,8 @@ static CMU_Clock_TypeDef EUSART_ClockGet(EUSART_TypeDef *eusart);
 
 static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
                                    const EUSART_UartInit_TypeDef *init,
-                                   const EUSART_IrDAInit_TypeDef *irdaInit);
+                                   const EUSART_IrDAInit_TypeDef *irdaInit,
+                                   const EUSART_DaliInit_TypeDef *daliInit);
 
 #if defined(EUSART_PRESENT)
 static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
@@ -112,7 +121,7 @@ void EUSART_UartInitHf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
   EFM_ASSERT(init->databits <= eusartDataBits9);
 
   // Initialize EUSART with common features to HF and LF.
-  EUSART_AsyncInitCommon(eusart, init, NULL);
+  EUSART_AsyncInitCommon(eusart, init, NULL, NULL);
 }
 
 /***************************************************************************//**
@@ -160,7 +169,7 @@ void EUSART_UartInitLf(EUSART_TypeDef *eusart, const EUSART_UartInit_TypeDef *in
   EFM_ASSERT(init->baudrate <= 9600 && init->baudrate != 0);
 
   // Initialize EUSART with common features to HF and LF.
-  EUSART_AsyncInitCommon(eusart, init, NULL);
+  EUSART_AsyncInitCommon(eusart, init, NULL, NULL);
 }
 
 /***************************************************************************//**
@@ -192,8 +201,9 @@ void EUSART_IrDAInit(EUSART_TypeDef *eusart,
   }
 
   // Initialize EUSART with common features to HF and LF.
-  EUSART_AsyncInitCommon(eusart, &irdaInit->init, irdaInit);
+  EUSART_AsyncInitCommon(eusart, &irdaInit->init, irdaInit, NULL);
 }
+
 #if defined(EUSART_PRESENT)
 /***************************************************************************//**
  * Initializes the EUSART when used in SPI mode.
@@ -216,7 +226,53 @@ void EUSART_SpiInit(EUSART_TypeDef *eusart, EUSART_SpiInit_TypeDef const *init)
 
   EUSART_SyncInitCommon(eusart, init);
 }
-#endif
+
+#if defined(EUSART_DALICFG_DALIEN)
+/***************************************************************************//**
+ * Initializes the EUSART when used in DALI mode with the high or low
+ * frequency clock.
+ *
+ * @note (1) When EUSART oversampling is set to eusartOVS0 (Disable), the peripheral
+ *           clock frequency must be at least three times higher than the
+ *           chosen baud rate. In LF, max input clock is 32768 (LFXO or LFRCO),
+ *           thus 32768 / 3 ~ 9600 baudrate.
+ ******************************************************************************/
+void EUSART_DaliInit(EUSART_TypeDef *eusart,
+                     const EUSART_DaliInit_TypeDef *daliInit)
+{
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(EUSART_REF_VALID(eusart));
+  // Init structure must be provided.
+  EFM_ASSERT(daliInit);
+
+  if (daliInit->init.loopbackEnable) {
+    // If LOOPBK in CFG0 is set to 1 in order to do loopback testing for DALI,
+    // then in this case DALIRXENDT should be set to 1 and DALIRXDATABITS should
+    // be set the same as DALITXDATABITS.
+    EFM_ASSERT( (daliInit->TXdatabits >> _EUSART_DALICFG_DALITXDATABITS_SHIFT)
+                == (daliInit->RXdatabits >> _EUSART_DALICFG_DALIRXDATABITS_SHIFT));
+  }
+
+  if (daliInit->daliLowFrequencyEnable) {
+    // Validate the low frequency capability of the EUSART instance.
+    EFM_ASSERT(EUSART_EM2_CAPABLE(EUSART_NUM(eusart)));
+    // The oversampling must be disabled when using a low frequency clock.
+    EFM_ASSERT(daliInit->init.oversampling == eusartOVS0);
+    // In LF, max baudrate is 9600. See Note #1.
+    // but manchester is running at 2x clock 9600 => 4800
+    EFM_ASSERT(daliInit->init.baudrate <= 4800);
+  } else {
+    EFM_ASSERT(daliInit->init.oversampling != eusartOVS0);
+    // In HF, 2.4 kbps <= baudrate <= 1.152 Mbps.
+    // but manchester is running at 2x clock so 2.4 kbps => 1.2 kbps
+    EFM_ASSERT(daliInit->init.baudrate >= 1200 && daliInit->init.baudrate <= 57600);
+  }
+
+  // Initialize EUSART with common features to HF and LF.
+  EUSART_AsyncInitCommon(eusart, &daliInit->init, NULL, daliInit);
+}
+#endif /* EUSART_DALICFG_DALIEN */
+#endif /* EUSART_PRESENT */
 
 /***************************************************************************//**
  * Configure the EUSART to its reset state.
@@ -226,7 +282,7 @@ void EUSART_Reset(EUSART_TypeDef *eusart)
   // 1. Properly disable the module
   EUSART_Disable(eusart);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   // Manual toggling tx_sclk_mst to synchronize handshake
   // when switching from SPI master to other modes
   // so module is disabling correctly.
@@ -252,7 +308,10 @@ void EUSART_Reset(EUSART_TypeDef *eusart)
   eusart->FRAMECFG = _EUSART_FRAMECFG_RESETVALUE;
 #if defined(EUSART_PRESENT)
   eusart->DTXDATCFG = _EUSART_DTXDATCFG_RESETVALUE;
-#endif
+#if defined(EUSART_DALICFG_DALIEN)
+  eusart->DALICFG = _EUSART_DALICFG_RESETVALUE;
+#endif /* EUSART_DALICFG_DALIEN */
+#endif /* EUSART_PRESENT */
   eusart->TIMINGCFG = _EUSART_TIMINGCFG_RESETVALUE;
   eusart->IRHFCFG = _EUSART_IRHFCFG_RESETVALUE;
   eusart->IRLFCFG = _EUSART_IRLFCFG_RESETVALUE;
@@ -368,7 +427,61 @@ uint16_t EUSART_Spi_TxRx(EUSART_TypeDef *eusart, uint16_t data)
   }
   return (uint16_t)eusart->RXDATA;
 }
-#endif
+
+#if defined(EUSART_DALICFG_DALIEN)
+/***************************************************************************//**
+ * Transmits one frame.
+ ******************************************************************************/
+void EUSART_Dali_Tx(EUSART_TypeDef *eusart, uint32_t data)
+{
+  uint32_t packet;
+
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(EUSART_REF_VALID(eusart));
+
+  // Check that transmit FIFO is not full.
+  while (!(eusart->STATUS & EUSART_STATUS_TXFL)) {
+  }
+
+  for (uint8_t index = 0; index < dali_tx_nb_packets[EUSART_NUM(eusart)]; index++) {
+    // when DALICFG.DALIEN is set to 1, then all 16 bits [15:0] represent data
+    // First write to TXDATA register should contain 16 LSBs of the TX frame.
+    // Transmission will not start after this first write.
+    // Second write to TXDATA register should contain the remaining TX frame bits.
+    // This second write will result in start of transmission.
+    packet = (data >> (index * 16));
+    // To ensure compatibility with future devices, always write bits [31:16] to 0.
+    packet &= 0x0000FFFF;
+    eusart->TXDATA = packet;
+  }
+}
+
+/***************************************************************************//**
+ * Receive one frame.
+ ******************************************************************************/
+uint32_t EUSART_Dali_Rx(EUSART_TypeDef *eusart)
+{
+  uint32_t data = 0;
+
+  // Make sure the module exists on the selected chip.
+  EFM_ASSERT(EUSART_REF_VALID(eusart));
+
+  while (!(eusart->STATUS & EUSART_STATUS_RXFL)) {
+  }   // Wait for incoming data.
+
+  for (uint8_t index = 0; index < dali_rx_nb_packets[EUSART_NUM(eusart)]; index++) {
+    // when DALICFG.DALIEN is set to 1, then all 16 bits [15:0] represent data
+    // When receiving a frame that has more than 16 databits,
+    // RXDATA register needs to be read twice:
+    //    First read will provide 16 LSBs of the received frame.
+    //    Second read will provide the remaining RX frame bits.
+    data |= ((eusart->RXDATA & _EUSART_RXDATA_RXDATA_MASK) << (index * 16));
+  }
+  return data;
+}
+
+#endif /* EUSART_DALICFG_DALIEN */
+#endif /* EUSART_PRESENT */
 
 /***************************************************************************//**
  * Configures the baudrate (or as close as possible to a specified baudrate)
@@ -382,10 +495,17 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
                         uint32_t baudrate)
 {
   uint32_t          clkdiv;
-  uint8_t           oversample;
+  uint8_t           oversample = 0;
 
   // Prevent dividing by 0.
   EFM_ASSERT(baudrate);
+
+#if defined(EUSART_DALICFG_DALIEN)
+  if (eusart->DALICFG & EUSART_DALICFG_DALIEN) {
+    // adjust for manchester double-clocking scheme
+    baudrate *= 2;
+  }
+#endif /* EUSART_DALICFG_DALIEN */
 
   // Make sure the module exists on the selected chip.
   EFM_ASSERT(EUSART_REF_VALID(eusart));
@@ -494,23 +614,25 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
       default:
         // Invalid input
         EFM_ASSERT(0);
-        return;
+        break;
     }
 
-    // Calculate and set the CLKDIV with fractional bits.
-    clkdiv  = (32 * refFreq) / (baudrate * oversample);
-    clkdiv -= 32;
-    clkdiv *= 8;
+    if (oversample > 0U) {
+      // Calculate and set the CLKDIV with fractional bits.
+      clkdiv  = (32 * refFreq) / (baudrate * oversample);
+      clkdiv -= 32;
+      clkdiv *= 8;
 
-    // Verify that the resulting clock divider is within limits.
-    EFM_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
+      // Verify that the resulting clock divider is within limits.
+      EFM_ASSERT(clkdiv <= _EUSART_CLKDIV_MASK);
 
-    // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
-    clkdiv &= _EUSART_CLKDIV_MASK;
+      // If the EFM_ASSERT is not enabled, make sure not to write to reserved bits.
+      clkdiv &= _EUSART_CLKDIV_MASK;
 
-    eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
-    eusart->CLKDIV = clkdiv;
-    eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
+      eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
+      eusart->CLKDIV = clkdiv;
+      eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
+    }
   }
 }
 
@@ -542,6 +664,13 @@ uint32_t EUSART_BaudrateGet(EUSART_TypeDef *eusart)
     div = eusart->CLKDIV;
     ovs = (EUSART_OVS_TypeDef)(eusart->CFG0 & _EUSART_CFG0_OVS_MASK);
     br = EUSART_AsyncBaudrateCalc(freq, div, ovs);
+
+#if defined(EUSART_DALICFG_DALIEN)
+    if (eusart->DALICFG & EUSART_DALICFG_DALIEN) {
+      // adjust for manchester double-clocking scheme
+      br /= 2;
+    }
+#endif /* EUSART_DALICFG_DALIEN */
   }
 
   return br;
@@ -695,7 +824,8 @@ static CMU_Clock_TypeDef EUSART_ClockGet(EUSART_TypeDef *eusart)
  ******************************************************************************/
 static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
                                    const EUSART_UartInit_TypeDef  *init,
-                                   const EUSART_IrDAInit_TypeDef  *irdaInit)
+                                   const EUSART_IrDAInit_TypeDef  *irdaInit,
+                                   const EUSART_DaliInit_TypeDef  *daliInit)
 {
   // LF register about to be modified requires sync busy check.
   if (eusart->EN) {
@@ -796,6 +926,40 @@ static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
                             | (uint32_t)(irdaInit->irDARxFilterEnable);
     }
   }
+
+#if defined(EUSART_DALICFG_DALIEN)
+  // DALI-specific configuration section
+  if (daliInit) {
+    if (init->loopbackEnable) {
+      // If LOOPBK in CFG0 is set to 1 in order to do loopback testing for DALI,
+      // then in this case DALIRXENDT should be set to 1.
+      eusart->DALICFG_SET = EUSART_DALICFG_DALIRXENDT;
+    }
+
+    // keep track of the number of 16-bits packet to send
+    if (daliInit->TXdatabits <= eusartDaliTxDataBits16) {
+      dali_tx_nb_packets[EUSART_NUM(eusart)] = 1;
+    } else {
+      dali_tx_nb_packets[EUSART_NUM(eusart)] = 2;
+    }
+
+    // keep track of the number of 16-bits packet to receive
+    if (daliInit->RXdatabits <= eusartDaliRxDataBits16) {
+      dali_rx_nb_packets[EUSART_NUM(eusart)] = 1;
+    } else {
+      dali_rx_nb_packets[EUSART_NUM(eusart)] = 2;
+    }
+
+    // Configure the numbers of bits per TX and RX frames
+    eusart->DALICFG = (eusart->DALICFG & ~(_EUSART_DALICFG_DALITXDATABITS_MASK
+                                           | _EUSART_DALICFG_DALIRXDATABITS_MASK))
+                      | daliInit->TXdatabits
+                      | daliInit->RXdatabits;
+    eusart->DALICFG_SET = EUSART_DALICFG_DALIEN;
+  }
+#else
+  (void)(daliInit);
+#endif /* EUSART_DALICFG_DALIEN */
 
   // Enable EUSART IP.
   EUSART_Enable(eusart, eusartEnable);
@@ -1030,7 +1194,7 @@ __STATIC_INLINE uint32_t EUSART_AsyncBaudrateCalc(uint32_t refFreq,
    * clkdiv <= _EUSART_CLKDIV_MASK (currently 0x7FFFF8)
    * and 'oversample' has been reduced to <= 3.
    */
-  divisor = oversample * (256 + clkdiv);
+  divisor = (uint64_t)(oversample * (256 + clkdiv));
 
   quotient = refFreq / divisor;
   remainder = refFreq % divisor;
@@ -1074,6 +1238,9 @@ __STATIC_INLINE void EUSART_Disable(EUSART_TypeDef *eusart)
       }
     }
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+    eusart->CLKDIV = eusart->CLKDIV;
+    eusart_sync(eusart, _EUSART_SYNCBUSY_DIV_MASK);
+
     // Read data until FIFO is emptied
     // but taking care not to underflow the receiver
     while (eusart->STATUS & EUSART_STATUS_RXFL) {

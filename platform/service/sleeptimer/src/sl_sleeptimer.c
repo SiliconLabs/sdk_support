@@ -37,6 +37,14 @@
 #include "sli_sleeptimer_hal.h"
 #include "sl_atomic.h"
 
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
+#if (defined(SL_CATALOG_POWER_MANAGER_PRESENT))
+#include "sl_power_manager.h"
+#include "sli_power_manager.h"
+#endif
+
 #define TIME_UNIX_EPOCH                         (1970u)
 #define TIME_NTP_EPOCH                          (1900u)
 #define TIME_ZIGBEE_EPOCH                       (2000u)
@@ -87,7 +95,7 @@ static uint32_t timer_frequency;
 static sl_sleeptimer_timer_handle_t *timer_head;
 
 // Count at last update of delta of first timer.
-static sl_sleeptimer_tick_count_t last_delta_update_count;
+static volatile sl_sleeptimer_tick_count_t last_delta_update_count;
 
 // Initialization flag.
 static bool is_sleeptimer_initialized = false;
@@ -905,11 +913,15 @@ uint32_t sl_sleeptimer_get_max_ms32_conversion(void)
  ******************************************************************************/
 uint32_t sl_sleeptimer_tick_to_ms(uint32_t tick)
 {
-  if (is_power_of_2(timer_frequency)) {
-    return (uint32_t)(((uint64_t)tick * (uint64_t)1000u) >> div_to_log2(timer_frequency));
-  } else {
-    return (uint32_t)(((uint64_t)tick * (uint64_t)1000u) / timer_frequency);
+  if (timer_frequency != 0u) {
+    if (is_power_of_2(timer_frequency)) {
+      return (uint32_t)(((uint64_t)tick * (uint64_t)1000u) >> div_to_log2(timer_frequency));
+    } else {
+      return (uint32_t)(((uint64_t)tick * (uint64_t)1000u) / timer_frequency);
+    }
   }
+
+  return 0u;
 }
 
 /*******************************************************************************
@@ -918,7 +930,8 @@ uint32_t sl_sleeptimer_tick_to_ms(uint32_t tick)
 sl_status_t sl_sleeptimer_tick64_to_ms(uint64_t tick,
                                        uint64_t *ms)
 {
-  if (tick <= UINT64_MAX / 1000) {
+  if ((tick <= UINT64_MAX / 1000)
+      && (timer_frequency != 0u)) {
     if (is_power_of_2(timer_frequency)) {
       *ms =  (uint64_t)(((uint64_t)tick * (uint64_t)1000u) >> div_to_log2(timer_frequency));
       return SL_STATUS_OK;
@@ -1010,11 +1023,12 @@ void process_timer_irq(uint8_t local_flag)
       CORE_ENTER_ATOMIC();
     }
 
+    sleep_on_isr_exit = false;
     if ((nb_timer_expire == 1u)
-        && (current->option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG)) {
-      sleep_on_isr_exit = true;
-    } else {
-      sleep_on_isr_exit = false;
+        && current != NULL) {
+      if (current->option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
+        sleep_on_isr_exit = true;
+      }
     }
 
     if (timer_head) {
@@ -1055,6 +1069,21 @@ static void delta_list_insert_timer(sl_sleeptimer_timer_handle_t *handle,
                                     sl_sleeptimer_tick_count_t timeout)
 {
   sl_sleeptimer_tick_count_t local_handle_delta = timeout;
+
+#ifdef SL_CATALOG_POWER_MANAGER_PRESENT
+  // If Power Manager is present, it's possible that a clock restore is needed right away
+  // if we are in the context of a deepsleep and the timeout value is smaller than the restore time.
+  // If it's the case, the restore will be started and the timeout value will be updated to match
+  // the restore delay.
+  if (handle->option_flags == 0) {
+    uint32_t wakeup_delay = sli_power_manager_get_restore_delay();
+
+    if (local_handle_delta < wakeup_delay) {
+      local_handle_delta = wakeup_delay;
+      sli_power_manager_initiate_restore();
+    }
+  }
+#endif
 
   handle->delta = local_handle_delta;
 

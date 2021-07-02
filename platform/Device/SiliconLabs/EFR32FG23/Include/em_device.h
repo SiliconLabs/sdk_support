@@ -14,7 +14,7 @@
  * @endverbatim
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -41,7 +41,10 @@
 
 #ifndef EM_DEVICE_H
 #define EM_DEVICE_H
-#if defined(EFR32FG23A010F256GM40)
+#if defined(EFR32FG23A010F128GM40)
+#include "efr32fg23a010f128gm40.h"
+
+#elif defined(EFR32FG23A010F256GM40)
 #include "efr32fg23a010f256gm40.h"
 
 #elif defined(EFR32FG23A010F256GM48)
@@ -55,6 +58,9 @@
 
 #elif defined(EFR32FG23A011F512GM40)
 #include "efr32fg23a011f512gm40.h"
+
+#elif defined(EFR32FG23A020F128GM40)
+#include "efr32fg23a020f128gm40.h"
 
 #elif defined(EFR32FG23A020F256GM40)
 #include "efr32fg23a020f256gm40.h"
@@ -71,29 +77,26 @@
 #elif defined(EFR32FG23A021F512GM40)
 #include "efr32fg23a021f512gm40.h"
 
-#elif defined(EFR32FG23B010F256GM40)
-#include "efr32fg23b010f256gm40.h"
-
-#elif defined(EFR32FG23B010F256GM48)
-#include "efr32fg23b010f256gm48.h"
-
-#elif defined(EFR32FG23B010F512GM40)
-#include "efr32fg23b010f512gm40.h"
+#elif defined(EFR32FG23B010F128GM40)
+#include "efr32fg23b010f128gm40.h"
 
 #elif defined(EFR32FG23B010F512GM48)
 #include "efr32fg23b010f512gm48.h"
 
-#elif defined(EFR32FG23B020F256GM40)
-#include "efr32fg23b020f256gm40.h"
+#elif defined(EFR32FG23B010F512IM40)
+#include "efr32fg23b010f512im40.h"
 
-#elif defined(EFR32FG23B020F256GM48)
-#include "efr32fg23b020f256gm48.h"
+#elif defined(EFR32FG23B010F512IM48)
+#include "efr32fg23b010f512im48.h"
 
-#elif defined(EFR32FG23B020F512GM40)
-#include "efr32fg23b020f512gm40.h"
+#elif defined(EFR32FG23B020F128GM40)
+#include "efr32fg23b020f128gm40.h"
 
-#elif defined(EFR32FG23B020F512GM48)
-#include "efr32fg23b020f512gm48.h"
+#elif defined(EFR32FG23B020F512IM40)
+#include "efr32fg23b020f512im40.h"
+
+#elif defined(EFR32FG23B020F512IM48)
+#include "efr32fg23b020f512im48.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

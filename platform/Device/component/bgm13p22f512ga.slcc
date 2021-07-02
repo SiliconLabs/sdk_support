@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: BGM13P22F512GA
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/BGM13/Source/system_bgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/BGM13/Source/IAR/startup_bgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/BGM13/Source/GCC/startup_bgm13.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/BGM13/Source/ARM/startup_bgm13.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: bgm13p22f512ga.h
@@ -71,6 +81,8 @@
     - path: em_device.h
     - path: system_bgm13.h
     path: platform/Device/SiliconLabs/BGM13/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: bgm13p22f512ga
   - name: device
@@ -140,6 +152,8 @@
   - name: device_has_wtimer
   - name: device_has_wtimer0
   - name: device_has_bootloader_flash
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -185,7 +199,6 @@
     value: 2048
 - tag:
   - device:opn:bgm13p22f512ga
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: bgm13p22f512ga

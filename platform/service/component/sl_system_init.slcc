@@ -1,7 +1,7 @@
 id: sl_system_init
 label: System Init
 package: platform
-category: Services|Runtime|System Setup
+category: Services|System Setup
 quality: production
 root_path: platform/service/system/
 source:

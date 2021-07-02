@@ -37,19 +37,20 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-#define SL_SIMPLE_LED_POLARITY_ACTIVE_LOW  0U
-#define SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH 1U
+#define SL_SIMPLE_LED_POLARITY_ACTIVE_LOW  0U ///< LED Active polarity Low
+#define SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH 1U ///< LED Active polarity High
 
 /*******************************************************************************
  *****************************   DATA TYPES   **********************************
  ******************************************************************************/
 
-typedef uint8_t sl_led_polarity_t;
+typedef uint8_t sl_led_polarity_t;    ///< LED GPIO polarities (active high/low)
 
+/// A Simple LED instance
 typedef struct {
-  GPIO_Port_TypeDef port;
-  uint8_t           pin;
-  sl_led_polarity_t polarity;
+  GPIO_Port_TypeDef port;             ///< LED port
+  uint8_t           pin;              ///< LED pin
+  sl_led_polarity_t polarity;         ///< Initial state of LED
 } sl_simple_led_context_t;
 
 /*******************************************************************************

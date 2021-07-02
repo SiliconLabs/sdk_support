@@ -32,9 +32,46 @@
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
+#include "em_device.h"
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Convert a type name into an enum entry name, since enum entries and type
+// names share the same C namespace.
+#define SLI_PSA_CONTEXT_ENUM_NAME(NAME) \
+  NAME ## _e
+// Convenience macro for getting the size of a PSA context structure type
+#define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME) \
+  (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
+
+// Type names supported by sli_psa_context_get_size
+typedef enum {
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_hash_operation_t),
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_cipher_operation_t),
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_mac_operation_t),
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_aead_operation_t),
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_key_derivation_operation_t)
+} sli_psa_context_name_t;
+
+/***************************************************************************//**
+ * @brief
+ *   Get the size of a named PSA context structure. This is valuable for code
+ *   shipping as precompiled libraries and needing to link with a source version
+ *   of PSA Crypto, since the context structures can change in size based on
+ *   configuration options which might not have been present at library
+ *   compilation time.
+ *
+ * @param ctx_type
+ *   Which context structure to get the size of. Use
+ *   #SLI_PSA_CONTEXT_ENUM_NAME(psa_xxx_operation_t) as argument.
+ *
+ * @return
+ *   Size (in bytes) of the context structure as expected by the current build.
+ ******************************************************************************/
+size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type);
 
 /***************************************************************************//**
  * @brief
@@ -50,11 +87,35 @@ extern "C" {
 __STATIC_INLINE
 void sli_psa_zeroize(void *v, size_t n)
 {
+  if (n == 0) {
+    return;
+  }
+
   volatile unsigned char *p = v;
   while (n--) {
     *p++ = 0;
   }
 }
+
+#if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
+// See function documentation in sli_psa_driver_ghash.c
+void sli_psa_software_ghash_setup(const uint8_t Ek[16],
+                                  uint64_t HL[16],
+                                  uint64_t HH[16]);
+
+void sli_psa_software_ghash_multiply(const uint64_t HL[16],
+                                     const uint64_t HH[16],
+                                     uint8_t output[16],
+                                     const uint8_t input[16]);
+
+#endif /* SLI_PSA_SUPPORT_GCM_IV_CALCULATION */
+
+// Declare the TRNG function prototype if it's not already declared by PSA
+#if defined(MBEDTLS_ENTROPY_HARDWARE_ALT) && !defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
+psa_status_t mbedtls_psa_external_get_random(
+  void *context,
+  uint8_t *output, size_t output_size, size_t *output_length);
+#endif
 
 #ifdef __cplusplus
 }

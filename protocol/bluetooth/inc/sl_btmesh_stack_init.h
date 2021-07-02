@@ -76,6 +76,8 @@ extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_server_optimized
 extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_server_full;
 extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_client_optimized;
 extern const struct sli_bgapi_class sli_bgapi_class_btmesh_time_client_full;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_migration_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_btmesh_migration_full;
 
 
 /* Macro to get a pointer to a BGAPI class declaration */

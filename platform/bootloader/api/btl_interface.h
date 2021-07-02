@@ -279,22 +279,36 @@ typedef struct {
 #define BTL_MAIN_STAGE_MAX_SIZE           (0x00004800UL - BTL_FIRST_STAGE_SIZE)
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 // No bootloader area: Place the bootloader in main flash
-#define BTL_FIRST_STAGE_BASE              0x00000000UL
-#define BTL_APPLICATION_BASE              0x00004000UL
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00004000UL)
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE \
                                            - BTL_FIRST_STAGE_SIZE)
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
 // No bootloader area: Place the bootloader in main flash
-#define BTL_FIRST_STAGE_BASE              0x00000000UL
-#define BTL_APPLICATION_BASE              0x00006000UL
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE \
                                            - BTL_FIRST_STAGE_SIZE)
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_210)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_215)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
 #else
 #error "This part is not supported in this bootloader version."
 #endif
 
 #if defined(MAIN_BOOTLOADER_TEST) || defined(MAIN_BOOTLOADER_IN_MAIN_FLASH)
-#define BTL_MAIN_STAGE_BASE               (0UL)
+#define BTL_MAIN_STAGE_BASE               (FLASH_BASE)
 #else
 #define BTL_MAIN_STAGE_BASE               (BTL_FIRST_STAGE_BASE \
                                            + BTL_FIRST_STAGE_SIZE)

@@ -31,6 +31,18 @@ requires:
 documentation:
   docset: gecko-platform
   document:
+    - page: emlib/api/efm32g/group-rmu
+      condition: [device_sdid_71]
+    - page: emlib/api/efm32gg/group-rmu
+      condition: [device_sdid_72]
+    - page: emlib/api/efm32tg/group-rmu
+      condition: [device_sdid_73]
+    - page: emlib/api/efm32lg/group-rmu
+      condition: [device_sdid_74]
+    - page: emlib/api/efm32zg/group-rmu
+      condition: [device_sdid_76]
+    - page: emlib/api/efm32hg/group-rmu
+      condition: [device_sdid_77]
     - page: emlib/api/efr32xg1/group-rmu
       condition: [device_sdid_80]
     - page: emlib/api/efr32xg12/group-rmu

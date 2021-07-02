@@ -933,6 +933,7 @@ void OSSchedRoundRobinCfg(CPU_BOOLEAN en,
  *                       - RTOS_ERR_NOT_AVAIL
  *                       - RTOS_ERR_NONE_WAITING
  *                       - RTOS_ERR_OS_SCHED_LOCKED
+ *                       - RTOS_ERR_INVALID_STATE
  *
  * @note     (1) This function MUST be called from a task.
  *******************************************************************************************************/
@@ -947,6 +948,9 @@ void OSSchedRoundRobinYield(RTOS_ERR *p_err)
 
   //                                                               Not allowed to call from an ISR
   OS_ASSERT_DBG_ERR_SET((!CORE_InIrqContext()), *p_err, RTOS_ERR_ISR,; );
+
+  //                                                               Not allowed in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET((!CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE,; );
 
   if (OSSchedLockNestingCtr > 0u) {                             // Can't yield if the scheduler is locked
     RTOS_ERR_SET(*p_err, RTOS_ERR_OS_SCHED_LOCKED);
@@ -1022,6 +1026,9 @@ void OSStart(RTOS_ERR *p_err)
 
   //                                                               Make sure kernel is not already running
   OS_ASSERT_DBG_ERR_SET((OSRunning == OS_STATE_OS_STOPPED), *p_err, RTOS_ERR_INVALID_STATE,; );
+
+  //                                                               Not allowed in atomic/critical sections
+  OS_ASSERT_DBG_ERR_SET((!CORE_IrqIsDisabled()), *p_err, RTOS_ERR_INVALID_STATE,; );
 
   OSPrioHighRdy = OS_PrioGetHighest();                          // Find the highest priority
   OSPrioCur = OSPrioHighRdy;

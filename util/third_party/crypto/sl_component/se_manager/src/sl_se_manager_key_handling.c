@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager key handling.
+ * @brief Silicon Labs Secure Engine Manager key handling.
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -125,8 +125,10 @@ sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
 
   uint32_t key_type = (key->type & KEYSPEC_TYPE_MASK);
 
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Round up to word length
   key_size = (key_size + 3U) & ~0x03U;
+  #endif
 
   if (key_type == KEYSPEC_TYPE_RAW) {
     *storage_size = key_size;
@@ -163,6 +165,7 @@ sl_status_t sli_key_get_storage_size(const sl_se_key_descriptor_t* key,
   return SL_STATUS_OK;
 }
 
+#if defined(SLI_SE_KEY_PADDING_REQUIRED)
 /***************************************************************************//**
  * @brief
  *   Clear the additional bytes of a key that is not word-aligned.
@@ -193,6 +196,7 @@ static sl_status_t clear_padding(const sl_se_key_descriptor_t *key)
   }
   return SL_STATUS_OK;
 }
+#endif
 
 // -----------------------------------------------------------------------------
 // Global Functions
@@ -211,6 +215,7 @@ sl_status_t sli_key_get_size(const sl_se_key_descriptor_t *key, uint32_t *size)
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
              || (key_type == KEYSPEC_TYPE_ECC_EDWARDS)
              || (key_type == KEYSPEC_TYPE_ECC_MONTGOMERY)
+             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)
 #endif
              ) {
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -234,13 +239,7 @@ sl_status_t sli_key_get_size(const sl_se_key_descriptor_t *key, uint32_t *size)
     {
       *size = (key->type & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK);
     }
-  }
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  else if (key_type == KEYSPEC_TYPE_ECC_EDDSA) {
-    *size = 32;
-  }
-#endif
-  else {
+  } else {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -270,8 +269,13 @@ sl_status_t sli_key_check_equivalent(const sl_se_key_descriptor_t *key_1,
   if (key_1->type != key_2->type) {
     // The type fields are different, but this may be due to one of the keys
     // not containing the size in the type, but rather in the size field.
-    if ((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
-        == SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM) {
+    if (((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
+         == SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM)
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+        || ((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
+            == SL_SE_KEY_TYPE_ECC_EDDSA)
+#endif
+        ) {
       if ((key_1->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)
           == (key_2->type & SL_SE_KEY_TYPE_ALGORITHM_MASK)) {
         // Assume that the sizes are equal for now (this will be checked later)
@@ -507,17 +511,12 @@ sl_status_t sli_se_key_to_keyspec(const sl_se_key_descriptor_t *key,
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
              || (key_type == KEYSPEC_TYPE_ECC_EDWARDS)
              || (key_type == KEYSPEC_TYPE_ECC_MONTGOMERY)
+             || (key_type == KEYSPEC_TYPE_ECC_EDDSA)
 #endif
              ) {
     *keyspec = (*keyspec & ~KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK)
                | ((size - 1) & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK);
-  }
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-  else if (key_type == KEYSPEC_TYPE_ECC_EDDSA) {
-    *keyspec = (*keyspec & ~KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK);
-  }
-#endif
-  else {
+  } else {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -661,13 +660,8 @@ sl_status_t sli_se_keyspec_to_key(const uint32_t keyspec,
       return SL_STATUS_INVALID_PARAMETER;
     }
 
-    // For some ECC keys, their length is encoded in the type
-  #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-    if ((keyspec & KEYSPEC_TYPE_MASK) != KEYSPEC_TYPE_ECC_EDDSA)
-  #endif
-    {
-      key->type = (key->type & ~SL_SE_KEY_TYPE_ATTRIBUTES_MASK) | ((keyspec & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK) + 1);
-    }
+    // For ECC keys, their length is encoded in the type
+    key->type = (key->type & ~SL_SE_KEY_TYPE_ATTRIBUTES_MASK) | ((keyspec & KEYSPEC_ATTRIBUTES_ECC_SIZE_MASK) + 1);
   }
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
@@ -895,10 +889,13 @@ sl_status_t sl_se_generate_key(sl_se_command_context_t *cmd_ctx,
   // Execute command
   status = sli_se_execute_and_wait(cmd_ctx);
 
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Clear padding for plaintext keys upon success
   if (status == SL_STATUS_OK) {
     status = clear_padding(key_out);
   }
+  #endif
+
   return status;
 }
 
@@ -1101,11 +1098,14 @@ sl_status_t sl_se_export_key(sl_se_command_context_t *cmd_ctx,
 
   status = sli_se_execute_and_wait(cmd_ctx);
 
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // The SE will only output word-aligned data. Clear the extra padding before
   // returning
   if (status == SL_STATUS_OK) {
     status = clear_padding(key_out);
   }
+  #endif
+
   return status;
 }
 
@@ -1178,10 +1178,14 @@ sl_status_t sl_se_transfer_key(sl_se_command_context_t *cmd_ctx,
   sli_add_key_output(cmd_ctx, key_out, status);
 
   status = sli_se_execute_and_wait(cmd_ctx);
+
+  #if defined(SLI_SE_KEY_PADDING_REQUIRED)
   // Clear padding bytes for plaintext keys upon success
   if (status == SL_STATUS_OK) {
     status = clear_padding(key_out);
   }
+  #endif
+
   return status;
 }
 

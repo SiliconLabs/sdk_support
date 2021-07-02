@@ -6,14 +6,22 @@
 - quality: production
 - define:
   - name: MGM210PB32JIA
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/MGM21/Source/system_mgm21.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/MGM21/Source/IAR/startup_mgm21.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/MGM21/Source/GCC/startup_mgm21.c
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: mgm210pb32jia.h
@@ -65,6 +73,8 @@
     - path: mgm21_wdog.h
     - path: system_mgm21.h
     path: platform/Device/SiliconLabs/MGM21/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: mgm210pb32jia
   - name: device
@@ -143,6 +153,8 @@
   - name: device_has_wdog
   - name: device_has_wdog0
   - name: device_has_wdog1
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -188,7 +200,6 @@
     value: 2048
 - tag:
   - device:opn:mgm210pb32jia
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: mgm210pb32jia

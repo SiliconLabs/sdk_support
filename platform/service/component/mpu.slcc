@@ -16,6 +16,7 @@ requires:
   - name: emlib_common
   - name: emlib_core
   - name: status
+  - name: device_has_mpu
 template_contribution:
   - name: component_catalog
     value: mpu

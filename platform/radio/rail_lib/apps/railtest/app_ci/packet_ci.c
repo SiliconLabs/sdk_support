@@ -190,41 +190,54 @@ void dataConfig(sl_cli_command_arg_t *args)
     return;
   }
 
-  RAIL_Status_t status;
-
-  // Don't configure other sources here
-  railDataConfig.txSource = TX_PACKET_DATA;
-  railDataConfig.rxSource = RX_PACKET_DATA;
+  RAIL_DataConfig_t newConfig = railDataConfig; // local struct copy
 
   if (memcmp(sl_cli_get_argument_string(args, 0), "pkt", 3) == 0) {
     // Packet mode
-    railDataConfig.txMethod = PACKET_MODE;
+    newConfig.txMethod = PACKET_MODE;
   } else if (memcmp(sl_cli_get_argument_string(args, 0), "fifo", 4) == 0) {
-    railDataConfig.txMethod = FIFO_MODE;
+    newConfig.txMethod = FIFO_MODE;
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Invalid Data Method selection.");
   }
 
   if (memcmp(sl_cli_get_argument_string(args, 1), "pkt", 3) == 0) {
     // Packet mode
-    railDataConfig.rxMethod = PACKET_MODE;
+    newConfig.rxMethod = PACKET_MODE;
   } else if (memcmp(sl_cli_get_argument_string(args, 1), "fifo", 4) == 0) {
-    railDataConfig.rxMethod = FIFO_MODE;
+    newConfig.rxMethod = FIFO_MODE;
   } else {
     responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Invalid Data Method selection.");
   }
 
-  status = RAIL_ConfigData(railHandle, &railDataConfig);
-  if (status) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Failed to successfully call RAIL_DataConfig: %d", status);
-  } else {
-    // @TODO Make this print nicer
-    responsePrint(sl_cli_get_command_string(args, 0),
-                  "TxMethod:%s,"
-                  "RxMethod:%s",
-                  sl_cli_get_argument_string(args, 0),
-                  sl_cli_get_argument_string(args, 1));
+  // newConfig.txSource is unchanged
+
+  newConfig.rxSource = RX_PACKET_DATA; // Default
+  if (sl_cli_get_argument_count(args) >= 3) {
+    newConfig.rxSource = (RAIL_RxDataSource_t)sl_cli_get_argument_uint8(args, 2);
   }
+
+  RAIL_Status_t status = RAIL_ConfigData(railHandle, &newConfig);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Failed to successfully call RAIL_DataConfig: %d", status);
+    return;
+  }
+
+  // Reset RX FIFO and rxRawSourceBytes counter for a new rxSource
+  if (railDataConfig.rxSource != newConfig.rxSource) {
+    counters.rxRawSourceBytes = 0;
+    RAIL_ResetFifo(railHandle, false, true);
+  }
+
+  railDataConfig = newConfig; // global struct copy
+
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "TxMethod:%s,"
+                "RxMethod:%s,"
+                "RxSource:%u",
+                newConfig.txMethod == PACKET_MODE ? "pkt" : "fifo",
+                newConfig.rxMethod == PACKET_MODE ? "pkt" : "fifo",
+                newConfig.rxSource);
 }
 
 static union {

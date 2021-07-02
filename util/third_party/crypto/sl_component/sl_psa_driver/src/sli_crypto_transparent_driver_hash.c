@@ -34,6 +34,11 @@
 
 #include "sli_crypto_transparent_types.h"
 #include "sli_crypto_transparent_functions.h"
+
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
 #include "crypto_management.h"
 #include "em_crypto.h"
 #include "em_core.h"
@@ -45,6 +50,7 @@
 #define SHA_COUNTER_SIZE 2
 #define SHA_BLOCK_SIZE 64
 
+#if defined(PSA_WANT_ALG_SHA_1)
 static const uint8_t init_state_sha1[32] =
 {
   0x67, 0x45, 0x23, 0x01,
@@ -56,7 +62,9 @@ static const uint8_t init_state_sha1[32] =
   0x00, 0x00, 0x00, 0x00,
   0x00, 0x00, 0x00, 0x00
 };
+#endif // PSA_WANT_ALG_SHA_1
 
+#if defined(PSA_WANT_ALG_SHA_224)
 static const uint8_t init_state_sha224[32] =
 {
   0xC1, 0x05, 0x9E, 0xD8,
@@ -68,7 +76,9 @@ static const uint8_t init_state_sha224[32] =
   0x64, 0xF9, 0x8F, 0xA7,
   0xBE, 0xFA, 0x4F, 0xA4
 };
+#endif // PSA_WANT_ALG_SHA_224
 
+#if defined(PSA_WANT_ALG_SHA_256)
 static const uint8_t init_state_sha256[32] =
 {
   0x6A, 0x09, 0xE6, 0x67,
@@ -80,6 +90,7 @@ static const uint8_t init_state_sha256[32] =
   0x1F, 0x83, 0xD9, 0xAB,
   0x5B, 0xE0, 0xCD, 0x19
 };
+#endif // PSA_WANT_ALG_SHA_256
 
 static const unsigned char sha_padding[64] =
 {
@@ -90,14 +101,20 @@ static const unsigned char sha_padding[64] =
 };
 
 static int crypto_hash_process(psa_algorithm_t algo,
-                               uint8_t* state_in,
-                               const unsigned char *blockdata,
-                               uint8_t* state_out,
+                               const uint32_t* state_in,
+                               const uint32_t* blockdata,
+                               uint32_t* state_out,
                                uint32_t num_blocks);
+
+#endif // PSA_WANT_ALG_SHA_*
 
 psa_status_t sli_crypto_transparent_hash_setup(sli_crypto_transparent_hash_operation_t *operation,
                                                psa_algorithm_t alg)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -105,15 +122,21 @@ psa_status_t sli_crypto_transparent_hash_setup(sli_crypto_transparent_hash_opera
   memset(operation, 0, sizeof(sli_crypto_transparent_hash_operation_t));
 
   switch (alg) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
-      memcpy(operation->state, init_state_sha1, sizeof(operation->state));
+      memcpy(operation->state, init_state_sha1, sizeof(init_state_sha1));
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
-      memcpy(operation->state, init_state_sha224, sizeof(operation->state));
+      memcpy(operation->state, init_state_sha224, sizeof(init_state_sha224));
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
-      memcpy(operation->state, init_state_sha256, sizeof(operation->state));
+      memcpy(operation->state, init_state_sha256, sizeof(init_state_sha256));
       break;
+#endif // PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_NOT_SUPPORTED;
   }
@@ -123,12 +146,25 @@ psa_status_t sli_crypto_transparent_hash_setup(sli_crypto_transparent_hash_opera
   operation->total[1] = 0;
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)alg;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_crypto_transparent_hash_update(sli_crypto_transparent_hash_operation_t *operation,
                                                 const uint8_t *input,
                                                 size_t input_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (operation == NULL
       || (input == NULL && input_length > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
@@ -137,10 +173,16 @@ psa_status_t sli_crypto_transparent_hash_update(sli_crypto_transparent_hash_oper
   size_t blocks, fill, left;
 
   switch (operation->hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
-      break;
+#endif // PSA_WANT_ALG_SHA_256
+    break;
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -160,7 +202,7 @@ psa_status_t sli_crypto_transparent_hash_update(sli_crypto_transparent_hash_oper
   }
 
   if ((left > 0) && (input_length >= fill)) {
-    memcpy((void *) (operation->buffer + left), input, fill);
+    memcpy((void*)(((uint32_t)operation->buffer) + left), input, fill);
     crypto_hash_process(operation->hash_type,
                         operation->state,
                         operation->buffer,
@@ -174,21 +216,45 @@ psa_status_t sli_crypto_transparent_hash_update(sli_crypto_transparent_hash_oper
 
   if (input_length >= SHA_BLOCK_SIZE) {
     blocks = input_length / SHA_BLOCK_SIZE;
-    crypto_hash_process(operation->hash_type,
-                        operation->state,
-                        input,
-                        operation->state,
-                        blocks);
+
+    if (((uint32_t)input & 0x3) == 0) {
+      // word-aligned input can be processed directly
+      crypto_hash_process(operation->hash_type,
+                          operation->state,
+                          (const uint32_t*)input,
+                          operation->state,
+                          blocks);
+    } else {
+      // Unaligned input needs to be aligned and processed blockwise
+      for (size_t i = 0; i < blocks; i++) {
+        memcpy(operation->buffer, &input[i * SHA_BLOCK_SIZE], SHA_BLOCK_SIZE);
+        crypto_hash_process(operation->hash_type,
+                            operation->state,
+                            operation->buffer,
+                            operation->state,
+                            1);
+      }
+    }
 
     input += SHA_BLOCK_SIZE * blocks;
     input_length -= SHA_BLOCK_SIZE * blocks;
   }
 
   if (input_length > 0) {
-    memcpy((void *) (operation->buffer + left), input, input_length);
+    memcpy((void*)(((uint32_t)operation->buffer) + left), input, input_length);
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)input;
+  (void)input_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_crypto_transparent_hash_finish(sli_crypto_transparent_hash_operation_t *operation,
@@ -196,25 +262,35 @@ psa_status_t sli_crypto_transparent_hash_finish(sli_crypto_transparent_hash_oper
                                                 size_t hash_size,
                                                 size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   size_t last_data_byte, num_pad_bytes, output_size;
   uint8_t msglen[8];
 
   if (operation == NULL
-      || hash_length == NULL
-      || hash == NULL) {
+      || (hash_length == NULL && hash_size > 0)
+      || (hash == NULL && hash_size > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
   switch (operation->hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       output_size = 20;
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       output_size = 28;
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       output_size = 32;
       break;
+#endif // PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -256,16 +332,39 @@ psa_status_t sli_crypto_transparent_hash_finish(sli_crypto_transparent_hash_oper
   memcpy(hash, operation->state, output_size);
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+  (void)hash;
+  (void)hash_size;
+  (void)hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_crypto_transparent_hash_abort(sli_crypto_transparent_hash_operation_t *operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (operation != NULL) {
     // Accelerator does not keep state, so just zero out the context and we're good
     memset(operation, 0, sizeof(sli_crypto_transparent_hash_operation_t));
   }
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 psa_status_t sli_crypto_transparent_hash_compute(psa_algorithm_t alg,
@@ -275,11 +374,15 @@ psa_status_t sli_crypto_transparent_hash_compute(psa_algorithm_t alg,
                                                  size_t hash_size,
                                                  size_t *hash_length)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   sli_crypto_transparent_hash_operation_t operation;
 
   if ((input == NULL && input_length > 0)
-      || hash == NULL
-      || hash_length == NULL) {
+      || (hash == NULL && hash_size > 0)
+      || (hash_length == NULL && hash_size > 0)) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -290,15 +393,21 @@ psa_status_t sli_crypto_transparent_hash_compute(psa_algorithm_t alg,
 
   size_t output_size;
   switch (operation.hash_type) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       output_size = 20;
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       output_size = 28;
       break;
+#endif // PSA_WANT_ALG_SHA_224
+#if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       output_size = 32;
       break;
+#endif // PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -322,26 +431,46 @@ psa_status_t sli_crypto_transparent_hash_compute(psa_algorithm_t alg,
                                               hash_length);
 
   return status;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)alg;
+  (void)input;
+  (void)input_length;
+  (void)hash;
+  (void)hash_size;
+  (void)hash_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
 static int crypto_hash_process(psa_algorithm_t algo,
-                               uint8_t* state_in,
-                               const unsigned char *blockdata,
-                               uint8_t* state_out,
+                               const uint32_t* state_in,
+                               const uint32_t* blockdata,
+                               uint32_t* state_out,
                                uint32_t num_blocks)
 {
-  uint32_t temp[16];
   CORE_DECLARE_IRQ_STATE;
   CRYPTO_TypeDef *crypto = crypto_management_acquire();
 
   switch (algo) {
+#if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       crypto->CTRL = CRYPTO_CTRL_SHA_SHA1;
       break;
+#endif // PSA_WANT_ALG_SHA_1
+#if defined(PSA_WANT_ALG_SHA_224) || defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_224:
     case PSA_ALG_SHA_256:
       crypto->CTRL = CRYPTO_CTRL_SHA_SHA2;
       break;
+#endif // PSA_WANT_ALG_SHA_224 || PSA_WANT_ALG_SHA_256
     default:
       return PSA_ERROR_BAD_STATE;
   }
@@ -359,7 +488,7 @@ static int crypto_hash_process(psa_algorithm_t algo,
   /* Get state in big-endian */
   uint32_t statedata[8];
   for (size_t i = 0; i < 8; i++) {
-    statedata[i] = __REV(((uint32_t*)state_in)[i]);
+    statedata[i] = __REV(state_in[i]);
   }
 
   /* Put the state into crypto */
@@ -374,19 +503,8 @@ static int crypto_hash_process(psa_algorithm_t algo,
 
   /* Load the data block(s) */
   for ( size_t i = 0; i < num_blocks; i++ ) {
-    const uint32_t *input_block;     /* word aligned */
-
-    if (((uint32_t)blockdata) & 0x3) {
-      /* handle unaligned input data */
-      const uint8_t * unaligned_data = &blockdata[i * 64];
-      memcpy(temp, unaligned_data, 64);
-      input_block = temp;
-    } else {
-      input_block = (const uint32_t *)&blockdata[i * 64];
-    }
-
     CORE_ENTER_CRITICAL();
-    CRYPTO_QDataWrite(&crypto->QDATA1BIG, input_block);
+    CRYPTO_QDataWrite(&crypto->QDATA1BIG, &blockdata[i * SHA_BLOCK_SIZE / sizeof(uint32_t)]);
     CORE_EXIT_CRITICAL();
 
     /* Process the loaded data block */
@@ -397,30 +515,29 @@ static int crypto_hash_process(psa_algorithm_t algo,
   }
 
   /* Fetch state of the hash algorithm */
-  if ((uint32_t)(state_out) & 0x3) {
-    CORE_ENTER_CRITICAL();
-    CRYPTO_DDataRead(&crypto->DDATA0, statedata);
-    CORE_EXIT_CRITICAL();
-    memcpy(state_out, statedata, 32);
-  } else {
-    CORE_ENTER_CRITICAL();
-    CRYPTO_DDataRead(&crypto->DDATA0, (uint32_t*)state_out);
-    CORE_EXIT_CRITICAL();
-  }
+  CORE_ENTER_CRITICAL();
+  CRYPTO_DDataRead(&crypto->DDATA0, state_out);
+  CORE_EXIT_CRITICAL();
 
   crypto_management_release(crypto);
 
   /* Store state in little-endian */
   for (size_t i = 0; i < 8; i++) {
-    ((uint32_t*)state_out)[i] = __REV(((uint32_t*)state_out)[i]);
+    state_out[i] = __REV(state_out[i]);
   }
 
   return PSA_SUCCESS;
 }
 
+#endif // PSA_WANT_ALG_SHA_*
+
 psa_status_t sli_crypto_transparent_hash_clone(const sli_crypto_transparent_hash_operation_t *source_operation,
                                                sli_crypto_transparent_hash_operation_t *target_operation)
 {
+#if defined(PSA_WANT_ALG_SHA_1)    \
+  || defined(PSA_WANT_ALG_SHA_224) \
+  || defined(PSA_WANT_ALG_SHA_256)
+
   if (source_operation == NULL
       || target_operation == NULL) {
     return PSA_ERROR_BAD_STATE;
@@ -441,6 +558,15 @@ psa_status_t sli_crypto_transparent_hash_clone(const sli_crypto_transparent_hash
   *target_operation = *source_operation;
 
   return PSA_SUCCESS;
+
+#else // PSA_WANT_ALG_SHA_*
+
+  (void)source_operation;
+  (void)target_operation;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_SHA_*
 }
 
 #endif // defined(CRYPTO_PRESENT)

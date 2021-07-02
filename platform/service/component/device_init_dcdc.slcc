@@ -3,7 +3,7 @@ label: "Device Init: DC-DC"
 package: platform
 description: >
   Device initialization for DC-DC converter
-category: Services|Runtime|Device Initialization
+category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:

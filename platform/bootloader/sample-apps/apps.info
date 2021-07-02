@@ -70,11 +70,35 @@ bootloader-storage-internal-single-512k {
 
   Application Bootloader for all EFR32 and EFM32 devices with 512kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of Silicon Labs EmberZNet, Bluetooth and Connect sample applications on 512 kB EFR32xG13 devices. The layout of the storage should be modified before being run on other devices.
 }
+bootloader-storage-internal-single-512k-131072k {
+  name=Internal Storage Bootloader (single image on 512kB device with 131072k flash base)
+  dir=bootloader-storage-internal-single-512k-131072k/template/
+  isc=bootloader-storage-internal-single-512k-131072k/template/bootloader-storage-internal-single-512k-131072k.isc
+  architecture=efr32~series[2]~device_configuration[3],efm32~series[2]~device_configuration[3],efr32~series[2]~device_configuration[4],efm32~series[2]~device_configuration[4]
+
+  Application Bootloader for all EFR32 and EFM32 devices with 512kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time, and is plug-and-play compatible with the "Local Storage Bootloader" configuration of Silicon Labs EmberZNet, Bluetooth and Connect sample applications on 512 kB EFR32xG13 devices. The layout of the storage should be modified before being run on other devices.
+}
+bootloader-storage-internal-single-1536k-131072k {
+  name=Internal Storage Bootloader (single image on 1536kB device with 131072k flash base)
+  dir=bootloader-storage-internal-single-1536k-131072k/template/
+  isc=bootloader-storage-internal-single-1536k-131072k/template/bootloader-storage-internal-single-1536k-131072k.isc
+  architecture=efr32~series[2]~device_configuration[4]~flash[1536K],efm32~series[2]~device_configuration[4]~flash[1536K]
+
+  Application Bootloader for all EFR32 and EFM32 devices with 1536kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. This sample configuration supports storing a single firmware update image at a time.
+}
 bootloader-storage-internal-single-352k {
   name=Internal Storage Bootloader (single image on 352kB device)
   dir=bootloader-storage-internal-single-352k/template/
   isc=bootloader-storage-internal-single-352k/template/bootloader-storage-internal-single-352k.isc
   architecture=efr32~series[2]~device_configuration[2]~flash[352K],efm32~series[2]~device_configuration[2]~flash[352K]
+
+  Application Bootloader for all EFR32 and EFM32 devices with 352kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. The layout of the storage should be modified before being run on other devices.
+}
+bootloader-storage-internal-single-352k-131072k {
+  name=Internal Storage Bootloader (single image on 352kB device with 131072k flash base)
+  dir=bootloader-storage-internal-single-352k-131072k/template/
+  isc=bootloader-storage-internal-single-352k-131072k/template/bootloader-storage-internal-single-352k-131072k.isc
+  architecture=efr32~series[2]~device_configuration[3],efm32~series[2]~device_configuration[3],efr32~series[2]~device_configuration[4],efm32~series[2]~device_configuration[4]
 
   Application Bootloader for all EFR32 and EFM32 devices with 352kB or larger flash, using the internal flash memory to store upgrade images received by the application in an application specific way, such as OTA, USB, Ethernet, etc. The layout of the storage should be modified before being run on other devices.
 }

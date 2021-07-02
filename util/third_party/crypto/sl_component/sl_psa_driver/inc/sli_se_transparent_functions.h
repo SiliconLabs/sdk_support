@@ -121,11 +121,6 @@ psa_status_t sli_se_transparent_cipher_decrypt_setup(sli_se_transparent_cipher_o
                                                      size_t key_buffer_size,
                                                      psa_algorithm_t alg);
 
-psa_status_t sli_se_transparent_cipher_generate_iv(sli_se_transparent_cipher_operation_t *operation,
-                                                   uint8_t *iv,
-                                                   size_t iv_size,
-                                                   size_t *iv_length);
-
 psa_status_t sli_se_transparent_cipher_set_iv(sli_se_transparent_cipher_operation_t *operation,
                                               const uint8_t *iv,
                                               size_t iv_length);
@@ -143,6 +138,25 @@ psa_status_t sli_se_transparent_cipher_finish(sli_se_transparent_cipher_operatio
                                               uint8_t *output,
                                               size_t output_size,
                                               size_t *output_length);
+
+psa_status_t sli_se_transparent_sign_message(const psa_key_attributes_t *attributes,
+                                             const uint8_t *key_buffer,
+                                             size_t key_buffer_size,
+                                             psa_algorithm_t alg,
+                                             const uint8_t *input,
+                                             size_t input_length,
+                                             uint8_t *signature,
+                                             size_t signature_size,
+                                             size_t *signature_length);
+
+psa_status_t sli_se_transparent_verify_message(const psa_key_attributes_t *attributes,
+                                               const uint8_t *key_buffer,
+                                               size_t key_buffer_size,
+                                               psa_algorithm_t alg,
+                                               const uint8_t *input,
+                                               size_t input_length,
+                                               const uint8_t *signature,
+                                               size_t signature_length);
 
 psa_status_t sli_se_transparent_sign_hash(const psa_key_attributes_t *attributes,
                                           const uint8_t *key_buffer,
@@ -314,10 +328,13 @@ psa_status_t sli_se_transparent_export_public_key(const psa_key_attributes_t *at
                                                   size_t data_size,
                                                   size_t *data_length);
 
-psa_status_t sli_se_transparent_validate_key(const psa_key_attributes_t *attributes,
-                                             const uint8_t *data,
-                                             size_t data_length,
-                                             size_t *bits);
+psa_status_t sli_se_transparent_import_key(const psa_key_attributes_t *attributes,
+                                           const uint8_t *data,
+                                           size_t data_length,
+                                           uint8_t *key_buffer,
+                                           size_t key_buffer_size,
+                                           size_t *key_buffer_length,
+                                           size_t *bits);
 
 psa_status_t sli_se_transparent_key_agreement(psa_algorithm_t alg,
                                               const psa_key_attributes_t *attributes,

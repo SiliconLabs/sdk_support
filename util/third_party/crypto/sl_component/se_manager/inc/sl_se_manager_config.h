@@ -36,7 +36,7 @@
 /// of the configuration options in this file.
 
 #if defined (SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
+  #include "sl_component_catalog.h"
 #endif
 
 #if defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)

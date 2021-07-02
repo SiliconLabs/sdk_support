@@ -32,12 +32,14 @@
 #ifndef __APPS_COMMON_H__
 #define __APPS_COMMON_H__
 
+// This header will always be included. If CLI support is disabled, all CLI
+// functions will be compiled successfully and then be deadstripped from code.
 #include "sl_cli.h"
 
 #include "em_gpio.h" // For ButtonArray definition
 #include "circular_queue.h"
 
-#include "rail_types.h"
+#include "rail.h"
 #include "rail_ble.h"
 #include "rail_zwave.h"
 
@@ -77,51 +79,52 @@
 #define COUNTOF(a) (sizeof(a) / sizeof(a[0]))
 #define TX_CONTINUOUS_COUNT (0xFFFFFFFF)
 
-#define RAIL_EVENT_STRINGS                              \
-  {                                                     \
-    "RSSI_AVERAGE_DONE",                                \
-    "RX_ACK_TIMEOUT",                                   \
-    "RX_FIFO_ALMOST_FULL",                              \
-    "RX_PACKET_RECEIVED",                               \
-    "RX_PREAMBLE_LOST",                                 \
-    "RX_PREAMBLE_DETECT",                               \
-    "RX_SYNC1_DETECT",                                  \
-    "RX_SYNC2_DETECT",                                  \
-    "RX_FRAME_ERROR",                                   \
-    "RX_FIFO_FULL",                                     \
-    "RX_FIFO_OVERFLOW",                                 \
-    "RX_ADDRESS_FILTERED",                              \
-    "RX_TIMEOUT",                                       \
-    "SCHEDULED_RX/TX_STARTED",                          \
-    "RX_SCHEDULED_RX_END",                              \
-    "RX_SCHEDULED_RX_MISSED",                           \
-    "RX_PACKET_ABORTED",                                \
-    "RX_FILTER_PASSED",                                 \
-    "RX_TIMING_LOST",                                   \
-    "RX_TIMING_DETECT",                                 \
-    "RX_CHANNEL_HOPPING_COMPLETE/RX_DUTY_CYCLE_RX_END", \
-    "IEEE802154_DATA_REQUEST_COMMAND/ZWAVE_BEAM",       \
-    "TX_FIFO_ALMOST_EMPTY",                             \
-    "TX_PACKET_SENT",                                   \
-    "TXACK_PACKET_SENT",                                \
-    "TX_ABORTED",                                       \
-    "TXACK_ABORTED",                                    \
-    "TX_BLOCKED",                                       \
-    "TXACK_BLOCKED",                                    \
-    "TX_UNDERFLOW",                                     \
-    "TXACK_UNDERFLOW",                                  \
-    "TX_CHANNEL_CLEAR",                                 \
-    "TX_CHANNEL_BUSY",                                  \
-    "TX_CCA_RETRY",                                     \
-    "TX_START_CCA",                                     \
-    "TX_STARTED",                                       \
-    "TX_SCHEDULED_TX_MISSED",                           \
-    "CONFIG_UNSCHEDULED",                               \
-    "CONFIG_SCHEDULED",                                 \
-    "SCHEDULED_STATUS",                                 \
-    "CAL_NEEDED",                                       \
-    "RF_SENSED",                                        \
-    "PA_PROTECTION",                                    \
+#define RAIL_EVENT_STRINGS                                              \
+  {                                                                     \
+    "RSSI_AVERAGE_DONE",                                                \
+    "RX_ACK_TIMEOUT",                                                   \
+    "RX_FIFO_ALMOST_FULL",                                              \
+    "RX_PACKET_RECEIVED",                                               \
+    "RX_PREAMBLE_LOST",                                                 \
+    "RX_PREAMBLE_DETECT",                                               \
+    "RX_SYNC1_DETECT",                                                  \
+    "RX_SYNC2_DETECT",                                                  \
+    "RX_FRAME_ERROR",                                                   \
+    "RX_FIFO_FULL",                                                     \
+    "RX_FIFO_OVERFLOW",                                                 \
+    "RX_ADDRESS_FILTERED",                                              \
+    "RX_TIMEOUT",                                                       \
+    "SCHEDULED_RX/TX_STARTED",                                          \
+    "RX_SCHEDULED_RX_END",                                              \
+    "RX_SCHEDULED_RX_MISSED",                                           \
+    "RX_PACKET_ABORTED",                                                \
+    "RX_FILTER_PASSED",                                                 \
+    "RX_TIMING_LOST",                                                   \
+    "RX_TIMING_DETECT",                                                 \
+    "RX_CHANNEL_HOPPING_COMPLETE/RX_DUTY_CYCLE_RX_END",                 \
+    "IEEE802154_DATA/ZWAVE_LR_ACK/_REQUEST_COMMAND/TX_MFM_BUFFER_DONE", \
+    "ZWAVE_BEAM",                                                       \
+    "TX_FIFO_ALMOST_EMPTY",                                             \
+    "TX_PACKET_SENT",                                                   \
+    "TXACK_PACKET_SENT",                                                \
+    "TX_ABORTED",                                                       \
+    "TXACK_ABORTED",                                                    \
+    "TX_BLOCKED",                                                       \
+    "TXACK_BLOCKED",                                                    \
+    "TX_UNDERFLOW",                                                     \
+    "TXACK_UNDERFLOW",                                                  \
+    "TX_CHANNEL_CLEAR",                                                 \
+    "TX_CHANNEL_BUSY",                                                  \
+    "TX_CCA_RETRY",                                                     \
+    "TX_START_CCA",                                                     \
+    "TX_STARTED",                                                       \
+    "TX_SCHEDULED_TX_MISSED",                                           \
+    "CONFIG_UNSCHEDULED",                                               \
+    "CONFIG_SCHEDULED",                                                 \
+    "SCHEDULED_STATUS",                                                 \
+    "CAL_NEEDED",                                                       \
+    "RF_SENSED",                                                        \
+    "PA_PROTECTION",                                                    \
   }
 
 // Since channel hopping is pretty space intensive, put some limitations on it
@@ -157,7 +160,7 @@ typedef struct PhySwitchToRx{
 typedef enum RailTxType {
   TX_TYPE_NORMAL,
   TX_TYPE_CSMA,
-  TX_TYPE_LBT
+  TX_TYPE_LBT,
 } RailTxType_t;
 
 typedef struct ButtonArray {
@@ -194,6 +197,10 @@ typedef struct ZWaveBeamData {
    * The node ID contained in the received beam frame.
    */
   RAIL_ZWAVE_NodeId_t nodeId;
+  /**
+   * RSSI at which the beam was received.
+   */
+  int8_t beamRssi;
 } ZWaveBeamData_t;
 
 typedef struct RxPacketData {
@@ -211,12 +218,12 @@ typedef struct RxPacketData {
    */
   uint8_t *dataPtr;
   /**
-   * The packet's frequency offset
-   */
-  /**
    * The number of bytes that are in the dataPtr array.
    */
   uint16_t dataLength;
+  /**
+   * The packet's frequency offset
+   */
   RAIL_FrequencyOffset_t freqOffset;
   /**
    * The packet's status
@@ -292,6 +299,7 @@ typedef struct Counters{
   uint32_t txChannelBusy;
 
   uint32_t receive;
+  uint32_t receiveCrcErrDrop;
   uint32_t syncDetect;
   uint32_t preambleLost;
   uint32_t preambleDetect;
@@ -317,6 +325,8 @@ typedef struct Counters{
   uint32_t dataRequests;
   Stats_t rssi;
   uint32_t paProtect;
+  uint32_t subPhyCount[RAIL_BLE_RX_SUBPHY_COUNT];
+  uint64_t rxRawSourceBytes;
 } Counters_t;
 
 typedef RAIL_Status_t (*TxTimestampFunc)(RAIL_Handle_t, RAIL_TxPacketDetails_t *);
@@ -337,6 +347,8 @@ extern uint8_t configIndex;
 extern uint32_t continuousTransferPeriod;
 extern bool enableRandomTxDelay;
 extern int32_t txCount;
+extern int32_t txRepeatCount;
+#define RAIL_Idle txRepeatCount = 0, RAIL_Idle // Ensure explicit idles clear txRepeatCount
 extern uint32_t txAfterRxDelay;
 extern int32_t txCancelDelay;
 extern RAIL_StopMode_t txCancelMode;
@@ -375,6 +387,12 @@ extern volatile uint32_t packetsHeld;
 #define PERIPHERAL_ENABLE (0x01)
 #define ASYNC_RESPONSE (0x02)
 #endif
+
+#define RX_DATA_SOURCE_EVENT_STATE_CHECKED   0
+#define RX_DATA_SOURCE_EVENT_STATE_OCCURRED  1 // .. up to _SUSPENDED
+#define RX_DATA_SOURCE_EVENT_STATE_SUSPENDED 1000
+extern volatile uint16_t rxDataSourceEventState;
+
 extern uint8_t logLevel;
 extern uint8_t txData[SL_RAIL_TEST_MAX_PACKET_LENGTH];
 extern uint16_t txDataLen;
@@ -474,6 +492,7 @@ bool inAppMode(AppMode_t appMode, char *command);
 bool inRadioState(RAIL_RadioState_t state, char *command);
 bool parseTimeModeFromString(char *str, RAIL_TimeMode_t *mode);
 const char *configuredRxAntenna(RAIL_RxOptions_t rxOptions);
+RAIL_Status_t configureTxFifo(void);
 
 void updateStats(int32_t newValue, Stats_t *stats);
 void rfSensedCheck(void);
@@ -529,6 +548,7 @@ void RAILCb_RxFifoAlmostFull(RAIL_Handle_t railHandle);
 void RAILCb_RxChannelHoppingComplete(RAIL_Handle_t railHandle);
 void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle);
 void RAILCb_ZWAVE_BeamFrame(RAIL_Handle_t railHandle);
+void RAILCb_ZWAVE_LrAckData(RAIL_Handle_t railHandle);
 
 void printAddresses(sl_cli_command_arg_t *args);
 void getAddressFilter(sl_cli_command_arg_t *args);

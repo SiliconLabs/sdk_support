@@ -1,10 +1,10 @@
-id: "micriumos_rtos_description"
-label: "RTOS Description"
-package: "micrium-krnx"
-description: "RTOS Description"
+id: micriumos_rtos_description
+label: RTOS Description
+package: micrium-krnx
+description: RTOS Description
 category: RTOS|Micrium OS|Common
-quality: "production"
+quality: production
 provides:
-  - name: "rtos_description"
+  - name: rtos_description
 template_file:
-  - path: "platform/micrium_os/cfg/rtos_description.h.jinja"
+  - path: platform/micrium_os/cfg/rtos_description.h.jinja

@@ -14,6 +14,9 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+// Define module name for Power Manager debuging feature.
+#define CURRENT_MODULE_NAME    "BASE"
+
 #include PLATFORM_HEADER
 #include "sleep-efm32.h"
 #include "sl_power_manager.h"
@@ -30,11 +33,14 @@
 
 #if defined(RTCC_PRESENT) && (RTCC_COUNT == 1)
 #define SYSTIMER_IRQ_N   RTCC_IRQn
+#elif defined(SYSRTC_PRESENT)
+#warning ToDo: Figure out how to use SYSRTC for bobcat
+#define SYSTIMER_IRQ_N   SYSRTC_APP_IRQn
 #else
 #define SYSTIMER_IRQ_N   RTC_IRQn
 #endif
 
-#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+#if defined (_SILICON_LABS_32B_SERIES_2_CONFIG_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 // On series 2, config 2 parts, the device headers define separate masks for
 // each pin interrupt. Device headers for earlier parts define a single
 // combined mask.
@@ -64,7 +70,7 @@
                                | _GPIO_IEN_EXTIEN10_MASK \
                                | _GPIO_IEN_EXTIEN11_MASK)
 
-#elif defined (_SILICON_LABS_32B_SERIES_2) && !defined (_GPIO_IEN_EXT_MASK)
+#elif (defined (_SILICON_LABS_32B_SERIES_2) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)) && !defined (_GPIO_IEN_EXT_MASK)
 // On series 2, config 1 devices, the pin interrupt mask was renamed (relative
 // to series 1).
   #define _GPIO_IEN_EXT_MASK  _GPIO_IEN_EXTIEN_MASK

@@ -38,66 +38,6 @@
 extern "C" {
 #endif
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
-
-psa_status_t sli_se_transparent_key_derivation_setup(
-  sli_se_transparent_key_derivation_operation_t *operation,
-  psa_algorithm_t alg)
-{
-  return sli_se_driver_key_derivation_setup(operation, alg);
-}
-
-psa_status_t sli_se_transparent_key_derivation_set_capacity(
-  sli_se_transparent_key_derivation_operation_t *operation,
-  size_t capacity)
-{
-  return sli_se_driver_key_derivation_set_capacity(operation, capacity);
-}
-
-psa_status_t sli_se_transparent_key_derivation_input_bytes(
-  sli_se_driver_key_derivation_operation_t *operation,
-  psa_key_derivation_step_t step,
-  const uint8_t *data,
-  size_t data_length)
-{
-  return sli_se_driver_key_derivation_input_bytes(operation,
-                                                  step,
-                                                  data,
-                                                  data_length);
-}
-
-psa_status_t sli_se_transparent_key_derivation_output_key(
-  const psa_key_attributes_t *attributes,
-  sli_se_transparent_key_derivation_operation_t *operation,
-  uint8_t *key_buffer,
-  size_t key_buffer_size,
-  size_t *key_buffer_length)
-{
-  return sli_se_driver_key_derivation_output_key(attributes,
-                                                 operation,
-                                                 key_buffer,
-                                                 key_buffer_size,
-                                                 key_buffer_length);
-}
-
-psa_status_t sli_se_transparent_key_derivation_output_bytes(
-  sli_se_transparent_key_derivation_operation_t *operation,
-  uint8_t *output,
-  size_t output_length)
-{
-  return sli_se_driver_key_derivation_output_bytes(operation,
-                                                   output,
-                                                   output_length);
-}
-
-psa_status_t sli_se_transparent_key_derivation_abort(
-  sli_se_transparent_key_derivation_operation_t *operation)
-{
-  return sli_se_driver_key_derivation_abort(operation);
-}
-
-#endif // Vault
-
 psa_status_t sli_se_transparent_key_agreement(
   psa_algorithm_t alg,
   const psa_key_attributes_t *attributes,

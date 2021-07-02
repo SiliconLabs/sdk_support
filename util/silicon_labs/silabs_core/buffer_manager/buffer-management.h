@@ -45,7 +45,7 @@
 #define __BUFFER_MANAGEMENT_H__
 
 typedef uint16_t Buffer;
-#define NULL_BUFFER 0x0000
+#define NULL_BUFFER 0x0000u
 
 typedef Buffer MessageBufferQueue;
 typedef Buffer PacketHeader;

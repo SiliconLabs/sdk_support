@@ -1,16 +1,16 @@
-id: "simple_button"
-label: "Simple Button"
-package: "platform"
+id: simple_button
+label: Simple Button
+package: platform
 description: >
   The Simple Button Driver provides an implementation of the Generic Button API.
   This driver supports both active high and low buttons and configurable
-  debouncing. 
-  
+  debouncing.
 
-  This component is instantiable, meaning that several named instances can be 
-  created. For each instance a configuration is generated along with an 
+
+  This component is instantiable, meaning that several named instances can be
+  created. For each instance a configuration is generated along with an
   initialization struct set according to this configuration. These instance
-  defines and variables are available in a generated header file, 
+  defines and variables are available in a generated header file,
   sl_simple_button_instances.h.
 
 
@@ -19,25 +19,28 @@ description: >
   instance configurations, during the sl_system_init() call in main.c.
 
 
-  Selecting this component will also include the Simple Button Core component, which is 
+  Selecting this component will also include the Simple Button Core component, which is
   the implementation of the Simple Button driver itself.
-category: "Platform|Driver"
-quality: "production"
+category: Platform|Driver|Button
+quality: production
+root_path: platform/driver/button/
 instantiable:
-  prefix: "instance"
+  prefix: instance
 config_file:
-  - path: "platform/driver/button/config/sl_simple_button_{{instance}}_config.h"
-    file_id: "simple_button_config"
+  - path: "config/sl_simple_button_{{instance}}_config.h"
+    file_id: simple_button_config
 provides:
-  - name: "simple_button"
+  - name: simple_button
     allow_multiple: true
 requires:
-  - name: "simple_button_core"
+  - name: simple_button_core
 template_contribution:
-  - name: "simple_button_instance"
+  - name: simple_button_instance
     value: "{{instance}}"
-  - name: "component_catalog"
+  - name: component_catalog
     value: "{{instance}}"
+  - name: component_catalog
+    value: simple_button
 documentation:
     docset: gecko-platform
     document: driver/api/group-simple-button

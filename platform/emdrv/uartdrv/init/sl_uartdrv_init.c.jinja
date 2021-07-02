@@ -126,8 +126,8 @@ UARTDRV_InitLeuart_t sl_uartdrv_leuart_init_{{instance}} = {  {# Create LEUART i
   .port = SL_UARTDRV_LEUART_{{instance | upper}}_PERIPHERAL,
   .baudRate = SL_UARTDRV_LEUART_{{instance | upper}}_BAUDRATE,
 #if defined(_LEUART_ROUTELOC0_MASK)
-  .portLocationTx = SL_UARTDRV_LEUART_{{instance | upper}}_TX_PORT,
-  .portLocationRx = SL_UARTDRV_LEUART_{{instance | upper}}_RX_PORT,
+  .portLocationTx = SL_UARTDRV_LEUART_{{instance | upper}}_TX_LOC,
+  .portLocationRx = SL_UARTDRV_LEUART_{{instance | upper}}_RX_LOC,
 #else
   .portLocation = SL_UARTDRV_LEUART_{{instance | upper}}_ROUTE_LOC,
 #endif

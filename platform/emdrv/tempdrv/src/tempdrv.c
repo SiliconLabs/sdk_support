@@ -80,14 +80,12 @@ static TEMPDRV_CallbackSet_t *lowCallback;
 static bool TEMPDRV_InitState = false;
 static bool TEMPDRV_EnableState = false;
 
-static int convertToTemp(uint32_t emu);
 static uint32_t convertToEmu(int temp);
 static void updateInterrupts(void);
 
 #if defined(_DEVINFO_CAL_TEMP_MASK)
 // Calibration values to be initialized in TEMPDRV_Init
 static int calibrationEMU;
-static int calibrationTEMP;
 // Fallback calibration values in case DI calibration data not present
 static uint8_t fallbackEMU = 0x90;
 static uint8_t fallbackTEMP = 25;
@@ -387,33 +385,6 @@ static bool checkForDuplicates(TEMPDRV_CallbackSet_t *set, int8_t temp)
 
 /***************************************************************************//**
  * @brief
- *   Convert EMU value to degrees Celsius
- *
- * @param[in] emu
- *   EMU value to convert
- *
- * @return
- *    temperature in degrees Celsius
- ******************************************************************************/
-static int convertToTemp(uint32_t emu)
-{
-#if defined(_SILICON_LABS_32B_SERIES_2)
-  return (int)emu - 273; // Convert from Kelvin to Celsius
-#else
-  int res = (int) calibrationTEMP - ((emu * 8) / 5);
-  // Cap conversion results at int8_t bounds
-  if (res < -128) {
-    res = -128;
-  } else if (res > 127) {
-    res = 127;
-  }
-
-  return (int8_t) res;
-#endif
-}
-
-/***************************************************************************//**
- * @brief
  *   Convert a temperature in &deg;C to an EMU sensor value
  *
  * @param[in] temp
@@ -548,7 +519,6 @@ static void calibration(void)
 
   // calculate conversion offsets. Based on assumed slope of 5/8
   calibrationEMU = (DIemu) + ((5 * (DItemp)) / 8);
-  calibrationTEMP = (DItemp) + (8 * (DIemu) / 5);
 #endif
 }
 /// @endcond
@@ -674,18 +644,21 @@ uint8_t TEMPDRV_GetActiveCallbacks(TEMPDRV_LimitType_t limit)
  ******************************************************************************/
 int8_t TEMPDRV_GetTemp(void)
 {
-  uint32_t val1;
-  uint32_t val2;
+  float tempCelsius;
+  int8_t result;
 
-  // Read twice to ensure a stable value
-  do {
-    val1 = (EMU->TEMP & _EMU_TEMP_TEMP_MASK)
-           >> _EMU_TEMP_TEMP_SHIFT;
-    val2 = (EMU->TEMP & _EMU_TEMP_TEMP_MASK)
-           >> _EMU_TEMP_TEMP_SHIFT;
-  } while (val1 != val2);
+  tempCelsius = EMU_TemperatureGet();
 
-  return convertToTemp(val1);
+  if (tempCelsius < INT8_MIN) {
+    tempCelsius = INT8_MIN;
+  } else if (tempCelsius > INT8_MAX) {
+    tempCelsius = INT8_MAX;
+  }
+
+  // adding extra 0.5 before truncating to simulate rounding behavior
+  result = (((int8_t) (tempCelsius + 0.5 - INT8_MIN)) + INT8_MIN);
+
+  return result;
 }
 
 /***************************************************************************//**

@@ -20,11 +20,11 @@
 #if defined(LOCKBITS_BASE)
 #define PUBKEY_OFFSET_X (0x34A)
 #define PUBKEY_OFFSET_Y (0x36A)
-#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+#elif defined(SEMAILBOX_PRESENT)
 #include <stddef.h>
 #include "config/btl_config.h"
 // Lockbits are placed in the topmost flash page
-#define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) -(FLASH_PAGE_SIZE))
+#define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) - (FLASH_PAGE_SIZE))
 #if defined(BOOTLOADER_FALLBACK_LEGACY_KEY)
 #include "em_se.h"
 #define PUBKEY_OFFSET_X (0x34C)
@@ -33,7 +33,7 @@
 // #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
 // Lockbits are placed in the topmost flash page
-#define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) -(FLASH_PAGE_SIZE))
+#define LOCKBITS_BASE ((FLASH_BASE) + (FLASH_SIZE) - (FLASH_PAGE_SIZE))
 #define PUBKEY_OFFSET_X (0x34C)
 #define PUBKEY_OFFSET_Y (0x36C)
 // #elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_205)
@@ -43,11 +43,14 @@
 
 const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 {
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+#if defined(SEMAILBOX_PRESENT)
 #if defined(BOOTLOADER_FALLBACK_LEGACY_KEY)
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
+#endif
   uint8_t se_platform_pubKey[64];
   SE_Response_t ret = SE_readPubkey(SE_KEY_TYPE_BOOT, &se_platform_pubKey, 64, false);
-  if (ret == SE_RESPONSE_INTERNAL_ERROR) {
+  if (ret == SE_RESPONSE_INTERNAL_ERROR || ret == SE_RESPONSE_NOT_INITIALIZED) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_X);
   } else {
     return NULL;
@@ -55,7 +58,7 @@ const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 #else
   return NULL;
 #endif
-// defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+// defined(SEMAILBOX_PRESENT)
 #else
   return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_X);
 #endif
@@ -63,11 +66,14 @@ const uint8_t* btl_getSignedBootloaderKeyXPtr(void)
 
 const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
 {
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+#if defined(SEMAILBOX_PRESENT)
 #if defined(BOOTLOADER_FALLBACK_LEGACY_KEY)
+#if defined(_CMU_CLKEN1_SEMAILBOXHOST_MASK)
+  CMU->CLKEN1_SET = CMU_CLKEN1_SEMAILBOXHOST;
+#endif
   uint8_t se_platform_pubKey[64];
   SE_Response_t ret = SE_readPubkey(SE_KEY_TYPE_BOOT, &se_platform_pubKey, 64, false);
-  if (ret == SE_RESPONSE_INTERNAL_ERROR) {
+  if (ret == SE_RESPONSE_INTERNAL_ERROR || ret == SE_RESPONSE_NOT_INITIALIZED) {
     return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_Y);
   } else {
     return NULL;
@@ -75,7 +81,7 @@ const uint8_t* btl_getSignedBootloaderKeyYPtr(void)
 #else
   return NULL;
 #endif
-// defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
+// defined(SEMAILBOX_PRESENT)
 #else
   return (const uint8_t*)(LOCKBITS_BASE + PUBKEY_OFFSET_Y);
 #endif

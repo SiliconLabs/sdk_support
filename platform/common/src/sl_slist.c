@@ -69,7 +69,7 @@ void sl_slist_push_back(sl_slist_node_t **head,
   sl_slist_node_t **node_ptr = head;
 
   EFM_ASSERT((item != NULL)
-		     && (head != NULL));
+             && (head != NULL));
 
   while (*node_ptr != NULL) {
     node_ptr = &((*node_ptr)->node);

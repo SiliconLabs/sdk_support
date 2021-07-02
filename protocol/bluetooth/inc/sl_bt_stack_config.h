@@ -30,11 +30,17 @@ typedef struct {
   sl_bt_bluetooth_ll_priorities * linklayer_priorities; //Priority configuration, if NULL uses default values
 }sl_bt_stack_config_t;
 
-/** PAVDD input straight from power supply */
-#define SL_BT_RADIO_PA_INPUT_VBAT   0
+/** Value indicating the PA configuration is disabled  */
+#define SL_BT_RADIO_PA_CONFIG_DISABLED 0
 
-/** PAVDD input from DC/DC */
-#define SL_BT_RADIO_PA_INPUT_DCDC   1
+/** Value indicating the PA configuration is enabled  */
+#define SL_BT_RADIO_PA_CONFIG_ENABLED  1
+
+/** PA configuration - PAVDD input from battery supply. Voltage: ~ 3300 mV */
+#define SL_BT_RADIO_PA_INPUT_VBAT      0
+
+/** PA configuration - PAVDD input from DCDC supply. Voltage: ~ 1800 mV */
+#define SL_BT_RADIO_PA_INPUT_DCDC      1
 
 typedef struct {
   uint8_t config_enable; // Non-zero value indicates this is a valid PA config
@@ -49,7 +55,11 @@ typedef struct {
                          // Default value: RAIL_TX_POWER_MODE_2P4_HP
 }sl_bt_radio_pa_config_t;
 
+/** Flag indicating Bluetooth runs in RTOS */
 #define SL_BT_CONFIG_FLAG_RTOS                         256
+
+/** Flag indicating Bluetooth can allow EM2 with inaccurate LF clock */
+#define SL_BT_CONFIG_FLAG_INACCURATE_LFCLK_EM2           512
 
 typedef void (*sl_bt_priority_schedule_callback)(void);
 typedef void (*sl_bt_stack_schedule_callback)(void);

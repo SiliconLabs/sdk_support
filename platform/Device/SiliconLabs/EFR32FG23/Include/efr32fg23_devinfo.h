@@ -3,7 +3,7 @@
  * @brief EFR32FG23 DEVINFO register and bit field definitions
  ******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories, Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
  ******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -114,7 +114,7 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for DEVINFO INFO */
-#define _DEVINFO_INFO_RESETVALUE                                 0x0A000000UL                             /**< Default value for DEVINFO_INFO              */
+#define _DEVINFO_INFO_RESETVALUE                                 0x0C000000UL                             /**< Default value for DEVINFO_INFO              */
 #define _DEVINFO_INFO_MASK                                       0xFFFFFFFFUL                             /**< Mask for DEVINFO_INFO                       */
 #define _DEVINFO_INFO_CRC_SHIFT                                  0                                        /**< Shift value for DEVINFO_CRC                 */
 #define _DEVINFO_INFO_CRC_MASK                                   0xFFFFUL                                 /**< Bit mask for DEVINFO_CRC                    */
@@ -126,7 +126,7 @@ typedef struct {
 #define DEVINFO_INFO_PRODREV_DEFAULT                             (_DEVINFO_INFO_PRODREV_DEFAULT << 16)    /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 #define _DEVINFO_INFO_DEVINFOREV_SHIFT                           24                                       /**< Shift value for DEVINFO_DEVINFOREV          */
 #define _DEVINFO_INFO_DEVINFOREV_MASK                            0xFF000000UL                             /**< Bit mask for DEVINFO_DEVINFOREV             */
-#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x0000000AUL                             /**< Mode DEFAULT for DEVINFO_INFO               */
+#define _DEVINFO_INFO_DEVINFOREV_DEFAULT                         0x0000000CUL                             /**< Mode DEFAULT for DEVINFO_INFO               */
 #define DEVINFO_INFO_DEVINFOREV_DEFAULT                          (_DEVINFO_INFO_DEVINFOREV_DEFAULT << 24) /**< Shifted mode DEFAULT for DEVINFO_INFO       */
 
 /* Bit fields for DEVINFO PART */
@@ -319,7 +319,7 @@ typedef struct {
 
 /* Bit fields for DEVINFO SWCAPA1 */
 #define _DEVINFO_SWCAPA1_RESETVALUE                              0x00000000UL                            /**< Default value for DEVINFO_SWCAPA1           */
-#define _DEVINFO_SWCAPA1_MASK                                    0x00000007UL                            /**< Mask for DEVINFO_SWCAPA1                    */
+#define _DEVINFO_SWCAPA1_MASK                                    0x0000001FUL                            /**< Mask for DEVINFO_SWCAPA1                    */
 #define DEVINFO_SWCAPA1_RFMCUEN                                  (0x1UL << 0)                            /**< RF-MCU                                      */
 #define _DEVINFO_SWCAPA1_RFMCUEN_SHIFT                           0                                       /**< Shift value for DEVINFO_RFMCUEN             */
 #define _DEVINFO_SWCAPA1_RFMCUEN_MASK                            0x1UL                                   /**< Bit mask for DEVINFO_RFMCUEN                */
@@ -335,6 +335,11 @@ typedef struct {
 #define _DEVINFO_SWCAPA1_GWEN_MASK                               0x4UL                                   /**< Bit mask for DEVINFO_GWEN                   */
 #define _DEVINFO_SWCAPA1_GWEN_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for DEVINFO_SWCAPA1            */
 #define DEVINFO_SWCAPA1_GWEN_DEFAULT                             (_DEVINFO_SWCAPA1_GWEN_DEFAULT << 2)    /**< Shifted mode DEFAULT for DEVINFO_SWCAPA1    */
+#define DEVINFO_SWCAPA1_XOUT                                     (0x1UL << 3)                            /**< XOUT                                        */
+#define _DEVINFO_SWCAPA1_XOUT_SHIFT                              3                                       /**< Shift value for DEVINFO_XOUT                */
+#define _DEVINFO_SWCAPA1_XOUT_MASK                               0x8UL                                   /**< Bit mask for DEVINFO_XOUT                   */
+#define _DEVINFO_SWCAPA1_XOUT_DEFAULT                            0x00000000UL                            /**< Mode DEFAULT for DEVINFO_SWCAPA1            */
+#define DEVINFO_SWCAPA1_XOUT_DEFAULT                             (_DEVINFO_SWCAPA1_XOUT_DEFAULT << 3)    /**< Shifted mode DEFAULT for DEVINFO_SWCAPA1    */
 
 /* Bit fields for DEVINFO EXTINFO */
 #define _DEVINFO_EXTINFO_RESETVALUE                              0x00000000UL                               /**< Default value for DEVINFO_EXTINFO           */

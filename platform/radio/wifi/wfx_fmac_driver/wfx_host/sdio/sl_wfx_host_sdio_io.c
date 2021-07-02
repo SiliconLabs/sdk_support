@@ -22,6 +22,14 @@
 #include "sl_power_manager.h"
 #endif
 
+#ifdef LIB_MEM_CFG_HEAP_SIZE
+#if (LIB_MEM_CFG_HEAP_SIZE < 20480)
+#error "LIB_MEM_CFG_HEAP_SIZE needs to be >= 20480"
+#endif
+#else
+#error "LIB_MEM_CFG_HEAP_SIZE config missing"
+#endif
+
 #ifndef SL_WIFI_CFG_SD_CONTROLLER_NAME
 #define SL_WIFI_CFG_SD_CONTROLLER_NAME             "sd0"
 #endif
@@ -144,16 +152,16 @@ static sl_status_t sdio_io_write_extended(uint8_t function, uint32_t address, ui
   if (data_length >= 512) {
     block_count = (data_length / SL_WFX_SDIO_BLOCK_SIZE) + ( ( (data_length % SL_WFX_SDIO_BLOCK_SIZE) == 0) ? 0 : 1);
     sdio_fnct_wrblk(address,
-                          data,
-                          block_count,
-                          1,
-                          &err);
+                    data,
+                    block_count,
+                    1,
+                    &err);
   } else {
     sdio_fnct_wr(address,
-                       data,
-                       data_length,
-                       1,
-                       &err);
+                 data,
+                 data_length,
+                 1,
+                 &err);
   }
 
   if (RTOS_ERR_CODE_GET(err) == RTOS_ERR_NONE) {
@@ -177,16 +185,16 @@ static sl_status_t sdio_io_read_extended(uint8_t function, uint32_t address, uin
     block_count = (data_length / SL_WFX_SDIO_BLOCK_SIZE) + ( ( (data_length % SL_WFX_SDIO_BLOCK_SIZE) == 0) ? 0 : 1);
 
     sdio_fnct_rdblk(address,
-                          data,
-                          block_count,
-                          1,
-                          &err);
+                    data,
+                    block_count,
+                    1,
+                    &err);
   } else {
     sdio_fnct_rd(address,
-                       data,
-                       data_length,
-                       1,
-                       &err);
+                 data,
+                 data_length,
+                 1,
+                 &err);
   }
 
   if (RTOS_ERR_CODE_GET(err) == RTOS_ERR_NONE) {
@@ -242,7 +250,8 @@ static void sdio_irq_callback(void* arg)
 
   (void)arg;
 
-  OSFlagPost(&wfx_bus_evts, SL_WFX_BUS_EVENT_FLAG_RX, OS_OPT_POST_FLAG_SET, &err);
+  OSSemPost(&wfx_wakeup_sem, OS_OPT_POST_ALL, &err);
+  OSFlagPost(&bus_events, SL_WFX_BUS_EVENT_FLAG_RX, OS_OPT_POST_FLAG_SET, &err);
 }
 
 /****************************************************************************************************//**
@@ -263,8 +272,7 @@ sl_status_t sl_wfx_host_enable_platform_interrupt(void)
 //                        false,
 //                        true);
     return SL_STATUS_OK;
-  }
-  else
+  } else
 #endif
   {
     RTOS_ERR err;
@@ -294,8 +302,7 @@ sl_status_t sl_wfx_host_disable_platform_interrupt(void)
   if (useWIRQ) {
     GPIO_IntDisable(1 << wirq_irq_nb);
     return SL_STATUS_OK;
-  }
-  else
+  } else
 #endif
   {
     RTOS_ERR err;

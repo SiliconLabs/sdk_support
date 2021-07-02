@@ -196,7 +196,8 @@ bool RAIL_SupportsAlternateTxPower(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports antenna diversity.
 /// See also runtime refinement \ref RAIL_SupportsAntennaDiversity().
-#if ((_SILICON_LABS_32B_SERIES_1_CONFIG >= 2) || (_SILICON_LABS_32B_SERIES == 2))
+#if ((_SILICON_LABS_32B_SERIES_1_CONFIG >= 2) \
+  || (_SILICON_LABS_32B_SERIES == 2))
 #define RAIL_SUPPORTS_ANTENNA_DIVERSITY 1
 #else
 #define RAIL_SUPPORTS_ANTENNA_DIVERSITY 0
@@ -257,6 +258,25 @@ bool RAIL_SupportsChannelHopping(RAIL_Handle_t railHandle);
  *   if the chip in general claims to support it.
  */
 bool RAIL_SupportsDualSyncWords(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports automatic transitions
+/// from TX to TX.
+/// See also runtime refinement \ref RAIL_SupportsTxToTx().
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
+#define RAIL_SUPPORTS_TX_TO_TX 1
+#else
+#define RAIL_SUPPORTS_TX_TO_TX 0
+#endif
+
+/**
+ * Indicate whether this chip supports automatic TX to TX transitions.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if TX to TX transitions are supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_TX_TO_TX.
+ */
+bool RAIL_SupportsTxToTx(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports thermistor measurements.
 /// See also runtime refinement \ref RAIL_SupportsExternalThermistor().
@@ -500,7 +520,7 @@ bool RAIL_BLE_Supports2Mbps(RAIL_Handle_t railHandle)
 /// Antenna Switching needed for Angle-of-Arrival receives or
 /// Angle-of-Departure transmits.
 /// See also runtime refinement \ref RAIL_BLE_SupportsAntennaSwitching().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #define RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING 0
@@ -521,7 +541,8 @@ bool RAIL_BLE_SupportsAntennaSwitching(RAIL_Handle_t railHandle);
 /// See also runtime refinement \ref RAIL_BLE_SupportsCodedPhy().
 #if ((_SILICON_LABS_32B_SERIES_1_CONFIG == 3) \
   || (_SILICON_LABS_32B_SERIES_2_CONFIG == 1) \
-  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2))
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4))
 #define RAIL_BLE_SUPPORTS_CODED_PHY RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define  RAIL_BLE_SUPPORTS_CODED_PHY 0
@@ -542,7 +563,8 @@ bool RAIL_BLE_SupportsCodedPhy(RAIL_Handle_t railHandle);
 /// Boolean to indicate whether the selected chip supports the BLE Simulscan PHY
 /// used for simultaneous BLE 1Mbps and Coded PHY reception.
 /// See also runtime refinement \ref RAIL_BLE_SupportsSimulscanPhy().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if ((_SILICON_LABS_32B_SERIES_2_CONFIG == 2) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4))
 #define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_SIMULSCAN_PHY 0
@@ -563,7 +585,7 @@ bool RAIL_BLE_SupportsSimulscanPhy(RAIL_Handle_t railHandle);
 /// CTE (Constant Tone Extension) needed for Angle-of-Arrival/Departure
 /// transmits.
 /// See also runtime refinement \ref RAIL_BLE_SupportsCte().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #define RAIL_BLE_SUPPORTS_CTE RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_CTE 0
@@ -602,7 +624,7 @@ bool RAIL_BLE_SupportsQuuppa(RAIL_Handle_t railHandle);
 /// Boolean to indicate whether the selected chip supports BLE
 /// IQ Sampling needed for Angle-of-Arrival/Departure receives.
 /// See also runtime refinement \ref RAIL_BLE_SupportsIQSampling().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 2 || _SILICON_LABS_32B_SERIES_2_CONFIG == 4)
 #define RAIL_BLE_SUPPORTS_IQ_SAMPLING RAIL_SUPPORTS_PROTOCOL_BLE
 #else
 #define RAIL_BLE_SUPPORTS_IQ_SAMPLING 0
@@ -644,7 +666,7 @@ bool RAIL_BLE_SupportsIQSampling(RAIL_Handle_t railHandle);
  * to receive auxiliary packets.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return true if BLE Phy switch to RX is supported; false otherwise.
+ * @return true if BLE PHY switch to RX is supported; false otherwise.
  *
  * Runtime refinement of compile-time \ref RAIL_BLE_SUPPORTS_PHY_SWITCH_TO_RX.
  */
@@ -811,16 +833,6 @@ bool RAIL_IEEE802154_SupportsEMultipurposeFrames(RAIL_Handle_t railHandle);
  * RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868.
  */
 bool RAIL_IEEE802154_SupportsGSubsetGB868(RAIL_Handle_t railHandle);
-
-/// Boolean to indicate whether the selected chip supports
-/// IEEE 802.15.4G-2012 feature subset needed for Zigbee 915MHz.
-/// See also runtime refinement
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
-#define RAIL_FEAT_IEEE802154_G_R23_NA_SUPPORTED \
-  (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_SUBGHZ_BAND)
-#else
-#define RAIL_FEAT_IEEE802154_SUPPORTS_G_R23_NA 0
-#endif
 
 /// Boolean to indicate whether the selected chip supports
 /// IEEE 802.15.4G-2012 reception and transmission of frames
@@ -998,7 +1010,7 @@ bool RAIL_SupportsProtocolZWave(RAIL_Handle_t railHandle);
  * Indicate whether this chip supports the Z-Wave energy detect PHY.
  *
  * @param[in] railHandle A RAIL instance handle.
- * @return true if the Z-Wave energy detct PHY is supported; false otherwise.
+ * @return true if the Z-Wave energy detect PHY is supported; false otherwise.
  *
  * Runtime refinement of compile-time \ref RAIL_ZWAVE_SUPPORTS_ED_PHY.
  */
@@ -1062,10 +1074,30 @@ bool RAIL_SupportsSQPhy(RAIL_Handle_t railHandle);
  */
 bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/// Boolean to indicate whether the selected chip supports Notch capability.
+/// See also runtime refinement \ref RAIL_SupportsNotch().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
+#define RAIL_SUPPORTS_NOTCH 1
+#else
+#define RAIL_SUPPORTS_NOTCH 0
+#endif
+
+/**
+ * Indicate whether this chip supports Notch capability.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the Notch capability is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_NOTCH.
+ */
+bool RAIL_SupportsNotch(RAIL_Handle_t railHandle);
+#endif //DOXYGEN_SHOULD_SKIP_THIS
+
 /// Boolean to indicate whether the selected chip supports
 /// direct mode.
 /// See also runtime refinement \ref RAIL_SupportsDirectMode().
-#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG == 3))
 #define RAIL_SUPPORTS_DIRECT_MODE 1
 #else
 #define RAIL_SUPPORTS_DIRECT_MODE 0

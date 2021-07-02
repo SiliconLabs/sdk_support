@@ -180,25 +180,25 @@ int mbedtls_sha512_finish_ret(mbedtls_sha512_context *ctx, unsigned char output[
 void mbedtls_sha512_starts(mbedtls_sha512_context *ctx,
                            int is384)
 {
-  mbedtls_sha512_starts_ret(ctx, is384);
+  (void) mbedtls_sha512_starts_ret(ctx, is384);
 }
 
 void mbedtls_sha512_process(mbedtls_sha512_context *ctx, const unsigned char data[128])
 {
-  mbedtls_sha512_update_ret(ctx, data, 128);
+  (void) mbedtls_sha512_update_ret(ctx, data, 128);
 }
 
 void mbedtls_sha512_update(mbedtls_sha512_context *ctx,
                            const unsigned char *input,
                            size_t ilen)
 {
-  mbedtls_sha512_update_ret(ctx, input, ilen);
+  (void) mbedtls_sha512_update_ret(ctx, input, ilen);
 }
 
 void mbedtls_sha512_finish(mbedtls_sha512_context *ctx,
                            unsigned char output[64])
 {
-  mbedtls_sha512_finish_ret(ctx, output);
+  (void) mbedtls_sha512_finish_ret(ctx, output);
 }
 #endif /* !DEPRECATED_REMOVED */
 #endif /* SHA512 acceleration active */
@@ -263,25 +263,25 @@ int mbedtls_sha256_finish_ret(mbedtls_sha256_context *ctx, unsigned char output[
 void mbedtls_sha256_starts(mbedtls_sha256_context *ctx,
                            int is224)
 {
-  mbedtls_sha256_starts_ret(ctx, is224);
+  (void) mbedtls_sha256_starts_ret(ctx, is224);
 }
 
 void mbedtls_sha256_process(mbedtls_sha256_context *ctx, const unsigned char data[64])
 {
-  mbedtls_sha256_update_ret(ctx, data, 64);
+  (void) mbedtls_sha256_update_ret(ctx, data, 64);
 }
 
 void mbedtls_sha256_update(mbedtls_sha256_context *ctx,
                            const unsigned char *input,
                            size_t ilen)
 {
-  mbedtls_sha256_update_ret(ctx, input, ilen);
+  (void) mbedtls_sha256_update_ret(ctx, input, ilen);
 }
 
 void mbedtls_sha256_finish(mbedtls_sha256_context *ctx,
                            unsigned char output[32])
 {
-  mbedtls_sha256_finish_ret(ctx, output);
+  (void) mbedtls_sha256_finish_ret(ctx, output);
 }
 #endif /* !DEPRECATED_REMOVED */
 #endif /* SHA256 acceleration active */
@@ -344,25 +344,25 @@ int mbedtls_sha1_finish_ret(mbedtls_sha1_context *ctx, unsigned char output[20])
 #if !defined(MBEDTLS_DEPRECATED_REMOVED)
 void mbedtls_sha1_starts(mbedtls_sha1_context *ctx)
 {
-  mbedtls_sha1_starts_ret(ctx);
+  (void) mbedtls_sha1_starts_ret(ctx);
 }
 
 void mbedtls_sha1_process(mbedtls_sha1_context *ctx, const unsigned char data[64])
 {
-  mbedtls_sha1_update_ret(ctx, data, 64);
+  (void) mbedtls_sha1_update_ret(ctx, data, 64);
 }
 
 void mbedtls_sha1_update(mbedtls_sha1_context *ctx,
                          const unsigned char *input,
                          size_t ilen)
 {
-  mbedtls_sha1_update_ret(ctx, input, ilen);
+  (void) mbedtls_sha1_update_ret(ctx, input, ilen);
 }
 
 void mbedtls_sha1_finish(mbedtls_sha1_context *ctx,
                          unsigned char output[20])
 {
-  mbedtls_sha1_finish_ret(ctx, output);
+  (void) mbedtls_sha1_finish_ret(ctx, output);
 }
 #endif /* !DEPRECATED_REMOVED */
 #endif /* SHA1 acceleration active */

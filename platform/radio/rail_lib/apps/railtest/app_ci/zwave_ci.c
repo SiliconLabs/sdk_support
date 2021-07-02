@@ -303,9 +303,20 @@ void RAILCb_ZWAVE_BeamFrame(RAIL_Handle_t railHandle)
   }
 
   (void)RAIL_ZWAVE_GetLrBeamTxPower(railHandle, &beamPacket->beamPacket.lrBeamTxPower);
+  (void)RAIL_ZWAVE_GetBeamChannelIndex(railHandle, &beamPacket->beamPacket.channelIndex);
+  (void)RAIL_ZWAVE_GetBeamRssi(railHandle, &beamPacket->beamPacket.beamRssi);
 
-  RAIL_ZWAVE_GetBeamChannelIndex(railHandle, &beamPacket->beamPacket.channelIndex);
   queueAdd(&railAppEventQueue, beamPacketHandle);
+}
+
+void RAILCb_ZWAVE_LrAckData(RAIL_Handle_t railHandle)
+{
+  RAIL_ZWAVE_LrAckData_t lrAckData = {
+    .noiseFloorDbm = (int8_t)(RAIL_GetRssi(railHandle, false) / 4),
+    .txPowerDbm = (int8_t)(RAIL_GetTxPowerDbm(railHandle) / 10),
+    .receiveRssiDbm = (int8_t)(RAIL_GetRssi(railHandle, false) / 4) // Ideally should be AGC_FRAMERSSI
+  };
+  RAIL_ZWAVE_SetLrAckData(railHandle, &lrAckData);
 }
 #else //!RAIL_FEAT_ZWAVE_SUPPORTED
 

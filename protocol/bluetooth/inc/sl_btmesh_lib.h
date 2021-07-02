@@ -56,18 +56,17 @@ uint32_t mesh_lib_transition_time_to_ms(uint8_t transition_time);
  * This function needs to be called before using other helper library
  * functions.
  *
- * @param malloc_fn Function to use to allocate memory during runtime
- * @param free_fn Function to free allocated memory during runtime
- * @param generic_models Number of models on the device for which
- * event handlers will be registered; see
- * mesh_lib_generic_client_register_handler() and
- * mesh_lib_generic_server_register_handler()
+ * @param initial_num The initial number of entries which the array is
+ * allocated for
+ * @param increment The number of extra entries allocated when needed
+ * event handlers will be registered; if 0, no reallocation occurs; see
+ * @ref mesh_lib_generic_client_register_handler and
+ * @ref mesh_lib_generic_server_register_handler
  *
- * @return bg_err_success on success; an error code otherwise
+ * @return SL_STATUS_OK on success
+ * @return SL_STATUS_NO_MORE_RESOURCE if memory allocation failed
  */
-sl_status_t mesh_lib_init(void *(*malloc_fn)(size_t),
-                          void (*free_fn)(void *),
-                          size_t generic_models);
+sl_status_t mesh_lib_init(size_t initial_num, size_t increment);
 
 /**
  * @brief Initialize Mesh helper library
@@ -112,7 +111,7 @@ void mesh_lib_generic_client_event_handler(sl_btmesh_msg_t *evt);
  * @brief Client request handler function for generic server model
  *
  * When a generic server client request event is passed to
- * mesh_lib_generic_server_event_handler() it will call
+ * @ref mesh_lib_generic_server_event_handler it will call
  * the request handler function that has been registered
  * for the model that received the message. It will have
  * unpacked the request data into a generic request
@@ -147,7 +146,7 @@ typedef void
  * @brief Server state change handler function for generic server model
  *
  * When a generic server state change event is passed to
- * mesh_lib_generic_server_event_handler() it will call the request
+ * @ref mesh_lib_generic_server_event_handler it will call the request
  * handler function that has been registered for the model that
  * emitted the state change event. It will have unpacked the event
  * data into a generic request structure and other parameters.
@@ -178,7 +177,7 @@ typedef void
  * @brief Server state recall handler function for generic server model
  *
  * When a generic server state recall event is passed to
- * mesh_lib_generic_server_event_handler() it will call the request
+ * @ref mesh_lib_generic_server_event_handler it will call the request
  * handler function that has been registered for the model that
  * emitted the state recall event. It will have unpacked the event
  * data into a generic request structure and other parameters.
@@ -287,23 +286,33 @@ mesh_lib_generic_server_publish(uint16_t model_id,
 /**
  * @brief Register handler functions for a server model
  *
- * After this function is called mesh_lib_generic_server_event_handler()
+ * After this function is called @ref mesh_lib_generic_server_event_handler
  * will start passing client requests and server state changes to the
  * registered functions.
  *
+ * @note It is possible to have any (but not all at once) callback to be NULL.
+ * NULL function pointers are handled appropriately in
+ * @ref mesh_lib_generic_server_event_handler.
+ *
  * @param model_id Model for which functions are being registered
  * @param element_index Element where the model resides
- * @param cb Function for client requests
- * @param ch Function for server state changes
+ * @param request Function for client requests
+ * @param change Function for server state changes
  * @param recall  Function for server state recall
  *
- * @return bg_err_success if registration succeeded; an error otherwise
+ * @return SL_STATUS_OK if registration succeeded
+ * @return SL_STATUS_NULL_POINTER if all three callback function pointer inputs
+ * are NULL
+ * @return SL_STATUS_INVALID_STATE if model and element ID pair is already
+ * registered
+ * @return SL_STATUS_NO_MORE_RESOURCE if no empty registry entry could be
+ * attained
  */
 sl_status_t
 mesh_lib_generic_server_register_handler(uint16_t model_id,
                                          uint16_t element_index,
-                                         mesh_lib_generic_server_client_request_cb cb,
-                                         mesh_lib_generic_server_change_cb ch,
+                                         mesh_lib_generic_server_client_request_cb request,
+                                         mesh_lib_generic_server_change_cb change,
                                          mesh_lib_generic_server_recall_cb recall);
 
 /***
@@ -314,7 +323,7 @@ mesh_lib_generic_server_register_handler(uint16_t model_id,
  * @brief Server response handler function for generic client model
  *
  * When a generic client server response event is passed to
- * mesh_lib_generic_client_event_handler() it will call the response
+ * @ref mesh_lib_generic_client_event_handler it will call the response
  * handler function that has been registered for the model that
  * received the message. It will have unpacked the response data into
  * generic state structures and other parameters.
@@ -432,18 +441,24 @@ mesh_lib_generic_client_publish(uint16_t model_id,
  * @brief Register handler functions for a client model
  *
  * After this function is called
- * mesh_lib_generic_client_event_handler() will start passing server
+ * @ref mesh_lib_generic_client_event_handler will start passing server
  * response events to the registered functions.
  *
  * @param model_id Model for which functions are being registered
  * @param element_index Element where the model resides
- * @param cb Function for server responses
+ * @param response Function for server responses
  *
- * @return bg_err_success if registration succeeded; an error otherwise
+ * @return SL_STATUS_OK if registration succeeded
+ * @return SL_STATUS_NULL_POINTER if all three callback function pointer inputs
+ * are NULL
+ * @return SL_STATUS_INVALID_STATE if model and element ID pair is already
+ * registered
+ * @return SL_STATUS_NO_MORE_RESOURCE if no empty registry entry could be
+ * attained
  */
 sl_status_t
 mesh_lib_generic_client_register_handler(uint16_t model_id,
                                          uint16_t element_index,
-                                         mesh_lib_generic_client_server_response_cb cb);
+                                         mesh_lib_generic_client_server_response_cb response);
 
 #endif

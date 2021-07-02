@@ -152,7 +152,7 @@ typedef void(*nvm3_HalClose_t)(void);
  *   such as the device family, write size, whether the NVM is memory mapped or
  *   not, and finally the NVM page size.
  *
- * @param[in] deviceInfo
+ * @param[in] info
  *   A pointer to a structure that will receive the device information.
  ******************************************************************************/
 typedef Ecode_t (*nvm3_HalGetInfo_t)(nvm3_HalInfo_t *info);
@@ -197,10 +197,10 @@ typedef Ecode_t (*nvm3_HalPageErase_t)(nvm3_HalPtr_t nvmAdr);
  * @param[in] nvmAdr
  *   A memory address in NVM where data will be read.
  *
- * @param[in] *pDst
+ * @param[in] *dst
  *   A pointer to the destination buffer.
  *
- * @param[in] cnt
+ * @param[in] wordCnt
  *   The number of words to read.
  ******************************************************************************/
 typedef Ecode_t (*nvm3_HalReadWords_t)(nvm3_HalPtr_t nvmAdr, void *dst, size_t wordCnt);

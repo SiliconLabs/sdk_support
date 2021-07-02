@@ -15,6 +15,7 @@ documentation:
 requires:
   # rail support
   - name: device_supports_rail_stack # device must support "RAIL Stacks" (e.g., RAILtest)
+  - name: rail_util_pa
 
   # silabs_core
   - name: silabs_core_memory_manager
@@ -27,6 +28,11 @@ requires:
 
   # emlib
   - name: emlib_rmu
+  - name: emlib_core
+  - name: emlib_gpio
+  - name: emlib_cmu
+  - name: emlib_usart
+  - name: emlib_prs
 
   # sl_component
   - name: component_catalog
@@ -56,6 +62,10 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
+  - path: platform/radio/rail_lib/apps/railtest/config/efr32xg24/sl_rail_test_config.h
+    condition:
+      - device_series_2
+      - device_sdid_215
 
 include:
   - path: platform/radio/rail_lib/hal
@@ -73,6 +83,27 @@ include:
       - path: railapp_antenna.h
       - path: railapp_rmr.h
       - path: railapp_malloc.h
+  # Explicitly include cli and iostream headers here if CLI support is
+  # disabled such that all CLI code still compiles successfully first and
+  # is then deadstripped away second.
+  - path: platform/service/cli/inc
+    file_list:
+      - path: sl_cli.h
+      - path: sl_cli_types.h
+      - path: sl_cli_command.h
+      - path: sl_cli_arguments.h
+    unless:
+      - cli
+  - path: platform/service/cli/config
+    file_list:
+      - path: sl_cli_config.h
+    unless:
+      - cli
+  - path: platform/service/iostream/inc
+    file_list:
+      - path: sl_iostream.h
+    unless:
+      - cli
 
 source:
   - path: platform/radio/rail_lib/apps/railtest/app_main.c
@@ -106,7 +137,6 @@ source:
   - path: platform/radio/rail_lib/apps/railapp/railapp_antenna.c
 
   - path: platform/radio/rail_lib/hal/efr32/hal_efr.c
-  - path: platform/radio/rail_lib/hal/hal_common.c
 
   - path: platform/radio/rail_lib/plugin/pa-auto-mode/pa_auto_mode.c
 
@@ -559,6 +589,8 @@ template_contribution:
           help: "txMethod: 'pkt'/'fifo'"
         - type: string
           help: "rxMethod: 'pkt'/'fifo'"
+        - type: uint8opt
+          help: "rxSource: RAIL_RxDataSource_t (>0 requires fifo mode)"
 
   - name: cli_command
     value:
@@ -828,8 +860,8 @@ template_contribution:
       handler: sleep
       help: "Sleep until UART input or RF Sensed (if either configured)."
       argument:
-        - type: uint8
-          help: "energyMode: 0-4, for EM1P use 2 with radio on"
+        - type: string
+          help: "energyMode: 0-4[hs], for EM1P use 2 with radio on"
         - type: uint32opt
           help: "Legacy: RfSenseUs\\n                                        RfBand: 0=none,1=GHz,2=MHz,3=both\\n                          or Selective: SyncwordBytes Syncword RfBand"
 
@@ -1073,8 +1105,7 @@ template_contribution:
       help: "Configure the radio for 2.4 GHz 802.15.4.\\n                    Use with enable802154."
       argument:
         - type: uint8opt
-          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable"
-
+          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable"
   - name: cli_command
     value:
       name: config863MHz802154
@@ -1850,6 +1881,28 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: setNextTxRepeat
+      handler: setNextTxRepeat
+      help: "Set next transmit's automatic repeat count."
+      argument:
+        - type: uint16
+          help: "number of auto-repeated transmits after the first"
+        - type: uint32opt
+          help: "delayUs inter-transmit or hop delay\\n                    [uint32opt] channel (if hopping)\\n                    repeat delayUs and channel for additional hops."
+
+  - name: cli_command
+    value:
+      name: setNextBleTxRepeat
+      handler: setNextBleTxRepeat
+      help: "Set next transmit's automatic repeat count."
+      argument:
+        - type: uint16
+          help: "number of auto-repeated transmits after the first"
+        - type: uint32opt
+          help: "delayUs inter-transmit or hop delay\\n                    [uint32opt] phy railChannel logicalChannel accessAddress\\n                    (a hop's config, repeat from delayUs for additional hops)"
+
+  - name: cli_command
+    value:
       name: setTxTimePos
       handler: setTxTimePos
       help: "Set desired TX timestamp position."
@@ -1870,16 +1923,16 @@ template_contribution:
     value:
       name: setTimings
       handler: setTimings
-      help: "Set RAIL state transition timings."
+      help: "Set RAIL state transition timings (use -1 to keep same)."
       argument:
-        - type: uint32
+        - type: int32
           help: "idleToRxUs"
-        - type: uint32
+        - type: int32
           help: "rxToTxUs"
-        - type: uint32
+        - type: int32
           help: "idleToTxUs"
-        - type: uint32opt
-          help: "txToRxUs\\n                    [uint32opt] rxSearchTimeoutUs\\n                    [uint32opt] txToRxSearchTimeout"
+        - type: int32opt
+          help: "txToRxUs [0]\\n                    [int32opt] rxSearchTimeoutUs [0]\\n                    [int32opt] txToRxSearchTimeout [0]\\n                    [int32opt] txToTx [0]"
 
   - name: cli_command
     value:
@@ -2051,7 +2104,7 @@ template_contribution:
         - type: uint32
           help: "time: per mode"
         - type: stringopt
-          help: "['rel'=Relative] 'abs'=Absolute\\n                    [stringopt] 'abort' RX if TX occurs during packet RX\\n                                    otherwise TX is delayed to end of RX"
+          help: "['abs'=Absolute] 'rel'=Relative\\n                    [stringopt] 'abort' RX if TX occurs during packet RX\\n                                    otherwise TX is delayed to end of RX"
 
   - name: cli_command
     value:
@@ -2126,3 +2179,14 @@ template_contribution:
       argument:
         - type: uint8
           help: "optionBitMask: 1=HFXO | 2=HFRCO | 4=DCDC | 8=LCD"
+
+  - name: cli_command
+    value:
+      name: configNotch
+      handler: configNotch
+      help: "Configure Notch filter."
+      argument:
+        - type: uint32
+          help: "interferer frequency"
+        - type: uint32opt
+          help: "interferer bandwidth"

@@ -57,7 +57,7 @@
   #define RETARGET_TXPIN       8                            /* UART transmission pin */
   #define RETARGET_RXPORT      gpioPortA                    /* UART reception port */
   #define RETARGET_RXPIN       9                            /* UART reception pin */
-  #define RETARGET_USART       1                            /* Includes em_usart.h */
+  #define RETARGET_USART       0                            /* Includes em_usart.h */
 #else
 #error "Illegal USART selection."
 #endif

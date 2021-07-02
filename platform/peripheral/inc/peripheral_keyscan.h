@@ -42,12 +42,7 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup peripheral
- * @{
- ******************************************************************************/
-
-/***************************************************************************//**
- * @addtogroup KEYSCAN
+ * @addtogroup keyscan
  * @{
  ******************************************************************************/
 
@@ -55,24 +50,24 @@ extern "C" {
  *********************************   ENUM   ************************************
  ******************************************************************************/
 
-// KEYSCAN configuration delay values
+/// KEYSCAN configuration delay values
 typedef enum {
-  SL_KEYSCAN_DELAY_2MS = 0,
-  SL_KEYSCAN_DELAY_4MS,
-  SL_KEYSCAN_DELAY_6MS,
-  SL_KEYSCAN_DELAY_8MS,
-  SL_KEYSCAN_DELAY_10MS,
-  SL_KEYSCAN_DELAY_12MS,
-  SL_KEYSCAN_DELAY_14MS,
-  SL_KEYSCAN_DELAY_16MS,
-  SL_KEYSCAN_DELAY_18MS,
-  SL_KEYSCAN_DELAY_20MS,
-  SL_KEYSCAN_DELAY_22MS,
-  SL_KEYSCAN_DELAY_24MS,
-  SL_KEYSCAN_DELAY_26MS,
-  SL_KEYSCAN_DELAY_28MS,
-  SL_KEYSCAN_DELAY_30MS,
-  SL_KEYSCAN_DELAY_32MS
+  SL_KEYSCAN_DELAY_2MS = 0, ///< 2 ms delay.
+  SL_KEYSCAN_DELAY_4MS,     ///< 4 ms delay.
+  SL_KEYSCAN_DELAY_6MS,     ///< 6 ms delay.
+  SL_KEYSCAN_DELAY_8MS,     ///< 8 ms delay.
+  SL_KEYSCAN_DELAY_10MS,    ///< 10 ms delay.
+  SL_KEYSCAN_DELAY_12MS,    ///< 12 ms delay.
+  SL_KEYSCAN_DELAY_14MS,    ///< 14 ms delay.
+  SL_KEYSCAN_DELAY_16MS,    ///< 16 ms delay.
+  SL_KEYSCAN_DELAY_18MS,    ///< 18 ms delay.
+  SL_KEYSCAN_DELAY_20MS,    ///< 20 ms delay.
+  SL_KEYSCAN_DELAY_22MS,    ///< 22 ms delay.
+  SL_KEYSCAN_DELAY_24MS,    ///< 24 ms delay.
+  SL_KEYSCAN_DELAY_26MS,    ///< 26 ms delay.
+  SL_KEYSCAN_DELAY_28MS,    ///< 28 ms delay.
+  SL_KEYSCAN_DELAY_30MS,    ///< 30 ms delay.
+  SL_KEYSCAN_DELAY_32MS     ///< 32 ms delay.
 } sl_keyscan_delay_t;
 
 /*******************************************************************************
@@ -284,8 +279,7 @@ __STATIC_INLINE void sl_keyscan_set_interrupts(uint32_t flags)
   KEYSCAN->IF_SET = flags;
 }
 
-/** @} (end addtogroup KEYSCAN) */
-/** @} (end addtogroup peripheral) */
+/** @} (end addtogroup keyscan) */
 
 #ifdef __cplusplus
 }

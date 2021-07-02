@@ -222,21 +222,20 @@ PacketHeader sl_mac_make_data_message(sl_mac_node_id_t destination,
   return message;
 }
 
-PacketHeader sl_mac_make_raw_message(uint8_t payloadLength,
-                                     const uint8_t *payload,
+PacketHeader sl_mac_make_raw_message(Buffer payload,
                                      uint16_t macInfoFlags,
                                      uint8_t nwk_index)
 {
-  PacketHeader message = emAllocateBuffer(EMBER_MAC_IN_MEMORY_OVERHEAD + payloadLength);
+  PacketHeader message = emAllocateBuffer(EMBER_MAC_IN_MEMORY_OVERHEAD);
   if (message == NULL_BUFFER) {
     return message;
   }
   sl_mac_in_memory_overhead_t *in_memory_packet = (sl_mac_in_memory_overhead_t *)emGetBufferPointer(message);
-  MEMSET(in_memory_packet, 0, emGetBufferLength(message) );
+  MEMSET(in_memory_packet, 0, emGetBufferLength(message));
   in_memory_packet->info.nwk_index = NWK_INDEX;
   sl_mac_header_set_mac_info(message, macInfoFlags);
-  if (payload != NULL) {
-    MEMCOPY(in_memory_packet->payload, payload, payloadLength);
+  if (payload != NULL_BUFFER) {
+    emSetPayloadLink(message, payload);
   }
   return message;
 }

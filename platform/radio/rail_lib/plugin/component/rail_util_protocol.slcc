@@ -27,6 +27,10 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
+  - path: platform/radio/rail_lib/plugin/rail_util_protocol/config/efr32xg24/sl_rail_util_protocol_config.h
+    condition:
+      - device_series_2
+      - device_sdid_215
 include:
   - path: platform/radio/rail_lib/plugin/rail_util_protocol
     file_list:

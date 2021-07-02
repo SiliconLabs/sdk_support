@@ -36,6 +36,10 @@
 #include "sl_rail_util_init_{{ inst | lower }}_config.h"
 {%- endfor %}
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum sl_rail_util_handle_type{
 {%- for inst in rail_util_init_instance %}
   SL_RAIL_UTIL_HANDLE_{{ inst | upper }},
@@ -154,6 +158,8 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle,
     ? RAIL_EVENT_IEEE802154_DATA_REQUEST_COMMAND : RAIL_EVENTS_NONE)                   \
   | (SL_RAIL_UTIL_INIT_EVENT_ZWAVE_BEAM_{{ inst | upper }}_ENABLE                      \
     ? RAIL_EVENT_ZWAVE_BEAM : RAIL_EVENTS_NONE)                                        \
+  | (SL_RAIL_UTIL_INIT_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND_{{ inst | upper }}_ENABLE    \
+    ? RAIL_EVENT_ZWAVE_LR_ACK_REQUEST_COMMAND : RAIL_EVENTS_NONE)                      \
   | (SL_RAIL_UTIL_INIT_EVENT_TX_FIFO_ALMOST_EMPTY_{{ inst | upper }}_ENABLE            \
     ? RAIL_EVENT_TX_FIFO_ALMOST_EMPTY : RAIL_EVENTS_NONE)                              \
   | (SL_RAIL_UTIL_INIT_EVENT_TX_PACKET_SENT_{{ inst | upper }}_ENABLE                  \
@@ -204,5 +210,9 @@ void sl_rail_util_on_event(RAIL_Handle_t rail_handle,
 #define SL_RAIL_UTIL_INIT_EVENT_{{ inst | upper }}_INVERSE_MASK \
   (~SL_RAIL_UTIL_INIT_EVENT_{{ inst | upper }}_MASK)
 {%- endfor %}
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_INIT_H

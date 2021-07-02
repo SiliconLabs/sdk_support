@@ -41,7 +41,6 @@
 #include "sl_power_manager.h"
 #endif
 
-
 #define USART           SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
 
 static OS_SEM spi_sem;
@@ -56,8 +55,7 @@ static bool spi_enabled = false;
 
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 
-
-static int sl_wfx_host_spi_set_config (void *usart)
+static int sl_wfx_host_spi_set_config(void *usart)
 {
   int ret = -1;
 
@@ -134,9 +132,9 @@ sl_status_t sl_wfx_host_init_bus(void)
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
 
-  res = sl_wfx_host_spi_set_config (USART);
+  res = sl_wfx_host_spi_set_config(USART);
   if (res != 0) {
-      return SL_STATUS_FAIL;
+    return SL_STATUS_FAIL;
   }
 
   spi_enabled = true;
@@ -190,7 +188,6 @@ sl_status_t sl_wfx_host_deinit_bus(void)
   return SL_STATUS_OK;
 }
 
-
 /**************************************************************************//**
  * Assert chip select.
  *****************************************************************************/
@@ -210,8 +207,8 @@ sl_status_t sl_wfx_host_spi_cs_deassert()
 }
 
 static bool rx_dma_complete(unsigned int channel,
-                          unsigned int sequenceNo,
-                          void *userParam)
+                            unsigned int sequenceNo,
+                            void *userParam)
 {
   (void)channel;
   (void)sequenceNo;
@@ -308,7 +305,6 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
     OSSemPend(&spi_sem, 0, OS_OPT_PEND_BLOCKING, 0, &err);
   }
 
-
   if (err.Code == RTOS_ERR_NONE) {
     return SL_STATUS_OK;
   } else {
@@ -363,6 +359,5 @@ sl_status_t sl_wfx_host_disable_spi(void)
   }
   return SL_STATUS_OK;
 }
-
 
 #endif

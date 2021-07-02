@@ -39,7 +39,7 @@
 - tag:
   - board:pn:BRD2503
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A02
   - board:device:efm32pg22c200f512im40
   - hardware:has:vcom
   - hardware:has:sensor:si7021

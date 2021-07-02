@@ -12,7 +12,7 @@ description: >
 category: RTOS|FreeRTOS
 quality: "production"
 source:
-  - path: "util/third_party/freertos/Source/portable/MemMang/heap_3.c"
+  - path: "util/third_party/freertos/kernel/portable/MemMang/heap_3.c"
 provides:
   - name: "freertos_heap"
 requires:

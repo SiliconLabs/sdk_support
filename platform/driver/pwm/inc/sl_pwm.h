@@ -42,8 +42,7 @@ extern "C" {
  *
  * @note If several PWM driver instances are set up to use the same TIMER
  * instance, the PWM frequency of these instances must be the same.
- *
- * ### PWM Example Code {#pwm_example}
+ * ### PWM Example Code
  *
  * Basic example for generating PWM waveform:
  *

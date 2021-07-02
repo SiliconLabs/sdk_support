@@ -135,6 +135,36 @@ static void mbedtls_zeroize(void *v, size_t n)
   volatile unsigned char *p = v; while (n--) *p++ = 0;
 }
 
+static int sli_validate_gcm_params(size_t tag_len,
+                                   size_t iv_len,
+                                   size_t add_len)
+{
+  // NOTE: tag lengths != 16 byte are only supported as of SE FW v1.2.0.
+  //   Earlier firmware versions will return an error trying to verify non-16-byte
+  //   tags using this function.
+  if ( tag_len < 4 || tag_len > 16 || iv_len == 0 ) {
+    return (MBEDTLS_ERR_GCM_BAD_INPUT);
+  }
+
+  /* AD are limited to 2^64 bits, so 2^61 bytes. Since the length of AAD is
+   * limited by the mbedtls API to a size_t, length checking only needs to be
+   * done on 64-bit platforms. */
+#if SIZE_MAX > 0xFFFFFFFFUL
+  if (add_len >> 61 != 0) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
+#else
+  (void) add_len;
+#endif /* 64-bit size_t */
+
+  /* Library does not support non-12-byte IVs */
+  if (iv_len != 12) {
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  }
+
+  return 0;
+}
+
 // Initialize a context
 void mbedtls_gcm_init(mbedtls_gcm_context *ctx)
 {
@@ -149,6 +179,7 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
                        const unsigned char *key,
                        unsigned int keybits)
 {
+  (void) cipher;
   GCM_VALIDATE_RET(ctx != NULL);
   GCM_VALIDATE_RET(key != NULL);
   GCM_VALIDATE_RET(cipher == MBEDTLS_CIPHER_ID_AES);
@@ -247,10 +278,9 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   GCM_VALIDATE_RET(iv != NULL);
   GCM_VALIDATE_RET(add_len == 0 || add != NULL);
 
-  if (iv_len != 12
-      ||// AD are limited to 2^64 bits, so 2^61 bytes.
-      ((uint64_t) add_len) >> 61 != 0) {
-    return(MBEDTLS_ERR_GCM_BAD_INPUT);
+  int status = sli_validate_gcm_params(16, iv_len, add_len);
+  if (status) {
+    return status;
   }
 
   // Check if this context has already acquired a crypto device, which means
@@ -570,6 +600,11 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
 
   GCM_VALIDATE_RET(ctx != NULL);
   GCM_VALIDATE_RET(tag != NULL);
+
+  int status = sli_validate_gcm_params(tag_len, 12, 16);
+  if (status) {
+    return status;
+  }
 
   // Check if this context has already acquired a crypto device, which means
   // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM

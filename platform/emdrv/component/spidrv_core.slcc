@@ -38,12 +38,12 @@ config_file:
   - path: config/spidrv_config.h
 template_file:
   - path: "init/sl_spidrv_init.c.jinja"
-    condition: [spidrv]
+    condition: [spidrv_instance]
   - path: "init/sl_spidrv_instances.h.jinja"
-    condition: [spidrv]
+    condition: [spidrv_instance]
 template_contribution:
   - name: event_handler
-    condition: [spidrv]
+    condition: [spidrv_instance]
     value:
       event: driver_init
       include: "sl_spidrv_instances.h"

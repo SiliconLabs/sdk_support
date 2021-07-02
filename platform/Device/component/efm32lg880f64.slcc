@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: EFM32LG880F64
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFM32LG/Source/system_efm32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFM32LG/Source/IAR/startup_efm32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFM32LG/Source/GCC/startup_efm32lg.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/EFM32LG/Source/ARM/startup_efm32lg.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efm32lg880f64.h
@@ -70,6 +80,8 @@
     - path: em_device.h
     - path: system_efm32lg.h
     path: platform/Device/SiliconLabs/EFM32LG/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efm32lg880f64
   - name: device
@@ -132,6 +144,7 @@
   - name: device_has_usart2
   - name: device_has_vcmp
   - name: device_has_wdog
+  - name: device_has_dwt
   - name: device_has_mpu
 - requires:
   - name: cmsis_core
@@ -164,7 +177,6 @@
     value: 2048
 - tag:
   - device:opn:efm32lg880f64
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efm32lg880f64

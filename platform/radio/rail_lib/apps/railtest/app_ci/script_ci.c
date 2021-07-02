@@ -44,11 +44,15 @@
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
   #include "sl_component_catalog.h"
 #endif
-#include "sl_cli_storage_ram_instances.h"
+#if defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT)
+  #include "sl_cli_storage_ram_instances.h"
+#endif
 #if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
   #include "sl_cli_storage_nvm3_instances.h"
 #endif
-#include "sl_cli_delay.h"
+#if defined(SL_CATALOG_CLI_DELAY_PRESENT)
+  #include "sl_cli_delay.h"
+#endif
 
 static bool flashCommandScriptExists;
 static bool ramCommandScriptExists;
@@ -56,6 +60,7 @@ static bool ramCommandScriptExists;
 // non-blocking wait
 void wait(sl_cli_command_arg_t *args)
 {
+#if defined(SL_CATALOG_CLI_DELAY_PRESENT)
   // Relative time by default
   RAIL_TimeMode_t timeMode = RAIL_TIME_DELAY;
 
@@ -95,6 +100,11 @@ void wait(sl_cli_command_arg_t *args)
 
   // Call the non-blocking wait function (with a relative delay in ms).
   sl_cli_delay_command(args);
+#else
+  (void)args;
+  responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                     "CLI Delay support not enabled");
+#endif //SL_CATALOG_CLI_DELAY_PRESENT
 }
 
 void enterScript(sl_cli_command_arg_t *args)
@@ -119,14 +129,21 @@ void enterScript(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
                        "Flash support not enabled");
     return;
-#endif
+#endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
   } else {
     // Use RAM.
+#if defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT)
     if (ramCommandScriptExists) {
       sl_cli_storage_ram_clear(args);
     }
     ramCommandScriptExists = true;
     sl_cli_storage_ram_define(args);
+#else
+    (void)ramCommandScriptExists;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "RAM support not enabled");
+    return;
+#endif //SL_CATALOG_CLI_STORAGE_RAM_PRESENT
   }
 
   responsePrint(sl_cli_get_command_string(args, 0),
@@ -154,11 +171,18 @@ void clearScript(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
                        "Flash support not enabled");
     return;
-#endif
+#endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
   } else {
     // Use RAM.
+#if defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT)
     ramCommandScriptExists = false;
     sl_cli_storage_ram_clear(args);
+#else
+    (void)ramCommandScriptExists;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "RAM support not enabled");
+    return;
+#endif //SL_CATALOG_CLI_STORAGE_RAM_PRESENT
   }
 
   responsePrint(sl_cli_get_command_string(args, 0),
@@ -186,17 +210,25 @@ void printScript(sl_cli_command_arg_t *args)
       success = true;
     }
 #else
+    (void)scriptCount;
     responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
                        "Flash support not enabled");
     return;
 #endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
   } else {
     // Use RAM.
+#if defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT)
     scriptCount = sl_cli_storage_ram_count(args->handle);
     if (scriptCount > 0U) {
       sl_cli_storage_ram_list(args);
       success = true;
     }
+#else
+    (void)scriptCount;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "RAM support not enabled");
+    return;
+#endif //SL_CATALOG_CLI_STORAGE_RAM_PRESENT
   }
 
   responsePrint(sl_cli_get_command_string(args, 0),
@@ -225,17 +257,25 @@ void runScript(sl_cli_command_arg_t *args)
       success = true;
     }
 #else
+    (void)scriptCount;
     responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
                        "Flash support not enabled");
     return;
 #endif //SL_CATALOG_CLI_STORAGE_NVM3_PRESENT
   } else {
     // Use RAM.
+#if defined(SL_CATALOG_CLI_STORAGE_RAM_PRESENT)
     scriptCount = sl_cli_storage_ram_count(args->handle);
     if (scriptCount > 0U) {
       sl_cli_storage_ram_execute(args);
       success = true;
     }
+#else
+    (void)scriptCount;
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x12,
+                       "RAM support not enabled");
+    return;
+#endif //SL_CATALOG_CLI_STORAGE_RAM_PRESENT
   }
 
   responsePrint(sl_cli_get_command_string(args, 0),

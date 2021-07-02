@@ -109,8 +109,16 @@ static const RAIL_TxPowerConfig_t paInit2p4 =
   .mode = RAIL_TX_POWER_MODE_2P4_HP,   /* Power Amplifier mode */
 #endif
 #else
-#ifdef HAL_PA_SELECTION
-  .mode = HAL_PA_SELECTION,            /* Power Amplifier mode */
+#ifdef HAL_PA_SELECTION  /* Power Amplifier mode */
+#if (HAL_PA_SELECTION == HAL_PA_SELECTION_2P4_HP) && defined(RAIL_TX_POWER_MODE_2P4_HP)
+  .mode = RAIL_TX_POWER_MODE_2P4_HP,
+#elif (HAL_PA_SELECTION == HAL_PA_SELECTION_2P4_MP) && defined(RAIL_TX_POWER_MODE_2P4_MP)
+  .mode = RAIL_TX_POWER_MODE_2P4_MP,           
+#elif (HAL_PA_SELECTION == HAL_PA_SELECTION_2P4_LP) && defined(RAIL_TX_POWER_MODE_2P4_LP)
+  .mode = RAIL_TX_POWER_MODE_2P4_LP,  
+#else
+  .mode = RAIL_TX_POWER_MODE_2P4_HIGHEST, 
+#endif
 #else
   .mode = RAIL_TX_POWER_MODE_2P4_HIGHEST,
 #endif
@@ -280,7 +288,9 @@ void halInit(void)
   halInternalEm4Wakeup();
 #endif
 
+#ifndef FPGA
   halInternalStartSystemTimer();
+#endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
   // Initialize the HFXO manager after halConfigInit() is done

@@ -6,14 +6,22 @@
 - quality: production
 - define:
   - name: EFR32ZG23A010F512GM40
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/EFR32ZG23/Source/system_efr32zg23.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/EFR32ZG23/Source/IAR/startup_efr32zg23.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/EFR32ZG23/Source/GCC/startup_efr32zg23.c
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: efr32zg23a010f512gm40.h
@@ -78,6 +86,8 @@
     - path: em_device.h
     - path: system_efr32zg23.h
     path: platform/Device/SiliconLabs/EFR32ZG23/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: efr32zg23a010f512gm40
   - name: device
@@ -176,6 +186,8 @@
   - name: device_has_wdog
   - name: device_has_wdog0
   - name: device_has_wdog1
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -184,7 +196,7 @@
   - name: device_supports_rail_stack
   - name: device_supports_connect
   - name: device_supports_zwave
-  - name: device_supports_zwave_gateway
+  - name: device_supports_zwave_end_device
 - requires:
   - name: cmsis_core
 - template_contribution:
@@ -218,7 +230,6 @@
     value: 2048
 - tag:
   - device:opn:efr32zg23a010f512gm40
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: efr32zg23a010f512gm40

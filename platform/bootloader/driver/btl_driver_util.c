@@ -90,7 +90,10 @@ void util_deinitUsart(USART_TypeDef *btlUsart, uint8_t usartNum, CMU_Clock_TypeD
   CMU_ClockEnable(btlUsartClock, false);
 #endif
 
-#if defined(_CMU_CLKEN0_MASK)
-  CMU->CLKEN0_CLR = (CMU_CLKEN0_USART0 | CMU_CLKEN0_USART1);
+#if defined(CMU_CLKEN0_USART0)
+  CMU->CLKEN0_CLR = CMU_CLKEN0_USART0;
+#endif
+#if defined(CMU_CLKEN0_USART1)
+  CMU->CLKEN0_CLR = CMU_CLKEN0_USART1;
 #endif
 }

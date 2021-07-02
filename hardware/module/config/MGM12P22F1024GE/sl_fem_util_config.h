@@ -47,12 +47,6 @@
 // <q SL_FEM_UTIL_TX_HIGH_POWER_ENABLE> Enable TX High Power Mode
 // <i> Default: 0
 #define SL_FEM_UTIL_TX_HIGH_POWER_ENABLE   0
-// <q SL_FEM_UTIL_OPTIMIZED_PHY_ENABLE> Enable FEM optimized PHY by default
-// <i> Default: 0
-#define SL_FEM_UTIL_OPTIMIZED_PHY_ENABLE   0
-// <q SL_FEM_UTIL_RUNTIME_PHY_SELECT> Enable runtime PHY select
-// <i> Default: 0
-#define SL_FEM_UTIL_RUNTIME_PHY_SELECT     0
 // </h>
 // <<< end of configuration section >>>
 
@@ -97,5 +91,8 @@
 
 // [GPIO_SL_FEM_UTIL_TX_HIGH_POWER]$
 // <<< sl:end pin_tool >>>
+
+#define SL_FEM_UTIL_OPTIMIZED_PHY_ENABLE   0
+#define SL_FEM_UTIL_RUNTIME_PHY_SELECT     0
 
 #endif // SL_FEM_UTIL_CONFIG_H

@@ -50,6 +50,8 @@ template_contribution:
       include: sl_sleeptimer.h
       handler: sl_sleeptimer_init
     priority: -10
+  - name: component_catalog
+    value: sleeptimer
 validation_helper:
   - path: platform/service/sleeptimer/sleeptimer_peripheral_validation.py
 documentation:

@@ -30,8 +30,8 @@
 
 /**
  * This file includes an alternative implementation of the standard
- * mbedtls/libary/ecjpake.c using the secure element incorporated in Series-2
- * devices with Secure Element from Silicon Laboratories.
+ * mbedtls/libary/ecjpake.c using the secure engine incorporated in Series-2
+ * devices with Secure Engine from Silicon Laboratories.
  */
 
 #if !defined(MBEDTLS_CONFIG_FILE)
@@ -155,7 +155,7 @@ static int parse_tls_zkp(const uint8_t **ibuf, size_t *ilen, size_t *rlen,
 
   if (field_length == 0) {
     // scalar cannot be zero
-    return MBEDTLS_ERR_ECP_INVALID_KEY;
+    return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
   }
 
   // right-adjust
@@ -309,7 +309,7 @@ int mbedtls_ecjpake_check(const mbedtls_ecjpake_context *ctx)
 {
   ECJPAKE_VALIDATE_RET(ctx != NULL);
 
-  if (ctx->curve_flags == 0 || (ctx->pwd_len > 0 && ctx->pwd == NULL)) {
+  if (ctx->curve_flags == 0) {
     return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
   }
 

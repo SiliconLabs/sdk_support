@@ -10,6 +10,7 @@ provides:
 requires:
   - name: "wfx_fmac_driver"
   - name: "io_sd_driver_sdhc_arasan"
+  - name: "device_init_hfrco"
   - name: "device_has_sdio"
 root_path: "platform/radio/wifi/wfx_fmac_driver"
 include:
@@ -20,6 +21,7 @@ source:
   - path: "bus/sl_wfx_bus_sdio.c"
   - path: "wfx_host/sdio/sl_wfx_host_sdio_fnct.c"
   - path: "wfx_host/sdio/sl_wfx_host_sdio_io.c"
+  - path: "wfx_host/sdio/bsp_sd_hc.c"
 config_file:
   - path: "config/sl_wfx_bus_sdio_configuration.h"
     file_id: "sl_wfx_bus_sdio_configuration"

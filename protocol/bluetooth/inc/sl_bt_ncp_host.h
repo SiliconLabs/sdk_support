@@ -88,32 +88,42 @@
 
 #include "sl_bt_api.h"
 
-#ifndef SL_BT_QUEUE_LEN
+#ifndef SL_BT_API_QUEUE_LEN
 #define SL_BT_API_QUEUE_LEN 30
 #endif
 
-#define SL_BT_API_DEFINE()                                   \
-  sl_bt_msg_t _sl_bt_cmd_msg;                                \
-  sl_bt_msg_t _sl_bt_rsp_msg;                                \
-  sl_bt_msg_t *sl_bt_cmd_msg = &_sl_bt_cmd_msg;              \
-  sl_bt_msg_t *sl_bt_rsp_msg = &_sl_bt_rsp_msg;              \
-  void (*sl_bt_api_output)(uint32_t len1, uint8_t* data1);   \
-  int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1); \
-  int32_t (*sl_bt_api_peek)(void);                           \
-  sl_bt_msg_t sl_bt_queue[SL_BT_API_QUEUE_LEN];              \
-  int    sl_bt_queue_w = 0;                                  \
-  int    sl_bt_queue_r = 0;
+#define SL_BT_API_DEFINE()
 
-extern sl_bt_msg_t sl_bt_queue[SL_BT_API_QUEUE_LEN];
-extern int    sl_bt_queue_w;
-extern int    sl_bt_queue_r;
+/**
+ * Structure defining a device type and the event queue where events of that
+ * type should be stored.
+ */
+typedef struct {
+  enum sl_bgapi_dev_types device_type; /*< Protocol/device type */
+  uint32_t write_offset; /*< Pointer to the protocol consumer's write offset counter */
+  uint32_t read_offset; /*< Pointer to the protocol consumer's write offset counter */
+  sl_bt_msg_t *buffer; /*< Pointer to the protocol consumer's event queue buffer */
+  uint32_t len; /*< Number of events possible to store in the queue */
+} bgapi_device_type_queue_t;
+
+extern bgapi_device_type_queue_t sl_bt_api_queue;
+
+void sli_bgapi_register_device(bgapi_device_type_queue_t *queue);
+bool sli_bgapi_device_queue_has_events(bgapi_device_type_queue_t *device_queue);
+bool sli_bgapi_other_events_in_queue(enum sl_bgapi_dev_types my_device_type);
+sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type_queue_t *device_queue);
 
 /**
  * Initialize SL_BT_API
  * @param OFUNC
  * @param IFUNC
  */
-#define SL_BT_API_INITIALIZE(OFUNC, IFUNC) sl_bt_api_output = OFUNC; sl_bt_api_input = IFUNC; sl_bt_api_peek = NULL;
+#define SL_BT_API_INITIALIZE(OFUNC, IFUNC)          \
+  do { sl_bt_api_output = OFUNC;                    \
+       sl_bt_api_input = IFUNC;                     \
+       sl_bt_api_peek = NULL;                       \
+       sli_bgapi_register_device(&sl_bt_api_queue); \
+  } while (0)
 
 /**
  * Initialize SL_BT_API to support nonblocking mode
@@ -121,7 +131,12 @@ extern int    sl_bt_queue_r;
  * @param IFUNC
  * @param PFUNC peek function to check if there is data to be read from UART
  */
-#define SL_BT_API_INITIALIZE_NONBLOCK(OFUNC, IFUNC, PFUNC) sl_bt_api_output = OFUNC; sl_bt_api_input = IFUNC; sl_bt_api_peek = PFUNC;
+#define SL_BT_API_INITIALIZE_NONBLOCK(OFUNC, IFUNC, PFUNC) \
+  do { sl_bt_api_output = OFUNC;                           \
+       sl_bt_api_input = IFUNC;                            \
+       sl_bt_api_peek = PFUNC;                             \
+       sli_bgapi_register_device(&sl_bt_api_queue);        \
+  } while (0)
 
 extern void(*sl_bt_api_output)(uint32_t len1, uint8_t* data1);
 extern int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1);
@@ -129,5 +144,7 @@ extern int32_t(*sl_bt_api_peek)(void);
 void sl_bt_host_handle_command();
 void sl_bt_host_handle_command_noresponse();
 sl_status_t sl_bt_wait_event(sl_bt_msg_t *p);
+
+sl_bt_msg_t* sli_wait_for_bgapi_message(sl_bt_msg_t *response_buf);
 
 #endif

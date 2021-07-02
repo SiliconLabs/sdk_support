@@ -102,6 +102,7 @@ sl_status_t sl_wfx_host_init(void)
 
   host_context.wf200_firmware_download_progress = 0;
   host_context.wf200_initialized = 0;
+
   OSSemCreate(&wfx_confirmation, "wfx confirmation", 0, &err);
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     error = true;
@@ -110,7 +111,7 @@ sl_status_t sl_wfx_host_init(void)
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     error = true;
   }
-  OSMutexCreate(&wfx_mutex, "wfx host mutex",&err);
+  OSMutexCreate(&wfx_mutex, "wfx host mutex", &err);
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     error = true;
   }
@@ -327,8 +328,7 @@ sl_status_t sl_wfx_host_lock(void)
 {
   RTOS_ERR err;
   OSMutexPend(&wfx_mutex, 0, OS_OPT_PEND_BLOCKING, 0, &err);
-  if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE)
-  {
+  if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     return SL_STATUS_FAIL;
   }
   return SL_STATUS_OK;
@@ -343,8 +343,7 @@ sl_status_t sl_wfx_host_unlock(void)
 {
   RTOS_ERR err;
   OSMutexPost(&wfx_mutex, OS_OPT_POST_NONE, &err);
-  if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE)
-  {
+  if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
     return SL_STATUS_FAIL;
   }
   return SL_STATUS_OK;

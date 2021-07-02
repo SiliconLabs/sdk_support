@@ -5,7 +5,7 @@ description: HFXO Manager - Manager for the High Frequency Crystal Oscillator
 category: Services
 quality: production
 config_file:
-  - path: platform/service/hfxo_manager/config/sl_hfxo_manager_config.h  
+  - path: platform/service/hfxo_manager/config/sl_hfxo_manager_config.h
 source:
   - path: platform/service/hfxo_manager/src/sl_hfxo_manager.c
   - path: platform/service/hfxo_manager/src/sl_hfxo_manager_hal_s2.c
@@ -36,4 +36,4 @@ template_contribution:
     priority: -5
 documentation:
   docset: gecko-platform
-  document: service/api/group-hfxo-manager   
+  document: service/api/group-hfxo-manager

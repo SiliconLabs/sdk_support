@@ -353,6 +353,9 @@ static const debugSignal_t debugSignals[] =
       }
     }
   },
+#ifndef _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC0
+#define _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC0 (0x00000001UL)
+#endif
   {
     .name = "CC0",
     .isPrs = true,
@@ -363,6 +366,9 @@ static const debugSignal_t debugSignals[] =
       }
     }
   },
+#ifndef _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC1
+#define _PRS_ASYNC_CH_CTRL_SIGSEL_PROTIMERLCC1 (0x00000002UL)
+#endif
   {
     .name = "CC1",
     .isPrs = true,

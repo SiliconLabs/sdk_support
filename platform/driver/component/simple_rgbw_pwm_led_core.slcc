@@ -1,6 +1,6 @@
-id: "simple_rgbw_pwm_led_core"
+id: simple_rgbw_pwm_led_core
 label: Simple RGBW PWM LED Core
-package: "platform"
+package: platform
 description: >
   The Simple RGBW PWM LED Driver provides an implementation of the Generic LED 
   API. This driver supports controlling Red/Green/Blue/White LED sets and uses 
@@ -10,26 +10,29 @@ description: >
   This component includes only the Simple RGBW PWM LED driver core. To configure and create
   instances of this driver, the Simple RGBW PWM LED component should be included in the 
   project.
-category: "Platform|Driver"
-quality: "production"
+category: Platform|Driver|LED
+quality: production
+root_path: platform/driver/leddrv/
+ui_hints:
+  visibility: never
 source:
-  - path: "platform/driver/leddrv/src/sl_simple_rgbw_pwm_led.c"
+  - path: src/sl_simple_rgbw_pwm_led.c
 include:
-  - path: "platform/driver/leddrv/inc"
+  - path: inc
     file_list:
       - path: sl_simple_rgbw_pwm_led.h
 provides:
-  - name: "simple_rgbw_pwm_led_core"
+  - name: simple_rgbw_pwm_led_core
 requires:
-  - name: "status"
-  - name: "emlib_timer"
-  - name: "emlib_gpio"
-  - name: "emlib_cmu"
-  - name: "emlib_common"
-  - name: "led"
+  - name: status
+  - name: emlib_timer
+  - name: emlib_gpio
+  - name: emlib_cmu
+  - name: emlib_common
+  - name: led
 template_file:
-  - path: "platform/driver/leddrv/inst/sl_simple_rgbw_pwm_led_instances.c.jinja"
-  - path: "platform/driver/leddrv/inst/sl_simple_rgbw_pwm_led_instances.h.jinja"
+  - path: inst/sl_simple_rgbw_pwm_led_instances.c.jinja
+  - path: inst/sl_simple_rgbw_pwm_led_instances.h.jinja
 template_contribution:
   - name: event_handler
     condition: [simple_rgbw_pwm_led]

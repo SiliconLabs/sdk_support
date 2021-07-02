@@ -49,16 +49,19 @@ sl_status_t sl_device_init_clocks(void)
 {%- set lf_clock = 'cmuSelect_LFRCO' %}
 {%- endif %}
   CMU_ClockSelectSet(cmuClock_SYSCLK, {{ hf_clock }});
-#if defined(CMU_EM01GRPACLKCTRL_MASK)
+#if defined(_CMU_EM01GRPACLKCTRL_MASK)
   CMU_ClockSelectSet(cmuClock_EM01GRPACLK, {{ hf_clock }});
 #endif
-#if defined(CMU_EM01GRPBCLKCTRL_MASK)
+#if defined(_CMU_EM01GRPBCLKCTRL_MASK)
   CMU_ClockSelectSet(cmuClock_EM01GRPBCLK, {{ hf_clock }});
 #endif
   CMU_ClockSelectSet(cmuClock_EM23GRPACLK, {{ lf_clock }});
   CMU_ClockSelectSet(cmuClock_EM4GRPACLK, {{ lf_clock }});
 #if defined(RTCC_PRESENT)
   CMU_ClockSelectSet(cmuClock_RTCC, {{ lf_clock }});
+#endif
+#if defined(SYSRTC_PRESENT)
+  CMU_ClockSelectSet(cmuClock_SYSRTC, {{ lf_clock }});
 #endif
   CMU_ClockSelectSet(cmuClock_WDOG0, {{ lf_clock }});
 #if WDOG_COUNT > 1

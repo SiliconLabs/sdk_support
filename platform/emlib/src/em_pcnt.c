@@ -216,8 +216,7 @@ void PCNT_Enable(PCNT_TypeDef *pcnt, PCNT_Mode_TypeDef mode)
  * @param[in] pcnt
  *   A pointer to the PCNT peripheral register block.
  *
- * @param[out] isEnabled
- *   Returns TRUE if the module is enabled.
+ * @return Returns TRUE if the module is enabled.
  ******************************************************************************/
 bool PCNT_IsEnabled(PCNT_TypeDef *pcnt)
 {
@@ -735,10 +734,10 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
         | (((uint32_t)init->s1CntDir) << _PCNT_CTRL_S1CDIR_SHIFT);
 
   /* Configure counter events for regular and auxiliary counters. */
-  if (init->cntEvent != PCNT_CNT_EVEN_NONE) {
+  if (init->cntEvent != PCNT_CNT_EVENT_NONE) {
     tmp |= ((uint32_t)init->cntEvent) << _PCNT_CTRL_CNTEV_SHIFT;
   }
-  if (init->auxCntEvent != PCNT_CNT_EVEN_NONE) {
+  if (init->auxCntEvent != PCNT_CNT_EVENT_NONE) {
     tmp |= ((uint32_t)init->auxCntEvent) << _PCNT_CTRL_AUXCNTEV_SHIFT;
   }
 

@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Silicon Labs Secure Element Manager Internal key defines
+ * @brief Silicon Labs Secure Engine Manager Internal key defines
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -35,6 +35,7 @@
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
 /// Key descriptor for internal application attestation key
   #define SL_SE_APPLICATION_ATTESTATION_KEY                     \
   {                                                             \
@@ -50,6 +51,22 @@
       },                                                        \
     },                                                          \
   }
+#else
+/// Key descriptor for internal application attestation key
+  #define SL_SE_APPLICATION_ATTESTATION_KEY                     \
+  {                                                             \
+    .type = SL_SE_KEY_TYPE_ECC_P256,                            \
+    .flags = SL_SE_KEY_FLAG_IS_DEVICE_GENERATED                 \
+             | SL_SE_KEY_FLAG_ASYMMETRIC_BUFFER_HAS_PRIVATE_KEY \
+             | SL_SE_KEY_FLAG_ASYMMETRIC_SIGNING_ONLY,          \
+    .storage = {                                                \
+      .method = SL_SE_KEY_STORAGE_INTERNAL_IMMUTABLE,           \
+      .location = {                                             \
+        .slot = SL_SE_KEY_SLOT_APPLICATION_ATTESTATION_KEY,     \
+      },                                                        \
+    },                                                          \
+  }
+#endif
 
 /// Key descriptor for internal SE attestation key
 /// @note: Can only be used to get the public part

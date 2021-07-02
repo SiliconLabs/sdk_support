@@ -105,6 +105,12 @@ psa_status_t sli_crypto_transparent_mac_sign_setup(sli_crypto_transparent_mac_op
                                                    size_t key_buffer_size,
                                                    psa_algorithm_t alg);
 
+psa_status_t sli_crypto_transparent_mac_verify_setup(sli_crypto_transparent_mac_operation_t *operation,
+                                                     const psa_key_attributes_t *attributes,
+                                                     const uint8_t *key_buffer,
+                                                     size_t key_buffer_size,
+                                                     psa_algorithm_t alg);
+
 psa_status_t sli_crypto_transparent_mac_update(sli_crypto_transparent_mac_operation_t *operation,
                                                const uint8_t *input,
                                                size_t input_length);
@@ -113,6 +119,10 @@ psa_status_t sli_crypto_transparent_mac_sign_finish(sli_crypto_transparent_mac_o
                                                     uint8_t *mac,
                                                     size_t mac_size,
                                                     size_t *mac_length);
+
+psa_status_t sli_crypto_transparent_mac_verify_finish(sli_crypto_transparent_mac_operation_t *operation,
+                                                      const uint8_t *mac,
+                                                      size_t mac_length);
 
 psa_status_t sli_crypto_transparent_mac_abort(sli_crypto_transparent_mac_operation_t *operation);
 
@@ -147,11 +157,6 @@ psa_status_t sli_crypto_transparent_cipher_decrypt_setup(sli_crypto_transparent_
                                                          const uint8_t *key_buffer,
                                                          size_t key_buffer_size,
                                                          psa_algorithm_t alg);
-
-psa_status_t sli_crypto_transparent_cipher_generate_iv(sli_crypto_transparent_cipher_operation_t *operation,
-                                                       uint8_t *iv,
-                                                       size_t iv_size,
-                                                       size_t *iv_length);
 
 psa_status_t sli_crypto_transparent_cipher_set_iv(sli_crypto_transparent_cipher_operation_t *operation,
                                                   const uint8_t *iv,

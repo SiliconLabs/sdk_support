@@ -20,20 +20,18 @@ OS_MUTEX   wfx_securelink_rx_mutex;
 /*
  * The task that implements the securelink renegotiation with WFX.
  */
-static void wfx_securelink_task (void *p_arg)
+static void wfx_securelink_task(void *p_arg)
 {
   RTOS_ERR err;
   sl_status_t result;
   (void)p_arg;
 
-  OSMutexCreate(&wfx_securelink_rx_mutex,"wfx secure link RX mutex", &err);
-  for( ;; )
-  {
-  OSTaskSemPend (0,OS_OPT_PEND_BLOCKING,0,&err);
+  OSMutexCreate(&wfx_securelink_rx_mutex, "wfx secure link RX mutex", &err);
+  for (;; ) {
+    OSTaskSemPend(0, OS_OPT_PEND_BLOCKING, 0, &err);
     result = sl_wfx_secure_link_renegotiate_session_key();
-    if (result != SL_STATUS_OK)
-    {
-      printf ("session key negotiation error %lu\n",result);
+    if (result != SL_STATUS_OK) {
+      printf("session key negotiation error %lu\n", result);
     }
   }
 }
@@ -41,7 +39,7 @@ static void wfx_securelink_task (void *p_arg)
 /***************************************************************************//**
  * @brief Creates WF200 securelink key renegotiation task.
  ******************************************************************************/
-void wfx_securelink_task_start (void)
+void wfx_securelink_task_start(void)
 {
   RTOS_ERR err;
 

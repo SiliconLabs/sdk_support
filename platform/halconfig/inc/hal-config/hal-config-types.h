@@ -20,6 +20,7 @@
 
 #include "em_gpio.h"
 
+#define HAL_CLK_HFCLK_SOURCE_HFRCODPLL  0
 #define HAL_CLK_HFCLK_SOURCE_HFRCO      1
 #define HAL_CLK_HFCLK_SOURCE_HFXO       2
 #define HAL_CLK_HFCLK_SOURCE_FSRCO      3
@@ -87,6 +88,12 @@ typedef uint8_t HalRadioConfig_t;
 #define HAL_SERIAL_PORT_UART1         0x31
 #define HAL_SERIAL_PORT_LEUART0       0x40
 #define HAL_SERIAL_PORT_LEUART1       0x41
+#define HAL_SERIAL_PORT_EUART0        0x50
+#define HAL_SERIAL_PORT_EUART1        0x51
+#define HAL_SERIAL_PORT_EUSART0       0x60
+#define HAL_SERIAL_PORT_EUSART1       0x61
+#define HAL_SERIAL_PORT_EUSART2       0x62
+#define HAL_SERIAL_PORT_EUSART3       0x63
 
 #define HAL_SPI_PORT_USART0           0x20
 #define HAL_SPI_PORT_USART1           0x21
@@ -94,6 +101,10 @@ typedef uint8_t HalRadioConfig_t;
 #define HAL_SPI_PORT_USART3           0x23
 #define HAL_SPI_PORT_USART4           0x24
 #define HAL_SPI_PORT_USART5           0x25
+#define HAL_SPI_PORT_EUSART0          0x60
+#define HAL_SPI_PORT_EUSART1          0x61
+#define HAL_SPI_PORT_EUSART2          0x62
+#define HAL_SPI_PORT_EUSART3          0x63
 
 #define HAL_UART_FLOW_CONTROL_NONE      0
 #define HAL_UART_FLOW_CONTROL_SW        1

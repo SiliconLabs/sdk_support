@@ -46,7 +46,7 @@ static int32_t sendPacket(BgapiPacket_t *packet)
 static int32_t receivePacket(BgapiPacket_t *packet)
 {
   int32_t ret = BOOTLOADER_OK;
-  size_t requestedBytes;
+  uint8_t requestedBytes;
   size_t receivedBytes;
   uint8_t *buf = (uint8_t *)&(packet->header);
 

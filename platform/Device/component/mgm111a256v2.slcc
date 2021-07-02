@@ -6,17 +6,27 @@
 - quality: production
 - define:
   - name: MGM111A256V2
+    unless:
+    - device_content_override
 - source:
   - path: platform/Device/SiliconLabs/MGM1/Source/system_mgm1.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_iar
     path: platform/Device/SiliconLabs/MGM1/Source/IAR/startup_mgm1.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_gcc
     path: platform/Device/SiliconLabs/MGM1/Source/GCC/startup_mgm1.c
+    unless:
+    - device_content_override
   - condition:
     - toolchain_arm
     path: platform/Device/SiliconLabs/MGM1/Source/ARM/startup_mgm1.s
+    unless:
+    - device_content_override
 - include:
   - file_list:
     - path: mgm111a256v2.h
@@ -59,6 +69,8 @@
     - path: mgm1_wdog_pch.h
     - path: system_mgm1.h
     path: platform/Device/SiliconLabs/MGM1/Include/
+    unless:
+    - device_content_override
 - provides:
   - name: mgm111a256v2
   - name: device
@@ -111,6 +123,8 @@
   - name: device_has_usart1
   - name: device_has_wdog
   - name: device_has_wdog0
+  - name: device_has_dwt
+  - name: device_has_emu_temp_sensor
   - name: device_has_fpu
   - name: device_has_mpu
   - name: device_has_radio
@@ -155,7 +169,6 @@
     value: 2048
 - tag:
   - device:opn:mgm111a256v2
-  - device:default
 - toolchain_settings:
   - option: device_opn
     value: mgm111a256v2

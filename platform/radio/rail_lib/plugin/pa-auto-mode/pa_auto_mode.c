@@ -78,7 +78,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
 #elif _SILICON_LABS_32B_SERIES_2_CONFIG == 2
 RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   {
-    .min = -167,
+    .min = -287,
     .max = 0,
     .mode = RAIL_TX_POWER_MODE_2P4_LP,
     .band = RAIL_PA_BAND_2P4GIG
@@ -97,6 +97,23 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
     .max = INT16_MAX,
     .mode = RAIL_TX_POWER_MODE_SUBGIG_HP,
     .band = RAIL_PA_BAND_SUBGIG
+  }
+};
+#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 4
+RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+#if (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM <= 10)
+  {
+    .min = -250,
+    .max = 0,
+    .mode = RAIL_TX_POWER_MODE_2P4_LP,
+    .band = RAIL_PA_BAND_2P4GIG
+  },
+#endif
+  {
+    .min = INT16_MIN,
+    .max = INT16_MAX,
+    .mode = RAIL_TX_POWER_MODE_2P4_HP,
+    .band = RAIL_PA_BAND_2P4GIG
   }
 };
 #else
@@ -140,7 +157,9 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
 
   // Find the index of the configuration entry that contains
   // the desired power.
-  for (uint8_t index = 0; index < (sizeof(RAIL_PaAutoModeConfig) / sizeof((RAIL_PaAutoModeConfig)[0])); index++) {
+  // Note: Code assumes there must be a catch-all entry for each band
+  // else the loop will wander into uncharted RAM
+  for (uint8_t index = 0U; RAIL_PaAutoModeConfig[index].band <= RAIL_PA_BAND_SUBGIG; index++) {
     RAIL_PaAutoModeConfigEntry_t entry = RAIL_PaAutoModeConfig[index];
     if ((entry.band == band) && (entry.min <= *power) && (entry.max >= *power)) {
       *mode = entry.mode;

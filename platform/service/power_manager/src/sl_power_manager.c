@@ -71,14 +71,19 @@ static uint8_t requirement_em_table[SLI_POWER_MANAGER_EM_TABLE_SIZE] = {
 // Counter variable to save the number of High Accuracy HF clock requirements requested.
 uint8_t requirement_high_accuracy_hf_clock_counter = 0;
 
+#ifdef SLI_DEVICE_SUPPORTS_EM1P
+// Variable to indicate if the High Accuracy HF clock requirements count is back to zero.
+bool requirement_high_accuracy_hf_clock_back_to_zero = false;
+#endif
+
 // Current active energy mode.
 static sl_power_manager_em_t current_em = SL_POWER_MANAGER_EM0;
 
-// Saved energy mode we are coming from in an Early Wake-up.
-static sl_power_manager_em_t early_wakeup_from_em = SL_POWER_MANAGER_EM0;
+// Saved energy mode we are coming from when waiting for HFXO ready.
+static sl_power_manager_em_t waiting_clock_restore_from_em = SL_POWER_MANAGER_EM0;
 
-// Flag indicating if we are in the process of waiting for the HF clock restore after an early wakeup
-static bool is_waiting_for_early_wakeup_restore = false;
+// Flag indicating if we are sleeping, waiting for the HF clock restore
+static bool is_sleeping_waiting_for_clock_restore = false;
 
 // Flag indicating if the system states (clocks) are saved and should be restored
 static bool is_states_saved = false;
@@ -110,6 +115,12 @@ static uint32_t sleeptimer_frequency;
 
 static bool is_hf_x_oscillator_not_preserved;
 
+// Store if we are currently waiting for HF clock restoration to finish
+static bool is_actively_waiting_for_clock_restore = false;
+
+// Indicates if the clock restore was completed from the HFXO ISR
+static bool is_restored_from_hfxo_isr = false;
+
 /*
  *********************************************************************************************************
  *                                           HOOK REFERENCES
@@ -121,6 +132,12 @@ bool sl_power_manager_sleep_on_isr_exit(void);
 // Callback to application after wakeup but before restoring interrupts.
 // For internal Silicon Labs use only
 __WEAK void sli_power_manager_on_wakeup(void);
+
+// Callback to notify possible transition from EM1P to EM2.
+// For internal Silicon Labs use only
+#ifdef SLI_DEVICE_SUPPORTS_EM1P
+__WEAK void sli_power_manager_em1p_to_em2_notification(void);
+#endif
 
 /***************************************************************************//**
  * Mandatory callback that allows to cancel sleeping action.
@@ -142,6 +159,10 @@ static void power_manager_notify_em_transition(sl_power_manager_em_t from,
 
 static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
                                     void *data);
+
+static void clock_restore_and_wait(void);
+
+static void clock_restore(void);
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -222,12 +243,25 @@ void sl_power_manager_sleep(void)
 
     // Notify listeners if transition to another energy mode
     if (lowest_em != current_em) {
-      if (is_waiting_for_early_wakeup_restore == false) {
+#ifdef SLI_DEVICE_SUPPORTS_EM1P
+      requirement_high_accuracy_hf_clock_back_to_zero = false;
+#endif
+      if (is_sleeping_waiting_for_clock_restore == false) {
         // But only notify if we are not in the process of waiting for the HF oscillators restore.
         power_manager_notify_em_transition(current_em, lowest_em);
       }
       current_em = lowest_em;           // Keep new active energy mode
     }
+
+#ifdef SLI_DEVICE_SUPPORTS_EM1P
+    // Notification for possible transition from EM1P to EM2
+    // For internal Silicon Labs use only
+    if (requirement_high_accuracy_hf_clock_back_to_zero
+        && current_em == SL_POWER_MANAGER_EM2) {
+      requirement_high_accuracy_hf_clock_back_to_zero = false;
+      sli_power_manager_em1p_to_em2_notification();
+    }
+#endif
 
     // Pre-sleep operations if any are necessary
     if ((lowest_em >= SL_POWER_MANAGER_EM2)
@@ -244,6 +278,12 @@ void sl_power_manager_sleep(void)
     // Apply lowest reachable energy mode
     sli_power_manager_apply_em(current_em);
 
+    // In case we are waiting for the restore from an early wake-up,
+    // we put back the current EM to the one before the early wake-up to do the next notification correctly.
+    if (is_sleeping_waiting_for_clock_restore == true) {
+      current_em = waiting_clock_restore_from_em;
+    }
+
     // Notify consumer of wakeup while interrupts are still off
     // For internal Silicon Labs use only
     sli_power_manager_on_wakeup();
@@ -255,9 +295,12 @@ void sl_power_manager_sleep(void)
     sl_sleeptimer_stop_timer(&clock_wakeup_timer_handle);
   } while (sl_power_manager_sleep_on_isr_exit() == true);
 
+#ifdef SLI_DEVICE_SUPPORTS_EM1P
+  requirement_high_accuracy_hf_clock_back_to_zero = false;
+#endif
+
   if (is_states_saved == true) {
-    is_states_saved = false;
-    is_waiting_for_early_wakeup_restore = false;
+    is_sleeping_waiting_for_clock_restore = false;
     // Restore clocks
     if (is_hf_x_oscillator_not_preserved) {
       sli_power_manager_restore_high_freq_accuracy_clk();
@@ -270,6 +313,7 @@ void sl_power_manager_sleep(void)
       CORE_ENTER_CRITICAL();
     }
     sli_power_manager_restore_states();
+    is_states_saved = false;
   }
 
   evaluate_wakeup(SL_POWER_MANAGER_EM0);
@@ -287,31 +331,22 @@ void sl_power_manager_sleep(void)
  * @param   em    Energy mode. Possible values are:
  *                SL_POWER_MANAGER_EM1
  *                SL_POWER_MANAGER_EM2
- *                SL_POWER_MANAGER_EM3
  *
  * @param   add   Flag indicating if requirement is added (true) or removed
  *                (false).
+ *
+ * @note Need to be call inside a critical section.
  ******************************************************************************/
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
-                                             bool add,
-                                             const char *name)
+                                             bool add)
 {
-  CORE_DECLARE_IRQ_STATE;
-
   // EM0 is not allowed
   EFM_ASSERT((em > SL_POWER_MANAGER_EM0) && (em < SL_POWER_MANAGER_EM3));
 
-  CORE_ENTER_CRITICAL();
   // Cannot increment above 255 (wraparound not allowed)
   EFM_ASSERT(!((requirement_em_table[em - 1] == UINT8_MAX) && (add == true)));
   // Cannot decrement below 0 (wraparound not allowed)
   EFM_ASSERT(!((requirement_em_table[em - 1] == 0) && (add == false)));
-
-#if (SL_POWER_MANAGER_DEBUG == 1)
-  sli_power_manager_debug_log_em_requirement(em, add, name);
-#else
-  (void)name;
-#endif
 
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_em_table[em - 1] += (add) ? 1 : -1;
@@ -327,26 +362,14 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
       // Restore clock; Everything is restored (HF and LF Clocks), the sleep loop will
       // shutdown the clocks when returning sleeping
 
-      if (is_hf_x_oscillator_not_preserved) {
-        sli_power_manager_restore_high_freq_accuracy_clk();
-        is_hf_x_oscillator_not_preserved = false;
-      }
+      clock_restore_and_wait();
 
-      if (is_states_saved) {
-        is_states_saved = false;
-        is_waiting_for_early_wakeup_restore = false;
-        sli_power_manager_is_high_freq_accuracy_clk_ready(true);
-        sli_power_manager_restore_states();
+      if (current_em != lowest_em) {
+        power_manager_notify_em_transition(current_em, lowest_em);
+        current_em = lowest_em;           // Keep new active energy mode
       }
-      power_manager_notify_em_transition(current_em, lowest_em);
-      current_em = lowest_em;           // Keep new active energy mode
     }
-
-    // if going to a lower level, the loop in sl_power_manager_sleep() will save the
-    // states if required and notify the subscriber
   }
-
-  CORE_EXIT_CRITICAL();
 }
 
 #if defined(SLI_DEVICE_SUPPORTS_EM1P)
@@ -367,14 +390,62 @@ void sli_power_manager_update_hf_clock_settings_preservation_requirement(bool ad
   EFM_ASSERT(!((requirement_high_accuracy_hf_clock_counter == 0) && (add == false)));
 
   // Cannot add requirement if the "normal" clock settings are not currently applied
-  EFM_ASSERT(!((current_em != SL_POWER_MANAGER_EM0) && (add == true)));
+  EFM_ASSERT(!((current_em > SL_POWER_MANAGER_EM2) && (add == true)));
 
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_high_accuracy_hf_clock_counter += (add) ? 1 : -1;
 
+  // Save if the requirement is back to zero.
+  requirement_high_accuracy_hf_clock_back_to_zero = (requirement_high_accuracy_hf_clock_counter == 0) ? true : false;
+
   CORE_EXIT_CRITICAL();
 }
 #endif
+
+/***************************************************************************//**
+ * Gets the wake-up restore process time.
+ * If we are not in the context of a deepsleep and therefore don't need to
+ * do a restore, the return value is 0.
+ *
+ *
+ * @return   Wake-up restore process time.
+ ******************************************************************************/
+uint32_t sli_power_manager_get_restore_delay(void)
+{
+  uint32_t wakeup_delay = 0;
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+
+  // If we are not currently in deepsleep, not need for any clock restore
+  if (current_em <= SL_POWER_MANAGER_EM1) {
+    CORE_EXIT_CRITICAL();
+    return wakeup_delay;
+  }
+
+  // Get the clock restore delay
+  wakeup_delay = sl_power_manager_schedule_wakeup_get_restore_overhead_tick();
+  wakeup_delay += sli_power_manager_get_wakeup_process_time_overhead();
+
+  CORE_EXIT_CRITICAL();
+
+  return wakeup_delay;
+}
+
+/***************************************************************************//**
+ * Initiates the wake-up restore process.
+ ******************************************************************************/
+void sli_power_manager_initiate_restore(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+
+  // Start restore process
+  clock_restore();
+
+  CORE_EXIT_CRITICAL();
+}
 
 /***************************************************************************//**
  * Registers a callback to be called on given Energy Mode transition(s).
@@ -511,6 +582,29 @@ __WEAK bool sl_power_manager_is_ok_to_sleep(void)
 __WEAK bool sl_power_manager_sleep_on_isr_exit(void)
 {
   return false;
+}
+
+/**************************************************************************//**
+ * Determines if the HFXO interrupt was part of the last wake-up and/or if
+ * the HFXO early wakeup expired during the last ISR
+ * and if it was the only timer to expire in that period.
+ *
+ * @return true if power manager sleep can return to sleep,
+ *         false otherwise.
+ *****************************************************************************/
+bool sl_power_manager_is_latest_wakeup_internal(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+  bool sleep;
+
+  CORE_ENTER_CRITICAL();
+  sleep = is_restored_from_hfxo_isr;
+  is_restored_from_hfxo_isr = false;
+  CORE_EXIT_CRITICAL();
+
+  sleep |= sl_sleeptimer_is_power_manager_early_restore_timer_latest_to_expire();
+
+  return sleep;
 }
 
 /*******************************************************************************
@@ -670,7 +764,11 @@ static void evaluate_wakeup(sl_power_manager_em_t to)
 }
 
 /***************************************************************************//**
- * Updates EM1 requirement.
+ * Updates internal EM1 requirement.
+ * We add an internal EM1 requirement when we would usually go into EM2/EM3
+ * but there is not enough time before the next schedule event requiring a
+ * clock restore. So we just go to sleep in EM1.
+ * We remove this internal EM1 requirement next time we wake-up.
  *
  * @param   add  true, to add EM1 requirement,
  *               false, to remove EM1 requirement.
@@ -687,11 +785,93 @@ static void update_em1_requirement(bool add)
   EFM_ASSERT(!((requirement_em_table[SL_POWER_MANAGER_EM1 - 1] == 0) && (add == false)));
 
 #if (SL_POWER_MANAGER_DEBUG == 1)
-  sli_power_manager_debug_log_em_requirement(SL_POWER_MANAGER_EM1, add, "internal_early_wakeup");
+  sli_power_manager_debug_log_em_requirement(SL_POWER_MANAGER_EM1, add, "PM_INTERNAL_EM1_REQUIREMENT");
 #endif
 
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_em_table[SL_POWER_MANAGER_EM1 - 1] += (add) ? 1 : -1;
+
+  // In rare occasions a clock restore must be started here:
+  // - An asynchronous event wake-up the system from deepsleep very near the early wake-up event,
+  //   When we re-enter the sleep loop, we delete the internal early wake-up timer, but during
+  //   the evaluation before sleep, it is calculated that not enough time is remains to go to
+  //   deepsleep. In that case, since we deleted the early wake-up timer we must start the
+  //   restore process here.
+  // - A synchronous event is added during an ISR, when we evaluate if the timeout is bigger
+  //   than the clock restore time, it's barely bigger, so no clock restore process is started
+  //   at that time. But when we do the evaluate before sleep, the remaining time is now smaller
+  //   than the clock restore delay. So me must start the restore process here.
+  if (add == true
+      && current_em >= SL_POWER_MANAGER_EM2
+      && is_sleeping_waiting_for_clock_restore == false) {
+    clock_restore();
+  }
+}
+
+/***************************************************************************//**
+ * Do clock restore process and wait for it to be completed.
+ ******************************************************************************/
+static void clock_restore_and_wait(void)
+{
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+  if (is_states_saved == true) {
+    if (is_actively_waiting_for_clock_restore == false) {
+      is_actively_waiting_for_clock_restore = true;
+
+      // Since we will actively wait for clock restore, we cancel any current non-active wait.
+      is_sleeping_waiting_for_clock_restore = false;
+    }
+
+    if (is_hf_x_oscillator_not_preserved) {
+      sli_power_manager_restore_high_freq_accuracy_clk();
+      is_hf_x_oscillator_not_preserved = false;
+    }
+
+    CORE_EXIT_CRITICAL();
+    // We remove the critical section in case HFXO fails to startup and the HFXO Interrupt needs to run to handle the error.
+    sli_power_manager_is_high_freq_accuracy_clk_ready(true);
+    CORE_ENTER_CRITICAL();
+    if (is_actively_waiting_for_clock_restore) {
+      sli_power_manager_restore_states();
+      is_actively_waiting_for_clock_restore = false;
+    }
+
+    is_states_saved = false;
+  }
+  CORE_EXIT_CRITICAL();
+}
+
+/***************************************************************************//**
+ * Start clock restore process.
+ *
+ * @note Need to be call inside a critical section.
+ ******************************************************************************/
+static void clock_restore(void)
+{
+  // Check if we need to start the clock restore process
+  if (is_states_saved == true) {
+    if (is_hf_x_oscillator_not_preserved) {
+      sli_power_manager_restore_high_freq_accuracy_clk();
+      is_hf_x_oscillator_not_preserved = false;
+    }
+    if (sli_power_manager_is_high_freq_accuracy_clk_ready(false)) {
+      // Do the clock restore if the HF oscillator is already ready
+      sli_power_manager_restore_states();
+      is_states_saved = false;
+
+      // We do the notification only when the restore is completed.
+      power_manager_notify_em_transition(current_em, SL_POWER_MANAGER_EM1);
+      current_em = SL_POWER_MANAGER_EM1; // Keep new active energy mode
+    } else {
+      // If the HF oscillator is not yet ready, we will go back to sleep while waiting
+      is_sleeping_waiting_for_clock_restore = true;
+
+      // Save current EM to do the right notification later
+      waiting_clock_restore_from_em = current_em;
+    }
+  }
 }
 
 /***************************************************************************//**
@@ -717,26 +897,14 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
 
   CORE_ENTER_CRITICAL();
 
-  if (is_states_saved == true) {
-    if (is_hf_x_oscillator_not_preserved) {
-      sli_power_manager_restore_high_freq_accuracy_clk();
-      is_hf_x_oscillator_not_preserved = false;
-    }
-    if (sli_power_manager_is_high_freq_accuracy_clk_ready(false)) {
-      is_states_saved = false;
-      sli_power_manager_restore_states();
-    }
+  if (is_actively_waiting_for_clock_restore) {
+    // In case we are already actively waiting for HFXO ready in another ISR, just exit
+    CORE_EXIT_CRITICAL();
+    return;
   }
 
-  if (is_states_saved == false) {
-    // We do the notification only when the restore is completed.
-    power_manager_notify_em_transition(current_em, SL_POWER_MANAGER_EM1);
-    current_em = SL_POWER_MANAGER_EM1; // Keep new active energy mode
-  } else {
-    is_waiting_for_early_wakeup_restore = true;
-  }
-
-  early_wakeup_from_em = current_em;
+  // If needed start the clock restore process
+  clock_restore();
 
   CORE_EXIT_CRITICAL();
 }
@@ -752,11 +920,30 @@ void sli_hfxo_manager_notify_ready_for_power_manager(void)
   // We should only notify here in the case of early wakeup, since we go back
   // to sleep in EM1 during the wait for HFXO ready.
   if (current_em != SL_POWER_MANAGER_EM0
-      && is_states_saved == true) {
+      && is_sleeping_waiting_for_clock_restore == true) {
     sli_power_manager_restore_states();
-    power_manager_notify_em_transition(early_wakeup_from_em, SL_POWER_MANAGER_EM1);
+    power_manager_notify_em_transition(waiting_clock_restore_from_em, SL_POWER_MANAGER_EM1);
     current_em = SL_POWER_MANAGER_EM1;
-    is_waiting_for_early_wakeup_restore = false;
+    is_sleeping_waiting_for_clock_restore = false;
     is_states_saved = false;
+    is_restored_from_hfxo_isr = true;
   }
 }
+
+#if defined(EMU_VSCALE_PRESENT)
+/***************************************************************************//**
+ * Enable or disable fast wake-up in EM2 and EM3
+ *
+ * @note Will also update the wake up time from EM2 to EM0.
+ ******************************************************************************/
+void sl_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable)
+{
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_CRITICAL();
+
+  sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(enable);
+
+  CORE_EXIT_CRITICAL();
+}
+#endif

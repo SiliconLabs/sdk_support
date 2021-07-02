@@ -26,6 +26,7 @@ provides:
 requires:
   - name: "emlib_emu"
   - name: "ecode"
+  - name: "device_has_emu_temp_sensor"
 documentation:
     docset: gecko-platform
     document: driver/api/group-tempdrv

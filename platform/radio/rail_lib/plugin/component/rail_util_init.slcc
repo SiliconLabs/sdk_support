@@ -8,10 +8,10 @@ instantiable:
   prefix: inst
 requires:
   - name: rail_lib
+  - name: rail_util_init_core
   - name: rail_util_protocol
   - name: rail_util_init_core
   - name: rail_util_callbacks
-  - name: sl_flex_assert
 provides:
   - name: rail_util_init
     allow_multiple: true
@@ -34,6 +34,10 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
+  - path: "platform/radio/rail_lib/plugin/rail_util_init/config/efr32xg24/sl_rail_util_init_{{instance}}_config.h"
+    condition:
+      - device_series_2
+      - device_sdid_215
 template_contribution:
   - name: rail_util_init_instance
     value: "{{instance}}"

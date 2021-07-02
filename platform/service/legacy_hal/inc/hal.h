@@ -32,6 +32,13 @@
 #include "button.h"
 #include "crc.h"
 
+#if defined(SL_CATALOG_LEGACY_BOOTLOADER_INTERFACE_PRESENT)
+#include "bootloader-common.h"
+#include "bootloader-interface.h"
+#include "bootloader-interface-app.h"
+#include "bootloader-interface-standalone.h"
+#endif
+
 #include "random.h"
 #include "sl_token_api.h"
 #include "cortexm3/diagnostic.h"
