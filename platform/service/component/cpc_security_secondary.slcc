@@ -1,0 +1,22 @@
+id: cpc_security_secondary
+label: CPC SECURITY SECONDARY
+package: platform
+description: Co-Processor Communication (CPC) security endpoint for Secondary Device
+category: Services|Co-Processor Communication
+ui_hints:
+  visibility: never
+quality: alpha
+root_path: platform/service/cpc
+source:
+  - path: src/sl_cpc_security_secondary.c
+include:
+  - path: inc
+    file_list:
+      - path: sl_cpc_security_secondary.h
+provides:
+  - name: cpc_security_secondary
+requires:
+  - name: cpc_secondary
+template_contribution:
+  - name: component_catalog
+    value: cpc_security_secondary
