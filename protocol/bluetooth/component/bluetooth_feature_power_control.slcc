@@ -3,7 +3,7 @@ label:  "PowerControl"
 package: "Bluetooth"
 description: >
   Bluetooth LE Power Control feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
 config_file:
@@ -22,3 +22,8 @@ template_contribution:
       include: "sl_bt_power_control_config.h"
       function: "sl_bt_init_power_control"
     priority: 4
+  - name: bluetooth_controller_feature_init
+    value:
+      include: sl_bt_power_control_config.h
+      function: "sl_bt_init_power_control()"
+    priority: 10

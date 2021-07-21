@@ -358,7 +358,7 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
 
 }
 
-sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
                                         uint8_t handle,
                                         uint8_t single_shot) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
@@ -377,7 +377,7 @@ sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
 
 }
 
-sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
                                              uint32_t slack,
                                              uint8_t handle,
                                              uint8_t single_shot) {
@@ -1118,6 +1118,21 @@ sl_status_t sl_bt_connection_close(uint8_t connection) {
 
 }
 
+sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_connection_read_remote_used_features.connection=connection;
+
+    cmd->header=sl_bt_cmd_connection_read_remote_used_features_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_connection_read_remote_used_features.result;
+
+}
+
 sl_status_t sl_bt_gatt_set_max_mtu(uint16_t max_mtu, uint16_t *max_mtu_out) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -1501,65 +1516,363 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 
 }
 
-sl_status_t sl_bt_gatt_server_set_capabilities(uint32_t caps,
-                                               uint32_t reserved) {
+sl_status_t sl_bt_gattdb_new_session(uint16_t *session) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_gatt_server_set_capabilities.caps=caps;
-    cmd->data.cmd_gatt_server_set_capabilities.reserved=reserved;
 
-    cmd->header=sl_bt_cmd_gatt_server_set_capabilities_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
+    cmd->header=sl_bt_cmd_gattdb_new_session_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_gatt_server_set_capabilities.result;
+    *session = rsp->data.rsp_gattdb_new_session.session;
+    return rsp->data.rsp_gattdb_new_session.result;
 
 }
 
-sl_status_t sl_bt_gatt_server_enable_capabilities(uint32_t caps) {
+sl_status_t sl_bt_gattdb_add_service(uint16_t session,
+                                     uint8_t type,
+                                     uint8_t property,
+                                     size_t uuid_len,
+                                     const uint8_t* uuid,
+                                     uint16_t *service) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_gatt_server_enable_capabilities.caps=caps;
+    cmd->data.cmd_gattdb_add_service.session=session;
+    cmd->data.cmd_gattdb_add_service.type=type;
+    cmd->data.cmd_gattdb_add_service.property=property;
+    cmd->data.cmd_gattdb_add_service.uuid.len=uuid_len;
+    memcpy(cmd->data.cmd_gattdb_add_service.uuid.data,uuid,uuid_len);
 
-    cmd->header=sl_bt_cmd_gatt_server_enable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+    cmd->header=sl_bt_cmd_gattdb_add_service_id+(((5+uuid_len)&0xff)<<8)+(((5+uuid_len)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_gatt_server_enable_capabilities.result;
+    *service = rsp->data.rsp_gattdb_add_service.service;
+    return rsp->data.rsp_gattdb_add_service.result;
 
 }
 
-sl_status_t sl_bt_gatt_server_disable_capabilities(uint32_t caps) {
+sl_status_t sl_bt_gattdb_remove_service(uint16_t session, uint16_t service) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
-    cmd->data.cmd_gatt_server_disable_capabilities.caps=caps;
+    cmd->data.cmd_gattdb_remove_service.session=session;
+    cmd->data.cmd_gattdb_remove_service.service=service;
 
-    cmd->header=sl_bt_cmd_gatt_server_disable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+    cmd->header=sl_bt_cmd_gattdb_remove_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    return rsp->data.rsp_gatt_server_disable_capabilities.result;
+    return rsp->data.rsp_gattdb_remove_service.result;
 
 }
 
-sl_status_t sl_bt_gatt_server_get_enabled_capabilities(uint32_t *caps) {
+sl_status_t sl_bt_gattdb_add_included_service(uint16_t session,
+                                              uint16_t service,
+                                              uint16_t included_service,
+                                              uint16_t *attribute) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
 
+    cmd->data.cmd_gattdb_add_included_service.session=session;
+    cmd->data.cmd_gattdb_add_included_service.service=service;
+    cmd->data.cmd_gattdb_add_included_service.included_service=included_service;
 
-    cmd->header=sl_bt_cmd_gatt_server_get_enabled_capabilities_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+    cmd->header=sl_bt_cmd_gattdb_add_included_service_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
 
 
     sl_bt_host_handle_command();
-    *caps = rsp->data.rsp_gatt_server_get_enabled_capabilities.caps;
-    return rsp->data.rsp_gatt_server_get_enabled_capabilities.result;
+    *attribute = rsp->data.rsp_gattdb_add_included_service.attribute;
+    return rsp->data.rsp_gattdb_add_included_service.result;
+
+}
+
+sl_status_t sl_bt_gattdb_remove_included_service(uint16_t session,
+                                                 uint16_t attribute) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_remove_included_service.session=session;
+    cmd->data.cmd_gattdb_remove_included_service.attribute=attribute;
+
+    cmd->header=sl_bt_cmd_gattdb_remove_included_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_remove_included_service.result;
+
+}
+
+sl_status_t sl_bt_gattdb_add_uuid16_characteristic(uint16_t session,
+                                                   uint16_t service,
+                                                   uint16_t property,
+                                                   uint16_t security,
+                                                   uint8_t flag,
+                                                   sl_bt_uuid_16_t uuid,
+                                                   uint8_t value_type,
+                                                   uint16_t maxlen,
+                                                   size_t value_len,
+                                                   const uint8_t* value,
+                                                   uint16_t *characteristic) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.session=session;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.service=service;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.property=property;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.security=security;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.flag=flag;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.uuid=uuid;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.value_type=value_type;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.maxlen=maxlen;
+    cmd->data.cmd_gattdb_add_uuid16_characteristic.value.len=value_len;
+    memcpy(cmd->data.cmd_gattdb_add_uuid16_characteristic.value.data,value,value_len);
+
+    cmd->header=sl_bt_cmd_gattdb_add_uuid16_characteristic_id+(((16+value_len)&0xff)<<8)+(((16+value_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *characteristic = rsp->data.rsp_gattdb_add_uuid16_characteristic.characteristic;
+    return rsp->data.rsp_gattdb_add_uuid16_characteristic.result;
+
+}
+
+sl_status_t sl_bt_gattdb_add_uuid128_characteristic(uint16_t session,
+                                                    uint16_t service,
+                                                    uint16_t property,
+                                                    uint16_t security,
+                                                    uint8_t flag,
+                                                    uuid_128 uuid,
+                                                    uint8_t value_type,
+                                                    uint16_t maxlen,
+                                                    size_t value_len,
+                                                    const uint8_t* value,
+                                                    uint16_t *characteristic) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.session=session;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.service=service;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.property=property;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.security=security;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.flag=flag;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.uuid=uuid;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.value_type=value_type;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.maxlen=maxlen;
+    cmd->data.cmd_gattdb_add_uuid128_characteristic.value.len=value_len;
+    memcpy(cmd->data.cmd_gattdb_add_uuid128_characteristic.value.data,value,value_len);
+
+    cmd->header=sl_bt_cmd_gattdb_add_uuid128_characteristic_id+(((30+value_len)&0xff)<<8)+(((30+value_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *characteristic = rsp->data.rsp_gattdb_add_uuid128_characteristic.characteristic;
+    return rsp->data.rsp_gattdb_add_uuid128_characteristic.result;
+
+}
+
+sl_status_t sl_bt_gattdb_remove_characteristic(uint16_t session,
+                                               uint16_t characteristic) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_remove_characteristic.session=session;
+    cmd->data.cmd_gattdb_remove_characteristic.characteristic=characteristic;
+
+    cmd->header=sl_bt_cmd_gattdb_remove_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_remove_characteristic.result;
+
+}
+
+sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
+                                               uint16_t characteristic,
+                                               uint16_t property,
+                                               uint16_t security,
+                                               sl_bt_uuid_16_t uuid,
+                                               uint8_t value_type,
+                                               uint16_t maxlen,
+                                               size_t value_len,
+                                               const uint8_t* value,
+                                               uint16_t *descriptor) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.session=session;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.characteristic=characteristic;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.property=property;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.security=security;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.uuid=uuid;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.value_type=value_type;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.maxlen=maxlen;
+    cmd->data.cmd_gattdb_add_uuid16_descriptor.value.len=value_len;
+    memcpy(cmd->data.cmd_gattdb_add_uuid16_descriptor.value.data,value,value_len);
+
+    cmd->header=sl_bt_cmd_gattdb_add_uuid16_descriptor_id+(((15+value_len)&0xff)<<8)+(((15+value_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *descriptor = rsp->data.rsp_gattdb_add_uuid16_descriptor.descriptor;
+    return rsp->data.rsp_gattdb_add_uuid16_descriptor.result;
+
+}
+
+sl_status_t sl_bt_gattdb_add_uuid128_descriptor(uint16_t session,
+                                                uint16_t characteristic,
+                                                uint16_t property,
+                                                uint16_t security,
+                                                uuid_128 uuid,
+                                                uint8_t value_type,
+                                                uint16_t maxlen,
+                                                size_t value_len,
+                                                const uint8_t* value,
+                                                uint16_t *descriptor) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.session=session;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.characteristic=characteristic;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.property=property;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.security=security;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.uuid=uuid;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.value_type=value_type;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.maxlen=maxlen;
+    cmd->data.cmd_gattdb_add_uuid128_descriptor.value.len=value_len;
+    memcpy(cmd->data.cmd_gattdb_add_uuid128_descriptor.value.data,value,value_len);
+
+    cmd->header=sl_bt_cmd_gattdb_add_uuid128_descriptor_id+(((29+value_len)&0xff)<<8)+(((29+value_len)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *descriptor = rsp->data.rsp_gattdb_add_uuid128_descriptor.descriptor;
+    return rsp->data.rsp_gattdb_add_uuid128_descriptor.result;
+
+}
+
+sl_status_t sl_bt_gattdb_remove_descriptor(uint16_t session,
+                                           uint16_t descriptor) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_remove_descriptor.session=session;
+    cmd->data.cmd_gattdb_remove_descriptor.descriptor=descriptor;
+
+    cmd->header=sl_bt_cmd_gattdb_remove_descriptor_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_remove_descriptor.result;
+
+}
+
+sl_status_t sl_bt_gattdb_start_service(uint16_t session, uint16_t service) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_start_service.session=session;
+    cmd->data.cmd_gattdb_start_service.service=service;
+
+    cmd->header=sl_bt_cmd_gattdb_start_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_start_service.result;
+
+}
+
+sl_status_t sl_bt_gattdb_stop_service(uint16_t session, uint16_t service) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_stop_service.session=session;
+    cmd->data.cmd_gattdb_stop_service.service=service;
+
+    cmd->header=sl_bt_cmd_gattdb_stop_service_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_stop_service.result;
+
+}
+
+sl_status_t sl_bt_gattdb_start_characteristic(uint16_t session,
+                                              uint16_t characteristic) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_start_characteristic.session=session;
+    cmd->data.cmd_gattdb_start_characteristic.characteristic=characteristic;
+
+    cmd->header=sl_bt_cmd_gattdb_start_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_start_characteristic.result;
+
+}
+
+sl_status_t sl_bt_gattdb_stop_characteristic(uint16_t session,
+                                             uint16_t characteristic) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_stop_characteristic.session=session;
+    cmd->data.cmd_gattdb_stop_characteristic.characteristic=characteristic;
+
+    cmd->header=sl_bt_cmd_gattdb_stop_characteristic_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_stop_characteristic.result;
+
+}
+
+sl_status_t sl_bt_gattdb_commit(uint16_t session) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_commit.session=session;
+
+    cmd->header=sl_bt_cmd_gattdb_commit_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_commit.result;
+
+}
+
+sl_status_t sl_bt_gattdb_abort(uint16_t session) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gattdb_abort.session=session;
+
+    cmd->header=sl_bt_cmd_gattdb_abort_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gattdb_abort.result;
 
 }
 
@@ -1856,6 +2169,85 @@ sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connectio
 
 }
 
+sl_status_t sl_bt_gatt_server_set_capabilities(uint32_t caps,
+                                               uint32_t reserved) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gatt_server_set_capabilities.caps=caps;
+    cmd->data.cmd_gatt_server_set_capabilities.reserved=reserved;
+
+    cmd->header=sl_bt_cmd_gatt_server_set_capabilities_id+(((8)&0xff)<<8)+(((8)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gatt_server_set_capabilities.result;
+
+}
+
+sl_status_t sl_bt_gatt_server_enable_capabilities(uint32_t caps) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gatt_server_enable_capabilities.caps=caps;
+
+    cmd->header=sl_bt_cmd_gatt_server_enable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gatt_server_enable_capabilities.result;
+
+}
+
+sl_status_t sl_bt_gatt_server_disable_capabilities(uint32_t caps) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gatt_server_disable_capabilities.caps=caps;
+
+    cmd->header=sl_bt_cmd_gatt_server_disable_capabilities_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_gatt_server_disable_capabilities.result;
+
+}
+
+sl_status_t sl_bt_gatt_server_get_enabled_capabilities(uint32_t *caps) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+
+    cmd->header=sl_bt_cmd_gatt_server_get_enabled_capabilities_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *caps = rsp->data.rsp_gatt_server_get_enabled_capabilities.caps;
+    return rsp->data.rsp_gatt_server_get_enabled_capabilities.result;
+
+}
+
+sl_status_t sl_bt_gatt_server_read_client_supported_features(uint8_t connection,
+                                                             uint8_t *client_features) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_gatt_server_read_client_supported_features.connection=connection;
+
+    cmd->header=sl_bt_cmd_gatt_server_read_client_supported_features_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *client_features = rsp->data.rsp_gatt_server_read_client_supported_features.client_features;
+    return rsp->data.rsp_gatt_server_read_client_supported_features.result;
+
+}
+
 sl_status_t sl_bt_nvm_save(uint16_t key,
                            size_t value_len,
                            const uint8_t* value) {
@@ -2108,7 +2500,7 @@ sl_status_t sl_bt_sm_set_passkey(int32_t passkey) {
 
 }
 
-sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data) {
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
@@ -2124,7 +2516,7 @@ sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data) 
 
 }
 
-sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
                                 size_t max_oob_data_size,
                                 size_t *oob_data_len,
                                 uint8_t *oob_data) {
@@ -2146,7 +2538,7 @@ sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
 
 }
 
-sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_len,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_len,
                                             const uint8_t* oob_data) {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
@@ -2226,7 +2618,7 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm) {
 
 }
 
-sl_status_t sl_bt_sm_list_all_bondings() {
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_list_all_bondings() {
     struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
 
     struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
@@ -2266,6 +2658,147 @@ sl_status_t sl_bt_sm_delete_bondings() {
 
     sl_bt_host_handle_command();
     return rsp->data.rsp_sm_delete_bondings.result;
+
+}
+
+sl_status_t sl_bt_sm_get_bonding_handles(uint32_t reserved,
+                                         uint32_t *num_bondings,
+                                         size_t max_bondings_size,
+                                         size_t *bondings_len,
+                                         uint8_t *bondings) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_get_bonding_handles.reserved=reserved;
+
+    cmd->header=sl_bt_cmd_sm_get_bonding_handles_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *num_bondings = rsp->data.rsp_sm_get_bonding_handles.num_bondings;
+    *bondings_len = rsp->data.rsp_sm_get_bonding_handles.bondings.len;
+    if (rsp->data.rsp_sm_get_bonding_handles.bondings.len <= max_bondings_size) {
+        memcpy(bondings,rsp->data.rsp_sm_get_bonding_handles.bondings.data,rsp->data.rsp_sm_get_bonding_handles.bondings.len);
+    }
+    return rsp->data.rsp_sm_get_bonding_handles.result;
+
+}
+
+sl_status_t sl_bt_sm_get_bonding_details(uint32_t bonding,
+                                         bd_addr *address,
+                                         uint8_t *address_type,
+                                         uint8_t *security_mode,
+                                         uint8_t *key_size) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_get_bonding_details.bonding=bonding;
+
+    cmd->header=sl_bt_cmd_sm_get_bonding_details_id+(((4)&0xff)<<8)+(((4)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    memcpy(address,&rsp->data.rsp_sm_get_bonding_details.address,sizeof(bd_addr));
+    *address_type = rsp->data.rsp_sm_get_bonding_details.address_type;
+    *security_mode = rsp->data.rsp_sm_get_bonding_details.security_mode;
+    *key_size = rsp->data.rsp_sm_get_bonding_details.key_size;
+    return rsp->data.rsp_sm_get_bonding_details.result;
+
+}
+
+sl_status_t sl_bt_sm_find_bonding_by_address(bd_addr address,
+                                             uint32_t *bonding,
+                                             uint8_t *security_mode,
+                                             uint8_t *key_size) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    memcpy(&cmd->data.cmd_sm_find_bonding_by_address.address,&address,sizeof(bd_addr));
+
+    cmd->header=sl_bt_cmd_sm_find_bonding_by_address_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    *bonding = rsp->data.rsp_sm_find_bonding_by_address.bonding;
+    *security_mode = rsp->data.rsp_sm_find_bonding_by_address.security_mode;
+    *key_size = rsp->data.rsp_sm_find_bonding_by_address.key_size;
+    return rsp->data.rsp_sm_find_bonding_by_address.result;
+
+}
+
+sl_status_t sl_bt_sm_set_bonding_key(uint32_t bonding,
+                                     uint8_t key_type,
+                                     aes_key_128 key) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_set_bonding_key.bonding=bonding;
+    cmd->data.cmd_sm_set_bonding_key.key_type=key_type;
+    memcpy(&cmd->data.cmd_sm_set_bonding_key.key,&key,sizeof(aes_key_128));
+
+    cmd->header=sl_bt_cmd_sm_set_bonding_key_id+(((21)&0xff)<<8)+(((21)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_sm_set_bonding_key.result;
+
+}
+
+sl_status_t sl_bt_sm_set_legacy_oob(uint8_t enable, aes_key_128 oob_data) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_set_legacy_oob.enable=enable;
+    memcpy(&cmd->data.cmd_sm_set_legacy_oob.oob_data,&oob_data,sizeof(aes_key_128));
+
+    cmd->header=sl_bt_cmd_sm_set_legacy_oob_id+(((17)&0xff)<<8)+(((17)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_sm_set_legacy_oob.result;
+
+}
+
+sl_status_t sl_bt_sm_set_oob(uint8_t enable,
+                             aes_key_128 *random,
+                             aes_key_128 *confirm) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_set_oob.enable=enable;
+
+    cmd->header=sl_bt_cmd_sm_set_oob_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    memcpy(random,&rsp->data.rsp_sm_set_oob.random,sizeof(aes_key_128));
+    memcpy(confirm,&rsp->data.rsp_sm_set_oob.confirm,sizeof(aes_key_128));
+    return rsp->data.rsp_sm_set_oob.result;
+
+}
+
+sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
+                                    aes_key_128 random,
+                                    aes_key_128 confirm) {
+    struct sl_bt_packet *cmd = (struct sl_bt_packet *)sl_bt_cmd_msg;
+
+    struct sl_bt_packet *rsp = (struct sl_bt_packet *)sl_bt_rsp_msg;
+
+    cmd->data.cmd_sm_set_remote_oob.enable=enable;
+    memcpy(&cmd->data.cmd_sm_set_remote_oob.random,&random,sizeof(aes_key_128));
+    memcpy(&cmd->data.cmd_sm_set_remote_oob.confirm,&confirm,sizeof(aes_key_128));
+
+    cmd->header=sl_bt_cmd_sm_set_remote_oob_id+(((33)&0xff)<<8)+(((33)&0x700)>>8);
+
+
+    sl_bt_host_handle_command();
+    return rsp->data.rsp_sm_set_remote_oob.result;
 
 }
 

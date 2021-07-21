@@ -5,6 +5,12 @@
 
 // <h> Bluetooth LE Power Control Configuration
 
+// <o SL_BT_ACTIVATE_POWER_CONTROL> Activate or deactivate the power control functionality
+// <i> Default: 1
+// <i> Setting value to 1 activates the power control feature, and golden RSSI range parameters shall be applied.
+// <i> Setting value to 0 deactivates the power control feature. The golden RSSI range parameters are ignored.
+#define SL_BT_ACTIVATE_POWER_CONTROL (1)
+
 // <o SL_BT_GOLDEN_RSSI_MIN_1M> The lower bound of RSSI golden range on 1M PHY
 // <i> Default: -60
 // <i> Define the lower bound of RSSI golden range which the RSSI on 1M PHY of a

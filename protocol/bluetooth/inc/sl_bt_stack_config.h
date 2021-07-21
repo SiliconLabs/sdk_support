@@ -80,7 +80,7 @@ typedef struct {
   uint32_t config_flags;
   sl_bt_stack_config_t bluetooth;
 
-  // GATT database (pointer of "struct bg_gattdb_def*" type)
+  // GATT database (pointer of "sli_bt_gattdb_t*" type)
   const void* gattdb;
 
   //Callback for priority scheduling, used for RTOS support. If NULL uses pendsv irq.

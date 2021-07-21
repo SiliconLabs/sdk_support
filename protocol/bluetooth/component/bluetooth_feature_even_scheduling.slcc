@@ -3,11 +3,11 @@ label:  "Even Connection Scheduling Algorithm"
 package: "Bluetooth"
 description: >
   Bluetooth Even Connection Scheduling Algorithm
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
 provides:
   - name: "bluetooth_feature_even_scheduling"
 template_contribution:
@@ -15,3 +15,7 @@ template_contribution:
     value:
       function: "sl_bt_enable_even_scheduling"
     priority: 1
+  - name: bluetooth_controller_feature_init
+    value:
+      function: "sl_btctrl_enable_even_connsch()"
+    priority: 10    

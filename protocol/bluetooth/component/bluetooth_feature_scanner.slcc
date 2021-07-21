@@ -3,11 +3,11 @@ label: "Scanner"
 package: "Bluetooth"
 description: >
   Bluetooth Low Energy scanning feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
 provides:
   - name: "bluetooth_feature_scanner"
 template_contribution:

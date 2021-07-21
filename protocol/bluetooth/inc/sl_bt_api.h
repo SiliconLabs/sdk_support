@@ -171,11 +171,11 @@ sl_status_t sl_bt_dfu_flash_set_address(uint32_t address);
  * Upload the whole firmware image file into the Bluetooth device. The passed
  * data length must be a multiple of 4 bytes. Because the BGAPI command payload
  * size is limited, multiple commands need to be issued one after the other
- * until the whole .bin firmware image file is uploaded to the device. After
- * each command, the next address of the flash sector in memory to write to is
+ * until the whole firmware image file is uploaded to the device. After each
+ * command, the next address of the flash sector in memory to write to is
  * automatically updated by the bootloader.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data An array of data which will be written onto the flash.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -245,7 +245,7 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_rsp_system_set_lazy_soft_timer_id                      0x1a010020
 
 /**
- * @brief System boot mode
+ * @brief Specifies the mode that the system will boot into
  */
 typedef enum
 {
@@ -255,201 +255,204 @@ typedef enum
 } sl_bt_system_boot_mode_t;
 
 /**
- * @brief Link Layer Configuration Keys
+ * @brief These Keys are used to configure Link Layer Operation
  */
 typedef enum
 {
-  sl_bt_system_linklayer_config_key_halt                       = 0x1,  /**<
-                                                                            (0x1)
-                                                                            Same
-                                                                            as
-                                                                            system_halt
-                                                                            command,
-                                                                            value-0
-                                                                            Stop
-                                                                            Radio
-                                                                            1-
-                                                                            Start
-                                                                            Radio */
-  sl_bt_system_linklayer_config_key_priority_range             = 0x2,  /**<
-                                                                            (0x2)
-                                                                            Sets
-                                                                            the
-                                                                            RAIL
-                                                                            priority_mapping
-                                                                            offset
-                                                                            field
-                                                                            of
-                                                                            the
-                                                                            link
-                                                                            layer
-                                                                            priority
-                                                                            configuration
-                                                                            structure
-                                                                            to
-                                                                            the
-                                                                            first
-                                                                            byte
-                                                                            of
-                                                                            the
-                                                                            value
-                                                                            field. */
-  sl_bt_system_linklayer_config_key_scan_channels              = 0x3,  /**<
-                                                                            (0x3)
-                                                                            Sets
-                                                                            channels
-                                                                            to
-                                                                            scan
-                                                                            on.
-                                                                            The
-                                                                            first
-                                                                            byte
-                                                                            of
-                                                                            the
-                                                                            value
-                                                                            is
-                                                                            the
-                                                                            channel
-                                                                            map.
-                                                                            0x1
-                                                                            =
-                                                                            Channel
-                                                                            37,
-                                                                            0x2
-                                                                            =
-                                                                            Channel
-                                                                            38,
-                                                                            0x4
-                                                                            =
-                                                                            Channel
-                                                                            39 */
-  sl_bt_system_linklayer_config_key_set_flags                  = 0x4,  /**<
-                                                                            (0x4)
-                                                                            Sets
-                                                                            the
-                                                                            link
-                                                                            layer
-                                                                            configuration
-                                                                            flags.
-                                                                            The
-                                                                            value
-                                                                            is a
-                                                                            little
-                                                                            endian
-                                                                            32-bit
-                                                                            integer.
-                                                                            Flag
-                                                                            Values:
-                                                                              -
-                                                                                0x00000001
-                                                                                \-
-                                                                                Disable
-                                                                                Feature
-                                                                                Exchange
-                                                                                when
-                                                                                slave
-                                                                              -
-                                                                                0x00000002
-                                                                                \-
-                                                                                Disable
-                                                                                Feature
-                                                                                Exchange
-                                                                                when
-                                                                                master */
-  sl_bt_system_linklayer_config_key_clr_flags                  = 0x5,  /**<
-                                                                            (0x5)
-                                                                            The
-                                                                            value
-                                                                            is
-                                                                            flags
-                                                                            to
-                                                                            clear.
-                                                                            Flags
-                                                                            are
-                                                                            the
-                                                                            same
-                                                                            as
-                                                                            in
-                                                                            SET_FLAGS
-                                                                            command. */
-  sl_bt_system_linklayer_config_key_set_afh_interval           = 0x7,  /**<
-                                                                            (0x7)
-                                                                            Set
-                                                                            afh_scan_interval
-                                                                            field
-                                                                            of
-                                                                            Link
-                                                                            Layer
-                                                                            priority
-                                                                            configuration
-                                                                            structure. */
-  sl_bt_system_linklayer_config_key_set_priority_table         = 0x9,  /**<
-                                                                            (0x9)
-                                                                            The
-                                                                            value
-                                                                            contains
-                                                                            a
-                                                                            priority
-                                                                            table
-                                                                            to
-                                                                            be
-                                                                            copied
-                                                                            over
-                                                                            the
-                                                                            existing
-                                                                            table.
-                                                                            If
-                                                                            the
-                                                                            value
-                                                                            is
-                                                                            smaller
-                                                                            than
-                                                                            the
-                                                                            full
-                                                                            table,
-                                                                            only
-                                                                            those
-                                                                            values
-                                                                            are
-                                                                            updated.
-                                                                            See
-                                                                            sl_bt_bluetooth_ll_priorities
-                                                                            struct
-                                                                            for
-                                                                            the
-                                                                            definition
-                                                                            of a
-                                                                            priority
-                                                                            table. */
-  sl_bt_system_linklayer_config_key_power_control_golden_range = 0x10  /**<
-                                                                            (0x10)
-                                                                            Power
-                                                                            control
-                                                                            golden
-                                                                            range
-                                                                            configuration.
-                                                                            The
-                                                                            first
-                                                                            byte
-                                                                            of
-                                                                            the
-                                                                            value
-                                                                            is
-                                                                            the
-                                                                            lower
-                                                                            boundary
-                                                                            and
-                                                                            the
-                                                                            second
-                                                                            byte
-                                                                            is
-                                                                            the
-                                                                            upper
-                                                                            boundary.
-                                                                            Values
-                                                                            are
-                                                                            in
-                                                                            dBm. */
+  sl_bt_system_linklayer_config_key_halt                       = 0x1, /**<
+                                                                           (0x1)
+                                                                           Same
+                                                                           as
+                                                                           system_halt
+                                                                           command,
+                                                                           value-0
+                                                                           Stop
+                                                                           Radio
+                                                                           1-
+                                                                           Start
+                                                                           Radio */
+  sl_bt_system_linklayer_config_key_priority_range             = 0x2, /**<
+                                                                           (0x2)
+                                                                           Sets
+                                                                           the
+                                                                           RAIL
+                                                                           priority_mapping
+                                                                           offset
+                                                                           field
+                                                                           of
+                                                                           the
+                                                                           link
+                                                                           layer
+                                                                           priority
+                                                                           configuration
+                                                                           structure
+                                                                           to
+                                                                           the
+                                                                           first
+                                                                           byte
+                                                                           of
+                                                                           the
+                                                                           value
+                                                                           field. */
+  sl_bt_system_linklayer_config_key_scan_channels              = 0x3, /**<
+                                                                           (0x3)
+                                                                           Sets
+                                                                           channels
+                                                                           to
+                                                                           scan
+                                                                           on.
+                                                                           The
+                                                                           first
+                                                                           byte
+                                                                           of
+                                                                           the
+                                                                           value
+                                                                           is
+                                                                           the
+                                                                           channel
+                                                                           map.
+                                                                           0x1 =
+                                                                           Channel
+                                                                           37,
+                                                                           0x2 =
+                                                                           Channel
+                                                                           38,
+                                                                           0x4 =
+                                                                           Channel
+                                                                           39 */
+  sl_bt_system_linklayer_config_key_set_flags                  = 0x4, /**<
+                                                                           (0x4)
+                                                                           Sets
+                                                                           the
+                                                                           link
+                                                                           layer
+                                                                           configuration
+                                                                           flags.
+                                                                           The
+                                                                           value
+                                                                           is a
+                                                                           little
+                                                                           endian
+                                                                           32-bit
+                                                                           integer.
+                                                                           Flag
+                                                                           Values:
+                                                                             -
+                                                                               0x00000001
+                                                                               \-
+                                                                               Disable
+                                                                               Feature
+                                                                               Exchange
+                                                                               in
+                                                                               peripheral
+                                                                               role
+                                                                               of
+                                                                               the
+                                                                               connection
+                                                                             -
+                                                                               0x00000002
+                                                                               \-
+                                                                               Disable
+                                                                               Feature
+                                                                               Exchange
+                                                                               in
+                                                                               central
+                                                                               role
+                                                                               of
+                                                                               the
+                                                                               connection */
+  sl_bt_system_linklayer_config_key_clr_flags                  = 0x5, /**<
+                                                                           (0x5)
+                                                                           The
+                                                                           value
+                                                                           is
+                                                                           flags
+                                                                           to
+                                                                           clear.
+                                                                           Flags
+                                                                           are
+                                                                           the
+                                                                           same
+                                                                           as in
+                                                                           SET_FLAGS
+                                                                           command. */
+  sl_bt_system_linklayer_config_key_set_afh_interval           = 0x7, /**<
+                                                                           (0x7)
+                                                                           Set
+                                                                           afh_scan_interval
+                                                                           field
+                                                                           of
+                                                                           Link
+                                                                           Layer
+                                                                           priority
+                                                                           configuration
+                                                                           structure. */
+  sl_bt_system_linklayer_config_key_set_priority_table         = 0x9, /**<
+                                                                           (0x9)
+                                                                           The
+                                                                           value
+                                                                           contains
+                                                                           a
+                                                                           priority
+                                                                           table
+                                                                           to be
+                                                                           copied
+                                                                           over
+                                                                           the
+                                                                           existing
+                                                                           table.
+                                                                           If
+                                                                           the
+                                                                           value
+                                                                           is
+                                                                           smaller
+                                                                           than
+                                                                           the
+                                                                           full
+                                                                           table,
+                                                                           only
+                                                                           those
+                                                                           values
+                                                                           are
+                                                                           updated.
+                                                                           See
+                                                                           sl_bt_bluetooth_ll_priorities
+                                                                           struct
+                                                                           for
+                                                                           the
+                                                                           definition
+                                                                           of a
+                                                                           priority
+                                                                           table. */
+  sl_bt_system_linklayer_config_key_power_control_golden_range = 0xa  /**<
+                                                                           (0xa)
+                                                                           Power
+                                                                           control
+                                                                           golden
+                                                                           range
+                                                                           configuration.
+                                                                           The
+                                                                           first
+                                                                           byte
+                                                                           of
+                                                                           the
+                                                                           value
+                                                                           is
+                                                                           the
+                                                                           lower
+                                                                           boundary
+                                                                           and
+                                                                           the
+                                                                           second
+                                                                           byte
+                                                                           is
+                                                                           the
+                                                                           upper
+                                                                           boundary.
+                                                                           Values
+                                                                           are
+                                                                           in
+                                                                           dBm. */
 } sl_bt_system_linklayer_config_key_t;
 
 /**
@@ -746,8 +749,10 @@ sl_status_t sl_bt_system_halt(uint8_t halt);
  *     - <b>sl_bt_system_linklayer_config_key_set_flags (0x4):</b> Sets the link
  *       layer configuration flags. The value is a little endian 32-bit integer.
  *       Flag Values:
- *         - 0x00000001 - Disable Feature Exchange when slave
- *         - 0x00000002 - Disable Feature Exchange when master
+ *         - 0x00000001 - Disable Feature Exchange in peripheral role of the
+ *           connection
+ *         - 0x00000002 - Disable Feature Exchange in central role of the
+ *           connection
  *
  *     - <b>sl_bt_system_linklayer_config_key_clr_flags (0x5):</b> The value is
  *       flags to clear. Flags are the same as in SET_FLAGS command.
@@ -759,11 +764,11 @@ sl_status_t sl_bt_system_halt(uint8_t halt);
  *       updated. See sl_bt_bluetooth_ll_priorities struct for the definition of
  *       a priority table.
  *     - <b>sl_bt_system_linklayer_config_key_power_control_golden_range
- *       (0x10):</b> Power control golden range configuration. The first byte of
+ *       (0xa):</b> Power control golden range configuration. The first byte of
  *       the value is the lower boundary and the second byte is the upper
  *       boundary. Values are in dBm.
  *   @endparblock
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Configuration data. Length and contents of the data field
  *   depend on the key value used.
  *
@@ -920,9 +925,9 @@ sl_status_t sl_bt_system_get_identity_address(bd_addr *address, uint8_t *type);
 
 /***************************************************************************//**
  *
- * Get random data up to 16 bytes.
+ * Get random data.
  *
- * @param[in] length Length of random data. THe maximum length is 16 bytes.
+ * @param[in] length Length of random data.
  * @param[in] max_data_size Size of output buffer passed in @p data
  * @param[out] data_len On return, set to the length of output data written to
  *   @p data
@@ -941,7 +946,7 @@ sl_status_t sl_bt_system_get_random_data(uint8_t length,
  * Write data into the system data buffer. Data will be appended to the end of
  * existing data.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Data to write
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -982,6 +987,9 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> . Use the sleeptimer component (in platform services
+ * category) for timers.
+ *
  * Start a software timer. Multiple concurrent timers can be running
  * simultaneously. 256 unique timer handles (IDs) are available. The maximum
  * number of concurrent timers is configurable at device initialization. Up to
@@ -1011,11 +1019,14 @@ sl_status_t sl_bt_system_get_counters(uint8_t reset,
  *   - @ref sl_bt_evt_system_soft_timer - Sent after this timer has lapsed.
  *
  ******************************************************************************/
-sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
                                         uint8_t handle,
                                         uint8_t single_shot);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> . Use the sleeptimer component (in platform services
+ * category) for timers.
  *
  * Start a software timer with slack. The slack parameter allows the stack to
  * optimize wakeups and save power. The timer event is triggered between time
@@ -1044,7 +1055,7 @@ sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
  *   - @ref sl_bt_evt_system_soft_timer - Sent after this timer has lapsed.
  *
  ******************************************************************************/
-sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
                                              uint32_t slack,
                                              uint8_t handle,
                                              uint8_t single_shot);
@@ -1070,7 +1081,7 @@ sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
 #define sl_bt_rsp_gap_enable_whitelisting_id                         0x03020020
 
 /**
- * @brief Device Address Types
+ * @brief These values define Bluetooth device address types.
  */
 typedef enum
 {
@@ -1084,7 +1095,7 @@ typedef enum
 } sl_bt_gap_address_type_t;
 
 /**
- * @brief PHY Types
+ * @brief Types of PHYs
  */
 typedef enum
 {
@@ -1095,7 +1106,7 @@ typedef enum
 } sl_bt_gap_phy_type_t;
 
 /**
- * @brief PHY Types with Coding Schemes
+ * @brief PHY types with coding schemes
  */
 typedef enum
 {
@@ -1138,7 +1149,7 @@ sl_status_t sl_bt_gap_set_privacy_mode(uint8_t privacy, uint8_t interval);
  * persists until overwritten with a subsequent command or until the system is
  * reset.
  *
- * @param[in] channel_map_len Array length
+ * @param[in] channel_map_len Length of data in @p channel_map
  * @param[in] channel_map @parblock
  *   This parameter is 5 bytes and contains 37 1-bit fields.
  *   The nth field (in the range 0 to 36) contains the value for the link layer
@@ -1159,11 +1170,11 @@ sl_status_t sl_bt_gap_set_data_channel_classification(size_t channel_map_len,
 
 /***************************************************************************//**
  *
- * Enable or disable whitelisting. The setting will be effective the next time
- * that scanning is enabled. To add devices to the whitelist, either bond with
- * the device or add it manually with @ref sl_bt_sm_add_to_whitelist.
+ * Enable or disable accept list filtering. The setting will be effective the
+ * next time that scanning is enabled. To add devices to the accept list, either
+ * bond with the device or add it manually with @ref sl_bt_sm_add_to_whitelist.
  *
- * @param[in] enable 1 enable, 0 disable whitelisting.
+ * @param[in] enable 1 enable, 0 disable accept list filtering.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -1219,7 +1230,10 @@ sl_status_t sl_bt_gap_enable_whitelisting(uint8_t enable);
 #define sl_bt_rsp_advertiser_delete_set_id                           0x02040020
 
 /**
- * @brief Advertiser Connectable Mode
+ * @brief 
+                These values define the available connectable modes, which indicate whether the device accepts
+                connection requests or scan requests.
+            
  */
 typedef enum
 {
@@ -1248,7 +1262,10 @@ typedef enum
 } sl_bt_advertiser_connectable_mode_t;
 
 /**
- * @brief Advertiser Discoverable Mode
+ * @brief 
+                These values define the available Discoverable Modes, which dictate how the device is visible to other
+                devices.
+            
  */
 typedef enum
 {
@@ -1273,7 +1290,7 @@ typedef enum
 } sl_bt_advertiser_discoverable_mode_t;
 
 /**
- * @brief Advertising Address Type
+ * @brief Address type to use for advertising
  */
 typedef enum
 {
@@ -1686,7 +1703,7 @@ sl_status_t sl_bt_advertiser_clear_configuration(uint8_t handle,
  *     - <b>0:</b> Advertising packets
  *     - <b>1:</b> Scan response packets
  *     - <b>8:</b> Periodic advertising packets
- * @param[in] adv_data_len Array length
+ * @param[in] adv_data_len Length of data in @p adv_data
  * @param[in] adv_data Data to be set
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -1778,9 +1795,9 @@ sl_status_t sl_bt_advertiser_set_long_data(uint8_t handle, uint8_t packet_type);
  *   1. Add a flags field to advertising data.
  *   2. Add a TX power level field to advertising data if the TX power service
  *      exists in the local GATT database.
- *   3. Add a slave connection interval range field to advertising data if the
- *      GAP peripheral preferred connection parameters characteristic exists in
- *      the local GATT database.
+ *   3. Add a peripheral connection interval range field to advertising data if
+ *      the GAP peripheral preferred connection parameters characteristic exists
+ *      in the local GATT database.
  *   4. Add a list of 16-bit service UUIDs to advertising data if there are one
  *      or more 16-bit service UUIDs to advertise. The list is complete if all
  *      advertised 16-bit UUIDs are in advertising data. Otherwise, the list is
@@ -1955,7 +1972,9 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t handle);
 #define sl_bt_rsp_scanner_stop_id                                    0x05050020
 
 /**
- * @brief Scanner Discovery Mode
+ * @brief 
+                These values indicate which Bluetooth discovery mode to use when scanning for advertising devices.
+            
  */
 typedef enum
 {
@@ -2214,18 +2233,20 @@ sl_status_t sl_bt_scanner_stop();
 #define sl_bt_rsp_sync_close_id                                      0x01420020
 
 /**
- * @brief Advertiser Clock Accuracy
+ * @brief 
+                These values indicate the advertiser clock accuracy in a periodic advertising synchronization.
+            
  */
 typedef enum
 {
-  sl_bt_sync_clock_accuracy_500 = 0x500, /**< (0x500) Clock accuracy 500 ppm */
-  sl_bt_sync_clock_accuracy_250 = 0x250, /**< (0x250) Clock accuracy 250 ppm */
-  sl_bt_sync_clock_accuracy_150 = 0x150, /**< (0x150) Clock accuracy 150 ppm */
-  sl_bt_sync_clock_accuracy_100 = 0x100, /**< (0x100) Clock accuracy 100 ppm */
-  sl_bt_sync_clock_accuracy_75  = 0x75,  /**< (0x75) Clock accuracy 75 ppm */
-  sl_bt_sync_clock_accuracy_50  = 0x50,  /**< (0x50) Clock accuracy 50 ppm */
-  sl_bt_sync_clock_accuracy_30  = 0x30,  /**< (0x30) Clock accuracy 30 ppm */
-  sl_bt_sync_clock_accuracy_20  = 0x20   /**< (0x20) Clock accuracy 20 ppm */
+  sl_bt_sync_clock_accuracy_500 = 0x1f4, /**< (0x1f4) Clock accuracy 500 ppm */
+  sl_bt_sync_clock_accuracy_250 = 0xfa,  /**< (0xfa) Clock accuracy 250 ppm */
+  sl_bt_sync_clock_accuracy_150 = 0x96,  /**< (0x96) Clock accuracy 150 ppm */
+  sl_bt_sync_clock_accuracy_100 = 0x64,  /**< (0x64) Clock accuracy 100 ppm */
+  sl_bt_sync_clock_accuracy_75  = 0x4b,  /**< (0x4b) Clock accuracy 75 ppm */
+  sl_bt_sync_clock_accuracy_50  = 0x32,  /**< (0x32) Clock accuracy 50 ppm */
+  sl_bt_sync_clock_accuracy_30  = 0x1e,  /**< (0x1e) Clock accuracy 30 ppm */
+  sl_bt_sync_clock_accuracy_20  = 0x14   /**< (0x14) Clock accuracy 20 ppm */
 } sl_bt_sync_advertiser_clock_accuracy_t;
 
 /**
@@ -2448,6 +2469,7 @@ sl_status_t sl_bt_sync_close(uint16_t sync);
 #define sl_bt_cmd_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_cmd_connection_get_remote_tx_power_id                  0x0c060020
 #define sl_bt_cmd_connection_close_id                                0x05060020
+#define sl_bt_cmd_connection_read_remote_used_features_id            0x0d060020
 #define sl_bt_rsp_connection_set_default_parameters_id               0x00060020
 #define sl_bt_rsp_connection_set_default_preferred_phy_id            0x01060020
 #define sl_bt_rsp_connection_open_id                                 0x04060020
@@ -2461,9 +2483,10 @@ sl_status_t sl_bt_sync_close(uint16_t sync);
 #define sl_bt_rsp_connection_get_tx_power_id                         0x0b060020
 #define sl_bt_rsp_connection_get_remote_tx_power_id                  0x0c060020
 #define sl_bt_rsp_connection_close_id                                0x05060020
+#define sl_bt_rsp_connection_read_remote_used_features_id            0x0d060020
 
 /**
- * @brief Security Modes
+ * @brief Indicate the Bluetooth Security Mode.
  */
 typedef enum
 {
@@ -2479,7 +2502,9 @@ typedef enum
 } sl_bt_connection_security_t;
 
 /**
- * @brief Transmit Power Reporting Mode
+ * @brief 
+                These values define transmit power reporting modes in LE power control.
+            
  */
 typedef enum
 {
@@ -2490,7 +2515,9 @@ typedef enum
 } sl_bt_connection_power_reporting_mode_t;
 
 /**
- * @brief Transmit Power Level Flags
+ * @brief 
+                Transmit power level flags
+            
  */
 typedef enum
 {
@@ -2501,8 +2528,8 @@ typedef enum
 } sl_bt_connection_tx_power_flag_t;
 
 /**
- * @{ @name Transmit Power Reporting Constants
- * @anchor sl_bt_connection_tx_power_const
+ * @addtogroup sl_bt_connection_tx_power_const Transmit Power Reporting Constants
+ * @{
  *
  * Constants in transmit power reporting
  */
@@ -2527,9 +2554,10 @@ typedef enum
  * a data packet was received within 6 connection interval). If the connection
  * does not get established, an @ref sl_bt_evt_connection_closed event may
  * immediately follow. This event also reports whether the connected devices are
- * already bonded and what the role of the Bluetooth device (Slave or Master)
- * is. An open connection can be closed with @ref sl_bt_connection_close command
- * by giving the connection handle obtained from this event.
+ * already bonded and what the role of the Bluetooth device (central or
+ * peripheral) is. An open connection can be closed with @ref
+ * sl_bt_connection_close command by giving the connection handle obtained from
+ * this event.
  */
 
 /** @brief Identifier of the opened event */
@@ -2553,8 +2581,8 @@ PACKSTRUCT( struct sl_bt_evt_connection_opened_s
                                  (0x3):</b> Private non-resolvable random
                                  address */
   uint8_t master;       /**< Device role in connection. Values:
-                               - <b>0:</b> Slave
-                               - <b>1:</b> Master */
+                               - <b>0:</b> Peripheral
+                               - <b>1:</b> Central */
   uint8_t connection;   /**< Handle for new connection */
   uint8_t bonding;      /**< Bonding handle. Values:
                                - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b> No
@@ -2589,8 +2617,8 @@ PACKSTRUCT( struct sl_bt_evt_connection_parameters_s
 {
   uint8_t  connection;    /**< Connection handle */
   uint16_t interval;      /**< Connection interval. Time = Value x 1.25 ms */
-  uint16_t latency;       /**< Slave latency (how many connection intervals the
-                               slave can skip) */
+  uint16_t latency;       /**< Peripheral latency (how many connection intervals
+                               the peripheral can skip) */
   uint16_t timeout;       /**< Supervision timeout. Time = Value x 10 ms */
   uint8_t  security_mode; /**< Enum @ref sl_bt_connection_security_t. Connection
                                security mode. Values:
@@ -2859,6 +2887,33 @@ typedef struct sl_bt_evt_connection_closed_s sl_bt_evt_connection_closed_t;
 
 /** @} */ // end addtogroup sl_bt_evt_connection_closed
 
+/**
+ * @addtogroup sl_bt_evt_connection_remote_used_features sl_bt_evt_connection_remote_used_features
+ * @{
+ * @brief List of link layer features supported by the remote device.
+ */
+
+/** @brief Identifier of the remote_used_features event */
+#define sl_bt_evt_connection_remote_used_features_id                 0x080600a0
+
+/***************************************************************************//**
+ * @brief Data structure of the remote_used_features event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_connection_remote_used_features_s
+{
+  uint8_t    connection; /**< Connection handle */
+  uint8array features;   /**< This parameter is 8 bytes in little endian format
+                              and contains bit fields describing the supported
+                              link layer features of the remote device. Bit
+                              value 1 means that the feature is supported.
+                              The bits are explained in Bluetooth specification
+                              Vol 6, Part B, 4.6. */
+});
+
+typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_remote_used_features_t;
+
+/** @} */ // end addtogroup sl_bt_evt_connection_remote_used_features
+
 /***************************************************************************//**
  *
  * Set the default Bluetooth connection parameters. The values are valid for all
@@ -2885,8 +2940,8 @@ typedef struct sl_bt_evt_connection_closed_s sl_bt_evt_connection_closed_t;
  *   Default value: 50 ms
  *   @endparblock
  * @param[in] latency @parblock
- *   Slave latency, which defines how many connection intervals the slave can
- *   skip if it has no data to send
+ *   Peripheral latency, which defines how many connection intervals the
+ *   peripheral can skip if it has no data to send
  *     - Range: 0x0000 to 0x01f4
  *
  *   Default value: 0
@@ -3031,7 +3086,7 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
  * @b Events
  *   - @ref sl_bt_evt_connection_opened - This event is triggered after the
  *     connection is opened and indicates whether the devices are already bonded
- *     and whether the role of the Bluetooth device is Slave or Master.
+ *     and the role of the device in this connection.
  *   - @ref sl_bt_evt_connection_parameters - This event indicates the
  *     connection parameters and security mode of the connection.
  *
@@ -3057,8 +3112,8 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *     - Range: 0x0006 to 0x0c80
  *     - Time Range: 7.5 ms to 4 s
  * @param[in] latency @parblock
- *   Slave latency, which defines how many connection intervals the slave can
- *   skip if it has no data to send
+ *   Peripheral latency, which defines how many connection intervals the
+ *   peripheral can skip if it has no data to send
  *     - Range: 0x0000 to 0x01f4
  *
  *   Use 0x0000 for default value
@@ -3154,13 +3209,13 @@ sl_status_t sl_bt_connection_set_preferred_phy(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Temporarily enable or disable slave latency. Used only when Bluetooth device
- * is acting as slave. When slave latency is disabled, the slave latency
- * connection parameter is not set to 0 but the device will wake up on every
- * connection interval to receive and send packets.
+ * Temporarily enable or disable peripheral latency. Used only when Bluetooth
+ * device is acting as peripheral. When peripheral latency is disabled, the
+ * peripheral latency connection parameter is not set to 0 but the device will
+ * wake up on every connection interval to receive and send packets.
  *
  * @param[in] connection Connection Handle
- * @param[in] disable 0 enable, 1 disable slave latency. Default: 0
+ * @param[in] disable 0 enable, 1 disable peripheral latency. Default: 0
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -3329,6 +3384,20 @@ sl_status_t sl_bt_connection_get_remote_tx_power(uint8_t connection,
  ******************************************************************************/
 sl_status_t sl_bt_connection_close(uint8_t connection);
 
+/***************************************************************************//**
+ *
+ * Read link layer features supported by the remote device.
+ *
+ * @param[in] connection Connection Handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_connection_remote_used_features
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection);
+
 /** @} */ // end addtogroup sl_bt_connection
 
 /**
@@ -3384,7 +3453,9 @@ sl_status_t sl_bt_connection_close(uint8_t connection);
 #define sl_bt_rsp_gatt_write_descriptor_value_id                     0x0f090020
 
 /**
- * @brief Attribute Protocol Opcode
+ * @brief 
+                These values indicate which attribute request or response has caused the event.
+            
  */
 typedef enum
 {
@@ -3410,7 +3481,10 @@ typedef enum
 } sl_bt_gatt_att_opcode_t;
 
 /**
- * @brief Characteristic Client Configuration Flag
+ * @brief 
+                These values define whether the client is to receive notifications or indications from a remote GATT
+                server.
+            
  */
 typedef enum
 {
@@ -3421,7 +3495,10 @@ typedef enum
 } sl_bt_gatt_client_config_flag_t;
 
 /**
- * @brief Execute Write Flag
+ * @brief 
+                These values define whether the GATT server is to cancel all queued writes or commit all queued writes
+                to a remote database.
+            
  */
 typedef enum
 {
@@ -3693,7 +3770,7 @@ sl_status_t sl_bt_gatt_discover_primary_services(uint8_t connection);
  * that this GATT procedure was successfully completed or failed with an error.
  *
  * @param[in] connection Connection handle
- * @param[in] uuid_len Array length
+ * @param[in] uuid_len Length of data in @p uuid
  * @param[in] uuid Service UUID in little endian format
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -3768,7 +3845,7 @@ sl_status_t sl_bt_gatt_discover_characteristics(uint8_t connection,
  * @param[in] connection Connection handle
  * @param[in] service GATT service handle. This value is normally received from
  *   the gatt_service event.
- * @param[in] uuid_len Array length
+ * @param[in] uuid_len Length of data in @p uuid
  * @param[in] uuid Characteristic UUID in little endian format
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -3945,7 +4022,7 @@ sl_status_t sl_bt_gatt_read_characteristic_value_from_offset(uint8_t connection,
  * the value of a user-type characteristic.
  *
  * @param[in] connection Connection handle
- * @param[in] characteristic_list_len Array length
+ * @param[in] characteristic_list_len Length of data in @p characteristic_list
  * @param[in] characteristic_list List of uint16 characteristic handles each in
  *   little endian format.
  *
@@ -3978,7 +4055,7 @@ sl_status_t sl_bt_gatt_read_multiple_characteristic_values(uint8_t connection,
  * @param[in] connection Connection handle
  * @param[in] service GATT service handle. This value is normally received from
  *   the gatt_service event.
- * @param[in] uuid_len Array length
+ * @param[in] uuid_len Length of data in @p uuid
  * @param[in] uuid Characteristic UUID in little endian format
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -4006,7 +4083,7 @@ sl_status_t sl_bt_gatt_read_characteristic_value_by_uuid(uint8_t connection,
  * @param[in] connection Connection handle
  * @param[in] characteristic GATT characteristic handle. This value is normally
  *   received from the gatt_characteristic event.
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Characteristic value
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -4033,7 +4110,7 @@ sl_status_t sl_bt_gatt_write_characteristic_value(uint8_t connection,
  * @param[in] connection Connection handle
  * @param[in] characteristic GATT characteristic handle. This value is normally
  *   received from the gatt_characteristic event.
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Characteristic value
  * @param[out] sent_len The length of data sent to the remote GATT server
  *
@@ -4065,7 +4142,7 @@ sl_status_t sl_bt_gatt_write_characteristic_value_without_response(uint8_t conne
  * @param[in] characteristic GATT characteristic handle. This value is normally
  *   received from the gatt_characteristic event.
  * @param[in] offset Offset of the characteristic value
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Value to write into the specified characteristic of the
  *   remote GATT database
  * @param[out] sent_len The length of data sent to the remote GATT server
@@ -4102,7 +4179,7 @@ sl_status_t sl_bt_gatt_prepare_characteristic_value_write(uint8_t connection,
  * @param[in] characteristic GATT characteristic handle. This value is normally
  *   received from the gatt_characteristic event.
  * @param[in] offset Offset of the characteristic value
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Value to write into the specified characteristic of the
  *   remote GATT database
  * @param[out] sent_len The length of data sent to the remote GATT server
@@ -4181,7 +4258,7 @@ sl_status_t sl_bt_gatt_read_descriptor_value(uint8_t connection,
  *
  * @param[in] connection Connection handle
  * @param[in] descriptor GATT characteristic descriptor handle
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Descriptor value
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -4199,20 +4276,709 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 /** @} */ // end addtogroup sl_bt_gatt
 
 /**
+ * @addtogroup sl_bt_gattdb GATT Database
+ * @{
+ *
+ * @brief GATT Database
+ *
+ * These commands and events are used for managing the local GATT database.
+ *
+ * Many commands in this class return the handles of created attributes. These
+ * handles may change during commit if attributes are not created in the order
+ * they present in the database. For example, when creating a new service using
+ * the @ref sl_bt_gattdb_add_service command, the service declaration handle
+ * returned from this command becomes invalid later when an attribute is added
+ * or removed in front of this service. If the user requires that the attribute
+ * handles returned from these commands must remain valid after the database
+ * update has been committed, attributes must be created in the order they
+ * present in the database.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_gattdb_new_session_id                              0x00460020
+#define sl_bt_cmd_gattdb_add_service_id                              0x01460020
+#define sl_bt_cmd_gattdb_remove_service_id                           0x02460020
+#define sl_bt_cmd_gattdb_add_included_service_id                     0x03460020
+#define sl_bt_cmd_gattdb_remove_included_service_id                  0x04460020
+#define sl_bt_cmd_gattdb_add_uuid16_characteristic_id                0x05460020
+#define sl_bt_cmd_gattdb_add_uuid128_characteristic_id               0x06460020
+#define sl_bt_cmd_gattdb_remove_characteristic_id                    0x07460020
+#define sl_bt_cmd_gattdb_add_uuid16_descriptor_id                    0x08460020
+#define sl_bt_cmd_gattdb_add_uuid128_descriptor_id                   0x09460020
+#define sl_bt_cmd_gattdb_remove_descriptor_id                        0x0a460020
+#define sl_bt_cmd_gattdb_start_service_id                            0x0b460020
+#define sl_bt_cmd_gattdb_stop_service_id                             0x0c460020
+#define sl_bt_cmd_gattdb_start_characteristic_id                     0x0d460020
+#define sl_bt_cmd_gattdb_stop_characteristic_id                      0x0e460020
+#define sl_bt_cmd_gattdb_commit_id                                   0x0f460020
+#define sl_bt_cmd_gattdb_abort_id                                    0x10460020
+#define sl_bt_rsp_gattdb_new_session_id                              0x00460020
+#define sl_bt_rsp_gattdb_add_service_id                              0x01460020
+#define sl_bt_rsp_gattdb_remove_service_id                           0x02460020
+#define sl_bt_rsp_gattdb_add_included_service_id                     0x03460020
+#define sl_bt_rsp_gattdb_remove_included_service_id                  0x04460020
+#define sl_bt_rsp_gattdb_add_uuid16_characteristic_id                0x05460020
+#define sl_bt_rsp_gattdb_add_uuid128_characteristic_id               0x06460020
+#define sl_bt_rsp_gattdb_remove_characteristic_id                    0x07460020
+#define sl_bt_rsp_gattdb_add_uuid16_descriptor_id                    0x08460020
+#define sl_bt_rsp_gattdb_add_uuid128_descriptor_id                   0x09460020
+#define sl_bt_rsp_gattdb_remove_descriptor_id                        0x0a460020
+#define sl_bt_rsp_gattdb_start_service_id                            0x0b460020
+#define sl_bt_rsp_gattdb_stop_service_id                             0x0c460020
+#define sl_bt_rsp_gattdb_start_characteristic_id                     0x0d460020
+#define sl_bt_rsp_gattdb_stop_characteristic_id                      0x0e460020
+#define sl_bt_rsp_gattdb_commit_id                                   0x0f460020
+#define sl_bt_rsp_gattdb_abort_id                                    0x10460020
+
+/**
+ * @brief 
+                This enum defines GATT service types.
+            
+ */
+typedef enum
+{
+  sl_bt_gattdb_primary_service   = 0x0, /**< (0x0) Primary service */
+  sl_bt_gattdb_secondary_service = 0x1  /**< (0x1) Secondary service */
+} sl_bt_gattdb_service_type_t;
+
+/**
+ * @brief 
+                This enum defines characteristic and descriptor value types.
+            
+ */
+typedef enum
+{
+  sl_bt_gattdb_fixed_length_value    = 0x1, /**< (0x1) A fixed-length value
+                                                 managed by the local GATT
+                                                 server for responding the read
+                                                 and write requests of remote
+                                                 GATT clients */
+  sl_bt_gattdb_variable_length_value = 0x2, /**< (0x2) A variable-length value
+                                                 managed by the local GATT
+                                                 server for responding the read
+                                                 and write requests of remote
+                                                 GATT clients */
+  sl_bt_gattdb_user_managed_value    = 0x3  /**< (0x3) A value managed by the
+                                                 user application for responding
+                                                 the read and write requests of
+                                                 remote GATT clients. */
+} sl_bt_gattdb_value_type_t;
+
+/**
+ * @addtogroup sl_bt_gattdb_service_property_flags GATT Service Property Flags
+ * @{
+ *
+ * This enum defines GATT service property flags.
+ */
+
+/** The service should be advertised. */
+#define SL_BT_GATTDB_ADVERTISED_SERVICE 0x1       
+
+/** @} */ // end GATT Service Property Flags
+
+/**
+ * @addtogroup sl_bt_gattdb_security_requirements GATT Attribute Security Requirement Flags
+ * @{
+ *
+ * This enum defines the security requirement flags for GATT characteristic
+ * value properties.
+ */
+
+/** The read property requires pairing and encrypted connection. */
+#define SL_BT_GATTDB_ENCRYPTED_READ       0x1       
+
+/** The read property requires bonding and encrypted connection. */
+#define SL_BT_GATTDB_BONDED_READ          0x2       
+
+/** The read property requires authenticated pairing and encrypted connection.
+ * */
+#define SL_BT_GATTDB_AUTHENTICATED_READ   0x4       
+
+/** The write property requires pairing and encrypted connection. */
+#define SL_BT_GATTDB_ENCRYPTED_WRITE      0x8       
+
+/** The write property requires bonding and encrypted connection. */
+#define SL_BT_GATTDB_BONDED_WRITE         0x10      
+
+/** The write property requires authenticated pairing and encrypted connection.
+ * */
+#define SL_BT_GATTDB_AUTHENTICATED_WRITE  0x20      
+
+/** The notification and indication properties require pairing and encrypted
+ * connection. */
+#define SL_BT_GATTDB_ENCRYPTED_NOTIFY     0x40      
+
+/** The notification and indication properties require bonding and encrypted
+ * connection. */
+#define SL_BT_GATTDB_BONDED_NOTIFY        0x80      
+
+/** The notification and indication properties require authenticated pairing and
+ * encrypted connection. */
+#define SL_BT_GATTDB_AUTHENTICATED_NOTIFY 0x100     
+
+/** @} */ // end GATT Attribute Security Requirement Flags
+
+/**
+ * @addtogroup sl_bt_gattdb_flags GATT Database Flags
+ * @{
+ *
+ * This enum defines the options of GATT attribute management.
+ */
+
+/** Do not automatically create a Client Characteristic Configuration descriptor
+ * when adding a characteristic that has the notify or indicate property. */
+#define SL_BT_GATTDB_NO_AUTO_CCCD 0x1       
+
+/** @} */ // end GATT Database Flags
+
+/**
+ * @addtogroup sl_bt_gattdb_characteristic_properties GATT Characteristic Property Flags
+ * @{
+ *
+ * This enum defines the property flags for GATT characteristic values. Lower
+ * byte is Characteristic Properties and higher byte is Characteristic Extended
+ * Properties.
+ */
+
+/** A GATT client can read the characteristic value. */
+#define SL_BT_GATTDB_CHARACTERISTIC_READ              0x2       
+
+/** A GATT client can write the characteristic value without a response. */
+#define SL_BT_GATTDB_CHARACTERISTIC_WRITE_NO_RESPONSE 0x4       
+
+/** A GATT client can write the characteristic value. */
+#define SL_BT_GATTDB_CHARACTERISTIC_WRITE             0x8       
+
+/** The characteristic value can be notified without acknowledgment. */
+#define SL_BT_GATTDB_CHARACTERISTIC_NOTIFY            0x10      
+
+/** The characteristic value can be notified with acknowledgment. */
+#define SL_BT_GATTDB_CHARACTERISTIC_INDICATE          0x20      
+
+/** The additional characteristic properties are defined. */
+#define SL_BT_GATTDB_CHARACTERISTIC_EXTENDED_PROPS    0x80      
+
+/** The characteristic value supports reliable write. */
+#define SL_BT_GATTDB_CHARACTERISTIC_RELIABLE_WRITE    0x101     
+
+/** @} */ // end GATT Characteristic Property Flags
+
+/**
+ * @addtogroup sl_bt_gattdb_descriptor_properties GATT Descriptor Property Flags
+ * @{
+ *
+ * This enum defines the property flags for GATT characteristic descriptors.
+ */
+
+/** A GATT client can read the descriptor value. */
+#define SL_BT_GATTDB_DESCRIPTOR_READ       0x1       
+
+/** A GATT client can write the descriptor value. */
+#define SL_BT_GATTDB_DESCRIPTOR_WRITE      0x2       
+
+/** The descriptor is local only and should be invisible to GATT clients. */
+#define SL_BT_GATTDB_DESCRIPTOR_LOCAL_ONLY 0x200     
+
+/** @} */ // end GATT Descriptor Property Flags
+
+/***************************************************************************//**
+ *
+ * Start a new GATT database update session. If the operation is successful, the
+ * Bluetooth stack returns a session ID, with which, the GATT database can be
+ * updated by calling other database management APIs of this class. Changes in
+ * the database are not immediately saved. Unsaved changes are invisible to a
+ * connected remote GATT client.
+ *
+ * After all changes were performed successfully, commit the changes using the
+ * @ref sl_bt_gattdb_commit command. The Bluetooth stack will save the changes
+ * and handle GATT caching as needed. Unsaved database changes can also be
+ * cancelled by calling the @ref sl_bt_gattdb_abort command. In either case,
+ * after a commit or abort command is called, the current session is closed and
+ * the session ID becomes invalid.
+ *
+ * Only one session is allowed at a time. Error SL_STATUS_ALREADY_EXISTS is
+ * returned if another session has been started already.
+ *
+ * @param[out] session The database update session ID
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_new_session(uint16_t *session);
+
+/***************************************************************************//**
+ *
+ * Add a service into the local GATT database. On success, the service is
+ * appended to the service list and is in stopped state. Use @ref
+ * sl_bt_gattdb_start_service command to set it visible to remote GATT clients.
+ *
+ * It is not allowed to add the Generic Attribute Profile service. If the
+ * application needs GATT caching, enable the feature in the configuration of
+ * this component and the GATT server will handle GATT caching according to the
+ * procedures specified by the Bluetooth core specification.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] type Enum @ref sl_bt_gattdb_service_type_t. The service type.
+ *   Values:
+ *     - <b>sl_bt_gattdb_primary_service (0x0):</b> Primary service
+ *     - <b>sl_bt_gattdb_secondary_service (0x1):</b> Secondary service
+ * @param[in] property Service properties. Value: 0 or bit flag @ref
+ *   SL_BT_GATTDB_ADVERTISED_SERVICE
+ * @param[in] uuid_len Length of data in @p uuid
+ * @param[in] uuid The service UUID in little endian format
+ * @param[out] service The service declaration attribute handle. This handle is
+ *   ensured valid in current session. It may change after the session if
+ *   attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_service(uint16_t session,
+                                     uint8_t type,
+                                     uint8_t property,
+                                     size_t uuid_len,
+                                     const uint8_t* uuid,
+                                     uint16_t *service);
+
+/***************************************************************************//**
+ *
+ * Remove a service and its characteristics from the local GATT database.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_remove_service(uint16_t session, uint16_t service);
+
+/***************************************************************************//**
+ *
+ * Add an included-service attribute to a service.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *   which the included-service attribute is added to
+ * @param[in] included_service The service declaration attribute handle of the
+ *   service to be included
+ * @param[out] attribute The included-service attribute handle. This handle is
+ *   ensured valid in current session. It may change after the session if
+ *   attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_included_service(uint16_t session,
+                                              uint16_t service,
+                                              uint16_t included_service,
+                                              uint16_t *attribute);
+
+/***************************************************************************//**
+ *
+ * Remove an included-service attribute from a service.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] attribute The included-service attribute handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_remove_included_service(uint16_t session,
+                                                 uint16_t attribute);
+
+/***************************************************************************//**
+ *
+ * Add a 16-bits UUID characteristic to a service. On success, the
+ * characteristic is appended to the characteristic list of the service and it
+ * inherits the started or stopped state of the service. In addition, it can be
+ * started and stopped separately with the @ref
+ * sl_bt_gattdb_start_characteristic and @ref sl_bt_gattdb_stop_characteristic
+ * commands.
+ *
+ * If the @p flag parameter does not set @ref SL_BT_GATTDB_NO_AUTO_CCCD, the
+ * stack will automatically add a Client Characteristic Configuration descriptor
+ * to this characteristic when it has the notify or indicate property. If @ref
+ * SL_BT_GATTDB_NO_AUTO_CCCD is set, the user application should add the
+ * descriptor separately as needed.
+ *
+ * A Characteristic Extended Properties descriptor is automatically added if the
+ * reliable write property is set.
+ *
+ * Use the @ref sl_bt_gattdb_add_uuid128_characteristic command to add a
+ * 128-bits UUID characteristic.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *   which the characteristic is added to
+ * @param[in] property Characteristic value properties. Value: bitmask of @ref
+ *   sl_bt_gattdb_characteristic_properties
+ * @param[in] security Security requirement. Value: 0 or bitmask of @ref
+ *   sl_bt_gattdb_security_requirements. A security requirement flag for a
+ *   property is ignored if the property is not set for the characteristic
+ *   value.
+ * @param[in] flag Option flags. Value: 0 or bitmask of @ref sl_bt_gattdb_flags.
+ * @param[in] uuid The 16-bits UUID in little endian format
+ * @param[in] value_type Enum @ref sl_bt_gattdb_value_type_t. The value type.
+ *   Values:
+ *     - <b>sl_bt_gattdb_fixed_length_value (0x1):</b> A fixed-length value
+ *       managed by the local GATT server for responding the read and write
+ *       requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_variable_length_value (0x2):</b> A variable-length
+ *       value managed by the local GATT server for responding the read and
+ *       write requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_user_managed_value (0x3):</b> A value managed by the
+ *       user application for responding the read and write requests of remote
+ *       GATT clients.
+ * @param[in] maxlen The maximum length of the characteristic value. Ignored if
+ *   @p value_type is @ref sl_bt_gattdb_user_managed_value.
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value The initial characteristic value. Length of this value must
+ *   be less than or equal to @p maxlen. Ignored if @p value_type is @ref
+ *   sl_bt_gattdb_user_managed_value.
+ * @param[out] characteristic The characteristic value attribute handle. This
+ *   handle is ensured valid in current session. It may change after the session
+ *   if attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_uuid16_characteristic(uint16_t session,
+                                                   uint16_t service,
+                                                   uint16_t property,
+                                                   uint16_t security,
+                                                   uint8_t flag,
+                                                   sl_bt_uuid_16_t uuid,
+                                                   uint8_t value_type,
+                                                   uint16_t maxlen,
+                                                   size_t value_len,
+                                                   const uint8_t* value,
+                                                   uint16_t *characteristic);
+
+/***************************************************************************//**
+ *
+ * Add a 128-bits UUID characteristic to a service. On success, the
+ * characteristic is appended to the characteristic list of the service and it
+ * inherits the started or stopped state of the service. In addition, it can be
+ * started and stopped separately with the @ref
+ * sl_bt_gattdb_start_characteristic and @ref sl_bt_gattdb_stop_characteristic
+ * commands.
+ *
+ * If the @p flag parameter does not set @ref SL_BT_GATTDB_NO_AUTO_CCCD, the
+ * stack will automatically add a Client Characteristic Configuration descriptor
+ * to this characteristic when it has the notify or indicate property. If @ref
+ * SL_BT_GATTDB_NO_AUTO_CCCD is set, the user application should add the
+ * descriptor separately as needed.
+ *
+ * A Characteristic Extended Properties descriptor is automatically added if the
+ * reliable write property is set.
+ *
+ * Use the @ref sl_bt_gattdb_add_uuid16_characteristic command to add a 16-bits
+ * UUID characteristic.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *   which the characteristic is added to
+ * @param[in] property Characteristic value properties. Value: bitmask of @ref
+ *   sl_bt_gattdb_characteristic_properties
+ * @param[in] security Security requirement. Value: 0 or bitmask of @ref
+ *   sl_bt_gattdb_security_requirements. A security requirement flag for a
+ *   property is ignored if the property is not set for the characteristic
+ *   value.
+ * @param[in] flag Option flags. Value: 0 or bitmask of @ref sl_bt_gattdb_flags.
+ * @param[in] uuid The 128-bits UUID in little endian format
+ * @param[in] value_type Enum @ref sl_bt_gattdb_value_type_t. The value type.
+ *   Values:
+ *     - <b>sl_bt_gattdb_fixed_length_value (0x1):</b> A fixed-length value
+ *       managed by the local GATT server for responding the read and write
+ *       requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_variable_length_value (0x2):</b> A variable-length
+ *       value managed by the local GATT server for responding the read and
+ *       write requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_user_managed_value (0x3):</b> A value managed by the
+ *       user application for responding the read and write requests of remote
+ *       GATT clients.
+ * @param[in] maxlen The maximum length of the characteristic value. Ignored if
+ *   @p value_type is @ref sl_bt_gattdb_user_managed_value.
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value The initial characteristic value. Length of this value must
+ *   be less than or equal to @p maxlen. Ignored if @p value_type is @ref
+ *   sl_bt_gattdb_user_managed_value.
+ * @param[out] characteristic The characteristic value attribute handle. This
+ *   handle is ensured valid in current session. It may change after the session
+ *   if attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_uuid128_characteristic(uint16_t session,
+                                                    uint16_t service,
+                                                    uint16_t property,
+                                                    uint16_t security,
+                                                    uint8_t flag,
+                                                    uuid_128 uuid,
+                                                    uint8_t value_type,
+                                                    uint16_t maxlen,
+                                                    size_t value_len,
+                                                    const uint8_t* value,
+                                                    uint16_t *characteristic);
+
+/***************************************************************************//**
+ *
+ * Remove a characteristic and its descriptors from a service.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] characteristic The characteristic value attribute handle of the
+ *   characteristic
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_remove_characteristic(uint16_t session,
+                                               uint16_t characteristic);
+
+/***************************************************************************//**
+ *
+ * Add a 16-bits UUID descriptor to a characteristic. On success, the descriptor
+ * is appended to the descriptor list of the characteristic and it inherits the
+ * started or stopped state of the characteristic.
+ *
+ * This command does not support adding Characteristic Extended Properties
+ * descriptors. This descriptor is automatically added if the characteristic
+ * value has the reliable-write property, or when a Characteristic User
+ * Description descriptor is added and the user description has the write
+ * property.
+ *
+ * Use the @ref sl_bt_gattdb_add_uuid128_descriptor command to add a 128-bits
+ * UUID descriptor.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] characteristic The characteristic value attribute handle of the
+ *   characteristic the descriptor is added to
+ * @param[in] property The descriptor properties. Value: bitmask of @ref
+ *   sl_bt_gattdb_descriptor_properties
+ * @param[in] security Security requirement. Value: 0 or bitmask of @ref
+ *   sl_bt_gattdb_security_requirements. A security requirement flag for a
+ *   property is ignored if the property is not set for the descriptor.
+ * @param[in] uuid The 16-bits UUID in little endian format
+ * @param[in] value_type Enum @ref sl_bt_gattdb_value_type_t. The value type.
+ *   Ignored if this is a Client Characteristic Configuration descriptor.
+ *   Values:
+ *     - <b>sl_bt_gattdb_fixed_length_value (0x1):</b> A fixed-length value
+ *       managed by the local GATT server for responding the read and write
+ *       requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_variable_length_value (0x2):</b> A variable-length
+ *       value managed by the local GATT server for responding the read and
+ *       write requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_user_managed_value (0x3):</b> A value managed by the
+ *       user application for responding the read and write requests of remote
+ *       GATT clients.
+ * @param[in] maxlen The maximum length of the descriptor value. Ignored if @p
+ *   value_type is sl_bt_gattdb_user_managed_value, or if this is a Client
+ *   Characteristic Configuration descriptor.
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value The initial descriptor value. Length of this value must be
+ *   less than or equal to @p maxlen. Ingored if value type is @ref
+ *   sl_bt_gattdb_user_managed_value, or if this is a Client Characteristic
+ *   Configuration descriptor.
+ * @param[out] descriptor The descriptor attribute handle. This handle is
+ *   ensured valid in current session. It may change after the session if
+ *   attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
+                                               uint16_t characteristic,
+                                               uint16_t property,
+                                               uint16_t security,
+                                               sl_bt_uuid_16_t uuid,
+                                               uint8_t value_type,
+                                               uint16_t maxlen,
+                                               size_t value_len,
+                                               const uint8_t* value,
+                                               uint16_t *descriptor);
+
+/***************************************************************************//**
+ *
+ * Add a 128-bits UUID descriptor to a characteristic. On success, the
+ * descriptor is appended to the descriptor list of the characteristic and it
+ * inherits the started or stopped state of the characteristic.
+ *
+ * This command does not support adding Characteristic Extended Properties
+ * descriptors. This descriptor is automatically added if the characteristic
+ * value has the reliable-write property, or when a Characteristic User
+ * Description descriptor is added and the user description has the write
+ * property.
+ *
+ * Use the @ref sl_bt_gattdb_add_uuid16_descriptor command to add a 16-bits UUID
+ * descriptor.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] characteristic The characteristic value attribute handle of the
+ *   characteristic the descriptor is added to
+ * @param[in] property Bitmask of characteristic descriptor properties
+ * @param[in] security Security requirement. Value: 0 or bitmask of @ref
+ *   sl_bt_gattdb_security_requirements. A security requirement flag for a
+ *   property is ignored if the property is not set for the descriptor.
+ * @param[in] uuid The 128-bits UUID in little endian format
+ * @param[in] value_type Enum @ref sl_bt_gattdb_value_type_t. The value type.
+ *   Ignored if this is a Client Characteristic Configuration descriptor.
+ *   Values:
+ *     - <b>sl_bt_gattdb_fixed_length_value (0x1):</b> A fixed-length value
+ *       managed by the local GATT server for responding the read and write
+ *       requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_variable_length_value (0x2):</b> A variable-length
+ *       value managed by the local GATT server for responding the read and
+ *       write requests of remote GATT clients
+ *     - <b>sl_bt_gattdb_user_managed_value (0x3):</b> A value managed by the
+ *       user application for responding the read and write requests of remote
+ *       GATT clients.
+ * @param[in] maxlen The maximum length of the descriptor value. Ignored if @p
+ *   value_type is sl_bt_gattdb_user_managed_value, or if this is a Client
+ *   Characteristic Configuration descriptor.
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value The initial descriptor value. Length of this value must be
+ *   less than or equal to @p maxlen. Ingored if value type is @ref
+ *   sl_bt_gattdb_user_managed_value, or if this is a Client Characteristic
+ *   Configuration descriptor.
+ * @param[out] descriptor The descriptor attribute handle. This handle is
+ *   ensured valid in current session. It may change after the session if
+ *   attributes have been inserted or deleted in front of it.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_add_uuid128_descriptor(uint16_t session,
+                                                uint16_t characteristic,
+                                                uint16_t property,
+                                                uint16_t security,
+                                                uuid_128 uuid,
+                                                uint8_t value_type,
+                                                uint16_t maxlen,
+                                                size_t value_len,
+                                                const uint8_t* value,
+                                                uint16_t *descriptor);
+
+/***************************************************************************//**
+ *
+ * Remove a descriptor from a characteristic.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] descriptor The descriptor handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_remove_descriptor(uint16_t session,
+                                           uint16_t descriptor);
+
+/***************************************************************************//**
+ *
+ * Start a service so that the service and its attributes including
+ * characteristics and descriptors become visible to remote GATT clients after
+ * this change has been committed.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_start_service(uint16_t session, uint16_t service);
+
+/***************************************************************************//**
+ *
+ * Stop a service so that the service and its attributes including
+ * characteristics and descriptors become invisible to remote GATT clients after
+ * this change has been committed.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] service The service declaration attribute handle of the service
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_stop_service(uint16_t session, uint16_t service);
+
+/***************************************************************************//**
+ *
+ * Start a characteristic so that the characteristic and its attributes become
+ * visible to remote GATT clients after this change has been committed. Error
+ * SL_STATUS_INVALID_STATE is returned if the parent service is not started.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] characteristic The characteristic value attribute handle of the
+ *   characteristic
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_start_characteristic(uint16_t session,
+                                              uint16_t characteristic);
+
+/***************************************************************************//**
+ *
+ * Stop a characteristic so that the characteristic and its attributes become
+ * invisible to remote GATT clients after this change has been committed.
+ *
+ * @param[in] session The database update session ID
+ * @param[in] characteristic The characteristic value attribute handle of the
+ *   characteristic
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_stop_characteristic(uint16_t session,
+                                             uint16_t characteristic);
+
+/***************************************************************************//**
+ *
+ * Save all changes performed in current session and close the session. The
+ * stack will assign final handles to new and affected attributes, and handle
+ * GATT caching as needed. The session ID, temporary attribute handles returned
+ * during this session, and other existing attribute handles that are after
+ * newly added or removed attributes are invalidated.
+ *
+ * Some attribute handles returned in this session may become invalid if
+ * attributes are not created in the order they present in the database. In this
+ * case, attribute handle cache of the database in the user application must be
+ * refreshed to avoid accidentally using an invalidated handle in subsequent
+ * operations.
+ *
+ * @param[in] session The database update session ID
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_commit(uint16_t session);
+
+/***************************************************************************//**
+ *
+ * Cancel all changes performed in current session and close the session. The
+ * database remains at the same state as just before the session was started.
+ * The session ID and all temporary attribute handles returned during this
+ * session are invalidated.
+ *
+ * @param[in] session The database update session ID
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gattdb_abort(uint16_t session);
+
+/** @} */ // end addtogroup sl_bt_gattdb
+
+/**
  * @addtogroup sl_bt_gatt_server GATT Server
  * @{
  *
  * @brief GATT Server
  *
- * These commands and events are used by the local GATT server to manage the
- * local GATT database.
+ * These commands and events are used for accessing to the local GATT server and
+ * database.
  */
 
 /* Command and Response IDs */
-#define sl_bt_cmd_gatt_server_set_capabilities_id                    0x080a0020
-#define sl_bt_cmd_gatt_server_enable_capabilities_id                 0x0c0a0020
-#define sl_bt_cmd_gatt_server_disable_capabilities_id                0x0d0a0020
-#define sl_bt_cmd_gatt_server_get_enabled_capabilities_id            0x0e0a0020
 #define sl_bt_cmd_gatt_server_set_max_mtu_id                         0x0a0a0020
 #define sl_bt_cmd_gatt_server_get_mtu_id                             0x0b0a0020
 #define sl_bt_cmd_gatt_server_find_attribute_id                      0x060a0020
@@ -4227,10 +4993,11 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 #define sl_bt_cmd_gatt_server_notify_all_id                          0x110a0020
 #define sl_bt_cmd_gatt_server_read_client_configuration_id           0x120a0020
 #define sl_bt_cmd_gatt_server_send_user_prepare_write_response_id    0x140a0020
-#define sl_bt_rsp_gatt_server_set_capabilities_id                    0x080a0020
-#define sl_bt_rsp_gatt_server_enable_capabilities_id                 0x0c0a0020
-#define sl_bt_rsp_gatt_server_disable_capabilities_id                0x0d0a0020
-#define sl_bt_rsp_gatt_server_get_enabled_capabilities_id            0x0e0a0020
+#define sl_bt_cmd_gatt_server_set_capabilities_id                    0x080a0020
+#define sl_bt_cmd_gatt_server_enable_capabilities_id                 0x0c0a0020
+#define sl_bt_cmd_gatt_server_disable_capabilities_id                0x0d0a0020
+#define sl_bt_cmd_gatt_server_get_enabled_capabilities_id            0x0e0a0020
+#define sl_bt_cmd_gatt_server_read_client_supported_features_id      0x150a0020
 #define sl_bt_rsp_gatt_server_set_max_mtu_id                         0x0a0a0020
 #define sl_bt_rsp_gatt_server_get_mtu_id                             0x0b0a0020
 #define sl_bt_rsp_gatt_server_find_attribute_id                      0x060a0020
@@ -4245,9 +5012,17 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 #define sl_bt_rsp_gatt_server_notify_all_id                          0x110a0020
 #define sl_bt_rsp_gatt_server_read_client_configuration_id           0x120a0020
 #define sl_bt_rsp_gatt_server_send_user_prepare_write_response_id    0x140a0020
+#define sl_bt_rsp_gatt_server_set_capabilities_id                    0x080a0020
+#define sl_bt_rsp_gatt_server_enable_capabilities_id                 0x0c0a0020
+#define sl_bt_rsp_gatt_server_disable_capabilities_id                0x0d0a0020
+#define sl_bt_rsp_gatt_server_get_enabled_capabilities_id            0x0e0a0020
+#define sl_bt_rsp_gatt_server_read_client_supported_features_id      0x150a0020
 
 /**
- * @brief Characteristic Client Configuration Flags
+ * @brief 
+                These values define whether the server is to sent notifications or indications to a remote GATT
+                server.
+            
  */
 typedef enum
 {
@@ -4270,7 +5045,10 @@ typedef enum
 } sl_bt_gatt_server_client_configuration_t;
 
 /**
- * @brief Characteristic Status Flag
+ * @brief 
+                These values describe whether the characteristic client configuration was changed or whether a
+                characteristic confirmation was received.
+            
  */
 typedef enum
 {
@@ -4438,6 +5216,7 @@ PACKSTRUCT( struct sl_bt_evt_gatt_server_characteristic_status_s
                                      status_flags is 0x2 (confirmation
                                      received), the value of this field can be
                                      ignored. */
+  uint16_t client_config;       /**< The handle of client-config descriptor. */
 });
 
 typedef struct sl_bt_evt_gatt_server_characteristic_status_s sl_bt_evt_gatt_server_characteristic_status_t;
@@ -4490,6 +5269,386 @@ PACKSTRUCT( struct sl_bt_evt_gatt_server_indication_timeout_s
 typedef struct sl_bt_evt_gatt_server_indication_timeout_s sl_bt_evt_gatt_server_indication_timeout_t;
 
 /** @} */ // end addtogroup sl_bt_evt_gatt_server_indication_timeout
+
+/***************************************************************************//**
+ *
+ * Set the maximum size of ATT Message Transfer Units (MTU). The functionality
+ * is the same as @ref sl_bt_gatt_set_max_mtu and this setting applies to both
+ * GATT client and server. If the given value is too large according to the
+ * maximum BGAPI payload size, the system will select the maximum possible value
+ * as the maximum ATT_MTU. If the maximum ATT_MTU is larger than 23, the GATT
+ * client in the stack will automatically send an MTU exchange request after a
+ * Bluetooth connection was established.
+ *
+ * @param[in] max_mtu @parblock
+ *   Maximum size of Message Transfer Units (MTU) allowed
+ *     - Range: 23 to 250
+ *
+ *   Default: 247
+ *   @endparblock
+ * @param[out] max_mtu_out The maximum ATT_MTU selected by the system if this
+ *   command succeeded
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_set_max_mtu(uint16_t max_mtu,
+                                          uint16_t *max_mtu_out);
+
+/***************************************************************************//**
+ *
+ * Get the size of ATT Message Transfer Units (MTU) for a connection.
+ *
+ * @param[in] connection Connection handle
+ * @param[out] mtu The maximum ATT_MTU used by the connection
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_get_mtu(uint8_t connection, uint16_t *mtu);
+
+/***************************************************************************//**
+ *
+ * Find attributes of a certain type from a local GATT database. The type is
+ * usually given as a 16-bit or 128-bit UUID in little endian format.
+ *
+ * @param[in] start Search start handle
+ * @param[in] type_len Length of data in @p type
+ * @param[in] type The attribute type UUID
+ * @param[out] attribute Attribute handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_find_attribute(uint16_t start,
+                                             size_t type_len,
+                                             const uint8_t* type,
+                                             uint16_t *attribute);
+
+/***************************************************************************//**
+ *
+ * Read the value of an attribute from a local GATT database. Only (maximum
+ * BGAPI payload size - 3) amount of data can be read at once. The application
+ * can continue reading with increased offset value if it receives (maximum
+ * BGAPI payload size - 3) amount of data.
+ *
+ * @param[in] attribute Attribute handle
+ * @param[in] offset Value offset
+ * @param[in] max_value_size Size of output buffer passed in @p value
+ * @param[out] value_len On return, set to the length of output data written to
+ *   @p value
+ * @param[out] value The attribute value
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_read_attribute_value(uint16_t attribute,
+                                                   uint16_t offset,
+                                                   size_t max_value_size,
+                                                   size_t *value_len,
+                                                   uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Read the type of an attribute from a local GATT database. The type is a UUID,
+ * usually 16 or 128 bits long in little endian format.
+ *
+ * @param[in] attribute Attribute handle
+ * @param[in] max_type_size Size of output buffer passed in @p type
+ * @param[out] type_len On return, set to the length of output data written to
+ *   @p type
+ * @param[out] type The attribute type UUID
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_read_attribute_type(uint16_t attribute,
+                                                  size_t max_type_size,
+                                                  size_t *type_len,
+                                                  uint8_t *type);
+
+/***************************************************************************//**
+ *
+ * Write the value of an attribute in the local GATT database. Writing the value
+ * of a characteristic of the local GATT database will not trigger notifications
+ * or indications to the remote GATT client if the characteristic has a property
+ * to indicate or notify and the client has enabled notification or indication.
+ * Notifications and indications are sent to the remote GATT client using @ref
+ * sl_bt_gatt_server_send_notification or @ref sl_bt_gatt_server_send_indication
+ * commands.
+ *
+ * @param[in] attribute Attribute handle
+ * @param[in] offset Value offset
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_write_attribute_value(uint16_t attribute,
+                                                    uint16_t offset,
+                                                    size_t value_len,
+                                                    const uint8_t* value);
+
+/***************************************************************************//**
+ *
+ * Send a response to a @ref sl_bt_evt_gatt_server_user_read_request event. The
+ * response needs to be sent within 30 seconds, otherwise no more GATT
+ * transactions are allowed by the remote side. If attr_errorcode is set to 0,
+ * the characteristic value is sent to the remote GATT client in the standard
+ * way. Other attr_errorcode values will cause the local GATT server to send an
+ * attribute protocol error response instead of the actual data. At most,
+ * ATT_MTU - 1 amount of data can be sent at one time. The client will continue
+ * reading by sending new read request with an increased offset value if it
+ * receives ATT_MTU - 1 amount of data.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] characteristic GATT characteristic handle received in the @ref
+ *   sl_bt_evt_gatt_server_user_read_request event.
+ * @param[in] att_errorcode Attribute protocol error code
+ *     - <b>0:</b> No error
+ *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
+ *       Protocol, Error Codes table.
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Characteristic value to send to the GATT client. Ignored if
+ *   att_errorcode is not 0.
+ * @param[out] sent_len The length of data sent to the remote GATT client
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_user_read_response(uint8_t connection,
+                                                      uint16_t characteristic,
+                                                      uint8_t att_errorcode,
+                                                      size_t value_len,
+                                                      const uint8_t* value,
+                                                      uint16_t *sent_len);
+
+/***************************************************************************//**
+ *
+ * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
+ * parameter @p att_opcode in the event is @ref sl_bt_gatt_write_request or @ref
+ * sl_bt_gatt_execute_write_request (see @ref sl_bt_gatt_att_opcode_t). The
+ * response needs to be sent within 30 seconds, otherwise no more GATT
+ * transactions are allowed by the remote side. When responding to @ref
+ * sl_bt_gatt_execute_write_request, the value of parameter @p characteristic is
+ * ignored. If attr_errorcode is set to 0, the ATT protocol's write response is
+ * sent to indicate to the remote GATT client that the write operation was
+ * processed successfully. Other values will cause the local GATT server to send
+ * an ATT protocol error response.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] characteristic GATT characteristic handle received in the @ref
+ *   sl_bt_evt_gatt_server_user_write_request event
+ * @param[in] att_errorcode Attribute protocol error code
+ *     - <b>0:</b> No error
+ *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
+ *       Protocol, Error Codes table.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_user_write_response(uint8_t connection,
+                                                       uint16_t characteristic,
+                                                       uint8_t att_errorcode);
+
+/***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_gatt_server_send_notification,
+ * @ref sl_bt_gatt_server_send_indication and @ref sl_bt_gatt_server_notify_all
+ * commands.
+ *
+ * A notification or indication is sent only if the client has enabled it by
+ * setting the corresponding flag to the Client Characteristic Configuration
+ * descriptor. If the Client Characteristic Configuration descriptor supports
+ * both notifications and indications, the stack will always send a notification
+ * even when the client has enabled both.
+ *
+ * Send notifications or indications to one or more remote GATT clients. At
+ * most, ATT_MTU - 3 amount of data can be sent one time.
+ *
+ * A new indication to a GATT client can't be sent until an outstanding
+ * indication procedure with the same client has completed. The procedure is
+ * completed when a confirmation from the client is received. The confirmation
+ * is indicated by @ref sl_bt_evt_gatt_server_characteristic_status.
+ *
+ * The error SL_STATUS_INVALID_STATE is returned if the characteristic does not
+ * have the notification property, or if the client has not enabled the
+ * notification. The same applies to the indication property, and in addition,
+ * SL_STATUS_INVALID_STATE is returned if an indication procedure with the same
+ * client is outstanding. Always check the response for this command for errors
+ * before trying to send more data.
+ *
+ * @param[in] connection A handle of the connection over which the notification
+ *   or indication is sent. Values:
+ *     - <b>0xff:</b> Sends notification or indication to all connected devices.
+ *     - <b>Other:</b> Connection handle
+ * @param[in] characteristic Characteristic handle
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value to be notified or indicated
+ * @param[out] sent_len The length of data sent if only one connected device is
+ *   the receiver; otherwise an unused value.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_gatt_server_send_characteristic_notification(uint8_t connection,
+                                                               uint16_t characteristic,
+                                                               size_t value_len,
+                                                               const uint8_t* value,
+                                                               uint16_t *sent_len);
+
+/***************************************************************************//**
+ *
+ * Send a notification to a remote GATT client. At most ATT_MTU - 3 amount of
+ * data can be sent in a notification. An error SL_STATUS_COMMAND_TOO_LONG is
+ * returned if the given value length exceeds ATT_MTU - 3.
+ *
+ * A notification is sent only if the client has enabled it by setting the
+ * corresponding flag to the Client Characteristic Configuration descriptor. The
+ * error SL_STATUS_INVALID_PARAMETER is returned if the characteristic does not
+ * have the notification property. The error SL_STATUS_INVALID_STATE is returned
+ * if the client has not enabled the notification.
+ *
+ * @param[in] connection A handle of the connection over which the notification
+ *   is sent.
+ * @param[in] characteristic Characteristic handle
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value to be notified
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_notification(uint8_t connection,
+                                                uint16_t characteristic,
+                                                size_t value_len,
+                                                const uint8_t* value);
+
+/***************************************************************************//**
+ *
+ * Send an indication to a remote GATT client. At most, ATT_MTU - 3 amount of
+ * data can be sent in an indication. An error SL_STATUS_COMMAND_TOO_LONG is
+ * returned if the given value length exceeds ATT_MTU - 3.
+ *
+ * An indication is sent only if the client has enabled it by setting the
+ * corresponding flag to the Client Characteristic Configuration descriptor. The
+ * error SL_STATUS_INVALID_PARAMETER is returned if the characteristic does not
+ * have the indication property. The error SL_STATUS_INVALID_STATE is returned
+ * if the client has not enabled the indication.
+ *
+ * A new indication to a GATT client can't be sent until an outstanding
+ * indication procedure with the same client has completed. The procedure is
+ * completed when a confirmation from the client is received. The confirmation
+ * is indicated by @ref sl_bt_evt_gatt_server_characteristic_status.
+ *
+ * The error SL_STATUS_IN_PROGRESS is returned if an indication procedure with
+ * the same client is outstanding. Always wait for confirmation for previous
+ * indication before sending a new indication.
+ *
+ * @param[in] connection A handle of the connection over which the indication is
+ *   sent.
+ * @param[in] characteristic Characteristic handle
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value to be indicated
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_gatt_server_characteristic_status - This event is
+ *     triggered after the confirmation from the client is received.
+ *   - @ref sl_bt_evt_gatt_server_indication_timeout - This event indicates
+ *     confirmation from the remote GATT client has not been received within 30
+ *     seconds after an indication was sent. Further GATT transactions over this
+ *     connection are not allowed by the stack.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_indication(uint8_t connection,
+                                              uint16_t characteristic,
+                                              size_t value_len,
+                                              const uint8_t* value);
+
+/***************************************************************************//**
+ *
+ * Send notifications or indications to all connected remote GATT clients. At
+ * most ATT_MTU - 3 amount of data can be sent in a notification or indication.
+ * If the given value length exceeds the limit, first ATT_MTU - 3 bytes will be
+ * sent without error, and rest of data will be ignored.
+ *
+ * A notification or indication is sent only if the client has enabled it by
+ * setting the corresponding flag to the Client Characteristic Configuration
+ * descriptor. If the Client Characteristic Configuration descriptor supports
+ * both notifications and indications, the stack will always send a notification
+ * even when the client has enabled both.
+ *
+ * A new indication to a GATT client can't be sent until an outstanding
+ * indication procedure with the same client has completed, and the operation
+ * will continue for the next client. The procedure is completed when a
+ * confirmation from the client is received. The confirmation is indicated by
+ * @ref sl_bt_evt_gatt_server_characteristic_status.
+ *
+ * @param[in] characteristic Characteristic handle
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value to be notified or indicated
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_notify_all(uint16_t characteristic,
+                                         size_t value_len,
+                                         const uint8_t* value);
+
+/***************************************************************************//**
+ *
+ * Read client characteristic configuration of a remote GATT client.
+ *
+ * @param[in] connection A handle of the connection to a remote client.
+ * @param[in] characteristic Characteristic handle
+ * @param[out] client_config_flags Enum @ref
+ *   sl_bt_gatt_server_client_configuration_t. Client characteristic
+ *   configuration of a remote client.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_read_client_configuration(uint8_t connection,
+                                                        uint16_t characteristic,
+                                                        uint16_t *client_config_flags);
+
+/***************************************************************************//**
+ *
+ * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
+ * parameter @p att_opcode in the event is @ref sl_bt_gatt_prepare_write_request
+ * (see @ref sl_bt_gatt_att_opcode_t). The response needs to be sent within 30
+ * seconds, otherwise no more GATT transactions are allowed by the remote side.
+ * If @p att_errorcode is set to 0, the ATT protocol's prepare write response is
+ * sent to indicate to the remote GATT client that the write operation was
+ * processed successfully. Other values will cause the local GATT server to send
+ * an ATT protocol error response. The application should set values of
+ * parameters @p offset and @p value to identical values from the @ref
+ * sl_bt_evt_gatt_server_user_write_request event, the values will be verified
+ * on the client side in case the request is a reliable write (by Bluetooth Core
+ * Specification Volume 3, Part G, 4.9.5).
+ *
+ * @param[in] connection Connection handle
+ * @param[in] characteristic GATT characteristic handle. This value is normally
+ *   received from the gatt_characteristic event.
+ * @param[in] att_errorcode Attribute protocol error code
+ *     - <b>0:</b> No error
+ *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
+ *       Protocol, Error Codes table.
+ * @param[in] offset Value offset
+ * @param[in] value_len Length of data in @p value
+ * @param[in] value Value
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connection,
+                                                               uint16_t characteristic,
+                                                               uint8_t att_errorcode,
+                                                               uint16_t offset,
+                                                               size_t value_len,
+                                                               const uint8_t* value);
 
 /***************************************************************************//**
  *
@@ -4556,382 +5715,18 @@ sl_status_t sl_bt_gatt_server_get_enabled_capabilities(uint32_t *caps);
 
 /***************************************************************************//**
  *
- * Set the maximum size of ATT Message Transfer Units (MTU). The functionality
- * is the same as @ref sl_bt_gatt_set_max_mtu and this setting applies to both
- * GATT client and server. If the given value is too large according to the
- * maximum BGAPI payload size, the system will select the maximum possible value
- * as the maximum ATT_MTU. If the maximum ATT_MTU is larger than 23, the GATT
- * client in the stack will automatically send an MTU exchange request after a
- * Bluetooth connection was established.
- *
- * @param[in] max_mtu @parblock
- *   Maximum size of Message Transfer Units (MTU) allowed
- *     - Range: 23 to 250
- *
- *   Default: 247
- *   @endparblock
- * @param[out] max_mtu_out The maximum ATT_MTU selected by the system if this
- *   command succeeded
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_set_max_mtu(uint16_t max_mtu,
-                                          uint16_t *max_mtu_out);
-
-/***************************************************************************//**
- *
- * Get the size of ATT Message Transfer Units (MTU) for a connection.
- *
- * @param[in] connection Connection handle
- * @param[out] mtu The maximum ATT_MTU used by the connection
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_get_mtu(uint8_t connection, uint16_t *mtu);
-
-/***************************************************************************//**
- *
- * Find attributes of a certain type from a local GATT database. The type is
- * usually given as a 16-bit or 128-bit UUID in little endian format.
- *
- * @param[in] start Search start handle
- * @param[in] type_len Array length
- * @param[in] type The attribute type UUID
- * @param[out] attribute Attribute handle
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_find_attribute(uint16_t start,
-                                             size_t type_len,
-                                             const uint8_t* type,
-                                             uint16_t *attribute);
-
-/***************************************************************************//**
- *
- * Read the value of an attribute from a local GATT database. Only (maximum
- * BGAPI payload size - 3) amount of data can be read at once. The application
- * can continue reading with increased offset value if it receives (maximum
- * BGAPI payload size - 3) amount of data.
- *
- * @param[in] attribute Attribute handle
- * @param[in] offset Value offset
- * @param[in] max_value_size Size of output buffer passed in @p value
- * @param[out] value_len On return, set to the length of output data written to
- *   @p value
- * @param[out] value The attribute value
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_read_attribute_value(uint16_t attribute,
-                                                   uint16_t offset,
-                                                   size_t max_value_size,
-                                                   size_t *value_len,
-                                                   uint8_t *value);
-
-/***************************************************************************//**
- *
- * Read the type of an attribute from a local GATT database. The type is a UUID,
- * usually 16 or 128 bits long in little endian format.
- *
- * @param[in] attribute Attribute handle
- * @param[in] max_type_size Size of output buffer passed in @p type
- * @param[out] type_len On return, set to the length of output data written to
- *   @p type
- * @param[out] type The attribute type UUID
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_read_attribute_type(uint16_t attribute,
-                                                  size_t max_type_size,
-                                                  size_t *type_len,
-                                                  uint8_t *type);
-
-/***************************************************************************//**
- *
- * Write the value of an attribute in the local GATT database. Writing the value
- * of a characteristic of the local GATT database will not trigger notifications
- * or indications to the remote GATT client if the characteristic has a property
- * to indicate or notify and the client has enabled notification or indication.
- * Notifications and indications are sent to the remote GATT client using @ref
- * sl_bt_gatt_server_send_notification or @ref sl_bt_gatt_server_send_indication
- * commands.
- *
- * @param[in] attribute Attribute handle
- * @param[in] offset Value offset
- * @param[in] value_len Array length
- * @param[in] value Value
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_write_attribute_value(uint16_t attribute,
-                                                    uint16_t offset,
-                                                    size_t value_len,
-                                                    const uint8_t* value);
-
-/***************************************************************************//**
- *
- * Send a response to a @ref sl_bt_evt_gatt_server_user_read_request event. The
- * response needs to be sent within 30 seconds, otherwise no more GATT
- * transactions are allowed by the remote side. If attr_errorcode is set to 0,
- * the characteristic value is sent to the remote GATT client in the standard
- * way. Other attr_errorcode values will cause the local GATT server to send an
- * attribute protocol error response instead of the actual data. At most,
- * ATT_MTU - 1 amount of data can be sent at one time. The client will continue
- * reading by sending new read request with an increased offset value if it
- * receives ATT_MTU - 1 amount of data.
- *
- * @param[in] connection Connection handle
- * @param[in] characteristic GATT characteristic handle received in the @ref
- *   sl_bt_evt_gatt_server_user_read_request event.
- * @param[in] att_errorcode Attribute protocol error code
- *     - <b>0:</b> No error
- *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
- *       Protocol, Error Codes table.
- * @param[in] value_len Array length
- * @param[in] value Characteristic value to send to the GATT client. Ignored if
- *   att_errorcode is not 0.
- * @param[out] sent_len The length of data sent to the remote GATT client
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_send_user_read_response(uint8_t connection,
-                                                      uint16_t characteristic,
-                                                      uint8_t att_errorcode,
-                                                      size_t value_len,
-                                                      const uint8_t* value,
-                                                      uint16_t *sent_len);
-
-/***************************************************************************//**
- *
- * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
- * parameter @p att_opcode in the event is @ref sl_bt_gatt_write_request or @ref
- * sl_bt_gatt_execute_write_request (see @ref sl_bt_gatt_att_opcode_t). The
- * response needs to be sent within 30 seconds, otherwise no more GATT
- * transactions are allowed by the remote side. When responding to @ref
- * sl_bt_gatt_execute_write_request, the value of parameter @p characteristic is
- * ignored. If attr_errorcode is set to 0, the ATT protocol's write response is
- * sent to indicate to the remote GATT client that the write operation was
- * processed successfully. Other values will cause the local GATT server to send
- * an ATT protocol error response.
- *
- * @param[in] connection Connection handle
- * @param[in] characteristic GATT characteristic handle received in the @ref
- *   sl_bt_evt_gatt_server_user_write_request event
- * @param[in] att_errorcode Attribute protocol error code
- *     - <b>0:</b> No error
- *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
- *       Protocol, Error Codes table.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_send_user_write_response(uint8_t connection,
-                                                       uint16_t characteristic,
-                                                       uint8_t att_errorcode);
-
-/***************************************************************************//**
- *
- * Send notifications or indications to one or more remote GATT clients. At
- * most, ATT_MTU - 3 amount of data can be sent one time.
- *
- * <b>Deprecated</b> and replaced by @ref sl_bt_gatt_server_send_notification,
- * @ref sl_bt_gatt_server_send_indication and @ref sl_bt_gatt_server_notify_all
- * commands.
- *
- * A notification or indication is sent only if the client has enabled it by
- * setting the corresponding flag to the Client Characteristic Configuration
- * descriptor. If the Client Characteristic Configuration descriptor supports
- * both notifications and indications, the stack will always send a notification
- * even when the client has enabled both.
- *
- * A new indication to a GATT client can't be sent until an outstanding
- * indication procedure with the same client has completed. The procedure is
- * completed when a confirmation from the client is received. The confirmation
- * is indicated by @ref sl_bt_evt_gatt_server_characteristic_status.
- *
- * The error SL_STATUS_INVALID_STATE is returned if the characteristic does not
- * have the notification property, or if the client has not enabled the
- * notification. The same applies to the indication property, and in addition,
- * SL_STATUS_INVALID_STATE is returned if an indication procedure with the same
- * client is outstanding. Always check the response for this command for errors
- * before trying to send more data.
- *
- * @param[in] connection A handle of the connection over which the notification
- *   or indication is sent. Values:
- *     - <b>0xff:</b> Sends notification or indication to all connected devices.
- *     - <b>Other:</b> Connection handle
- * @param[in] characteristic Characteristic handle
- * @param[in] value_len Array length
- * @param[in] value Value to be notified or indicated
- * @param[out] sent_len The length of data sent if only one connected device is
- *   the receiver; otherwise an unused value.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_gatt_server_send_characteristic_notification(uint8_t connection,
-                                                               uint16_t characteristic,
-                                                               size_t value_len,
-                                                               const uint8_t* value,
-                                                               uint16_t *sent_len);
-
-/***************************************************************************//**
- *
- * Send a notification to a remote GATT client. At most ATT_MTU - 3 amount of
- * data can be sent in a notification. An error SL_STATUS_COMMAND_TOO_LONG is
- * returned if the given value length exceeds ATT_MTU - 3.
- *
- * A notification is sent only if the client has enabled it by setting the
- * corresponding flag to the Client Characteristic Configuration descriptor. The
- * error SL_STATUS_INVALID_PARAMETER is returned if the characteristic does not
- * have the notification property. The error SL_STATUS_INVALID_STATE is returned
- * if the client has not enabled the notification.
- *
- * @param[in] connection A handle of the connection over which the notification
- *   is sent.
- * @param[in] characteristic Characteristic handle
- * @param[in] value_len Array length
- * @param[in] value Value to be notified
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_send_notification(uint8_t connection,
-                                                uint16_t characteristic,
-                                                size_t value_len,
-                                                const uint8_t* value);
-
-/***************************************************************************//**
- *
- * Send an indication to a remote GATT client. At most, ATT_MTU - 3 amount of
- * data can be sent in an indication. An error SL_STATUS_COMMAND_TOO_LONG is
- * returned if the given value length exceeds ATT_MTU - 3.
- *
- * An indication is sent only if the client has enabled it by setting the
- * corresponding flag to the Client Characteristic Configuration descriptor. The
- * error SL_STATUS_INVALID_PARAMETER is returned if the characteristic does not
- * have the indication property. The error SL_STATUS_INVALID_STATE is returned
- * if the client has not enabled the indication.
- *
- * A new indication to a GATT client can't be sent until an outstanding
- * indication procedure with the same client has completed. The procedure is
- * completed when a confirmation from the client is received. The confirmation
- * is indicated by @ref sl_bt_evt_gatt_server_characteristic_status.
- *
- * The error SL_STATUS_IN_PROGRESS is returned if an indication procedure with
- * the same client is outstanding. Always wait for confirmation for previous
- * indication before sending a new indication.
- *
- * @param[in] connection A handle of the connection over which the indication is
- *   sent.
- * @param[in] characteristic Characteristic handle
- * @param[in] value_len Array length
- * @param[in] value Value to be indicated
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- * @b Events
- *   - @ref sl_bt_evt_gatt_server_characteristic_status - This event is
- *     triggered after the confirmation from the client is received.
- *   - @ref sl_bt_evt_gatt_server_indication_timeout - This event indicates
- *     confirmation from the remote GATT client has not been received within 30
- *     seconds after an indication was sent. Further GATT transactions over this
- *     connection are not allowed by the stack.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_send_indication(uint8_t connection,
-                                              uint16_t characteristic,
-                                              size_t value_len,
-                                              const uint8_t* value);
-
-/***************************************************************************//**
- *
- * Send notifications or indications to all connected remote GATT clients. At
- * most ATT_MTU - 3 amount of data can be sent in a notification or indication.
- * If the given value length exceeds the limit, first ATT_MTU - 3 bytes will be
- * sent without error, and rest of data will be ignored.
- *
- * A notification or indication is sent only if the client has enabled it by
- * setting the corresponding flag to the Client Characteristic Configuration
- * descriptor. If the Client Characteristic Configuration descriptor supports
- * both notifications and indications, the stack will always send a notification
- * even when the client has enabled both.
- *
- * A new indication to a GATT client can't be sent until an outstanding
- * indication procedure with the same client has completed, and the operation
- * will continue for the next client. The procedure is completed when a
- * confirmation from the client is received. The confirmation is indicated by
- * @ref sl_bt_evt_gatt_server_characteristic_status.
- *
- * @param[in] characteristic Characteristic handle
- * @param[in] value_len Array length
- * @param[in] value Value to be notified or indicated
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_notify_all(uint16_t characteristic,
-                                         size_t value_len,
-                                         const uint8_t* value);
-
-/***************************************************************************//**
- *
- * Read client characteristic configuration of a remote GATT client.
+ * Read client supported features of a remote GATT client.
  *
  * @param[in] connection A handle of the connection to a remote client.
- * @param[in] characteristic Characteristic handle
- * @param[out] client_config_flags Client characteristic configuration of a
- *   remote client.
+ * @param[out] client_features Bit field describing client supported features of
+ *   a remote client. See Bluetooth specification Vol 3, Part G, 7.2 for the
+ *   values.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_gatt_server_read_client_configuration(uint8_t connection,
-                                                        uint16_t characteristic,
-                                                        uint16_t *client_config_flags);
-
-/***************************************************************************//**
- *
- * Send a response to a @ref sl_bt_evt_gatt_server_user_write_request event when
- * parameter @p att_opcode in the event is @ref sl_bt_gatt_prepare_write_request
- * (see @ref sl_bt_gatt_att_opcode_t). The response needs to be sent within 30
- * seconds, otherwise no more GATT transactions are allowed by the remote side.
- * If @p att_errorcode is set to 0, the ATT protocol's prepare write response is
- * sent to indicate to the remote GATT client that the write operation was
- * processed successfully. Other values will cause the local GATT server to send
- * an ATT protocol error response. The application should set values of
- * parameters @p offset and @p value to identical values from the @ref
- * sl_bt_evt_gatt_server_user_write_request event, the values will be verified
- * on the client side in case the request is a reliable write (by Bluetooth Core
- * Specification Volume 3, Part G, 4.9.5).
- *
- * @param[in] connection Connection handle
- * @param[in] characteristic GATT characteristic handle. This value is normally
- *   received from the gatt_characteristic event.
- * @param[in] att_errorcode Attribute protocol error code
- *     - <b>0:</b> No error
- *     - <b>Non-zero:</b> See Bluetooth specification, Host volume, Attribute
- *       Protocol, Error Codes table.
- * @param[in] offset Value offset
- * @param[in] value_len Array length
- * @param[in] value Value
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connection,
-                                                               uint16_t characteristic,
-                                                               uint8_t att_errorcode,
-                                                               uint16_t offset,
-                                                               size_t value_len,
-                                                               const uint8_t* value);
+sl_status_t sl_bt_gatt_server_read_client_supported_features(uint8_t connection,
+                                                             uint8_t *client_features);
 
 /** @} */ // end addtogroup sl_bt_gatt_server
 
@@ -4976,8 +5771,8 @@ sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connectio
 #define sl_bt_rsp_nvm_erase_all_id                                   0x010d0020
 
 /**
- * @{ @name Defined Keys
- * @anchor sl_bt_nvm_keys
+ * @addtogroup sl_bt_nvm_keys Defined Keys
+ * @{
  *
  * Define keys
  */
@@ -4995,7 +5790,7 @@ sl_status_t sl_bt_gatt_server_send_user_prepare_write_response(uint8_t connectio
  * more than 56 bytes.
  *
  * @param[in] key NVM key
- * @param[in] value_len Array length
+ * @param[in] value_len Length of data in @p value
  * @param[in] value Value to store into the specified NVM key
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -5064,7 +5859,9 @@ sl_status_t sl_bt_nvm_erase_all();
 #define sl_bt_rsp_test_dtm_end_id                                    0x020e0020
 
 /**
- * @brief Test Packet Types
+ * @brief 
+                Test packet types supported by the stack
+            
  */
 typedef enum
 {
@@ -5080,7 +5877,7 @@ typedef enum
 } sl_bt_test_packet_type_t;
 
 /**
- * @brief Test PHY Types
+ * @brief Test PHY types
  */
 typedef enum
 {
@@ -5357,6 +6154,13 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_cmd_sm_list_all_bondings_id                            0x0b0f0020
 #define sl_bt_cmd_sm_delete_bonding_id                               0x060f0020
 #define sl_bt_cmd_sm_delete_bondings_id                              0x070f0020
+#define sl_bt_cmd_sm_get_bonding_handles_id                          0x150f0020
+#define sl_bt_cmd_sm_get_bonding_details_id                          0x160f0020
+#define sl_bt_cmd_sm_find_bonding_by_address_id                      0x170f0020
+#define sl_bt_cmd_sm_set_bonding_key_id                              0x180f0020
+#define sl_bt_cmd_sm_set_legacy_oob_id                               0x190f0020
+#define sl_bt_cmd_sm_set_oob_id                                      0x1a0f0020
+#define sl_bt_cmd_sm_set_remote_oob_id                               0x1b0f0020
 #define sl_bt_rsp_sm_configure_id                                    0x010f0020
 #define sl_bt_rsp_sm_set_minimum_key_size_id                         0x140f0020
 #define sl_bt_rsp_sm_set_debug_mode_id                               0x0f0f0020
@@ -5374,26 +6178,41 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_rsp_sm_list_all_bondings_id                            0x0b0f0020
 #define sl_bt_rsp_sm_delete_bonding_id                               0x060f0020
 #define sl_bt_rsp_sm_delete_bondings_id                              0x070f0020
+#define sl_bt_rsp_sm_get_bonding_handles_id                          0x150f0020
+#define sl_bt_rsp_sm_get_bonding_details_id                          0x160f0020
+#define sl_bt_rsp_sm_find_bonding_by_address_id                      0x170f0020
+#define sl_bt_rsp_sm_set_bonding_key_id                              0x180f0020
+#define sl_bt_rsp_sm_set_legacy_oob_id                               0x190f0020
+#define sl_bt_rsp_sm_set_oob_id                                      0x1a0f0020
+#define sl_bt_rsp_sm_set_remote_oob_id                               0x1b0f0020
 
 /**
- * @brief Bonding Keys
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ * @brief 
+                These values define the bonding keys of the bonded device stored in the persistent store.
+            
  */
 typedef enum
 {
-  sl_bt_sm_bonding_key_ltk         = 0x1,  /**< (0x1) LTK saved in master */
-  sl_bt_sm_bonding_key_addr_public = 0x2,  /**< (0x2) Public Address */
-  sl_bt_sm_bonding_key_addr_static = 0x4,  /**< (0x4) Static Address */
-  sl_bt_sm_bonding_key_irk         = 0x8,  /**< (0x8) Identity resolving key for
-                                                resolvable private addresses */
-  sl_bt_sm_bonding_key_edivrand    = 0x10, /**< (0x10) EDIV+RAND received from
-                                                slave */
-  sl_bt_sm_bonding_key_csrk        = 0x20, /**< (0x20) Connection signature
-                                                resolving key */
-  sl_bt_sm_bonding_key_masterid    = 0x40  /**< (0x40) EDIV+RAND sent to master */
+  sl_bt_sm_bonding_key_remote_ltk = 0x1, /**< (0x1) LTK used as central device,
+                                              always used when paired using
+                                              secure connections and local LTK
+                                              does not exist */
+  sl_bt_sm_bonding_key_local_ltk  = 0x2, /**< (0x2) LTK used as peripheral
+                                              device when using legacy pairing,
+                                              only used with secure connections
+                                              pairing if key exists */
+  sl_bt_sm_bonding_key_irk        = 0x3  /**< (0x3) Identity resolving key for
+                                              resolvable private addresses */
 } sl_bt_sm_bonding_key_t;
+/** @endcond */ // end restricted enum type
 
 /**
- * @brief SMP I/O Capabilities
+ * @brief 
+                These values define the security management related I/O capabilities supported by the device.
+            
  */
 typedef enum
 {
@@ -5502,13 +6321,24 @@ typedef struct sl_bt_evt_sm_confirm_passkey_s sl_bt_evt_sm_confirm_passkey_t;
  ******************************************************************************/
 PACKSTRUCT( struct sl_bt_evt_sm_bonded_s
 {
-  uint8_t connection; /**< Connection handle */
-  uint8_t bonding;    /**< Bonding handle. Values:
-                             - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b>
-                               Pairing completed without bonding - the pairing
-                               key will be discarded after disconnection.
-                             - <b>Other:</b> Procedure completed, pairing key
-                               stored with given bonding handle */
+  uint8_t connection;    /**< Connection handle */
+  uint8_t bonding;       /**< Bonding handle. Values:
+                                - <b>SL_BT_INVALID_BONDING_HANDLE (0xff):</b>
+                                  Pairing completed without bonding - the
+                                  pairing key will be discarded after
+                                  disconnection.
+                                - <b>Other:</b> Procedure completed, pairing key
+                                  stored with given bonding handle */
+  uint8_t security_mode; /**< Enum @ref sl_bt_connection_security_t. Connection
+                              security mode. Values:
+                                - <b>sl_bt_connection_mode1_level2 (0x1):</b>
+                                  Unauthenticated pairing with encryption
+                                - <b>sl_bt_connection_mode1_level3 (0x2):</b>
+                                  Authenticated pairing with encryption
+                                - <b>sl_bt_connection_mode1_level4 (0x3):</b>
+                                  Authenticated Secure Connections pairing with
+                                  encryption using a 128-bit strength encryption
+                                  key */
 });
 
 typedef struct sl_bt_evt_sm_bonded_s sl_bt_evt_sm_bonded_t;
@@ -5689,12 +6519,12 @@ sl_status_t sl_bt_sm_set_debug_mode();
 
 /***************************************************************************//**
  *
- * Add device to whitelist, which can be enabled with @ref
+ * Add device to accept list, which can be enabled with @ref
  * sl_bt_gap_enable_whitelisting.
  *
- * @param[in] address Address of the device added to whitelist
+ * @param[in] address Address of the device added to accept list
  * @param[in] address_type Enum @ref sl_bt_gap_address_type_t. Address type of
- *   the device added to whitelist. Values:
+ *   the device added to accept list. Values:
  *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
  *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
  *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Private resolvable
@@ -5770,21 +6600,25 @@ sl_status_t sl_bt_sm_set_passkey(int32_t passkey);
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_sm_set_legacy_oob command.
+ *
  * Set OOB data (out-of-band encryption data) for legacy pairing for a device.
  * OOB data may be, for example, a PIN code exchanged over an alternate path,
  * such as NFC. The device will not allow any other bonding if OOB data is set.
  * OOB data can't be set simultaneously with secure connections OOB data.
  *
- * @param[in] oob_data_len Array length
+ * @param[in] oob_data_len Length of data in @p oob_data
  * @param[in] oob_data OOB data. To set OOB data, send a 16-byte array. Values
  *   are in little endian format. To clear OOB data, send a zero-length array.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data);
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_sm_set_oob command.
  *
  * Enable the use of OOB data (out-of-band encryption data) for a device for
  * secure connections pairing. Enabling will generate new OOB data and confirm
@@ -5808,18 +6642,20 @@ sl_status_t sl_bt_sm_set_oob_data(size_t oob_data_len, const uint8_t* oob_data);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
                                 size_t max_oob_data_size,
                                 size_t *oob_data_len,
                                 uint8_t *oob_data);
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_sm_set_remote_oob command.
+ *
  * Set OOB data and confirm values (out-of-band encryption) received from the
  * remote device for secure connections pairing. OOB data must be enabled with
  * @ref sl_bt_sm_use_sc_oob before setting the remote device OOB data.
  *
- * @param[in] oob_data_len Array length
+ * @param[in] oob_data_len Length of data in @p oob_data
  * @param[in] oob_data Remote device OOB data and confirm values. To set OOB
  *   data, send a 32-byte array. First 16-bytes is OOB data and last 16-bytes
  *   the confirm value. Values are in little endian format. To clear OOB data,
@@ -5828,7 +6664,7 @@ sl_status_t sl_bt_sm_use_sc_oob(uint8_t enable,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_len,
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_set_sc_remote_oob_data(size_t oob_data_len,
                                             const uint8_t* oob_data);
 
 /***************************************************************************//**
@@ -5896,6 +6732,9 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm);
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_sm_get_bonding_handles and @ref
+ * sl_bt_sm_get_bonding_details commands.
+ *
  * List all bondings stored in the bonding database. Bondings are reported by
  * the @ref sl_bt_evt_sm_list_bonding_entry event for each bonding and the
  * report is ended with @ref sl_bt_evt_sm_list_all_bondings_complete event. Use
@@ -5910,11 +6749,12 @@ sl_status_t sl_bt_sm_bonding_confirm(uint8_t connection, uint8_t confirm);
  *   - @ref sl_bt_evt_sm_list_all_bondings_complete
  *
  ******************************************************************************/
-sl_status_t sl_bt_sm_list_all_bondings();
+SL_BGAPI_DEPRECATED sl_status_t sl_bt_sm_list_all_bondings();
 
 /***************************************************************************//**
  *
- * Delete specified bonding information or whitelist from the persistent store.
+ * Delete specified bonding information or accept list filtering from the
+ * persistent store.
  *
  * @param[in] bonding Bonding handle
  *
@@ -5925,14 +6765,199 @@ sl_status_t sl_bt_sm_delete_bonding(uint8_t bonding);
 
 /***************************************************************************//**
  *
- * Delete all bonding information and whitelist from the persistent store. This
- * will also delete device local identity resolving key (IRK).
+ * Delete all bonding information and accept list filtering from the persistent
+ * store. This will also delete device local identity resolving key (IRK).
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
 sl_status_t sl_bt_sm_delete_bondings();
+
+/***************************************************************************//**
+ *
+ * Get number of entries saved in bonding database and bitmask of their handles.
+ * The entry in bonding database can be either bonding or accept list filtering
+ * device. Use @ref sl_bt_sm_get_bonding_details to find the type of bonding
+ * entry and the device's address.
+ *
+ * @param[in] reserved Use the value 0 on this reserved field. Do not use
+ *   none-zero values because they are reserved for future use.
+ * @param[out] num_bondings Total number of bondings and accept list filtering
+ *   devices stored in bonding database.
+ * @param[in] max_bondings_size Size of output buffer passed in @p bondings
+ * @param[out] bondings_len On return, set to the length of output data written
+ *   to @p bondings
+ * @param[out] bondings 4 byte bit field of used bonding handles in little
+ *   endian format. Bit 0 of first byte is bonding handle 0, bit 0 of second
+ *   byte is bonding handle 8 etc. If the bit is 1 that bonding handle exists in
+ *   the bonding database.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_get_bonding_handles(uint32_t reserved,
+                                         uint32_t *num_bondings,
+                                         size_t max_bondings_size,
+                                         size_t *bondings_len,
+                                         uint8_t *bondings);
+
+/***************************************************************************//**
+ *
+ * Get the detailed information for bonding entry. The data includes remote
+ * device address and address type as well as security mode for bonding and used
+ * encryption key length.
+ *
+ * @param[in] bonding Bonding handle
+ * @param[out] address Bluetooth address of the remote device
+ * @param[out] address_type Enum @ref sl_bt_gap_address_type_t. Address type.
+ *   Values:
+ *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
+ *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
+ * @param[out] security_mode Enum @ref sl_bt_connection_security_t. Connection
+ *   security mode. Accept list filtering entry has security mode as no
+ *   security. Values:
+ *     - <b>sl_bt_connection_mode1_level1 (0x0):</b> No security
+ *     - <b>sl_bt_connection_mode1_level2 (0x1):</b> Unauthenticated pairing
+ *       with encryption
+ *     - <b>sl_bt_connection_mode1_level3 (0x2):</b> Authenticated pairing with
+ *       encryption
+ *     - <b>sl_bt_connection_mode1_level4 (0x3):</b> Authenticated Secure
+ *       Connections pairing with encryption using a 128-bit strength encryption
+ *       key
+ * @param[out] key_size Key length in bytes, 0 for accept list filtering entry
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_get_bonding_details(uint32_t bonding,
+                                         bd_addr *address,
+                                         uint8_t *address_type,
+                                         uint8_t *security_mode,
+                                         uint8_t *key_size);
+
+/***************************************************************************//**
+ *
+ * Find the bonding or accept list filtering entry by a Bluetooth device
+ * address.
+ *
+ * @param[in] address The Bluetooth device address
+ * @param[out] bonding The bonding handle
+ * @param[out] security_mode Enum @ref sl_bt_connection_security_t. Connection
+ *   security mode. Accept list filtering entry has security mode as no
+ *   security. Values:
+ *     - <b>sl_bt_connection_mode1_level1 (0x0):</b> No security
+ *     - <b>sl_bt_connection_mode1_level2 (0x1):</b> Unauthenticated pairing
+ *       with encryption
+ *     - <b>sl_bt_connection_mode1_level3 (0x2):</b> Authenticated pairing with
+ *       encryption
+ *     - <b>sl_bt_connection_mode1_level4 (0x3):</b> Authenticated Secure
+ *       Connections pairing with encryption using a 128-bit strength encryption
+ *       key
+ * @param[out] key_size Key length in bytes, 0 for accept list filtering entry
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_find_bonding_by_address(bd_addr address,
+                                             uint32_t *bonding,
+                                             uint8_t *security_mode,
+                                             uint8_t *key_size);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set key for bonding or accept list filtering entry overwriting any possible
+ * existing key. If there is error which leaves bonding entry in inconsistent
+ * state the bonding will be deleted. Only IRK can be added to accept list
+ * filtering entry.
+ *
+ * @param[in] bonding Bonding handle
+ * @param[in] key_type Enum @ref sl_bt_sm_bonding_key_t. Key type. Values:
+ *     - <b>sl_bt_sm_bonding_key_remote_ltk (0x1):</b> LTK used as central
+ *       device, always used when paired using secure connections and local LTK
+ *       does not exist
+ *     - <b>sl_bt_sm_bonding_key_local_ltk (0x2):</b> LTK used as peripheral
+ *       device when using legacy pairing, only used with secure connections
+ *       pairing if key exists
+ *     - <b>sl_bt_sm_bonding_key_irk (0x3):</b> Identity resolving key for
+ *       resolvable private addresses
+ * @param[in] key Bonding key in little endian format.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_bonding_key(uint32_t bonding,
+                                     uint8_t key_type,
+                                     aes_key_128 key);
+
+/***************************************************************************//**
+ *
+ * Set OOB data (out-of-band encryption data) for legacy pairing for a device.
+ * OOB data may be, for example, a PIN code exchanged over an alternate path,
+ * such as NFC. The device will not allow any other bonding if OOB data is set.
+ * OOB data can't be set simultaneously with secure connections OOB data.
+ *
+ * @param[in] enable Enable OOB with legacy pairing. Values:
+ *     - <b>0:</b> disable
+ *     - <b>1:</b> enable
+ * @param[in] oob_data 16-byte legacy pairing OOB data in little endian format.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_legacy_oob(uint8_t enable, aes_key_128 oob_data);
+
+/***************************************************************************//**
+ *
+ * Enable the use of OOB data (out-of-band encryption data) for a device for
+ * secure connections pairing. Enabling will generate new OOB data and confirm
+ * values, which can be sent to the remote device. After enabling the secure
+ * connections OOB data, the remote devices OOB data can be set with @ref
+ * sl_bt_sm_set_remote_oob. Calling this function will erase any set remote
+ * device OOB data and confirm values. The device will not allow any other
+ * bonding if OOB data is set. The secure connections OOB data cannot be enabled
+ * simultaneously with legacy pairing OOB data.
+ *
+ * @param[in] enable Enable OOB with secure connections pairing. Values:
+ *     - <b>0:</b> disable
+ *     - <b>1:</b> enable
+ * @param[out] random 16-byte randomly-generated secure connections OOB data in
+ *   little endian format.
+ * @param[out] confirm 16-byte confirm value for the OOB random value in little
+ *   endian format.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_oob(uint8_t enable,
+                             aes_key_128 *random,
+                             aes_key_128 *confirm);
+
+/***************************************************************************//**
+ *
+ * Set OOB data and confirm values (out-of-band encryption) received from the
+ * remote device for secure connections pairing. OOB data must be enabled with
+ * @ref sl_bt_sm_set_oob before setting the remote device OOB data.
+ *
+ * @param[in] enable Enable remote device OOB data with secure connections
+ *   pairing. Values:
+ *     - <b>0:</b> disable
+ *     - <b>1:</b> enable
+ * @param[in] random 16-byte remote device secure connections OOB data in little
+ *   endian format.
+ * @param[in] confirm 16-byte remote device confirm value for the OOB random
+ *   value in little endian format.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
+                                    aes_key_128 random,
+                                    aes_key_128 confirm);
 
 /** @} */ // end addtogroup sl_bt_sm
 
@@ -5962,7 +6987,7 @@ sl_status_t sl_bt_sm_delete_bondings();
  *
  * Default is "OTA" if a name is not set.
  *
- * @param[in] name_len Array length
+ * @param[in] name_len Length of data in @p name
  * @param[in] name OTA device name
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -5978,7 +7003,7 @@ sl_status_t sl_bt_ota_set_device_name(size_t name_len, const uint8_t* name);
  *   advertising packets or scan response packets.
  *     - <b>2:</b> OTA advertising packets
  *     - <b>4:</b> OTA scan response packets
- * @param[in] adv_data_len Array length
+ * @param[in] adv_data_len Length of data in @p adv_data
  * @param[in] adv_data Data to be set
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -6058,7 +7083,7 @@ sl_status_t sl_bt_ota_set_rf_path(uint8_t enable, uint8_t antenna);
 #define sl_bt_rsp_coex_get_counters_id                               0x01200020
 
 /**
- * @brief Coexistence Options
+ * @brief Coexistence configuration options
  */
 typedef enum
 {
@@ -6162,49 +7187,49 @@ sl_status_t sl_bt_coex_get_counters(uint8_t reset,
 
 /**
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
- * @brief Result values for LE Credit Based Connection Response
+ * @brief Result values for LE credit-based connection response.
  */
 typedef enum
 {
-  sl_bt_l2cap_connection_successful            = 0x0,  /**< (0x0) Connection
-                                                            successful */
-  sl_bt_l2cap_le_psm_not_supported             = 0x2,  /**< (0x2) Connection
-                                                            refused - LE_PSM not
-                                                            supported */
-  sl_bt_l2cap_no_resources_available           = 0x4,  /**< (0x4) Connection
-                                                            refused - no
-                                                            resources available */
-  sl_bt_l2cap_insufficient_authentication      = 0x5,  /**< (0x5) Connection
-                                                            refused -
-                                                            insufficient
-                                                            authentication */
-  sl_bt_l2cap_insufficient_authorization       = 0x6,  /**< (0x6) Connection
-                                                            refused -
-                                                            insufficient
-                                                            authorization */
-  sl_bt_l2cap_insufficient_encryption_key_size = 0x7,  /**< (0x7) Connection
-                                                            refused -
-                                                            insufficient
-                                                            encryption key size */
-  sl_bt_l2cap_insufficient_encryption          = 0x8,  /**< (0x8) Connection
-                                                            refused -
-                                                            insufficient
-                                                            encryption */
-  sl_bt_l2cap_invalid_source_cid               = 0x9,  /**< (0x9) Connection
-                                                            refused - invalid
-                                                            Source CID */
-  sl_bt_l2cap_source_cid_already_allocated     = 0x10, /**< (0x10) Connection
-                                                            refused - Source CID
-                                                            already allocated */
-  sl_bt_l2cap_unacceptable_parameters          = 0x11  /**< (0x11) Connection
-                                                            refused -
-                                                            unacceptable
-                                                            parameters */
+  sl_bt_l2cap_connection_successful            = 0x0, /**< (0x0) Connection
+                                                           successful */
+  sl_bt_l2cap_le_psm_not_supported             = 0x2, /**< (0x2) Connection
+                                                           refused - LE_PSM not
+                                                           supported */
+  sl_bt_l2cap_no_resources_available           = 0x4, /**< (0x4) Connection
+                                                           refused - no
+                                                           resources available */
+  sl_bt_l2cap_insufficient_authentication      = 0x5, /**< (0x5) Connection
+                                                           refused -
+                                                           insufficient
+                                                           authentication */
+  sl_bt_l2cap_insufficient_authorization       = 0x6, /**< (0x6) Connection
+                                                           refused -
+                                                           insufficient
+                                                           authorization */
+  sl_bt_l2cap_insufficient_encryption_key_size = 0x7, /**< (0x7) Connection
+                                                           refused -
+                                                           insufficient
+                                                           encryption key size */
+  sl_bt_l2cap_insufficient_encryption          = 0x8, /**< (0x8) Connection
+                                                           refused -
+                                                           insufficient
+                                                           encryption */
+  sl_bt_l2cap_invalid_source_cid               = 0x9, /**< (0x9) Connection
+                                                           refused - invalid
+                                                           Source CID */
+  sl_bt_l2cap_source_cid_already_allocated     = 0xa, /**< (0xa) Connection
+                                                           refused - Source CID
+                                                           already allocated */
+  sl_bt_l2cap_unacceptable_parameters          = 0xb  /**< (0xb) Connection
+                                                           refused -
+                                                           unacceptable
+                                                           parameters */
 } sl_bt_l2cap_coc_connection_result_t;
 
 /**
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
- * @brief Reason Codes of Command Reject
+ * @brief Reason codes describe why the request packet was rejected.
  */
 typedef enum
 {
@@ -6218,7 +7243,7 @@ typedef enum
 
 /**
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
- * @brief Signaling Command Codes
+ * @brief Command codes describe which of the request commands has been rejected.
  */
 typedef enum
 {
@@ -6583,7 +7608,7 @@ sl_status_t sl_bt_l2cap_coc_send_disconnection_request(uint8_t connection,
  * @param[in] connection Handle of the LE connection for sending data
  * @param[in] cid The CID represents the destination channel endpoint of the
  *   device sending data.
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data Data to be sent. Data length must be within the range of
  *   destination channel endpoint's MPS value.
  *
@@ -6648,7 +7673,7 @@ sl_status_t sl_bt_l2cap_coc_send_data(uint8_t connection,
  *
  *   Default: 0
  *   @endparblock
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over. This can be
@@ -6683,7 +7708,7 @@ sl_status_t sl_bt_cte_transmitter_clear_dtm_parameters();
  *     - <b>Bit 0:</b> AoA CTE response
  *     - <b>Bit 1:</b> AoD CTE response with 1 us slots
  *     - <b>Bit 2:</b> AoD CTE response with 2 us slots
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -6723,7 +7748,7 @@ sl_status_t sl_bt_cte_transmitter_disable_connection_cte(uint8_t connection);
  *     - <b>2:</b> AoD CTE with 2 us slots
  * @param[in] cte_count The number of CTEs to be transmitted in each periodic
  *   advertising interval
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -6765,7 +7790,7 @@ sl_status_t sl_bt_cte_transmitter_disable_connectionless_cte(uint8_t handle);
  *     - <b>2:</b> AoD CTE with 2 us slots
  * @param[in] cte_count The number of CTEs to be transmitted in each extended
  *   advertising interval. Currently only cte_count = 1 is supported.
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -7028,7 +8053,7 @@ typedef struct sl_bt_evt_cte_receiver_silabs_iq_report_s sl_bt_evt_cte_receiver_
  *
  *   Default: 1
  *   @endparblock
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over. This can be
@@ -7129,7 +8154,7 @@ sl_status_t sl_bt_cte_receiver_configure(uint8_t flags);
  * @param[in] slot_durations Slot durations
  *     - <b>1:</b> Switching and sampling slots are 1 us each
  *     - <b>2:</b> Switching and sampling slots are 2 us each
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -7173,7 +8198,7 @@ sl_status_t sl_bt_cte_receiver_disable_connection_cte(uint8_t connection);
  * @param[in] cte_count   - <b>0:</b> Sample and report all available CTEs
  *     - <b>Other values:</b> Maximum number of sampled CTEs in each periodic
  *       advertising interval
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -7212,7 +8237,7 @@ sl_status_t sl_bt_cte_receiver_disable_connectionless_cte(uint16_t sync);
  * @param[in] cte_count   - <b>0:</b> Sample and report all available CTEs
  *     - <b>Other values:</b> Maximum number of sampled CTEs in each extended
  *       advertising interval
- * @param[in] switching_pattern_len Array length
+ * @param[in] switching_pattern_len Length of data in @p switching_pattern
  * @param[in] switching_pattern Antenna switching pattern. Antennas will be
  *   switched in this order with the antenna switch pins during CTE. If the CTE
  *   is longer than the switching pattern, the pattern starts over.
@@ -7262,8 +8287,8 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte();
 #define sl_bt_rsp_memory_profiler_list_ram_usage_id                  0x02fd0020
 
 /**
- * @{ @name Memory profiler error flags
- * @anchor sl_bt_memory_profiler_error_flags
+ * @addtogroup sl_bt_memory_profiler_error_flags Memory profiler error flags
+ * @{
  *
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
  *
@@ -7290,8 +8315,8 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte();
 /** @} */ // end Memory profiler error flags
 
 /**
- * @{ @name Memory profiler reset flags
- * @anchor sl_bt_memory_profiler_reset_flags
+ * @addtogroup sl_bt_memory_profiler_reset_flags Memory profiler reset flags
+ * @{
  *
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
  *
@@ -7483,7 +8508,7 @@ typedef struct sl_bt_evt_user_message_to_host_s sl_bt_evt_user_message_to_host_t
  * The application on the target must send the response with @ref
  * sl_bt_send_rsp_user_message_to_target.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data The message
  * @param[in] max_response_size Size of output buffer passed in @p response
  * @param[out] response_len On return, set to the length of output data written
@@ -7508,7 +8533,7 @@ sl_status_t sl_bt_user_message_to_target(size_t data_len,
  *
  * By default, the NCP does not use the event filter.
  *
- * @param[in] data_len Array length
+ * @param[in] data_len Length of data in @p data
  * @param[in] data The message for managing event filter
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -7558,6 +8583,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_connection_tx_power_t                              evt_connection_tx_power; /**< Data field for connection tx_power event*/
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power; /**< Data field for connection remote_tx_power event*/
     sl_bt_evt_connection_closed_t                                evt_connection_closed; /**< Data field for connection closed event*/
+    sl_bt_evt_connection_remote_used_features_t                  evt_connection_remote_used_features; /**< Data field for connection remote_used_features event*/
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged; /**< Data field for gatt mtu_exchanged event*/
     sl_bt_evt_gatt_service_t                                     evt_gatt_service; /**< Data field for gatt service event*/
     sl_bt_evt_gatt_characteristic_t                              evt_gatt_characteristic; /**< Data field for gatt characteristic event*/

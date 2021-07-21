@@ -1,19 +1,27 @@
 #ifndef SL_BLUETOOTH_CONFIG_H
 #define SL_BLUETOOTH_CONFIG_H
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+#endif
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Stack Configuration
 
-// <o SL_BT_CONFIG_MAX_CONNECTIONS> Max number of connections <0-32>
-// <i> Default: 4
-// <i> Define the number of connections the application needs.
-#define SL_BT_CONFIG_MAX_CONNECTIONS     (4)
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
+#include "sl_bluetooth_connection_config.h"
+#else
+#define SL_BT_CONFIG_MAX_CONNECTIONS (0)
+#endif
 
-// <o SL_BT_CONFIG_USER_ADVERTISERS> Max number of advertisers reserved for user <0-8>
-// <i> Default: 1
-// <i> Define the number of advertisers the application needs.
-#define SL_BT_CONFIG_USER_ADVERTISERS     (1)
+// Max number of connections reserved by user application and components
+#define SL_BT_CONFIG_MAX_CONNECTIONS_SUM     (SL_BT_CONFIG_MAX_CONNECTIONS + SL_BT_COMPONENT_CONNECTIONS)
+
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_ADVERTISER_PRESENT
+#include "sl_bluetooth_advertiser_config.h"
+#else
+#define SL_BT_CONFIG_USER_ADVERTISERS (0)
+#endif
 
 #define SL_BT_CONFIG_MAX_ADVERTISERS     (SL_BT_CONFIG_USER_ADVERTISERS + SL_BT_COMPONENT_ADVERTISERS)
 
@@ -22,10 +30,11 @@
 // <i> Define the number of software timers the application needs.  Each timer needs resources from the stack to be implemented. Increasing amount of soft timers may cause degraded performance in some use cases.
 #define SL_BT_CONFIG_MAX_SOFTWARE_TIMERS     (4)
 
-// <o SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC> Max number of periodic advertising synchronizations <0-255>
-// <i> Default: 0
-// <i> Define the number of periodic advertising synchronizations the application needs.
-#define SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC     (0)
+#ifdef SL_CATALOG_BLUETOOTH_FEATURE_SYNC_PRESENT
+#include "sl_bluetooth_periodic_sync_config.h"
+#else
+#define SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC (0)
+#endif
 
 // <o SL_BT_CONFIG_BUFFER_SIZE> Buffer memory size for Bluetooth stack
 // <i> Default: 3150
@@ -88,15 +97,6 @@
 #define BT_EM2_LFCLK_REQ_FLAG       0
 
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
-#include "sl_component_catalog.h"
-#ifndef SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT
-#undef  SL_BT_CONFIG_MAX_CONNECTIONS
-#define SL_BT_CONFIG_MAX_CONNECTIONS               0
-#endif
-#ifndef SL_CATALOG_BLUETOOTH_FEATURE_SYNC_PRESENT
-#undef  SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC
-#define SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC 0
-#endif
 #if !defined(SL_CATALOG_BLUETOOTH_FEATURE_CONNECTION_PRESENT)    \
   && !defined(SL_CATALOG_BLUETOOTH_FEATURE_PERIODIC_ADV_PRESENT) \
   && !defined(SL_CATALOG_BLUETOOTH_FEATURE_SYNC_PRESENT)
@@ -116,8 +116,6 @@ void sli_bt_rtos_stack_callback();
   #define SL_BT_CONFIG_LL_CALLBACK    0
   #define SL_BT_CONFIG_STACK_CALLBACK 0
 #endif // SL_CATALOG_KERNEL_PRESENT
-
-extern const struct bg_gattdb_def bg_gattdb_data;
 
 #include "sl_bt_stack_config.h"
 
@@ -140,13 +138,13 @@ extern const struct bg_gattdb_def bg_gattdb_data;
 #define SL_BT_CONFIG_DEFAULT                                                   \
   {                                                                            \
     .config_flags = SL_BT_CONFIG_FLAGS,                                        \
-    .bluetooth.max_connections = SL_BT_CONFIG_MAX_CONNECTIONS,                 \
+    .bluetooth.max_connections = SL_BT_CONFIG_MAX_CONNECTIONS_SUM,             \
     .bluetooth.max_advertisers = SL_BT_CONFIG_MAX_ADVERTISERS,                 \
     .bluetooth.max_periodic_sync = SL_BT_CONFIG_MAX_PERIODIC_ADVERTISING_SYNC, \
     .bluetooth.max_buffer_memory = SL_BT_CONFIG_BUFFER_SIZE,                   \
     .scheduler_callback = SL_BT_CONFIG_LL_CALLBACK,                            \
     .stack_schedule_callback = SL_BT_CONFIG_STACK_CALLBACK,                    \
-    .gattdb = &bg_gattdb_data,                                                 \
+    .gattdb = &gattdb,                                                         \
     .max_timers = SL_BT_CONFIG_MAX_SOFTWARE_TIMERS,                            \
     .rf.tx_gain = SL_BT_CONFIG_RF_PATH_GAIN_TX,                                \
     .rf.rx_gain = SL_BT_CONFIG_RF_PATH_GAIN_RX,                                \

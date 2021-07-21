@@ -14,9 +14,6 @@
  *
  ******************************************************************************/
 
-#if !defined(__IAR_SYSTEMS_ICC__)
-#include <assert.h>
-#endif
 #include "sl_bt_ncp_host.h"
 #include "sl_status.h"
 
@@ -43,19 +40,39 @@ bgapi_device_type_queue_t sl_bt_api_queue = {
   SL_BT_API_QUEUE_LEN
 };
 
-void sli_bgapi_register_device(bgapi_device_type_queue_t *queue)
+sl_status_t sli_bgapi_register_device(bgapi_device_type_queue_t *queue)
 {
   size_t i;
   for (i = 0; i < SL_BGAPI_DEVICE_TYPES; i++) {
     if (device_event_queues[i] == NULL) {
       device_event_queues[i] = queue;
       registered_devices_count++;
-      return;
+      return SL_STATUS_OK;
     }
   }
-#if !defined(__IAR_SYSTEMS_ICC__)
-  assert(0); // Unable to register device type. Did you register something twice?
-#endif
+  return SL_STATUS_ALREADY_INITIALIZED;
+}
+
+sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc)
+{
+  if (!ofunc || !ifunc) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  sl_bt_api_output = ofunc;
+  sl_bt_api_input = ifunc;
+  sl_bt_api_peek = NULL;
+  return sli_bgapi_register_device(&sl_bt_api_queue);
+}
+
+sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc)
+{
+  if (!ofunc || !ifunc || !pfunc) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  sl_bt_api_output = ofunc;
+  sl_bt_api_input = ifunc;
+  sl_bt_api_peek = pfunc;
+  return sli_bgapi_register_device(&sl_bt_api_queue);
 }
 
 /**

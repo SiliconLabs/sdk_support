@@ -503,6 +503,14 @@ PACKSTRUCT( struct sl_bt_cmd_connection_close_s
 typedef struct sl_bt_cmd_connection_close_s sl_bt_cmd_connection_close_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_connection_read_remote_used_features_s
+{
+    uint8_t             connection;
+});
+
+typedef struct sl_bt_cmd_connection_read_remote_used_features_s sl_bt_cmd_connection_read_remote_used_features_t;
+
+
 
 PACKSTRUCT( struct sl_bt_cmd_gatt_set_max_mtu_s
 {
@@ -694,29 +702,176 @@ typedef struct sl_bt_cmd_gatt_write_descriptor_value_s sl_bt_cmd_gatt_write_desc
 
 
 
-PACKSTRUCT( struct sl_bt_cmd_gatt_server_set_capabilities_s
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_service_s
 {
-    uint32_t            caps;
-    uint32_t            reserved;
+    uint16_t            session;
+    uint8_t             type;
+    uint8_t             property;
+    uint8array          uuid;
 });
 
-typedef struct sl_bt_cmd_gatt_server_set_capabilities_s sl_bt_cmd_gatt_server_set_capabilities_t;
+typedef struct sl_bt_cmd_gattdb_add_service_s sl_bt_cmd_gattdb_add_service_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_gatt_server_enable_capabilities_s
+PACKSTRUCT( struct sl_bt_cmd_gattdb_remove_service_s
 {
-    uint32_t            caps;
+    uint16_t            session;
+    uint16_t            service;
 });
 
-typedef struct sl_bt_cmd_gatt_server_enable_capabilities_s sl_bt_cmd_gatt_server_enable_capabilities_t;
+typedef struct sl_bt_cmd_gattdb_remove_service_s sl_bt_cmd_gattdb_remove_service_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_gatt_server_disable_capabilities_s
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_included_service_s
 {
-    uint32_t            caps;
+    uint16_t            session;
+    uint16_t            service;
+    uint16_t            included_service;
 });
 
-typedef struct sl_bt_cmd_gatt_server_disable_capabilities_s sl_bt_cmd_gatt_server_disable_capabilities_t;
+typedef struct sl_bt_cmd_gattdb_add_included_service_s sl_bt_cmd_gattdb_add_included_service_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_remove_included_service_s
+{
+    uint16_t            session;
+    uint16_t            attribute;
+});
+
+typedef struct sl_bt_cmd_gattdb_remove_included_service_s sl_bt_cmd_gattdb_remove_included_service_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_uuid16_characteristic_s
+{
+    uint16_t            session;
+    uint16_t            service;
+    uint16_t            property;
+    uint16_t            security;
+    uint8_t             flag;
+    sl_bt_uuid_16_t     uuid;
+    uint8_t             value_type;
+    uint16_t            maxlen;
+    byte_array          value;
+});
+
+typedef struct sl_bt_cmd_gattdb_add_uuid16_characteristic_s sl_bt_cmd_gattdb_add_uuid16_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_uuid128_characteristic_s
+{
+    uint16_t            session;
+    uint16_t            service;
+    uint16_t            property;
+    uint16_t            security;
+    uint8_t             flag;
+    uuid_128            uuid;
+    uint8_t             value_type;
+    uint16_t            maxlen;
+    byte_array          value;
+});
+
+typedef struct sl_bt_cmd_gattdb_add_uuid128_characteristic_s sl_bt_cmd_gattdb_add_uuid128_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_remove_characteristic_s
+{
+    uint16_t            session;
+    uint16_t            characteristic;
+});
+
+typedef struct sl_bt_cmd_gattdb_remove_characteristic_s sl_bt_cmd_gattdb_remove_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_uuid16_descriptor_s
+{
+    uint16_t            session;
+    uint16_t            characteristic;
+    uint16_t            property;
+    uint16_t            security;
+    sl_bt_uuid_16_t     uuid;
+    uint8_t             value_type;
+    uint16_t            maxlen;
+    byte_array          value;
+});
+
+typedef struct sl_bt_cmd_gattdb_add_uuid16_descriptor_s sl_bt_cmd_gattdb_add_uuid16_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_add_uuid128_descriptor_s
+{
+    uint16_t            session;
+    uint16_t            characteristic;
+    uint16_t            property;
+    uint16_t            security;
+    uuid_128            uuid;
+    uint8_t             value_type;
+    uint16_t            maxlen;
+    byte_array          value;
+});
+
+typedef struct sl_bt_cmd_gattdb_add_uuid128_descriptor_s sl_bt_cmd_gattdb_add_uuid128_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_remove_descriptor_s
+{
+    uint16_t            session;
+    uint16_t            descriptor;
+});
+
+typedef struct sl_bt_cmd_gattdb_remove_descriptor_s sl_bt_cmd_gattdb_remove_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_start_service_s
+{
+    uint16_t            session;
+    uint16_t            service;
+});
+
+typedef struct sl_bt_cmd_gattdb_start_service_s sl_bt_cmd_gattdb_start_service_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_stop_service_s
+{
+    uint16_t            session;
+    uint16_t            service;
+});
+
+typedef struct sl_bt_cmd_gattdb_stop_service_s sl_bt_cmd_gattdb_stop_service_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_start_characteristic_s
+{
+    uint16_t            session;
+    uint16_t            characteristic;
+});
+
+typedef struct sl_bt_cmd_gattdb_start_characteristic_s sl_bt_cmd_gattdb_start_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_stop_characteristic_s
+{
+    uint16_t            session;
+    uint16_t            characteristic;
+});
+
+typedef struct sl_bt_cmd_gattdb_stop_characteristic_s sl_bt_cmd_gattdb_stop_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_commit_s
+{
+    uint16_t            session;
+});
+
+typedef struct sl_bt_cmd_gattdb_commit_s sl_bt_cmd_gattdb_commit_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gattdb_abort_s
+{
+    uint16_t            session;
+});
+
+typedef struct sl_bt_cmd_gattdb_abort_s sl_bt_cmd_gattdb_abort_t;
+
 
 
 PACKSTRUCT( struct sl_bt_cmd_gatt_server_set_max_mtu_s
@@ -850,6 +1005,39 @@ PACKSTRUCT( struct sl_bt_cmd_gatt_server_send_user_prepare_write_response_s
 });
 
 typedef struct sl_bt_cmd_gatt_server_send_user_prepare_write_response_s sl_bt_cmd_gatt_server_send_user_prepare_write_response_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gatt_server_set_capabilities_s
+{
+    uint32_t            caps;
+    uint32_t            reserved;
+});
+
+typedef struct sl_bt_cmd_gatt_server_set_capabilities_s sl_bt_cmd_gatt_server_set_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gatt_server_enable_capabilities_s
+{
+    uint32_t            caps;
+});
+
+typedef struct sl_bt_cmd_gatt_server_enable_capabilities_s sl_bt_cmd_gatt_server_enable_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gatt_server_disable_capabilities_s
+{
+    uint32_t            caps;
+});
+
+typedef struct sl_bt_cmd_gatt_server_disable_capabilities_s sl_bt_cmd_gatt_server_disable_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_gatt_server_read_client_supported_features_s
+{
+    uint8_t             connection;
+});
+
+typedef struct sl_bt_cmd_gatt_server_read_client_supported_features_s sl_bt_cmd_gatt_server_read_client_supported_features_t;
 
 
 
@@ -1028,6 +1216,67 @@ PACKSTRUCT( struct sl_bt_cmd_sm_delete_bonding_s
 });
 
 typedef struct sl_bt_cmd_sm_delete_bonding_s sl_bt_cmd_sm_delete_bonding_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_get_bonding_handles_s
+{
+    uint32_t            reserved;
+});
+
+typedef struct sl_bt_cmd_sm_get_bonding_handles_s sl_bt_cmd_sm_get_bonding_handles_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_get_bonding_details_s
+{
+    uint32_t            bonding;
+});
+
+typedef struct sl_bt_cmd_sm_get_bonding_details_s sl_bt_cmd_sm_get_bonding_details_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_find_bonding_by_address_s
+{
+    bd_addr             address;
+});
+
+typedef struct sl_bt_cmd_sm_find_bonding_by_address_s sl_bt_cmd_sm_find_bonding_by_address_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_set_bonding_key_s
+{
+    uint32_t            bonding;
+    uint8_t             key_type;
+    aes_key_128         key;
+});
+
+typedef struct sl_bt_cmd_sm_set_bonding_key_s sl_bt_cmd_sm_set_bonding_key_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_set_legacy_oob_s
+{
+    uint8_t             enable;
+    aes_key_128         oob_data;
+});
+
+typedef struct sl_bt_cmd_sm_set_legacy_oob_s sl_bt_cmd_sm_set_legacy_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_set_oob_s
+{
+    uint8_t             enable;
+});
+
+typedef struct sl_bt_cmd_sm_set_oob_s sl_bt_cmd_sm_set_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_set_remote_oob_s
+{
+    uint8_t             enable;
+    aes_key_128         random;
+    aes_key_128         confirm;
+});
+
+typedef struct sl_bt_cmd_sm_set_remote_oob_s sl_bt_cmd_sm_set_remote_oob_t;
 
 
 
@@ -1841,6 +2090,14 @@ PACKSTRUCT( struct sl_bt_rsp_connection_close_s
 typedef struct sl_bt_rsp_connection_close_s sl_bt_rsp_connection_close_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_connection_read_remote_used_features_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_connection_read_remote_used_features_s sl_bt_rsp_connection_read_remote_used_features_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_gatt_set_max_mtu_s
 {
     uint16_t            result;
@@ -2005,37 +2262,147 @@ PACKSTRUCT( struct sl_bt_rsp_gatt_write_descriptor_value_s
 typedef struct sl_bt_rsp_gatt_write_descriptor_value_s sl_bt_rsp_gatt_write_descriptor_value_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_gatt_server_set_capabilities_s
+PACKSTRUCT( struct sl_bt_rsp_gattdb_new_session_s
+{
+    uint16_t            result;
+    uint16_t            session;
+});
+
+typedef struct sl_bt_rsp_gattdb_new_session_s sl_bt_rsp_gattdb_new_session_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_service_s
+{
+    uint16_t            result;
+    uint16_t            service;
+});
+
+typedef struct sl_bt_rsp_gattdb_add_service_s sl_bt_rsp_gattdb_add_service_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_remove_service_s
 {
     uint16_t            result;
 });
 
-typedef struct sl_bt_rsp_gatt_server_set_capabilities_s sl_bt_rsp_gatt_server_set_capabilities_t;
+typedef struct sl_bt_rsp_gattdb_remove_service_s sl_bt_rsp_gattdb_remove_service_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_gatt_server_enable_capabilities_s
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_included_service_s
+{
+    uint16_t            result;
+    uint16_t            attribute;
+});
+
+typedef struct sl_bt_rsp_gattdb_add_included_service_s sl_bt_rsp_gattdb_add_included_service_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_remove_included_service_s
 {
     uint16_t            result;
 });
 
-typedef struct sl_bt_rsp_gatt_server_enable_capabilities_s sl_bt_rsp_gatt_server_enable_capabilities_t;
+typedef struct sl_bt_rsp_gattdb_remove_included_service_s sl_bt_rsp_gattdb_remove_included_service_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_gatt_server_disable_capabilities_s
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_uuid16_characteristic_s
+{
+    uint16_t            result;
+    uint16_t            characteristic;
+});
+
+typedef struct sl_bt_rsp_gattdb_add_uuid16_characteristic_s sl_bt_rsp_gattdb_add_uuid16_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_uuid128_characteristic_s
+{
+    uint16_t            result;
+    uint16_t            characteristic;
+});
+
+typedef struct sl_bt_rsp_gattdb_add_uuid128_characteristic_s sl_bt_rsp_gattdb_add_uuid128_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_remove_characteristic_s
 {
     uint16_t            result;
 });
 
-typedef struct sl_bt_rsp_gatt_server_disable_capabilities_s sl_bt_rsp_gatt_server_disable_capabilities_t;
+typedef struct sl_bt_rsp_gattdb_remove_characteristic_s sl_bt_rsp_gattdb_remove_characteristic_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_gatt_server_get_enabled_capabilities_s
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_uuid16_descriptor_s
 {
     uint16_t            result;
-    uint32_t            caps;
+    uint16_t            descriptor;
 });
 
-typedef struct sl_bt_rsp_gatt_server_get_enabled_capabilities_s sl_bt_rsp_gatt_server_get_enabled_capabilities_t;
+typedef struct sl_bt_rsp_gattdb_add_uuid16_descriptor_s sl_bt_rsp_gattdb_add_uuid16_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_add_uuid128_descriptor_s
+{
+    uint16_t            result;
+    uint16_t            descriptor;
+});
+
+typedef struct sl_bt_rsp_gattdb_add_uuid128_descriptor_s sl_bt_rsp_gattdb_add_uuid128_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_remove_descriptor_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_remove_descriptor_s sl_bt_rsp_gattdb_remove_descriptor_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_start_service_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_start_service_s sl_bt_rsp_gattdb_start_service_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_stop_service_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_stop_service_s sl_bt_rsp_gattdb_stop_service_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_start_characteristic_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_start_characteristic_s sl_bt_rsp_gattdb_start_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_stop_characteristic_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_stop_characteristic_s sl_bt_rsp_gattdb_stop_characteristic_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_commit_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_commit_s sl_bt_rsp_gattdb_commit_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gattdb_abort_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gattdb_abort_s sl_bt_rsp_gattdb_abort_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_gatt_server_set_max_mtu_s
@@ -2156,6 +2523,48 @@ PACKSTRUCT( struct sl_bt_rsp_gatt_server_send_user_prepare_write_response_s
 });
 
 typedef struct sl_bt_rsp_gatt_server_send_user_prepare_write_response_s sl_bt_rsp_gatt_server_send_user_prepare_write_response_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_set_capabilities_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gatt_server_set_capabilities_s sl_bt_rsp_gatt_server_set_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_enable_capabilities_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gatt_server_enable_capabilities_s sl_bt_rsp_gatt_server_enable_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_disable_capabilities_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_gatt_server_disable_capabilities_s sl_bt_rsp_gatt_server_disable_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_get_enabled_capabilities_s
+{
+    uint16_t            result;
+    uint32_t            caps;
+});
+
+typedef struct sl_bt_rsp_gatt_server_get_enabled_capabilities_s sl_bt_rsp_gatt_server_get_enabled_capabilities_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_gatt_server_read_client_supported_features_s
+{
+    uint16_t            result;
+    uint8_t             client_features;
+});
+
+typedef struct sl_bt_rsp_gatt_server_read_client_supported_features_s sl_bt_rsp_gatt_server_read_client_supported_features_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_nvm_save_s
@@ -2358,6 +2767,73 @@ PACKSTRUCT( struct sl_bt_rsp_sm_delete_bondings_s
 });
 
 typedef struct sl_bt_rsp_sm_delete_bondings_s sl_bt_rsp_sm_delete_bondings_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_get_bonding_handles_s
+{
+    uint16_t            result;
+    uint32_t            num_bondings;
+    uint8array          bondings;
+});
+
+typedef struct sl_bt_rsp_sm_get_bonding_handles_s sl_bt_rsp_sm_get_bonding_handles_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_get_bonding_details_s
+{
+    uint16_t            result;
+    bd_addr             address;
+    uint8_t             address_type;
+    uint8_t             security_mode;
+    uint8_t             key_size;
+});
+
+typedef struct sl_bt_rsp_sm_get_bonding_details_s sl_bt_rsp_sm_get_bonding_details_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_find_bonding_by_address_s
+{
+    uint16_t            result;
+    uint32_t            bonding;
+    uint8_t             security_mode;
+    uint8_t             key_size;
+});
+
+typedef struct sl_bt_rsp_sm_find_bonding_by_address_s sl_bt_rsp_sm_find_bonding_by_address_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_set_bonding_key_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sm_set_bonding_key_s sl_bt_rsp_sm_set_bonding_key_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_set_legacy_oob_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sm_set_legacy_oob_s sl_bt_rsp_sm_set_legacy_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_set_oob_s
+{
+    uint16_t            result;
+    aes_key_128         random;
+    aes_key_128         confirm;
+});
+
+typedef struct sl_bt_rsp_sm_set_oob_s sl_bt_rsp_sm_set_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_set_remote_oob_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sm_set_remote_oob_s sl_bt_rsp_sm_set_remote_oob_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_ota_set_device_name_s
@@ -2714,6 +3190,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_connection_get_tx_power_t                          cmd_connection_get_tx_power;
     sl_bt_cmd_connection_get_remote_tx_power_t                   cmd_connection_get_remote_tx_power;
     sl_bt_cmd_connection_close_t                                 cmd_connection_close;
+    sl_bt_cmd_connection_read_remote_used_features_t             cmd_connection_read_remote_used_features;
     sl_bt_cmd_gatt_set_max_mtu_t                                 cmd_gatt_set_max_mtu;
     sl_bt_cmd_gatt_discover_primary_services_t                   cmd_gatt_discover_primary_services;
     sl_bt_cmd_gatt_discover_primary_services_by_uuid_t           cmd_gatt_discover_primary_services_by_uuid;
@@ -2734,9 +3211,22 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_gatt_execute_characteristic_value_write_t          cmd_gatt_execute_characteristic_value_write;
     sl_bt_cmd_gatt_read_descriptor_value_t                       cmd_gatt_read_descriptor_value;
     sl_bt_cmd_gatt_write_descriptor_value_t                      cmd_gatt_write_descriptor_value;
-    sl_bt_cmd_gatt_server_set_capabilities_t                     cmd_gatt_server_set_capabilities;
-    sl_bt_cmd_gatt_server_enable_capabilities_t                  cmd_gatt_server_enable_capabilities;
-    sl_bt_cmd_gatt_server_disable_capabilities_t                 cmd_gatt_server_disable_capabilities;
+    sl_bt_cmd_gattdb_add_service_t                               cmd_gattdb_add_service;
+    sl_bt_cmd_gattdb_remove_service_t                            cmd_gattdb_remove_service;
+    sl_bt_cmd_gattdb_add_included_service_t                      cmd_gattdb_add_included_service;
+    sl_bt_cmd_gattdb_remove_included_service_t                   cmd_gattdb_remove_included_service;
+    sl_bt_cmd_gattdb_add_uuid16_characteristic_t                 cmd_gattdb_add_uuid16_characteristic;
+    sl_bt_cmd_gattdb_add_uuid128_characteristic_t                cmd_gattdb_add_uuid128_characteristic;
+    sl_bt_cmd_gattdb_remove_characteristic_t                     cmd_gattdb_remove_characteristic;
+    sl_bt_cmd_gattdb_add_uuid16_descriptor_t                     cmd_gattdb_add_uuid16_descriptor;
+    sl_bt_cmd_gattdb_add_uuid128_descriptor_t                    cmd_gattdb_add_uuid128_descriptor;
+    sl_bt_cmd_gattdb_remove_descriptor_t                         cmd_gattdb_remove_descriptor;
+    sl_bt_cmd_gattdb_start_service_t                             cmd_gattdb_start_service;
+    sl_bt_cmd_gattdb_stop_service_t                              cmd_gattdb_stop_service;
+    sl_bt_cmd_gattdb_start_characteristic_t                      cmd_gattdb_start_characteristic;
+    sl_bt_cmd_gattdb_stop_characteristic_t                       cmd_gattdb_stop_characteristic;
+    sl_bt_cmd_gattdb_commit_t                                    cmd_gattdb_commit;
+    sl_bt_cmd_gattdb_abort_t                                     cmd_gattdb_abort;
     sl_bt_cmd_gatt_server_set_max_mtu_t                          cmd_gatt_server_set_max_mtu;
     sl_bt_cmd_gatt_server_get_mtu_t                              cmd_gatt_server_get_mtu;
     sl_bt_cmd_gatt_server_find_attribute_t                       cmd_gatt_server_find_attribute;
@@ -2751,6 +3241,10 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_gatt_server_notify_all_t                           cmd_gatt_server_notify_all;
     sl_bt_cmd_gatt_server_read_client_configuration_t            cmd_gatt_server_read_client_configuration;
     sl_bt_cmd_gatt_server_send_user_prepare_write_response_t     cmd_gatt_server_send_user_prepare_write_response;
+    sl_bt_cmd_gatt_server_set_capabilities_t                     cmd_gatt_server_set_capabilities;
+    sl_bt_cmd_gatt_server_enable_capabilities_t                  cmd_gatt_server_enable_capabilities;
+    sl_bt_cmd_gatt_server_disable_capabilities_t                 cmd_gatt_server_disable_capabilities;
+    sl_bt_cmd_gatt_server_read_client_supported_features_t       cmd_gatt_server_read_client_supported_features;
     sl_bt_cmd_nvm_save_t                                         cmd_nvm_save;
     sl_bt_cmd_nvm_load_t                                         cmd_nvm_load;
     sl_bt_cmd_nvm_erase_t                                        cmd_nvm_erase;
@@ -2771,6 +3265,13 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_sm_passkey_confirm_t                               cmd_sm_passkey_confirm;
     sl_bt_cmd_sm_bonding_confirm_t                               cmd_sm_bonding_confirm;
     sl_bt_cmd_sm_delete_bonding_t                                cmd_sm_delete_bonding;
+    sl_bt_cmd_sm_get_bonding_handles_t                           cmd_sm_get_bonding_handles;
+    sl_bt_cmd_sm_get_bonding_details_t                           cmd_sm_get_bonding_details;
+    sl_bt_cmd_sm_find_bonding_by_address_t                       cmd_sm_find_bonding_by_address;
+    sl_bt_cmd_sm_set_bonding_key_t                               cmd_sm_set_bonding_key;
+    sl_bt_cmd_sm_set_legacy_oob_t                                cmd_sm_set_legacy_oob;
+    sl_bt_cmd_sm_set_oob_t                                       cmd_sm_set_oob;
+    sl_bt_cmd_sm_set_remote_oob_t                                cmd_sm_set_remote_oob;
     sl_bt_cmd_ota_set_device_name_t                              cmd_ota_set_device_name;
     sl_bt_cmd_ota_set_advertising_data_t                         cmd_ota_set_advertising_data;
     sl_bt_cmd_ota_set_configuration_t                            cmd_ota_set_configuration;
@@ -2862,6 +3363,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_connection_get_tx_power_t                          rsp_connection_get_tx_power;
     sl_bt_rsp_connection_get_remote_tx_power_t                   rsp_connection_get_remote_tx_power;
     sl_bt_rsp_connection_close_t                                 rsp_connection_close;
+    sl_bt_rsp_connection_read_remote_used_features_t             rsp_connection_read_remote_used_features;
     sl_bt_rsp_gatt_set_max_mtu_t                                 rsp_gatt_set_max_mtu;
     sl_bt_rsp_gatt_discover_primary_services_t                   rsp_gatt_discover_primary_services;
     sl_bt_rsp_gatt_discover_primary_services_by_uuid_t           rsp_gatt_discover_primary_services_by_uuid;
@@ -2882,10 +3384,23 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_gatt_execute_characteristic_value_write_t          rsp_gatt_execute_characteristic_value_write;
     sl_bt_rsp_gatt_read_descriptor_value_t                       rsp_gatt_read_descriptor_value;
     sl_bt_rsp_gatt_write_descriptor_value_t                      rsp_gatt_write_descriptor_value;
-    sl_bt_rsp_gatt_server_set_capabilities_t                     rsp_gatt_server_set_capabilities;
-    sl_bt_rsp_gatt_server_enable_capabilities_t                  rsp_gatt_server_enable_capabilities;
-    sl_bt_rsp_gatt_server_disable_capabilities_t                 rsp_gatt_server_disable_capabilities;
-    sl_bt_rsp_gatt_server_get_enabled_capabilities_t             rsp_gatt_server_get_enabled_capabilities;
+    sl_bt_rsp_gattdb_new_session_t                               rsp_gattdb_new_session;
+    sl_bt_rsp_gattdb_add_service_t                               rsp_gattdb_add_service;
+    sl_bt_rsp_gattdb_remove_service_t                            rsp_gattdb_remove_service;
+    sl_bt_rsp_gattdb_add_included_service_t                      rsp_gattdb_add_included_service;
+    sl_bt_rsp_gattdb_remove_included_service_t                   rsp_gattdb_remove_included_service;
+    sl_bt_rsp_gattdb_add_uuid16_characteristic_t                 rsp_gattdb_add_uuid16_characteristic;
+    sl_bt_rsp_gattdb_add_uuid128_characteristic_t                rsp_gattdb_add_uuid128_characteristic;
+    sl_bt_rsp_gattdb_remove_characteristic_t                     rsp_gattdb_remove_characteristic;
+    sl_bt_rsp_gattdb_add_uuid16_descriptor_t                     rsp_gattdb_add_uuid16_descriptor;
+    sl_bt_rsp_gattdb_add_uuid128_descriptor_t                    rsp_gattdb_add_uuid128_descriptor;
+    sl_bt_rsp_gattdb_remove_descriptor_t                         rsp_gattdb_remove_descriptor;
+    sl_bt_rsp_gattdb_start_service_t                             rsp_gattdb_start_service;
+    sl_bt_rsp_gattdb_stop_service_t                              rsp_gattdb_stop_service;
+    sl_bt_rsp_gattdb_start_characteristic_t                      rsp_gattdb_start_characteristic;
+    sl_bt_rsp_gattdb_stop_characteristic_t                       rsp_gattdb_stop_characteristic;
+    sl_bt_rsp_gattdb_commit_t                                    rsp_gattdb_commit;
+    sl_bt_rsp_gattdb_abort_t                                     rsp_gattdb_abort;
     sl_bt_rsp_gatt_server_set_max_mtu_t                          rsp_gatt_server_set_max_mtu;
     sl_bt_rsp_gatt_server_get_mtu_t                              rsp_gatt_server_get_mtu;
     sl_bt_rsp_gatt_server_find_attribute_t                       rsp_gatt_server_find_attribute;
@@ -2900,6 +3415,11 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_gatt_server_notify_all_t                           rsp_gatt_server_notify_all;
     sl_bt_rsp_gatt_server_read_client_configuration_t            rsp_gatt_server_read_client_configuration;
     sl_bt_rsp_gatt_server_send_user_prepare_write_response_t     rsp_gatt_server_send_user_prepare_write_response;
+    sl_bt_rsp_gatt_server_set_capabilities_t                     rsp_gatt_server_set_capabilities;
+    sl_bt_rsp_gatt_server_enable_capabilities_t                  rsp_gatt_server_enable_capabilities;
+    sl_bt_rsp_gatt_server_disable_capabilities_t                 rsp_gatt_server_disable_capabilities;
+    sl_bt_rsp_gatt_server_get_enabled_capabilities_t             rsp_gatt_server_get_enabled_capabilities;
+    sl_bt_rsp_gatt_server_read_client_supported_features_t       rsp_gatt_server_read_client_supported_features;
     sl_bt_rsp_nvm_save_t                                         rsp_nvm_save;
     sl_bt_rsp_nvm_load_t                                         rsp_nvm_load;
     sl_bt_rsp_nvm_erase_t                                        rsp_nvm_erase;
@@ -2925,6 +3445,13 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_sm_list_all_bondings_t                             rsp_sm_list_all_bondings;
     sl_bt_rsp_sm_delete_bonding_t                                rsp_sm_delete_bonding;
     sl_bt_rsp_sm_delete_bondings_t                               rsp_sm_delete_bondings;
+    sl_bt_rsp_sm_get_bonding_handles_t                           rsp_sm_get_bonding_handles;
+    sl_bt_rsp_sm_get_bonding_details_t                           rsp_sm_get_bonding_details;
+    sl_bt_rsp_sm_find_bonding_by_address_t                       rsp_sm_find_bonding_by_address;
+    sl_bt_rsp_sm_set_bonding_key_t                               rsp_sm_set_bonding_key;
+    sl_bt_rsp_sm_set_legacy_oob_t                                rsp_sm_set_legacy_oob;
+    sl_bt_rsp_sm_set_oob_t                                       rsp_sm_set_oob;
+    sl_bt_rsp_sm_set_remote_oob_t                                rsp_sm_set_remote_oob;
     sl_bt_rsp_ota_set_device_name_t                              rsp_ota_set_device_name;
     sl_bt_rsp_ota_set_advertising_data_t                         rsp_ota_set_advertising_data;
     sl_bt_rsp_ota_set_configuration_t                            rsp_ota_set_configuration;
@@ -2983,6 +3510,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_connection_tx_power_t                              evt_connection_tx_power;
     sl_bt_evt_connection_remote_tx_power_t                       evt_connection_remote_tx_power;
     sl_bt_evt_connection_closed_t                                evt_connection_closed;
+    sl_bt_evt_connection_remote_used_features_t                  evt_connection_remote_used_features;
     sl_bt_evt_gatt_mtu_exchanged_t                               evt_gatt_mtu_exchanged;
     sl_bt_evt_gatt_service_t                                     evt_gatt_service;
     sl_bt_evt_gatt_characteristic_t                              evt_gatt_characteristic;

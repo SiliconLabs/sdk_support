@@ -71,7 +71,7 @@ extern "C" {
 
 #ifndef SL_BT_TYPE_UINT8ARRARY
 #define SL_BT_TYPE_UINT8ARRARY
-/** @brief Variable-length uint8_t array */
+/** @brief Variable-length uint8_t array. Maximum length: 255 */
 typedef struct {
   uint8_t len;    /**< Number of bytes stored in @p data */
   uint8_t data[]; /**< Data bytes*/
@@ -80,7 +80,7 @@ typedef struct {
 
 #ifndef SL_BT_TYPE_BYTE_ARRARY
 #define SL_BT_TYPE_BYTE_ARRARY
-/** @brief Variable-length int8_t array */
+/** @brief Variable-length int8_t array. Maximum length: 65535 */
 typedef struct {
   uint16_t len;    /**< Number of bytes stored in @p data */
   int8_t   data[]; /**< Data bytes*/
@@ -111,11 +111,19 @@ typedef struct {
 } aes_key_128;
 #endif
 
+#ifndef SL_BT_TYPE_UUID16
+#define SL_BT_TYPE_UUID16
+/** @brief 16-bit UUID */
+typedef struct {
+  uint8_t data[2]; /**< 16-bit UUID */
+} sl_bt_uuid_16_t;
+#endif
+
 #ifndef SL_BT_TYPE_UUID64
 #define SL_BT_TYPE_UUID64
 /** @brief 64-bit UUID */
 typedef struct {
-  uint8_t data[8]; /**< 128-bit UUID */
+  uint8_t data[8]; /**< 64-bit UUID */
 } sl_bt_uuid_64_t;
 #endif
 

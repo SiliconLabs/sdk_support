@@ -7,7 +7,7 @@ category: "Bluetooth|Stack|Direction Finding"
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
-  - name: bluetooth_stack
+  - name: bluetooth_controller
   - name: device_supports_bluetooth_cte
   - name: device_supports_bluetooth_iq_sampling
   - name: device_supports_bluetooth_antenna_switching

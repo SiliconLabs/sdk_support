@@ -3,16 +3,23 @@ label:  "Connection"
 package: "Bluetooth"
 description: >
   Bluetooth connection feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bluetooth_connection_config.h"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
 provides:
   - name: "bluetooth_feature_connection"
+validation_helper:
+  - path: "component/bluetooth_feature_connection_validate.py"
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_connection
+  - name: bluetooth_controller_init
+    value:
+      include: "sl_bluetooth_connection_config.h"
   - name: bluetooth_bgapi_class
     value:
       class: "connection"

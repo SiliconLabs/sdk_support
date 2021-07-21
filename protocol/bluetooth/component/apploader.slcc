@@ -372,7 +372,7 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_efr32mg22"
-#EFR32MG22
+#MGM22
   - path: "lib/EFR32MG22/GCC/binapploader.o"
     condition:
       - "toolchain_gcc"
@@ -381,6 +381,24 @@ library:
     condition:
       - "toolchain_iar"
       - "device_family_mgm22"
+#EFR32MG24
+  - path: "lib/EFR32MG24/GCC/binapploader.o"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_efr32mg24"
+  - path: "lib/EFR32MG24/IAR/binapploader.o"
+    condition:
+      - "toolchain_iar"
+      - "device_family_efr32mg24"
+#MGM24
+  - path: "lib/EFR32MG24/GCC/binapploader.o"
+    condition:
+      - "toolchain_gcc"
+      - "device_family_mgm24"
+  - path: "lib/EFR32MG24/IAR/binapploader.o"
+    condition:
+      - "toolchain_iar"
+      - "device_family_mgm24"
 provides:
   - name: "apploader"
 template_contribution:

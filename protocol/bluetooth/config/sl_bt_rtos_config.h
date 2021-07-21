@@ -37,7 +37,7 @@
 // <i> handler task must have the lowest priority in these three Bluetooth RTOS tasks.
 #define SL_BT_RTOS_EVENT_HANDLER_TASK_PRIORITY  (50)
 
-// <o SL_BT_RTOS_EVENT_HANDLER_TASK_STACK_SIZE> Bluetooth event handler task stack size in bytes
+// <o SL_BT_RTOS_EVENT_HANDLER_STACK_SIZE> Bluetooth event handler task stack size in bytes
 // <i> Default: 1000
 // <i> Define the stack size of the Bluetooth event handler task. The value is in bytes
 // <i> and will be word aligned when it is applied at the task creation.

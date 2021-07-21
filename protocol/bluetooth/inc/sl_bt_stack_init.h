@@ -41,6 +41,8 @@ extern const struct sli_bgapi_class sli_bgapi_class_bt_connection_optimized;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_connection_full;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_optimized;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_full;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gattdb_optimized;
+extern const struct sli_bgapi_class sli_bgapi_class_bt_gattdb_full;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_server_optimized;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_gatt_server_full;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_nvm_optimized;
@@ -62,9 +64,9 @@ extern const struct sli_bgapi_class sli_bgapi_class_bt_cte_receiver_full;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_memory_profiler_optimized;
 extern const struct sli_bgapi_class sli_bgapi_class_bt_memory_profiler_full;
 
-extern void ll_initAFH();
-extern void ll_initPeriodicAdv();
-extern void ll_connSchAlgorithmEvenEnable();
+extern void sl_btctrl_init_afh(uint32_t flags);
+extern void sl_btctrl_init_periodic_adv();
+extern void sl_btctrl_enable_even_connsch();
 extern void sli_bt_init_periodic_advertising();
 extern void sli_bt_init_whitelisting();
 extern void sl_memory_profiler_init();
@@ -130,7 +132,7 @@ void sl_bt_init_multiprotocol();
  */
 static inline void sl_bt_init_afh()
 {
-  ll_initAFH();
+  sl_btctrl_init_afh(1);
 }
 
 /**
@@ -142,7 +144,7 @@ static inline void sl_bt_init_afh()
  */
 static inline void sl_bt_enable_even_scheduling()
 {
-  ll_connSchAlgorithmEvenEnable();
+  sl_btctrl_enable_even_connsch();
 }
 
 /**
@@ -154,7 +156,7 @@ static inline void sl_bt_enable_even_scheduling()
  */
 static inline void sl_bt_init_periodic_advertising()
 {
-  ll_initPeriodicAdv();
+  sl_btctrl_init_periodic_adv();
   sli_bt_init_periodic_advertising();
 }
 

@@ -119,42 +119,87 @@ static const osMutexAttr_t bgapi_mutex_attr = {
   .cb_size = osMutexCbSize
 };
 
+static void sl_bt_rtos_deinit()
+{
+  (void) osEventFlagsDelete(bluetooth_event_flags);
+  bluetooth_event_flags = NULL;
+  (void) osMutexDelete(bluetooth_mutex_id);
+  bluetooth_mutex_id = NULL;
+  (void) osMutexDelete(bgapi_mutex_id);
+  bgapi_mutex_id = NULL;
+  (void) osThreadTerminate(tid_thread_bluetooth);
+  tid_thread_bluetooth = NULL;
+  (void) osThreadTerminate(tid_thread_link_layer);
+  tid_thread_link_layer = NULL;
+#ifndef SL_BT_DISABLE_EVENT_TASK
+  (void) osThreadTerminate(tid_thread_event_handler);
+  tid_thread_event_handler = NULL;
+#endif
+}
+
 sl_status_t sl_bt_rtos_init()
 {
-  bluetooth_event_flags = osEventFlagsNew(&bluetooth_event_flags_attr);
-  bluetooth_mutex_id = osMutexNew(&bluetooth_mutex_attr);
-  bgapi_mutex_id = osMutexNew(&bgapi_mutex_attr);
+  // Create event flags
+  if (bluetooth_event_flags == NULL) {
+    bluetooth_event_flags = osEventFlagsNew(&bluetooth_event_flags_attr);
+  }
+  if (bluetooth_event_flags == NULL) {
+    goto failed;
+  }
+
+  // Create mutex for Bluetooth stack
+  if (bluetooth_mutex_id == NULL) {
+    bluetooth_mutex_id = osMutexNew(&bluetooth_mutex_attr);
+  }
+  if (bluetooth_mutex_id == NULL) {
+    goto failed;
+  }
+
+  // Create mutex for BGAPI
+  if (bgapi_mutex_id == NULL) {
+    bgapi_mutex_id = osMutexNew(&bgapi_mutex_attr);
+  }
+  if (bgapi_mutex_id == NULL) {
+    goto failed;
+  }
 
   sli_bgapi_set_cmd_handler_delegate(sli_bt_cmd_handler_rtos_delegate);
 
   // Create thread for Bluetooth stack
-  tid_thread_bluetooth = osThreadNew(bluetooth_thread,
-                                     NULL,
-                                     &thread_bluetooth_attr);
+  if (tid_thread_bluetooth == NULL) {
+    tid_thread_bluetooth = osThreadNew(bluetooth_thread,
+                                       NULL,
+                                       &thread_bluetooth_attr);
+  }
+  if (tid_thread_bluetooth == NULL) {
+    goto failed;
+  }
 
   // Create thread for Linklayer
-  tid_thread_link_layer = osThreadNew(linklayer_thread,
-                                      NULL,
-                                      &thread_Linklayer_attr);
+  if (tid_thread_link_layer == NULL) {
+    tid_thread_link_layer = osThreadNew(linklayer_thread,
+                                        NULL,
+                                        &thread_Linklayer_attr);
+  }
+  if (tid_thread_link_layer == NULL) {
+    goto failed;
+  }
 
   // Create thread for Bluetooth event handler
 #ifndef SL_BT_DISABLE_EVENT_TASK
-  tid_thread_event_handler = osThreadNew(event_handler_thread,
-                                         NULL,
-                                         &thread_event_handler_attr);
-#endif
-
-  if (bluetooth_event_flags == NULL
-      || bluetooth_mutex_id == NULL
-      || bgapi_mutex_id == NULL
-      || tid_thread_bluetooth == NULL
-#ifndef SL_BT_DISABLE_EVENT_TASK
-      || tid_thread_event_handler == NULL
-#endif
-      || tid_thread_link_layer == NULL) {
-    return SL_STATUS_FAIL;
+  if (tid_thread_event_handler == NULL) {
+    tid_thread_event_handler = osThreadNew(event_handler_thread,
+                                           NULL,
+                                           &thread_event_handler_attr);
   }
+  if (tid_thread_event_handler == NULL) {
+    goto failed;
+  }
+#endif
   return SL_STATUS_OK;
+  failed:
+  sl_bt_rtos_deinit();
+  return SL_STATUS_FAIL;
 }
 
 //This callback is called from interrupt context (Kernel Aware)
@@ -250,7 +295,7 @@ static void linklayer_thread(void *p_arg)
 
 // Event task, this calls the application code
 #ifndef SL_BT_DISABLE_EVENT_TASK
-void event_handler_thread(void *p_arg)
+static void event_handler_thread(void *p_arg)
 {
   (void)p_arg;
 

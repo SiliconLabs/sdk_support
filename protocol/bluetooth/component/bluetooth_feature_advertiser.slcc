@@ -3,14 +3,21 @@ label: "Advertiser"
 package: "Bluetooth"
 description: >
   Bluetooth Low Energy advertising feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
+config_file:
+  - path: "config/sl_bluetooth_advertiser_config.h"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
 provides:
   - name: "bluetooth_feature_advertiser"
 template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_advertiser
+  - name: bluetooth_controller_init
+    value:
+      include: "sl_bluetooth_advertiser_config.h"
   - name: bluetooth_bgapi_class
     value:
       class: "advertiser"

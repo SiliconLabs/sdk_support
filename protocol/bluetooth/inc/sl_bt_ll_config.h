@@ -39,6 +39,8 @@ typedef struct {
 #define SL_BT_BLUETOOTH_PA_AUTOMODE 0xff
 
 typedef struct {
+  uint8_t activate_power_control;
+
   int8_t golden_rssi_min_1m; //<! Golden range lowest RSSI for 1M PHY.
   int8_t golden_rssi_max_1m; //<! Golden range highest RSSI for 1M PHY.
 

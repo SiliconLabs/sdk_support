@@ -3,11 +3,15 @@ label: "Periodic Advertising"
 package: "Bluetooth"
 description: >
   Bluetooth periodic advertising feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
+config_file:
+  - path: "config/sl_bluetooth_periodic_adv_config.h"
+    unless: 
+      - "bluetooth_stack"
 provides:
   - name: "bluetooth_feature_periodic_adv"
 template_contribution:
@@ -19,3 +23,8 @@ template_contribution:
     priority: 10
     unless:
       - "device_sdid_80"
+  - name: bluetooth_controller_init
+    value:
+      include: "sl_bluetooth_periodic_adv_config.h"
+      function: "sl_btctrl_alloc_periodic_adv(SL_BT_CONFIG_MAX_PERIODIC_ADVERTISERS);sl_btctrl_init_periodic_adv()"
+    priority: 10

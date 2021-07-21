@@ -92,8 +92,6 @@
 #define SL_BT_API_QUEUE_LEN 30
 #endif
 
-#define SL_BT_API_DEFINE()
-
 /**
  * Structure defining a device type and the event queue where events of that
  * type should be stored.
@@ -108,35 +106,52 @@ typedef struct {
 
 extern bgapi_device_type_queue_t sl_bt_api_queue;
 
-void sli_bgapi_register_device(bgapi_device_type_queue_t *queue);
+sl_status_t sli_bgapi_register_device(bgapi_device_type_queue_t *queue);
 bool sli_bgapi_device_queue_has_events(bgapi_device_type_queue_t *device_queue);
 bool sli_bgapi_other_events_in_queue(enum sl_bgapi_dev_types my_device_type);
 sl_status_t sli_bgapi_get_event(int block, sl_bt_msg_t *event, bgapi_device_type_queue_t *device_queue);
 
 /**
- * Initialize SL_BT_API
- * @param OFUNC
- * @param IFUNC
+ * Function that sends a message to the serial port.
+ *
+ * @param msg_len Length of the message
+ * @param msg_data The message data
  */
-#define SL_BT_API_INITIALIZE(OFUNC, IFUNC)          \
-  do { sl_bt_api_output = OFUNC;                    \
-       sl_bt_api_input = IFUNC;                     \
-       sl_bt_api_peek = NULL;                       \
-       sli_bgapi_register_device(&sl_bt_api_queue); \
-  } while (0)
+typedef void(*tx_func)(uint32_t msg_len, uint8_t* msg_data);
 
 /**
- * Initialize SL_BT_API to support nonblocking mode
- * @param OFUNC
- * @param IFUNC
- * @param PFUNC peek function to check if there is data to be read from UART
+ *  @brief Function that reads data from serial port.
+ *
+ *  @param[in]  dataLength The amount of bytes to read.
+ *  @param[out] data Buffer used for storing the data.
+ *  @return  The amount of bytes read or -1 on failure.
  */
-#define SL_BT_API_INITIALIZE_NONBLOCK(OFUNC, IFUNC, PFUNC) \
-  do { sl_bt_api_output = OFUNC;                           \
-       sl_bt_api_input = IFUNC;                            \
-       sl_bt_api_peek = PFUNC;                             \
-       sli_bgapi_register_device(&sl_bt_api_queue);        \
-  } while (0)
+typedef int32_t(*rx_func)(uint32_t dataLength, uint8_t* data);
+
+/**
+ * @brief  Returns the number of bytes in the input buffer.
+ * @return The number of bytes in the input buffer or -1 on failure.
+ */
+typedef int32_t(*rx_peek_func)(void);
+
+/**
+ * Initialize NCP host Bluetooth API.
+ *
+ * @param ofunc The function for sending api messages
+ * @param ifunc The function for receiving api messages
+ * @return Status code
+ */
+sl_status_t sl_bt_api_initialize(tx_func ofunc, rx_func ifunc);
+
+/**
+ * Initialize NCP host Bluetooth API.
+ *
+ * @param ofunc The function for sending api messages
+ * @param ifunc The function for receiving api messages
+ * @param pfunc The function for getting the number of bytes in the input buffer
+ * @return Status code
+ */
+sl_status_t sl_bt_api_initialize_nonblock(tx_func ofunc, rx_func ifunc, rx_peek_func pfunc);
 
 extern void(*sl_bt_api_output)(uint32_t len1, uint8_t* data1);
 extern int32_t (*sl_bt_api_input)(uint32_t len1, uint8_t* data1);

@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<!--Build Version : -->
+<!--Build Version v3.2.0 -->
 <api device_id="4" device_name="bt">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
@@ -19,11 +19,13 @@
         <datatype base="uint32" name="service"/>
         <datatype base="uint16" name="characteristic"/>
         <datatype base="uint16" name="descriptor"/>
+        <datatype base="uint16" name="attribute_handle"/>
         <datatype base="uint8array" name="uuid"/>
         <datatype base="uint8" name="att_errorcode"/>
         <datatype base="uint8" name="att_opcode"/>
         <datatype base="uuid_128" name="uuid_128"/>
         <datatype base="aes_key_128" name="aes_key_128"/>
+        <datatype base="sl_bt_uuid_16_t" name="uuid_16"/>
         <datatype base="sl_bt_uuid_64_t" name="uuid_64"/>
         <datatype base="int64" name="int64"/>
         <datatype base="uint64" name="uint64"/>
@@ -260,19 +262,19 @@
             </params>
         </event>
         <enums name="boot_mode">
-            <enum name="boot_mode_normal" value="0"/>
-            <enum name="boot_mode_uart_dfu" value="1"/>
-            <enum name="boot_mode_ota_dfu" value="2"/>
+            <enum name="boot_mode_normal" value="0x0"/>
+            <enum name="boot_mode_uart_dfu" value="0x1"/>
+            <enum name="boot_mode_ota_dfu" value="0x2"/>
         </enums>
         <enums name="linklayer_config_key">
-            <enum name="linklayer_config_key_halt" value="1"/>
-            <enum name="linklayer_config_key_priority_range" value="2"/>
-            <enum name="linklayer_config_key_scan_channels" value="3"/>
-            <enum name="linklayer_config_key_set_flags" value="4"/>
-            <enum name="linklayer_config_key_clr_flags" value="5"/>
-            <enum name="linklayer_config_key_set_afh_interval" value="7"/>
-            <enum name="linklayer_config_key_set_priority_table" value="9"/>
-            <enum name="linklayer_config_key_power_control_golden_range" value="10"/>
+            <enum name="linklayer_config_key_halt" value="0x1"/>
+            <enum name="linklayer_config_key_priority_range" value="0x2"/>
+            <enum name="linklayer_config_key_scan_channels" value="0x3"/>
+            <enum name="linklayer_config_key_set_flags" value="0x4"/>
+            <enum name="linklayer_config_key_clr_flags" value="0x5"/>
+            <enum name="linklayer_config_key_set_afh_interval" value="0x7"/>
+            <enum name="linklayer_config_key_set_priority_table" value="0x9"/>
+            <enum name="linklayer_config_key_power_control_golden_range" value="0xa"/>
         </enums>
     </class>
     <class index="2" name="gap">
@@ -302,22 +304,22 @@
             </returns>
         </command>
         <enums name="address_type">
-            <enum name="public_address" value="0"/>
-            <enum name="static_address" value="1"/>
-            <enum name="random_resolvable_address" value="2"/>
-            <enum name="random_nonresolvable_address" value="3"/>
+            <enum name="public_address" value="0x0"/>
+            <enum name="static_address" value="0x1"/>
+            <enum name="random_resolvable_address" value="0x2"/>
+            <enum name="random_nonresolvable_address" value="0x3"/>
         </enums>
         <enums name="phy_type">
-            <enum name="1m_phy" value="1"/>
-            <enum name="2m_phy" value="2"/>
-            <enum name="coded_phy" value="4"/>
-            <enum name="any_phys" value="0"/>
+            <enum name="1m_phy" value="0x1"/>
+            <enum name="2m_phy" value="0x2"/>
+            <enum name="coded_phy" value="0x4"/>
+            <enum name="any_phys" value="0xff"/>
         </enums>
         <enums name="phy_and_coding_type">
-            <enum name="1m_phy_uncoded" value="1"/>
-            <enum name="2m_phy_uncoded" value="2"/>
-            <enum name="coded_phy_125k" value="4"/>
-            <enum name="coded_phy_500k" value="8"/>
+            <enum name="1m_phy_uncoded" value="0x1"/>
+            <enum name="2m_phy_uncoded" value="0x2"/>
+            <enum name="coded_phy_125k" value="0x4"/>
+            <enum name="coded_phy_500k" value="0x8"/>
         </enums>
     </class>
     <class index="4" name="advertiser">
@@ -499,22 +501,22 @@
             </params>
         </event>
         <enums name="connectable_mode">
-            <enum name="non_connectable" value="0"/>
-            <enum name="directed_connectable" value="1"/>
-            <enum name="connectable_scannable" value="2"/>
-            <enum name="scannable_non_connectable" value="3"/>
-            <enum name="connectable_non_scannable" value="4"/>
+            <enum name="non_connectable" value="0x0"/>
+            <enum name="directed_connectable" value="0x1"/>
+            <enum name="connectable_scannable" value="0x2"/>
+            <enum name="scannable_non_connectable" value="0x3"/>
+            <enum name="connectable_non_scannable" value="0x4"/>
         </enums>
         <enums name="discoverable_mode">
-            <enum name="non_discoverable" value="0"/>
-            <enum name="limited_discoverable" value="1"/>
-            <enum name="general_discoverable" value="2"/>
-            <enum name="broadcast" value="3"/>
-            <enum name="user_data" value="4"/>
+            <enum name="non_discoverable" value="0x0"/>
+            <enum name="limited_discoverable" value="0x1"/>
+            <enum name="general_discoverable" value="0x2"/>
+            <enum name="broadcast" value="0x3"/>
+            <enum name="user_data" value="0x4"/>
         </enums>
         <enums name="adv_address_type">
-            <enum name="identity_address" value="0"/>
-            <enum name="non_resolvable" value="1"/>
+            <enum name="identity_address" value="0x0"/>
+            <enum name="non_resolvable" value="0x1"/>
         </enums>
     </class>
     <class index="5" name="scanner">
@@ -569,9 +571,9 @@
             </params>
         </event>
         <enums name="discover_mode">
-            <enum name="discover_limited" value="0"/>
-            <enum name="discover_generic" value="1"/>
-            <enum name="discover_observation" value="2"/>
+            <enum name="discover_limited" value="0x0"/>
+            <enum name="discover_generic" value="0x1"/>
+            <enum name="discover_observation" value="0x2"/>
         </enums>
     </class>
     <class index="66" name="sync">
@@ -632,14 +634,14 @@
             </params>
         </event>
         <enums name="advertiser_clock_accuracy">
-            <enum name="clock_accuracy_500" value="500"/>
-            <enum name="clock_accuracy_250" value="250"/>
-            <enum name="clock_accuracy_150" value="150"/>
-            <enum name="clock_accuracy_100" value="100"/>
-            <enum name="clock_accuracy_75" value="75"/>
-            <enum name="clock_accuracy_50" value="50"/>
-            <enum name="clock_accuracy_30" value="30"/>
-            <enum name="clock_accuracy_20" value="20"/>
+            <enum name="clock_accuracy_500" value="0x1f4"/>
+            <enum name="clock_accuracy_250" value="0xfa"/>
+            <enum name="clock_accuracy_150" value="0x96"/>
+            <enum name="clock_accuracy_100" value="0x64"/>
+            <enum name="clock_accuracy_75" value="0x4b"/>
+            <enum name="clock_accuracy_50" value="0x32"/>
+            <enum name="clock_accuracy_30" value="0x1e"/>
+            <enum name="clock_accuracy_20" value="0x14"/>
         </enums>
     </class>
     <class index="6" name="connection">
@@ -772,6 +774,14 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="13" name="read_remote_used_features" >
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="opened">
             <params>
                 <param datatype="bd_addr" name="address" type="bd_addr"/>
@@ -839,19 +849,25 @@
                 <param datatype="uint8" name="connection" type="uint8"/>
             </params>
         </event>
+        <event index="8" name="remote_used_features">
+            <params>
+                <param datatype="uint8" name="connection" type="uint8"/>
+                <param datatype="uint8array" name="features" type="uint8array"/>
+            </params>
+        </event>
         <enums name="security">
-            <enum name="mode1_level1" value="0"/>
-            <enum name="mode1_level2" value="1"/>
-            <enum name="mode1_level3" value="2"/>
-            <enum name="mode1_level4" value="3"/>
+            <enum name="mode1_level1" value="0x0"/>
+            <enum name="mode1_level2" value="0x1"/>
+            <enum name="mode1_level3" value="0x2"/>
+            <enum name="mode1_level4" value="0x3"/>
         </enums>
         <enums name="power_reporting_mode">
-            <enum name="power_reporting_disable" value="0"/>
-            <enum name="power_reporting_enable" value="1"/>
+            <enum name="power_reporting_disable" value="0x0"/>
+            <enum name="power_reporting_enable" value="0x1"/>
         </enums>
         <enums name="tx_power_flag">
-            <enum name="tx_power_at_minimum" value="1"/>
-            <enum name="tx_power_at_maximum" value="2"/>
+            <enum name="tx_power_at_minimum" value="0x1"/>
+            <enum name="tx_power_at_maximum" value="0x2"/>
         </enums>
     </class>
     <class index="9" name="gatt">
@@ -1100,67 +1116,230 @@
             </params>
         </event>
         <enums name="att_opcode">
-            <enum name="read_by_type_request" value="0"/>
-            <enum name="read_by_type_response" value="0"/>
-            <enum name="read_request" value="0"/>
-            <enum name="read_response" value="0"/>
-            <enum name="read_blob_request" value="0"/>
-            <enum name="read_blob_response" value="0"/>
-            <enum name="read_multiple_request" value="0"/>
-            <enum name="read_multiple_response" value="0"/>
-            <enum name="write_request" value="0"/>
-            <enum name="write_response" value="0"/>
-            <enum name="write_command" value="0"/>
-            <enum name="prepare_write_request" value="0"/>
-            <enum name="prepare_write_response" value="0"/>
-            <enum name="execute_write_request" value="0"/>
-            <enum name="execute_write_response" value="0"/>
-            <enum name="handle_value_notification" value="0"/>
-            <enum name="handle_value_indication" value="0"/>
+            <enum name="read_by_type_request" value="0x8"/>
+            <enum name="read_by_type_response" value="0x9"/>
+            <enum name="read_request" value="0xa"/>
+            <enum name="read_response" value="0xb"/>
+            <enum name="read_blob_request" value="0xc"/>
+            <enum name="read_blob_response" value="0xd"/>
+            <enum name="read_multiple_request" value="0xe"/>
+            <enum name="read_multiple_response" value="0xf"/>
+            <enum name="write_request" value="0x12"/>
+            <enum name="write_response" value="0x13"/>
+            <enum name="write_command" value="0x52"/>
+            <enum name="prepare_write_request" value="0x16"/>
+            <enum name="prepare_write_response" value="0x17"/>
+            <enum name="execute_write_request" value="0x18"/>
+            <enum name="execute_write_response" value="0x19"/>
+            <enum name="handle_value_notification" value="0x1b"/>
+            <enum name="handle_value_indication" value="0x1d"/>
         </enums>
         <enums name="client_config_flag">
-            <enum name="disable" value="0"/>
-            <enum name="notification" value="0"/>
-            <enum name="indication" value="0"/>
+            <enum name="disable" value="0x0"/>
+            <enum name="notification" value="0x1"/>
+            <enum name="indication" value="0x2"/>
         </enums>
         <enums name="execute_write_flag">
-            <enum name="cancel" value="0"/>
-            <enum name="commit" value="0"/>
+            <enum name="cancel" value="0x0"/>
+            <enum name="commit" value="0x1"/>
         </enums>
     </class>
-    <class index="10" name="gatt_server">
-        <command index="8" name="set_capabilities" >
-            <params>
-                <param datatype="uint32" name="caps" type="uint32"/>
-                <param datatype="uint32" name="reserved" type="uint32"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="12" name="enable_capabilities" >
-            <params>
-                <param datatype="uint32" name="caps" type="uint32"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="13" name="disable_capabilities" >
-            <params>
-                <param datatype="uint32" name="caps" type="uint32"/>
-            </params>
-            <returns>
-                <param datatype="errorcode" name="result" type="uint16"/>
-            </returns>
-        </command>
-        <command index="14" name="get_enabled_capabilities" >
+    <class index="70" name="gattdb">
+        <command index="0" name="new_session" >
             <params/>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
-                <param datatype="uint32" name="caps" type="uint32"/>
+                <param datatype="uint16" name="session" type="uint16"/>
             </returns>
         </command>
+        <command index="1" name="add_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="uint8" name="type" type="uint8"/>
+                <param datatype="uint8" name="property" type="uint8"/>
+                <param datatype="uuid" name="uuid" type="uint8array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+            </returns>
+        </command>
+        <command index="2" name="remove_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="3" name="add_included_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+                <param datatype="attribute_handle" name="included_service" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint16" name="attribute" type="uint16"/>
+            </returns>
+        </command>
+        <command index="4" name="remove_included_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="attribute" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="5" name="add_uuid16_characteristic" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+                <param datatype="uint16" name="property" type="uint16"/>
+                <param datatype="uint16" name="security" type="uint16"/>
+                <param datatype="uint8" name="flag" type="uint8"/>
+                <param datatype="uuid_16" name="uuid" type="sl_bt_uuid_16_t"/>
+                <param datatype="uint8" name="value_type" type="uint8"/>
+                <param datatype="uint16" name="maxlen" type="uint16"/>
+                <param datatype="uint16array" name="value" type="uint16array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+            </returns>
+        </command>
+        <command index="6" name="add_uuid128_characteristic" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+                <param datatype="uint16" name="property" type="uint16"/>
+                <param datatype="uint16" name="security" type="uint16"/>
+                <param datatype="uint8" name="flag" type="uint8"/>
+                <param datatype="uuid_128" name="uuid" type="uuid_128"/>
+                <param datatype="uint8" name="value_type" type="uint8"/>
+                <param datatype="uint16" name="maxlen" type="uint16"/>
+                <param datatype="uint16array" name="value" type="uint16array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+            </returns>
+        </command>
+        <command index="7" name="remove_characteristic" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="8" name="add_uuid16_descriptor" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+                <param datatype="uint16" name="property" type="uint16"/>
+                <param datatype="uint16" name="security" type="uint16"/>
+                <param datatype="uuid_16" name="uuid" type="sl_bt_uuid_16_t"/>
+                <param datatype="uint8" name="value_type" type="uint8"/>
+                <param datatype="uint16" name="maxlen" type="uint16"/>
+                <param datatype="uint16array" name="value" type="uint16array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="attribute_handle" name="descriptor" type="uint16"/>
+            </returns>
+        </command>
+        <command index="9" name="add_uuid128_descriptor" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+                <param datatype="uint16" name="property" type="uint16"/>
+                <param datatype="uint16" name="security" type="uint16"/>
+                <param datatype="uuid_128" name="uuid" type="uuid_128"/>
+                <param datatype="uint8" name="value_type" type="uint8"/>
+                <param datatype="uint16" name="maxlen" type="uint16"/>
+                <param datatype="uint16array" name="value" type="uint16array"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="attribute_handle" name="descriptor" type="uint16"/>
+            </returns>
+        </command>
+        <command index="10" name="remove_descriptor" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="descriptor" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="11" name="start_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="12" name="stop_service" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="service" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="13" name="start_characteristic" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="14" name="stop_characteristic" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+                <param datatype="attribute_handle" name="characteristic" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="15" name="commit" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="16" name="abort" >
+            <params>
+                <param datatype="uint16" name="session" type="uint16"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <enums name="service_type">
+            <enum name="primary_service" value="0x0"/>
+            <enum name="secondary_service" value="0x1"/>
+        </enums>
+        <enums name="value_type">
+            <enum name="fixed_length_value" value="0x1"/>
+            <enum name="variable_length_value" value="0x2"/>
+            <enum name="user_managed_value" value="0x3"/>
+        </enums>
+    </class>
+    <class index="10" name="gatt_server">
         <command index="10" name="set_max_mtu" >
             <params>
                 <param datatype="uint16" name="max_mtu" type="uint16"/>
@@ -1313,6 +1492,47 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="8" name="set_capabilities" >
+            <params>
+                <param datatype="uint32" name="caps" type="uint32"/>
+                <param datatype="uint32" name="reserved" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="12" name="enable_capabilities" >
+            <params>
+                <param datatype="uint32" name="caps" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="13" name="disable_capabilities" >
+            <params>
+                <param datatype="uint32" name="caps" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="14" name="get_enabled_capabilities" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="caps" type="uint32"/>
+            </returns>
+        </command>
+        <command index="21" name="read_client_supported_features" >
+            <params>
+                <param datatype="connection" name="connection" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint8" name="client_features" type="uint8"/>
+            </returns>
+        </command>
         <event index="0" name="attribute_value">
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>
@@ -1345,6 +1565,7 @@
                 <param datatype="characteristic" name="characteristic" type="uint16"/>
                 <param datatype="uint8" name="status_flags" type="uint8"/>
                 <param datatype="uint16" name="client_config_flags" type="uint16"/>
+                <param datatype="descriptor" name="client_config" type="uint16"/>
             </params>
         </event>
         <event index="4" name="execute_write_completed">
@@ -1359,14 +1580,14 @@
             </params>
         </event>
         <enums name="client_configuration">
-            <enum name="disable" value="0"/>
-            <enum name="notification" value="0"/>
-            <enum name="indication" value="0"/>
-            <enum name="notification_and_indication" value="0"/>
+            <enum name="disable" value="0x0"/>
+            <enum name="notification" value="0x1"/>
+            <enum name="indication" value="0x2"/>
+            <enum name="notification_and_indication" value="0x3"/>
         </enums>
         <enums name="characteristic_status_flag">
-            <enum name="client_config" value="0"/>
-            <enum name="confirmation" value="0"/>
+            <enum name="client_config" value="0x1"/>
+            <enum name="confirmation" value="0x2"/>
         </enums>
     </class>
     <class index="13" name="nvm">
@@ -1469,21 +1690,21 @@
             </params>
         </event>
         <enums name="packet_type">
-            <enum name="pkt_prbs9" value="0"/>
-            <enum name="pkt_11110000" value="0"/>
-            <enum name="pkt_10101010" value="0"/>
-            <enum name="pkt_11111111" value="0"/>
-            <enum name="pkt_00000000" value="0"/>
-            <enum name="pkt_00001111" value="0"/>
-            <enum name="pkt_01010101" value="0"/>
-            <enum name="pkt_pn9" value="0"/>
-            <enum name="pkt_carrier" value="0"/>
+            <enum name="pkt_prbs9" value="0x0"/>
+            <enum name="pkt_11110000" value="0x1"/>
+            <enum name="pkt_10101010" value="0x2"/>
+            <enum name="pkt_11111111" value="0x4"/>
+            <enum name="pkt_00000000" value="0x5"/>
+            <enum name="pkt_00001111" value="0x6"/>
+            <enum name="pkt_01010101" value="0x7"/>
+            <enum name="pkt_pn9" value="0xfd"/>
+            <enum name="pkt_carrier" value="0xfe"/>
         </enums>
         <enums name="phy">
-            <enum name="phy_1m" value="0"/>
-            <enum name="phy_2m" value="0"/>
-            <enum name="phy_125k" value="0"/>
-            <enum name="phy_500k" value="0"/>
+            <enum name="phy_1m" value="0x1"/>
+            <enum name="phy_2m" value="0x2"/>
+            <enum name="phy_125k" value="0x3"/>
+            <enum name="phy_500k" value="0x4"/>
         </enums>
     </class>
     <class index="15" name="sm">
@@ -1624,6 +1845,78 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="21" name="get_bonding_handles" >
+            <params>
+                <param datatype="uint32" name="reserved" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="num_bondings" type="uint32"/>
+                <param datatype="uint8array" name="bondings" type="uint8array"/>
+            </returns>
+        </command>
+        <command index="22" name="get_bonding_details" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+                <param datatype="uint8" name="address_type" type="uint8"/>
+                <param datatype="uint8" name="security_mode" type="uint8"/>
+                <param datatype="uint8" name="key_size" type="uint8"/>
+            </returns>
+        </command>
+        <command index="23" name="find_bonding_by_address" >
+            <params>
+                <param datatype="bd_addr" name="address" type="bd_addr"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+                <param datatype="uint8" name="security_mode" type="uint8"/>
+                <param datatype="uint8" name="key_size" type="uint8"/>
+            </returns>
+        </command>
+        <command index="24" name="set_bonding_key" >
+            <params>
+                <param datatype="uint32" name="bonding" type="uint32"/>
+                <param datatype="uint8" name="key_type" type="uint8"/>
+                <param datatype="aes_key_128" name="key" type="aes_key_128"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="25" name="set_legacy_oob" >
+            <params>
+                <param datatype="uint8" name="enable" type="uint8"/>
+                <param datatype="aes_key_128" name="oob_data" type="aes_key_128"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="26" name="set_oob" >
+            <params>
+                <param datatype="uint8" name="enable" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="aes_key_128" name="random" type="aes_key_128"/>
+                <param datatype="aes_key_128" name="confirm" type="aes_key_128"/>
+            </returns>
+        </command>
+        <command index="27" name="set_remote_oob" >
+            <params>
+                <param datatype="uint8" name="enable" type="uint8"/>
+                <param datatype="aes_key_128" name="random" type="aes_key_128"/>
+                <param datatype="aes_key_128" name="confirm" type="aes_key_128"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="0" name="passkey_display">
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>
@@ -1645,6 +1938,7 @@
             <params>
                 <param datatype="connection" name="connection" type="uint8"/>
                 <param datatype="uint8" name="bonding" type="uint8"/>
+                <param datatype="uint8" name="security_mode" type="uint8"/>
             </params>
         </event>
         <event index="4" name="bonding_failed">
@@ -1670,20 +1964,16 @@
             <params/>
         </event>
         <enums name="bonding_key">
-            <enum name="bonding_key_ltk" value="0"/>
-            <enum name="bonding_key_addr_public" value="0"/>
-            <enum name="bonding_key_addr_static" value="0"/>
-            <enum name="bonding_key_irk" value="0"/>
-            <enum name="bonding_key_edivrand" value="0"/>
-            <enum name="bonding_key_csrk" value="0"/>
-            <enum name="bonding_key_masterid" value="0"/>
+            <enum name="bonding_key_remote_ltk" value="0x1"/>
+            <enum name="bonding_key_local_ltk" value="0x2"/>
+            <enum name="bonding_key_irk" value="0x3"/>
         </enums>
         <enums name="io_capability">
-            <enum name="io_capability_displayonly" value="0"/>
-            <enum name="io_capability_displayyesno" value="1"/>
-            <enum name="io_capability_keyboardonly" value="2"/>
-            <enum name="io_capability_noinputnooutput" value="3"/>
-            <enum name="io_capability_keyboarddisplay" value="4"/>
+            <enum name="io_capability_displayonly" value="0x0"/>
+            <enum name="io_capability_displayyesno" value="0x1"/>
+            <enum name="io_capability_keyboardonly" value="0x2"/>
+            <enum name="io_capability_noinputnooutput" value="0x3"/>
+            <enum name="io_capability_keyboarddisplay" value="0x4"/>
         </enums>
     </class>
     <class index="16" name="ota">
@@ -1761,9 +2051,9 @@
             </returns>
         </command>
         <enums name="option">
-            <enum name="option_enable" value="0"/>
-            <enum name="option_tx_abort" value="0"/>
-            <enum name="option_high_priority" value="0"/>
+            <enum name="option_enable" value="0x100"/>
+            <enum name="option_tx_abort" value="0x400"/>
+            <enum name="option_high_priority" value="0x800"/>
         </enums>
     </class>
     <class index="67" name="l2cap">
@@ -1872,26 +2162,26 @@
             </params>
         </event>
         <enums name="coc_connection_result">
-            <enum name="connection_successful" value="0"/>
-            <enum name="le_psm_not_supported" value="2"/>
-            <enum name="no_resources_available" value="4"/>
-            <enum name="insufficient_authentication" value="5"/>
-            <enum name="insufficient_authorization" value="6"/>
-            <enum name="insufficient_encryption_key_size" value="7"/>
-            <enum name="insufficient_encryption" value="8"/>
-            <enum name="invalid_source_cid" value="9"/>
-            <enum name="source_cid_already_allocated" value="10"/>
-            <enum name="unacceptable_parameters" value="11"/>
+            <enum name="connection_successful" value="0x0"/>
+            <enum name="le_psm_not_supported" value="0x2"/>
+            <enum name="no_resources_available" value="0x4"/>
+            <enum name="insufficient_authentication" value="0x5"/>
+            <enum name="insufficient_authorization" value="0x6"/>
+            <enum name="insufficient_encryption_key_size" value="0x7"/>
+            <enum name="insufficient_encryption" value="0x8"/>
+            <enum name="invalid_source_cid" value="0x9"/>
+            <enum name="source_cid_already_allocated" value="0xa"/>
+            <enum name="unacceptable_parameters" value="0xb"/>
         </enums>
         <enums name="command_reject_reason">
-            <enum name="command_not_understood" value="0"/>
-            <enum name="signaling_mtu_exceeded" value="1"/>
-            <enum name="invalid_cid_request" value="2"/>
+            <enum name="command_not_understood" value="0x0"/>
+            <enum name="signaling_mtu_exceeded" value="0x1"/>
+            <enum name="invalid_cid_request" value="0x2"/>
         </enums>
         <enums name="command_code">
-            <enum name="disconnection_request" value="0"/>
-            <enum name="connection_request" value="0"/>
-            <enum name="flow_control_credit" value="0"/>
+            <enum name="disconnection_request" value="0x6"/>
+            <enum name="connection_request" value="0x14"/>
+            <enum name="flow_control_credit" value="0x16"/>
         </enums>
     </class>
     <class index="68" name="cte_transmitter">

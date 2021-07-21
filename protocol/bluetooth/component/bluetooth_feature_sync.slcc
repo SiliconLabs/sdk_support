@@ -3,11 +3,13 @@ label: "Periodic Advertising Synchronization"
 package: "Bluetooth"
 description: >
   Bluetooth periodic advertising synchronization feature
-category: "Bluetooth|Stack"
+category: "Bluetooth|Feature"
 quality: "production"
 root_path: "protocol/bluetooth"
 requires:
-  - name: "bluetooth_stack"
+  - name: "bluetooth_controller"
+config_file:
+  - path: "config/sl_bluetooth_periodic_sync_config.h"
 provides:
   - name: "bluetooth_feature_sync"
 template_contribution:

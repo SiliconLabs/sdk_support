@@ -15,11 +15,11 @@
  ******************************************************************************/
 
 /**************************************************************************//**
- *
- *  Information on open-source software used with the library can be found in
- *  the included license.txt file.
- *
- ******************************************************************************/
+*
+*  Information on open-source software used with the library can be found in
+*  the included license.txt file.
+*
+******************************************************************************/
 
 /**************************************************************************//**
  *  @file
@@ -47,9 +47,16 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/**
+ * @addtogroup sl_rtl_error Error Codes
+ * @{
+ *
+ * @brief RTL library Error Codes
+ *
+ */
+
 /// RTL error code
-enum sl_rtl_error_code
-{
+enum sl_rtl_error_code{
   SL_RTL_ERROR_SUCCESS = 0, ///< Successful execution / estimation complete
   SL_RTL_ERROR_ARGUMENT, ///< Invalid argument
   SL_RTL_ERROR_OUT_OF_MEMORY, ///< Memory / allocation failure
@@ -60,9 +67,11 @@ enum sl_rtl_error_code
   SL_RTL_ERROR_INTERNAL, ///< An internal error occurred
   SL_RTL_ERROR_IQ_SAMPLE_QA, ///< IQ sample quality analysis failed
   SL_RTL_ERROR_FEATURE_NOT_SUPPORTED, ///< The requested feature is not supported by the library
+  SL_RTL_ERROR_INCORRECT_MEASUREMENT, ///< The error of the last measurement for this locator was too large
 
   SL_RTL_ERROR_LAST ///< Number of error codes
 };
+/** @} */ // end addtogroup sl_rtl_error
 
 /**
  * @addtogroup sl_rtl_aox Angle of Arrival / Departure
@@ -82,18 +91,19 @@ enum sl_rtl_error_code
  */
 
 /// AoX antenna array type
-enum sl_rtl_aox_array_type
-{
-  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0, ///< Ref. 4x4 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,     ///< Ref. 3x3 Uniform Rectangular Array
-  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,     ///< Ref. 1x4 Uniform Linear Array
+enum sl_rtl_aox_array_type{
+  SL_RTL_AOX_ARRAY_TYPE_4x4_URA = 0, ///< Silicon Labs Ref. 4x4 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_3x3_URA,     ///< Silicon Labs Ref. 3x3 Uniform Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_1x4_ULA,     ///< Silicon Labs Ref. 1x4 Uniform Linear Array
+  SL_RTL_AOX_ARRAY_TYPE_4x4_DP_URA,  ///< Silicon Labs Ref. 4x4 Uniform Dual Polarized Rectangular Array
+  SL_RTL_AOX_ARRAY_TYPE_COREHW_15x15_DP,    ///< CoreHw Ref. 150 mm x 150 mm, 8 Element Dual Polarized Array
+  SL_RTL_AOX_ARRAY_TYPE_COREHW_12x12_DP,    ///< CoreHw Ref. 120 mm x 120 mm, 8 Element Dual Polarized Array
 
   SL_RTL_AOX_ARRAY_TYPE_LAST ///< Placeholder
 };
 
 /// AoX estimator mode
-enum sl_rtl_aox_mode
-{
+enum sl_rtl_aox_mode{
   SL_RTL_AOX_MODE_ONE_SHOT_BASIC = 3, ///< Medium filtering, medium response. Returns 2D angle, requires 10 rounds. Most suitable for single shot measurement.
   SL_RTL_AOX_MODE_ONE_SHOT_BASIC_LIGHTWEIGHT, ///< Medium filtering, medium response, low CPU cost & low elevation resolution. 2D angle, req. 10 rounds. Most suitable for single shot measurement.
   SL_RTL_AOX_MODE_ONE_SHOT_FAST_RESPONSE, ///< Low filtering, fast response, low CPU cost & low elevation resolution. 2D angle, requires 2 rounds. Most suitable for single shot measurement.
@@ -111,26 +121,24 @@ enum sl_rtl_aox_mode
 };
 
 // AoX constraint types
-enum sl_rtl_aox_constraint_type
-{
+enum sl_rtl_aox_constraint_type{
   SL_RTL_AOX_CONSTRAINT_TYPE_AZIMUTH = 0, ///< Azimuth constraint in degrees
   SL_RTL_AOX_CONSTRAINT_TYPE_ELEVATION, ///< Elevation constraint in degrees
 };
 
 // AoX switch pattern modes
-enum sl_rtl_aox_switch_pattern_mode
-{
+enum sl_rtl_aox_switch_pattern_mode{
   SL_RTL_AOX_SWITCH_PATTERN_MODE_DEFAULT = 0, ///< Internally defined switch pattern: 0, 1, 2, ..., N-1, where N is the number of antennas
   SL_RTL_AOX_SWITCH_PATTERN_MODE_RANDOM, ///< Internally defined random switch pattern
-  SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL ///< Switch pattern set externally by the user
+  SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTERNAL, ///< Switch pattern set externally by the user
+  SL_RTL_AOX_SWITCH_PATTERN_MODE_EXTRA_REFERENCE, ///< Switch pattern set externally by the user with extra reference antenna as a first
 };
 
 /// Angle of Arrival / Departure library item
 typedef void* sl_rtl_aox_libitem;
 
 // Structure for IQ sample quality calculation antenna-specific results
-typedef struct
-{
+typedef struct {
   float level;             ///< Antenna signal level, in decibels
   float snr;               ///< Antenna level signal to noise ratio, in decibels
   float phase_value;       ///< Antenna's average unrotated phase value in the packet, in radians
@@ -138,8 +146,7 @@ typedef struct
 } sl_rtl_clib_iq_sample_qa_antenna_data_t;
 
 // Structure for IQ sample quality calculation results
-typedef struct
-{
+typedef struct {
   bool data_available;     ///< If false, all the antenna values are undefined
   uint32_t curr_channel;   ///< Radio channel for the last packet
   float ref_freq;          ///< Apparent supplemental tone frequency
@@ -165,12 +172,11 @@ typedef enum {
 } sl_rtl_slib_iq_sample_qa_result_t;
 
 #define SL_RTL_AOX_IQ_SAMPLE_QA_CLEAR_BIT(code, bit) \
-  (code &= ~ (1UL << bit))
-#define SL_RTL_AOX_IQ_SAMPLE_QA_SET_BIT(code, bit)   \
+  (code &= ~(1UL << bit))
+#define SL_RTL_AOX_IQ_SAMPLE_QA_SET_BIT(code, bit) \
   (code |= (1UL << bit))
-#define SL_RTL_AOX_IQ_SAMPLE_QA_IS_SET(code, bit)    \
+#define SL_RTL_AOX_IQ_SAMPLE_QA_IS_SET(code, bit) \
   (code & (1UL << bit))
-
 
 /**************************************************************************//**
  * Initialize the AoX libitem instance.
@@ -339,7 +345,6 @@ enum sl_rtl_error_code sl_rtl_aox_iq_sample_qa_get_details(sl_rtl_aox_libitem* i
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_iq_sample_qa_get_channel_details(sl_rtl_aox_libitem* item, uint8_t channel, sl_rtl_clib_iq_sample_qa_dataset_t *results, sl_rtl_clib_iq_sample_qa_antenna_data_t *antenna_data);
 
-
 /**************************************************************************//**
  * Create the estimator after initializing the libitem and setting parameters.
  *
@@ -410,6 +415,17 @@ enum sl_rtl_error_code sl_rtl_aox_set_switch_pattern_mode(sl_rtl_aox_libitem* it
 enum sl_rtl_error_code sl_rtl_aox_update_switch_pattern(sl_rtl_aox_libitem* item, uint32_t* switch_pattern_in, uint32_t** switch_pattern_out);
 
 /**************************************************************************//**
+ * Set the random seed for the switch pattern, which is used in case of random pattern mode.
+ * It can be called at run-time after initializing and creating the estimator.
+ *
+ * @param[in] item Pointer to the initialized and configured AoX libitem
+ * @param[in] seed_value The seed value to be used.
+ * internally defined switch pattern modes, otherwise can be zero.
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_aox_set_switch_pattern_seed(sl_rtl_aox_libitem* item, int32_t seed_value);
+
+/**************************************************************************//**
  * Reset estimator state. Calling this function causes the selected aox-mode to start from its initial state.
  * This function can be called at run-time after initializing and creating the estimator.
  *
@@ -441,6 +457,66 @@ enum sl_rtl_error_code sl_rtl_aox_reset_estimator(sl_rtl_aox_libitem* item);
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_aox_process(sl_rtl_aox_libitem* item, float** i_samples, float** q_samples, float tone_frequency, float* az_out, float* el_out);
 
+/**************************************************************************//**
+ * Get standard deviation for the latest AoA/AoD-estimate
+ *
+ * @param[in] item Pointer to the initialized and configured AoX libitem
+ * @param[out] az_std_dev Pointer for getting standard deviation of the
+ *                         latest azimuth estimate
+ * @param[out] el_std_dev Pointer for getting standard deviation of the
+ *                         latest elevation estimate
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * This function can be called after sl_rtl_aox_process to fetch standard
+ * deviation for the latest AoA/AoD-estimate. Positive standard deviations
+ * indicate line-of-sight detection and negative values indicate likely
+ * non-line-of-sight detection.
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_aox_get_latest_aoa_standard_deviation(sl_rtl_aox_libitem* item, float* az_std_dev, float* el_std_dev);
+
+/**************************************************************************//**
+ * Feed the expected angles back to the locator.
+ *
+ * @param[in] item Pointer to the initialized and configured AoX libitem
+ * @param[in] expected_az Expected azimuth angle calculated by position algorithm
+ * @param[in] expected_el Expected elevation angle calculated by position algorithm
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * Position algorithm has a more complete view of tha asset's location, and
+ * the direction it should be found can be calculated back and fed to the
+ * locator, so that it can recover faster from situations like for example
+ * when it has locked to a reflection rather than to the line of sight signal.
+ * See also the sl_rtl_loc_get_expected_direction().
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_aox_set_expected_direction(sl_rtl_aox_libitem* item, float expected_az, float expected_el);
+
+/**************************************************************************//**
+ * Feed the expected angle deviations back to the locator.
+ *
+ * @param[in] item Pointer to the initialized and configured AoX libitem
+ * @param[in] deviation_az Deviation of the expected azimuth angle calculated by position algorithm
+ * @param[in] deviation_el Deviation of the expected elevation angle calculated by position algorithm
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * Report expected deviations calculated by the position algorithm back to
+ * the locator so that angles are calculated more accurately taking in account
+ * the goodness of the expected directions. If sl_rtl_aox_set_expected_direction()
+ * is called but this function is not called, the algorithm will use default values
+ * for the expected deviations.
+ * See also sl_rtl_loc_get_expected_deviation() and sl_rtl_aox_set_expected_direction().
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_aox_set_expected_deviation(sl_rtl_aox_libitem* item, float deviation_az, float deviation_el);
+
+/**************************************************************************//**
+ * Clear the expected directions and deviations from the locator.
+ *
+ * @param[in] item Pointer to the initialized and configured AoX libitem
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *
+ * See also sl_rtl_aox_set_expected_direction() and sl_rtl_aox_set_expected_deviation().
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_aox_clear_expected_direction(sl_rtl_aox_libitem* item);
+
 /** @} */ // end addtogroup sl_rtl_aox
 
 /**
@@ -453,9 +529,10 @@ enum sl_rtl_error_code sl_rtl_aox_process(sl_rtl_aox_libitem* item, float** i_sa
  * and distances.
  */
 
+#define SL_RTL_LOC_ALL_LOCATORS (uint32_t)(-1)
+
 /// Locator-specific measurements
-enum sl_rtl_loc_locator_measurement_field
-{
+enum sl_rtl_loc_locator_measurement_field{
   SL_RTL_LOC_LOCATOR_MEASUREMENT_AZIMUTH,   ///< Measured azimuth from locator to tag
   SL_RTL_LOC_LOCATOR_MEASUREMENT_ELEVATION, ///< Measured elevation from locator to tag
   SL_RTL_LOC_LOCATOR_MEASUREMENT_DISTANCE,  ///< Measured distance from locator to tag
@@ -468,14 +545,12 @@ enum sl_rtl_loc_locator_measurement_field
 };
 
 /// Target-specific measurements - Not yet supported
-enum sl_rtl_loc_target_measurement_field
-{
+enum sl_rtl_loc_target_measurement_field{
   SL_RTL_LOC_TARGET_MEASUREMENT_LAST
 };
 
 /// Estimation mode
-enum sl_rtl_loc_estimation_mode
-{
+enum sl_rtl_loc_estimation_mode{
   SL_RTL_LOC_ESTIMATION_MODE_TWO_DIM_FAST_RESPONSE, ///< Two-dimensional mode - Only X and Y plane considered, less filtered mode for fast moving assests
   SL_RTL_LOC_ESTIMATION_MODE_THREE_DIM_FAST_RESPONSE, ///< Three-dimensional mode - Covers X, Y and Z planes, less filtered mode for fast moving assests
 
@@ -485,9 +560,15 @@ enum sl_rtl_loc_estimation_mode
   SL_RTL_LOC_ESTIMATION_MODE_LAST
 };
 
+/// Measurement validation method
+enum sl_rtl_loc_measurement_validation_method{
+  SL_RTL_LOC_MEASUREMENT_VALIDATION_MINIMUM,  ///< Only the basic validation integrated in the locationing algorithm (default)
+  SL_RTL_LOC_MEASUREMENT_VALIDATION_MEDIUM,   ///< May discard the most inaccurate measurements with an additional calculation round
+  SL_RTL_LOC_MEASUREMENT_VALIDATION_FULL,     ///< May discard the most inaccurate measurements with several calculation rounds
+};
+
 /// Locator-specific parameters related to locationing
-enum sl_rtl_loc_locator_parameter
-{
+enum sl_rtl_loc_locator_parameter{
   SL_RTL_LOC_LOCATOR_PARAMETER_AZIMUTH_COVARIANCE, ///< Covariance of the azimuth measurements specific to locator
   SL_RTL_LOC_LOCATOR_PARAMETER_ELEVATION_COVARIANCE, ///< Covariance of the elevation measurements specific to locator
   SL_RTL_LOC_LOCATOR_PARAMETER_DISTANCE_COVARIANCE, ///< Covariance of the distance measurements specific to locator
@@ -496,8 +577,7 @@ enum sl_rtl_loc_locator_parameter
 };
 
 /// Target-specific parameters related to locationing
-enum sl_rtl_loc_target_parameter
-{
+enum sl_rtl_loc_target_parameter{
   SL_RTL_LOC_TARGET_PARAMETER_TARGET_HEIGHT, // Z-position when the target is statically on some x-y-plane
   SL_RTL_LOC_TARGET_CLEAR_TARGET_HEIGHT,     // Clear the previously set Z-position
 
@@ -505,8 +585,7 @@ enum sl_rtl_loc_target_parameter
 };
 
 /// Locationing state results
-enum sl_rtl_loc_result
-{
+enum sl_rtl_loc_result{
   SL_RTL_LOC_RESULT_POSITION_X = 0, ///< Estimated X-axis position of the target
   SL_RTL_LOC_RESULT_POSITION_Y, ///< Estimated Y-axis position of the target
   SL_RTL_LOC_RESULT_POSITION_Z, ///< Estimated Z-axis position of the target
@@ -527,8 +606,7 @@ enum sl_rtl_loc_result
 };
 
 /// Locator item which contains the position and orientation of the locator array
-struct sl_rtl_loc_locator_item
-{
+struct sl_rtl_loc_locator_item{
   float coordinate_x; ///< X-axis coordinate of the locator
   float coordinate_y; ///< Y-axis coordinate of the locator
   float coordinate_z; ///< Z-axis coordinate of the locator
@@ -559,6 +637,18 @@ enum sl_rtl_error_code sl_rtl_loc_init(sl_rtl_loc_libitem* item);
 enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
 
 /**************************************************************************//**
+ * Reinitialize the locationing libitem instance.
+ *
+ * Reset the libitem's internal values to the starting point so that it can
+ * start all over from the beginning. This can be used for example in testing
+ * instead of deleting and re-creating the libitem object.
+ *
+ * @param[in] item Pointer to the libitem to be initialized
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_reinit(sl_rtl_loc_libitem* item);
+
+/**************************************************************************//**
  * Set the locationing dimensionality mode. Possible choices are 2D or 3D
  * modes. Two-dimensional mode does not vary the z-position of the target and
  * assumes it is 0 at all times. When updating, for example, the distance measure-
@@ -571,6 +661,21 @@ enum sl_rtl_error_code sl_rtl_loc_deinit(sl_rtl_loc_libitem* item);
  * @return ::SL_RTL_ERROR_SUCCESS if successful
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_set_mode(sl_rtl_loc_libitem* item, enum sl_rtl_loc_estimation_mode mode);
+
+/**************************************************************************//**
+ * Set the measurement validation method. If not given, the minimum mehod is
+ * used. Possible choises are minumim, medium and full. The minimum does not
+ * icrease the calculation cpu load as it is integrated inside the algorithms
+ * normal operation. The medium and full methods uses additionally one or
+ * multiple calculation rounds respectively and may discard the most
+ * inaccurate mesurements from the calculation. (But leaving always enough
+ * of them for that the estimate can be calculated).
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] method Validation method as enum
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_set_measurement_validation(sl_rtl_loc_libitem* item, enum sl_rtl_loc_measurement_validation_method method);
 
 /**************************************************************************//**
  * Add a locator item into the locationing estimator after setting its position
@@ -686,6 +791,161 @@ enum sl_rtl_error_code sl_rtl_loc_get_result(sl_rtl_loc_libitem* item, enum sl_r
  *****************************************************************************/
 enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates(sl_rtl_loc_libitem* item, uint32_t locator_id, enum sl_rtl_loc_locator_measurement_field field, float* value_out);
 
+/**************************************************************************//**
+ * Get the expected direction of the asset for the locator
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value
+ * @param[out] elevation The expected elevation value
+ * @param[out] distance The expected distance value
+ * @return ::SL_RTL_ERROR_SUCCESS if the locator does not require correction
+ * @return ::SL_RTL_ERROR_INCORRECT_MEASUREMENT if the locator's previous measurement was ignored because of too large error
+ * @returns Another error code in case of error
+ *
+ * Position calculation has a better overal view to the asset's location than
+ * any individual locator. In case the direction angles differ too much from
+ * the expected direction, the locator can be instructed to correct its
+ * internal state so that in can recover from this incorrectness faster.
+ * See also the sl_rtl_aox_set_expected_direction()
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_get_expected_direction(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance);
+
+/**************************************************************************//**
+ * Get the deviation values for expected direction of the asset for the locator
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator whose measurement will be retrieved
+ * @param[out] azimuth The expected azimuth value's standard deviation
+ * @param[out] elevation The expected elevation value's standard deviation
+ * @param[out] distance The expected distance value's standard deviation
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_get_expected_deviation(sl_rtl_loc_libitem* item, uint32_t locator_id, float *azimuth, float *elevation, float *distance);
+
+/**************************************************************************//**
+ * Get the number of locators disabled from position calculation because
+ * of too large direction error
+ *
+ * @param[in] item Pointer to the libitem
+ * @returns Number of locators needing correction, or -1 in case of any other error
+ *****************************************************************************/
+int sl_rtl_loc_get_number_disabled(sl_rtl_loc_libitem* item);
+
+/**************************************************************************//**
+ * Check if the asset is in reach of a given locator, according to the position
+ * based filtering.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of the locator to run the test
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+bool sl_rtl_loc_filter_in_reach(sl_rtl_loc_libitem* item, uint32_t locator_id);
+
+/**************************************************************************//**
+ * Clear all the position based filters from a locator or from all the
+ * locators.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_clear(sl_rtl_loc_libitem* item, uint32_t locator_id);
+
+/**************************************************************************//**
+ * Add a position based filter. This filter is based on distance from a locator.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] radius Distance from the locator
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_sphere(sl_rtl_loc_libitem* item, uint32_t locator_id, float radius, bool exclude_region);
+
+/**************************************************************************//**
+ * Add a position based filter. This two dimensional filter is based on
+ * distance from a locator.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] radius Distance from the locator
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_circle(sl_rtl_loc_libitem* item, uint32_t locator_id, float radius, bool exclude_region);
+
+/**************************************************************************//**
+ * Add a position based filter. This filter defines relative distances in
+ * coordinate axes' directions.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] xDelta Maximimun distance in X-coordinate direction
+ * @param[in] yDelta Maximimun distance in Y-coordinate direction
+ * @param[in] zDelta Maximimun distance in Z-coordinate direction
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_box(sl_rtl_loc_libitem* item, uint32_t locator_id, float xDelta, float yDelta, float zDelta, bool exclude_region);
+
+/**************************************************************************//**
+ * Add a position based filter. This two dimensional filter defines relative
+ * distances in coordinate axes' directions.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] xDelta Maximimun distance in X-coordinate direction
+ * @param[in] yDelta Maximimun distance in Y-coordinate direction
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_rect(sl_rtl_loc_libitem* item, uint32_t locator_id, float xDelta, float yDelta, bool exclude_region);
+
+/**************************************************************************//**
+ * Add a position based filter. This filter defines an area in global
+ * coordinates.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] minX Minimun X-coordinate value
+ * @param[in] maxX Maximun X-coordinate value
+ * @param[in] minY Minimun Y-coordinate value
+ * @param[in] maxY Maximun Y-coordinate value
+ * @param[in] minZ Minimun Z-coordinate value
+ * @param[in] maxZ Maximun Z-coordinate value
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_room(sl_rtl_loc_libitem* item, uint32_t locator_id, float minX, float maxX, float minY, float maxY, float minZ, float maxZ, bool exclude_region);
+
+/**************************************************************************//**
+ * Add a position based filter. This two dimensional filter defines an area in
+ * global coordinates.
+ * The filter can be added to one locator or all the locators. A locator may
+ * have several filters which are combined.
+ *
+ * @param[in] item Pointer to the libitem
+ * @param[in] locator_id ID of a single locator or ::SL_RTL_LOC_ALL_LOCATORS
+ * @param[in] minX Minimun X-coordinate value
+ * @param[in] maxX Maximun X-coordinate value
+ * @param[in] minY Minimun Y-coordinate value
+ * @param[in] maxY Maximun Y-coordinate value
+ * @param[in] exclude_region If true, define an excluded region instead
+ * @return ::SL_RTL_ERROR_SUCCESS if successful
+ *****************************************************************************/
+enum sl_rtl_error_code sl_rtl_loc_filter_floor(sl_rtl_loc_libitem* item, uint32_t locator_id, float minX, float maxX, float minY, float maxY, bool exclude_region);
+
 /** @} */ // end addtogroup sl_rtl_loc
 
 /**
@@ -702,8 +962,7 @@ enum sl_rtl_error_code sl_rtl_loc_get_measurement_in_system_coordinates(sl_rtl_l
 typedef void* sl_rtl_util_libitem;
 
 /// Util parameter
-enum sl_rtl_util_parameter
-{
+enum sl_rtl_util_parameter{
   SL_RTL_UTIL_PARAMETER_AMOUNT_OF_FILTERING = 0 ///< Amount of filtering in range [0.0f, 1.0f]
 };
 

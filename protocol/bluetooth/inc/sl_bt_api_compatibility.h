@@ -43,7 +43,7 @@ typedef enum
   system_linklayer_config_key_clr_flags                  = 0x5,
   system_linklayer_config_key_set_afh_interval           = 0x7,
   system_linklayer_config_key_set_priority_table         = 0x9,
-  system_linklayer_config_key_power_control_golden_range = 0x10
+  system_linklayer_config_key_power_control_golden_range = 0xa
 } system_linklayer_config_key_t;
 
 /*
@@ -127,14 +127,14 @@ typedef enum
  */
 typedef enum
 {
-  sync_clock_accuracy_500 = 0x500,
-  sync_clock_accuracy_250 = 0x250,
-  sync_clock_accuracy_150 = 0x150,
-  sync_clock_accuracy_100 = 0x100,
-  sync_clock_accuracy_75  = 0x75,
-  sync_clock_accuracy_50  = 0x50,
-  sync_clock_accuracy_30  = 0x30,
-  sync_clock_accuracy_20  = 0x20
+  sync_clock_accuracy_500 = 0x1f4,
+  sync_clock_accuracy_250 = 0xfa,
+  sync_clock_accuracy_150 = 0x96,
+  sync_clock_accuracy_100 = 0x64,
+  sync_clock_accuracy_75  = 0x4b,
+  sync_clock_accuracy_50  = 0x32,
+  sync_clock_accuracy_30  = 0x1e,
+  sync_clock_accuracy_20  = 0x14
 } sync_advertiser_clock_accuracy_t;
 
 /*
@@ -218,6 +218,55 @@ typedef enum
 } gatt_execute_write_flag_t;
 
 /*
+ * Deprecated and replaced by sl_bt_gattdb_service_type_t.
+ */
+typedef enum
+{
+  gattdb_primary_service   = 0x0,
+  gattdb_secondary_service = 0x1
+} gattdb_service_type_t;
+
+/*
+ * Deprecated and replaced by sl_bt_gattdb_value_type_t.
+ */
+typedef enum
+{
+  gattdb_fixed_length_value    = 0x1,
+  gattdb_variable_length_value = 0x2,
+  gattdb_user_managed_value    = 0x3
+} gattdb_value_type_t;
+
+/*
+ * Deprecated GATTDB_* defines replaced by SL_BT_GATTDB_*.
+ */
+#define GATTDB_ADVERTISED_SERVICE 0x1       
+
+#define GATTDB_ENCRYPTED_READ       0x1       
+#define GATTDB_BONDED_READ          0x2       
+#define GATTDB_AUTHENTICATED_READ   0x4       
+#define GATTDB_ENCRYPTED_WRITE      0x8       
+#define GATTDB_BONDED_WRITE         0x10      
+#define GATTDB_AUTHENTICATED_WRITE  0x20      
+#define GATTDB_ENCRYPTED_NOTIFY     0x40      
+#define GATTDB_BONDED_NOTIFY        0x80      
+#define GATTDB_AUTHENTICATED_NOTIFY 0x100     
+
+#define GATTDB_NO_AUTO_CCCD         0x1       
+
+#define GATTDB_CHARACTERISTIC_READ              0x2       
+#define GATTDB_CHARACTERISTIC_WRITE_NO_RESPONSE 0x4       
+#define GATTDB_CHARACTERISTIC_WRITE             0x8       
+#define GATTDB_CHARACTERISTIC_NOTIFY            0x10      
+#define GATTDB_CHARACTERISTIC_INDICATE          0x20      
+#define GATTDB_CHARACTERISTIC_EXTENDED_PROPS    0x80      
+#define GATTDB_CHARACTERISTIC_RELIABLE_WRITE    0x101     
+
+#define GATTDB_DESCRIPTOR_READ                  0x1       
+#define GATTDB_DESCRIPTOR_WRITE                 0x2       
+#define GATTDB_DESCRIPTOR_LOCAL_ONLY            0x200     
+
+
+/*
  * Deprecated and replaced by sl_bt_gatt_server_client_configuration_t.
  */
 typedef enum
@@ -275,13 +324,9 @@ typedef enum
  */
 typedef enum
 {
-  sm_bonding_key_ltk         = 0x1,
-  sm_bonding_key_addr_public = 0x2,
-  sm_bonding_key_addr_static = 0x4,
-  sm_bonding_key_irk         = 0x8,
-  sm_bonding_key_edivrand    = 0x10,
-  sm_bonding_key_csrk        = 0x20,
-  sm_bonding_key_masterid    = 0x40
+  sm_bonding_key_remote_ltk = 0x1,
+  sm_bonding_key_local_ltk  = 0x2,
+  sm_bonding_key_irk        = 0x3
 } sm_bonding_key_t;
 
 /*
@@ -319,8 +364,8 @@ typedef enum
   l2cap_insufficient_encryption_key_size = 0x7,
   l2cap_insufficient_encryption          = 0x8,
   l2cap_invalid_source_cid               = 0x9,
-  l2cap_source_cid_already_allocated     = 0x10,
-  l2cap_unacceptable_parameters          = 0x11
+  l2cap_source_cid_already_allocated     = 0xa,
+  l2cap_unacceptable_parameters          = 0xb
 } l2cap_coc_connection_result_t;
 
 /*
