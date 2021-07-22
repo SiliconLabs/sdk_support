@@ -34,6 +34,15 @@ const sli_bt_gattdb_t gattdb = {0};
 {%-     endfor %}
 {%-   endif %}
 {%- endfor %}
+{%- for entry in bluetooth_stack_pre_init %}
+{%-   if entry["include"] is string %}
+#include "{{ entry["include"] }}"
+{%-   else %}
+{%-     for f in entry["include"] %}
+#include "{{ f }}"
+{%-     endfor %}
+{%-   endif %}
+{%- endfor %}
 {%- for entry in bluetooth_on_event %}
 {%-   if entry["include"] is string %}
 #include "{{ entry["include"] }}"
@@ -90,6 +99,9 @@ void sl_bt_init(void)
 {%- if btmesh_stack is defined %}
   linklayer_priorities.scan_max = linklayer_priorities.adv_min + 1;
 {%- endif %}
+  {%- for entry in bluetooth_stack_pre_init %}
+  {{ entry["function"] }}();
+  {%- endfor %}
   // Stack initialization could fail, e.g., due to out of memory.
   // The failure could not be returned to user yet as the system initialization
   // does not return an error code.

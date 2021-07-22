@@ -4417,6 +4417,7 @@ sl_status_t sl_btmesh_generic_client_init_hsl();
 #define sl_btmesh_cmd_generic_server_init_lightness_id                   0x0e1f0028
 #define sl_btmesh_cmd_generic_server_init_ctl_id                         0x0f1f0028
 #define sl_btmesh_cmd_generic_server_init_hsl_id                         0x101f0028
+#define sl_btmesh_cmd_generic_server_get_cached_state_id                 0x111f0028
 #define sl_btmesh_rsp_generic_server_respond_id                          0x001f0028
 #define sl_btmesh_rsp_generic_server_update_id                           0x011f0028
 #define sl_btmesh_rsp_generic_server_publish_id                          0x021f0028
@@ -4433,6 +4434,7 @@ sl_status_t sl_btmesh_generic_client_init_hsl();
 #define sl_btmesh_rsp_generic_server_init_lightness_id                   0x0e1f0028
 #define sl_btmesh_rsp_generic_server_init_ctl_id                         0x0f1f0028
 #define sl_btmesh_rsp_generic_server_init_hsl_id                         0x101f0028
+#define sl_btmesh_rsp_generic_server_get_cached_state_id                 0x111f0028
 
 /**
  * @addtogroup sl_btmesh_evt_generic_server_client_request sl_btmesh_evt_generic_server_client_request
@@ -4791,6 +4793,37 @@ sl_status_t sl_btmesh_generic_server_init_ctl();
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_generic_server_init_hsl();
+
+/***************************************************************************//**
+ *
+ * Get model cached state. This command can be used to get cached model states
+ * after scene recall when using compacted recall events. This command supports
+ * only those states that would have been reported by @ref
+ * sl_btmesh_evt_generic_server_state_recall events.
+ *
+ * @param[in] elem_index Server model element index
+ * @param[in] model_id Server model ID
+ * @param[in] type Model-specific state type, identifying the kind of state
+ *   reported in the state change event. See get state types list for details.
+ * @param[out] remaining_ms Time (in milliseconds) remaining before transition
+ *   from current state to target state is complete. Ignored if no transition is
+ *   taking place.
+ * @param[in] max_parameters_size Size of output buffer passed in @p parameters
+ * @param[out] parameters_len On return, set to the length of output data
+ *   written to @p parameters
+ * @param[out] parameters Message-specific parameters, serialized into a byte
+ *   array
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
+                                                      uint16_t model_id,
+                                                      uint8_t type,
+                                                      uint32_t *remaining_ms,
+                                                      size_t max_parameters_size,
+                                                      size_t *parameters_len,
+                                                      uint8_t *parameters);
 
 /** @} */ // end addtogroup sl_btmesh_generic_server
 
@@ -10931,9 +10964,11 @@ sl_status_t sl_btmesh_scene_client_delete(uint16_t server_address,
 #define sl_btmesh_cmd_scene_server_init_id                               0x00500028
 #define sl_btmesh_cmd_scene_server_deinit_id                             0x01500028
 #define sl_btmesh_cmd_scene_server_reset_register_id                     0x02500028
+#define sl_btmesh_cmd_scene_server_enable_compact_recall_events_id       0x03500028
 #define sl_btmesh_rsp_scene_server_init_id                               0x00500028
 #define sl_btmesh_rsp_scene_server_deinit_id                             0x01500028
 #define sl_btmesh_rsp_scene_server_reset_register_id                     0x02500028
+#define sl_btmesh_rsp_scene_server_enable_compact_recall_events_id       0x03500028
 
 /**
  * @addtogroup sl_btmesh_evt_scene_server_get sl_btmesh_evt_scene_server_get
@@ -11041,6 +11076,40 @@ typedef struct sl_btmesh_evt_scene_server_publish_s sl_btmesh_evt_scene_server_p
 
 /** @} */ // end addtogroup sl_btmesh_evt_scene_server_publish
 
+/**
+ * @addtogroup sl_btmesh_evt_scene_server_compact_recall sl_btmesh_evt_scene_server_compact_recall
+ * @{
+ * @brief Recall a scene.
+ */
+
+/** @brief Identifier of the compact_recall event */
+#define sl_btmesh_evt_scene_server_compact_recall_id                     0x055000a8
+
+/***************************************************************************//**
+ * @brief Data structure of the compact_recall event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_scene_server_compact_recall_s
+{
+  uint8array states; /**< Byte array containind recalled states. Array consist
+                          of 5 byte chunks as follows:
+
+                            - Element id as 16bit unsigned integer in little
+                              endian format
+                            - Model id as 16bit unsigned integer in little
+                              endian format
+                            - Model-specific state type, identifying the kind of
+                              state recalled See get state types list for
+                              details.
+
+                          after this event application can request recalled
+                          states with @ref
+                          sl_btmesh_generic_server_get_cached_state command */
+});
+
+typedef struct sl_btmesh_evt_scene_server_compact_recall_s sl_btmesh_evt_scene_server_compact_recall_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_scene_server_compact_recall
+
 /***************************************************************************//**
  *
  * Initialize the Scene Server model. Server does not have any internal
@@ -11078,6 +11147,23 @@ sl_status_t sl_btmesh_scene_server_deinit(uint16_t elem_index);
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_scene_server_reset_register(uint16_t elem_index);
+
+/***************************************************************************//**
+ *
+ * Switch to compact reporting for recalled states. Compact state reduces amount
+ * buffering memory needed by the scene recall and is recommended for devices
+ * with big amount of models or for devices in environment with lots of
+ * bluetooth advertisement traffic.
+ *
+ * When compact mode is active @ref sl_btmesh_evt_scene_server_compact_recall is
+ * generated instead of several @ref sl_btmesh_evt_generic_server_state_recall
+ * events.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_scene_server_enable_compact_recall_events();
 
 /** @} */ // end addtogroup sl_btmesh_scene_server
 
@@ -12563,6 +12649,7 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_scene_server_register_get_t                    evt_scene_server_register_get; /**< Data field for scene_server register_get event*/
     sl_btmesh_evt_scene_server_recall_t                          evt_scene_server_recall; /**< Data field for scene_server recall event*/
     sl_btmesh_evt_scene_server_publish_t                         evt_scene_server_publish; /**< Data field for scene_server publish event*/
+    sl_btmesh_evt_scene_server_compact_recall_t                  evt_scene_server_compact_recall; /**< Data field for scene_server compact_recall event*/
     sl_btmesh_evt_scene_setup_server_store_t                     evt_scene_setup_server_store; /**< Data field for scene_setup_server store event*/
     sl_btmesh_evt_scene_setup_server_delete_t                    evt_scene_setup_server_delete; /**< Data field for scene_setup_server delete event*/
     sl_btmesh_evt_scene_setup_server_publish_t                   evt_scene_setup_server_publish; /**< Data field for scene_setup_server publish event*/

@@ -1,5 +1,5 @@
 /***************************************************************************//**
- * @brief Bluetooth API source code compatibility for deprecated items
+ * @brief BT API source code compatibility for deprecated items
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -43,7 +43,10 @@ typedef enum
   system_linklayer_config_key_clr_flags                  = 0x5,
   system_linklayer_config_key_set_afh_interval           = 0x7,
   system_linklayer_config_key_set_priority_table         = 0x9,
-  system_linklayer_config_key_power_control_golden_range = 0xa
+  system_linklayer_config_key_set_rx_packet_filtering    = 0xa,
+  system_linklayer_config_key_set_simultaneous_scanning  = 0xb,
+  system_linklayer_config_key_set_channelmap_flags       = 0xc,
+  system_linklayer_config_key_power_control_golden_range = 0x10
 } system_linklayer_config_key_t;
 
 /*
@@ -57,27 +60,7 @@ typedef enum
   gap_random_nonresolvable_address = 0x3
 } gap_address_type_t;
 
-/*
- * Deprecated and replaced by sl_bt_gap_phy_type_t.
- */
-typedef enum
-{
-  gap_1m_phy    = 0x1,
-  gap_2m_phy    = 0x2,
-  gap_coded_phy = 0x4,
-  gap_any_phys  = 0xff
-} gap_phy_type_t;
 
-/*
- * Deprecated and replaced by sl_bt_gap_phy_and_coding_type_t.
- */
-typedef enum
-{
-  gap_1m_phy_uncoded = 0x1,
-  gap_2m_phy_uncoded = 0x2,
-  gap_coded_phy_125k = 0x4,
-  gap_coded_phy_500k = 0x8
-} gap_phy_and_coding_type_t;
 
 /*
  * Deprecated and replaced by sl_bt_advertiser_connectable_mode_t.
@@ -397,6 +380,49 @@ typedef enum
 #define MEMORY_PROFILER_RESET_ERROR_FLAGS               0x1       
 #define MEMORY_PROFILER_RESET_ALLOC_FAILURES            0x2       
 
+/*
+ * Deprecated and replaced by sl_bt_gap_phy_type_t.
+ */
+typedef enum
+{
+  gap_1m_phy    = 0x1,
+  gap_2m_phy    = 0x2,
+  gap_coded_phy = 0x4,
+  gap_any_phys  = 0xff
+} gap_phy_type_t;
+
+/*
+ * Deprecated and replaced by sl_bt_gap_phy_and_coding_type_t.
+ */
+typedef enum
+{
+  gap_1m_phy_uncoded = 0x1,
+  gap_2m_phy_uncoded = 0x2,
+  gap_coded_phy_125k = 0x4,
+  gap_coded_phy_500k = 0x8
+} gap_phy_and_coding_type_t;
+
+/**
+ * Deprecated and replaced by sl_bt_gap_phy_t.
+ */
+typedef enum
+{
+  sl_bt_gap_1m_phy    = 0x1,  /**< (0x1) 1M PHY */
+  sl_bt_gap_2m_phy    = 0x2,  /**< (0x2) 2M PHY */
+  sl_bt_gap_coded_phy = 0x4,  /**< (0x4) Coded PHY, 125k (S=8) or 500k (S=2) */
+  sl_bt_gap_any_phys  = 0xff  /**< (0xff) Any PHYs the device supports */
+} sl_bt_gap_phy_type_t;
+
+/**
+ * Deprecated and replaced by sl_bt_gap_phy_coding_t.
+ */
+typedef enum
+{
+  sl_bt_gap_1m_phy_uncoded = 0x1, /**< (0x1) 1M PHY */
+  sl_bt_gap_2m_phy_uncoded = 0x2, /**< (0x2) 2M PHY */
+  sl_bt_gap_coded_phy_125k = 0x4, /**< (0x4) 125k Coded PHY (S=8) */
+  sl_bt_gap_coded_phy_500k = 0x8  /**< (0x8) 500k Coded PHY (S=2) */
+} sl_bt_gap_phy_and_coding_type_t;
 
 #ifdef __cplusplus
 }

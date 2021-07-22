@@ -259,200 +259,379 @@ typedef enum
  */
 typedef enum
 {
-  sl_bt_system_linklayer_config_key_halt                       = 0x1, /**<
-                                                                           (0x1)
-                                                                           Same
-                                                                           as
-                                                                           system_halt
-                                                                           command,
-                                                                           value-0
-                                                                           Stop
-                                                                           Radio
-                                                                           1-
-                                                                           Start
-                                                                           Radio */
-  sl_bt_system_linklayer_config_key_priority_range             = 0x2, /**<
-                                                                           (0x2)
-                                                                           Sets
-                                                                           the
-                                                                           RAIL
-                                                                           priority_mapping
-                                                                           offset
-                                                                           field
-                                                                           of
-                                                                           the
-                                                                           link
-                                                                           layer
-                                                                           priority
-                                                                           configuration
-                                                                           structure
-                                                                           to
-                                                                           the
-                                                                           first
-                                                                           byte
-                                                                           of
-                                                                           the
-                                                                           value
-                                                                           field. */
-  sl_bt_system_linklayer_config_key_scan_channels              = 0x3, /**<
-                                                                           (0x3)
-                                                                           Sets
-                                                                           channels
-                                                                           to
-                                                                           scan
-                                                                           on.
-                                                                           The
-                                                                           first
-                                                                           byte
-                                                                           of
-                                                                           the
-                                                                           value
-                                                                           is
-                                                                           the
-                                                                           channel
-                                                                           map.
-                                                                           0x1 =
-                                                                           Channel
-                                                                           37,
-                                                                           0x2 =
-                                                                           Channel
-                                                                           38,
-                                                                           0x4 =
-                                                                           Channel
-                                                                           39 */
-  sl_bt_system_linklayer_config_key_set_flags                  = 0x4, /**<
-                                                                           (0x4)
-                                                                           Sets
-                                                                           the
-                                                                           link
-                                                                           layer
-                                                                           configuration
-                                                                           flags.
-                                                                           The
-                                                                           value
-                                                                           is a
-                                                                           little
-                                                                           endian
-                                                                           32-bit
-                                                                           integer.
-                                                                           Flag
-                                                                           Values:
-                                                                             -
-                                                                               0x00000001
-                                                                               \-
-                                                                               Disable
-                                                                               Feature
-                                                                               Exchange
-                                                                               in
-                                                                               peripheral
-                                                                               role
-                                                                               of
-                                                                               the
-                                                                               connection
-                                                                             -
-                                                                               0x00000002
-                                                                               \-
-                                                                               Disable
-                                                                               Feature
-                                                                               Exchange
-                                                                               in
-                                                                               central
-                                                                               role
-                                                                               of
-                                                                               the
-                                                                               connection */
-  sl_bt_system_linklayer_config_key_clr_flags                  = 0x5, /**<
-                                                                           (0x5)
-                                                                           The
-                                                                           value
-                                                                           is
-                                                                           flags
-                                                                           to
-                                                                           clear.
-                                                                           Flags
-                                                                           are
-                                                                           the
-                                                                           same
-                                                                           as in
-                                                                           SET_FLAGS
-                                                                           command. */
-  sl_bt_system_linklayer_config_key_set_afh_interval           = 0x7, /**<
-                                                                           (0x7)
-                                                                           Set
-                                                                           afh_scan_interval
-                                                                           field
-                                                                           of
-                                                                           Link
-                                                                           Layer
-                                                                           priority
-                                                                           configuration
-                                                                           structure. */
-  sl_bt_system_linklayer_config_key_set_priority_table         = 0x9, /**<
-                                                                           (0x9)
-                                                                           The
-                                                                           value
-                                                                           contains
-                                                                           a
-                                                                           priority
-                                                                           table
-                                                                           to be
-                                                                           copied
-                                                                           over
-                                                                           the
-                                                                           existing
-                                                                           table.
-                                                                           If
-                                                                           the
-                                                                           value
-                                                                           is
-                                                                           smaller
-                                                                           than
-                                                                           the
-                                                                           full
-                                                                           table,
-                                                                           only
-                                                                           those
-                                                                           values
-                                                                           are
-                                                                           updated.
-                                                                           See
-                                                                           sl_bt_bluetooth_ll_priorities
-                                                                           struct
-                                                                           for
-                                                                           the
-                                                                           definition
-                                                                           of a
-                                                                           priority
-                                                                           table. */
-  sl_bt_system_linklayer_config_key_power_control_golden_range = 0xa  /**<
-                                                                           (0xa)
-                                                                           Power
-                                                                           control
-                                                                           golden
-                                                                           range
-                                                                           configuration.
-                                                                           The
-                                                                           first
-                                                                           byte
-                                                                           of
-                                                                           the
-                                                                           value
-                                                                           is
-                                                                           the
-                                                                           lower
-                                                                           boundary
-                                                                           and
-                                                                           the
-                                                                           second
-                                                                           byte
-                                                                           is
-                                                                           the
-                                                                           upper
-                                                                           boundary.
-                                                                           Values
-                                                                           are
-                                                                           in
-                                                                           dBm. */
+  sl_bt_system_linklayer_config_key_halt                       = 0x1,  /**<
+                                                                            (0x1)
+                                                                            Same
+                                                                            as
+                                                                            system_halt
+                                                                            command,
+                                                                            value-0
+                                                                            Stop
+                                                                            Radio
+                                                                            1-
+                                                                            Start
+                                                                            Radio */
+  sl_bt_system_linklayer_config_key_priority_range             = 0x2,  /**<
+                                                                            (0x2)
+                                                                            Sets
+                                                                            the
+                                                                            RAIL
+                                                                            priority_mapping
+                                                                            offset
+                                                                            field
+                                                                            of
+                                                                            the
+                                                                            link
+                                                                            layer
+                                                                            priority
+                                                                            configuration
+                                                                            structure
+                                                                            to
+                                                                            the
+                                                                            first
+                                                                            byte
+                                                                            of
+                                                                            the
+                                                                            value
+                                                                            field. */
+  sl_bt_system_linklayer_config_key_scan_channels              = 0x3,  /**<
+                                                                            (0x3)
+                                                                            Sets
+                                                                            channels
+                                                                            to
+                                                                            scan
+                                                                            on.
+                                                                            The
+                                                                            first
+                                                                            byte
+                                                                            of
+                                                                            the
+                                                                            value
+                                                                            is
+                                                                            the
+                                                                            channel
+                                                                            map.
+                                                                            0x1
+                                                                            =
+                                                                            Channel
+                                                                            37,
+                                                                            0x2
+                                                                            =
+                                                                            Channel
+                                                                            38,
+                                                                            0x4
+                                                                            =
+                                                                            Channel
+                                                                            39 */
+  sl_bt_system_linklayer_config_key_set_flags                  = 0x4,  /**<
+                                                                            (0x4)
+                                                                            Sets
+                                                                            the
+                                                                            link
+                                                                            layer
+                                                                            configuration
+                                                                            flags.
+                                                                            The
+                                                                            value
+                                                                            is a
+                                                                            little
+                                                                            endian
+                                                                            32-bit
+                                                                            integer.
+                                                                            Flag
+                                                                            Values:
+                                                                              -
+                                                                                0x00000001
+                                                                                \-
+                                                                                Disable
+                                                                                Feature
+                                                                                Exchange
+                                                                                in
+                                                                                peripheral
+                                                                                role
+                                                                                of
+                                                                                the
+                                                                                connection
+                                                                              -
+                                                                                0x00000002
+                                                                                \-
+                                                                                Disable
+                                                                                Feature
+                                                                                Exchange
+                                                                                in
+                                                                                central
+                                                                                role
+                                                                                of
+                                                                                the
+                                                                                connection */
+  sl_bt_system_linklayer_config_key_clr_flags                  = 0x5,  /**<
+                                                                            (0x5)
+                                                                            The
+                                                                            value
+                                                                            is
+                                                                            flags
+                                                                            to
+                                                                            clear.
+                                                                            Flags
+                                                                            are
+                                                                            the
+                                                                            same
+                                                                            as
+                                                                            in
+                                                                            SET_FLAGS
+                                                                            command. */
+  sl_bt_system_linklayer_config_key_set_afh_interval           = 0x7,  /**<
+                                                                            (0x7)
+                                                                            Set
+                                                                            afh_scan_interval
+                                                                            field
+                                                                            of
+                                                                            Link
+                                                                            Layer
+                                                                            priority
+                                                                            configuration
+                                                                            structure. */
+  sl_bt_system_linklayer_config_key_set_priority_table         = 0x9,  /**<
+                                                                            (0x9)
+                                                                            The
+                                                                            value
+                                                                            contains
+                                                                            a
+                                                                            priority
+                                                                            table
+                                                                            to
+                                                                            be
+                                                                            copied
+                                                                            over
+                                                                            the
+                                                                            existing
+                                                                            table.
+                                                                            If
+                                                                            the
+                                                                            value
+                                                                            is
+                                                                            smaller
+                                                                            than
+                                                                            the
+                                                                            full
+                                                                            table,
+                                                                            only
+                                                                            those
+                                                                            values
+                                                                            are
+                                                                            updated.
+                                                                            See
+                                                                            sl_bt_bluetooth_ll_priorities
+                                                                            struct
+                                                                            for
+                                                                            the
+                                                                            definition
+                                                                            of a
+                                                                            priority
+                                                                            table. */
+  sl_bt_system_linklayer_config_key_set_rx_packet_filtering    = 0xa,  /**<
+                                                                            (0xa)
+                                                                            Configure
+                                                                            and
+                                                                            enable
+                                                                            or
+                                                                            disable
+                                                                            RX
+                                                                            packet
+                                                                            filtering
+                                                                            feature.
+                                                                            Value:
+                                                                            >= 5
+                                                                            bytes.
+                                                                              -
+                                                                                Byte
+                                                                                1
+                                                                                \-
+                                                                                The
+                                                                                filter
+                                                                                count
+                                                                              -
+                                                                                Byte
+                                                                                2
+                                                                                \-
+                                                                                The
+                                                                                filter
+                                                                                offset
+                                                                              -
+                                                                                Byte
+                                                                                3
+                                                                                \-
+                                                                                The
+                                                                                length
+                                                                                of
+                                                                                the
+                                                                                filter
+                                                                                list
+                                                                              -
+                                                                                Byte
+                                                                                4
+                                                                                \-
+                                                                                The
+                                                                                bitmask
+                                                                                flags
+                                                                              -
+                                                                                Rest
+                                                                                of
+                                                                                the
+                                                                                data
+                                                                                \-
+                                                                                The
+                                                                                filter
+                                                                                list */
+  sl_bt_system_linklayer_config_key_set_simultaneous_scanning  = 0xb,  /**<
+                                                                            (0xb)
+                                                                            Enable
+                                                                            or
+                                                                            disable
+                                                                            simultaneous
+                                                                            scanning
+                                                                            on
+                                                                            the
+                                                                            1M
+                                                                            and
+                                                                            Coded
+                                                                            PHYs.
+                                                                            Value:
+                                                                            1
+                                                                            byte.
+                                                                              -
+                                                                                0
+                                                                                \-
+                                                                                Disable
+                                                                                simultaneous
+                                                                                scanning.
+                                                                              -
+                                                                                1
+                                                                                \-
+                                                                                Enable
+                                                                                simultaneous
+                                                                                scanning. */
+  sl_bt_system_linklayer_config_key_set_channelmap_flags       = 0xc,  /**<
+                                                                            (0xc)
+                                                                            Configure
+                                                                            channelmap
+                                                                            adaptivity
+                                                                            flags.
+                                                                            Value:
+                                                                            4
+                                                                            bytes. */
+  sl_bt_system_linklayer_config_key_power_control_golden_range = 0x10  /**<
+                                                                            (0x10)
+                                                                            Power
+                                                                            control
+                                                                            golden
+                                                                            range
+                                                                            configuration.
+                                                                            The
+                                                                            first
+                                                                            byte
+                                                                            of
+                                                                            the
+                                                                            value
+                                                                            is
+                                                                            the
+                                                                            lower
+                                                                            boundary
+                                                                            and
+                                                                            the
+                                                                            second
+                                                                            byte
+                                                                            is
+                                                                            the
+                                                                            upper
+                                                                            boundary.
+                                                                            Values
+                                                                            are
+                                                                            in
+                                                                            dBm.
+                                                                            Set
+                                                                            golden
+                                                                            range
+                                                                            parameters.
+                                                                            Value:
+                                                                            8
+                                                                            bytes.
+                                                                              -
+                                                                                Byte
+                                                                                1
+                                                                                \-
+                                                                                Minimal
+                                                                                RSSI
+                                                                                on
+                                                                                1M
+                                                                                PHY
+                                                                              -
+                                                                                Byte
+                                                                                2
+                                                                                \-
+                                                                                Maximal
+                                                                                RSSI
+                                                                                on
+                                                                                1M
+                                                                                PHY
+                                                                              -
+                                                                                Byte
+                                                                                3
+                                                                                \-
+                                                                                Minimal
+                                                                                RSSI
+                                                                                on
+                                                                                2M
+                                                                                PHY
+                                                                              -
+                                                                                Byte
+                                                                                4
+                                                                                \-
+                                                                                Maximal
+                                                                                RSSI
+                                                                                on
+                                                                                2M
+                                                                                PHY
+                                                                              -
+                                                                                Byte
+                                                                                5
+                                                                                \-
+                                                                                Minimal
+                                                                                RSSI
+                                                                                on
+                                                                                Coded
+                                                                                PHY
+                                                                                S=8
+                                                                              -
+                                                                                Byte
+                                                                                6
+                                                                                \-
+                                                                                Maximal
+                                                                                RSSI
+                                                                                on
+                                                                                Coded
+                                                                                PHY
+                                                                                S=8
+                                                                              -
+                                                                                Byte
+                                                                                7
+                                                                                \-
+                                                                                Minimal
+                                                                                RSSI
+                                                                                on
+                                                                                Coded
+                                                                                PHY
+                                                                                S=2
+                                                                              -
+                                                                                Byte
+                                                                                8
+                                                                                \-
+                                                                                Maximal
+                                                                                RSSI
+                                                                                on
+                                                                                Coded
+                                                                                PHY
+                                                                                S=2 */
 } sl_bt_system_linklayer_config_key_t;
 
 /**
@@ -763,10 +942,36 @@ sl_status_t sl_bt_system_halt(uint8_t halt);
  *       If the value is smaller than the full table, only those values are
  *       updated. See sl_bt_bluetooth_ll_priorities struct for the definition of
  *       a priority table.
+ *     - <b>sl_bt_system_linklayer_config_key_set_rx_packet_filtering (0xa):</b>
+ *       Configure and enable or disable RX packet filtering feature. Value: >=
+ *       5 bytes.
+ *         - Byte 1 - The filter count
+ *         - Byte 2 - The filter offset
+ *         - Byte 3 - The length of the filter list
+ *         - Byte 4 - The bitmask flags
+ *         - Rest of the data - The filter list
+ *
+ *     - <b>sl_bt_system_linklayer_config_key_set_simultaneous_scanning
+ *       (0xb):</b> Enable or disable simultaneous scanning on the 1M and Coded
+ *       PHYs. Value: 1 byte.
+ *         - 0 - Disable simultaneous scanning.
+ *         - 1 - Enable simultaneous scanning.
+ *
+ *     - <b>sl_bt_system_linklayer_config_key_set_channelmap_flags (0xc):</b>
+ *       Configure channelmap adaptivity flags. Value: 4 bytes.
  *     - <b>sl_bt_system_linklayer_config_key_power_control_golden_range
- *       (0xa):</b> Power control golden range configuration. The first byte of
+ *       (0x10):</b> Power control golden range configuration. The first byte of
  *       the value is the lower boundary and the second byte is the upper
- *       boundary. Values are in dBm.
+ *       boundary. Values are in dBm. Set golden range parameters. Value: 8
+ *       bytes.
+ *         - Byte 1 - Minimal RSSI on 1M PHY
+ *         - Byte 2 - Maximal RSSI on 1M PHY
+ *         - Byte 3 - Minimal RSSI on 2M PHY
+ *         - Byte 4 - Maximal RSSI on 2M PHY
+ *         - Byte 5 - Minimal RSSI on Coded PHY S=8
+ *         - Byte 6 - Maximal RSSI on Coded PHY S=8
+ *         - Byte 7 - Minimal RSSI on Coded PHY S=2
+ *         - Byte 8 - Maximal RSSI on Coded PHY S=2
  *   @endparblock
  * @param[in] data_len Length of data in @p data
  * @param[in] data Configuration data. Length and contents of the data field
@@ -1099,22 +1304,22 @@ typedef enum
  */
 typedef enum
 {
-  sl_bt_gap_1m_phy    = 0x1,  /**< (0x1) 1M PHY */
-  sl_bt_gap_2m_phy    = 0x2,  /**< (0x2) 2M PHY */
-  sl_bt_gap_coded_phy = 0x4,  /**< (0x4) Coded PHY, 125k (S=8) or 500k (S=2) */
-  sl_bt_gap_any_phys  = 0xff  /**< (0xff) Any PHYs the device supports */
-} sl_bt_gap_phy_type_t;
+  sl_bt_gap_phy_1m    = 0x1,  /**< (0x1) 1M PHY */
+  sl_bt_gap_phy_2m    = 0x2,  /**< (0x2) 2M PHY */
+  sl_bt_gap_phy_coded = 0x4,  /**< (0x4) Coded PHY, 125k (S=8) or 500k (S=2) */
+  sl_bt_gap_phy_any   = 0xff  /**< (0xff) Any PHYs the device supports */
+} sl_bt_gap_phy_t;
 
 /**
  * @brief PHY types with coding schemes
  */
 typedef enum
 {
-  sl_bt_gap_1m_phy_uncoded = 0x1, /**< (0x1) 1M PHY */
-  sl_bt_gap_2m_phy_uncoded = 0x2, /**< (0x2) 2M PHY */
-  sl_bt_gap_coded_phy_125k = 0x4, /**< (0x4) 125k Coded PHY (S=8) */
-  sl_bt_gap_coded_phy_500k = 0x8  /**< (0x8) 500k Coded PHY (S=2) */
-} sl_bt_gap_phy_and_coding_type_t;
+  sl_bt_gap_phy_coding_1m_uncoded = 0x1, /**< (0x1) 1M PHY */
+  sl_bt_gap_phy_coding_2m_uncoded = 0x2, /**< (0x2) 2M PHY */
+  sl_bt_gap_phy_coding_125k_coded = 0x4, /**< (0x4) 125k Coded PHY (S=8) */
+  sl_bt_gap_phy_coding_500k_coded = 0x8  /**< (0x8) 500k Coded PHY (S=2) */
+} sl_bt_gap_phy_coding_t;
 
 /***************************************************************************//**
  *
@@ -1462,22 +1667,22 @@ sl_status_t sl_bt_advertiser_set_timing(uint8_t handle,
  *
  * @param[in] handle Advertising set handle
  * @param[in] primary_phy @parblock
- *   Enum @ref sl_bt_gap_phy_type_t. The PHY on which the advertising packets
- *   are transmitted on the primary advertising channel. If legacy advertising
- *   PDUs are used, 1M PHY must be used. Values:
- *     - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_coded_phy (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the primary advertising channel. If legacy advertising PDUs
+ *   are used, 1M PHY must be used. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
  *
- *   Default value: @ref sl_bt_gap_1m_phy
+ *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
  * @param[in] secondary_phy @parblock
- *   Enum @ref sl_bt_gap_phy_type_t. The PHY on which the advertising packets
- *   are transmitted on the secondary advertising channel. Values:
- *     - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_2m_phy (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_coded_phy (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the secondary advertising channel. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
  *
- *   Default value: @ref sl_bt_gap_1m_phy
+ *   Default value: @ref sl_bt_gap_phy_1m
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -2039,22 +2244,22 @@ PACKSTRUCT( struct sl_bt_evt_scanner_scan_report_s
                                        - <b>SL_BT_INVALID_BONDING_HANDLE
                                          (0xff):</b> No bonding
                                        - <b>Other:</b> Bonding handle */
-  uint8_t    primary_phy;       /**< Enum @ref sl_bt_gap_phy_type_t. The PHY on
-                                     which advertising packets are transmitted
-                                     on the primary advertising channel. Ignore
-                                     this field if the report is for a legacy
+  uint8_t    primary_phy;       /**< Enum @ref sl_bt_gap_phy_t. The PHY on which
+                                     advertising packets are transmitted on the
+                                     primary advertising channel. Ignore this
+                                     field if the report is for a legacy
                                      advertising PDU. Values:
-                                       - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
-                                       - <b>sl_bt_gap_coded_phy (0x4):</b> Coded
+                                       - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                       - <b>sl_bt_gap_phy_coded (0x4):</b> Coded
                                          PHY, 125k (S=8) or 500k (S=2) */
-  uint8_t    secondary_phy;     /**< Enum @ref sl_bt_gap_phy_type_t. The PHY on
-                                     which advertising packets are transmitted
-                                     on the secondary advertising channel.
-                                     Ignore this field if the report is for a
-                                     legacy advertising PDU. Values:
-                                       - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
-                                       - <b>sl_bt_gap_2m_phy (0x2):</b> 2M PHY
-                                       - <b>sl_bt_gap_coded_phy (0x4):</b> Coded
+  uint8_t    secondary_phy;     /**< Enum @ref sl_bt_gap_phy_t. The PHY on which
+                                     advertising packets are transmitted on the
+                                     secondary advertising channel. Ignore this
+                                     field if the report is for a legacy
+                                     advertising PDU. Values:
+                                       - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                       - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                       - <b>sl_bt_gap_phy_coded (0x4):</b> Coded
                                          PHY, 125k (S=8) or 500k (S=2) */
   uint8_t    adv_sid;           /**< Advertising set identifier */
   int8_t     tx_power;          /**< TX power value in the received packet
@@ -2269,11 +2474,11 @@ PACKSTRUCT( struct sl_bt_evt_sync_opened_s
   uint8_t  address_type;   /**< Advertiser address type. Values:
                                   - <b>0:</b> Public address
                                   - <b>1:</b> Random address */
-  uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_type_t. The advertiser
-                                PHY. Values:
-                                  - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
-                                  - <b>sl_bt_gap_2m_phy (0x2):</b> 2M PHY
-                                  - <b>sl_bt_gap_coded_phy (0x4):</b> Coded PHY,
+  uint8_t  adv_phy;        /**< Enum @ref sl_bt_gap_phy_t. The advertiser PHY.
+                                Values:
+                                  - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+                                  - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+                                  - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY,
                                     125k (S=8) or 500k (S=2) */
   uint16_t adv_interval;   /**< The periodic advertising interval. Value in
                                 units of 1.25 ms
@@ -2364,7 +2569,8 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
  * established synchronization.
  *
  * The application should determine skip and timeout values based on the
- * periodic advertising interval provided by the advertiser. If @p skip and @p
+ * periodic advertising interval provided by the advertiser. It is recommended
+ * to use a long enough timeout that allows multiple receives. If @p skip and @p
  * timeout are used, select appropriate values so that they allow a few
  * receiving attempts. Periodic advertising intervals are reported in event @ref
  * sl_bt_evt_scanner_scan_report.
@@ -2375,9 +2581,9 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
  *     - Default value: 0
  * @param[in] timeout The maximum permitted time between successful receives. If
  *   this time is exceeded, synchronization is lost. Unit: 10 ms.
- *     - Range: 0x06 to 0xFFFF
+ *     - Range: 0x0A to 0x4000
  *     - Unit: 10 ms
- *     - Time range: 100 ms ms to 163.84 s
+ *     - Time range: 100 ms to 163.84 s
  *     - Default value: 1000 ms
  * @param[in] flags No flags defined currently
  *
@@ -2710,14 +2916,16 @@ PACKSTRUCT( struct sl_bt_evt_connection_get_remote_tx_power_completed_s
   uint16_t status;      /**< SL_STATUS_OK or another error code indicating the
                              reading remote transmit power operation failed. */
   uint8_t  connection;  /**< Handle of the connection */
-  uint8_t  phy;         /**< Enum @ref sl_bt_gap_phy_and_coding_type_t. The PHY
-                             for which the transmit power is reported. Values:
-                               - <b>sl_bt_gap_1m_phy_uncoded (0x1):</b> 1M PHY
-                               - <b>sl_bt_gap_2m_phy_uncoded (0x2):</b> 2M PHY
-                               - <b>sl_bt_gap_coded_phy_125k (0x4):</b> 125k
-                                 Coded PHY (S=8)
-                               - <b>sl_bt_gap_coded_phy_500k (0x8):</b> 500k
-                                 Coded PHY (S=2) */
+  uint8_t  phy;         /**< Enum @ref sl_bt_gap_phy_coding_t. The PHY for which
+                             the transmit power is reported. Values:
+                               - <b>sl_bt_gap_phy_coding_1m_uncoded (0x1):</b>
+                                 1M PHY
+                               - <b>sl_bt_gap_phy_coding_2m_uncoded (0x2):</b>
+                                 2M PHY
+                               - <b>sl_bt_gap_phy_coding_125k_coded (0x4):</b>
+                                 125k Coded PHY (S=8)
+                               - <b>sl_bt_gap_phy_coding_500k_coded (0x8):</b>
+                                 500k Coded PHY (S=2) */
   int8_t   power_level; /**< Transmit power level. Values:
                                - <b>Range -127 to 20:</b> The transmit power
                                  level in dBm
@@ -2769,14 +2977,16 @@ typedef struct sl_bt_evt_connection_get_remote_tx_power_completed_s sl_bt_evt_co
 PACKSTRUCT( struct sl_bt_evt_connection_tx_power_s
 {
   uint8_t connection;  /**< Handle of the connection */
-  uint8_t phy;         /**< Enum @ref sl_bt_gap_phy_and_coding_type_t. The PHY
-                            which the transmit power is reported for. Values:
-                              - <b>sl_bt_gap_1m_phy_uncoded (0x1):</b> 1M PHY
-                              - <b>sl_bt_gap_2m_phy_uncoded (0x2):</b> 2M PHY
-                              - <b>sl_bt_gap_coded_phy_125k (0x4):</b> 125k
-                                Coded PHY (S=8)
-                              - <b>sl_bt_gap_coded_phy_500k (0x8):</b> 500k
-                                Coded PHY (S=2) */
+  uint8_t phy;         /**< Enum @ref sl_bt_gap_phy_coding_t. The PHY which the
+                            transmit power is reported for. Values:
+                              - <b>sl_bt_gap_phy_coding_1m_uncoded (0x1):</b> 1M
+                                PHY
+                              - <b>sl_bt_gap_phy_coding_2m_uncoded (0x2):</b> 2M
+                                PHY
+                              - <b>sl_bt_gap_phy_coding_125k_coded (0x4):</b>
+                                125k Coded PHY (S=8)
+                              - <b>sl_bt_gap_phy_coding_500k_coded (0x8):</b>
+                                500k Coded PHY (S=2) */
   int8_t  power_level; /**< Transmit power level. Values:
                               - <b>Range -127 to 20:</b> The transmit power
                                 level in dBm
@@ -2825,14 +3035,16 @@ typedef struct sl_bt_evt_connection_tx_power_s sl_bt_evt_connection_tx_power_t;
 PACKSTRUCT( struct sl_bt_evt_connection_remote_tx_power_s
 {
   uint8_t connection;  /**< Handle of the connection */
-  uint8_t phy;         /**< Enum @ref sl_bt_gap_phy_and_coding_type_t. The PHY
-                            which the transmit power is reported for. Values:
-                              - <b>sl_bt_gap_1m_phy_uncoded (0x1):</b> 1M PHY
-                              - <b>sl_bt_gap_2m_phy_uncoded (0x2):</b> 2M PHY
-                              - <b>sl_bt_gap_coded_phy_125k (0x4):</b> 125k
-                                Coded PHY (S=8)
-                              - <b>sl_bt_gap_coded_phy_500k (0x8):</b> 500k
-                                Coded PHY (S=2) */
+  uint8_t phy;         /**< Enum @ref sl_bt_gap_phy_coding_t. The PHY which the
+                            transmit power is reported for. Values:
+                              - <b>sl_bt_gap_phy_coding_1m_uncoded (0x1):</b> 1M
+                                PHY
+                              - <b>sl_bt_gap_phy_coding_2m_uncoded (0x2):</b> 2M
+                                PHY
+                              - <b>sl_bt_gap_phy_coding_125k_coded (0x4):</b>
+                                125k Coded PHY (S=8)
+                              - <b>sl_bt_gap_phy_coding_500k_coded (0x8):</b>
+                                500k Coded PHY (S=2) */
   int8_t  power_level; /**< Transmit power level. Values:
                               - <b>Range -127 to 20:</b> The transmit power
                                 level in dBm
@@ -3073,10 +3285,10 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
  *       random address
  *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Private
  *       non-resolvable random address
- * @param[in] initiating_phy Enum @ref sl_bt_gap_phy_type_t. The initiating PHY.
+ * @param[in] initiating_phy Enum @ref sl_bt_gap_phy_t. The initiating PHY.
  *   Values:
- *     - <b>sl_bt_gap_1m_phy (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_coded_phy (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
  * @param[out] connection Handle that will be assigned to the connection after
  *   the connection is established. This handle is valid only if the result code
  *   of this response is 0 (zero).
@@ -3323,11 +3535,11 @@ sl_status_t sl_bt_connection_set_remote_power_reporting(uint8_t connection,
  * Get the transmit power of the local device on the given connection and PHY.
  *
  * @param[in] connection Handle of the connection
- * @param[in] phy Enum @ref sl_bt_gap_phy_and_coding_type_t. The PHY. Values:
- *     - <b>sl_bt_gap_1m_phy_uncoded (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_2m_phy_uncoded (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_coded_phy_125k (0x4):</b> 125k Coded PHY (S=8)
- *     - <b>sl_bt_gap_coded_phy_500k (0x8):</b> 500k Coded PHY (S=2)
+ * @param[in] phy Enum @ref sl_bt_gap_phy_coding_t. The PHY. Values:
+ *     - <b>sl_bt_gap_phy_coding_1m_uncoded (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coding_2m_uncoded (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coding_125k_coded (0x4):</b> 125k Coded PHY (S=8)
+ *     - <b>sl_bt_gap_phy_coding_500k_coded (0x8):</b> 500k Coded PHY (S=2)
  * @param[out] current_level The current transmit power level of the PHY on the
  *   connection. Values:
  *     - <b>Range -127 to 20:</b> The transmit power level in dBm
@@ -3352,11 +3564,11 @@ sl_status_t sl_bt_connection_get_tx_power(uint8_t connection,
  * completed.
  *
  * @param[in] connection Handle of the connection
- * @param[in] phy Enum @ref sl_bt_gap_phy_and_coding_type_t. The PHY. Values:
- *     - <b>sl_bt_gap_1m_phy_uncoded (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_2m_phy_uncoded (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_coded_phy_125k (0x4):</b> 125k Coded PHY (S=8)
- *     - <b>sl_bt_gap_coded_phy_500k (0x8):</b> 500k Coded PHY (S=2)
+ * @param[in] phy Enum @ref sl_bt_gap_phy_coding_t. The PHY. Values:
+ *     - <b>sl_bt_gap_phy_coding_1m_uncoded (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coding_2m_uncoded (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coding_125k_coded (0x4):</b> 125k Coded PHY (S=8)
+ *     - <b>sl_bt_gap_phy_coding_500k_coded (0x8):</b> 500k Coded PHY (S=2)
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -4935,9 +5147,13 @@ sl_status_t sl_bt_gattdb_stop_characteristic(uint16_t session,
  *
  * Save all changes performed in current session and close the session. The
  * stack will assign final handles to new and affected attributes, and handle
- * GATT caching as needed. The session ID, temporary attribute handles returned
- * during this session, and other existing attribute handles that are after
- * newly added or removed attributes are invalidated.
+ * GATT caching as needed. The stack removes the client characteristic
+ * configurations of non-connected GATT clients except the service-changed
+ * configuration. For connected GATT clients during this database change, the
+ * stack removes the configurations to the removed characteristics. The session
+ * ID, temporary attribute handles returned during this session, and other
+ * existing attribute handles that are after newly added or removed attributes
+ * are invalidated.
  *
  * Some attribute handles returned in this session may become invalid if
  * attributes are not created in the order they present in the database. In this
@@ -6025,7 +6241,10 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_test_dtm_tx(uint8_t packet_type,
  *     - <b>sl_bt_test_phy_125k (0x3):</b> 125k Coded PHY
  *     - <b>sl_bt_test_phy_500k (0x4):</b> 500k Coded PHY
  * @param[in] power_level TX power level in unit dBm. Values:
- *     - <b>-127 to +20:</b> Use specified or the nearest TX power level.
+ *     - <b>-127 to +20:</b> Use specified or the nearest TX power level. The
+ *       minimum -127 dBm is specified in the Bluetooth specification. However,
+ *       a device may not support this low TX power. In addition, only some
+ *       devices support 20 dBm TX power.
  *     - <b>0x7E:</b> Use minimum TX power level the device supports.
  *     - <b>0x7F:</b> Use the smallest of the maximum TX power level the device
  *       supports and the global maximum TX power setting in stack.

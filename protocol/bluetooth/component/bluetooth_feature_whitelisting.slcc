@@ -10,6 +10,7 @@ quality: "production"
 root_path: "protocol/bluetooth"
 requires:
   - name: "bluetooth_stack"
+  - name: "bluetooth_feature_gap"
 provides:
   - name: "bluetooth_feature_whitelisting"
 template_contribution:

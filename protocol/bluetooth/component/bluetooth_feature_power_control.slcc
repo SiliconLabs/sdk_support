@@ -17,7 +17,7 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_power_control
-  - name: bluetooth_stack_init
+  - name: bluetooth_stack_pre_init
     value:
       include: "sl_bt_power_control_config.h"
       function: "sl_bt_init_power_control"

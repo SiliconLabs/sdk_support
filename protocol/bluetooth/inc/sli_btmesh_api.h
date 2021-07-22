@@ -779,6 +779,16 @@ PACKSTRUCT( struct sl_btmesh_cmd_generic_server_publish_s
 typedef struct sl_btmesh_cmd_generic_server_publish_s sl_btmesh_cmd_generic_server_publish_t;
 
 
+PACKSTRUCT( struct sl_btmesh_cmd_generic_server_get_cached_state_s
+{
+    uint16_t            elem_index;
+    uint16_t            model_id;
+    uint8_t             type;
+});
+
+typedef struct sl_btmesh_cmd_generic_server_get_cached_state_s sl_btmesh_cmd_generic_server_get_cached_state_t;
+
+
 
 PACKSTRUCT( struct sl_btmesh_cmd_test_set_nettx_s
 {
@@ -3532,6 +3542,16 @@ PACKSTRUCT( struct sl_btmesh_rsp_generic_server_init_hsl_s
 typedef struct sl_btmesh_rsp_generic_server_init_hsl_s sl_btmesh_rsp_generic_server_init_hsl_t;
 
 
+PACKSTRUCT( struct sl_btmesh_rsp_generic_server_get_cached_state_s
+{
+    uint16_t            result;
+    uint32_t            remaining_ms;
+    uint8array          parameters;
+});
+
+typedef struct sl_btmesh_rsp_generic_server_get_cached_state_s sl_btmesh_rsp_generic_server_get_cached_state_t;
+
+
 PACKSTRUCT( struct sl_btmesh_rsp_test_get_nettx_s
 {
     uint16_t            result;
@@ -4762,6 +4782,14 @@ PACKSTRUCT( struct sl_btmesh_rsp_scene_server_reset_register_s
 typedef struct sl_btmesh_rsp_scene_server_reset_register_s sl_btmesh_rsp_scene_server_reset_register_t;
 
 
+PACKSTRUCT( struct sl_btmesh_rsp_scene_server_enable_compact_recall_events_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_btmesh_rsp_scene_server_enable_compact_recall_events_s sl_btmesh_rsp_scene_server_enable_compact_recall_events_t;
+
+
 PACKSTRUCT( struct sl_btmesh_rsp_scene_setup_server_init_s
 {
     uint16_t            result;
@@ -5146,6 +5174,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_cmd_generic_server_respond_t                       cmd_generic_server_respond;
     sl_btmesh_cmd_generic_server_update_t                        cmd_generic_server_update;
     sl_btmesh_cmd_generic_server_publish_t                       cmd_generic_server_publish;
+    sl_btmesh_cmd_generic_server_get_cached_state_t              cmd_generic_server_get_cached_state;
     sl_btmesh_cmd_test_set_nettx_t                               cmd_test_set_nettx;
     sl_btmesh_cmd_test_set_relay_t                               cmd_test_set_relay;
     sl_btmesh_cmd_test_set_adv_scan_params_t                     cmd_test_set_adv_scan_params;
@@ -5431,6 +5460,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_generic_server_init_lightness_t                rsp_generic_server_init_lightness;
     sl_btmesh_rsp_generic_server_init_ctl_t                      rsp_generic_server_init_ctl;
     sl_btmesh_rsp_generic_server_init_hsl_t                      rsp_generic_server_init_hsl;
+    sl_btmesh_rsp_generic_server_get_cached_state_t              rsp_generic_server_get_cached_state;
     sl_btmesh_rsp_test_get_nettx_t                               rsp_test_get_nettx;
     sl_btmesh_rsp_test_set_nettx_t                               rsp_test_set_nettx;
     sl_btmesh_rsp_test_get_relay_t                               rsp_test_get_relay;
@@ -5575,6 +5605,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_rsp_scene_server_init_t                            rsp_scene_server_init;
     sl_btmesh_rsp_scene_server_deinit_t                          rsp_scene_server_deinit;
     sl_btmesh_rsp_scene_server_reset_register_t                  rsp_scene_server_reset_register;
+    sl_btmesh_rsp_scene_server_enable_compact_recall_events_t    rsp_scene_server_enable_compact_recall_events;
     sl_btmesh_rsp_scene_setup_server_init_t                      rsp_scene_setup_server_init;
     sl_btmesh_rsp_scheduler_client_init_t                        rsp_scheduler_client_init;
     sl_btmesh_rsp_scheduler_client_deinit_t                      rsp_scheduler_client_deinit;
@@ -5733,6 +5764,7 @@ PACKSTRUCT( struct sl_btmesh_packet {
     sl_btmesh_evt_scene_server_register_get_t                    evt_scene_server_register_get;
     sl_btmesh_evt_scene_server_recall_t                          evt_scene_server_recall;
     sl_btmesh_evt_scene_server_publish_t                         evt_scene_server_publish;
+    sl_btmesh_evt_scene_server_compact_recall_t                  evt_scene_server_compact_recall;
     sl_btmesh_evt_scene_setup_server_store_t                     evt_scene_setup_server_store;
     sl_btmesh_evt_scene_setup_server_delete_t                    evt_scene_setup_server_delete;
     sl_btmesh_evt_scene_setup_server_publish_t                   evt_scene_setup_server_publish;

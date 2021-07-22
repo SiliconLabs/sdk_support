@@ -2197,6 +2197,34 @@ sl_status_t sl_btmesh_generic_server_init_hsl() {
 
 }
 
+sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
+                                                      uint16_t model_id,
+                                                      uint8_t type,
+                                                      uint32_t *remaining_ms,
+                                                      size_t max_parameters_size,
+                                                      size_t *parameters_len,
+                                                      uint8_t *parameters) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_generic_server_get_cached_state.elem_index=elem_index;
+    cmd->data.cmd_generic_server_get_cached_state.model_id=model_id;
+    cmd->data.cmd_generic_server_get_cached_state.type=type;
+
+    cmd->header=sl_btmesh_cmd_generic_server_get_cached_state_id+(((5)&0xff)<<8)+(((5)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *remaining_ms = rsp->data.rsp_generic_server_get_cached_state.remaining_ms;
+    *parameters_len = rsp->data.rsp_generic_server_get_cached_state.parameters.len;
+    if (rsp->data.rsp_generic_server_get_cached_state.parameters.len <= max_parameters_size) {
+        memcpy(parameters,rsp->data.rsp_generic_server_get_cached_state.parameters.data,rsp->data.rsp_generic_server_get_cached_state.parameters.len);
+    }
+    return rsp->data.rsp_generic_server_get_cached_state.result;
+
+}
+
 sl_status_t sl_btmesh_test_get_nettx(uint8_t *count, uint8_t *interval) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
@@ -5243,6 +5271,20 @@ sl_status_t sl_btmesh_scene_server_reset_register(uint16_t elem_index) {
 
     sl_btmesh_host_handle_command();
     return rsp->data.rsp_scene_server_reset_register.result;
+
+}
+
+sl_status_t sl_btmesh_scene_server_enable_compact_recall_events() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_scene_server_enable_compact_recall_events_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_scene_server_enable_compact_recall_events.result;
 
 }
 

@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<!--Build Version v3.2.0 -->
-<api device_id="5" device_name="btmesh">
+<api device_id="5" device_name="btmesh" version="3.2.1">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
         <datatype base="int16" name="int16"/>
@@ -908,6 +907,25 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </params>
         </event>
+        <defines name="oob_capabilities">
+            <define name="OOB_OTHER" value="0x1"/>
+            <define name="OOB_URI" value="0x2"/>
+            <define name="OOB_2D_MR_CODE" value="0x4"/>
+            <define name="OOB_BAR_CODE" value="0x8"/>
+            <define name="OOB_NFC" value="0x10"/>
+            <define name="OOB_NUMBER" value="0x20"/>
+            <define name="OOB_STRING" value="0x40"/>
+            <define name="OOB_RFU_7" value="0x80"/>
+            <define name="OOB_RFU_8" value="0x100"/>
+            <define name="OOB_RFU_9" value="0x200"/>
+            <define name="OOB_RFU_A" value="0x400"/>
+            <define name="OOB_LOC_ON_BOX" value="0x800"/>
+            <define name="OOB_LOC_IN_BOX" value="0x1000"/>
+            <define name="OOB_LOC_PAPER" value="0x2000"/>
+            <define name="OOB_LOC_MANUAL" value="0x4000"/>
+            <define name="OOB_LOC_DEVICE" value="0x8000"/>
+            <define name="OOB_RFU_MASK" value="0x780"/>
+        </defines>
     </class>
     <class index="24" name="proxy">
         <command index="0" name="connect" >
@@ -1381,6 +1399,72 @@
                 <param datatype="uint8array" name="parameters" type="uint8array"/>
             </params>
         </event>
+        <defines name="get_state_type">
+            <define name="state_on_off" value="0x0"/>
+            <define name="state_on_power_up" value="0x1"/>
+            <define name="state_level" value="0x2"/>
+            <define name="state_power_level" value="0x3"/>
+            <define name="state_power_level_last" value="0x4"/>
+            <define name="state_power_level_default" value="0x5"/>
+            <define name="state_power_level_range" value="0x6"/>
+            <define name="state_transition_time" value="0x6"/>
+            <define name="state_battery" value="0x8"/>
+            <define name="state_location_global" value="0x9"/>
+            <define name="state_location_local" value="0xa"/>
+            <define name="state_property_user" value="0xb"/>
+            <define name="state_property_admin" value="0xc"/>
+            <define name="state_property_manuf" value="0xd"/>
+            <define name="state_property_list_user" value="0xe"/>
+            <define name="state_property_list_admin" value="0xf"/>
+            <define name="state_property_list_manuf" value="0x10"/>
+            <define name="state_property_list_client" value="0x11"/>
+            <define name="state_lightness_actual" value="0x80"/>
+            <define name="state_lightness_linear" value="0x81"/>
+            <define name="state_lightness_last" value="0x82"/>
+            <define name="state_lightness_default" value="0x83"/>
+            <define name="state_lightness_range" value="0x84"/>
+            <define name="state_ctl" value="0x85"/>
+            <define name="state_ctl_temperature" value="0x86"/>
+            <define name="state_ctl_default" value="0x87"/>
+            <define name="state_ctl_range" value="0x88"/>
+            <define name="state_ctl_lightness_temperature" value="0x89"/>
+            <define name="state_hsl" value="0x8a"/>
+            <define name="state_hsl_hue" value="0x8b"/>
+            <define name="state_hsl_saturation" value="0x8c"/>
+            <define name="state_hsl_default" value="0x8d"/>
+            <define name="state_hsl_range" value="0x8e"/>
+            <define name="state_hsl_target" value="0x8f"/>
+        </defines>
+        <defines name="set_request_type">
+            <define name="request_on_off" value="0x0"/>
+            <define name="request_on_power_up" value="0x1"/>
+            <define name="request_level" value="0x2"/>
+            <define name="request_level_delta" value="0x3"/>
+            <define name="request_level_move" value="0x4"/>
+            <define name="request_level_halt" value="0x5"/>
+            <define name="request_power_level" value="0x6"/>
+            <define name="request_power_level_default" value="0x7"/>
+            <define name="request_power_level_range" value="0x8"/>
+            <define name="request_transition_time" value="0x9"/>
+            <define name="request_location_global" value="0xa"/>
+            <define name="request_location_local" value="0xb"/>
+            <define name="request_property_user" value="0xc"/>
+            <define name="request_property_admin" value="0xd"/>
+            <define name="request_property_manuf" value="0xe"/>
+            <define name="request_lightness_actual" value="0x80"/>
+            <define name="request_lightness_linear" value="0x81"/>
+            <define name="request_lightness_default" value="0x82"/>
+            <define name="request_lightness_range" value="0x83"/>
+            <define name="request_ctl" value="0x84"/>
+            <define name="request_ctl_temperature" value="0x85"/>
+            <define name="request_ctl_default" value="0x86"/>
+            <define name="request_ctl_range" value="0x87"/>
+            <define name="request_hsl" value="0x88"/>
+            <define name="request_hsl_hue" value="0x89"/>
+            <define name="request_hsl_saturation" value="0x8a"/>
+            <define name="request_hsl_default" value="0x8b"/>
+            <define name="request_hsl_range" value="0x8c"/>
+        </defines>
     </class>
     <class index="31" name="generic_server">
         <command index="0" name="respond" >
@@ -1496,6 +1580,18 @@
             <params/>
             <returns>
                 <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
+        <command index="17" name="get_cached_state" >
+            <params>
+                <param datatype="uint16" name="elem_index" type="uint16"/>
+                <param datatype="uint16" name="model_id" type="uint16"/>
+                <param datatype="uint8" name="type" type="uint8"/>
+            </params>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+                <param datatype="uint32" name="remaining_ms" type="uint32"/>
+                <param datatype="uint8array" name="parameters" type="uint8array"/>
             </returns>
         </command>
         <event index="0" name="client_request">
@@ -3719,6 +3815,12 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <command index="3" name="enable_compact_recall_events" >
+            <params/>
+            <returns>
+                <param datatype="errorcode" name="result" type="uint16"/>
+            </returns>
+        </command>
         <event index="1" name="get">
             <params>
                 <param datatype="uint16" name="destination_address" type="uint16"/>
@@ -3749,6 +3851,11 @@
             <params>
                 <param datatype="uint16" name="elem_index" type="uint16"/>
                 <param datatype="uint32" name="period_ms" type="uint32"/>
+            </params>
+        </event>
+        <event index="5" name="compact_recall">
+            <params>
+                <param datatype="uint8array" name="states" type="uint8array"/>
             </params>
         </event>
     </class>

@@ -16,3 +16,7 @@ template_contribution:
     value:
       class: "cte_transmitter"
     priority: 10
+  - name: bluetooth_controller_feature_init
+    value:
+      function: "sl_btctrl_init_cte()"
+    priority: 10

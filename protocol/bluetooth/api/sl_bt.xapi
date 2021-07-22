@@ -1,6 +1,5 @@
 <?xml version="1.0" ?>
-<!--Build Version v3.2.0 -->
-<api device_id="4" device_name="bt">
+<api device_id="4" device_name="bt" version="3.2.1">
     <datatypes>
         <datatype base="uint16" name="errorcode"/>
         <datatype base="int16" name="int16"/>
@@ -274,7 +273,10 @@
             <enum name="linklayer_config_key_clr_flags" value="0x5"/>
             <enum name="linklayer_config_key_set_afh_interval" value="0x7"/>
             <enum name="linklayer_config_key_set_priority_table" value="0x9"/>
-            <enum name="linklayer_config_key_power_control_golden_range" value="0xa"/>
+            <enum name="linklayer_config_key_set_rx_packet_filtering" value="0xa"/>
+            <enum name="linklayer_config_key_set_simultaneous_scanning" value="0xb"/>
+            <enum name="linklayer_config_key_set_channelmap_flags" value="0xc"/>
+            <enum name="linklayer_config_key_power_control_golden_range" value="0x10"/>
         </enums>
     </class>
     <class index="2" name="gap">
@@ -309,17 +311,17 @@
             <enum name="random_resolvable_address" value="0x2"/>
             <enum name="random_nonresolvable_address" value="0x3"/>
         </enums>
-        <enums name="phy_type">
-            <enum name="1m_phy" value="0x1"/>
-            <enum name="2m_phy" value="0x2"/>
-            <enum name="coded_phy" value="0x4"/>
-            <enum name="any_phys" value="0xff"/>
+        <enums name="phy">
+            <enum name="phy_1m" value="0x1"/>
+            <enum name="phy_2m" value="0x2"/>
+            <enum name="phy_coded" value="0x4"/>
+            <enum name="phy_any" value="0xff"/>
         </enums>
-        <enums name="phy_and_coding_type">
-            <enum name="1m_phy_uncoded" value="0x1"/>
-            <enum name="2m_phy_uncoded" value="0x2"/>
-            <enum name="coded_phy_125k" value="0x4"/>
-            <enum name="coded_phy_500k" value="0x8"/>
+        <enums name="phy_coding">
+            <enum name="phy_coding_1m_uncoded" value="0x1"/>
+            <enum name="phy_coding_2m_uncoded" value="0x2"/>
+            <enum name="phy_coding_125k_coded" value="0x4"/>
+            <enum name="phy_coding_500k_coded" value="0x8"/>
         </enums>
     </class>
     <class index="4" name="advertiser">
@@ -869,6 +871,11 @@
             <enum name="tx_power_at_minimum" value="0x1"/>
             <enum name="tx_power_at_maximum" value="0x2"/>
         </enums>
+        <defines name="tx_power_const">
+            <define name="tx_power_unmanaged" value="0x7e"/>
+            <define name="tx_power_unavailable" value="0x7f"/>
+            <define name="tx_power_change_unavailable" value="0x7f"/>
+        </defines>
     </class>
     <class index="9" name="gatt">
         <command index="0" name="set_max_mtu" >
@@ -1338,6 +1345,37 @@
             <enum name="variable_length_value" value="0x2"/>
             <enum name="user_managed_value" value="0x3"/>
         </enums>
+        <defines name="service_property_flags">
+            <define name="advertised_service" value="0x1"/>
+        </defines>
+        <defines name="security_requirements">
+            <define name="encrypted_read" value="0x1"/>
+            <define name="bonded_read" value="0x2"/>
+            <define name="authenticated_read" value="0x4"/>
+            <define name="encrypted_write" value="0x8"/>
+            <define name="bonded_write" value="0x10"/>
+            <define name="authenticated_write" value="0x20"/>
+            <define name="encrypted_notify" value="0x40"/>
+            <define name="bonded_notify" value="0x80"/>
+            <define name="authenticated_notify" value="0x100"/>
+        </defines>
+        <defines name="flags">
+            <define name="no_auto_cccd" value="0x1"/>
+        </defines>
+        <defines name="characteristic_properties">
+            <define name="characteristic_read" value="0x2"/>
+            <define name="characteristic_write_no_response" value="0x4"/>
+            <define name="characteristic_write" value="0x8"/>
+            <define name="characteristic_notify" value="0x10"/>
+            <define name="characteristic_indicate" value="0x20"/>
+            <define name="characteristic_extended_props" value="0x80"/>
+            <define name="characteristic_reliable_write" value="0x101"/>
+        </defines>
+        <defines name="descriptor_properties">
+            <define name="descriptor_read" value="0x1"/>
+            <define name="descriptor_write" value="0x2"/>
+            <define name="descriptor_local_only" value="0x200"/>
+        </defines>
     </class>
     <class index="10" name="gatt_server">
         <command index="10" name="set_max_mtu" >
@@ -1623,6 +1661,9 @@
                 <param datatype="errorcode" name="result" type="uint16"/>
             </returns>
         </command>
+        <defines name="keys">
+            <define name="key_ctune" value="0x32"/>
+        </defines>
     </class>
     <class index="14" name="test">
         <command index="0" name="dtm_tx" >
@@ -2447,6 +2488,14 @@
         <event index="1" name="list_ram_usage_complete">
             <params/>
         </event>
+        <defines name="error_flags">
+            <define name="error_too_many_trackers" value="0x1"/>
+            <define name="error_too_many_live_allocations" value="0x2"/>
+        </defines>
+        <defines name="reset_flags">
+            <define name="reset_error_flags" value="0x1"/>
+            <define name="reset_alloc_failures" value="0x2"/>
+        </defines>
     </class>
     <class index="255" name="user">
         <command index="0" name="message_to_target" >
