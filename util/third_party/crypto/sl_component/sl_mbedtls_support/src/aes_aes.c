@@ -396,13 +396,21 @@ int mbedtls_aes_setkey_enc(mbedtls_aes_context *ctx,
   AES_VALIDATE_RET(ctx != NULL);
   AES_VALIDATE_RET(key != NULL);
 
-  if ( (128 != keybits)
+  switch (keybits) {
+    case 128:
+      break;
+    case 192:
+      // AES-192 is not supported on series-0 devices.
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+    case 256:
 #if defined(AES_CTRL_AES256)
-       && (256 != keybits)
+      break;
+#else
+      // AES-256 is not supported on some series-0 devices.
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
 #endif
-       ) {
-    // Unsupported key size
-    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+    default:
+      return MBEDTLS_ERR_AES_INVALID_KEY_LENGTH;
   }
 
   ctx->keybits = keybits;
@@ -428,16 +436,22 @@ int mbedtls_aes_setkey_dec(mbedtls_aes_context *ctx,
       AES_DecryptKey128(ctx->key, key);
       aes_unlock();
       break;
-#if defined(AES_CTRL_AES256)
+    case 192:
+      // AES-192 is not supported on series-0 devices.
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     case 256:
+#if defined(AES_CTRL_AES256)
       ctx->keybits = keybits;
       aes_lock();
       AES_DecryptKey256(ctx->key, key);
       aes_unlock();
       break;
+#else
+      // AES-256 is not supported on some series-0 devices.
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
 #endif
     default:
-      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+      return MBEDTLS_ERR_AES_INVALID_KEY_LENGTH;
   }
 
   return 0;

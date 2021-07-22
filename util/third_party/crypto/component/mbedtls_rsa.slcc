@@ -15,6 +15,7 @@ requires:
   - name: mbedtls_hash
   - name: mbedtls_core
   - name: mbedtls_rsa_size
+  - name: mbedtls_x509
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_RSA_C

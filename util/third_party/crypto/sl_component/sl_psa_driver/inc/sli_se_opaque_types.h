@@ -30,18 +30,6 @@
 #ifndef SLI_SE_OPAQUE_TYPES_H
 #define SLI_SE_OPAQUE_TYPES_H
 
-/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
-
-/***************************************************************************//**
- * \addtogroup sl_psa_drivers
- * \{
- ******************************************************************************/
-
-/***************************************************************************//**
- * \addtogroup sl_psa_drivers_se
- * \{
- ******************************************************************************/
-
 #include "em_device.h"
 
 #ifdef __cplusplus
@@ -61,49 +49,72 @@ extern "C" {
 #include "psa/crypto_driver_common.h"
 #include "psa/crypto_platform.h"
 
+/***************************************************************************//**
+ * \addtogroup sl_psa_drivers
+ * \{
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * \addtogroup sl_psa_drivers_se PSA drivers for devices with Secure Engine
+ * \{
+ ******************************************************************************/
+
 /*******************************************************************************
  * Defines *
  ******************************************************************************/
 
-/// Location value for keys managed by this driver
+/// Location value for keys to be stored encrypted with the device-unique secret,
+/// or for accessing the built-in keys on Vault devices.
 #define PSA_KEY_LOCATION_SLI_SE_OPAQUE   ((psa_key_location_t)0x000001UL)
 
-/// Version of opaque header struct
-#define SLI_SE_OPAQUE_KEY_CONTEXT_VERSION (0x01)
-
 #if defined(MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS)
+/***************************************************************************//**
+ * \addtogroup sl_psa_drivers_se_builtin_keys Builtin keys on devices with Secure Engine
+ * \brief These key ID values belong to the builtin range of PSA, and allow access
+ *        to the keys which respectively are and can be preprovisioned in Secure Engine
+ *        devices. Refer to \ref psa_builtin_keys or AN1311 for more information on the
+ *        usage of builtin keys through PSA Crypto.
+ * \{
+ ******************************************************************************/
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 #ifndef SL_SE_BUILTIN_KEY_APPLICATION_ATTESTATION_ID
-/// Vendor Key ID for application identity key
+/// Vendor Key ID for the built-in application identity key on Vault High devices
 #define SL_SE_BUILTIN_KEY_APPLICATION_ATTESTATION_ID  (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 5)
 #endif
 
 #ifndef SL_SE_BUILTIN_KEY_SYSTEM_ATTESTATION_ID
-/// Vendor Key ID for SE identity key
+/// Vendor Key ID for the built-in SE identity key on Vault High devices
 #define SL_SE_BUILTIN_KEY_SYSTEM_ATTESTATION_ID       (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 4)
 #endif
 #endif /* VAULT */
 
 #ifndef SL_SE_BUILTIN_KEY_SECUREBOOT_ID
-/// Vendor Key ID for Secure Boot verifying key
+/// Vendor Key ID for the Secure Boot verifying key provisioned to the Secure Engine.
 #define SL_SE_BUILTIN_KEY_SECUREBOOT_ID               (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 1)
 #endif
 
 #ifndef SL_SE_BUILTIN_KEY_SECUREDEBUG_ID
-/// Vendor Key ID for Secure Debug verifying key
+/// Vendor Key ID for the Secure Debug verifying key provisioned to the Secure Engine.
 #define SL_SE_BUILTIN_KEY_SECUREDEBUG_ID              (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 2)
 #endif
 
 #ifndef SL_SE_BUILTIN_KEY_AES128_ID
-/// Vendor Key ID for SE-provisioned AES 128 key
+/// Vendor Key ID for AES-128 key provisioned to the Secure Engine.
 #define SL_SE_BUILTIN_KEY_AES128_ID                   (MBEDTLS_PSA_KEY_ID_BUILTIN_MIN + 3)
 #endif
 
-/// Built-in AES key mode of operation, defaults to CTR mode
+/// Algorithm with which the #SL_SE_BUILTIN_KEY_AES128_ID key will be used. PSA Crypto
+/// only allows one specific usage algorithm per built-in key ID.
 #ifndef SL_SE_BUILTIN_KEY_AES128_ALG
 #define SL_SE_BUILTIN_KEY_AES128_ALG                  (PSA_ALG_CTR)
 #endif
+/** \} (end addtogroup sl_psa_drivers_se_builtin_keys) */
 #endif /* MBEDTLS_PSA_CRYPTO_BUILTIN_KEYS */
+
+/// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
+/// Version of opaque header struct
+#define SLI_SE_OPAQUE_KEY_CONTEXT_VERSION (0x01)
 
 /*******************************************************************************
  * Structs *
@@ -189,9 +200,8 @@ typedef struct {
 }
 #endif
 
+/// @endcond
 /** \} (end addtogroup sl_psa_drivers_se) */
 /** \} (end addtogroup sl_psa_drivers) */
-
-/// @endcond
 
 #endif // SLI_SE_OPAQUE_TYPES_H

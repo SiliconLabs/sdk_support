@@ -47,3 +47,26 @@ size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type)
       return 0;
   }
 }
+
+psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
+                                            size_t padded_data_length,
+                                            uint8_t padding_bytes)
+{
+  // Check that the last padding byte is valid.
+  // Note that the below checks are valid for both partial block padding
+  // and complete padding blocks.
+  size_t invalid_padding = 0;
+  invalid_padding |= (padding_bytes > padded_data_length);
+  invalid_padding |= (padding_bytes == 0);
+
+  // Check that every padding byte is correct (equal to padding_bytes)
+  size_t pad_index = padded_data_length - padding_bytes;
+  for (size_t i = 0; i < padded_data_length; ++i) {
+    // The number of checks should be independent of padding_bytes,
+    // so use pad_index instead to make the result zero for non-padding
+    // bytes in out_buf.
+    invalid_padding |= (padded_data[i] ^ padding_bytes) * (i >= pad_index);
+  }
+
+  return invalid_padding ? PSA_ERROR_INVALID_PADDING : PSA_SUCCESS;
+}

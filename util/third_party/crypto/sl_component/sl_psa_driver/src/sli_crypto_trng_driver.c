@@ -73,6 +73,10 @@ static psa_status_t sli_crypto_trng_soft_reset(void)
     }
   }
 
+  // If softreset is not successful, turn off the TRNG enable bit to
+  // signal that the next entropy fetch function needs to re-initialize
+  // the TRNG peripheral.
+  TRNG0->CONTROL &= ~TRNG_CONTROL_ENABLE;
   return PSA_ERROR_HARDWARE_FAILURE;
 }
 

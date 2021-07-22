@@ -138,6 +138,7 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
                                                uint8_t* output,
                                                size_t plaintext_length,
                                                size_t tag_length,
+                                               uint8_t* tag,
                                                bool encrypt_ndecrypt)
 {
   // Step 1: calculate H = Ek(0)
@@ -202,7 +203,7 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   // If we're decrypting, mix in the to-be-checked tag value before transforming
   if (!encrypt_ndecrypt) {
     for (size_t i = 0; i < tag_length; i++) {
-      tagbuf[i] ^= input[plaintext_length + i];
+      tagbuf[i] ^= tag[i];
     }
   }
 
@@ -243,23 +244,25 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
   }
 
   // Step 7: transform data using AES-CTR
-  data_in = block_t_convert(input, plaintext_length);
-  data_out = block_t_convert(output, plaintext_length);
-  block_t nonce_internal = block_t_convert(iv, sizeof(iv));
+  if (plaintext_length) {
+    data_in = block_t_convert(input, plaintext_length);
+    data_out = block_t_convert(output, plaintext_length);
+    block_t nonce_internal = block_t_convert(iv, sizeof(iv));
 
-  status = cryptoacc_management_acquire();
-  if (status != PSA_SUCCESS) {
-    return status;
-  }
-  sx_ret = sx_aes_ctr_encrypt((const block_t *)&key,
-                              (const block_t *)&data_in,
-                              &data_out,
-                              (const block_t *)&nonce_internal);
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return status;
+    }
+    sx_ret = sx_aes_ctr_encrypt((const block_t *)&key,
+                                (const block_t *)&data_in,
+                                &data_out,
+                                (const block_t *)&nonce_internal);
 
-  status = cryptoacc_management_release();
-  if (sx_ret != CRYPTOLIB_SUCCESS
-      || status != PSA_SUCCESS) {
-    return PSA_ERROR_HARDWARE_FAILURE;
+    status = cryptoacc_management_release();
+    if (sx_ret != CRYPTOLIB_SUCCESS
+        || status != PSA_SUCCESS) {
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
   }
 
   // Step 8: If we're encrypting, accumulate the ciphertext now
@@ -306,7 +309,7 @@ static psa_status_t sli_cryptoacc_software_gcm(const uint8_t* keybuf,
 
   // Step 11: output tag for encrypt operation, check tag for decrypt
   if (encrypt_ndecrypt) {
-    memcpy(&output[plaintext_length], tagbuf, tag_length);
+    memcpy(tag, tagbuf, tag_length);
   } else {
     uint8_t accumulator = 0;
     for (size_t i = 0; i < tag_length; i++) {
@@ -336,139 +339,24 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt(const psa_key_attributes_t *
                                                     size_t *ciphertext_length)
 {
 #if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
-
-  if (key_buffer == NULL
-      || attributes == NULL
-      || nonce == NULL
-      || (additional_data == NULL && additional_data_length > 0)
-      || (plaintext == NULL && plaintext_length > 0)
-      || (plaintext_length > 0 && (ciphertext == NULL || ciphertext_size == 0))
-      || ciphertext_length == NULL) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  size_t key_bits = psa_get_key_bits(attributes);
-  size_t tag_length = PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes),
-                                          psa_get_key_bits(attributes),
-                                          alg);
-
-  // Verify that the driver supports the given parameters.
-  psa_status_t status = check_aead_parameters(attributes, alg, nonce_length, additional_data_length);
-  if (status != PSA_SUCCESS) {
-    return status;
-  }
-
-  // Check input-key size.
-  if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
-    return PSA_ERROR_INVALID_ARGUMENT;
-  }
-
-  // Check sufficient output buffer size.
-  if (ciphertext_size < plaintext_length + tag_length) {
+  if (ciphertext_size <= plaintext_length) {
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
 
-  // Our drivers only support full or no overlap between input and output
-  // buffers. So in the case of partial overlap, copy the input buffer into
-  // the output buffer and process it in place as if the buffers fully
-  // overlapped.
-  if ((ciphertext > plaintext) && (ciphertext < (plaintext + plaintext_length))) {
-    memmove(ciphertext, plaintext, plaintext_length);
-    plaintext = ciphertext;
+  size_t tag_length = 0;
+  psa_status_t psa_status = sli_cryptoacc_transparent_aead_encrypt_tag(
+    attributes, key_buffer, key_buffer_size, alg,
+    nonce, nonce_length,
+    additional_data, additional_data_length,
+    plaintext, plaintext_length,
+    ciphertext, plaintext_length, ciphertext_length,
+    &ciphertext[plaintext_length], ciphertext_size - plaintext_length, &tag_length);
+
+  if (psa_status == PSA_SUCCESS) {
+    *ciphertext_length += tag_length;
   }
 
-  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
-  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
-
-  block_t key = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
-  block_t aad_block = block_t_convert(additional_data, additional_data_length);
-  block_t nonce_internal = block_t_convert(nonce, nonce_length);
-  block_t data_in = block_t_convert(plaintext, plaintext_length);
-  block_t data_out = block_t_convert(ciphertext, plaintext_length);
-  block_t tag_block = block_t_convert(ciphertext + plaintext_length, tag_length);
-
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
-#if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
-
-      // Check length of plaintext.
-    {
-      unsigned char q = 16 - 1 - (unsigned char) nonce_length;
-      if (q < sizeof(plaintext_length)
-          && plaintext_length >= (1UL << (q * 8))) {
-        return PSA_ERROR_INVALID_ARGUMENT;
-      }
-    }
-
-      status = cryptoacc_management_acquire();
-      if (status != PSA_SUCCESS) {
-        return status;
-      }
-      sx_ret = sx_aes_ccm_encrypt((const block_t *)&key,
-                                  (const block_t *)&data_in,
-                                  &data_out,
-                                  (const block_t *)&nonce_internal,
-                                  &tag_block,
-                                  (const block_t *)&aad_block);
-      status = cryptoacc_management_release();
-      if (sx_ret != CRYPTOLIB_SUCCESS
-          || status != PSA_SUCCESS) {
-        return PSA_ERROR_HARDWARE_FAILURE;
-      }
-
-      *ciphertext_length = plaintext_length + tag_length;
-      return_status = PSA_SUCCESS;
-      break;
-#endif // PSA_WANT_ALG_CCM
-#if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
-      if (nonce_length == AES_IV_GCM_SIZE) {
-        uint8_t tagbuf[16];
-        tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
-
-        status = cryptoacc_management_acquire();
-        if (status != PSA_SUCCESS) {
-          return status;
-        }
-        sx_ret = sx_aes_gcm_encrypt((const block_t *)&key,
-                                    (const block_t *)&data_in,
-                                    &data_out,
-                                    (const block_t *)&nonce_internal,
-                                    &tag_block,
-                                    (const block_t *)&aad_block);
-        status = cryptoacc_management_release();
-        if (sx_ret != CRYPTOLIB_SUCCESS
-            || status != PSA_SUCCESS) {
-          return PSA_ERROR_HARDWARE_FAILURE;
-        }
-        // Copy only requested part of computed tag to user output buffer.
-        memcpy(ciphertext + plaintext_length, tagbuf, tag_length);
-        *ciphertext_length = plaintext_length + tag_length;
-        return_status = PSA_SUCCESS;
-      }
-#if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
-      else {
-        return_status = sli_cryptoacc_software_gcm(key_buffer, PSA_BITS_TO_BYTES(key_bits),
-                                                   nonce, nonce_length,
-                                                   additional_data, additional_data_length,
-                                                   plaintext,
-                                                   ciphertext,
-                                                   plaintext_length,
-                                                   tag_length,
-                                                   true);
-        if (return_status == PSA_SUCCESS) {
-          *ciphertext_length = plaintext_length + tag_length;
-        }
-      }
-#else // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
-      else {
-        return_status = PSA_ERROR_NOT_SUPPORTED;
-      }
-#endif // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
-      break;
-#endif // PSA_WANT_ALG_GCM
-  }
-  return return_status;
+  return psa_status;
 
 #else // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
 
@@ -513,14 +401,253 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
   size_t tag_length = PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes),
                                           psa_get_key_bits(attributes),
                                           alg);
+
+  if (ciphertext_length < tag_length
+      || ciphertext == NULL
+      || (tag_length > 16)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Split the tag in its own buffer to avoid potential issues when the
+  // plaintext buffer extends into the tag area
+  uint8_t check_tag[16];
+  memcpy(check_tag, &ciphertext[ciphertext_length - tag_length], tag_length);
+
+  return sli_cryptoacc_transparent_aead_decrypt_tag(
+    attributes, key_buffer, key_buffer_size, alg,
+    nonce, nonce_length,
+    additional_data, additional_data_length,
+    ciphertext, ciphertext_length - tag_length,
+    check_tag, tag_length,
+    plaintext, plaintext_size, plaintext_length);
+#else // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)nonce;
+  (void)nonce_length;
+  (void)additional_data;
+  (void)additional_data_length;
+  (void)plaintext;
+  (void)plaintext_size;
+  (void)plaintext_length;
+  (void)ciphertext;
+  (void)ciphertext_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+}
+
+psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes_t *attributes,
+                                                        const uint8_t *key_buffer,
+                                                        size_t key_buffer_size,
+                                                        psa_algorithm_t alg,
+                                                        const uint8_t *nonce,
+                                                        size_t nonce_length,
+                                                        const uint8_t *additional_data,
+                                                        size_t additional_data_length,
+                                                        const uint8_t *plaintext,
+                                                        size_t plaintext_length,
+                                                        uint8_t *ciphertext,
+                                                        size_t ciphertext_size,
+                                                        size_t *ciphertext_length,
+                                                        uint8_t *tag,
+                                                        size_t tag_size,
+                                                        size_t *tag_length)
+{
+#if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+
   if (key_buffer == NULL
+      || attributes == NULL
+      || nonce == NULL
+      || (additional_data == NULL && additional_data_length > 0)
+      || (plaintext == NULL && plaintext_length > 0)
+      || (plaintext_length > 0 && (ciphertext == NULL || ciphertext_size == 0))
+      || ciphertext_length == NULL || tag_length == NULL
+      || tag_size == 0 || tag == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  size_t key_bits = psa_get_key_bits(attributes);
+  *tag_length = PSA_AEAD_TAG_LENGTH(psa_get_key_type(attributes),
+                                    psa_get_key_bits(attributes),
+                                    alg);
+
+  // Verify that the driver supports the given parameters.
+  psa_status_t status = check_aead_parameters(attributes, alg, nonce_length, additional_data_length);
+  if (status != PSA_SUCCESS) {
+    return status;
+  }
+
+  // Check input-key size.
+  if (key_buffer_size < PSA_BITS_TO_BYTES(key_bits)) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  // Check sufficient output buffer size.
+  if ((ciphertext_size < plaintext_length)
+      || (tag_size < *tag_length)) {
+    return PSA_ERROR_BUFFER_TOO_SMALL;
+  }
+
+  // Our drivers only support full or no overlap between input and output
+  // buffers. So in the case of partial overlap, copy the input buffer into
+  // the output buffer and process it in place as if the buffers fully
+  // overlapped.
+  if ((ciphertext > plaintext) && (ciphertext < (plaintext + plaintext_length))) {
+    memmove(ciphertext, plaintext, plaintext_length);
+    plaintext = ciphertext;
+  }
+
+  psa_status_t return_status = PSA_ERROR_CORRUPTION_DETECTED;
+  uint32_t sx_ret = CRYPTOLIB_CRYPTO_ERR;
+
+  block_t key = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
+  block_t aad_block = block_t_convert(additional_data, additional_data_length);
+  block_t nonce_internal = block_t_convert(nonce, nonce_length);
+  block_t data_in = block_t_convert(plaintext, plaintext_length);
+  block_t data_out = block_t_convert(ciphertext, plaintext_length);
+  block_t tag_block = block_t_convert(tag, *tag_length);
+
+  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+#if defined(PSA_WANT_ALG_CCM)
+    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+
+      // Check length of plaintext.
+    {
+      unsigned char q = 16 - 1 - (unsigned char) nonce_length;
+      if (q < sizeof(plaintext_length)
+          && plaintext_length >= (1UL << (q * 8))) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+    }
+
+      status = cryptoacc_management_acquire();
+      if (status != PSA_SUCCESS) {
+        return status;
+      }
+      sx_ret = sx_aes_ccm_encrypt((const block_t *)&key,
+                                  (const block_t *)&data_in,
+                                  &data_out,
+                                  (const block_t *)&nonce_internal,
+                                  &tag_block,
+                                  (const block_t *)&aad_block);
+      status = cryptoacc_management_release();
+      if (sx_ret != CRYPTOLIB_SUCCESS
+          || status != PSA_SUCCESS) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+
+      return_status = PSA_SUCCESS;
+      break;
+#endif // PSA_WANT_ALG_CCM
+#if defined(PSA_WANT_ALG_GCM)
+    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+      if (nonce_length == AES_IV_GCM_SIZE) {
+        uint8_t tagbuf[16];
+        tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
+
+        status = cryptoacc_management_acquire();
+        if (status != PSA_SUCCESS) {
+          return status;
+        }
+        sx_ret = sx_aes_gcm_encrypt((const block_t *)&key,
+                                    (const block_t *)&data_in,
+                                    &data_out,
+                                    (const block_t *)&nonce_internal,
+                                    &tag_block,
+                                    (const block_t *)&aad_block);
+        status = cryptoacc_management_release();
+        if (sx_ret != CRYPTOLIB_SUCCESS
+            || status != PSA_SUCCESS) {
+          return PSA_ERROR_HARDWARE_FAILURE;
+        }
+        // Copy only requested part of computed tag to user output buffer.
+        memcpy(tag, tagbuf, *tag_length);
+        return_status = PSA_SUCCESS;
+      }
+#if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
+      else {
+        return_status = sli_cryptoacc_software_gcm(key_buffer, PSA_BITS_TO_BYTES(key_bits),
+                                                   nonce, nonce_length,
+                                                   additional_data, additional_data_length,
+                                                   plaintext,
+                                                   ciphertext,
+                                                   plaintext_length,
+                                                   *tag_length,
+                                                   tag,
+                                                   true);
+      }
+#else // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
+      else {
+        return_status = PSA_ERROR_NOT_SUPPORTED;
+      }
+#endif // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
+      break;
+#endif // PSA_WANT_ALG_GCM
+  }
+
+  if (return_status == PSA_SUCCESS) {
+    *ciphertext_length = plaintext_length;
+  } else {
+    *ciphertext_length = 0;
+    *tag_length = 0;
+  }
+
+  return return_status;
+
+#else // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+
+  (void)attributes;
+  (void)key_buffer;
+  (void)key_buffer_size;
+  (void)alg;
+  (void)nonce;
+  (void)nonce_length;
+  (void)additional_data;
+  (void)additional_data_length;
+  (void)plaintext;
+  (void)plaintext_length;
+  (void)ciphertext;
+  (void)ciphertext_size;
+  (void)ciphertext_length;
+  (void)tag;
+  (void)tag_size;
+  (void)tag_length;
+
+  return PSA_ERROR_NOT_SUPPORTED;
+
+#endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM
+}
+
+psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes_t *attributes,
+                                                        const uint8_t *key_buffer,
+                                                        size_t key_buffer_size,
+                                                        psa_algorithm_t alg,
+                                                        const uint8_t *nonce,
+                                                        size_t nonce_length,
+                                                        const uint8_t *additional_data,
+                                                        size_t additional_data_length,
+                                                        const uint8_t *ciphertext,
+                                                        size_t ciphertext_length,
+                                                        const uint8_t* tag,
+                                                        size_t tag_length,
+                                                        uint8_t *plaintext,
+                                                        size_t plaintext_size,
+                                                        size_t *plaintext_length)
+{
+#if defined(PSA_WANT_ALG_CCM) || defined(PSA_WANT_ALG_GCM)
+  if (attributes == NULL
+      || key_buffer == NULL
       || nonce == NULL
       || (additional_data == NULL && additional_data_length > 0)
       || (ciphertext == NULL && ciphertext_length > 0)
-      || (ciphertext_length > tag_length && (plaintext == NULL || plaintext_size == 0))
-      || ciphertext_length == 0
-      || ciphertext_length < tag_length
-      || plaintext_length == NULL) {
+      || (plaintext == NULL && plaintext_size > 0)
+      || plaintext_length == NULL
+      || tag == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -537,21 +664,16 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
   }
 
   // Check sufficient output buffer size.
-  if (plaintext_size < ciphertext_length - tag_length) {
+  if (plaintext_size < ciphertext_length) {
     return PSA_ERROR_BUFFER_TOO_SMALL;
   }
-
-  // We have to copy the tag in case the decryption corrupts it in the case
-  // of overlapping input/output buffers
-  uint8_t check_tag[PSA_AEAD_TAG_MAX_SIZE];
-  memcpy(check_tag, &ciphertext[ciphertext_length - tag_length], tag_length);
 
   // Our drivers only support full or no overlap between input and output
   // buffers. So in the case of partial overlap, copy the input buffer into
   // the output buffer and process it in place as if the buffers fully
   // overlapped.
   if ((plaintext > ciphertext) && (plaintext < (ciphertext + ciphertext_length))) {
-    memmove(plaintext, ciphertext, ciphertext_length - tag_length);
+    memmove(plaintext, ciphertext, ciphertext_length);
     ciphertext = plaintext;
   }
 
@@ -578,10 +700,10 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
 
       key = block_t_convert(key_buffer, PSA_BITS_TO_BYTES(key_bits));
       aad_block = block_t_convert(additional_data, additional_data_length);
-      tag_block = block_t_convert(check_tag, tag_length);
+      tag_block = block_t_convert(tag, tag_length);
       nonce_internal = block_t_convert(nonce, nonce_length);
-      data_in = block_t_convert(ciphertext, ciphertext_length - tag_length);
-      data_out = block_t_convert(plaintext, ciphertext_length - tag_length);
+      data_in = block_t_convert(ciphertext, ciphertext_length);
+      data_out = block_t_convert(plaintext, ciphertext_length);
 
       status = cryptoacc_management_acquire();
       if (status != PSA_SUCCESS) {
@@ -599,7 +721,7 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
       } else if (sx_ret != CRYPTOLIB_SUCCESS || status != PSA_SUCCESS) {
         return_status = PSA_ERROR_HARDWARE_FAILURE;
       } else {
-        *plaintext_length = ciphertext_length - tag_length;
+        *plaintext_length = ciphertext_length;
         return_status = PSA_SUCCESS;
       }
       break;
@@ -615,8 +737,8 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
         aad_block = block_t_convert(additional_data, additional_data_length);
         tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
         nonce_internal = block_t_convert(nonce, nonce_length);
-        data_in = block_t_convert(ciphertext, ciphertext_length - tag_length);
-        data_out = block_t_convert(plaintext, ciphertext_length - tag_length);
+        data_in = block_t_convert(ciphertext, ciphertext_length);
+        data_out = block_t_convert(plaintext, ciphertext_length);
 
         status = cryptoacc_management_acquire();
         if (status != PSA_SUCCESS) {
@@ -634,18 +756,17 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
         } else {
           // Check that the provided tag equals the calculated one
           // (in constant time). Note that the tag returned by ccm_auth_crypt
-          // is encrypted, so we don't have to decrypt check_tag.
-          diff = 0;
-          for (uint32_t i = 0; i < tag_length; ++i) {
-            diff |= tagbuf[i] ^ check_tag[i];
-          }
+          // is encrypted, so we don't have to decrypt the tag.
+          diff = sli_psa_safer_memcmp(tag, tagbuf, tag_length);
+          sli_psa_zeroize(tagbuf, tag_length);
 
           if (diff != 0) {
             return_status = PSA_ERROR_INVALID_SIGNATURE;
           } else {
-            *plaintext_length = ciphertext_length - tag_length;
+            *plaintext_length = ciphertext_length;
             return_status = PSA_SUCCESS;
           }
+
           break;
         }
       }
@@ -656,11 +777,12 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
                                                    additional_data, additional_data_length,
                                                    ciphertext,
                                                    plaintext,
-                                                   ciphertext_length - tag_length,
+                                                   ciphertext_length,
                                                    tag_length,
+                                                   (uint8_t*)tag,
                                                    false);
         if (return_status == PSA_SUCCESS) {
-          *plaintext_length = ciphertext_length - tag_length;
+          *plaintext_length = ciphertext_length;
         }
       }
 #else // SLI_PSA_SUPPORT_GCM_IV_CALCULATION
@@ -677,7 +799,7 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
 
   if (return_status != PSA_SUCCESS) {
     *plaintext_length = 0;
-    memset(plaintext, 0, ciphertext_length - tag_length);
+    sli_psa_zeroize(plaintext, plaintext_size);
   }
 
   return return_status;
@@ -697,6 +819,8 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt(const psa_key_attributes_t *
   (void)plaintext_length;
   (void)ciphertext;
   (void)ciphertext_length;
+  (void)tag;
+  (void)tag_length;
 
   return PSA_ERROR_NOT_SUPPORTED;
 

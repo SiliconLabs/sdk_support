@@ -69,28 +69,73 @@ static int sli_nv_seed_init(void)
   return 0;
 }
 
-/* If the seed hasn't been generated yet, or has somehow been lost (NVM3 area got wiped)
- * then we generate a device unique seed by hashing the contents of the device unique
- * data area (containing serial number, calibration data, etc). */
+// If the seed hasn't been generated yet, or has somehow been lost (NVM3 area got wiped)
+// then we generate a device unique seed by hashing the contents of the device unique
+// data area (containing serial number, calibration data, etc) and the entire RAM content.
 static int sli_nv_seed_generate(uint8_t *buffer, size_t requested_length)
 {
   int ret;
 #if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
   uint8_t hash_buffer[64];
-  ret = mbedtls_sha512_ret((const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef),
-                           hash_buffer, 0);
+  mbedtls_sha512_context ctx;
+  mbedtls_sha512_init(&ctx);
+
+  ret = mbedtls_sha512_starts_ret(&ctx, 0);
+  if (ret != 0) {
+    goto exit;
+  }
+  // Device info
+  ret = mbedtls_sha512_update_ret(&ctx, (const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef));
+  if (ret != 0) {
+    goto exit;
+  }
+  // SRAM
+  ret = mbedtls_sha512_update_ret(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
+  if (ret != 0) {
+    goto exit;
+  }
+  ret = mbedtls_sha512_finish_ret(&ctx, hash_buffer);
+  if (ret != 0) {
+    goto exit;
+  }
 #elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
   uint8_t hash_buffer[32];
-  ret = mbedtls_sha256_ret((const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef),
-                           buffer, 0);
+  mbedtls_sha256_context ctx;
+  mbedtls_sha256_init(&ctx);
+
+  ret = mbedtls_sha256_starts_ret(&ctx, 0);
+  if (ret != 0) {
+    goto exit;
+  }
+  // Device info
+  ret = mbedtls_sha256_update_ret(&ctx, (const unsigned char *)DEVINFO, sizeof(DEVINFO_TypeDef));
+  if (ret != 0) {
+    goto exit;
+  }
+  // SRAM
+  ret = mbedtls_sha256_update_ret(&ctx, (const unsigned char *)SRAM_BASE, SRAM_SIZE);
+  if (ret != 0) {
+    goto exit;
+  }
+  ret = mbedtls_sha256_finish_ret(&ctx, hash_buffer);
+  if (ret != 0) {
+    goto exit;
+  }
 #else
 #error "NV seed entropy requested, but no entropy accumulator available"
 #endif
-  if ( sizeof(hash_buffer) < requested_length ) {
-    return MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
+  if (sizeof(hash_buffer) < requested_length) {
+    ret = MBEDTLS_ERR_ENTROPY_FILE_IO_ERROR;
   }
 
-  if ( ret == 0 ) {
+  exit:
+#if defined(MBEDTLS_ENTROPY_SHA512_ACCUMULATOR)
+  mbedtls_sha512_free(&ctx);
+#elif defined(MBEDTLS_ENTROPY_SHA256_ACCUMULATOR)
+  mbedtls_sha256_free(&ctx);
+#endif
+
+  if (ret == 0) {
     memcpy(buffer, hash_buffer, requested_length);
   }
   return ret;

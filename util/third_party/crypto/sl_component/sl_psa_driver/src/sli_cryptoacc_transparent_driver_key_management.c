@@ -34,6 +34,7 @@
 
 #include "sli_cryptoacc_transparent_types.h"
 #include "sli_cryptoacc_transparent_functions.h"
+#include "sli_psa_driver_common.h"
 #include "cryptoacc_management.h"
 // Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
 // interface header file when it becomes available.
@@ -342,7 +343,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
   }
 
   if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) { // Private key.
-    uint8_t *modulo_ptr = NULL;
+    void *modulus_ptr = NULL;
     *bits = psa_get_key_bits(attributes);
 
     // Determine key bit-size
@@ -361,7 +362,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
           // The order n is stored as the second element in the curve-parameter tuple
           // consisting of (q, n, Gx, Gy, a, b). The length of the parameters is
           // dependent on the length of the corresponding key.
-          modulo_ptr = sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize);
+          modulus_ptr = sx_ecc_curve_p192.params.addr + (1 * sx_ecc_curve_p192.bytesize);
         } else {
           return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -370,7 +371,7 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
 #if defined(PSA_WANT_ECC_SECP_R1_224)
       case 224:
         if (curve_type == PSA_ECC_FAMILY_SECP_R1) {
-          modulo_ptr = sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize);
+          modulus_ptr = sx_ecc_curve_p224.params.addr + (1 * sx_ecc_curve_p224.bytesize);
         } else {
           return PSA_ERROR_NOT_SUPPORTED;
         }
@@ -380,12 +381,12 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
         switch (curve_type) {
 #if defined(PSA_WANT_ECC_SECP_R1_256)
           case PSA_ECC_FAMILY_SECP_R1:
-            modulo_ptr = sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize);
+            modulus_ptr = sx_ecc_curve_p256.params.addr + (1 * sx_ecc_curve_p256.bytesize);
             break;
 #endif // PSA_WANT_ECC_SECP_R1_256
 #if defined(PSA_WANT_ECC_SECP_K1_256)
           case PSA_ECC_FAMILY_SECP_K1:
-            modulo_ptr = sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize);
+            modulus_ptr = sx_ecc_curve_p256k1.params.addr + (1 * sx_ecc_curve_p256k1.bytesize);
             break;
 #endif // PSA_WANT_ECC_SECP_K1_256
         }
@@ -394,50 +395,9 @@ psa_status_t sli_cryptoacc_transparent_import_key(const psa_key_attributes_t *at
         return PSA_ERROR_NOT_SUPPORTED;
     }
 
-    uint32_t non_zero_accumulator = 0;
-    uint8_t key_is_valid = 0;
-    if ((((uint32_t)data) & 0x3) == 0) { // Word-aligned.
-      // Compare private key to maximum allowed key and check that it is non-zero.
-      for (size_t i = 0; i < data_length / 4; ++i) {
-        non_zero_accumulator |= *(uint32_t*)&data[i * 4];
-
-        if (*(uint32_t*)&data[i * 4] < *(uint32_t*)&modulo_ptr[i * 4]) {
-          // Lesser than n - 1.
-          key_is_valid = 1;
-        } else if (*(uint32_t*)&data[i * 4] > *(uint32_t*)&modulo_ptr[i * 4]
-                   && key_is_valid != 1) {
-          return PSA_ERROR_INVALID_ARGUMENT;
-        } else if (i == data_length / 4 - 1
-                   && key_is_valid != 1) {
-          // Equal to modulus.
-          return PSA_ERROR_INVALID_ARGUMENT;
-        }
-      }
-    } else { // Not word-aligned.
-      // Compare private key to maximum allowed key and check that it is non-zero.
-      for (size_t i = 0; i < data_length; ++i) {
-        non_zero_accumulator |= data[i];
-
-        if (data[i] < modulo_ptr[i]) {
-          // Lesser than n - 1.
-          key_is_valid = 1;
-        } else if (data[i] > modulo_ptr[i]
-                   && key_is_valid != 1) {
-          return PSA_ERROR_INVALID_ARGUMENT;
-        } else if (i == data_length - 1
-                   && key_is_valid != 1) {
-          // Equal to modulus.
-          return PSA_ERROR_INVALID_ARGUMENT;
-        }
-      }
-    }
-
-    if (key_is_valid != 1
-        || non_zero_accumulator == 0) {
-      return PSA_ERROR_INVALID_ARGUMENT;
-    } else {
-      status = PSA_SUCCESS;
-    }
+    status = sli_psa_validate_ecc_weierstrass_privkey(data,
+                                                      modulus_ptr,
+                                                      data_length);
   } else { // Public key.
     block_t *domain_ptr = NULL;
     uint32_t curve_flags = 0;

@@ -41,21 +41,9 @@
 #include "sli_se_opaque_types.h"
 #include "sli_se_opaque_functions.h"
 #include "sli_se_manager_internal.h"
+#include "sli_psa_driver_common.h"
 
 #include <string.h>
-
-static inline int mbedtls_psa_safer_memcmp(
-  const uint8_t *a, const uint8_t *b, size_t n)
-{
-  size_t i;
-  unsigned char diff = 0;
-
-  for ( i = 0; i < n; i++ ) {
-    diff |= a[i] ^ b[i];
-  }
-
-  return(diff);
-}
 
 psa_status_t sli_se_opaque_mac_compute(const psa_key_attributes_t *attributes,
                                        const uint8_t *key_buffer,
@@ -314,7 +302,7 @@ psa_status_t sli_se_opaque_mac_verify_finish(sli_se_opaque_mac_operation_t *oper
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  if (mbedtls_psa_safer_memcmp(mac, calculated_mac, mac_length)) {
+  if (sli_psa_safer_memcmp(mac, calculated_mac, mac_length) != 0) {
     status = PSA_ERROR_INVALID_SIGNATURE;
   } else {
     status = PSA_SUCCESS;

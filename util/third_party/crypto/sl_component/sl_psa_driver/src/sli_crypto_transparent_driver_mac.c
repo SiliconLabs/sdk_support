@@ -33,6 +33,7 @@
 #if defined(CRYPTO_PRESENT)
 
 #include "sli_crypto_transparent_functions.h"
+#include "sli_psa_driver_common.h"
 #include "crypto_management.h"
 #include "psa/crypto.h"
 #include "em_crypto.h"
@@ -68,19 +69,6 @@ static psa_status_t sli_crypto_aes_crypt_cbc(const uint8_t *key_buffer,
                                              uint8_t iv[16],
                                              const uint8_t *input,
                                              uint8_t *output);
-
-static inline int mbedtls_psa_safer_memcmp(
-  const uint8_t *a, const uint8_t *b, size_t n)
-{
-  size_t i;
-  unsigned char diff = 0;
-
-  for ( i = 0; i < n; i++ ) {
-    diff |= a[i] ^ b[i];
-  }
-
-  return(diff);
-}
 
 #endif // PSA_WANT_ALG_CMAC
 
@@ -712,7 +700,7 @@ static psa_status_t sli_crypto_cmac_finalize(CRYPTO_TypeDef *crypto,
     status = PSA_SUCCESS;
   } else {
     /* Compare the MAC with the reference value in constant time */
-    status = mbedtls_psa_safer_memcmp((const uint8_t*)mac, (const uint8_t*)full_mac, mac_length) == 0 ? PSA_SUCCESS : PSA_ERROR_INVALID_SIGNATURE;
+    status = sli_psa_safer_memcmp((const uint8_t*)mac, (const uint8_t*)full_mac, mac_length) == 0 ? PSA_SUCCESS : PSA_ERROR_INVALID_SIGNATURE;
   }
 
   memset(full_mac, 0, sizeof(full_mac));

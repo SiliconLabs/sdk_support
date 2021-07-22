@@ -16,6 +16,7 @@ provides:
   - name: mbedtls_ecdsa_deterministic
 requires:
   - name: mbedtls_ecdsa
+  - name: mbedtls_hash
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ECDSA_DETERMINISTIC

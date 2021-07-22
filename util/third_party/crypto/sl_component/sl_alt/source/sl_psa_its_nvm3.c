@@ -606,4 +606,115 @@ psa_status_t psa_its_remove(psa_storage_uid_t uid)
   }
 }
 
+// -------------------------------------
+// Silicon Labs extensions
+static psa_storage_uid_t psa_its_identifier_of_slot(mbedtls_svc_key_id_t key)
+{
+#if defined(MBEDTLS_PSA_CRYPTO_KEY_ID_ENCODES_OWNER)
+  /* Encode the owner in the upper 32 bits. This means that if
+   * owner values are nonzero (as they are on a PSA platform),
+   * no key file will ever have a value less than 0x100000000, so
+   * the whole range 0..0xffffffff is available for non-key files. */
+  uint32_t unsigned_owner_id = MBEDTLS_SVC_KEY_ID_GET_OWNER_ID(key);
+  return(  ( (uint64_t) unsigned_owner_id << 32)
+           | MBEDTLS_SVC_KEY_ID_GET_KEY_ID(key) );
+#else
+  /* Use the key id directly as a file name.
+   * psa_is_key_id_valid() in psa_crypto_slot_management.c
+   * is responsible for ensuring that key identifiers do not have a
+   * value that is reserved for non-key files. */
+  return(key);
+#endif
+}
+
+psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
+                                       mbedtls_svc_key_id_t new_id)
+{
+  psa_storage_uid_t old_uid = psa_its_identifier_of_slot(old_id);
+  psa_storage_uid_t new_uid = psa_its_identifier_of_slot(new_id);
+  Ecode_t status;
+  uint32_t obj_type;
+  size_t its_file_size = 0;
+  psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+
+  // Check whether the key to migrate exists on disk
+  nvm3_ObjectKey_t nvm3_object_id = prepare_its_get_nvm3_id(old_uid);
+  if (nvm3_object_id > SLI_PSA_ITS_NVM3_RANGE_END) {
+    return PSA_ERROR_DOES_NOT_EXIST;
+  }
+
+  // Get total length to allocate
+  status = nvm3_getObjectInfo(nvm3_defaultHandle,
+                              nvm3_object_id,
+                              &obj_type,
+                              &its_file_size);
+  if (status != ECODE_NVM3_OK) {
+    return PSA_ERROR_STORAGE_FAILURE;
+  }
+
+  // Allocate temporary buffer and cast it to the metadata format
+  uint8_t *its_file_buffer = mbedtls_calloc(1, its_file_size);
+  sl_its_file_meta_v2_t* metadata = (sl_its_file_meta_v2_t*) its_file_buffer;
+
+  if (its_file_buffer == NULL) {
+    return PSA_ERROR_INSUFFICIENT_MEMORY;
+  }
+
+  // Read contents of pre-existing key into the temporary buffer
+  status = nvm3_readData(nvm3_defaultHandle,
+                         nvm3_object_id,
+                         its_file_buffer,
+                         its_file_size);
+  if (status != ECODE_NVM3_OK) {
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
+    goto exit;
+  }
+
+  // Swap out the old UID for the new one
+#if defined(SLI_PSA_ITS_SUPPORT_V1_FORMAT)
+  if (metadata->magic == SLI_PSA_ITS_META_MAGIC_V1) {
+    // Recast as v1 metadata
+    sl_its_file_meta_v1_t* metadata_v1 = (sl_its_file_meta_v1_t*) its_file_buffer;
+    if (metadata_v1->uid != old_uid) {
+      psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+      goto exit;
+    }
+    metadata_v1->uid = new_uid;
+  } else
+#endif
+  if (metadata->magic == SLI_PSA_ITS_META_MAGIC_V2) {
+    if (metadata->uid != old_uid) {
+      psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+      goto exit;
+    }
+    metadata->uid = new_uid;
+  } else {
+    psa_status = PSA_ERROR_CORRUPTION_DETECTED;
+    goto exit;
+  }
+
+  // Overwrite the NVM3 token with the changed buffer
+  status = nvm3_writeData(nvm3_defaultHandle,
+                          nvm3_object_id,
+                          its_file_buffer,
+                          its_file_size);
+  if (status == ECODE_NVM3_OK) {
+    // Update last lookup and report success
+    if (previous_lookup.set) {
+      if (previous_lookup.uid == old_uid) {
+        previous_lookup.uid = new_uid;
+      }
+    }
+    psa_status = PSA_SUCCESS;
+  } else {
+    psa_status = PSA_ERROR_STORAGE_FAILURE;
+  }
+
+  exit:
+  // Clear and free key buffer before return.
+  memset(its_file_buffer, 0, its_file_size);
+  mbedtls_free(its_file_buffer);
+  return psa_status;
+}
+
 #endif // MBEDTLS_PSA_CRYPTO_STORAGE_C && !MBEDTLS_PSA_ITS_FILE_C

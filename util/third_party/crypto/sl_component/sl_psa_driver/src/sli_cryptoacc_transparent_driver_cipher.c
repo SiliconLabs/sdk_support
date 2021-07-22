@@ -934,19 +934,17 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
 
         // Check how many bytes of padding to subtract.
         uint8_t pad_bytes = tmp_buf[15];
-        if (pad_bytes == 0 || pad_bytes > 16) {
-          return PSA_ERROR_INVALID_ARGUMENT;
+
+        // Check all padding bytes.
+        status = sli_psa_validate_pkcs7_padding(tmp_buf,
+                                                16,
+                                                pad_bytes);
+        if (status != PSA_SUCCESS) {
+          return status;
         }
 
         if (output_size < (input_length - AES_IV_SIZE - pad_bytes)) {
           return PSA_ERROR_BUFFER_TOO_SMALL;
-        }
-
-        // Check all padding bytes.
-        for (size_t i = pad_bytes; i > 0; i--) {
-          if (tmp_buf[16 - pad_bytes] != pad_bytes) {
-            return PSA_ERROR_INVALID_ARGUMENT;
-          }
         }
 
         // Copy non-padding bytes.
@@ -1906,37 +1904,19 @@ psa_status_t sli_cryptoacc_transparent_cipher_finish(sli_cryptoacc_transparent_c
           break;
         }
 
-        size_t invalid_padding = 0;
         size_t padding_bytes = out_buf[15];
+        status = sli_psa_validate_pkcs7_padding(out_buf,
+                                                16,
+                                                padding_bytes);
 
-        if (output_size < 16 - padding_bytes) {
-          status = PSA_ERROR_BUFFER_TOO_SMALL;
-          break;
-        }
-
-        // Check that the last padding byte is valid (in the range 0x1 to 0x10).
-        // Note that the below checks are valid for both partial block padding
-        // and complete padding blocks.
-        invalid_padding = 0;
-        invalid_padding |= (padding_bytes > 0x10);
-        invalid_padding |= (padding_bytes == 0);
-
-        // Check that every padding byte is correct (equal to padding_bytes)
-        size_t pad_index = 16 - padding_bytes;
-        for (size_t i = 0; i < 16; ++i) {
-          // The number of checks should be independent of padding_bytes,
-          // so use pad_index instead to make the result zero for non-padding
-          // bytes in out_buf.
-          invalid_padding |= (out_buf[i] ^ padding_bytes) * (i >= pad_index);
-        }
-
-        if (invalid_padding == 0) {
-          // The padding was valid
+        if (status == PSA_SUCCESS) {
+          // The padding was valid.
+          if (output_size < 16 - padding_bytes) {
+            status = PSA_ERROR_BUFFER_TOO_SMALL;
+            break;
+          }
           memcpy(output, out_buf, 16 - padding_bytes);
           *output_length = 16 - padding_bytes;
-          status = PSA_SUCCESS;
-        } else {
-          status = PSA_ERROR_INVALID_PADDING;
         }
       }
       break;

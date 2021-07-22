@@ -100,14 +100,16 @@
  *
  * Enable hardware acceleration of CCM through mbed TLS APIs.
  *
- * Module:  sl_mbedtls_support/src/se_ccm.c for devices with HSE,
- *          sl_mbedtls_support/src/cryptoacc_ccm.c for devices with CRYPTOACC
+ * Module:  sl_mbedtls_support/src/mbedtls_ccm.c for all devices, plus:
+ *          - sl_psa_driver/src/sli_se_transparent_driver_aead.c and sl_psa_driver/src/sli_se_driver_aead.c for devices with HSE,
+ *          - sl_psa_driver/src/sli_cryptoacc_transparent_driver_aead.c for devices with CRYPTOACC
+ *          - sl_psa_driver/src/sli_crypto_transparent_driver_aead.c for devices with CRYPTO
  *
  * Requires: \ref MBEDTLS_AES_C and \ref MBEDTLS_CCM_C (CRYPTOACC_PRESENT or SEMAILBOX_PRESENT)
  *
  * See MBEDTLS_CCM_C for more information.
  */
-#if defined(CRYPTOACC_PRESENT) || defined(DOXY_DOC_ONLY) \
+#if defined(CRYPTO_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(DOXY_DOC_ONLY) \
   || (defined(SEMAILBOX_PRESENT) && defined(SE_COMMAND_AES_CCM_ENCRYPT) && defined(SE_COMMAND_AES_CCM_DECRYPT) )
 #define MBEDTLS_CCM_ALT
 #endif

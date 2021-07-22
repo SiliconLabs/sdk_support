@@ -284,7 +284,6 @@ sl_status_t sl_se_aes_crypt_cfb8(sl_se_command_context_t *cmd_ctx,
 
   return ret;
 }
-
 /***************************************************************************//**
  * AES-CTR buffer encryption/decryption.
  ******************************************************************************/
@@ -302,7 +301,8 @@ sl_status_t sl_se_aes_crypt_ctr(sl_se_command_context_t *cmd_ctx,
   uint32_t processed = 0;
   sl_status_t command_status = SL_STATUS_OK;
 
-  if (cmd_ctx == NULL || key == NULL || input == NULL || output == NULL
+  if (cmd_ctx == NULL || key == NULL
+      || (length != 0 && (input == NULL || output == NULL))
       || nonce_counter == NULL || stream_block == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }

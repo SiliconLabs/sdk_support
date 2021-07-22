@@ -114,12 +114,9 @@ sl_status_t sl_se_ecc_sign(sl_se_command_context_t *cmd_ctx,
 
   #if defined(SL_SE_KEY_TYPE_ECC_EDDSA)
   // EdDSA requires the message twice
-  SE_DataTransfer_t repeated_message_buffer;
+  SE_DataTransfer_t repeated_message_buffer = SE_DATATRANSFER_DEFAULT(message, message_len);
   if ((key->type & SL_SE_KEY_TYPE_ALGORITHM_MASK) == SL_SE_KEY_TYPE_ECC_EDDSA) {
-    repeated_message_buffer.next = (void*)SE_DATATRANSFER_STOP;
-    repeated_message_buffer.data = (void*)message;
-    repeated_message_buffer.length = message_len;
-    SE_addDataInput(se_cmd, (SE_DataTransfer_t*)&repeated_message_buffer);
+    SE_addDataInput(se_cmd, &repeated_message_buffer);
   }
   #endif
 

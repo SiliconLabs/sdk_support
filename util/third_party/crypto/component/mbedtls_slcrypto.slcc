@@ -22,6 +22,8 @@ source:
     condition: [mbedtls_ecc, device_has_crypto]
   - path: sl_component/sl_mbedtls_support/src/crypto_gcm.c
     condition: [mbedtls_gcm, device_has_crypto]
+  - path: sl_component/sl_mbedtls_support/src/mbedtls_ccm.c
+    condition: [mbedtls_ccm, device_has_crypto]
   - path: sl_component/sl_mbedtls_support/src/mbedtls_cmac.c
     condition: [mbedtls_cmac, device_has_crypto]
   - path: sl_component/sl_mbedtls_support/src/mbedtls_sha.c
@@ -29,7 +31,7 @@ source:
   # Series 2 device support with HSE
   - path: sl_component/sl_mbedtls_support/src/se_aes.c
     condition: [mbedtls_aes, device_has_semailbox]
-  - path: sl_component/sl_mbedtls_support/src/se_ccm.c
+  - path: sl_component/sl_mbedtls_support/src/mbedtls_ccm.c
     condition: [mbedtls_ccm, device_has_semailbox]
   - path: sl_component/sl_mbedtls_support/src/mbedtls_cmac.c
     condition: [mbedtls_cmac, device_has_semailbox]
@@ -46,7 +48,7 @@ source:
   # Series 2 device support with VSE
   - path: sl_component/sl_mbedtls_support/src/cryptoacc_aes.c
     condition: [device_has_cryptoacc]
-  - path: sl_component/sl_mbedtls_support/src/cryptoacc_ccm.c
+  - path: sl_component/sl_mbedtls_support/src/mbedtls_ccm.c
     condition: [device_has_cryptoacc]
   - path: sl_component/sl_mbedtls_support/src/mbedtls_cmac.c
     condition: [device_has_cryptoacc]

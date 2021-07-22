@@ -812,6 +812,25 @@ int mbedtls_internal_ecp_add_mixed(const mbedtls_ecp_group *grp,
 {
   int             ret;
   CORE_DECLARE_IRQ_STATE;
+
+  /*
+   * Trivial cases: P == 0 or Q == 0 (case 1)
+   */
+  if ( mbedtls_ecp_is_zero((mbedtls_ecp_point *)P) ) {
+    return(mbedtls_ecp_copy(R, Q) );
+  }
+
+  if ( Q->Z.p != NULL && mbedtls_ecp_is_zero((mbedtls_ecp_point *)Q) ) {
+    return(mbedtls_ecp_copy(R, P) );
+  }
+
+  /*
+   * Make sure Q coordinates are normalized
+   */
+  if ( Q->Z.p != NULL && mbedtls_mpi_cmp_int(&Q->Z, 1) != 0 ) {
+    return(MBEDTLS_ERR_ECP_BAD_INPUT_DATA);
+  }
+
   CRYPTO_TypeDef *crypto = crypto_management_acquire();
 
   ecp_crypto_device_init(crypto, grp);

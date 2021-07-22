@@ -364,9 +364,15 @@ int mbedtls_aes_setkey_enc(mbedtls_aes_context *ctx,
 
   memset(ctx, 0, sizeof(mbedtls_aes_context) );
 
-  if ( (128UL != keybits) && (256UL != keybits) ) {
-    // Unsupported key size
-    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  switch (keybits) {
+    case 128:
+    case 256:
+      break;
+    case 192:
+      // AES-192 is not supported by CRYPTO
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+    default:
+      return MBEDTLS_ERR_AES_INVALID_KEY_LENGTH;
   }
 
   ctx->keybits = keybits;
@@ -389,9 +395,15 @@ int mbedtls_aes_setkey_dec(mbedtls_aes_context *ctx,
 
   memset(ctx, 0, sizeof(mbedtls_aes_context) );
 
-  if ( (128UL != keybits) && (256UL != keybits) ) {
-    // Unsupported key size
-    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  switch (keybits) {
+    case 128:
+    case 256:
+      break;
+    case 192:
+      // AES-192 is not supported by CRYPTO
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+    default:
+      return MBEDTLS_ERR_AES_INVALID_KEY_LENGTH;
   }
 
   ctx->keybits = keybits;

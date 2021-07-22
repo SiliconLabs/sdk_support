@@ -87,6 +87,7 @@ static psa_status_t se_get_random(unsigned char *output,
     return PSA_SUCCESS;
   }
 
+  *out_len = 0;
   return PSA_ERROR_HARDWARE_FAILURE;
 }
 #endif // SEMAILBOX_PRESENT
@@ -153,14 +154,38 @@ psa_status_t mbedtls_psa_external_get_random(
 {
   (void)context;
 
-#if defined(SEMAILBOX_PRESENT)
-  return se_get_random(output, output_size, output_length);
+  // Implement chunking support here, as the PSA core doesn't implement it (yet)
+#if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT) || defined(SLI_RNG_TRNG_ENABLED)
+  psa_status_t entropy_status = PSA_ERROR_CORRUPTION_DETECTED;
+  size_t entropy_max_retries = 5;
+  *output_length = 0;
 
-#elif defined(CRYPTOACC_PRESENT)
-  return cryptoacc_get_random(output, output_size, output_length);
+  while (entropy_max_retries > 0 && entropy_status != PSA_SUCCESS) {
+    size_t offset = *output_length;
+    #if defined(SEMAILBOX_PRESENT)
+    entropy_status = se_get_random(&output[offset], output_size - offset, output_length);
 
-#elif defined(SLI_RNG_TRNG_ENABLED)
-  return sli_crypto_trng_get_random(output, output_size, output_length);
+    #elif defined(CRYPTOACC_PRESENT)
+    entropy_status = cryptoacc_get_random(&output[offset], output_size - offset, output_length);
+
+    #elif defined(SLI_RNG_TRNG_ENABLED)
+    entropy_status = sli_crypto_trng_get_random(&output[offset], output_size - offset, output_length);
+
+    #else
+      #error "No known entropy source for external random function"
+    #endif
+
+    *output_length += offset;
+
+    if (*output_length >= output_size) {
+      entropy_status = PSA_SUCCESS;
+    }
+
+    // Consume a retry before going through another loop
+    entropy_max_retries--;
+  }
+
+  return entropy_status;
 
 #else // SE/CRYPTOACC/TRNG_ENABLED
   (void) output;

@@ -1169,6 +1169,7 @@ psa_status_t sli_se_opaque_export_key(const psa_key_attributes_t *attributes,
       // Copy out the padded key
       if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) {
         sli_se_unpad_big_endian(temp_key_buffer, data, key_size);
+        sli_psa_zeroize(temp_key_buffer, key_size);
       } else if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) {
         sli_se_unpad_curve_point(temp_key_buffer, data, key_size);
       } else
@@ -1297,7 +1298,7 @@ psa_status_t sli_se_driver_generate_key(const psa_key_attributes_t *attributes,
   #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
     if (PSA_KEY_LIFETIME_GET_LOCATION(psa_get_key_lifetime(attributes))
         == PSA_KEY_LOCATION_LOCAL_STORAGE) {
-      // Apply clamping if this is a Montgomery or Twisted Edwards key.
+      // Apply clamping if this is a Montgomery key.
       clamp_private_key_if_needed(attributes, key_buffer, key_bits);
     } else {
       // Add the key desc to the output array for opaque keys
@@ -1465,6 +1466,7 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
   // is supported. However, we must also account for non-word-aligned keys
   uint8_t temp_pub_buffer[SLI_SE_MAX_PADDED_PUBLIC_KEY_SIZE] = { 0 };
   uint8_t temp_priv_buffer[SLI_SE_MAX_PADDED_KEY_PAIR_SIZE] = { 0 };
+  size_t priv_key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
   if (PSA_KEY_TYPE_IS_ECC(psa_get_key_type(attributes))) {
     padding = sli_se_get_padding(PSA_BITS_TO_BYTES(psa_get_key_bits(attributes)));
   }
@@ -1472,7 +1474,6 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
     if (priv_key_desc.storage.method == SL_SE_KEY_STORAGE_EXTERNAL_PLAINTEXT) {
       // We must only fix the padding for plaintext private keys. Opaque padding
       // is already handled in import_key
-      size_t priv_key_size = PSA_BITS_TO_BYTES(psa_get_key_bits(attributes));
       if (key_buffer_size < priv_key_size) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
@@ -1541,7 +1542,7 @@ sli_se_driver_export_public_key(const psa_key_attributes_t *attributes,
       sli_se_unpad_curve_point(temp_pub_buffer,
                                data + prepend_format_byte,
                                (storage_size - prepend_format_byte) / 2);
-      memset(temp_pub_buffer, 0, sizeof(temp_pub_buffer));
+      sli_psa_zeroize(temp_priv_buffer, priv_key_size);
     }
     #endif // VAULT
     // Write the uncompressed format byte and actual data length
@@ -1641,7 +1642,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
 #if defined(SLI_PSA_WANT_ECC_SECP)
     case PSA_ECC_FAMILY_SECP_R1: {
       if (PSA_KEY_TYPE_IS_ECC_KEY_PAIR(key_type)) { // Private key.
-        uint8_t *modulus_ptr = NULL;
+        const void *modulus_ptr = NULL;
         *bits = psa_get_key_bits(attributes);
 
         // Determine key bit-size
@@ -1656,29 +1657,29 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
         switch (*bits) {
           #if defined(PSA_WANT_ECC_SECP_R1_192)
           case 192:
-            modulus_ptr = (uint8_t*)ecc_p192_n;
+            modulus_ptr = ecc_p192_n;
             break;
           #endif // PSA_WANT_ECC_SECP_R1_192
           #if defined(PSA_WANT_ECC_SECP_R1_224) && !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
           // Series-2-config-1 devices do not support SECP224R1.
           case 224:
-            modulus_ptr = (uint8_t*)ecc_p224_n;
+            modulus_ptr = ecc_p224_n;
             break;
           #endif // PSA_WANT_ECC_SECP_R1_224
           #if defined(PSA_WANT_ECC_SECP_R1_256)
           case 256:
-            modulus_ptr = (uint8_t*)ecc_p256_n;
+            modulus_ptr = ecc_p256_n;
             break;
           #endif // PSA_WANT_ECC_SECP_R1_256
           #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
           #if defined(PSA_WANT_ECC_SECP_R1_384)
           case 384:
-            modulus_ptr = (uint8_t*)ecc_p384_n;
+            modulus_ptr = ecc_p384_n;
             break;
           #endif // PSA_WANT_ECC_SECP_R1_384
           #if defined(PSA_WANT_ECC_SECP_R1_521)
           case 521:
-            modulus_ptr = (uint8_t*)ecc_p521_n;
+            modulus_ptr = ecc_p521_n;
             break;
           case 528:
             // Maybe a 521 bit long key which has been padded to 66 bytes.
@@ -1688,7 +1689,7 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
             }
             // Actually a 521 bit long key which has been padded to 66 bytes.
             *bits = 521;
-            modulus_ptr = (uint8_t*)ecc_p521_n;
+            modulus_ptr = ecc_p521_n;
             break;
           #endif // PSA_WANT_ECC_SECP_R1_521
           #endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
@@ -1697,52 +1698,10 @@ psa_status_t sli_se_driver_validate_key(const psa_key_attributes_t *attributes,
             break;
         }
 
-        // Compare private key to maximum allowed key and check that it is non-zero.
-        uint32_t non_zero_accumulator = 0;
-        uint8_t key_is_valid = 0;
-        if ((((uint32_t)data) & 0x3) == 0
-            && *bits != 521) { // Word-aligned.
-          for (size_t i = 0; i < data_length / 4; ++i) {
-            non_zero_accumulator |= *(uint32_t*)&data[i * 4];
-
-            if (*(uint32_t*)&data[i * 4] < *(uint32_t*)&modulus_ptr[i * 4]) {
-              // Lesser than n - 1.
-              key_is_valid = 1;
-            } else if (*(uint32_t*)&data[i * 4] > *(uint32_t*)&modulus_ptr[i * 4]
-                       && key_is_valid != 1) {
-              // Greater than modulus.
-              return PSA_ERROR_INVALID_ARGUMENT;
-            } else if (i == data_length / 4 - 1
-                       && key_is_valid != 1) {
-              // Equal to modulus.
-              return PSA_ERROR_INVALID_ARGUMENT;
-            }
-          }
-        } else { // Not word-aligned.
-          for (size_t i = 0; i < data_length; ++i) {
-            non_zero_accumulator |= data[i];
-
-            if (data[i] < modulus_ptr[i]) {
-              // Lesser than n - 1.
-              key_is_valid = 1;
-            } else if (data[i] > modulus_ptr[i]
-                       && key_is_valid != 1) {
-              // Greater than modulus.
-              return PSA_ERROR_INVALID_ARGUMENT;
-            } else if (i == data_length - 1
-                       && key_is_valid != 1) {
-              // Equal to modulus.
-              return PSA_ERROR_INVALID_ARGUMENT;
-            }
-          }
-        }
-
-        if (key_is_valid != 1
-            || non_zero_accumulator == 0) {
-          return PSA_ERROR_INVALID_ARGUMENT;
-        } else {
-          return_status = PSA_SUCCESS;
-        }
+        // Validate the private key.
+        return_status = sli_psa_validate_ecc_weierstrass_privkey(data,
+                                                                 modulus_ptr,
+                                                                 data_length);
       } else if (PSA_KEY_TYPE_IS_ECC_PUBLIC_KEY(key_type)) { // Public key.
         // Check that uncompressed representation is given.
         if (data[0] != 0x04) {

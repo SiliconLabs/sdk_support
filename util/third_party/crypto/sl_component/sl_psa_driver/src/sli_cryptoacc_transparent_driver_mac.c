@@ -33,6 +33,7 @@
 #if defined(CRYPTOACC_PRESENT)
 
 #include "sli_cryptoacc_transparent_functions.h"
+#include "sli_psa_driver_common.h"
 #include "cryptoacc_management.h"
 // Replace inclusion of psa/crypto_xxx.h with the new psa driver commong
 // interface header file when it becomes available.
@@ -101,19 +102,6 @@ static psa_status_t sli_cryptoacc_cmac_validate_key(
   return PSA_SUCCESS;
 }
 #endif // PSA_WANT_ALG_CMAC
-
-static inline int mbedtls_psa_safer_memcmp(
-  const uint8_t *a, const uint8_t *b, size_t n)
-{
-  size_t i;
-  unsigned char diff = 0;
-
-  for ( i = 0; i < n; i++ ) {
-    diff |= a[i] ^ b[i];
-  }
-
-  return(diff);
-}
 
 psa_status_t sli_cryptoacc_transparent_mac_compute(const psa_key_attributes_t *attributes,
                                                    const uint8_t *key_buffer,
@@ -379,7 +367,6 @@ psa_status_t sli_cryptoacc_transparent_mac_sign_setup(sli_cryptoacc_transparent_
 
       memcpy(operation->cipher_mac.key, key_buffer, key_size);
       operation->cipher_mac.key_len = key_size;
-      key_size = psa_get_key_bits(attributes) / 8;
 
       operation->cipher_mac.alg = alg;
       status = PSA_SUCCESS;
@@ -718,7 +705,7 @@ psa_status_t sli_cryptoacc_transparent_mac_verify_finish(sli_cryptoacc_transpare
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
-  if (mbedtls_psa_safer_memcmp(mac, calculated_mac, mac_length)) {
+  if (sli_psa_safer_memcmp(mac, calculated_mac, mac_length) != 0) {
     status = PSA_ERROR_INVALID_SIGNATURE;
   } else {
     status = PSA_SUCCESS;

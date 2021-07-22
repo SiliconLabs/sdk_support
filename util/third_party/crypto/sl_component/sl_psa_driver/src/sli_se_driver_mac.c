@@ -38,6 +38,7 @@
 #include "sli_se_driver_mac.h"
 #include "sli_se_manager_internal.h"
 #include "sli_se_driver_key_management.h"
+#include "sli_psa_driver_common.h"
 
 #include <string.h>
 
@@ -208,6 +209,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         // Copy the requested number of bytes (max 16) to the user buffer.
         if (status == SL_STATUS_OK) {
           memcpy(mac, tmp_mac, output_length);
+          sli_psa_zeroize(tmp_mac, sizeof(tmp_mac));
           *mac_length = output_length;
         }
         break;
@@ -221,6 +223,7 @@ psa_status_t sli_se_driver_mac_compute(sl_se_key_descriptor_t *key_desc,
         // Copy the requested number of bytes (max 16) to the user buffer.
         if (status == SL_STATUS_OK) {
           memcpy(mac, tmp_mac, output_length);
+          sli_psa_zeroize(tmp_mac, sizeof(tmp_mac));
           *mac_length = output_length;
         }
         break;

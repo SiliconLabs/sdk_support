@@ -216,6 +216,11 @@ typedef uint32_t psa_key_location_t;
  *
  * - Applications may freely choose key identifiers in the range
  *   #PSA_KEY_ID_USER_MIN to #PSA_KEY_ID_USER_MAX.
+ *   \note This file was shipped as part of the Silicon Labs SDK. Users of the
+ *         Silicon Labs SDK need to be aware that the entire SDK is considered
+ *         the 'application' from the mbed TLS / PSA documentation perspective.
+ *         Please refer to \ref sl_psa_usage_key_namespacing to see which key
+ *         identifiers are available to Silicon Labs SDK users.
  * - The implementation may define additional key identifiers in the range
  *   #PSA_KEY_ID_VENDOR_MIN to #PSA_KEY_ID_VENDOR_MAX.
  * - 0 is reserved as an invalid key identifier.

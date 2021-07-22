@@ -64,6 +64,7 @@
 
 #if defined(SEMAILBOX_PRESENT)
 #include "sli_se_transparent_functions.h"
+#define SLI_DEVICE_HAS_AES_192
 #define MAC_IMPLEMENTATION_PRESENT
 #define MAC_SETUP_EN_FCT    sli_se_transparent_mac_sign_setup
 #define MAC_SETUP_DE_FCT    sli_se_transparent_mac_verify_setup
@@ -90,6 +91,7 @@
 #define MAC_ONESHOT_DE_FCT  sli_crypto_transparent_mac_verify
 #elif defined(CRYPTOACC_PRESENT)
 #include "sli_cryptoacc_transparent_functions.h"
+#define SLI_DEVICE_HAS_AES_192
 #define MAC_IMPLEMENTATION_PRESENT
 #define MAC_SETUP_EN_FCT    sli_cryptoacc_transparent_mac_sign_setup
 #define MAC_SETUP_DE_FCT    sli_cryptoacc_transparent_mac_verify_setup
@@ -145,7 +147,11 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
       psa_set_key_bits(&attr, 128);
       break;
     case MBEDTLS_CIPHER_AES_192_ECB:
+      #if defined(SLI_DEVICE_HAS_AES_192)
       psa_set_key_bits(&attr, 192);
+      #else
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+      #endif
       break;
     case MBEDTLS_CIPHER_AES_256_ECB:
       psa_set_key_bits(&attr, 256);
@@ -244,14 +250,28 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
 
-  if ( (cipher_info->type != MBEDTLS_CIPHER_AES_128_ECB)
-       && (cipher_info->type != MBEDTLS_CIPHER_AES_192_ECB)
-       && (cipher_info->type != MBEDTLS_CIPHER_AES_256_ECB)) {
-    return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
-  }
-
-  if ( keylen != 128UL && keylen != 192UL && keylen != 256UL) {
-    return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
+  switch ( cipher_info->type ) {
+    case MBEDTLS_CIPHER_AES_128_ECB:
+      if ( keylen != 128UL ) {
+        return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
+      }
+      break;
+    case MBEDTLS_CIPHER_AES_192_ECB:
+      #if defined(SLI_DEVICE_HAS_AES_192)
+      if ( keylen != 192UL ) {
+        return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
+      }
+      break;
+      #else
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+      #endif
+    case MBEDTLS_CIPHER_AES_256_ECB:
+      if ( keylen != 256UL ) {
+        return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
+      }
+      break;
+    default:
+      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
   }
 
 #if defined(RADIOAES_PRESENT) && defined(SEMAILBOX_PRESENT)

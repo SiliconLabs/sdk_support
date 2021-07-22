@@ -348,6 +348,8 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   // Remember mode and additional authentication length
   ctx->mode = mode;
   ctx->add_len = add_len;
+  /* Reset data length to zero. */
+  ctx->len = 0;
 
   // Process additional authentication data if present.
   if (add_len) {

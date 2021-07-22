@@ -30,6 +30,13 @@
 #ifndef SL_MBEDTLS_H
 #define SL_MBEDTLS_H
 
+/**
+ * Initialize the Silicon Labs platform integration of mbedTLS.
+ *
+ * This function must be called by an application before using any mbedTLS
+ * functions. This function will make sure that the platform hooks in mbedTLS
+ * are configured to ensure correct runtime behavior.
+ */
 void sl_mbedtls_init(void);
 
 #endif

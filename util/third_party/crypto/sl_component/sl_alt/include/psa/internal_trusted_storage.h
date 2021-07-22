@@ -152,6 +152,9 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
  */
 psa_status_t psa_its_remove(psa_storage_uid_t uid);
 
+psa_status_t sli_psa_its_change_key_id(mbedtls_svc_key_id_t old_id,
+                                       mbedtls_svc_key_id_t new_id);
+
 #ifdef __cplusplus
 }
 #endif

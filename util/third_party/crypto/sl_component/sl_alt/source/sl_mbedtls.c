@@ -36,13 +36,6 @@
 #include "sli_radioaes_management.h"
 #endif
 
-/*
- * Initialize the Silicon Labs platform integration of mbedTLS.
- *
- * This function must be called by an application before using any mbedTLS
- * functions. This function will make sure that the platform hooks in mbedTLS
- * are configured to ensure correct runtime behavior.
- */
 void sl_mbedtls_init(void)
 {
 #if defined(SEMAILBOX_PRESENT) || defined(CRYPTOACC_PRESENT)

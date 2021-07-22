@@ -1194,6 +1194,7 @@ psa_status_t psa_hash_clone(const psa_hash_operation_t *source_operation,
 
 /** Calculate the MAC (message authentication code) of a message.
  *
+ * \note One-shot MAC is not implemented in this Silicon Labs release.
  * \note To verify the MAC of a message against an
  *       expected value, use psa_mac_verify() instead.
  *       Beware that comparing integrity or authenticity data such as
@@ -1243,6 +1244,8 @@ psa_status_t psa_mac_compute(mbedtls_svc_key_id_t key,
                              size_t *mac_length);
 
 /** Calculate the MAC of a message and compare it with a reference value.
+ *
+ * \note One-shot MAC is not implemented in this Silicon Labs release.
  *
  * \param key               Identifier of the key to use for the operation. It
  *                          must allow the usage PSA_KEY_USAGE_VERIFY_MESSAGE.
@@ -1614,6 +1617,8 @@ psa_status_t psa_mac_abort(psa_mac_operation_t *operation);
 
 /** Encrypt a message using a symmetric cipher.
  *
+ * \note One-shot cipher is not implemented in this Silicon Labs release.
+ *
  * This function encrypts a message with a random IV (initialization
  * vector). Use the multipart operation interface with a
  * #psa_cipher_operation_t object to provide other forms of IV.
@@ -1660,6 +1665,8 @@ psa_status_t psa_cipher_encrypt(mbedtls_svc_key_id_t key,
                                 size_t *output_length);
 
 /** Decrypt a message using a symmetric cipher.
+ *
+ * \note One-shot cipher is not implemented in this Silicon Labs release.
  *
  * This function decrypts a message encrypted with a symmetric cipher.
  *
@@ -2283,6 +2290,8 @@ static psa_aead_operation_t psa_aead_operation_init(void);
 
 /** Set the key for a multipart authenticated encryption operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * The sequence of operations to encrypt a message with authentication
  * is as follows:
  * -# Allocate an operation object which will be passed to all the functions
@@ -2353,6 +2362,8 @@ psa_status_t psa_aead_encrypt_setup(psa_aead_operation_t *operation,
 
 /** Set the key for a multipart authenticated decryption operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * The sequence of operations to decrypt a message with authentication
  * is as follows:
  * -# Allocate an operation object which will be passed to all the functions
@@ -2420,6 +2431,8 @@ psa_status_t psa_aead_decrypt_setup(psa_aead_operation_t *operation,
 
 /** Generate a random nonce for an authenticated encryption operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * This function generates a random nonce for the authenticated encryption
  * operation with an appropriate size for the chosen algorithm, key type
  * and key size.
@@ -2461,6 +2474,8 @@ psa_status_t psa_aead_generate_nonce(psa_aead_operation_t *operation,
 
 /** Set the nonce for an authenticated encryption or decryption operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * This function sets the nonce for the authenticated
  * encryption or decryption operation.
  *
@@ -2500,6 +2515,8 @@ psa_status_t psa_aead_set_nonce(psa_aead_operation_t *operation,
                                 size_t nonce_length);
 
 /** Declare the lengths of the message and additional data for AEAD.
+ *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
  *
  * The application must call this function before calling
  * psa_aead_update_ad() or psa_aead_update() if the algorithm for
@@ -2546,6 +2563,8 @@ psa_status_t psa_aead_set_lengths(psa_aead_operation_t *operation,
                                   size_t plaintext_length);
 
 /** Pass additional data to an active AEAD operation.
+ *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
  *
  * Additional data is authenticated, but not encrypted.
  *
@@ -2595,6 +2614,8 @@ psa_status_t psa_aead_update_ad(psa_aead_operation_t *operation,
                                 size_t input_length);
 
 /** Encrypt or decrypt a message fragment in an active AEAD operation.
+ *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
  *
  * Before calling this function, you must:
  * 1. Call either psa_aead_encrypt_setup() or psa_aead_decrypt_setup().
@@ -2685,6 +2706,8 @@ psa_status_t psa_aead_update(psa_aead_operation_t *operation,
 
 /** Finish encrypting a message in an AEAD operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * The operation must have been set up with psa_aead_encrypt_setup().
  *
  * This function finishes the authentication of the additional data
@@ -2774,6 +2797,8 @@ psa_status_t psa_aead_finish(psa_aead_operation_t *operation,
 
 /** Finish authenticating and decrypting a message in an AEAD operation.
  *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
+ *
  * The operation must have been set up with psa_aead_decrypt_setup().
  *
  * This function finishes the authenticated decryption of the message
@@ -2857,6 +2882,8 @@ psa_status_t psa_aead_verify(psa_aead_operation_t *operation,
                              size_t tag_length);
 
 /** Abort an AEAD operation.
+ *
+ * \note Multipart AEAD is not implemented in this Silicon Labs release.
  *
  * Aborting an operation frees all associated resources except for the
  * \p operation structure itself. Once aborted, the operation object

@@ -165,6 +165,8 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   /* Store input in context data structure. */
   ctx->dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
   ctx->add_len    = add_len;
+  /* Reset data length to zero. */
+  ctx->len        = 0;
 
   if (add_len == 0) {
     memcpy(ctx->sx_ctx, iv, AES_IV_GCM_SIZE);

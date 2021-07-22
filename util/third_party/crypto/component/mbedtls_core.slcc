@@ -125,6 +125,7 @@ requires:
 define:
   - name: MBEDTLS_CONFIG_FILE
     value: "<mbedtls_config.h>"
+    unless: [test_mbedtls_classic_common]
 provides:
   - name: mbedtls_core
   - name: mbedtls_config

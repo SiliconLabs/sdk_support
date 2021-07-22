@@ -431,6 +431,11 @@ sl_status_t sl_se_ack_command(sl_se_command_context_t *cmd_ctx);
 ///
 /// ## RTOS Mode and Multi-Thread Safety
 ///
+/// @note The SE Manager API is multi-thread safe, but does not support preemption.
+///       This means the API cannot be called from ISR or critical/atomic sections when running in an RTOS thread.
+///       When using the SE Manager API in a bare-metal application, it is the application developer's responsibility
+///       to not call the SE Manager APIs when another operation is in progress.
+///
 /// The SE Manager supports multi-thread safe APIs for MicriumOS and FreeRTOS interfacing with CMSIS RTOS2 APIs.
 ///
 /// For MicriumOS support the user application must define the compile time option SL_CATALOG_MICRIUMOS_KERNEL_PRESENT.

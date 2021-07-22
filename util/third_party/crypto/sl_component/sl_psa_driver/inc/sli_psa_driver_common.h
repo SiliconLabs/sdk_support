@@ -33,6 +33,7 @@
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
 #include "em_device.h"
+#include "psa/crypto.h"
 #include <stddef.h>
 
 #ifdef __cplusplus
@@ -73,6 +74,82 @@ typedef enum {
  ******************************************************************************/
 size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type);
 
+/*******************************************************************************
+ * @brief
+ *   Validate the PKCS#7 padding contained in the final block of plaintext
+ *   in certain block cipher modes of operation. Based on the get_pkcs_padding()
+ *   implementation in Mbed TLS.
+ *
+ * @param[in] padded_data
+ *   A buffer of (at least) size 16 containing the padded final block.
+ *
+ * @param padded_data_length
+ *   The length of the paddad data (should be 16). Parameter is mainly kept used
+ *   in order to make it harder for the compiler to optimize out some of the
+ *   "time-constantness".
+ *
+ * @param padding_bytes
+ *   The expected padding bytes (likely derived from padded_block[15]).
+ *
+ * @return
+ *   PSA_SUCCESS if the padding is valid, PSA_ERROR_INVALID_PADDING otherwise.
+ ******************************************************************************/
+psa_status_t sli_psa_validate_pkcs7_padding(uint8_t *padded_data,
+                                            size_t padded_data_length,
+                                            uint8_t padding_bytes);
+
+__STATIC_INLINE
+/*******************************************************************************
+ * @brief
+ *   Validate that a elliptic curve (in Weierstrass form) private key is valid.
+ *   This fuction attempts to operate in constant time.
+ *
+ * @param[in] privkey
+ *   A buffer containing the private key.
+ *
+ * @param padding_bytes
+ *   A buffer containing the modulus (n) to compare the private key against.
+ *
+ * @return
+ *   PSA_SUCCESS if the key is in [1, n-1], PSA_ERROR_INVALID_ARGUMENT otherwise.
+ ******************************************************************************/
+psa_status_t sli_psa_validate_ecc_weierstrass_privkey(const void *privkey,
+                                                      const void *modulus,
+                                                      size_t privkey_size)
+{
+  // Compare private key to maximum allowed value, n - 1,
+  // and also check that it is non-zero.
+
+  // Initial values.
+  uint8_t non_zero_accumulator = 0;
+  int32_t memcmp_res = 0;
+  int32_t diff = 0;
+
+  // Loop over every byte in the private key. We start from the end so that
+  // the final result we store reflects the first byte which differs between the
+  // two numbers (privkey and modulus).
+  for (size_t i = 0; i < privkey_size; ++i) {
+    // Partial non-zero check operation.
+    non_zero_accumulator |= ((uint8_t *)privkey)[privkey_size - 1 - i];
+
+    // Compute the difference between the current bytes being compared.
+    diff = ((uint8_t *)privkey)[privkey_size - 1 - i]
+           - ((uint8_t *)modulus)[privkey_size - 1 - i];
+
+    // This will only update memcmp_res if the difference is non-zero.
+    memcmp_res = (memcmp_res & - !diff) | diff;
+  }
+
+  if ((non_zero_accumulator == 0) || (memcmp_res >= 0)) {
+    // We have either failed because the private key turned out to be empty,
+    // or because the result of the memcmp indicated that the privkey was not
+    // smaller than the modulus.
+    return PSA_ERROR_INVALID_ARGUMENT;
+  } else {
+    return PSA_SUCCESS;
+  }
+}
+
 /***************************************************************************//**
  * @brief
  *   Clear a memory location in a way that is guaranteed not be optimized away
@@ -95,6 +172,36 @@ void sli_psa_zeroize(void *v, size_t n)
   while (n--) {
     *p++ = 0;
   }
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Perform a memcmp() in 'constant time'.
+ *
+ * @param[in]  a
+ *   Pointer to the first memory location.
+ *
+ * @param[in]  a
+ *   Pointer to the second memory location.
+ *
+ * @param[in] n
+ *   Number of bytes to compare between the two memory locations.
+ *
+ * @return
+ *   Zero if the buffer contents are equal, non-zero otherwise.
+ ******************************************************************************/
+__STATIC_INLINE
+uint8_t sli_psa_safer_memcmp(const uint8_t *a,
+                             const uint8_t *b,
+                             size_t n)
+{
+  uint8_t diff = 0u;
+
+  for (size_t i = 0; i < n; i++) {
+    diff |= a[i] ^ b[i];
+  }
+
+  return diff;
 }
 
 #if defined(SLI_PSA_SUPPORT_GCM_IV_CALCULATION)
