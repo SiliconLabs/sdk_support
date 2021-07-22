@@ -116,3 +116,5 @@ uint32_t sli_power_manager_convert_delay_us_to_tick(uint32_t time_us);
  ******************************************************************************/
 void sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(bool enable);
 #endif
+
+void sli_power_manager_low_frequency_restore(void);

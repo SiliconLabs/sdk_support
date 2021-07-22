@@ -152,7 +152,7 @@ static void GPIOINT_IRQDispatcher(uint32_t iflags)
     callback = gpioCallbacks[irqIdx];
     if (callback) {
       /* call user callback */
-      callback(irqIdx);
+      callback((uint8_t)irqIdx);
     }
   }
 }

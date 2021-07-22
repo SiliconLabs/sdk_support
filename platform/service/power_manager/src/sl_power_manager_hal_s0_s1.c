@@ -127,6 +127,8 @@ static uint32_t process_wakeup_overhead_tick = 0;
 static bool is_fast_wakeup_enabled = true;
 #endif
 
+static uint32_t cmu_status;
+
 /***************************************************************************//**
  * Do some hardware initialization if necessary.
  ******************************************************************************/
@@ -173,6 +175,9 @@ void sli_power_manager_init_hardware(void)
 #endif
 
   process_wakeup_overhead_tick += sli_power_manager_convert_delay_us_to_tick(EM2_WAKEUP_PROCESS_TIME_OVERHEAD_US);
+
+  // Save CMU register to handle the LF clock tree restore without the HF restore.
+  cmu_status = CMU->STATUS;
 }
 
 #if defined(EMU_VSCALE_PRESENT)
@@ -385,5 +390,37 @@ uint32_t sli_power_manager_get_wakeup_process_time_overhead(void)
   delay += process_wakeup_overhead_tick;
 
   return delay;
+}
+
+/*******************************************************************************
+ * Restores the Low Frequency clocks according to which LF oscillators are used.
+ ******************************************************************************/
+void sli_power_manager_low_frequency_restore(void)
+{
+  uint32_t cmu_locked;
+  uint32_t osc_en_cmd;
+
+  // CMU registers may be locked.
+  cmu_locked = CMU->LOCK & CMU_LOCK_LOCKKEY_LOCKED;
+  CMU_Unlock();
+
+#if defined(_CMU_OSCENCMD_MASK)
+  /* AUXHFRCO are automatically disabled (except if using debugger). */
+  /* HFRCO, USHFRCO and HFXO are automatically disabled. */
+  /* LFRCO/LFXO may be disabled by SW in EM3. */
+  /* Restore according to status prior to entering energy mode. */
+  osc_en_cmd = 0;
+  osc_en_cmd |= (cmu_status & CMU_STATUS_LFRCOENS) != 0U
+                ? CMU_OSCENCMD_LFRCOEN : 0U;
+  osc_en_cmd |= (cmu_status & CMU_STATUS_LFXOENS) != 0U
+                ? CMU_OSCENCMD_LFXOEN : 0U;
+
+  CMU->OSCENCMD = osc_en_cmd;
+#endif
+
+  // Restore CMU register locking
+  if (cmu_locked != 0U) {
+    CMU_Lock();
+  }
 }
 #endif

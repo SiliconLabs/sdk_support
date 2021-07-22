@@ -482,4 +482,14 @@ void sli_power_manager_set_high_accuracy_hf_clock_as_used(void)
 {
   is_hf_x_oscillator_used = true;
 }
+
+/*******************************************************************************
+ * Restores the Low Frequency clocks according to what LF oscillators are used.
+ *
+ * @note On series 2, the on-demand will enable automatically the oscillators
+ *       used when coming from sleep.
+ ******************************************************************************/
+void sli_power_manager_low_frequency_restore(void)
+{
+}
 #endif

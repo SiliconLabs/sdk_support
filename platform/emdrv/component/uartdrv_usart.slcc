@@ -40,6 +40,8 @@ provides:
 requires:
   - name: "uartdrv_core"
 template_contribution:
+  - name: component_catalog
+    value: uartdrv_usart
   - name: "uartdrv_usart_instances"
     value: "{{instance}}"
   - name: power_manager_handler

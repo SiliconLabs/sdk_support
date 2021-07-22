@@ -87,7 +87,7 @@ typedef enum {
 #if defined(_IDAC_CTRL_OUTMODE_MASK)
   idacOutputPin     = IDAC_CTRL_OUTMODE_PIN,     /**< Output to IDAC OUT pin. */
   idacOutputADC     = IDAC_CTRL_OUTMODE_ADC      /**< Output to ADC. */
-#elif ( _IDAC_CTRL_APORTOUTSEL_MASK )
+#elif defined(_IDAC_CTRL_APORTOUTSEL_MASK)
   idacOutputAPORT1XCH0 = IDAC_CTRL_APORTOUTSEL_APORT1XCH0, /**< Output to APORT 1X CH0. */
   idacOutputAPORT1YCH1 = IDAC_CTRL_APORTOUTSEL_APORT1YCH1, /**< Output to APORT 1Y CH1. */
   idacOutputAPORT1XCH2 = IDAC_CTRL_APORTOUTSEL_APORT1XCH2, /**< Output to APORT 1X CH2. */
@@ -170,6 +170,14 @@ typedef struct {
    * by calling IDAC_OutEnable().
    */
   bool                  prsEnable;
+#if defined(_IDAC_CTRL_MAINOUTENPRS_MASK)
+  /**
+   * Enables Peripheral reflex system (PRS) to control IDAC OUTPAD output. If false,
+   * IDAC output is controlled by writing to IDAC_MAINOUTEN in IDAC_CTRL or
+   * by calling IDAC_OutpadEnable().
+   */
+  bool                  prsEnableMain;
+#endif
 
   /**
    * Peripheral reflex system channel selection. Only applicable if @p prsEnable
@@ -188,6 +196,16 @@ typedef struct {
     false,         /**< Leave IDAC disabled when initialization done. */ \
     idacOutputPin, /**< Output to IDAC output pin. */                    \
     false,         /**< Disable PRS triggering. */                       \
+    idacPRSSELCh0, /**< Select PRS ch0 (if PRS triggering enabled). */   \
+    false          /**< Disable current sink mode. */                    \
+  }
+#elif defined(_IDAC_CTRL_MAINOUTEN_MASK)
+#define IDAC_INIT_DEFAULT                                                \
+  {                                                                      \
+    false,         /**< Leave IDAC disabled when initialization done. */ \
+    idacOutputAPORT1XCH0, /**< Output to APORT. */                       \
+    false,         /**< Disable APORT PRS triggering. */                 \
+    false,         /**< Disable MAIN PRS triggering. */                  \
     idacPRSSELCh0, /**< Select PRS ch0 (if PRS triggering enabled). */   \
     false          /**< Disable current sink mode. */                    \
   }
@@ -213,6 +231,9 @@ void IDAC_MinimalOutputTransitionMode(IDAC_TypeDef *idac, bool enable);
 void IDAC_RangeSet(IDAC_TypeDef *idac, const IDAC_Range_TypeDef range);
 void IDAC_StepSet(IDAC_TypeDef *idac, const uint32_t step);
 void IDAC_OutEnable(IDAC_TypeDef *idac, bool enable);
+#if defined(_IDAC_CTRL_MAINOUTEN_MASK)
+void IDAC_OutpadEnable(IDAC_TypeDef *idac, bool enable);
+#endif
 
 #if defined(_IDAC_IEN_MASK)
 /***************************************************************************//**

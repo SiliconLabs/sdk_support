@@ -1,3 +1,6 @@
+What's new in Gecko Platform 3.2.1.0
+* Selected quality improvements and bug fixes
+
 What's new in Gecko Platform 3.2.0.0
 * Peripherals
   * EFP Voltage scaling and Direct mode on EFR32xG22 and EFM32xG22.

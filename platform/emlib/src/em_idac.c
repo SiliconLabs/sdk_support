@@ -88,6 +88,11 @@ void IDAC_Init(IDAC_TypeDef *idac, const IDAC_Init_TypeDef *init)
     tmp |= IDAC_CTRL_APORTOUTENPRS;
 #endif
   }
+#if defined(_IDAC_CTRL_MAINOUTENPRS_MASK)
+  if (init->prsEnableMain) {
+    tmp |= IDAC_CTRL_MAINOUTENPRS;
+  }
+#endif
   if (init->sinkEnable) {
     tmp |= IDAC_CTRL_CURSINK;
   }
@@ -315,6 +320,10 @@ void IDAC_StepSet(IDAC_TypeDef *idac, const uint32_t step)
  * @brief
  *   Enable/disable the IDAC OUT pin.
  *
+ *  @warning
+ *   This function will not enable/disable the IDAC OUT pin if APORTOUTENPRS is set
+ *   because output enable will be controlled by PRS.
+ *
  * @param[in] idac
  *   A pointer to the IDAC peripheral register block.
  *
@@ -330,6 +339,34 @@ void IDAC_OutEnable(IDAC_TypeDef *idac, bool enable)
   BUS_RegBitWrite(&idac->CTRL, _IDAC_CTRL_APORTOUTEN_SHIFT, enable);
 #endif
 }
+
+#if defined(_IDAC_CTRL_MAINOUTEN_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Enable/disable the IDAC OUTPAD output.
+ *
+ * @note
+ *   IDAC OUTPAD is not available on some EFR32xG1 series devices as well as on
+ *   non-BGA125 EFR32MG12 devices either because of lack of that feature (former)
+ *   or because OUTPAD pin is not available on other packages (latter).
+ *
+ *  @warning
+ *   This function will not enable/disable the IDAC OUTPAD pin if MAINOUTENPRS is set
+ *   because output enable will be controlled by PRS.
+ *
+ * @param[in] idac
+ *   A pointer to the IDAC peripheral register block.
+ *
+ * @param[in] enable
+ *   True to enable the IDAC OUTPAD, false to disable.
+ ******************************************************************************/
+void IDAC_OutpadEnable(IDAC_TypeDef *idac, bool enable)
+{
+  EFM_ASSERT(IDAC_REF_VALID(idac));
+
+  BUS_RegBitWrite(&idac->CTRL, _IDAC_CTRL_MAINOUTEN_SHIFT, enable);
+}
+#endif
 
 /** @} (end addtogroup idac) */
 

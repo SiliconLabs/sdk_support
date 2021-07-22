@@ -341,10 +341,10 @@ void sl_simple_rgbw_pwm_led_turn_on(void *context)
       && (led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] == SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF)
       && (led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] == SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF)) {
     // No previous level set. Turn on with max level
-    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = led->resolution - 1;
-    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = led->resolution - 1;
-    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = led->resolution - 1;
-    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = led->resolution - 1;
+    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = (uint16_t)(led->resolution - 1);
+    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = (uint16_t)(led->resolution - 1);
+    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = (uint16_t)(led->resolution - 1);
+    led->level[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = (uint16_t)(led->resolution - 1);
   }
 
   sl_simple_rgbw_pwm_led_stop(led);

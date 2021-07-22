@@ -351,23 +351,27 @@ void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
   // Increment (add) or decrement (remove) energy mode counter.
   requirement_em_table[em - 1] += (add) ? 1 : -1;
 
-  if (current_em >= SL_POWER_MANAGER_EM2) {  // if currently sleeping at a level that can require a clock restore; i.e. called from ISR
+  if (add == true
+      && current_em >= SL_POWER_MANAGER_EM2) {  // if currently sleeping at a level that can require a clock restore; i.e. called from ISR
     sl_power_manager_em_t lowest_em;
     // If requirement added when sleeping, restore the clock before continuing the processing.
     // Retrieve lowest reachable energy mode
     lowest_em = get_lowest_em();
 
-    if (lowest_em < current_em) {
+    if (lowest_em <= SL_POWER_MANAGER_EM1) {
       // If new lowest requirement is greater than the current
       // Restore clock; Everything is restored (HF and LF Clocks), the sleep loop will
       // shutdown the clocks when returning sleeping
-
       clock_restore_and_wait();
+    } else if (current_em == SL_POWER_MANAGER_EM3
+               && lowest_em == SL_POWER_MANAGER_EM2) {
+      // Restore LF clocks if we are transitioning from EM3 to EM2
+      sli_power_manager_low_frequency_restore();
+    }
 
-      if (current_em != lowest_em) {
-        power_manager_notify_em_transition(current_em, lowest_em);
-        current_em = lowest_em;           // Keep new active energy mode
-      }
+    if (current_em != lowest_em) {
+      power_manager_notify_em_transition(current_em, lowest_em);
+      current_em = lowest_em;           // Keep new active energy mode
     }
   }
 }
