@@ -6,7 +6,7 @@
 - category: Platform|Board|Radio Board
 - quality: production
 - requires:
-  - name: wgm160px22kga2
+  - name: efm32gg11b820f2048gm64
   - name: brd4321a_config
   - name: hardware_board_mainboard
 - provides:

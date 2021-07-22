@@ -78,7 +78,7 @@ void emberAfPluginAntennaSetAntennaTxMode(void)
                       &antennaMode,
                       "set TX antenna mode");
 #elif !defined(EMBER_STACK_IP) //!EZSP_HOST
-  halSetAntennaMode(antennaMode != 0u);
+  halSetAntennaMode(antennaMode);
 #endif //EZSP_HOST
 }
 //-----------------------------------------------------------------------------

@@ -561,6 +561,11 @@
     <property key="installationPath" value="./EFM32PG22_DK2503A/config/brd2503a.hwconf"/>
   </contentItemData>
   <contentItemData>
+    <property key="partCompatibility" value="mcu.arm.efm32.pg23.efm32pg23b310f512im48"/>
+    <property key="boardCompatibility" value="brd2504a"/>
+    <property key="installationPath" value="./EFM32PG23_DK2504A/config/brd2504a.hwconf"/>
+  </contentItemData>
+  <contentItemData>
     <property key="partCompatibility" value="mcu.arm.efr32.zg13.zgm130s037hgn1"/>
     <property key="boardCompatibility" value="brd4200a.*A03"/>
     <property key="installationPath" value="./ZGM13_BRD4200A/config/brd4200arevA03.hwconf"/>
