@@ -41,38 +41,8 @@
 
 #ifndef EM_DEVICE_H
 #define EM_DEVICE_H
-#if defined(MGM210L022JIF)
-#include "mgm210l022jif.h"
-
-#elif defined(MGM210L022JNF)
-#include "mgm210l022jnf.h"
-
-#elif defined(MGM210LA22JIF)
-#include "mgm210la22jif.h"
-
-#elif defined(MGM210LA22JNF)
-#include "mgm210la22jnf.h"
-
-#elif defined(MGM210P022JIA)
-#include "mgm210p022jia.h"
-
-#elif defined(MGM210P032JIA)
-#include "mgm210p032jia.h"
-
-#elif defined(MGM210PA22JIA)
-#include "mgm210pa22jia.h"
-
-#elif defined(MGM210PA32JIA)
-#include "mgm210pa32jia.h"
-
-#elif defined(MGM210PB22JIA)
-#include "mgm210pb22jia.h"
-
-#elif defined(MGM210PB32JIA)
-#include "mgm210pb32jia.h"
-
-#elif defined(MGM211LA02JNF)
-#include "mgm211la02jnf.h"
+#if defined(EFR32MR21A020F512IM32)
+#include "efr32mr21a020f512im32.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

@@ -1,17 +1,6 @@
 /**************************************************************************//**
  * @file
- * @brief CMSIS Cortex-M Peripheral Access Layer for Silicon Laboratories
- *        microcontroller devices
- *
- * This is a convenience header file for defining the part number on the
- * build command line, instead of specifying the part specific header file.
- *
- * @verbatim
- * Example: Add "-DEFM32G890F128" to your build options, to define part
- *          Add "#include "em_device.h" to your source files
-
- *
- * @endverbatim
+ * @brief EFR32MR21 DMA descriptor bit field definitions
  ******************************************************************************
  * # License
  * <b>Copyright 2021 Silicon Laboratories, Inc. www.silabs.com</b>
@@ -39,42 +28,28 @@
  *
  *****************************************************************************/
 
-#ifndef EM_DEVICE_H
-#define EM_DEVICE_H
-#if defined(MGM210L022JIF)
-#include "mgm210l022jif.h"
-
-#elif defined(MGM210L022JNF)
-#include "mgm210l022jnf.h"
-
-#elif defined(MGM210LA22JIF)
-#include "mgm210la22jif.h"
-
-#elif defined(MGM210LA22JNF)
-#include "mgm210la22jnf.h"
-
-#elif defined(MGM210P022JIA)
-#include "mgm210p022jia.h"
-
-#elif defined(MGM210P032JIA)
-#include "mgm210p032jia.h"
-
-#elif defined(MGM210PA22JIA)
-#include "mgm210pa22jia.h"
-
-#elif defined(MGM210PA32JIA)
-#include "mgm210pa32jia.h"
-
-#elif defined(MGM210PB22JIA)
-#include "mgm210pb22jia.h"
-
-#elif defined(MGM210PB32JIA)
-#include "mgm210pb32jia.h"
-
-#elif defined(MGM211LA02JNF)
-#include "mgm211la02jnf.h"
-
-#else
-#error "em_device.h: PART NUMBER undefined"
+#if defined(__ICCARM__)
+#pragma system_include       /* Treat file as system include file. */
+#elif defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
+#pragma clang system_header  /* Treat file as system include file. */
 #endif
-#endif /* EM_DEVICE_H */
+
+/**************************************************************************//**
+* @addtogroup Parts
+* @{
+******************************************************************************/
+/**************************************************************************//**
+ * @defgroup DMA_DESCRIPTOR DMA Descriptor
+ * @{
+ *****************************************************************************/
+/** DMA_DESCRIPTOR Register Declaration */
+typedef struct {
+  /* Note! Use of double __IOM (volatile) qualifier to ensure that both */
+  /* pointer and referenced memory are declared volatile. */
+  __IOM uint32_t     CTRL;     /**< DMA control register */
+  __IOM void * __IOM SRC;      /**< DMA source address */
+  __IOM void * __IOM DST;      /**< DMA destination address */
+  __IOM void * __IOM LINK;     /**< DMA link address */
+} DMA_DESCRIPTOR_TypeDef;      /**< @} */
+
+/** @} End of group Parts */
