@@ -159,7 +159,7 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   // the desired power.
   // Note: Code assumes there must be a catch-all entry for each band
   // else the loop will wander into uncharted RAM
-  for (uint8_t index = 0U; RAIL_PaAutoModeConfig[index].band <= RAIL_PA_BAND_SUBGIG; index++) {
+  for (uint8_t index = 0U; RAIL_PaAutoModeConfig[index].band < RAIL_PA_BAND_COUNT; index++) {
     RAIL_PaAutoModeConfigEntry_t entry = RAIL_PaAutoModeConfig[index];
     if ((entry.band == band) && (entry.min <= *power) && (entry.max >= *power)) {
       *mode = entry.mode;

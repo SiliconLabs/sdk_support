@@ -158,6 +158,7 @@ void disableIncompatibleProtocols(RAIL_PtiProtocol_t newProtocol)
       && RAIL_MFM_IsEnabled(railHandle)) {
     (void) RAIL_MFM_Deinit(railHandle);
   }
+  (void) RAIL_SetPtiProtocol(railHandle, newProtocol);
 }
 
 void configRfSenseSelectiveOokWakeupPhy(sl_cli_command_arg_t *args)

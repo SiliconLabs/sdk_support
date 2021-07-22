@@ -237,6 +237,14 @@ RAIL_Status_t RAIL_EnablePti(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_SetPtiProtocol(RAIL_Handle_t railHandle,
                                   RAIL_PtiProtocol_t protocol);
 
+/**
+ * Get the protocol that RAIL outputs on PTI.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return PTI protocol in use.
+ */
+RAIL_PtiProtocol_t RAIL_GetPtiProtocol(RAIL_Handle_t railHandle);
+
 /** @} */ // end of group PTI
 
 /******************************************************************************
@@ -4502,7 +4510,8 @@ void RAIL_EnablePaCal(bool enable);
  *   \ref RAIL_RFSENSE_OFF or with senseTime set to 0 microseconds.
  *
  * @note Packet reception is not guaranteed to work correctly once RF Sense is
- *   enabled. To be safe, an application should turn this on only after idling
+ *   enabled, both in single protocol and multiprotocol RAIL.
+ *   To be safe, an application should turn this on only after idling
  *   the radio to stop receive and turn it off before attempting to restart
  *   receive. Since EM4 sleep causes the chip to come up through the reset
  *   vector any wake from EM4 must also shut off RF Sense to ensure proper
@@ -4548,9 +4557,9 @@ RAIL_Time_t RAIL_StartRfSense(RAIL_Handle_t railHandle,
 /// // Configure the receiving node (EFR32XG22) for RF Sense.
 /// RAIL_RfSenseSelectiveOokConfig_t config = {
 ///  .band = rfBand,
-///   .syncWordNumBytes = NUMSYNCWORDBYTES,
+///  .syncWordNumBytes = NUMSYNCWORDBYTES,
 ///  .syncWord = SYNCWORD,
-///   .cb = &RAILCb_SensedRf
+///  .cb = &RAILCb_SensedRf
 /// };
 /// RAIL_StartSelectiveOokRfSense(railHandle, &config);
 ///
@@ -4564,7 +4573,8 @@ RAIL_Time_t RAIL_StartRfSense(RAIL_Handle_t railHandle,
 ///   \ref RAIL_RfSenseSelectiveOokConfig_t as NULL.
 ///
 /// @note Packet reception is not guaranteed to work correctly once RF Sense is
-///   enabled. To be safe, an application should turn this on only after idling
+///   enabled, both in single protocol and multiprotocol RAIL.
+///   To be safe, an application should turn this on only after idling
 ///   the radio to stop receive and turn it off before attempting to restart
 ///   receive. Since EM4 sleep causes the chip to come up through the reset
 ///   vector any wake from EM4 must also shut off RF Sense to ensure proper
@@ -4701,8 +4711,6 @@ bool RAIL_IsRfSensed(RAIL_Handle_t railHandle);
  *       the runtume call \ref RAIL_SupportsChannelHopping() to check whether
  *       the platform supports this feature.
  *
- * @note This feature/API is currently not supported in multiprotocol.
- *
  * @note Calling this function will overwrite any settings configured with
  *       \ref RAIL_ConfigRxDutyCycle.
  */
@@ -4730,8 +4738,6 @@ RAIL_Status_t RAIL_ConfigRxChannelHopping(RAIL_Handle_t railHandle,
  *       the runtime call \ref RAIL_SupportsChannelHopping() to check whether
  *       the platform supports this feature.
  *
- * @note This feature/API is currently not supported in multiprotocol.
- *
  * @note RX Channel Hopping may not be enabled while auto-ACKing is enabled.
  *
  * @note Calling this function will overwrite any settings configured with
@@ -4754,7 +4760,8 @@ RAIL_Status_t RAIL_EnableRxChannelHopping(RAIL_Handle_t railHandle,
  *       the runtume call \ref RAIL_SupportsChannelHopping() to check whether
  *       the platform supports this feature.
  *
- * @note This feature/API is currently not supported in multiprotocol.
+ * @note In multiprotocol, this function returns \ref RAIL_RSSI_INVALID
+ *       immediately if railHandle is not the current active \ref RAIL_Handle_t.
  *
  * @note \ref RAIL_ConfigRxChannelHopping must be called successfully
  *       before this API is called.
@@ -4848,8 +4855,6 @@ int16_t RAIL_GetChannelHoppingRssi(RAIL_Handle_t railHandle,
 ///       the runtume call \ref RAIL_SupportsChannelHopping() to check whether
 ///       the platform supports this feature.
 ///
-/// @note This feature/API is currently not supported in multiprotocol.
-///
 /// @note Calling this function will overwrite any settings configured with
 ///       \ref RAIL_ConfigRxChannelHopping.
 RAIL_Status_t RAIL_ConfigRxDutyCycle(RAIL_Handle_t railHandle,
@@ -4871,8 +4876,6 @@ RAIL_Status_t RAIL_ConfigRxDutyCycle(RAIL_Handle_t railHandle,
  *       Use the compile time symbol \ref RAIL_SUPPORTS_CHANNEL_HOPPING or
  *       the runtume call \ref RAIL_SupportsChannelHopping() to check whether
  *       the platform supports this feature.
- *
- * @note This feature/API is currently not supported in multiprotocol.
  *
  * @note Calling this function will overwrite any settings configured with
  *       \ref RAIL_EnableRxChannelHopping.
@@ -5003,6 +5006,14 @@ void RAIL_SetTransitionTime(RAIL_Time_t transitionTime);
 ///   chip supports this feature or not.
 RAIL_Status_t RAIL_EnableDirectMode(RAIL_Handle_t railHandle,
                                     bool enable);
+
+/**
+ * Get the radio subsystem clock frequency in Hz.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return Radio subsystem clock frequency in Hz.
+ */
+uint32_t RAIL_GetRadioClockFreqHz(RAIL_Handle_t railHandle);
 
 /**
  * Set the crystal tuning.

@@ -61,7 +61,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP = 13,
   RAIL_ASSERT_FAILED_SYNTH_VCO_FREQUENCY = 14,
   RAIL_ASSERT_FAILED_RAC_STATE = 15,
-  RAIL_ASSERT_FAILED_TO_BE_ASSIGNED = 16, // Placeholder.
+  RAIL_ASSERT_FAILED_SYNTH_INVALID_VCOCTRL = 16,
   RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK = 17,
   RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE = 18,
   RAIL_ASSERT_FAILED_DFL_BITS_SIZE = 19,
@@ -110,6 +110,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_TX_CRC_CONFIG = 62,
   RAIL_ASSERT_INVALID_PA_OPERATION = 63,
   RAIL_ASSERT_SEQ_INVALID_PA_SELECTED = 64,
+  RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG = 65,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -130,6 +131,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_POST_WAKEUP)
 #define RAIL_ASSERT_FAILED_SYNTH_VCO_FREQUENCY                 ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYNTH_VCO_FREQUENCY)
 #define RAIL_ASSERT_FAILED_RAC_STATE                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RAC_STATE)
+#define RAIL_ASSERT_FAILED_SYNTH_INVALID_VCOCTRL               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SYNTH_INVALID_VCOCTRL)
 #define RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NESTED_SEQUENCER_LOCK)
 #define RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE                   ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RSSI_AVERAGE_DONE)
 #define RAIL_ASSERT_FAILED_DFL_BITS_SIZE                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_DFL_BITS_SIZE)
@@ -178,6 +180,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_TX_CRC_CONFIG                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_TX_CRC_CONFIG)
 #define RAIL_ASSERT_INVALID_PA_OPERATION                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_PA_OPERATION)
 #define RAIL_ASSERT_SEQ_INVALID_PA_SELECTED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_INVALID_PA_SELECTED)
+#define RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -221,7 +224,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*13*/ "Error synchronizing the RAIL timebase after sleep",                        \
     /*14*/ "VCO frequency outside supported range",                                    \
     /*15*/ "Radio active while changing channels",                                     \
-    /*16*/ "Unassigned error code",                                                    \
+    /*16*/ "Invalid Synth VCOCTRL field calculation",                                  \
     /*17*/ "Nested attempt to lock the sequencer",                                     \
     /*18*/ "RSSI averaging enabled without a valid callback",                          \
     /*19*/ "Invalid dynamic frame length setting provided (dflBits)",                  \
@@ -236,7 +239,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*28*/ "Attempted to set RAIL timings to invalid value",                           \
     /*29*/ "NULL was supplied as a RAIL_Handle_t argument",                            \
     /*30*/ "Scheduled timer not running",                                              \
-    /*31*/ "No active config to switch from",                                          \
+    /*31*/ "API improperly called while protocol inactive",                            \
     /*32*/ "No active handle after switch",                                            \
     /*33*/ "RfInit failed to configure active state",                                  \
     /*34*/ "No active handle for scheduled rx",                                        \
@@ -270,6 +273,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*62*/ "TX CRC configuration is corrupt",                                          \
     /*63*/ "The current PA config does not allow for this operation",                  \
     /*64*/ "The sequencer selected an invalid PA",                                     \
+    /*65*/ "Invalid/unsupported channel config",                                       \
 }
 
 /**

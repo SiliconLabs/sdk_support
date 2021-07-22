@@ -1074,26 +1074,6 @@ bool RAIL_SupportsSQPhy(RAIL_Handle_t railHandle);
  */
 bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-/// Boolean to indicate whether the selected chip supports Notch capability.
-/// See also runtime refinement \ref RAIL_SupportsNotch().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
-#define RAIL_SUPPORTS_NOTCH 1
-#else
-#define RAIL_SUPPORTS_NOTCH 0
-#endif
-
-/**
- * Indicate whether this chip supports Notch capability.
- *
- * @param[in] railHandle A RAIL instance handle.
- * @return true if the Notch capability is supported; false otherwise.
- *
- * Runtime refinement of compile-time \ref RAIL_SUPPORTS_NOTCH.
- */
-bool RAIL_SupportsNotch(RAIL_Handle_t railHandle);
-#endif //DOXYGEN_SHOULD_SKIP_THIS
-
 /// Boolean to indicate whether the selected chip supports
 /// direct mode.
 /// See also runtime refinement \ref RAIL_SupportsDirectMode().

@@ -206,9 +206,11 @@ void config863Mhz802154(sl_cli_command_arg_t *args)
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 2U;
     changeChannel(0x80);
-
-    txData[0] = 0x10; // enable whitening, 4-byte CRC
-    txData[1] = 0x70; // length indicator = 14, bit-reversed
+    // Hack to make a default 2-byte PHR in txData[]
+    if ((txDataLen == 16) && (txData[0] == 0x0F)) { // default tx packet
+      txData[0] = 0x18; // enable whitening, 2-byte CRC
+      txData[1] = 0x70; // length indicator = 14, bit-reversed
+    }
   }
   responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
 }
@@ -225,9 +227,11 @@ void config915Mhz802154(sl_cli_command_arg_t *args)
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 2U;
     changeChannel(0xE0);
-
-    txData[0] = 0x10; // enable whitening, 4-byte CRC
-    txData[1] = 0x70; // length indicator = 14, bit-reversed
+    // Hack to make a default 2-byte PHR in txData[]
+    if ((txDataLen == 16) && (txData[0] == 0x0F)) { // default tx packet
+      txData[0] = 0x18; // enable whitening, 2-byte CRC
+      txData[1] = 0x70; // length indicator = 14, bit-reversed
+    }
   }
   responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
 }

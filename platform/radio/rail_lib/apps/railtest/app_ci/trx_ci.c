@@ -421,6 +421,11 @@ void setTxTone(sl_cli_command_arg_t *args)
       antOptions = RAIL_TX_OPTION_ANTENNA0;
     }
   }
+  if (sl_cli_get_argument_count(args) >= 3) {
+    if (sl_cli_get_argument_uint32(args, 2) > 0) {
+      streamMode = RAIL_STREAM_CARRIER_WAVE_PHASENOISE;
+    }
+  }
   enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
 }
 

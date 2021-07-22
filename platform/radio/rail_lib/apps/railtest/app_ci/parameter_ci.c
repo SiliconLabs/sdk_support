@@ -592,8 +592,10 @@ void configPaAutoMode(sl_cli_command_arg_t *args)
   RAIL_PaAutoModeConfig[index].min = min;
   RAIL_PaAutoModeConfig[index].max = max;
   RAIL_PaAutoModeConfig[index].mode = mode;
-
-  responsePrint(sl_cli_get_command_string(args, 0), "Min:%d,Max:%d,Mode:%s", min, max, powerModes[mode]);
+  if (sl_cli_get_argument_count(args) >= 5) {
+    RAIL_PaAutoModeConfig[index].band = sl_cli_get_argument_uint8(args, 4);
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "Min:%d,Max:%d,Mode:%s,Band:%d", min, max, powerModes[mode], RAIL_PaAutoModeConfig[index].band);
 }
 
 void enablePaAutoMode(sl_cli_command_arg_t *args)
@@ -643,30 +645,5 @@ void setRetimeOption(sl_cli_command_arg_t *args)
                   ((finalRetimeOption & RAIL_RETIME_OPTION_DCDC) != 0U) ? "Enabled" : "Disabled");
   } else {
     responsePrint(sl_cli_get_command_string(args, 0), "Status:%d", status);
-  }
-}
-
-void configNotch(sl_cli_command_arg_t *args)
-{
-  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  RAIL_NotchConfig_t notchConfig = {
-    .interfererFreqHz = sl_cli_get_argument_uint8(args, 0),
-    .interfererBwHz = 0,
-  };
-
-  RAIL_Status_t status;
-
-  if (sl_cli_get_argument_count(args) > 1) {
-    notchConfig.interfererBwHz = sl_cli_get_argument_uint8(args, 1);
-  }
-
-  status = RAIL_ConfigNotch(railHandle, &notchConfig);
-
-  // Report the current enabled status
-  if (status == RAIL_STATUS_NO_ERROR) {
-    responsePrint(sl_cli_get_command_string(args, 0), "Successful");
-  } else {
-    responsePrintError(sl_cli_get_command_string(args, 0), (uint8_t)__LINE__,
-                       "Status: %d", status);
   }
 }

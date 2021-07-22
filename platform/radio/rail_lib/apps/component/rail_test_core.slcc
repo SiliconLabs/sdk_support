@@ -33,6 +33,7 @@ requires:
   - name: emlib_cmu
   - name: emlib_usart
   - name: emlib_prs
+  - name: emlib_system
 
   # sl_component
   - name: component_catalog
@@ -230,6 +231,12 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: getPti
+      handler: getPti
+      help: "Get PTI configuration."
+
+  - name: cli_command
+    value:
       name: setPrintingEnable
       handler: setPrintingEnable
       help: "Control all printing in RAILtest, except CLI."
@@ -403,6 +410,8 @@ template_contribution:
           help: "max: deci-dBm"
         - type: uint8
           help: "RAIL_TX_POWER_MODE for this power range"
+        - type: uint8opt
+          help: "Band for the PA: [0]-2"
 
   - name: cli_command
     value:
@@ -467,7 +476,7 @@ template_contribution:
         - type: uint32
           help: "0=Disable 1=Enable"
         - type: uint32opt
-          help: "antenna: [0]/1"
+          help: "antenna: [0]/1\\n         [uint32opt] mode: [0]/1=phaseNoise"
 
   - name: cli_command
     value:
@@ -478,7 +487,7 @@ template_contribution:
         - type: uint32
           help: "0=Disable 1=Enable"
         - type: uint32opt
-          help: "streamMode: [1=PN9] 2=1010 0=tone\\n                    [uint32opt] antenna: [0]/1"
+          help: "streamMode: [1=PN9] 2=1010 3=phaseNoise 0=tone\\n                    [uint32opt] antenna: [0]/1"
 
   - name: cli_command
     value:
@@ -790,7 +799,7 @@ template_contribution:
       handler: setTxAltPreambleLen
       help: "Set alternate TX preamble length, enabled via txOptions."
       argument:
-        - type: uint32
+        - type: uint16
           help: "preambleBits"
 
   - name: cli_command
@@ -2179,14 +2188,3 @@ template_contribution:
       argument:
         - type: uint8
           help: "optionBitMask: 1=HFXO | 2=HFRCO | 4=DCDC | 8=LCD"
-
-  - name: cli_command
-    value:
-      name: configNotch
-      handler: configNotch
-      help: "Configure Notch filter."
-      argument:
-        - type: uint32
-          help: "interferer frequency"
-        - type: uint32opt
-          help: "interferer bandwidth"

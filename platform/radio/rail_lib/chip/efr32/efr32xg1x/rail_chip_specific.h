@@ -914,49 +914,6 @@ RAIL_Status_t RAIL_GetRetimeOptions(RAIL_Handle_t railHandle,
 
 /** @} */ // end of group Retiming_EFR32
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-// -----------------------------------------------------------------------------
-// Notch filter
-// -----------------------------------------------------------------------------
-/**
- * @addtogroup Notch_EFR32 Notch Filter
- * @{
- * @brief EFR32-specific notch capability.
- * @ingroup RAIL_API
- *
- * Many wireless protocols operate on similar RF frequency bands.
- * The EFR product families have the ability to reduce interference
- * from undesired RF signal operating in the same frequency band.
- * Note that this feature is not supported on EFR32XG1 devices
- */
-/**
- * @struct RAIL_NotchConfig_t
- * @brief RAIL Notch filter configuration.
- *
- * This structure describes the undesired RF interferencer
- */
-typedef struct RAIL_NotchConfig {
-/** undesired interferer center frequency in Hz.
-    setting it to 0 will disable this feature.*/
-  uint32_t interfererFreqHz;
-/** undesired interferer frequency bandwidth in Hz*/
-  uint32_t interfererBwHz;
-} RAIL_NotchConfig_t;
-
-/**
- * Configure RAIL Notch filter
- *
- * @param[in] railHandle A RAIL instance handle.
- * @param[in] pNotchConfig Pointer to Notch filter configuration.
- * @return A status code indicating success of the function call.
- *
- */
-RAIL_Status_t RAIL_ConfigNotch(RAIL_Handle_t railHandle,
-                               const RAIL_NotchConfig_t *pNotchConfig);
-
-/** @} */  // end of group Notch_EFR32
-#endif //DOXYGEN_SHOULD_SKIP_THIS
-
 /******************************************************************************
  * RX Channel Hopping
  *****************************************************************************/

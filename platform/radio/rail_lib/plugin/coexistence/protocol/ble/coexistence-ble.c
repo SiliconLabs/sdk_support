@@ -115,9 +115,9 @@ uint16_t sl_bt_ll_coex_fast_random(void)
   return ll_coex.fastRandom();
 }
 
-void sl_bt_coex_set_config(sl_bt_ll_coex_config_t * config)
+void sl_bt_coex_set_config(sl_bt_ll_coex_config_t *config)
 {
-  memcpy(&ll_coex.config, config, sizeof(sl_bt_ll_coex_config_t));
+  ll_coex.config = *config; // struct copy
 }
 
 //set request and start scanPwm if in use

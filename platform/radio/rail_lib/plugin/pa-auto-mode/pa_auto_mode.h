@@ -53,7 +53,9 @@ RAIL_ENUM(RAIL_PaBand_t) {
   /** Indicates a 2.4GHz band PA. */
   RAIL_PA_BAND_2P4GIG,
   /** Indicates a Sub-GHz band PA. */
-  RAIL_PA_BAND_SUBGIG
+  RAIL_PA_BAND_SUBGIG,
+  /* A count of the choices in this enumeration. Must be last. */
+  RAIL_PA_BAND_COUNT,
 };
 
 /**

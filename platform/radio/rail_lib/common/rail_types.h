@@ -1676,6 +1676,7 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
   RAIL_PTI_PROTOCOL_ZIGBEE = 5, /**< PTI output for the Zigbee protocol. */
   RAIL_PTI_PROTOCOL_ZWAVE = 6, /**< PTI output for the Z-Wave protocol. */
   RAIL_PTI_PROTOCOL_WISUN = 7, /**< PTI output for the Wi-SUN protocol. */
+  RAIL_PTI_PROTOCOL_802154 = 8, /**< PTI output for a custom protocol using a built-in 802.15.4 radio config. */
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -1686,6 +1687,7 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
 #define RAIL_PTI_PROTOCOL_CONNECT ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_CONNECT)
 #define RAIL_PTI_PROTOCOL_ZIGBEE  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZIGBEE)
 #define RAIL_PTI_PROTOCOL_ZWAVE   ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_ZWAVE)
+#define RAIL_PTI_PROTOCOL_802154  ((RAIL_PtiProtocol_t) RAIL_PTI_PROTOCOL_802154)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of group PTI
@@ -3864,6 +3866,7 @@ RAIL_ENUM(RAIL_StreamMode_t) {
   RAIL_STREAM_CARRIER_WAVE = 0, /**< An unmodulated carrier wave. */
   RAIL_STREAM_PN9_STREAM = 1,   /**< PN9 byte sequence. */
   RAIL_STREAM_10_STREAM = 2, /**< 101010 sequence. */
+  RAIL_STREAM_CARRIER_WAVE_PHASENOISE = 3, /**< An unmodulated carrier wave with no change to PLL BW. For series-2, same as RAIL_STREAM_CARRIER_WAVE */
   RAIL_STREAM_MODES_COUNT   /**< A count of the choices in this enumeration. Must be last. */
 };
 
@@ -3872,6 +3875,7 @@ RAIL_ENUM(RAIL_StreamMode_t) {
 #define RAIL_STREAM_CARRIER_WAVE ((RAIL_StreamMode_t) RAIL_STREAM_CARRIER_WAVE)
 #define RAIL_STREAM_PN9_STREAM   ((RAIL_StreamMode_t) RAIL_STREAM_PN9_STREAM)
 #define RAIL_STREAM_10_STREAM   ((RAIL_StreamMode_t) RAIL_STREAM_10_STREAM)
+#define RAIL_STREAM_CARRIER_WAVE_PHASENOISE ((RAIL_StreamMode_t) RAIL_STREAM_CARRIER_WAVE_PHASENOISE)
 #define RAIL_STREAM_MODES_COUNT   ((RAIL_StreamMode_t) RAIL_STREAM_MODES_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 

@@ -52,6 +52,7 @@
 #include "em_core.h"
 #include "em_rmu.h"
 #include "em_emu.h"
+#include "em_system.h"
 
 #include "gpiointerrupt.h"
 #include "response_print.h"
@@ -330,9 +331,58 @@ void sl_rail_test_internal_app_init(void)
   // Make sure the response printer mirrors the default printingEnabled state
   responsePrintEnable(printingEnabled);
 
+#define EVALIT(a, b)  a # b
+#define PASTEIT(a, b) EVALIT(a, b)
+#if defined(_SILICON_LABS_32B_SERIES_1)
+ #if   (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+  #define FAMILY_NAME "EFR32XG1"
+ #else
+  #define FAMILY_NAME PASTEIT("EFR32XG1", _SILICON_LABS_32B_SERIES_1_CONFIG)
+ #endif
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  #define FAMILY_NAME PASTEIT("EFR32XG2", _SILICON_LABS_32B_SERIES_2_CONFIG)
+#else
+  #define FAMILY_NAME "??"
+#endif
+#ifndef _SILICON_LABS_GECKO_INTERNAL_SDID
+  #define _SILICON_LABS_GECKO_INTERNAL_SDID 0U
+#endif
+
   // Print app initialization information.
   RAILTEST_PRINTF("\n");
   responsePrint("reset", "App:%s,Built:%s", SL_RAIL_TEST_APP_NAME, buildDateTime);
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  uint32_t moduleName32[8] = {
+    DEVINFO->MODULENAME0, DEVINFO->MODULENAME1, DEVINFO->MODULENAME2,
+    DEVINFO->MODULENAME3, DEVINFO->MODULENAME4, DEVINFO->MODULENAME5,
+    DEVINFO->MODULENAME6, 0UL
+  };
+  char *moduleName = (char *) moduleName32;
+  for (uint8_t i = 0U; i < sizeof(moduleName32); i++) {
+    if ((moduleName[i] == '\0') || (moduleName[i] == '\xFF')) {
+      moduleName[i] = '\0';
+      break;
+    }
+  }
+  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x,ModuleName:%s",
+                RAIL_GetRadioClockFreqHz(railHandle),
+                DEVINFO->MODULEINFO,
+                ((moduleName[0] == '\0') ? "N/A" : moduleName));
+#else
+  responsePrint("radio", "FreqHz:%u,ModuleInfo:0x%08x",
+                RAIL_GetRadioClockFreqHz(railHandle),
+                DEVINFO->MODULEINFO);
+#endif
+  SYSTEM_ChipRevision_TypeDef chipRev = { 0, };
+  SYSTEM_ChipRevisionGet(&chipRev);
+  responsePrint("system", "Family:%s,Fam#:%u,ChipRev:%u.%u,sdid:%u,Part:0x%08x",
+                FAMILY_NAME,
+                chipRev.family,
+                chipRev.major,
+                chipRev.minor,
+                _SILICON_LABS_GECKO_INTERNAL_SDID,
+                DEVINFO->PART);
+  getPti(NULL);
 
   // Set TX FIFO, and verify that the size is correct
   if (configureTxFifo() != RAIL_STATUS_NO_ERROR) {

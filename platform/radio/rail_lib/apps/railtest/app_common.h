@@ -554,5 +554,6 @@ void printAddresses(sl_cli_command_arg_t *args);
 void getAddressFilter(sl_cli_command_arg_t *args);
 void printTxPacket(sl_cli_command_arg_t *args);
 void resetCounters(sl_cli_command_arg_t *args);
+void getPti(sl_cli_command_arg_t *args);
 
 #endif // __APPS_COMMON_H__

@@ -211,12 +211,35 @@ void getVersion(sl_cli_command_arg_t *args)
                 buildDateTime);
 }
 
+static const char *ptiModes[] = {
+  "Disabled", "3-wire-SPI", "2-wire-UART", "1-wire-UART", "??",
+};
+
+void getPti(sl_cli_command_arg_t *args)
+{
+  RAIL_PtiConfig_t ptiConfig;
+  // Get the current config and change the baud rate as requested
+  RAIL_GetPtiConfig(railHandle, &ptiConfig);
+  if (ptiConfig.mode >= (sizeof(ptiModes) / sizeof(*ptiModes))) {
+    ptiConfig.mode = (sizeof(ptiModes) / sizeof(*ptiModes)) - 1U;
+  }
+  responsePrint(((args == NULL) ? "pti" : sl_cli_get_command_string(args, 0)),
+                "mode:%s,baud:%u,protocol:%u,radioConfig:0x%02x",
+                ptiModes[ptiConfig.mode],
+                ptiConfig.baud,
+                RAIL_GetPtiProtocol(railHandle),
+                RAIL_IEEE802154_GetPtiRadioConfig(railHandle));
+}
+
 void setPtiProtocol(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  RAIL_Status_t status = RAIL_SetPtiProtocol(railHandle,
-                                             (RAIL_PtiProtocol_t) sl_cli_get_argument_uint8(args, 0));
-  responsePrint(sl_cli_get_command_string(args, 0), "Pti:%s", status ? "Error" : "Set");
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+  (void) RAIL_SetPtiProtocol(railHandle, (RAIL_PtiProtocol_t) sl_cli_get_argument_uint8(args, 0));
+  // success (or not) will be reflected in getPti() output
+  getPti(args);
 }
 
 void getVersionVerbose(sl_cli_command_arg_t *args)
@@ -663,10 +686,6 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_SUPPORTS_PROTOCOL_MFM",
                      RAIL_SUPPORTS_PROTOCOL_MFM ? "Yes" : "No",
                      RAIL_SupportsProtocolMfm(railHandle) ? "Yes" : "No");
-  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_SUPPORTS_NOTCH",
-                     RAIL_SUPPORTS_NOTCH ? "Yes" : "No",
-                     RAIL_SupportsNotch(railHandle) ? "Yes" : "No");
 }
 
 void cliSeparatorHack(sl_cli_command_arg_t *args)

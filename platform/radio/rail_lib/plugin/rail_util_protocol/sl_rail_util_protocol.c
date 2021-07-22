@@ -41,7 +41,7 @@
 
 static RAIL_Status_t sl_rail_util_protocol_config_proprietary(RAIL_Handle_t handle)
 {
-  (void) handle;
+  (void) RAIL_SetPtiProtocol(handle, RAIL_PTI_PROTOCOL_CUSTOM);
   return RAIL_STATUS_NO_ERROR;
 }
 
@@ -165,6 +165,8 @@ static RAIL_Status_t sl_rail_util_protocol_config_ieee802154_2p4ghz(RAIL_Handle_
   }
   if (RAIL_STATUS_NO_ERROR != status) {
     (void) RAIL_IEEE802154_Deinit(handle);
+  } else {
+    (void) RAIL_SetPtiProtocol(handle, RAIL_PTI_PROTOCOL_802154);
   }
   return status;
 }
@@ -234,6 +236,8 @@ static RAIL_Status_t sl_rail_util_protocol_config_ieee802154_gb868(RAIL_Handle_t
   }
   if (RAIL_STATUS_NO_ERROR != status) {
     (void) RAIL_IEEE802154_Deinit(handle);
+  } else {
+    (void) RAIL_SetPtiProtocol(handle, RAIL_PTI_PROTOCOL_802154);
   }
   return status;
 }

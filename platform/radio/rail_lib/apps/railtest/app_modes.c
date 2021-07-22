@@ -77,7 +77,7 @@ void enableAppMode(AppMode_t next, bool enable, char *command)
 
 const char *streamModeNames(RAIL_StreamMode_t streamMode)
 {
-  char *streamModes[] = { "Tone", "PN9", "10Stream" };
+  char *streamModes[] = { "Tone", "PN9", "10Stream", "TonePhaseNoise" };
   return streamModes[streamMode];
 }
 
