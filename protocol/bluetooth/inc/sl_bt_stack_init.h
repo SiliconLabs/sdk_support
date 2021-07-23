@@ -18,6 +18,10 @@
 #ifndef SL_BT_STACK_INIT_H
 #define SL_BT_STACK_INIT_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "sl_status.h"
 #include "sl_bt_api.h"
 #include "sl_bt_stack_config.h"
@@ -187,5 +191,9 @@ static inline void sl_bt_init_whitelisting()
  *   indicates a failure.
  */
 sl_status_t sl_bt_init_classes(const struct sli_bgapi_class * const * classes);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

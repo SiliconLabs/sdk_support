@@ -832,7 +832,7 @@ static psa_status_t ccm_auth_crypt(const unsigned char *key_buffer, size_t key_b
                               : cryptoKey256Bits);
 
   // Clear tag register (DATA2)
-  for (uint32_t i = 0; i < 4; ++i) {
+  for (uint32_t j = 0; j < 4; ++j) {
     crypto->DATA2 = 0;
   }
 
