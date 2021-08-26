@@ -22,9 +22,8 @@
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
 #include "sl_uartdrv_instances.h"
-
 #include "sl_hfxo_manager.h"
-//#include "nvm3_default.h"
+
 
 void sl_platform_init(void)
 {
@@ -64,7 +63,7 @@ void sl_driver_init(void)
 
 void sl_service_init(void)
 {
-    //sl_sleeptimer_init();
+    sl_sleeptimer_init();
 #if defined(_SILICON_LABS_32B_SERIES_2)
     sl_hfxo_manager_init();
 #endif
