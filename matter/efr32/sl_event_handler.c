@@ -17,13 +17,15 @@
 #include "sl_device_init_hfxo.h"
 #include "sl_device_init_lfxo.h"
 #include "sl_device_init_nvic.h"
+#include "sl_hfxo_manager.h"
 #include "sl_rail_util_pti.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
 #include "sl_uartdrv_instances.h"
-#include "sl_hfxo_manager.h"
-
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#include "sl_power_manager.h"
+#endif
 
 void sl_platform_init(void)
 {
@@ -46,6 +48,9 @@ void sl_platform_init(void)
     sl_device_init_emu();
     sl_board_init();
     osKernelInitialize();
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    sl_power_manager_init();
+#endif
 }
 
 void sl_kernel_start(void)
