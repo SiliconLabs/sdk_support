@@ -77,17 +77,24 @@ sl_status_t sl_device_init_clocks(void)
 #if defined(_CMU_EM01GRPBCLKCTRL_MASK)
     CMU_ClockSelectSet(cmuClock_EM01GRPBCLK, cmuSelect_HFXO);
 #endif
-    CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFXO);
-    CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFXO);
+
+    CMU_Select_TypeDef lfOcillator = cmuSelect_LFXO;
+    if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+    {
+        lfOcillator = cmuSelect_LFRCO;
+    }
+
+    CMU_ClockSelectSet(cmuClock_EM23GRPACLK, lfOcillator);
+    CMU_ClockSelectSet(cmuClock_EM4GRPACLK, lfOcillator);
 #if defined(RTCC_PRESENT)
-    CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_RTCC, lfOcillator);
 #endif
 #if defined(SYSRTC_PRESENT)
-    CMU_ClockSelectSet(cmuClock_SYSRTC, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_SYSRTC, lfOcillator);
 #endif
-    CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_WDOG0, lfOcillator);
 #if WDOG_COUNT > 1
-    CMU_ClockSelectSet(cmuClock_WDOG1, cmuSelect_LFXO);
+    CMU_ClockSelectSet(cmuClock_WDOG1, lfOcillator);
 #endif
 #endif // EFR32MG24
 
