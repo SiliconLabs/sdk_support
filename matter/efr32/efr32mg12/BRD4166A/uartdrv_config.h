@@ -68,8 +68,8 @@
 // <o EMDRV_UARTDRV_FLOW_CONTROL_ENABLE>  Flow control support
 // <1=> Enable
 // <0=> Disable
-// <i> Default: 1
-#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
+// <i> Default: 0
+#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       0
 #endif
 
 /// Maximum number of driver instances.
