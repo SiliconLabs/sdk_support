@@ -33,6 +33,10 @@
 
 #include "sl_fem_util_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /***************************************************************************//**
  * Initialize FEM
  ******************************************************************************/
@@ -57,5 +61,9 @@ bool sl_fem_util_get_phy_select(void);
  * Enable/disable FEM optimized radio configuration
  ******************************************************************************/
 void sl_fem_util_enable_phy(bool enable);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_FEM_UTIL_H

@@ -38,23 +38,17 @@
 typedef struct {
   /** Local sequence number write interval; must be a power of two */
   uint32_t pstore_write_interval_elem_seq;
-  /** Maximum number of elements on the device */
-  uint8_t max_elements;
-  /** Maximum number of models on the device */
-  uint8_t max_models;
+  /** Size of RAM cache for persistent keys stored under ITS */
+  uint16_t its_key_cache;
   /** Maximum number of network keys on the device */
   uint16_t max_net_keys;
   /** Maximum number of application keys on the device */
   uint16_t max_appkeys;
-  /** Maximum number of friendships for a friend/LPN device */
-  uint8_t max_friendships;
   /** Maximum number of model-application key bindings per model;
       should not be larger than the maximum number of application keys */
   uint16_t max_app_binds;
   /** Maximum number of subscription addresses per model */
   uint16_t max_subscriptions;
-  /** Maximum number of concurrently ongoing foundation model commands */
-  uint8_t max_foundation_model_commands;
   /** Network cache entry size */
   uint16_t net_cache_size;
   /** Replay protection list entry size; must be equal to or larger than
@@ -68,15 +62,6 @@ typedef struct {
   uint16_t max_recv_segs;
   /** Maximum number of virtual addresses on the node */
   uint16_t max_virtual_addresses;
-  /** Maximum number of provisioning sessions */
-  uint8_t max_provision_sessions;
-  /** Maximum number of provisioning bearers */
-  uint8_t max_provision_bearers;
-  /** Maximum number of concurrent GATT connections (for
-      provisioning and proxying) */
-  uint8_t max_gatt_connections;
-  /** GATT transport queue size */
-  uint8_t gatt_txqueue_size;
   /** Maximum number of provisioner database entries; ignored for node */
   uint16_t provisioner_max_ddb_entries;
   /** Maximum number of keys to store per node on provisioner;
@@ -93,8 +78,25 @@ typedef struct {
   uint8_t friend_max_subs_list;
   /** maximum deferred send queue for app layer */
   uint8_t app_send_max_queue;
-  /** Size of RAM cache for persistent keys stored under ITS */
-  uint16_t its_key_cache;
+  /** Maximum number number of proxy access control list entries */
+  uint8_t proxy_max_access_control_list_entries;
+  /** Maximum number of elements on the device */
+  uint8_t max_elements;
+  /** Maximum number of models on the device */
+  uint8_t max_models;
+  /** Maximum number of friendships for a friend/LPN device */
+  uint8_t max_friendships;
+  /** Maximum number of concurrently ongoing foundation model commands */
+  uint8_t max_foundation_model_commands;
+  /** Maximum number of provisioning sessions */
+  uint8_t max_provision_sessions;
+  /** Maximum number of provisioning bearers */
+  uint8_t max_provision_bearers;
+  /** Maximum number of concurrent GATT connections (for
+      provisioning and proxying) */
+  uint8_t max_gatt_connections;
+  /** GATT transport queue size */
+  uint8_t gatt_txqueue_size;
 } mesh_memory_config_t;
 
 #endif

@@ -39,14 +39,20 @@
 #include "rail_mfm.h"
 #include "app_common.h"
 
-#if RAIL_SUPPORTS_PROTOCOL_MFM
+#if RAIL_SUPPORTS_MFM
 #define MFM_RAW_BUF_SZ_BYTES 512
 
-RAIL_MFM_Config_t mfmConfig = {
-  .pBuffer0 = (&channelHoppingBufferSpace[0]),
-  .pBuffer1 = (&channelHoppingBufferSpace[MFM_RAW_BUF_SZ_BYTES / 4]),
-  .bufferSizeWords = (MFM_RAW_BUF_SZ_BYTES / 4),
-  .options = RAIL_MFM_OPTIONS_NONE,
+typedef struct RAIL_MFM_Config_App {
+  RAIL_MFM_PingPongBufferConfig_t buffer;
+  RAIL_StateTiming_t timings;
+} RAIL_MFM_Config_App_t;
+
+RAIL_MFM_Config_App_t mfmConfig = {
+  .buffer = {
+    .pBuffer0 = (&channelHoppingBufferSpace[0]),
+    .pBuffer1 = (&channelHoppingBufferSpace[MFM_RAW_BUF_SZ_BYTES / 4]),
+    .bufferSizeWords = (MFM_RAW_BUF_SZ_BYTES / 4)
+  },
   .timings = {
     .idleToTx = 100,
     .idleToRx = 0,
@@ -58,6 +64,48 @@ RAIL_MFM_Config_t mfmConfig = {
 };
 
 /******************* Local functions *******************/
+bool RAIL_MFM_IsEnabled(RAIL_Handle_t railHandle)
+{
+  (void) railHandle;
+
+  return (railDataConfig.txSource == TX_MFM_DATA);
+}
+
+RAIL_Status_t RAIL_MFM_Init(RAIL_Handle_t railHandle,
+                            RAIL_MFM_Config_App_t *config)
+{
+  RAIL_Status_t status;
+
+  railDataConfig.txSource = TX_MFM_DATA;
+  status = RAIL_SetMfmPingPongFifo(railHandle,
+                                   &(config->buffer));
+  if (status != RAIL_STATUS_NO_ERROR) {
+    return (status);
+  }
+
+  status = RAIL_ConfigData(railHandle, &railDataConfig);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    return (status);
+  }
+
+  return (RAIL_SetStateTiming(railHandle, &(config->timings)));
+}
+
+RAIL_Status_t RAIL_MFM_Deinit(RAIL_Handle_t railHandle)
+{
+  if (!RAIL_MFM_IsEnabled(railHandle)) {
+    return RAIL_STATUS_INVALID_STATE;
+  }
+
+  RAIL_Status_t status;
+  status = RAIL_StopTx(railHandle, RAIL_STOP_MODES_ALL);
+  if (status != RAIL_STATUS_NO_ERROR) {
+    return (status);
+  }
+
+  railDataConfig.txSource = TX_PACKET_DATA;
+  return (RAIL_ConfigData(railHandle, &railDataConfig));
+}
 
 void mfmStatus(sl_cli_command_arg_t *args)
 {
@@ -65,26 +113,20 @@ void mfmStatus(sl_cli_command_arg_t *args)
 
   // Report the current enabled status for MFM
   responsePrint(sl_cli_get_command_string(args, 0),
-                "MFM:%s,"
-                "callback:%s",
-                enabled ? "Enabled" : "Disabled",
-                ((mfmConfig.options & RAIL_MFM_OPTION_DETECT_TX_BUFFER_DONE) != 0U)
-                ? "Enabled" : "Disabled");
+                "MFM:%s",
+                enabled ? "Enabled" : "Disabled");
 }
 
 void mfmEnable(sl_cli_command_arg_t *args)
 {
   if (sl_cli_get_argument_count(args) >= 1) {
     bool enable = !!sl_cli_get_argument_uint8(args, 0);
-    if (sl_cli_get_argument_count(args) >= 2) {
-      mfmConfig.options = sl_cli_get_argument_uint8(args, 1);
-    }
 
     // Turn MFM mode on or off as requested
     if (enable) {
       uint32_t idx;
-      uint32_t *pDst0 = mfmConfig.pBuffer0;
-      uint32_t *pDst1 = mfmConfig.pBuffer1;
+      uint32_t *pDst0 = mfmConfig.buffer.pBuffer0;
+      uint32_t *pDst1 = mfmConfig.buffer.pBuffer1;
 
       disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_CUSTOM);
       RAIL_MFM_Init(railHandle, &mfmConfig);
@@ -107,12 +149,12 @@ void mfmEnable(sl_cli_command_arg_t *args)
   mfmStatus(args);
 }
 
-#else //!RAIL_SUPPORTS_PROTOCOL_MFM
+#else //!RAIL_SUPPORTS_MFM
 
 void mfmNotSupported(int argc, char **argv)
 {
   (void)argc;
-  responsePrintError(argv[0], 0x56, "MFM not suppported on this chip");
+  responsePrintError(argv[0], 0x56, "MFM is not suppported on this chip");
 }
 
 void mfmStatus(int argc, char **argv)
@@ -125,4 +167,4 @@ void mfmEnable(int argc, char **argv)
   mfmNotSupported(argc, argv);
 }
 
-#endif //RAIL_SUPPORTS_PROTOCOL_MFM
+#endif //RAIL_SUPPORTS_MFM

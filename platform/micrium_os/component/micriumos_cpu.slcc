@@ -2,7 +2,7 @@ id: micriumos_cpu
 label: Micrium OS CPU Module
 package: micrium-krnx
 description: Micrium OS CPU
-category: RTOS|Micrium OS|Common|CPU
+category: RTOS|Micrium OS|Common
 quality: production
 component_root_path: platform/micrium_os/cpu
 config_file:

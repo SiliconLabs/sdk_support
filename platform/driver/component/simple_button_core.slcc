@@ -13,8 +13,6 @@ description: >
 category: Platform|Driver|Button
 quality: production
 root_path: platform/driver/button/
-ui_hints:
-  visibility: never
 config_file:
   - path: config/sl_simple_button_config.h
 source:

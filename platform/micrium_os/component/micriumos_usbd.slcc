@@ -1,9 +1,9 @@
 id: micriumos_usbd
-label: USB Device
+label: Micrium-USB Device
 package: micrium-usbd
 description: Micrium OS USB Device
-category: Services|USB|Device
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 component_root_path: platform/micrium_os/usb
 config_file:
   - path: ../cfg/usbd_cfg.h
@@ -31,3 +31,5 @@ requires:
   - name: usbd_driver
   - name: usbd_class
   - name: common_oplock
+  - name: micriumos_bsp_usb_dev
+  - name: micriumos_bsp

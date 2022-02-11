@@ -56,15 +56,15 @@ static void sli_radioaes_update_mask(void)
     psa_status_t status = mbedtls_psa_external_get_random(NULL, (uint8_t*)&sli_radioaes_mask, sizeof(sli_radioaes_mask), &out_len);
     EFM_ASSERT(status == PSA_SUCCESS);
     EFM_ASSERT(out_len == sizeof(sli_radioaes_mask));
-  } else {
-    // Use a different mask for each new operation
-    // The masking logic requires the upper mask bit to be set
-    sli_radioaes_mask = (sli_radioaes_mask + 1) | (1UL << 31);
   }
+
+  // Use a different mask for each new operation
+  // The masking logic requires the upper mask bit to be set
+  sli_radioaes_mask = (sli_radioaes_mask + 1) | (1UL << 31);
 }
 #endif
 
-int sli_radioaes_acquire(void)
+sl_status_t sli_radioaes_acquire(void)
 {
 #if defined(_CMU_CLKEN0_MASK)
   CMU->CLKEN0 |= CMU_CLKEN0_RADIOAES;
@@ -81,7 +81,7 @@ int sli_radioaes_acquire(void)
     // sl_mbedtls_init, before using the radioaes.
     EFM_ASSERT(sli_radioaes_mask != 0);
     #endif
-    return 1;
+    return SL_STATUS_ISR;
   } else {
 #if defined(SL_SE_MANAGER_THREADING)
     sl_status_t ret = SL_STATUS_OK;
@@ -99,7 +99,7 @@ int sli_radioaes_acquire(void)
       if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
         kernel_lock_state = se_manager_osal_kernel_lock();
         if (kernel_lock_state < 0) {
-          return -1;
+          return SL_STATUS_SUSPENDED;
         }
       }
 
@@ -115,7 +115,7 @@ int sli_radioaes_acquire(void)
 
       if (kernel_state != osKernelInactive && kernel_state != osKernelReady) {
         if (se_manager_osal_kernel_restore_lock(kernel_lock_state) < 0) {
-          return -1;
+          return SL_STATUS_INVALID_STATE;
         }
       }
     }
@@ -130,7 +130,7 @@ int sli_radioaes_acquire(void)
     }
     #endif
 
-    return (ret != SL_STATUS_OK ? -1 : 0);
+    return ret;
 #else
     // Non-IRQ, no RTOS: busywait
     while (RADIOAES->STATUS & (AES_STATUS_FETCHERBSY | AES_STATUS_PUSHERBSY | AES_STATUS_SOFTRSTBSY)) {
@@ -139,27 +139,27 @@ int sli_radioaes_acquire(void)
     #if defined(SLI_RADIOAES_REQUIRES_MASKING)
     sli_radioaes_update_mask();
     #endif
-    return 0;
+    return SL_STATUS_OK;
 #endif
   }
 }
 
-int sli_radioaes_release(void)
+sl_status_t sli_radioaes_release(void)
 {
   // IRQ: nothing to do
   if ((SCB->ICSR & SCB_ICSR_VECTACTIVE_Msk) != 0U) {
-    return 0;
+    return SL_STATUS_OK;
   }
 #if defined(SL_SE_MANAGER_THREADING)
   // Non-IRQ, RTOS available: free mutex
-  return (0L - se_manager_osal_give_mutex(&radioaes_lock) );
+  return se_manager_osal_give_mutex(&radioaes_lock);
 #else
   // Non-IRQ, no RTOS: nothing to do.
-  return 0;
+  return SL_STATUS_OK;
 #endif
 }
 
-int sli_radioaes_save_state(sli_radioaes_state_t *ctx)
+sl_status_t sli_radioaes_save_state(sli_radioaes_state_t *ctx)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
@@ -167,10 +167,10 @@ int sli_radioaes_save_state(sli_radioaes_state_t *ctx)
   ctx->PUSHADDR = RADIOAES->PUSHADDR;
 
   CORE_EXIT_CRITICAL();
-  return 0;
+  return SL_STATUS_OK;
 }
 
-int sli_radioaes_restore_state(sli_radioaes_state_t *ctx)
+sl_status_t sli_radioaes_restore_state(sli_radioaes_state_t *ctx)
 {
   CORE_DECLARE_IRQ_STATE;
   CORE_ENTER_CRITICAL();
@@ -178,7 +178,7 @@ int sli_radioaes_restore_state(sli_radioaes_state_t *ctx)
   RADIOAES->PUSHADDR = ctx->PUSHADDR;
 
   CORE_EXIT_CRITICAL();
-  return 0;
+  return SL_STATUS_OK;
 }
 
 /// @endcond

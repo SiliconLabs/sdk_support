@@ -49,6 +49,7 @@
 #include "se_management.h"
 #include "mbedtls/ecjpake.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 /* Parameter validation macros based on platform_util.h */
@@ -289,12 +290,12 @@ int mbedtls_ecjpake_setup(mbedtls_ecjpake_context *ctx,
 
   // SE currently only supports SHA256 as JPAKE hashing mechanism
   if (hash != MBEDTLS_MD_SHA256) {
-    return MBEDTLS_ERR_MD_FEATURE_UNAVAILABLE;
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
   // SE currently only supports ECDSA secp256r1 as curve
   if (curve != MBEDTLS_ECP_DP_SECP256R1) {
-    return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
   ctx->curve_flags = 0x8000001FUL;
@@ -314,6 +315,20 @@ int mbedtls_ecjpake_check(const mbedtls_ecjpake_context *ctx)
   }
 
   return 0;
+}
+
+int mbedtls_ecjpake_set_point_format(mbedtls_ecjpake_context *ctx,
+                                     int point_format)
+{
+  switch (point_format) {
+    case MBEDTLS_ECP_PF_UNCOMPRESSED:
+      ctx->point_format = point_format;
+      return 0;
+    case MBEDTLS_ECP_PF_COMPRESSED:
+      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+    default:
+      return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
+  }
 }
 
 int mbedtls_ecjpake_write_round_one(mbedtls_ecjpake_context *ctx,
@@ -407,7 +422,7 @@ int mbedtls_ecjpake_write_round_one(mbedtls_ecjpake_context *ctx,
 
     return 0;
   } else {
-    return MBEDTLS_ERR_ECP_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
 }
 
@@ -577,8 +592,8 @@ int mbedtls_ecjpake_write_round_two(mbedtls_ecjpake_context *ctx,
       *(buf++) = MBEDTLS_ECP_TLS_NAMED_CURVE;
 
       // Next two bytes are the namedcurve value
-      *(buf++) = curve_info->tls_id >> 8;
-      *(buf++) = curve_info->tls_id & 0xFF;
+      *(buf++) = curve_info->MBEDTLS_PRIVATE(tls_id) >> 8;
+      *(buf++) = curve_info->MBEDTLS_PRIVATE(tls_id) & 0xFF;
 
       *olen += 3;
       len -= 3;
@@ -605,7 +620,7 @@ int mbedtls_ecjpake_write_round_two(mbedtls_ecjpake_context *ctx,
 
     return 0;
   } else {
-    return MBEDTLS_ERR_ECP_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
 }
 
@@ -640,11 +655,11 @@ int mbedtls_ecjpake_read_round_two(mbedtls_ecjpake_context *ctx,
     tls_id |= *(buf++);
 
     if ( (curve_info = mbedtls_ecp_curve_info_from_tls_id(tls_id) ) == NULL ) {
-      return(MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE);
+      return(MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED);
     }
 
-    if (curve_info->grp_id != MBEDTLS_ECP_DP_SECP256R1) {
-      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+    if (curve_info->MBEDTLS_PRIVATE(grp_id) != MBEDTLS_ECP_DP_SECP256R1) {
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     }
 
     len -= 3;

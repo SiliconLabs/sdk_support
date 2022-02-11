@@ -16,6 +16,7 @@ requires:
   - name: sim_eeprom2
   - name: sim_eeprom_callback
   - name: sim_eeprom_headers
+  - name: device_series_1
 root_path: ./
 include:
   - path: platform/service/sim_eeprom2_to_nvm3_upgrade/inc

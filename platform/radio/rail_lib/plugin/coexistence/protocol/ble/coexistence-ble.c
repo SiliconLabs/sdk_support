@@ -52,6 +52,8 @@ struct {
   COEX_ReqState_t scanPwmState;
 } ll_coex;
 
+COEX_Events_t sli_bt_coex_event_filter = ~COEX_EVENT_REQUEST_EVENTS;
+
 static inline bool isCoexEnabled(void)
 {
   return COEX_GetOptions() & COEX_OPTION_COEX_ENABLED;
@@ -321,6 +323,11 @@ static void setRequest(bool request, uint8_t priority)
   bool priorityState = ll_coex.enablePriority && (priority <= ll_coex.config.threshold_coex_pri);
   sli_bt_coex_counter_request(request, priorityState);
   if (request) {
+    sli_bt_coex_event_filter |= COEX_EVENT_REQUEST_EVENTS;
+  } else {
+    sli_bt_coex_event_filter &= ~COEX_EVENT_REQUEST_EVENTS;
+  }
+  if (request) {
     COEX_SetRequest(&ll_coex.reqState, COEX_REQ_ON | (priorityState ? COEX_REQ_HIPRI : 0), NULL);
   } else {
     COEX_SetRequest(&ll_coex.reqState, COEX_REQ_OFF, NULL);
@@ -335,19 +342,11 @@ bool sl_bt_coex_tx_allowed(void)
   return ((COEX_GetOptions() & COEX_OPTION_HOLDOFF_ACTIVE) == 0U);
 }
 
-/**
- * Random backoff delay to avoid request collisions in shared use case.
- */
-static void randomBackoffDelay(uint16_t randomDelayMaskUs)
+void sli_bt_coex_radio_callback(COEX_Events_t events)
 {
-  uint32_t delay = sl_bt_ll_coex_fast_random() & randomDelayMaskUs;
-  delay += RAIL_GetTime();
-  while ((int)(delay - RAIL_GetTime()) > 0) {
+  if (ll_coex.handle == NULL) {
+    return;
   }
-}
-
-static void coex_RadioCallback(COEX_Events_t events)
-{
   if (events & COEX_EVENT_HOLDOFF_CHANGED) {
     coexUpdateGrant(true);
   }
@@ -363,19 +362,15 @@ void sl_bt_init_coex(const sl_bt_coex_init_t *coexInit)
   ll_coex.requestWindowCalibration = coexInit->requestWindowCalibration;
 
   COEX_HAL_Init();
-  COEX_SetRandomDelayCallback(&randomBackoffDelay);
-  COEX_SetRadioCallback(&coex_RadioCallback);
   ll_coex.requestWindow = coexInit->requestWindow + coexInit->requestWindowCalibration;
 
   //Set default coex parameters
   sl_bt_ll_coex_config_t cfg = SL_BT_COEX_DEFAULT_CONFIG;
   sl_bt_coex_set_config(&cfg);
-  #if SL_RAIL_UTIL_COEX_DP_ENABLED
-  COEX_HAL_ConfigDp(SL_RAIL_UTIL_COEX_DP_PULSE_WIDTH_US);
-  #endif
   sl_bt_set_coex_options(SL_BT_COEX_OPTION_MASK
                          | SL_BT_COEX_OPTION_REQUEST_BACKOFF_MASK,
                          coexInit->options);
+  sli_bt_coex_radio_callback(COEX_EVENT_HOLDOFF_CHANGED);
   //Enable signal for early packet reception
   RAIL_ConfigEvents(ll_coex.handle, RAIL_EVENT_RX_SYNC1_DETECT, RAIL_EVENT_RX_SYNC1_DETECT);
 

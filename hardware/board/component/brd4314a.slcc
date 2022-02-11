@@ -22,6 +22,7 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
   - id: simple_led
     instance:
     - led0
@@ -29,6 +30,11 @@
     instance:
     - btn0
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4314A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD4314
   - board:variant:A

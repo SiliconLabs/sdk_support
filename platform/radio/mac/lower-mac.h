@@ -18,14 +18,14 @@
 #ifndef LOWER_MAC_H
 #define LOWER_MAC_H
 
-#if (defined(PHY_EM3XX) || defined(MAC_DUAL_PRESENT) || SINGLE_PHY_MULTIPAGE_SUPPORT || defined (UNIX) || defined (UNIX_SIMULATION) || defined(PHY_RAIL_LEGACY_PHY))
+#if (!defined(PHY_NULL) && !defined(ZIGBEE_STACK_ON_HOST)) && (defined(PHY_EM3XX) || defined(MAC_DUAL_PRESENT) || SINGLE_PHY_MULTIPAGE_SUPPORT || defined (UNIX) || defined (UNIX_SIMULATION) || defined(PHY_RAIL_LEGACY_PHY))
 #include "phy/phy.h"
 #else
 #include "mac-phy.h"
 #endif
 
 #include "multi-mac.h"
-#include "multi-network.h"
+#include "mac-multi-network.h"
 #include "sl_status.h"
 
 //------------------------------------------------------------------------------
@@ -60,10 +60,23 @@ enum
 
 extern LowerMacState emLowerMacState;
 
+// MAC TX Options Bitmask
+#ifdef DOXYGEN_SHOULD_SKIP_THIS
+enum sl_mac_tx_options_bitmask_t
+#else
+typedef uint8_t sl_mac_tx_options_bitmask_t;
+enum
+#endif
+{
+  EMBER_MAC_USE_NO_TX_OPTION  = 0x00, // 00000000
+  EMBER_MAC_USE_CSMA          = 0x01, // 00000001
+  EMBER_MAC_USE_WAKEUP_FRAMES = 0x02, // 00000010
+};
+
 bool sl_mac_lower_mac_is_idle(uint8_t mac_index);
 void sl_mac_lower_mac_set_idle(uint8_t mac_index);
 
-void sl_mac_lower_mac_send(uint8_t mac_index, uint8_t *packet, bool use_csma);
+void sl_mac_lower_mac_send(uint8_t mac_index, uint8_t *packet, sl_mac_tx_options_bitmask_t tx_options);
 void sl_mac_packet_send_complete_callback(uint8_t mac_index, sl_status_t status);
 
 sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawPacket);
@@ -78,6 +91,7 @@ RadioPowerMode sl_mac_lower_mac_get_radio_idle_mode(uint8_t mac_index);
 void sl_mac_purge_incoming_queue(uint8_t mac_index);
 bool sl_mac_lower_mac_is_expecting_data(void);
 bool sl_mac_lower_mac_radio_is_on(uint8_t mac_index);
+void sl_mac_lower_mac_update_active_radio_config(void);
 
 // Symbol timer APIs.
 sl_status_t sl_mac_lower_mac_schedule_symbol_timer(uint8_t mac_index, uint16_t symbols);
@@ -240,6 +254,40 @@ void sl_mac_lower_mac_radio_sleep(void);
 void sl_mac_lower_mac_radio_wakeup(void);
 uint32_t sl_mac_get_mac_timer(void);
 bool sl_mac_lower_mac_channel_is_valid(uint8_t mac_index, uint8_t mac_page_chan);
+sl_status_t sl_mac_enable_duty_cycling(void);
+
+// CSL related structs and APIs
+typedef struct {
+  uint16_t frame_type : 3;
+  uint16_t long_frame_control : 1;
+  uint16_t dest_addr_mode : 2;
+  uint16_t src_addr_mode : 2;
+  uint16_t pan_id_present : 1;
+  uint16_t security_enabled : 1;
+  uint16_t seq_num_suppression : 1;
+  uint16_t frame_pending : 1;
+  uint16_t frame_version : 2;
+  uint16_t ack_request : 1;
+  uint16_t ie_present : 1;
+} sl_mac_long_frame_control_t;
+
+typedef struct {
+  uint16_t length : 7;
+  uint16_t element_id : 8;
+  uint16_t type : 1;
+} sl_mac_header_ie_t;
+
+typedef struct {
+  uint16_t rendezvous_time;
+  uint16_t wakeup_interval;
+} sl_mac_rendezvous_ie_t;
+
+sl_status_t sl_mac_set_mac_csl_max_period(uint8_t mac_index, uint16_t mac_csl_max_period_ms);
+uint16_t sl_mac_get_mac_csl_max_period(uint8_t mac_index);
+sl_status_t sl_mac_set_mac_csl_period(uint8_t mac_index, uint16_t mac_csl_period_ms);
+uint16_t sl_mac_get_mac_csl_period(uint8_t mac_index);
+sl_status_t sl_mac_set_mac_csl_channel_sample(uint8_t mac_index, uint16_t mac_csl_channel_sample_ms);
+uint16_t sl_mac_get_mac_csl_channel_sample(uint8_t mac_index);
 
 // 802.15.4 software filtering APIs (see lower-mac-802.15.4-filtering.c)
 
@@ -254,6 +302,22 @@ bool sl_mac_802154_filter(uint8_t *packet);
 //workraound
 //#undef  MAX_RADIO_POWER
 //#define MAX_RADIO_POWER 3
+#endif
+
+#ifdef EMBER_STACK_CONNECT
+#define EVENT_CONTROL_SYSTEM
+#endif
+
+#ifndef EVENT_CONTROL_SYSTEM
+#define sli_mac_inactivate_event(x) emberEventSetInactive(&(x))
+#define sli_mac_activate_event(x) emberEventSetActive(&(x))
+#define sli_mac_set_event_delay_ms(x, y) emberEventSetDelayMs(&(x), y)
+#define sli_mac_event_is_active(x) emberEventIsScheduled(&(x))
+#else
+#define sli_mac_inactivate_event(x) emberEventControlSetInactive(x)
+#define sli_mac_activate_event(x) emberEventControlSetActive(x)
+#define sli_mac_set_event_delay_ms(x, y) emberEventControlSetDelayMS(x, y)
+#define sli_mac_event_is_active(x) emberEventControlGetActive(x)
 #endif
 
 #endif //LOWER_MAC_H

@@ -51,8 +51,14 @@ extern "C" {
 ///
 ///   @n @section sleepdrv_intro Introduction
 ///
-///   @warning This driver is deprecated and will be removed in a later relase
-///   Please use the power manager service instead.
+///   @warning This driver is deprecated and will be removed in a later release.
+///   Use the Power Manager service instead. For more information about Power Manager,
+///   see Services section.
+///
+///   @note See <a href="https://www.silabs.com/documents/public/application-notes/
+///         an1358-migrating-from-sleep-driver-to-power-manager.pdf">AN1358: Migrating
+///         from Sleep Driver to Power Manager</a> for information on how to migrate
+///         from Sleep Driver to Power Manager.
 ///
 ///   This is a sleep management module consisting of sleep.c and sleep.h
 ///   source files. The main purpose of the module is to make it easy for an
@@ -61,15 +67,15 @@ extern "C" {
 ///
 ///   The module works by providing an API for defining "sleep blocks" in the
 ///   application code. A "sleep block" will block the MCU from entering a certain
-///   energy mode. A "sleep block" can for instance block EM2 entry because an
+///   energy mode. A "sleep block" can, for instance, block EM2 entry because an
 ///   EM1 only peripheral is in use. These "sleep blocks" are created by the calls to
 ///   @ref SLEEP_SleepBlockBegin() and end with @ref SLEEP_SleepBlockEnd().
 ///
-///   When an application wants to enter a low energy mode it can call
+///   To enter a low energy mode, an application can call
 ///   @ref SLEEP_Sleep() to enter the lowest possible energy mode. This module
 ///   will use the "sleep blocks" to figure out the lowest possible energy mode.
 ///
-///   Here is an example of how the sleep driver is initialized and how it can
+///   The following is an example of the sleep driver initialization and how it can
 ///   be used to enter EM2.
 ///
 /// @code
@@ -83,7 +89,7 @@ extern "C" {
 ///   @n @section sleepdrv_callbacks Sleep and Wakeup Events/Callbacks
 ///
 ///   This module also provides a way to add application callbacks to notify
-///   the application that the MCU is entering sleep, or waking up from sleep.
+///   the application that the MCU is entering sleep or waking up from sleep.
 ///   These callbacks can be provided to the driver when calling
 ///   @ref SLEEP_InitEx().
 ///
@@ -94,7 +100,7 @@ extern "C" {
 ///   the MCU enter the selected energy mode, while returning false will force
 ///   the sleep driver to return without entering a sleep.
 ///
-///   Here is an example of how the sleep and wakeup callbacks are used.
+///   The following is an example of sleep and wakeup callbacks usage.
 ///
 ///   @code
 ///   static bool beforeSleep(SLEEP_EnergyMode_t mode)
@@ -132,12 +138,12 @@ extern "C" {
  ******************************************************************************/
 
 /**
- * This flag can be returned from the restoreCallback function in order to
+ * This flag is returned from the restoreCallback function to
  * signal that the sleep driver should continue as normal. */
 #define SLEEP_FLAG_NONE              0x0
 
 /**
- * This flag can be returned from the restoreCallback function in order to
+ * This flag is returned from the restoreCallback function to
  * signal to the sleep driver that HF clocks should not be restored and that
  * the sleep driver should go right back to sleep again. */
 #define SLEEP_FLAG_NO_CLOCK_RESTORE  0x1u
@@ -215,8 +221,8 @@ typedef struct {
 
   /**
    * Pointer to the callback function that is being called after wake up. This
-   * function is optional, if no wake up callback is needed by the application
-   * then this field must be set to NULL.
+   * function is optional. If no wake up callback is needed by the application,
+   * this field must be set to NULL.
    */
   void (*wakeupCallback)(SLEEP_EnergyMode_t emode);
 

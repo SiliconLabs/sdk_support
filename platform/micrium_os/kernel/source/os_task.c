@@ -337,10 +337,8 @@ void OSTaskCreate(OS_TCB       *p_tcb,
 #endif
 
   p_tcb->ExtPtr = p_ext;                                        // Save pointer to TCB extension
-#if ((OS_CFG_DBG_EN == DEF_ENABLED) || (OS_CFG_STAT_TASK_STK_CHK_EN == DEF_ENABLED) || (OS_CFG_TASK_STK_REDZONE_EN == DEF_ENABLED))
   p_tcb->StkBasePtr = p_stk_base;                               // Save pointer to the base address of the stack
   p_tcb->StkSize = stk_size;                                    // Save the stack size (in number of CPU_STK elements)
-#endif
   p_tcb->Opt = opt;                                             // Save task options
 
 #if (OS_CFG_TASK_REG_TBL_SIZE > 0u)
@@ -2170,9 +2168,7 @@ void OS_TaskInitTCB(OS_TCB *p_tcb)
   p_tcb->SemPendTimeMax = 0u;
 #endif
 
-#if ((OS_CFG_DBG_EN == DEF_ENABLED) || (OS_CFG_STAT_TASK_STK_CHK_EN == DEF_ENABLED))
   p_tcb->StkSize = 0u;
-#endif
 
 #if (OS_CFG_TASK_SUSPEND_EN == DEF_ENABLED)
   p_tcb->SuspendCtr = 0u;
@@ -2222,6 +2218,10 @@ void OS_TaskInitTCB(OS_TCB *p_tcb)
   p_tcb->DbgPrevPtr = DEF_NULL;
   p_tcb->DbgNextPtr = DEF_NULL;
   p_tcb->DbgNamePtr = (CPU_CHAR *)((void *)" ");
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  p_tcb->local_errno = 0;
 #endif
 }
 

@@ -583,7 +583,7 @@ sl_status_t sl_se_init_otp(sl_se_command_context_t *cmd_ctx,
     uint8_t reserved3[2];
   } otp_tamper_settings = {
     { 0x00 },
-    { 0xFF },
+    { 0xFF, 0xFF },
     { 0x00 }
   };
   #endif
@@ -1054,11 +1054,16 @@ sl_status_t sl_se_get_challenge(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_roll_challenge(sl_se_command_context_t *cmd_ctx)
 {
+  sl_se_challenge_t new_challenge;
   if (cmd_ctx == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
+  SE_DataTransfer_t out_data =
+    SE_DATATRANSFER_DEFAULT(new_challenge, sizeof(sl_se_challenge_t));
+
   sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_ROLL_CHALLENGE);
+  SE_addDataOutput(&cmd_ctx->command, &out_data);
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
@@ -1121,6 +1126,8 @@ sl_status_t sl_se_disable_tamper(sl_se_command_context_t *cmd_ctx,
   return sli_se_execute_and_wait(cmd_ctx);
 }
 
+#endif
+
 /***************************************************************************//**
  * Read size of stored certificates in SE.
  ******************************************************************************/
@@ -1139,9 +1146,7 @@ sl_status_t sl_se_read_cert_size(sl_se_command_context_t *cmd_ctx,
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
-#endif
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 /***************************************************************************//**
  * Read stored certificates in SE.
  ******************************************************************************/
@@ -1187,7 +1192,6 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
 
   return sli_se_execute_and_wait(cmd_ctx);
 }
-#endif
 
 #endif // defined(SEMAILBOX_PRESENT)
 

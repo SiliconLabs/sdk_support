@@ -33,6 +33,7 @@
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
 #include <stdint.h>
+#include "sl_status.h"
 
 #if defined(RADIOAES_PRESENT)
 
@@ -58,34 +59,37 @@ extern uint32_t sli_radioaes_mask;
 /***************************************************************************//**
  * @brief          Acquire RADIOAES access
  *
- * @return         0 if successful, positive if preempted, negative on error
+ * @return         SL_STATUS_OK if successful and resource is idle,
+ *                 SL_STATUS_ISR if successful but resource was preempted, in
+ *                   which case the caller is responsible for saving state,
+ *                 relevant status code on error
  ******************************************************************************/
-int sli_radioaes_acquire(void);
+sl_status_t sli_radioaes_acquire(void);
 
 /***************************************************************************//**
  * @brief          Release RADIOAES access
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_radioaes_release(void);
+sl_status_t sli_radioaes_release(void);
 
 /***************************************************************************//**
  * @brief          Save RADIOAES register state to RAM
  *
  * @param ctx      Context struct to save register state into
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_radioaes_save_state(sli_radioaes_state_t *ctx);
+sl_status_t sli_radioaes_save_state(sli_radioaes_state_t *ctx);
 
 /***************************************************************************//**
  * @brief          Restore RADIOAES register state from RAM
  *
  * @param ctx      Context struct to restore register state from
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_radioaes_restore_state(sli_radioaes_state_t *ctx);
+sl_status_t sli_radioaes_restore_state(sli_radioaes_state_t *ctx);
 
 #ifdef __cplusplus
 }

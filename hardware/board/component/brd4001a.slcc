@@ -14,7 +14,12 @@
   - name: hardware_board_from_slwmb4001a
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4001A"'
+  - name: SL_BOARD_REV
+    value: '"A03"'
 - tag:
   - board:pn:BRD4001
   - board:variant:A
-  - board:revision:A02
+  - board:revision:A03

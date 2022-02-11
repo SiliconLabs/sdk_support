@@ -59,7 +59,11 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
 
   sl_iostream_eusart_config_t config_{{ instance }} = { {# create init struct #}
     .eusart = SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL,
+#if (SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE != uartFlowControlSoftware)
     .flow_control = SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE,
+#else
+    .flow_control = usartHwFlowControlNone,
+#endif
     .enable_high_frequency = SL_IOSTREAM_EUSART_{{ instance | upper }}_ENABLE_HIGH_FREQUENCY,
     .clock = SL_IOSTREAM_EUSART_CLOCK_REF(SL_IOSTREAM_EUSART_{{ instance | upper }}_PERIPHERAL_NO),
 #if defined(EUSART_COUNT) && (EUSART_COUNT > 1)
@@ -85,6 +89,11 @@ sl_status_t sl_iostream_eusart_init_{{ instance }}(void)
     .rx_buffer_length = SL_IOSTREAM_EUSART_{{ instance | upper }}_RX_BUFFER_SIZE,
     .lf_to_crlf = SL_IOSTREAM_EUSART_{{ instance | upper }}_CONVERT_BY_DEFAULT_LF_TO_CRLF,
     .rx_when_sleeping = SL_IOSTREAM_EUSART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
+#if (SL_IOSTREAM_EUSART_{{ instance | upper }}_FLOW_CONTROL_TYPE == uartFlowControlSoftware)
+    .sw_flow_control = true,
+#else
+    .sw_flow_control = false,
+#endif
   };
 
   // Instantiate eusart instance {# Initialize eusart instance #}

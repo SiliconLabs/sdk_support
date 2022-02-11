@@ -63,7 +63,7 @@ typedef uint32_t RTCDRV_TimerID_t;
 
 /***************************************************************************//**
  * @brief
- *  Typedef for the user supplied callback function which is called when
+ *  Typedef for the user-supplied callback function which is called when
  *  a timer elapses.
  *
  * @note This callback is called from within an interrupt handler with

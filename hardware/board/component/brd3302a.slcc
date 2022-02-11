@@ -17,6 +17,11 @@
   - name: hardware_board_from_efm32g-dk3550
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD3302A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD3302
   - board:variant:A

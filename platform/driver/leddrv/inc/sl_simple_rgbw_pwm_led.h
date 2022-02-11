@@ -19,6 +19,7 @@
 #define SL_SIMPLE_RGBW_PWM_LED_H
 
 #include "sl_led.h"
+#include "sl_pwm_led.h"
 #include "em_gpio.h"
 #include <stdint.h>
 
@@ -29,7 +30,10 @@
 
 /***************************************************************************//**
  * @addtogroup simple_rgbw_pwm_led Simple RGBW PWM LED Driver
- * @brief Simple Red/Green/Blue/White PWM LED Driver
+ * @details Simple RGBW PWM LED Driver provides functionality to control
+ *        Red/Green/Blue/White LEDs that are driven by the PWM. Basic
+ *        functionalities such as on, off, toggle, or retrieve state of RGBW LED
+ *        can also be executed using this module.
  * @{
  ******************************************************************************/
 
@@ -45,8 +49,6 @@
 #define SL_SIMPLE_RGBW_PWM_LED_COLOR_B              2U  ///< LED Blue
 #define SL_SIMPLE_RGBW_PWM_LED_COLOR_W              3U  ///< LED White
 
-#define SL_SIMPLE_RGBW_PWM_LED_VALUE_OFF            0U  ///< LED off value
-
 #define SL_SIMPLE_RGBW_PWM_LED_NUM_CC_REQUIRED      4U  ///< Number of Timer Capture Channels required (1 for each RGBW color)
 
 /*******************************************************************************
@@ -57,25 +59,30 @@ typedef uint8_t sl_simple_rgbw_pwm_led_polarity_t;    ///< LED GPIO polarities (
 
 /// A Simple RGBW LED context
 typedef struct {
-  /* Config parameters */
-  GPIO_Port_TypeDef                 port[4];      ///< Red, Green, Blue and White GPIO ports
-  uint8_t                           pin[4];       ///< Red, Green, Blue and White GPIO pins
-  sl_simple_rgbw_pwm_led_polarity_t polarity[4];  ///< Red, Green, Blue and White GPIO polarities (active high/low)
-  uint8_t                           channel[4];   ///< Red, Green, Blue and White PWM timer channels
-  uint8_t                           location[4];  ///< Red, Green, Blue and White PWM timer location
-  TIMER_TypeDef                     *timer;       ///< PWM timer (common instance for all four RGBW LEDs)
-  uint32_t                          frequency;    ///< PWM frequency
-  uint32_t                          resolution;   ///< PWM resolution (dimming steps)
-  /* Settings */
-  uint16_t                          level[4];     ///< Red, Green, Blue and White levels (PWM duty cycle [0-65535])
-  sl_led_state_t                    state;        ///< Current state (ON/OFF)
+  sl_led_pwm_t      *red;        ///< PWM LED instance for red color
+  sl_led_pwm_t      *green;      ///< PWM LED instance for green color
+  sl_led_pwm_t      *blue;       ///< PWM LED instance for blue color
+  sl_led_pwm_t      *white;      ///< PWM LED instance for white color
+
+  TIMER_TypeDef     *timer;      ///< PWM timer (common instance for all LEDs)
+  uint32_t          frequency;   ///< PWM frequency
+  uint32_t          resolution;  ///< PWM resolution (dimming steps)
+  sl_led_state_t    state;       ///< Current state (ON/OFF)
 } sl_simple_rgbw_pwm_led_context_t;
 
 /// A Simple RGBW LED PWM instance
 typedef struct {
   sl_led_t       led_common;                      ///< Inherit from the Common LED Driver
-  void           (*set_rgbw_color)(void *context, uint16_t red, uint16_t green, uint16_t blue, uint16_t white);     ///< member function to set RGBW
-  void           (*get_rgbw_color)(void *context, uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *white); ///< member function to get RGBW
+  void           (*set_rgbw_color)(void *context,
+                                   uint16_t red,
+                                   uint16_t green,
+                                   uint16_t blue,
+                                   uint16_t white);  ///< member function to set RGBW
+  void           (*get_rgbw_color)(void *context,
+                                   uint16_t *red,
+                                   uint16_t *green,
+                                   uint16_t *blue,
+                                   uint16_t *white);  ///< member function to get RGBW
 } sl_led_rgbw_pwm_t;
 
 /*******************************************************************************
@@ -86,13 +93,12 @@ typedef struct {
  * Initialize the RGBW PWM LED driver.
  *
  * @param[in] led_handle         Pointer to rgbw-pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
  *
  * @return    Status Code:
  *              - SL_STATUS_OK   Success
  *              - SL_STATUS_FAIL Init error
  ******************************************************************************/
-sl_status_t sl_simple_rgbw_pwm_led_init(void *led_handle);
+sl_status_t sl_simple_rgbw_pwm_led_init(void *rgbw);
 
 /***************************************************************************//**
  * Turn on an RBGW LED.
@@ -100,54 +106,54 @@ sl_status_t sl_simple_rgbw_pwm_led_init(void *led_handle);
  *   If no previous levels set, turns on at max level for all four RGBW LEDs
  *
  * @param[in] led_handle         Pointer to rgbw_pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
  *
  ******************************************************************************/
-void sl_simple_rgbw_pwm_led_turn_on(void *led_handle);
+void sl_simple_rgbw_pwm_led_turn_on(void *rgbw);
 
 /***************************************************************************//**
  * Turn off an RGBW LED.
  *
  * @param[in] led_handle         Pointer to rgbw-pwm-led specific data:
- *                                 - sl_rgbw_pwm_led_context_t
  *
  ******************************************************************************/
-void sl_simple_rgbw_pwm_led_turn_off(void *led_handle);
+void sl_simple_rgbw_pwm_led_turn_off(void *rgbw);
 
 /***************************************************************************//**
  * Toggle an RGBW LED.
  *  The toggle "ON" behavior is as defined for sl_simple_rgbw_pwm_led_turn_on()
 
  * @param[in] led_handle         Pointer to rgbw-pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
  *
  ******************************************************************************/
-void sl_simple_rgbw_pwm_led_toggle(void *led_handle);
+void sl_simple_rgbw_pwm_led_toggle(void *rgbw);
 
 /***************************************************************************//**
  * Get status of an RGBW LED.
  *
  * @param[in] led_handle         Pointer to rgbw-pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
  *
  * @return    sl_led_state_t     Current state of RGBW LED.
  *                               0 for Red, Green, Blue and White LEDs are all OFF
  *                               1 for Red, Green, Blue or White LED is ON
  ******************************************************************************/
-sl_led_state_t sl_simple_rgbw_pwm_led_get_state(void *led_handle);
+sl_led_state_t sl_simple_rgbw_pwm_led_get_state(void *rgbw);
 
 /***************************************************************************//**
  * Set color mixing and dimming level of an RGBW LED.
  *
  * @param[in] led_handle         Pointer to rgbw-pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
+ *
  * @param[in] red                Red color level (PWM duty-cycle [0-65535])
  * @param[in] green              Green color level (PWM duty-cycle [0-65535])
  * @param[in] blue               Blue color level (PWM duty-cycle [0-65535])
  * @param[in] white              White color level (PWM duty-cycle [0-65535])
  *
  ******************************************************************************/
-void sl_simple_rgbw_pwm_led_set_color(void *led_handle, uint16_t red, uint16_t green, uint16_t blue, uint16_t white);
+void sl_simple_rgbw_pwm_led_set_color(void *rgbw,
+                                      uint16_t red,
+                                      uint16_t green,
+                                      uint16_t blue,
+                                      uint16_t white);
 
 /***************************************************************************//**
  * Get current color mixing and dimming level of an RGBW LED.
@@ -157,31 +163,35 @@ void sl_simple_rgbw_pwm_led_set_color(void *led_handle, uint16_t red, uint16_t g
  * is actually ON or OFF.
  *
  * @param[in]  led_handle        Pointer to rgbw-pwm-led specific data:
- *                                 - sl_simple_rgbw_pwm_led_context_t
+ *
  * @param[out] red               Red color level (PWM duty-cycle [0-65535])
  * @param[out] green             Green color level (PWM duty-cycle [0-65535])
  * @param[out] blue              Blue color level (PWM duty-cycle [0-65535])
  * @param[out] white             White color level (PWM duty-cycle [0-65535])
  *
  ******************************************************************************/
-void sl_simple_rgbw_pwm_led_get_color(void *led_handle, uint16_t *red, uint16_t *green, uint16_t *blue, uint16_t *white);
+void sl_simple_rgbw_pwm_led_get_color(void *rgbw,
+                                      uint16_t *red,
+                                      uint16_t *green,
+                                      uint16_t *blue,
+                                      uint16_t *white);
 
 /*******************************************************************************
  ****************   API extensions to the Common LED Driver   ******************
  ******************************************************************************/
 
-void sl_led_set_rgbw_color(const sl_led_rgbw_pwm_t *led_handle,   ///< LED Instance handle
-                           uint16_t red,                          ///< LED red intensity
-                           uint16_t green,                        ///< LED green intensity
-                           uint16_t blue,                         ///< LED blue intensity
-                           uint16_t white                         ///< LED white intensity
+void sl_led_set_rgbw_color(const sl_led_rgbw_pwm_t *rgbw,   ///< LED Instance handle
+                           uint16_t red,                    ///< LED red intensity
+                           uint16_t green,                  ///< LED green intensity
+                           uint16_t blue,                   ///< LED blue intensity
+                           uint16_t white                   ///< LED white intensity
                            ); ///< LED set RGBW color
 
-void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t * led_handle,    ///< LED Instance handle
-                           uint16_t * red,                          ///< LED red intensity
-                           uint16_t * green,                        ///< LED green intensity
-                           uint16_t * blue,                         ///< LED blue intensity
-                           uint16_t * white                         ///< LED white intensity
+void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t *rgbw,    ///< LED Instance handle
+                           uint16_t * red,                   ///< LED red intensity
+                           uint16_t * green,                 ///< LED green intensity
+                           uint16_t * blue,                  ///< LED blue intensity
+                           uint16_t * white                  ///< LED white intensity
                            ); ///< LED get RGBW setting
 
 /** @} (end group simple_rgbw_pwm_led) */
@@ -208,39 +218,59 @@ void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t * led_handle,    ///< LED Ins
 ///   @code{.c}
 ///// sl_simple_rgbw_pwm_led_instances.c
 ///
-///#include "sl_simple_rgbw_pwm_led.h"
 ///#include "em_gpio.h"
+///#include "sl_simple_rgbw_pwm_led.h"
+///
 ///#include "sl_simple_rgbw_pwm_led_inst0_config.h"
 ///
-///sl_simple_rgbw_pwm_led_context_t simple_rgbw_pwm_inst0_context = {
-///  .port[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = SL_SIMPLE_RGBW_PWM_LED_INST0_RED_PORT,
-///  .pin[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = SL_SIMPLE_RGBW_PWM_LED_INST0_RED_PIN,
-///  .polarity[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = SL_SIMPLE_RGBW_PWM_LED_INST0_RED_POLARITY,
-///  .channel[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = SL_SIMPLE_RGBW_PWM_LED_INST0_RED_CHANNEL,
+///
+///
+///sl_led_pwm_t red_inst0 = {
+///  .port = SIMPLE_RGBW_PWM_LED_INST0_PORT,
+///  .pin = SIMPLE_RGBW_PWM_LED_INST0_PIN,
+///  .polarity = SIMPLE_RGBW_PWM_LED_INST0_POLARITY,
+///  .channel = SIMPLE_RGBW_PWM_LED_INST0_CHANNEL,
 ///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_RED_LOC)
-///  .location[SL_SIMPLE_RGBW_PWM_LED_COLOR_R] = SL_SIMPLE_RGBW_PWM_LED_INST0_RED_LOC,
+///  .location = SIMPLE_RGBW_PWM_LED_INST0_LOC,
 ///#endif
-///  .port[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_PORT,
-///  .pin[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_PIN,
-///  .polarity[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_POLARITY,
-///  .channel[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_CHANNEL,
-///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_LOC)
-///  .location[SL_SIMPLE_RGBW_PWM_LED_COLOR_G] = SL_SIMPLE_RGBW_PWM_LED_INST0_GREEN_LOC,
+///};
+///
+///sl_led_pwm_t green_inst0 = {
+///  .port = SIMPLE_RGBW_PWM_LED_INST0_PORT,
+///  .pin = SIMPLE_RGBW_PWM_LED_INST0_PIN,
+///  .polarity = SIMPLE_RGBW_PWM_LED_INST0_POLARITY,
+///  .channel = SIMPLE_RGBW_PWM_LED_INST0_CHANNEL,
+///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_RED_LOC)
+///  .location = SIMPLE_RGBW_PWM_LED_INST0_LOC,
 ///#endif
-///  .port[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_PORT,
-///  .pin[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_PIN,
-///  .polarity[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_POLARITY,
-///  .channel[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_CHANNEL,
-///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_LOC)
-///  .location[SL_SIMPLE_RGBW_PWM_LED_COLOR_B] = SL_SIMPLE_RGBW_PWM_LED_INST0_BLUE_LOC,
+///};
+///
+///sl_led_pwm_t blue_inst0 = {
+///  .port = SIMPLE_RGBW_PWM_LED_INST0_PORT,
+///  .pin = SIMPLE_RGBW_PWM_LED_INST0_PIN,
+///  .polarity = SIMPLE_RGBW_PWM_LED_INST0_POLARITY,
+///  .channel = SIMPLE_RGBW_PWM_LED_INST0_CHANNEL,
+///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_RED_LOC)
+///  .location = SIMPLE_RGBW_PWM_LED_INST0_LOC,
 ///#endif
-///  .port[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_PORT,
-///  .pin[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_PIN,
-///  .polarity[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_POLARITY,
-///  .channel[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_CHANNEL,
-///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_LOC)
-///  .location[SL_SIMPLE_RGBW_PWM_LED_COLOR_W] = SL_SIMPLE_RGBW_PWM_LED_INST0_WHITE_LOC,
+///};
+///
+///sl_led_pwm_t white_inst0 = {
+///  .port = SIMPLE_RGBW_PWM_LED_INST0_PORT,
+///  .pin = SIMPLE_RGBW_PWM_LED_INST0_PIN,
+///  .polarity = SIMPLE_RGBW_PWM_LED_INST0_POLARITY,
+///  .channel = SIMPLE_RGBW_PWM_LED_INST0_CHANNEL,
+///#if defined(SL_SIMPLE_RGBW_PWM_LED_INST0_RED_LOC)
+///  .location = SIMPLE_RGBW_PWM_LED_INST0_LOC,
 ///#endif
+///};
+///
+///sl_simple_rgbw_pwm_led_context_t simple_rgbw_pwm_inst0_context = {
+///  .red = &red_inst0,
+///  .green = &green_inst0,
+///  .blue = &blue_inst0,
+///  .white = &white_inst0,
+///
 ///  .timer = SL_SIMPLE_RGBW_PWM_LED_INST0_PERIPHERAL,
 ///  .frequency = SL_SIMPLE_RGBW_PWM_LED_INST0_FREQUENCY,
 ///  .resolution = SL_SIMPLE_RGBW_PWM_LED_INST0_RESOLUTION,
@@ -257,9 +287,13 @@ void sl_led_get_rgbw_color(const sl_led_rgbw_pwm_t * led_handle,    ///< LED Ins
 ///  .get_rgbw_color = sl_simple_rgbw_pwm_led_get_color,
 ///};
 ///
+///
+///
 ///void sl_simple_rgbw_pwm_led_init_instances(void)
 ///{
+///
 ///  sl_led_init((sl_led_t *)&sl_inst0);
+///
 ///}
 ///   @endcode
 ///

@@ -2,7 +2,7 @@ id: micriumos_bsp_can
 label: CAN BSP
 package: micrium-cano
 description: Micrium OS CAN BSP
-category: Micrium OS|BSP
+category: Services|Micrium|BSP
 quality: production
 component_root_path: platform/micrium_os/bsp/siliconlabs/generic/source
 source:

@@ -63,7 +63,7 @@ extern "C" {
 typedef struct {
   psa_algorithm_t alg;
   union {
-    sl_se_cmac_streaming_context_t cmac;
+    sl_se_cmac_multipart_context_t cmac;
     struct {
       uint8_t iv[16];
       size_t iv_len;

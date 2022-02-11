@@ -46,10 +46,11 @@ extern "C" {
 #include "efr32xg23/config/sl_rail_util_pa_config.h"
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
 #include "efr32xg24/config/sl_rail_util_pa_config.h"
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#include "efr32xg25/config/sl_rail_util_pa_config.h"
 #elif defined (_SILICON_LABS_32B_SERIES_2)
 #include "efr32xg21/config/sl_rail_util_pa_config.h"
 #else
-
 #error "Unsupported platform!"
 #endif
 

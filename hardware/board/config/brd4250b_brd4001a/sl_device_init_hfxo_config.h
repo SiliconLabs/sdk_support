@@ -18,17 +18,20 @@
 // <i> Default: 360
 #define SL_DEVICE_INIT_HFXO_CTUNE          344
 
-// <o SL_DEVICE_INIT_HFXO_AUTOSTART> Auto-start HFXO
+// <h> Advanced Configurations
+// <o SL_DEVICE_INIT_HFXO_AUTOSTART> Auto-start HFXO. This feature is incompatible with Power Manager and can only be enabled in applications that do not use Power Manager or a radio protocol stack. - DEPRECATED
 // <true=> True
 // <false=> False
 // <i> Default: false
 #define SL_DEVICE_INIT_HFXO_AUTOSTART      false
 
-// <o SL_DEVICE_INIT_HFXO_AUTOSELECT> Auto-select HFXO
+// <o SL_DEVICE_INIT_HFXO_AUTOSELECT> Auto-select HFXO. This feature is incompatible with Power Manager and can only be enabled in applications that do not use Power Manager or a radio protocol stack. - DEPRECATED
 // <true=> True
 // <false=> False
 // <i> Default: false
 #define SL_DEVICE_INIT_HFXO_AUTOSELECT      false
+
+// </h>
 
 // <<< end of configuration section >>>
 

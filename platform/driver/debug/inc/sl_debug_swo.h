@@ -100,17 +100,63 @@ sl_status_t sl_debug_swo_disable_itm(uint32_t channel);
  *
  * @note
  * This function ensures that the ITM channel is enabled, and enables it if
- * it wasn't already.
+ * it wasn't already. Note that even if the debug port is locked, the byte
+ * will still be written on the SWO.
  *
  * @param[in] channel ITM channel number
- * @param[in] c Byte to send
+ * @param[in] byte Byte to send
  *
  * @return Status code
  * @retval SL_STATUS_OK Byte sent successfully
  * @retval SL_STATUS_NOT_INITIALIZED ITM has not been enabled, call
  *                                   @ref sl_debug_swo_init first.
  */
-sl_status_t sl_debug_swo_write(uint32_t channel, uint8_t c);
+sl_status_t sl_debug_swo_write_u8(uint32_t channel, uint8_t byte);
+
+/**
+ * Write a half-word to an ITM channel
+ *
+ * @details
+ * Writes the given half-word to the given ITM channel
+ *
+ * @note
+ * This function ensures that the ITM channel is enabled, and enables it if
+ * it wasn't already.
+ *
+ * @param[in] channel ITM channel number
+ * @param[in] half_word Half-word to send
+ *
+ * @return Status code
+ * @retval SL_STATUS_OK half-word sent successfully
+ * @retval SL_STATUS_NOT_INITIALIZED ITM has not been enabled, call
+ *                                   @ref sl_debug_swo_init first.
+ */
+sl_status_t sl_debug_swo_write_u16(uint32_t channel, uint16_t half_word);
+
+/**
+ * Write a word to an ITM channel
+ *
+ * @details
+ * Writes the given word to the given ITM channel
+ *
+ * @note
+ * This function ensures that the ITM channel is enabled, and enables it if
+ * it wasn't already.
+ *
+ * @param[in] channel ITM channel number
+ * @param[in] word Word to send
+ *
+ * @return Status code
+ * @retval SL_STATUS_OK half-word sent successfully
+ * @retval SL_STATUS_NOT_INITIALIZED ITM has not been enabled, call
+ *                                   @ref sl_debug_swo_init first.
+ */
+sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word);
+
+/**
+ * alias for backward compatibility
+ */
+#define sl_debug_swo_write sl_debug_swo_write_u8
 
 /** @} end debug_swo */
 /** @} end debug */

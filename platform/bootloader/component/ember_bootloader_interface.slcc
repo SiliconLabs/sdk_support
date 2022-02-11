@@ -1,6 +1,6 @@
 id: ember_bootloader_interface
 label: Ember Bootloader Application Interface
-package: platform
+package: bootloader
 description: Interface for interacting with the Ember bootloader.
 category: Platform|Bootloader
 quality: production

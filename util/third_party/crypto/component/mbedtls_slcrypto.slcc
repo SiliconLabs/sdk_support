@@ -11,7 +11,7 @@ category: Platform|Security|Internal
 quality: production
 component_root_path: util/third_party/crypto
 source:
-  - path: sl_component/sl_alt/source/sl_mbedtls.c
+  - path: sl_component/sl_mbedtls_support/src/sl_mbedtls.c
   # Series 0 device support
   - path: sl_component/sl_mbedtls_support/src/aes_aes.c
     condition: [device_has_aes]
@@ -41,8 +41,6 @@ source:
     condition: [mbedtls_gcm, device_has_semailbox]
   - path: sl_component/sl_mbedtls_support/src/se_jpake.c
     condition: [mbedtls_jpake, device_has_semailbox]
-  - path: sl_component/sl_alt/source/sl_se_management.c
-    condition: [device_has_semailbox]
   - path: sl_component/sl_mbedtls_support/src/mbedtls_sha.c
     condition: [mbedtls_sha_function, device_has_semailbox]
   # Series 2 device support with VSE
@@ -59,19 +57,17 @@ source:
   - path: sl_component/sl_mbedtls_support/src/mbedtls_sha.c
     condition: [mbedtls_sha_function, device_has_cryptoacc]
 include:
-  - path: sl_component/sl_alt/include
-    file_list:
-      - path: sl_mbedtls.h
-      - path: se_management.h
-        condition: [device_has_semailbox]
   - path: sl_component/sl_mbedtls_support/inc
     file_list:
       - path: aes_alt.h
       - path: ccm_alt.h
       - path: cmac_alt.h
+      - path: se_management.h
+        condition: [device_has_semailbox]
       - path: sha1_alt.h
       - path: sha256_alt.h
       - path: sha512_alt.h
+      - path: sl_mbedtls.h
       - path: threading_alt.h
         unless: [iot_crypto]
       # Series 1 device support
@@ -107,6 +103,7 @@ requires:
     condition: [device_series_2]
 provides:
   - name: mbedtls_slcrypto
+  - name: mbedtls_slcrypto_driver
 template_contribution:
 # FreeRTOS (non-AWS IOT) threading support
   - name: mbedtls_config

@@ -25,13 +25,10 @@
 // <i> Default: 115200
 #define SL_SERIAL_UART_BAUD_RATE              115200
 
-// <o SL_SERIAL_UART_FLOW_CONTROL> Hardware flow control
-// <usartHwFlowControlNone=> None
-// <usartHwFlowControlCts=> CTS
-// <usartHwFlowControlRts=> RTS
-// <usartHwFlowControlCtsAndRts=> CTS/RTS
-// <i> Default: usartHwFlowControlNone
-#define SL_SERIAL_UART_FLOW_CONTROL     usartHwFlowControlNone
+// <e SL_SERIAL_UART_FLOW_CONTROL> Hardware flow control
+// <i> Default: 0
+#define SL_SERIAL_UART_FLOW_CONTROL      0
+// </e>
 
 // <o SL_DRIVER_UART_RX_BUFFER_SIZE> Receive buffer size
 // <0-2048:1>
@@ -78,7 +75,7 @@
 
 
 
-// <gpio> SL_VCOM_ENABLE
+// <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
 #define SL_VCOM_ENABLE_PORT                      gpioPortA

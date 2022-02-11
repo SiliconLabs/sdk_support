@@ -23,6 +23,10 @@
 #ifndef __COEXISTENCE_802154_H__
 #define __COEXISTENCE_802154_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @name Radio HoldOff Configuration Definitions
  *
  * The following are used to aid in the abstraction with Radio
@@ -274,6 +278,10 @@ bool halPtaGetGpioInputOverride(halPtaGpioIndex_t gpioIndex);
 // the input value of a PTA is read from a virtual GPIO
 // rather than the physical PTA GPIO
 EmberStatus halPtaSetGpioInputOverride(halPtaGpioIndex_t gpioIndex, bool enabled);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__COEXISTENCE_802154_H__
 

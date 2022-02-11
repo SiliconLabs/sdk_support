@@ -2,7 +2,7 @@ id: micriumos_bsp_net_ether
 label: Micrium OS Ethernet BSP
 package: micrium-tcpx
 description: Board Support Package for Micrium OS Network Ethernet
-category: Micrium OS|BSP
+category: Services|Micrium|BSP
 quality: production
 ui_hints:
   visibility: never

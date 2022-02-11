@@ -35,7 +35,6 @@
 #ifndef _SILICON_LABS_MODULE
 
 #include "em_device.h"
-#include "em_common.h"
 #include "pa_conversions_efr32.h"
 
 #if defined(_SILICON_LABS_32B_SERIES_1)
@@ -57,7 +56,7 @@ static const int16_t RAIL_curves24LpVbat[RAIL_PA_CURVES_LP_VALUES] =
 // to ensure it can be overriden by customer versions of these functions. It
 // should *not* be defined in a customer build.
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
   .curves = {
@@ -99,7 +98,7 @@ static const int16_t RAIL_curves24LpDcdc[RAIL_PA_CURVES_LP_VALUES] =
   RAIL_PA_CURVES_2P4_LP;
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
   .curves = {
@@ -138,7 +137,7 @@ static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =
   RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
   .curves = {
@@ -160,7 +159,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
 };
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
   .curves = {
@@ -187,12 +186,27 @@ RAIL_DECLARE_TX_POWER_VBAT_CURVES_ALT;
 
 // This chip has the same curve for Vbat and DCDC
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = RAIL_DECLARE_TX_POWER_CURVES_CONFIG_ALT;
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
+#endif
+const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = RAIL_DECLARE_TX_POWER_CURVES_CONFIG_ALT;
+
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+
+RAIL_DECLARE_TX_POWER_VBAT_CURVES_ALT;
+
+// This chip has the same curve for Vbat and DCDC
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+__WEAK
+#endif
+const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = RAIL_DECLARE_TX_POWER_CURVES_CONFIG_ALT;
+
+#ifdef RAIL_PA_CONVERSIONS_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = RAIL_DECLARE_TX_POWER_CURVES_CONFIG_ALT;
 
@@ -215,7 +229,7 @@ static const RAIL_TxPowerCurveAlt_t RAIL_piecewiseDataLpVbat = {
 };
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
   .curves = {
@@ -226,6 +240,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_HP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataHpVbat },
     },
+#if _SILICON_LABS_32B_SERIES_2_CONFIG == 1
     {
       .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
       .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
@@ -233,6 +248,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
       .max = RAIL_TX_POWER_LEVEL_2P4_MP_MAX,
       .conversion = { .powerCurve = &RAIL_piecewiseDataMpVbat },
     },
+#endif // _SILICON_LABS_32B_SERIES_2_CONFIG == 1
     {
       .algorithm = RAIL_PA_ALGORITHM_PIECEWISE_LINEAR,
       .segments = RAIL_PA_CURVES_PIECEWISE_SEGMENTS,
@@ -244,7 +260,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
 };
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
   .curves = {
@@ -281,7 +297,7 @@ static const int16_t RAIL_curves24Lp[RAIL_PA_CURVES_LP_VALUES] =
   RAIL_PA_CURVES_2P4_LP_VBAT_CURVES;
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
   .curves = {
@@ -303,7 +319,7 @@ const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesVbat = {
 };
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurvesConfigAlt_t RAIL_TxPowerCurvesDcdc = {
   .curves = {

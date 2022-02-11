@@ -50,8 +50,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_leuart IO Stream LEUART
- * @brief IO Stream LEUART
+ * @addtogroup iostream_leuart I/O Stream LEUART
+ * @brief I/O Stream LEUART
  * @details
  * ## Overview
  *
@@ -69,7 +69,7 @@ extern "C" {
  *
  * ## Power manager integration
  *
- *   On transmission side, IO Stream-LEUART adds a requirement on EM2 until the transmit is
+ *   On transmission side, I/O Stream-LEUART adds a requirement on EM2 until the transmit is
  *   really completed. Once the transmit is completed the requirement is removed and the
  *   system can go to a lower energy mode if allowed.
  *
@@ -87,7 +87,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Data Types
 
-/// @brief Struct representing an IO Stream LEUART configuration.
+/// @brief Struct representing an I/O Stream LEUART configuration.
 typedef struct {
   LEUART_TypeDef *leuart;     ///< Pointer to LEUART peripheral
   IRQn_Type irq_number;       ///< IRQ number
@@ -104,7 +104,7 @@ typedef struct {
 #endif
 } sl_iostream_leuart_config_t;
 
-/// @brief Struct representing an IO Stream LEUART context.
+/// @brief Struct representing an I/O Stream LEUART context.
 typedef struct {
   sl_iostream_uart_context_t context; ///< underlying uart context
   LEUART_TypeDef *leuart;             ///< leuart instance handle
@@ -121,9 +121,9 @@ typedef struct {
 /***************************************************************************//**
  * LEUART Stream init.
  *
- * @param[in] iostream_uart  IO Stream UART handle.
+ * @param[in] iostream_uart  I/O Stream UART handle.
  *
- * @param[in] uart_config  IO Stream UART config.
+ * @param[in] uart_config  I/O Stream UART config.
  *
  * @param[in] init  LEUART initialization modes.
  *

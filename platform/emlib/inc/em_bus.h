@@ -58,7 +58,7 @@ extern "C" {
  *
  * @note
  *   This function is atomic on Cortex-M cores with bit-banding support. Bit-
- *   banding is a multicycle read-modify-write bus operation. RAM bit-banding is
+ *   banding is a multi cycle read-modify-write bus operation. RAM bit-banding is
  *   performed using the memory alias region at BITBAND_RAM_BASE.
  *
  * @param[in] addr An ddress of a 32-bit word in RAM.
@@ -129,7 +129,7 @@ __STATIC_INLINE unsigned int BUS_RamBitRead(volatile const uint32_t *addr,
  *
  * @note
  *   This function is atomic on Cortex-M cores with bit-banding support. Bit-
- *   banding is a multicycle read-modify-write bus operation. Peripheral register
+ *   banding is a multi cycle read-modify-write bus operation. Peripheral register
  *   bit-banding is performed using the memory alias region at BITBAND_PER_BASE.
  *
  * @param[in] addr A peripheral register address.

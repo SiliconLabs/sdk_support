@@ -2,7 +2,7 @@ id: micriumos_cpu_port_armv8m
 label: CPU port for ARMv8-M
 package: micrium-krnx
 description: Micrium OS CPU port for ARMv8-M
-category: RTOS|Micrium OS|Common|CPU
+category: RTOS|Micrium OS|Common
 quality: production
 ui_hints:
   visibility: never

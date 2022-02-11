@@ -12,6 +12,11 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_stk
+- define:
+  - name: SL_KIT_NAME
+    value: '"SLWSTK6000A"'
+  - name: SL_KIT_REV
+    value: '"D00"'
 - tag:
   - kit:opn:SLWSTK6000A
   - kit:pn:WSTK6000

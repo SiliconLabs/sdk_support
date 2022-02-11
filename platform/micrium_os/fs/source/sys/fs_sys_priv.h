@@ -261,6 +261,7 @@ typedef const struct fs_sys_api {
 #if (FS_TEST_FAT_JNL_EN == DEF_ENABLED)
 typedef enum fs_test_fat_jnl_test_num {
   INIT_TEST = 0u,
+  FSVOL_OPEN = 1u,
   FSFILE_OPEN = 10u,
   FSDIR_OPEN = 11u,
   FSFILE_WR1 = 12u,

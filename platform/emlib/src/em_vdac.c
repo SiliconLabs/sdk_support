@@ -276,11 +276,7 @@ void VDAC_Init(VDAC_TypeDef *vdac, const VDAC_Init_TypeDef *init)
 
   config = ((((uint32_t)init->warmupTime  << _VDAC_CFG_WARMUPTIME_SHIFT) & _VDAC_CFG_WARMUPTIME_MASK)
             | ((uint32_t)init->dbgHalt        << _VDAC_CFG_DBGHALT_SHIFT)
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
-            | ((uint32_t)init->onDemandClk    << _VDAC_CFG_ONDEMANDCLKDIS_SHIFT)
-#else
             | ((uint32_t)init->onDemandClk    << _VDAC_CFG_ONDEMANDCLK_SHIFT)
-#endif
             | ((uint32_t)init->dmaWakeUp      << _VDAC_CFG_DMAWU_SHIFT)
             | ((uint32_t)init->biasKeepWarm   << _VDAC_CFG_BIASKEEPWARM_SHIFT)
             | ((uint32_t)init->refresh        << _VDAC_CFG_REFRESHPERIOD_SHIFT)
@@ -288,7 +284,7 @@ void VDAC_Init(VDAC_TypeDef *vdac, const VDAC_Init_TypeDef *init)
             | (((uint32_t)init->prescaler     << _VDAC_CFG_PRESC_SHIFT) & _VDAC_CFG_PRESC_MASK)
             | ((uint32_t)init->reference      << _VDAC_CFG_REFRSEL_SHIFT)
             | ((uint32_t)init->ch0ResetPre    << _VDAC_CFG_CH0PRESCRST_SHIFT)
-            | ((uint32_t)init->sineReset      << _VDAC_CFG_CH0PRESCRST_SHIFT)
+            | ((uint32_t)init->sineReset      << _VDAC_CFG_SINERESET_SHIFT)
             | ((uint32_t)init->sineEnable     << _VDAC_CFG_SINEMODE_SHIFT)
             | ((uint32_t)init->diff           << _VDAC_CFG_DIFF_SHIFT));
 

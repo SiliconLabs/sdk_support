@@ -20,21 +20,26 @@
 #include <stdio.h>
 #include "hal.h"
 #include "em_chip.h"
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
 #include "tempdrv.h"
+#endif
 #include "em_emu.h"
 #include "em_cmu.h"
 #include "pa_conversions_efr32.h"
-#include "sl_iostream.h"
-#include "ustimer.h"
 #include "sl_sleeptimer.h"
 #include "em_wdog.h"
 #include "em_rmu.h"
-#include "sl_iostream_handles.h"
 #include "sl_power_manager.h"
 #include "rail.h"
 #include "sl_status.h"
 #include "sl_component_catalog.h"
 #include "sl_token_api.h"
+
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+#include "sl_iostream.h"
+#include "sl_iostream_usart.h"
+#include "sl_iostream_handles.h"
+#endif
 
 #if defined(SL_CATALOG_IOSTREAM_VUART_PRESENT)
 #include "sl_iostream_vuart.h"
@@ -42,6 +47,13 @@
 
 #if defined(SL_CATALOG_LED_PRESENT)
 #include "sl_led.h"
+#endif
+
+#if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
+#include "sl_button.h"
+#include "sl_simple_button.h"
+#include "sl_simple_button_config.h"
+#include "sl_simple_button_instances.h"
 #endif
 
 #define EMBER_SUCCESS             (0x00u)
@@ -87,19 +99,21 @@ sl_power_manager_on_isr_exit_t sl_legacy_hal_sleep_on_isr_exit(void)
 
 void halCommonDelayMicroseconds(uint16_t us)
 {
-  USTIMER_DelayIntSafe(us);
+  // Note: If you find that your software is hanging in this spot, then
+  // You most likely haven't run RAIL_Init() yet. If you really need
+  // us precision timings before RAIL_Init() is run, consider using
+  // the ustimer component instead of halCommonDelayMicroseconds().
+
+  RAIL_DelayUs(us);
 }
 
 void halCommonDelayMilliseconds(uint16_t ms)
 {
-  while (ms-- != 0U) {
-    halCommonDelayMicroseconds(1000u);
-  }
+  sl_sleeptimer_delay_millisecond(ms);
 }
 
 uint16_t halInternalStartSystemTimer(void)
 {
-  USTIMER_Init();
   if (sl_sleeptimer_init() != SL_STATUS_OK) {
     assert(0);
   }
@@ -109,6 +123,15 @@ uint16_t halInternalStartSystemTimer(void)
 void halInit(void)
 {
   halInternalClassifyReset();
+
+  // To be able to give more details on errors, we want faults enabled so
+  // they're not all forced into hard faults.
+  SCB->SHCSR |= (SCB_SHCSR_BUSFAULTENA_Msk
+                 | SCB_SHCSR_MEMFAULTENA_Msk
+#ifdef SCB_SHCSR_SECUREFAULTENA_Msk
+                 | SCB_SHCSR_SECUREFAULTENA_Msk
+#endif
+                 | SCB_SHCSR_USGFAULTENA_Msk);
 
   //Fill the unused portion of the memory reserved for the stack.
   //memset() is not being used to do this in case it uses the stack
@@ -123,7 +146,11 @@ void halInit(void)
     *dataDestination-- = STACK_FILL_VALUE;
   }
 
+  // TEMPDRV fixes an errata that only affects SDID 80
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
   TEMPDRV_Init();
+#endif
+
   EMU_UnlatchPinRetention();
 
   halInternalStartSystemTimer();
@@ -297,11 +324,12 @@ void halCommonMemPGMCopy(void* dest, const void PGM_NO_CONST *source, uint16_t b
   halCommonMemMove(dest, source, bytes);
 }
 
+#ifndef EMBER_TEST
 uint32_t halInternalGetCStackBottom(void)
 {
   return (uint32_t)(uint8_t *)_CSTACK_SEGMENT_BEGIN;
 }
-
+#endif
 // These variables are defined by the stack in ember-configuration.c
 extern uint16_t heapMemory[];
 extern const uint32_t heapMemorySize;
@@ -435,35 +463,6 @@ void emRadioSeedRandom(void)
 
 //------------------------------------------------------------------------------
 
-// emberSerial
-
-typedef enum COM_Port {
-  // Legacy COM port defines
-  COM_VCP = 0,
-  COM_USART0 = 1,
-  COM_USART1 = 2,
-  COM_USART2 = 3,
-  COM_USB = 4,
-  COM_LEUART0 = 5,
-  COM_LEUART1 = 6,
-
-  // VCP
-  comPortVcp = 0x10,
-
-  // USARTs
-  comPortUsart0 = 0x20,
-  comPortUsart1 = 0x21,
-  comPortUsart2 = 0x22,
-  comPortUsart3 = 0x23,
-
-  // LEUARTs
-  comPortLeuart0 = 0x40,
-  comPortLeuart1 = 0x41,
-
-  // USB
-  comPortUsb = 0x50,
-} COM_Port_t;
-
 EmberStatus emberSerialInit(uint8_t port,
                             SerialBaudRate rate,
                             SerialParity parity,
@@ -482,81 +481,106 @@ EmberStatus emberSerialWaitSend(uint8_t port)
   return EMBER_SUCCESS;
 }
 
-EmberStatus emberSerialReadByte(uint8_t port, uint8_t *dataByte)
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+const sl_iostream_instance_info_t * sli_legacy_hal_get_iostream_info(uint8_t port)
 {
+  sl_iostream_type_t type = SL_IOSTREAM_TYPE_UNDEFINED;
+  uint8_t periph = (uint8_t)(-1);
+
+  switch (port) {
+    case COM_VCP:
+    case comPortVcp:
+      type = SL_IOSTREAM_TYPE_VUART;
+      periph = 0;
+      break;
+    case COM_USART0:
+    case comPortUsart0:
+      type = SL_IOSTREAM_TYPE_UART;
+      periph = 0;
+      break;
+    case COM_USART1:
+    case comPortUsart1:
+      type = SL_IOSTREAM_TYPE_UART;
+      periph = 1;
+      break;
+    case COM_USART2:
+    case comPortUsart2:
+      type = SL_IOSTREAM_TYPE_UART;
+      periph = 2;
+      break;
+    case comPortUsart3:
+      type = SL_IOSTREAM_TYPE_UART;
+      periph = 3;
+      break;
+    default:
+      return NULL;
+  }
+
   for (uint8_t i = 0; i < sl_iostream_instances_count; i++) {
-    switch (port) {
-      case COM_VCP:
-      case comPortVcp:
-        if (sl_iostream_instances_info[i]->type == SL_IOSTREAM_TYPE_SWO) {
-          if (sl_iostream_getchar(sl_iostream_instances_info[i]->handle, (char *)dataByte) == SL_STATUS_OK) {
-            return EMBER_SUCCESS;
-          } else {
-            return EMBER_SERIAL_RX_EMPTY;
-          }
-        }
-        break;
-      case COM_USART0:
-      case comPortUsart0:
-        if (sl_iostream_instances_info[i]->type == SL_IOSTREAM_TYPE_UART && sl_iostream_instances_info[i]->periph_id == 0) {
-          if (sl_iostream_getchar(sl_iostream_instances_info[i]->handle, (char *)dataByte) == SL_STATUS_OK) {
-            return EMBER_SUCCESS;
-          } else {
-            return EMBER_SERIAL_RX_EMPTY;
-          }
-        }
-        break;
-      case COM_USART1:
-      case comPortUsart1:
-        if (sl_iostream_instances_info[i]->type == SL_IOSTREAM_TYPE_UART && sl_iostream_instances_info[i]->periph_id == 1) {
-          if (sl_iostream_getchar(sl_iostream_instances_info[i]->handle, (char *)dataByte) == SL_STATUS_OK) {
-            return EMBER_SUCCESS;
-          } else {
-            return EMBER_SERIAL_RX_EMPTY;
-          }
-        }
-        break;
-      case COM_USART2:
-      case comPortUsart2:
-        if (sl_iostream_instances_info[i]->type == SL_IOSTREAM_TYPE_UART && sl_iostream_instances_info[i]->periph_id == 2) {
-          if (sl_iostream_getchar(sl_iostream_instances_info[i]->handle, (char *)dataByte) == SL_STATUS_OK) {
-            return EMBER_SUCCESS;
-          } else {
-            return EMBER_SERIAL_RX_EMPTY;
-          }
-        }
-        break;
-      case comPortUsart3:
-        if (sl_iostream_instances_info[i]->type == SL_IOSTREAM_TYPE_UART && sl_iostream_instances_info[i]->periph_id == 3) {
-          if (sl_iostream_getchar(sl_iostream_instances_info[i]->handle, (char *)dataByte) == SL_STATUS_OK) {
-            return EMBER_SUCCESS;
-          } else {
-            return EMBER_SERIAL_RX_EMPTY;
-          }
-        }
-        break;
-      default:
-        return EMBER_SERIAL_INVALID_PORT;
-        break;
+    if (sl_iostream_instances_info[i] != NULL
+        && sl_iostream_instances_info[i]->type == type
+        && sl_iostream_instances_info[i]->periph_id == periph) {
+      return sl_iostream_instances_info[i];
     }
   }
+
+  return NULL;
+}
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+EmberStatus emberSerialReadByte(uint8_t port, uint8_t *dataByte)
+{
+  (void)port;
+  (void)dataByte;
+
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+  const sl_iostream_instance_info_t * info;
+  info = sli_legacy_hal_get_iostream_info(port);
+
+  if (info != NULL && info->handle != NULL) {
+    sl_status_t status = sl_iostream_getchar(info->handle, (char *)dataByte);
+
+    if (status == SL_STATUS_OK) {
+      return EMBER_SUCCESS;
+    } else if (status == SL_STATUS_EMPTY) {
+      return EMBER_SERIAL_RX_EMPTY;
+    }
+  }
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
   return EMBER_ERR_FATAL;
 }
 
-EmberStatus emberSerialReadData(uint8_t port, uint8_t *data, uint16_t length, uint16_t *bytesRead)
+EmberStatus emberSerialReadData(uint8_t port,
+                                uint8_t *data,
+                                uint16_t length,
+                                uint16_t *bytesRead)
 {
+  (void)port;
+  (void)data;
+  (void)length;
+  (void)bytesRead;
+
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+  const sl_iostream_instance_info_t * info;
+  info = sli_legacy_hal_get_iostream_info(port);
+
+  if (info == NULL || info->handle == NULL) {
+    return EMBER_ERR_FATAL;
+  }
+
   uint16_t bytesReadInternal = 0;
-  EmberStatus status;
+  sl_status_t status;
 
   while (bytesReadInternal < length) {
-    status = emberSerialReadByte(port, data);
+    status = sl_iostream_getchar(info->handle, (char *)data);
     switch (status) {
-      case EMBER_SUCCESS:
+      case SL_STATUS_OK:
         ++data;
         ++bytesReadInternal;
         break;
 
-      case EMBER_SERIAL_RX_EMPTY:
+      case SL_STATUS_EMPTY:
         // empty queue is not an error for us, we just want to keep waiting
         break;
 
@@ -565,7 +589,7 @@ EmberStatus emberSerialReadData(uint8_t port, uint8_t *data, uint16_t length, ui
         if (bytesRead) {
           *bytesRead = bytesReadInternal;
         }
-        return status;
+        return EMBER_ERR_FATAL;
     }
   }
 
@@ -574,10 +598,40 @@ EmberStatus emberSerialReadData(uint8_t port, uint8_t *data, uint16_t length, ui
     *bytesRead = bytesReadInternal;
   }
   return EMBER_SUCCESS;
+#else // !SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+  return EMBER_ERR_FATAL;
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
 }
 
-EmberStatus emberSerialGuaranteedPrintf(uint8_t port, const char * formatString, ...)
+EmberStatus emberSerialWriteByte(uint8_t port, uint8_t dataByte)
 {
+  (void)port;
+  (void)dataByte;
+
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+  const sl_iostream_instance_info_t * info;
+  info = sli_legacy_hal_get_iostream_info(port);
+
+  if (info != NULL && info->handle != NULL) {
+    sl_status_t status = sl_iostream_putchar(info->handle, (char)dataByte);
+
+    if (status == SL_STATUS_OK) {
+      return EMBER_SUCCESS;
+    }
+  }
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+  return EMBER_ERR_FATAL;
+}
+
+EmberStatus emberSerialGuaranteedPrintf(uint8_t port,
+                                        const char * formatString, ...)
+{
+  (void)port;
+  (void)formatString;
+
+#ifdef SL_CATALOG_LEGACY_PRINTF_PRESENT
   EmberStatus status;
   va_list ap;
   va_start(ap, formatString);
@@ -585,4 +639,214 @@ EmberStatus emberSerialGuaranteedPrintf(uint8_t port, const char * formatString,
   va_end(ap);
   printf("\n");
   return status;
+#else // !SL_CATALOG_LEGACY_PRINTF_PRESENT
+
+  return EMBER_ERR_FATAL;
+#endif // SL_CATALOG_LEGACY_PRINTF_PRESENT
 }
+
+bool halInternalUartXonRefreshDone(uint8_t port)
+{
+  (void)port;
+
+  // SL_IOSTREAM does not currently support software flow control
+  return true;
+}
+
+bool halInternalUartTxIsIdle(uint8_t port)
+{
+  (void)port;
+
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+  const sl_iostream_instance_info_t * info;
+  info = sli_legacy_hal_get_iostream_info(port);
+
+  assert(info != NULL
+         && info->type == SL_IOSTREAM_TYPE_UART
+         && info->handle != NULL
+         && info->handle->context != NULL);
+
+  sl_iostream_usart_context_t * context = info->handle->context;
+  uint32_t status = context->usart->STATUS;
+
+  return ((status & _USART_STATUS_TXIDLE_MASK) == _USART_STATUS_TXIDLE_MASK
+          && (status & _USART_STATUS_TXBUFCNT_MASK) == 0);
+#else // !SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+  return true;
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+}
+
+bool halInternalUartFlowControlRxIsEnabled(uint8_t port)
+{
+  (void)port;
+
+#ifdef SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+  const sl_iostream_instance_info_t * info;
+  info = sli_legacy_hal_get_iostream_info(port);
+
+  assert(info != NULL
+         && info->type == SL_IOSTREAM_TYPE_UART
+         && info->handle != NULL
+         && info->handle->context != NULL);
+
+  sl_iostream_usart_context_t * context = info->handle->context;
+  uint32_t status = context->usart->STATUS;
+
+  return ((status & _USART_STATUS_RXFULL_MASK) == 0);
+#else // !SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
+  return true;
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+}
+
+void halInternalSetCtune(uint16_t tune)
+{
+  #if defined(_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK) // series 1
+  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFRCO);
+
+  CMU_OscillatorEnable(cmuOsc_HFXO, false, false);
+  CMU->HFXOSTEADYSTATECTRL &= ~_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK;
+  CMU->HFXOSTEADYSTATECTRL |= (tune << _CMU_HFXOSTEADYSTATECTRL_CTUNE_SHIFT)
+                              & _CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK;
+  CMU_OscillatorEnable(cmuOsc_HFXO, true, true);
+
+  CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
+
+  #elif defined(_HFXO_XTALCTRL_CTUNEXIANA_MASK) // series 2
+  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_FSRCO);
+
+  // clear FORCEEN bit and set DISONDEMAND bit to enable writing of ctune values
+  HFXO0->CTRL &= ~_HFXO_CTRL_FORCEEN_MASK;
+  HFXO0->CTRL |= _HFXO_CTRL_DISONDEMAND_MASK;
+
+  // FSMLOCK only on series 2 config 1 and 2
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
+  // wait until FSMLOCK becomes 0
+  while ((HFXO0->STATUS & _HFXO_STATUS_FSMLOCK_MASK) == HFXO_STATUS_FSMLOCK) {
+  }
+  #endif
+
+  // check that the HFXO is off
+  if ((HFXO0->STATUS & _HFXO_STATUS_ENS_MASK) != HFXO_STATUS_ENS) {
+    HFXO0->XTALCTRL &= ~_HFXO_XTALCTRL_CTUNEXIANA_MASK;
+    HFXO0->XTALCTRL |= (tune << _HFXO_XTALCTRL_CTUNEXIANA_SHIFT)
+                       & _HFXO_XTALCTRL_CTUNEXIANA_MASK;
+    HFXO0->XTALCTRL &= ~_HFXO_XTALCTRL_CTUNEXOANA_MASK;
+    HFXO0->XTALCTRL |= (tune << _HFXO_XTALCTRL_CTUNEXOANA_SHIFT)
+                       & _HFXO_XTALCTRL_CTUNEXOANA_MASK;
+  }
+
+  // clear DISONDEMAND and set FORCEEN to reenable HFXO
+  HFXO0->CTRL &= ~_HFXO_CTRL_DISONDEMAND_MASK;
+  HFXO0->CTRL |= _HFXO_CTRL_FORCEEN_MASK;
+
+  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFXO);
+
+  #endif // _CMU_HFXOSTARTUPCTRL_CTUNE_MASK
+}
+
+uint16_t halInternalGetCtune(void)
+{
+  #if defined(_CMU_HFXOSTARTUPCTRL_CTUNE_MASK) // series 1
+  return (CMU->HFXOSTEADYSTATECTRL & _CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK)
+         >> _CMU_HFXOSTEADYSTATECTRL_CTUNE_SHIFT;
+  #elif defined(_HFXO_XTALCTRL_CTUNEXIANA_MASK) // series 2
+  return (HFXO0->XTALCTRL & _HFXO_XTALCTRL_CTUNEXIANA_MASK)
+         >> _HFXO_XTALCTRL_CTUNEXIANA_SHIFT;
+  #else //!_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK
+  return 0U;
+  #endif //_CMU_HFXOSTEADYSTATECTRL_CTUNE_MASK
+}
+
+#if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
+  #define BUTTON_COUNT (SL_SIMPLE_BUTTON_COUNT)
+#else
+  #define BUTTON_COUNT (0U)
+#endif
+
+// Make sure our data type is large enough to handle all buttons
+#if BUTTON_COUNT > 256U
+  #error Legacy HAL can not accomodate more than 256 buttons!
+#endif
+
+void halInternalInitButton(void)
+{
+  #if defined(SL_CATALOG_SIMPLE_BUTTON_PRESENT)
+  sl_simple_button_init_instances();
+  #endif
+}
+
+uint8_t halButtonState(uint8_t button)
+{
+  #if BUTTON_COUNT > 0
+  assert(button < BUTTON_COUNT);
+  const sl_button_t * ptr = SL_SIMPLE_BUTTON_INSTANCE(button);
+  sl_button_state_t state = sl_button_get_state(ptr);
+  assert(state != (sl_button_state_t)BUTTON_ERROR
+         && state != SL_SIMPLE_BUTTON_DISABLED);
+
+  return (state == SL_SIMPLE_BUTTON_PRESSED) ? BUTTON_PRESSED : BUTTON_RELEASED;
+  #else
+  (void)button;
+  assert(false);
+  // The assert above should prevent us from getting here, but this return
+  // prevents warnings or errors from compilers and static analyzers.
+  return (0U);
+  #endif
+}
+
+uint8_t halButtonPinState(uint8_t button)
+{
+  #if BUTTON_COUNT > 0
+  assert(button < BUTTON_COUNT);
+  assert(SL_SIMPLE_BUTTON_INSTANCE(button) != NULL);
+  sl_simple_button_context_t * context = SL_SIMPLE_BUTTON_INSTANCE(button)->context;
+  assert(context != NULL);
+  GPIO_Port_TypeDef port = SL_SIMPLE_BUTTON_GET_PORT(context);
+  uint8_t pin = SL_SIMPLE_BUTTON_GET_PIN(context);
+  uint8_t state = (uint8_t)GPIO_PinInGet(port, pin);
+  return (state == SL_SIMPLE_BUTTON_POLARITY) ? BUTTON_PRESSED : BUTTON_RELEASED;
+  #else
+  (void)button;
+  assert(false);
+  // The assert above should prevent us from getting here, but this return
+  // prevents warnings or errors from compilers and static analyzers.
+  return (0U);
+  #endif
+}
+
+#if (BUTTON_COUNT > 0) && LEGACY_HAL_TRANSLATE_BUTTON_INTERRUPT
+
+SL_WEAK void sl_button_on_change(const sl_button_t *handle)
+{
+  sl_button_state_t sl_state = sl_button_get_state(handle);
+
+  assert(sl_state != (sl_button_state_t)BUTTON_ERROR
+         && sl_state != SL_SIMPLE_BUTTON_DISABLED);
+
+  uint8_t em_state = (sl_state == SL_SIMPLE_BUTTON_PRESSED)
+                     ? BUTTON_PRESSED
+                     : BUTTON_RELEASED;
+
+  int button;
+
+  for (button = 0; button < BUTTON_COUNT; button++) {
+    if (handle == SL_SIMPLE_BUTTON_INSTANCE(button)) {
+      halButtonIsr(button, em_state);
+      break;
+    }
+  }
+
+  assert(button < BUTTON_COUNT);
+}
+
+SL_WEAK void halButtonIsr(uint8_t button, uint8_t state)
+{
+  // Weak stub implementation that can be overridden by the application
+  // Will only be called for changes in buttons configured for interrupt mode
+  (void) button;
+  (void) state;
+}
+
+#endif // SL_CATALOG_SIMPLE_BUTTON_PRESENT + LEGACY_HAL_TRANSLATE_BUTTON_INTERRUPT

@@ -56,8 +56,9 @@ static void wfx_interrupt(uint8_t intNo)
   RTOS_ERR err;
 
   (void)intNo;
-
-  OSSemPost(&wfx_wakeup_sem, OS_OPT_POST_ALL, &err);
+  if (wfx_wakeup_sem.Type == OS_OBJ_TYPE_SEM ) {
+    OSSemPost(&wfx_wakeup_sem, OS_OPT_POST_ALL, &err);
+  }
 #ifdef SL_CATALOG_WFX_BUS_SPI_PRESENT
   OSFlagPost(&bus_events, SL_WFX_BUS_EVENT_FLAG_RX, OS_OPT_POST_FLAG_SET, &err);
 #endif

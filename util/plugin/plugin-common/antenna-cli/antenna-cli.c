@@ -91,7 +91,7 @@ void emberAfPluginAntennaGetAntennaRxMode(void)
 #ifdef EZSP_HOST
   uint8_t valueLength = sizeof(antennaMode);
 
-  ezspGetValue(EZSP_VALUE_ANTENNA_MODE, &valueLength, &antennaMode);
+  ezspGetValue(EZSP_VALUE_ANTENNA_RX_MODE, &valueLength, &antennaMode);
 #elif !defined(EMBER_STACK_IP) //!EZSP_HOST
   antennaMode = (uint8_t)halGetAntennaRxMode();
 #endif //EZSP_HOST

@@ -28,6 +28,10 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: simple_led
     instance:
     - led0
@@ -36,9 +40,15 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4201C"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
 - tag:
   - board:pn:BRD4201
   - board:variant:C

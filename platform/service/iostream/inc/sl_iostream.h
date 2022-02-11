@@ -44,16 +44,17 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup iostream IO Stream
- * @brief IO Stream
+ * @addtogroup iostream I/O Stream
+ * @brief I/O Stream can be used to read/write different formats of data to various streams.
+ *        The source files for I/O Stream platform software module are present under platform/services/iostream.
  * @details
  * ## Overview
  *
- *   IO Stream is a platform module software that provides Input/Output functionalities
+ *   I/O Stream is a platform module software that provides Input/Output functionalities
  *   by creating streams. Streams are abstractions allowing a uniform way to read/write
  *   data regardless of the physical communication interface.
  *
- *   IO Stream offers many interfaces, see submodules for a list of all types available
+ *   I/O Stream offers many interfaces, see submodules for a list of all types available
  *   and their specificities.You can load multiple streams in the project and you can
  *   select the interface that must be used at runtime.Some interface type can also
  *   be instantiated, meaning that you can have multiple instances of an interface
@@ -61,8 +62,8 @@ extern "C" {
  *
  * ## Initialization
  *
- *   The IO Stream core doesn't require any initialization. Instead each stream type has
- *   their own initialization and their own configuration. See IO Stream specific type
+ *   The I/O Stream core doesn't require any initialization. Instead each stream type has
+ *   their own initialization and their own configuration. See I/O Stream specific type
  *   to know more about how to initialize a stream.
  *
  *   Note that most stream will set itself as the default stream during their initialization.
@@ -87,9 +88,9 @@ extern "C" {
  *
  * ## Printf
  *
- *   IO Stream provides third-party printf integrations. It can work with toolchain implementation
+ *   I/O Stream provides third-party printf integrations. It can work with toolchain implementation
  *   or with the tiny printf implementation for embedded system. The printf API doesn't have an
- *   argument for specifying the stream to be used, so IO Stream provides a printf API that takes
+ *   argument for specifying the stream to be used, so I/O Stream provides a printf API that takes
  *   a stream as an argument and calls the configured third-party implementation of printf.
  *
  * @{
@@ -122,7 +123,7 @@ SL_ENUM(sl_iostream_type_t){
   SL_IOSTREAM_TYPE_UNDEFINED = 6,        ///< Undefined Instance Type
 };
 
-/// @brief Struct representing an IO Stream instance.
+/// @brief Struct representing an I/O Stream instance.
 typedef struct {
   sl_iostream_t *handle;        ///< iostream instance handle.
   char *name;                   ///< iostream instance name.
@@ -140,16 +141,16 @@ extern sl_iostream_t sl_iostream_null;
 // Prototypes
 
 /***************************************************************************//**
- * Set the stream as default IO Stream.
+ * Set the stream as default I/O Stream.
  *
- * @param[in] stream   IO Stream to set as default.
+ * @param[in] stream   I/O Stream to set as default.
  *
  * @return  Status result
  ******************************************************************************/
 sl_status_t sl_iostream_set_default(sl_iostream_t *stream);
 
 /***************************************************************************//**
- * Get the default IO Stream configured.
+ * Get the default I/O Stream configured.
  *
  * @return  Status result
  ******************************************************************************/
@@ -158,7 +159,7 @@ sl_iostream_t *sl_iostream_get_default(void);
 /***************************************************************************//**
  * Configure the systemwide default stream.
  *
- * @param[in] stream  IO Stream to be used.
+ * @param[in] stream  I/O Stream to be used.
  *
  * @return  Status result
  ******************************************************************************/
@@ -171,7 +172,7 @@ sl_status_t sl_iostream_set_system_default(sl_iostream_t *stream);
 /***************************************************************************//**
  * Output data on a stream.
  *
- * @param[in] stream          IO Stream to be used.
+ * @param[in] stream          I/O Stream to be used.
  *                              SL_IOSTREAM_STDOUT;           Default output stream will be used.
  *                              Pointer to specific stream;   Specific stream will be used.
  *
@@ -188,7 +189,7 @@ sl_status_t sl_iostream_write(sl_iostream_t *stream,
 /***************************************************************************//**
  * Get data from a stream.
  *
- * @param[in]  stream          IO Stream to be used.
+ * @param[in]  stream          I/O Stream to be used.
  *                               SL_IOSTREAM_STDOUT;           Default output stream will be used.
  *                               Pointer to specific stream;   Specific stream will be used.
  *
@@ -208,7 +209,7 @@ sl_status_t sl_iostream_read(sl_iostream_t *stream,
 /***************************************************************************//**
  * Print a character on stream.
  *
- * @param[in] stream  IO Stream to be used:
+ * @param[in] stream  I/O Stream to be used:
  *                      SL_IOSTREAM_STDOUT;           Default output stream will be used.
  *                      SL_IOSTREAM_STDERR;           Default error output stream will be used.
  *                      Pointer to specific stream;   Specific stream will be used.
@@ -223,7 +224,7 @@ sl_status_t sl_iostream_putchar(sl_iostream_t *stream,
 /***************************************************************************//**
  * Print a character on stream.
  *
- * @param[in] stream  IO Stream to be used.
+ * @param[in] stream  I/O Stream to be used.
  *                      SL_IOSTREAM_STDIN;            Default input stream will be used.
  *                      Pointer to specific stream;   Specific stream will be used.
  *
@@ -237,7 +238,7 @@ sl_status_t sl_iostream_getchar(sl_iostream_t *stream,
 /***************************************************************************//**
  * Print a formated string on stream.
  *
- * @param[in] stream  IO Stream to be used:
+ * @param[in] stream  I/O Stream to be used:
  *                      SL_IOSTREAM_STDOUT;           Default output stream will be used.
  *                      SL_IOSTREAM_STDERR;           Default error output stream will be used.
  *                      Pointer to specific stream;   Specific stream will be used.

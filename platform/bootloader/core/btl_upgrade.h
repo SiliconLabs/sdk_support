@@ -3,7 +3,7 @@
  * @brief Bootloader upgrade functionality for the Silicon Labs bootloader
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 /**
- * Check if a bootloader upgrade is available.
+ * Check whether a bootloader upgrade is available.
  *
  * @return True if an upgrade image is in the upgrade location
  */

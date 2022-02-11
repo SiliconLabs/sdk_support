@@ -19,6 +19,11 @@
 - recommends:
   - id: brd4001a
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4505B"'
+  - name: SL_BOARD_REV
+    value: '"A01"'
 - tag:
   - board:pn:BRD4505
   - board:variant:B

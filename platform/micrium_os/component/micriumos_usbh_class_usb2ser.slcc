@@ -1,9 +1,9 @@
 id: micriumos_usbh_class_usb2ser
-label: USB Host Class - USB-to-Serial
+label: Micrium-USB Host Class - USB-to-Serial
 package: micrium-usbh
 description: Micrium OS USB Host USB-to-Serial Class
-category: Services|USB|Host
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 source:
   - path: platform/micrium_os/usb/source/host/class/usbh_usb2ser.c
 include:

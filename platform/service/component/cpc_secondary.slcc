@@ -20,8 +20,9 @@ requires:
   - name: cpc_secondary_driver
   - name: bootloader_interface
   - name: emlib_rmu
+  - name: gsdk_version
 validation_helper:
-  - path: cpc_configuration_validation.py
+  - path: cpc_configuration_validation.lua
 template_contribution:
   - name: component_catalog
     value: cpc_secondary

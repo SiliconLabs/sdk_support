@@ -28,6 +28,10 @@
  *
  ******************************************************************************/
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct BerStatus{
   uint32_t bytesTotal; /**< Number of bytes to receive */
   uint32_t bytesTested; /**< Number of bytes currently tested */
@@ -54,3 +58,7 @@ void configRxLengthSetting(uint16_t rxLength);
 
 void loadTxData(uint8_t *data, uint16_t dataLen);
 void setNextPacketTime(RAIL_ScheduleTxConfig_t *scheduledTxOptions);
+
+#ifdef __cplusplus
+}
+#endif

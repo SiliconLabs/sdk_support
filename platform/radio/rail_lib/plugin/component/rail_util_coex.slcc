@@ -17,6 +17,15 @@ requires:
   - name: rail_util_coex_cli
     condition:
       - cli
+      - ot_stack
+  - name: rail_util_coex_cli
+    condition:
+      - cli
+      - rail_test_core
+  - name: rail_util_coex_cli
+    condition:
+      - cli
+      - zigbee_pro_stack_support
   - name: rail_util_ieee802154_stack_event
     condition:
       - ot_stack
@@ -40,10 +49,13 @@ config_file:
   - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg1x/sl_rail_util_coex_config.h
     condition:
       - device_series_1
+    file_id: rail_util_coex_config
   - path: platform/radio/rail_lib/plugin/coexistence/config/efr32xg2x/sl_rail_util_coex_config.h
     condition:
       - device_series_2
+    file_id: rail_util_coex_config
   - path: platform/radio/rail_lib/plugin/coexistence/config/sl_rail_util_coex_common_config.h
+    file_id: rail_util_coex_common_config
 include:
   - path: platform/radio/rail_lib/plugin
   - path: platform/radio/rail_lib/plugin/coexistence/common
@@ -57,7 +69,7 @@ include:
       - path: coexistence-ble.h
       - path: coexistence-ble-ll.h
     condition:
-      - bluetooth_stack
+      - bluetooth_controller
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
     file_list:
       - path: coexistence-802154.h
@@ -66,6 +78,11 @@ include:
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc
     file_list:
       - path: coexistence-802154.h
+    condition:
+      - zigbee_pro_stack_support
+  - path: protocol/zigbee/stack/include/
+    file_list:
+      - path: ember-types.h
     condition:
       - zigbee_pro_stack_support
 source:
@@ -75,16 +92,21 @@ source:
   - path: platform/radio/rail_lib/plugin/coexistence/hal/efr32/coexistence-hal.c
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble.c
     condition:
-      - bluetooth_stack
+      - bluetooth_controller
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ble/coexistence-ble-counters.c
     condition:
-      - bluetooth_stack
+      - bluetooth_controller
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
     condition:
       - ot_stack
   - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/coexistence-802154.c
     condition:
       - zigbee_pro_stack_support
+  - path: platform/radio/rail_lib/plugin/coexistence/protocol/ieee802154_uc/sl_zigbee_coexistence_cb.c
+    condition:
+      - zigbee_pro_stack_support
+template_file:
+  - path: platform/radio/rail_lib/plugin/coexistence/common/coexistence_event.c.jinja
 template_contribution:
   - name: event_handler
     value:
@@ -94,6 +116,36 @@ template_contribution:
     priority: -9010
     condition:
       - zigbee_pro_stack_support
+  - name: rail_util_coex_callbacks
+    value:
+      handler: sli_bt_coex_radio_callback
+      event_filter: sli_bt_coex_event_filter
+    priority: -9010
+    condition:
+      - bluetooth_controller
+  - name: rail_util_coex_callbacks
+    value:
+      include: "coexistence-802154.h"
+      handler: sli_rail_util_ieee802154_coex_on_event
+      event_filter: sli_rail_util_ieee802154_coex_event_filter
+    priority: -9010
+    condition:
+      - ot_stack
+  - name: rail_util_coex_callbacks
+    value:
+      include: "coexistence-802154.h"
+      handler: sli_rail_util_ieee802154_coex_on_event
+      event_filter: sli_rail_util_ieee802154_coex_event_filter
+    priority: -9010
+    condition:
+      - zigbee_pro_stack_support      
+  - name: rail_util_coex_callbacks
+    value:
+      include: "coexistence-802154.h"
+      handler: sli_rail_util_ieee802154_coex_on_event
+      event_filter: sli_rail_util_ieee802154_coex_event_filter
+    condition:
+      - zigbee_pro_stack_support            
   - name: rail_util_ieee802154_callbacks
     value:
       include: coexistence-802154.h

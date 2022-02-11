@@ -26,8 +26,8 @@ extern "C" {
 #endif
 
 /***************************************************************************//**
- * @addtogroup led LED API
- * @brief Generic LED API
+ * @addtogroup led LED Driver
+ * @brief Generic LED Driver
  * @{
  ******************************************************************************/
 

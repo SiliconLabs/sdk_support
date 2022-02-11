@@ -37,6 +37,10 @@
 #include "em_core.h"
 #include "em_gpio.h" // For debug signal definitions
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /******************************************************************************
  * Typedefs
  *****************************************************************************/
@@ -126,6 +130,7 @@ void halEnablePrs(uint8_t channel,
 void halDisablePrs(uint8_t channel);
 
 void halCommonMemMove(void *dest, const void *src, uint16_t bytes);
+
 #define MEMCOPY(d, s, l) halCommonMemMove(d, s, l)
 
 /**
@@ -144,5 +149,9 @@ void halCommonMemMove(void *dest, const void *src, uint16_t bytes);
  * macro.  Something which is atomic cannot be interrupted by interrupts.
  */
 #define ATOMIC(blah)          CORE_ATOMIC_SECTION(blah)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __RAILTEST_HAL_H__

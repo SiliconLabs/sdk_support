@@ -48,6 +48,11 @@
       file_id: device_init_lfxo_config
     path: brd2600a/sl_device_init_lfxo_config.h
   - override:
+      component: i2cspm
+      file_id: i2cspm_config
+      instance: sensor
+    path: brd2600a/sl_i2cspm_sensor_config.h
+  - override:
       component: iostream_eusart
       file_id: iostream_eusart_config
       instance: vcom
@@ -57,6 +62,31 @@
       file_id: iostream_usart_config
       instance: vcom
     path: brd2600a/sl_iostream_usart_vcom_config.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: brd2600a/iot_flash_cfg_msc.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: sensor
+    path: brd2600a/iot_i2c_cfg_sensor.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
+      instance: led0
+    path: brd2600a/iot_pwm_cfg_led0.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: vcom
+    path: brd2600a/iot_uart_cfg_vcom.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: loopback
+    path: brd2600a/iot_uart_cfg_loopback.h
   - override:
       component: pwm
       file_id: pwm_config
@@ -95,23 +125,3 @@
       file_id: uartdrv_usart_config
       instance: vcom
     path: brd2600a/sl_uartdrv_usart_vcom_config.h
-  - override:
-      component: iot_flash
-      file_id: iot_flash_cfg
-      instance: msc
-    path: brd2600a/iot_flash_cfg_msc.h
-  - override:
-      component: iot_pwm
-      file_id: iot_pwm_cfg
-      instance: led0
-    path: brd2600a/iot_pwm_cfg_led0.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: vcom
-    path: brd2600a/iot_uart_cfg_vcom.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: loopback
-    path: brd2600a/iot_uart_cfg_loopback.h

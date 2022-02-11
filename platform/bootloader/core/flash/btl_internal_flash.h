@@ -3,7 +3,7 @@
  * @brief Abstraction of internal flash read and write routines.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -45,7 +45,7 @@ MISRAC_ENABLE
 // Prototypes
 
 /**
- * Erase a flash page
+ * Erase a flash page.
  *
  * @param[in] address Start address of the flash page to erase.
  * @return True if operation was successful
@@ -53,7 +53,7 @@ MISRAC_ENABLE
 bool flash_erasePage(uint32_t address);
 
 /**
- * Write buffer to internal flash
+ * Write buffer to internal flash.
  *
  * @param address   Starting address to write data to. Must be half-word aligned.
  * @param data      Data buffer to write to internal flash
@@ -67,7 +67,7 @@ bool flash_writeBuffer_dma(uint32_t       address,
                            int            ch);
 
 /**
- * Write buffer to internal flash
+ * Write buffer to internal flash.
  *
  * @param address   Starting address to write data to. Must be half-word aligned.
  * @param data      Data buffer to write to internal flash

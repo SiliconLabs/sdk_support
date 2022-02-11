@@ -76,6 +76,85 @@ extern "C" {
  */
 void RAIL_GetVersion(RAIL_Version_t *version, bool verbose);
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * A global pointer to the head of a linked list of state buffers
+ * \ref RAIL_Init() can utilize.
+ *
+ * RAIL internally provides one statically allocated RAM state buffer
+ * for single protocol, and two for dynamic multiprotocol. If your
+ * application needs more, they can be provided via \ref
+ * RAIL_AddStateBuffer3() or RAIL_AddStateBuffer4() which use
+ * internal buffers, or the more general \ref RAIL_AddStateBuffer().
+ *
+ * This symbol is WEAK in the RAIL library in case an application wants
+ * to allocate and provide its own buffers, but such use is highly
+ * discouraged.
+ */
+extern RAIL_StateBufferEntry_t *RAIL_StateBufferHead;
+
+/**
+ * Get the run-time size of the radio's state buffer.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Size, in bytes, of the radio's internal state buffer.
+ *   If the handle is invalid, 0 is returned.
+ *
+ * See \ref RAIL_STATE_BUFFER_BYTES for a compile-time estimated size
+ * definition, which may be larger than what this function returns.
+ */
+uint32_t RAIL_GetStateBufferSize(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Add an app-provided state buffer to the \ref RAIL_StateBufferHead list.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @param[in] newEntry pointer to a \ref RAIL_StateBufferEntry_t to
+ *   add to the liked list of state buffers headed by
+ *   \ref RAIL_StateBufferHead. Both the \ref RAIL_StateBufferEntry_t
+ *   to which this parameter points and the \ref
+ *   RAIL_StateBufferEntry_t::buffer to which that points must be
+ *   allocated in RAM and persist indefinitely beyond this call.
+ * @return Status code indicating success of the function call.
+ *   An error should be returned if the entry's
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes is too small or
+ *   the RAIL_StateBufferEntry_t::buffer pointer seems invalid.
+ *
+ * RAIL's internal \ref RAIL_StateBufferHead should prove
+ * sufficient for most applications, providing one (single protocol)
+ * or two (dynamic multiprotocol) buffers preallocated in RAM for
+ * use by \ref RAIL_Init(). This function exists for dynamic
+ * multiprotocol applications that needs more than two protocols, or
+ * that prefer to dynamically allocate RAIL state buffers just prior
+ * to calling \ref RAIL_Init() rather than having them statically
+ * allocated in RAM.
+ */
+RAIL_Status_t RAIL_AddStateBuffer(RAIL_Handle_t genericRailHandle,
+                                  RAIL_StateBufferEntry_t *newEntry);
+
+#endif//DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Add a 3rd multiprotocol internal state buffer for use by \ref RAIL_Init().
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *   An error is returned if the 3rd state buffer was previously added
+ *   or this isn't the RAIL multiprotocol library.
+ */
+RAIL_Status_t RAIL_AddStateBuffer3(RAIL_Handle_t genericRailHandle);
+
+/**
+ * Add a 4th multiprotocol internal state buffer for use by \ref RAIL_Init().
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Status code indicating success of the function call.
+ *   An error is returned if the 4th state buffer was previously added.
+ *   or this isn't the RAIL multiprotocol library.
+ */
+RAIL_Status_t RAIL_AddStateBuffer4(RAIL_Handle_t genericRailHandle);
+
 /**
  * Allocate a DMA channel for RAIL to work with.
  *
@@ -1559,8 +1638,16 @@ RAIL_Status_t RAIL_ConfigEvents(RAIL_Handle_t railHandle,
  * (unless configured to ignore CRC errors via the
  * \ref RAIL_RX_OPTION_IGNORE_CRC_ERRORS RX option). The application will
  * never have to deal with packet data from these packets.
- *
  * In either mode, the application can set RX options as needed.
+ *
+ * When \ref RAIL_DataConfig_t::rxSource is set to a value other than
+ * \ref RX_PACKET_DATA and \ref RAIL_Config_t::eventsCallback
+ * \ref RAIL_EVENT_RX_FIFO_OVERFLOW is enabled RX will be terminated
+ * if a RX FIFO overflow occurs.  If \ref RAIL_EVENT_RX_FIFO_OVERFLOW
+ * is not enabled, data will be discarded until the overflow condition
+ * is resolved.  To continue capturing data RX must be restarted using
+ * \ref RAIL_StartRx().
+ *
  */
 RAIL_Status_t RAIL_ConfigData(RAIL_Handle_t railHandle,
                               const RAIL_DataConfig_t *dataConfig);
@@ -1611,7 +1698,7 @@ uint16_t RAIL_WriteTxFifo(RAIL_Handle_t railHandle,
  *   this function.
  * @param[in] initLength A number of initial bytes already in the transmit FIFO.
  * @param[in] size A desired size of the transmit FIFO in bytes.
- * @return Returns the FIFO size in bytes.
+ * @return Returns the FIFO size in bytes, 0 if an error occurs.
  *
  * This function sets the memory location for the transmit FIFO. It
  * must be called at least once before any transmit operations occur.
@@ -1966,6 +2053,10 @@ RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
  * repetition completes successfully, then the TX success transition from
  * \ref RAIL_SetTxTransitions will be used.
  *
+ * Use \ref RAIL_GetTxPacketsRemaining() if need to know how many transmit
+ * completion events are expected before the repeating sequence is done, or
+ * how many were not performed due to a transmit error.
+ *
  * Any call to \ref RAIL_Idle or \ref RAIL_StopTx will clear the pending
  * repeated transmits. The state will also be cleared by another call to this
  * function. To clear the repeated transmits before they've started without
@@ -1983,6 +2074,8 @@ RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
  * Consider using \ref RAIL_TX_OPTION_RESEND if the same packet data is to
  * be repeated: then the Transmit FIFO only needs to be set/written once.
  *
+ * Do not call this function after starting a transmit operation or before
+ * processing the final transmit completion event of a prior transmit.
  * This function will fail to configure the repetition if a transmit of any
  * kind is ongoing, including during the time between an initial transmit and
  * the end of a previously-configured repetition.
@@ -1994,6 +2087,34 @@ RAIL_Status_t RAIL_GetTxTransitions(RAIL_Handle_t railHandle,
  */
 RAIL_Status_t RAIL_SetNextTxRepeat(RAIL_Handle_t railHandle,
                                    const RAIL_TxRepeatConfig_t *repeatConfig);
+
+/**
+ * Get the number of transmits remaining in a repeat operation.
+ * Must only be called from within event callback context when handling
+ * one of the \ref RAIL_EVENTS_TX_COMPLETION events.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return transmits remaining as described below.
+ *
+ * If the TX completion event is \ref RAIL_EVENT_TX_PACKET_SENT the
+ * returned value indicates how many more such events are expected
+ * before the repeat transmit operation is done. Due to interrupt
+ * latency and timing, this may be an overcount if greater than 0
+ * but is guaranteed to be accurate when 0.
+ *
+ * If the TX completion event is an error, the returned value indicates
+ * the number of requested transmits that were not performed. For
+ * \ref RAIL_EVENT_TX_ABORTED and \ref RAIL_EVENT_TX_UNDERFLOW the
+ * count does not include the failing transmit itself. For the other
+ * errors where a transmit never started or was blocked, the count
+ * would include the failing transmit, which may be one higher than
+ * the configured \ref RAIL_TxRepeatConfig_t::iterations if it was
+ * the original transmit that was blocked.
+ *
+ * If an infinite repeat was configured, this will return \ref
+ * RAIL_TX_REPEAT_INFINITE_ITERATIONS.
+ */
+uint16_t RAIL_GetTxPacketsRemaining(RAIL_Handle_t railHandle);
 
 /**
  * Configure RAIL automatic state transition timing.
@@ -4883,6 +5004,28 @@ RAIL_Status_t RAIL_ConfigRxDutyCycle(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_EnableRxDutyCycle(RAIL_Handle_t railHandle,
                                      bool enable);
 
+/**
+ * Get the default RX duty cycle configuration.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] config An application-provided non-NULL pointer to store
+ *                   the default RX duty cycle configuration.
+ * @return Status code indicating success of the function call.
+ * Note that RAIL_STATUS_INVALID_PARAMETER will be returned if the current
+ * channel's radio configuration does not support the requested information.
+ *
+ * To save power during RX, an application may want to go to low power as long as
+ * possible by periodically waking up and trying to
+ * "sense" if there are any incoming packets. This API returns the recommended
+ * RX duty cycle configuration, so the application can enter low power mode
+ * periodically without missing packets. To wake up
+ * earlier, the application can reduce the delay parameter.
+ * Note that these value might be different if any configuration / channel has
+ * changed.
+ **/
+RAIL_Status_t RAIL_GetDefaultRxDutyCycleConfig(RAIL_Handle_t railHandle,
+                                               RAIL_RxDutyCycleConfig_t *config);
+
 /** @} */ // end of group Rx_Channel_Hopping
 
 /******************************************************************************
@@ -4926,6 +5069,27 @@ void RAIL_YieldRadio(RAIL_Handle_t railHandle);
  * \ref RAIL_EVENT_SCHEDULER_STATUS event occurs.
  */
 RAIL_SchedulerStatus_t RAIL_GetSchedulerStatus(RAIL_Handle_t railHandle);
+
+/**
+ * Get the status of the RAIL scheduler, specific to the radio operation,
+ * along with \ref RAIL_Status_t returned by RAIL API invoked by the
+ * RAIL scheduler.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[out] pSchedulerStatus An application-provided pointer to store
+ *   \ref RAIL_SchedulerStatus_t status. Can be NULL as long as
+ *   \ref RAIL_Status_t pointer is not NULL.
+ * @param[out] pRailStatus An application-provided pointer to store
+ *   \ref RAIL_Status_t of the RAIL API invoked by the RAIL scheduler.
+ *   Can be NULL as long as \ref RAIL_SchedulerStatus_t pointer is not NULL.
+ * @return \ref RAIL_Status_t indicating success of the function call.
+ *
+ * This function can only be called from a callback context after the
+ * \ref RAIL_EVENT_SCHEDULER_STATUS event occurs.
+ */
+RAIL_Status_t RAIL_GetSchedulerStatusAlt(RAIL_Handle_t railHandle,
+                                         RAIL_SchedulerStatus_t *pSchedulerStatus,
+                                         RAIL_Status_t *pRailStatus);
 
 /**
  * Change the priority of a specified task type in multiprotocol.
@@ -4976,36 +5140,82 @@ void RAIL_SetTransitionTime(RAIL_Time_t transitionTime);
  * @{
  */
 
-/// Enable or disable direct mode for RAIL.
-///
-/// @param[in] railHandle A RAIL instance handle.
-/// @param[in] enable Whether or not to enable direct mode.
-/// @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
-///
-/// @warning This API configures fixed pins for TX data in, RX data out,
-///   and RX clock out. There should be more control over these pins in the
-///   future but they are currently fixed. Also, this API is not safe to
-///   use in a true multiprotocol app. On EFR32xG23 and later platforms,
-///   it is recommended to reset the RX buffer before calling this API since
-///   the RX buffer has to be 32-bit aligned. If the buffer is <b>not</b>
-///   reset but is 32-bit aligned, capture is performed on the remaining space available.
-///   If the buffer is <b>not</b> reset and is <b>not</b> 32-bit aligned, then
-///   RAIL_EnableDirectMode() returns \ref RAIL_STATUS_INVALID_STATE.
-/// @code{.c}
-/// // Reset RX buffer (EFR32xG23 and later platforms)
-/// RAIL_ResetFifo(railHandle, false, true);
-/// @endcode
-///
-/// In this mode, packets are output and input directly to the radio via GPIO
-/// and RAIL packet handling is ignored. On the EFR32, the DIN pin in TX is
-/// EFR32_PC10, which corresponds to EXP_HEADER15/WSTKP12, and the DOUT pin in
-/// RX is EFR32_PC11, which corresponds to EXP_HEADER16/WSTKP13.
-///
-/// @note This feature is only available on certain chips.
-///   \ref RAIL_SupportsDirectMode() can be used to check if a particular
-///   chip supports this feature or not.
+/**
+ * Configure direct mode for RAIL.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] directModeConfig Configuration structure to specify direct mode
+ *   parameters. Default configuration will be used if NULL is passed.
+ * @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
+ *
+ * This API configures direct mode and should be called before
+ * calling \ref RAIL_EnableDirectMode().  If this function is not called, the
+ * following default configuration will be used: \n
+ * \b EFR32xG1x \n
+ * Sync Rx : false \n
+ * Sync Tx : false \n
+ * TX data in (DIN) : EFR32_PC10 \n
+ * RX data out (DOUT) : EFR32_PC11 \n
+ * TX/RX clk out (DCLK) : EFR32_PC9 \n
+ * \b EFR32xG2x: \n
+ * Sync Rx : false \n
+ * Sync Tx : false \n
+ * TX data in (DIN) : EFR32_PA7 \n
+ * RX data out (DOUT) : EFR32_PA5 \n
+ * TX/RX clk out (DCLK) : EFR32_PA6
+ *
+ * @warning This API is not safe to use in a multiprotocol app.
+ */
+RAIL_Status_t RAIL_ConfigDirectMode(RAIL_Handle_t railHandle,
+                                    const RAIL_DirectModeConfig_t *directModeConfig);
+
+/**
+ *  Enable or disable direct mode for RAIL.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable Whether or not to enable direct mode for TX and RX.
+ * @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
+ * *
+ * See \ref RAIL_EnableDirectModeAlt() for more detailed function
+ * description.
+ *
+ * @warning New applications should consider using RAIL_EnableDirectModeAlt() for
+ *          this functionality.
+ *
+ * @note This feature is only available on certain devices.
+ *   \ref RAIL_SupportsDirectMode() can be used to check if a particular
+ *   device supports this feature or not.
+ *
+ * @warning This API is not safe to use in a true multiprotocol app.
+ */
 RAIL_Status_t RAIL_EnableDirectMode(RAIL_Handle_t railHandle,
                                     bool enable);
+
+/**
+ * Enable or disable direct mode for RAIL.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enableDirectTx Enable direct mode for data being transmitted out
+ *  of the radio.
+ * @param[in] enableDirectRx Enable direct mode for data being received from the
+ *  radio.
+ * @return \ref RAIL_STATUS_NO_ERROR on success and an error code on failure.
+ *
+ * This API enables or disables the modem and GPIOs for direct mode operation.
+ * see /ref RAIL_ConfigDirectMode for information on selecting the
+ * correct hardware configuration.  If direct mode is enabled,
+ * packets are output and input directly to the radio via GPIO
+ * and RAIL packet handling is ignored.
+ *
+ * @note This feature is only available on certain chips.
+ *   \ref RAIL_SupportsDirectMode() can be used to check if a particular
+ *   chip supports this feature or not.
+ *
+ * @warning this API is not safe to use in a true multiprotocol app.
+ */
+RAIL_Status_t RAIL_EnableDirectModeAlt(RAIL_Handle_t railHandle,
+                                       bool enableDirectTx,
+                                       bool enableDirectRx);
 
 /**
  * Get the radio subsystem clock frequency in Hz.
@@ -5089,6 +5299,9 @@ int32_t RAIL_GetTuneDelta(RAIL_Handle_t railHandle);
  * received packet, which includes the current radio frequency offset
  * (see \ref RAIL_SetFreqOffset()). If the chip has not been in RX,
  * it returns the nominal radio frequency offset.
+ *
+ * @note Changing to any non-idle radio state after reception can cause this
+ * value to be overwritten so it is safest to capture during packet reception.
  */
 RAIL_FrequencyOffset_t RAIL_GetRxFreqOffset(RAIL_Handle_t railHandle);
 
@@ -5277,6 +5490,16 @@ uint32_t RAIL_GetDebugMode(RAIL_Handle_t railHandle);
  */
 RAIL_Status_t RAIL_OverrideDebugFrequency(RAIL_Handle_t railHandle,
                                           uint32_t freq);
+
+/**
+ * Get the size of the radio's multiprotocol scheduler state buffer.
+ *
+ * @param[in] genericRailHandle A generic RAIL instance handle.
+ * @return Size, in bytes, of the radio's internal scheduler state buffer.
+ *   Zero is returned if the handle is invalid or this is the singleprotocol
+ *   library.
+ */
+uint32_t RAIL_GetSchedBufferSize(RAIL_Handle_t genericRailHandle);
 
 /** @} */ // end of group Debug
 

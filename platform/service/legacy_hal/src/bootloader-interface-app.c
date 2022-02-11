@@ -53,11 +53,6 @@ static bool bootloaderIsCommonBootloader(void)
 
 #else
 
-static void verifyAppBlVersion(uint16_t version)
-{
-  (void)version;
-}
-
 static bool bootloaderIsCommonBootloader(void)
 {
   return true;
@@ -68,7 +63,7 @@ static bool bootloaderIsCommonBootloader(void)
 static void verifyMainBootloaderVersion(uint32_t version)
 {
   // Assert that the main bootloader table pointer points to main flash or bootloader flash
-  assert(((uint32_t)mainBootloaderTable & 0xFFFF0000U) == 0x0U
+  assert(((uint32_t)mainBootloaderTable & 0xFFFF0000U) == FLASH_MEM_BASE
          || ((uint32_t)mainBootloaderTable & 0xFFFF0000U) == 0x0FE10000U);
   // Assert that the main bootloader table pointer points inside the bootloader
   assert(((uint32_t)mainBootloaderTable & 0x0000FFFFU) < 0x4000U);
@@ -172,8 +167,10 @@ EepromStateType eepromState;
 #if EEPROM_PAGE_SIZE < EBL_MIN_TAG_SIZE
   #error EEPROM_PAGE_SIZE smaller than EBL_MIN_TAG_SIZE
 #endif
+#ifdef _SILICON_LABS_32B_SERIES_1_CONFIG_1
 static uint8_t buff[EEPROM_PAGE_SIZE];
 EblConfigType eblConfig;
+#endif
 
 uint8_t bootloaderValidationContext[BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE];
 

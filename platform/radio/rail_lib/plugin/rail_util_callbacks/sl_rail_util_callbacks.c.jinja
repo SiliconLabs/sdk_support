@@ -31,7 +31,6 @@
  *
  ******************************************************************************/
  
-#include "em_common.h"
 #include "rail.h"
 #include "sl_component_catalog.h"
 #ifdef SL_CATALOG_APP_ASSERT_PRESENT
@@ -39,8 +38,6 @@
 #define APP_ASSERT(expr, ...) app_assert(expr,__VA_ARGS__)
 #else
  #define APP_ASSERT(expr, string ,rail_handle, error_code) \
-  (void)(rail_handle);         \
-  (void)(error_code);          \
   do {                         \
     if (!(expr)) {             \
       while (1) ;              \
@@ -56,10 +53,12 @@
 {%- endfor %}
 
 // Provide weak function called by callback RAILCb_AssertFailed.
-SL_WEAK
+__WEAK
 void sl_rail_util_on_assert_failed(RAIL_Handle_t rail_handle,
                                    RAIL_AssertErrorCodes_t error_code)
 {
+  (void) rail_handle;
+  (void) error_code;
   APP_ASSERT(false,
              "rail_handle: 0x%X, error_code: %d",
              rail_handle,
@@ -82,7 +81,7 @@ void RAILCb_AssertFailed(RAIL_Handle_t rail_handle,
 #endif
 
 // Provide weak function called by callback sli_rail_util_on_rf_ready.
-SL_WEAK
+__WEAK
 void sl_rail_util_on_rf_ready(RAIL_Handle_t rail_handle)
 {
   (void) rail_handle;
@@ -101,7 +100,7 @@ void sli_rail_util_on_rf_ready(RAIL_Handle_t rail_handle)
 
 // Provide weak function called by callback
 // sli_rail_util_on_channel_config_change.
-SL_WEAK
+__WEAK
 void sl_rail_util_on_channel_config_change(RAIL_Handle_t rail_handle,
                                            const RAIL_ChannelConfigEntry_t *entry)
 {
@@ -122,7 +121,7 @@ void sli_rail_util_on_channel_config_change(RAIL_Handle_t rail_handle,
 }
 
 // Provide weak function called by callback sli_rail_util_on_event.
-SL_WEAK
+__WEAK
 void sl_rail_util_on_event(RAIL_Handle_t rail_handle,
                            RAIL_Events_t events)
 {

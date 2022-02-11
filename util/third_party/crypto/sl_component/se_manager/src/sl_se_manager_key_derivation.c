@@ -119,8 +119,14 @@ sl_status_t sl_se_ecdh_compute_shared_secret(sl_se_command_context_t *cmd_ctx,
     }
   }
   #else
-  if ((key_pubkey_size * 2) > key_out->storage.location.buffer.size) {
-    return SL_STATUS_INVALID_PARAMETER;
+  if (key_in_priv->type == SL_SE_KEY_TYPE_ECC_X25519) {
+    if (key_pubkey_size > key_out->storage.location.buffer.size) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
+  } else {
+    if ((key_pubkey_size * 2) > key_out->storage.location.buffer.size) {
+      return SL_STATUS_INVALID_PARAMETER;
+    }
   }
   #endif
 
@@ -1001,14 +1007,14 @@ sl_status_t sl_se_derive_key_hkdf(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
                                     const sl_se_key_descriptor_t *in_key,
-                                    sl_se_hash_type_t hash,
+                                    sl_se_pbkdf2_prf_type_t prf,
                                     const unsigned char *salt,
                                     size_t salt_len,
                                     uint32_t iterations,
                                     sl_se_key_descriptor_t *out_key)
 {
-  uint32_t hash_mask;
   sl_status_t status = SL_STATUS_OK;
+  uint32_t command_word = 0U;
 
   if ((cmd_ctx == NULL) || (in_key == NULL) || (out_key == NULL)) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -1021,26 +1027,39 @@ sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  switch (hash) {
-    case SL_SE_HASH_SHA1:
-      hash_mask = SLI_SE_COMMAND_OPTION_HASH_SHA1;
+  switch (prf) {
+    case SL_SE_PRF_HMAC_SHA1:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC
+                     | SLI_SE_COMMAND_OPTION_HASH_SHA1;
       break;
 
-    case SL_SE_HASH_SHA224:
-      hash_mask = SLI_SE_COMMAND_OPTION_HASH_SHA224;
+    case SL_SE_PRF_HMAC_SHA224:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC
+                     | SLI_SE_COMMAND_OPTION_HASH_SHA224;
       break;
 
-    case SL_SE_HASH_SHA256:
-      hash_mask = SLI_SE_COMMAND_OPTION_HASH_SHA256;
+    case SL_SE_PRF_HMAC_SHA256:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC
+                     | SLI_SE_COMMAND_OPTION_HASH_SHA256;
       break;
 
-    case SL_SE_HASH_SHA384:
-      hash_mask = SLI_SE_COMMAND_OPTION_HASH_SHA384;
+    case SL_SE_PRF_HMAC_SHA384:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC
+                     | SLI_SE_COMMAND_OPTION_HASH_SHA384;
       break;
 
-    case SL_SE_HASH_SHA512:
-      hash_mask = SLI_SE_COMMAND_OPTION_HASH_SHA512;
+    case SL_SE_PRF_HMAC_SHA512:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_HMAC
+                     | SLI_SE_COMMAND_OPTION_HASH_SHA512;
       break;
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG) \
+      && (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3)
+    // PBKDF2 with CMAC as the PRF was first supported on EFR32xG23.
+    case SL_SE_PRF_AES_CMAC_128:
+      command_word = SLI_SE_COMMAND_DERIVE_KEY_PBKDF2_CMAC;
+      break;
+#endif
 
     default:
       return SL_STATUS_INVALID_PARAMETER;
@@ -1049,7 +1068,7 @@ sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
 
   // SE command structures.
   SE_Command_t *se_cmd = &cmd_ctx->command;
-  sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_DERIVE_KEY_PBKDF2 | hash_mask);
+  sli_se_command_init(cmd_ctx, command_word);
 
   sli_add_key_parameters(cmd_ctx, in_key, status);
   SE_addParameter(se_cmd, salt_len);

@@ -108,6 +108,10 @@ STATIC_ASSERT(sizeof(RailAppEvent_t) <= 36,
 #define RAIL_SKIP_CALIBRATIONS_BOOL false
 #endif
 
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+extern void sl_rail_util_ieee801254_on_rail_event(RAIL_Handle_t railHandle, RAIL_Events_t events);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
 // External control and status variables
 Counters_t counters = { 0 };
 bool receiveModeEnabled = false;
@@ -119,6 +123,7 @@ RAIL_RadioState_t rxSuccessTransition = RAIL_RF_STATE_IDLE;
 uint8_t logLevel = PERIPHERAL_ENABLE | ASYNC_RESPONSE;
 int32_t txCount = 0;
 int32_t txRepeatCount = 0;
+int32_t txRemainingCount = 0;
 uint32_t continuousTransferPeriod = SL_RAIL_TEST_CONTINUOUS_TRANSFER_PERIOD;
 bool enableRandomTxDelay = false;
 uint32_t txAfterRxDelay = 0;
@@ -189,8 +194,8 @@ bool printRxFreqOffsetData = false;
 bool printingEnabled = RAIL_PRINTING_DEFAULT_BOOL;
 
 // Names of RAIL_EVENT defines. This should align with rail_types.h
-const char* eventNames[] = RAIL_EVENT_STRINGS;
-uint8_t numRailEvents = COUNTOF(eventNames);
+const char * const eventNames[] = RAIL_EVENT_STRINGS;
+const uint8_t numRailEvents = COUNTOF(eventNames);
 
 // Channel Hopping configuration structures
 #if RAIL_FEAT_CHANNEL_HOPPING
@@ -375,9 +380,23 @@ void sl_rail_test_internal_app_init(void)
 #endif
   SYSTEM_ChipRevision_TypeDef chipRev = { 0, };
   SYSTEM_ChipRevisionGet(&chipRev);
-  responsePrint("system", "Family:%s,Fam#:%u,ChipRev:%u.%u,sdid:%u,Part:0x%08x",
+
+  // SYSTEM_ChipRevision_TypeDef defines either a partNumber field or a family field.
+  // If _SYSCFG_CHIPREV_PARTNUMBER_MASK is defined, there is a partNumber field.
+  // Otherwise, there is a family field.
+  responsePrint("system", "Family:%s,"
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+                "Part#:%u,"
+#else
+                "Fam#:%u,"
+#endif
+                "ChipRev:%u.%u,sdid:%u,Part:0x%08x",
                 FAMILY_NAME,
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+                chipRev.partNumber,
+#else
                 chipRev.family,
+#endif
                 chipRev.major,
                 chipRev.minor,
                 _SILICON_LABS_GECKO_INTERNAL_SDID,
@@ -609,6 +628,7 @@ void sl_rail_util_on_assert_failed(RAIL_Handle_t railHandle, uint32_t errorCode)
                 errorCode,
                 RAIL_AssertLineNumber,
                 errorMessage);
+  serialWaitForTxIdle();
   // Reset the chip since an assert is a fatal error
   NVIC_SystemReset();
 }
@@ -700,6 +720,11 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
       } else {
         // Treat similar to RX_FIFO_ALMOST_FULL: consume RX data
         RAILCb_RxFifoAlmostFull(railHandle);
+        // Since we disable RX after a overflow, go ahead and
+        // turn RX back on to continue collecting data.
+        if (receiveModeEnabled) {
+          RAIL_StartRx(railHandle, channel, NULL);
+        }
       }
     }
     if (events & RAIL_EVENT_RX_ADDRESS_FILTERED) {
@@ -753,11 +778,13 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
       scheduleNextTx();
     }
   }
+#if RAIL_SUPPORTS_MFM
   if (events & RAIL_EVENT_MFM_TX_BUFFER_DONE) {
-    if (RAIL_MFM_IsEnabled(railHandle)) {
+    if (railDataConfig.txSource == TX_MFM_DATA) {
       counters.userTx++;
     }
   }
+#endif
   if (events & RAIL_EVENT_TX_STARTED) {
     counters.userTxStarted++;
     (void) RAIL_GetTxTimePreambleStart(railHandle, RAIL_TX_STARTED_BYTES,
@@ -769,13 +796,18 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   // Process TX success before any failures in case an auto-repeat fails
   if (events & RAIL_EVENT_TX_PACKET_SENT) {
     counters.userTx++;
-    if (txRepeatCount > 0) {
+    txRemainingCount = RAIL_GetTxPacketsRemaining(railHandle);
+    if (txRemainingCount != txRepeatCount) {
+      counters.userTxRemainingErrors++;
+    }
+    if (txRemainingCount > 0) {
       // Defer calling RAILCb_TxPacketSent() to last of auto-repeat transmits
       internalTransmitCounter++;
       if (txRepeatCount != RAIL_TX_REPEAT_INFINITE_ITERATIONS) {
         txRepeatCount--;
       }
     } else {
+      txRepeatCount = 0;
       RAILCb_TxPacketSent(railHandle, false);
     }
   }
@@ -785,6 +817,15 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
                 | RAIL_EVENT_TX_CHANNEL_BUSY
                 | RAIL_EVENT_TX_SCHEDULED_TX_MISSED)) {
     lastTxStatus = events;
+    txRemainingCount = RAIL_GetTxPacketsRemaining(railHandle);
+    if ((txRepeatCount != RAIL_TX_REPEAT_INFINITE_ITERATIONS)
+        && (txRepeatCount > 0)
+        && ((events & (RAIL_EVENT_TX_ABORTED | RAIL_EVENT_TX_UNDERFLOW)) == 0U)) {
+      txRepeatCount++; // A transmit never happened
+    }
+    if (txRemainingCount != txRepeatCount) {
+      counters.userTxRemainingErrors++;
+    }
     txRepeatCount = 0;
     newTxError = true;
     failPackets++;
@@ -831,6 +872,9 @@ void sl_rail_util_on_event(RAIL_Handle_t railHandle, RAIL_Events_t events)
   if (events & RAIL_EVENT_PA_PROTECTION) {
     counters.paProtect++;
   }
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+  sl_rail_util_ieee801254_on_rail_event(railHandle, events);
+#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
 }
 
 volatile bool allowPowerManagerSleep = false;
@@ -862,12 +906,17 @@ void processPendingCalibrations(void)
       RAIL_CalibrateTemp(railHandle);
     }
 
-    // Disable the radio if we have to do IRCAL
     if (pendingCals & RAIL_CAL_ONETIME_IRCAL) {
-      RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
-      RAIL_CalibrateIr(railHandle, NULL);
-      if (receiveModeEnabled) {
-        RAIL_StartRx(railHandle, channel, NULL);
+      RAIL_AntennaSel_t rfPath = RAIL_ANTENNA_AUTO;
+      RAIL_Status_t retVal = RAIL_GetRfPath(railHandle, &rfPath);
+
+      if (retVal == RAIL_STATUS_NO_ERROR) {
+        // Disable the radio if we have to do IRCAL
+        RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
+        RAIL_CalibrateIrAlt(railHandle, NULL, rfPath);
+        if (receiveModeEnabled) {
+          RAIL_StartRx(railHandle, channel, NULL);
+        }
       }
     }
   }
@@ -899,12 +948,34 @@ void printNewTxError(void)
 
   if (newTxError) {
     newTxError = false;
-    if (lastTxStatus & RAIL_EVENT_TX_UNDERFLOW) {
+    if (lastTxStatus & (RAIL_EVENT_TX_UNDERFLOW | RAIL_EVENT_TX_ABORTED)) {
       if (logLevel & ASYNC_RESPONSE) {
         paramLastTxStatus = lastTxStatus;
         responsePrint("txPacket",
                       "txStatus:Error,"
                       "errorReason:Tx underflow or abort,"
+                      "errorCode:0x%x%08x",
+                      (uint32_t)(paramLastTxStatus >> 32),
+                      (uint32_t)(paramLastTxStatus));
+      }
+    }
+    if (lastTxStatus & RAIL_EVENT_TX_BLOCKED) {
+      if (logLevel & ASYNC_RESPONSE) {
+        paramLastTxStatus = lastTxStatus;
+        responsePrint("txPacket",
+                      "txStatus:Error,"
+                      "errorReason:Tx blocked,"
+                      "errorCode:0x%x%08x",
+                      (uint32_t)(paramLastTxStatus >> 32),
+                      (uint32_t)(paramLastTxStatus));
+      }
+    }
+    if (lastTxStatus & RAIL_EVENT_TX_SCHEDULED_TX_MISSED) {
+      if (logLevel & ASYNC_RESPONSE) {
+        paramLastTxStatus = lastTxStatus;
+        responsePrint("txPacket",
+                      "txStatus:Error,"
+                      "errorReason:SchedTx missed,"
                       "errorCode:0x%x%08x",
                       (uint32_t)(paramLastTxStatus >> 32),
                       (uint32_t)(paramLastTxStatus));
@@ -1063,6 +1134,7 @@ void finishTxSequenceIfPending(void)
                     "ccaSuccess:%u,"
                     "failed:%u,"
                     "lastTxStatus:0x%x%08x,"
+                    "txRemain:%d,"
                     "isAck:False",
                     (paramFailPackets == 0
                      ? "Complete"
@@ -1074,7 +1146,8 @@ void finishTxSequenceIfPending(void)
                     ccaSuccesses,
                     paramFailPackets,
                     (uint32_t)(paramLastTxStatus >> 32),
-                    (uint32_t)(paramLastTxStatus));
+                    (uint32_t)(paramLastTxStatus),
+                    txRemainingCount);
     }
     startTransmitCounter = internalTransmitCounter;
     failPackets = 0;

@@ -394,7 +394,6 @@ static sl_status_t sl_coulomb_counter_calibrate_output(sli_coulomb_counter_outpu
 
       handle.cal_count_low = ccc;
 
-      /* TODO: figure out why NREQ is hardcoded to 7 here */
       handle.cal_nreq_high = 0x7;
       status = sli_coulomb_counter_hal_cal_start(output, handle.cal_nreq_high, CCL_LEVEL_HIGH);
       if (status == SL_STATUS_OK) {
@@ -481,7 +480,7 @@ sl_coulomb_counter_calibration_status_t sl_coulomb_counter_calibrate_init(sl_cou
   }
 
 #if defined(EMU_VSCALE_PRESENT)
-  EMU_VScaleEM01_TypeDef em01VScale = EMU_VScaleGet();
+  /* Initialize EM23 voltage scaling. */
   EMU_VScaleEM23_TypeDef em23VScale = (EMU_VScaleEM23_TypeDef)((EMU->CTRL & _EMU_CTRL_EM23VSCALE_MASK)
                                                                >> _EMU_CTRL_EM23VSCALE_SHIFT);
 
@@ -490,6 +489,10 @@ sl_coulomb_counter_calibration_status_t sl_coulomb_counter_calibrate_init(sl_cou
   } else if (em23VScale == emuVScaleEM23_FastWakeup) {
     handle.cal_em2_vscale = EMU_VSCALE2;
   }
+
+  /* Initialize EM01 voltage scaling. */
+#if defined(EMU_VSCALE_EM01_PRESENT)
+  EMU_VScaleEM01_TypeDef em01VScale = EMU_VScaleGet();
 
   if (em01VScale == emuVScaleEM01_HighPerformance) {
     handle.cal_em0_vscale = EMU_VSCALE2;
@@ -501,6 +504,12 @@ sl_coulomb_counter_calibration_status_t sl_coulomb_counter_calibrate_init(sl_cou
 #endif
   }
 #else
+  /* If EM01 voltage scaling not present, use default value. */
+  handle.cal_em0_vscale = EMU_VSCALE2;
+#endif
+
+#else
+  /* If EMx voltage scaling not present, use default values. */
   handle.cal_em2_vscale = EMU_VSCALE2;
   handle.cal_em0_vscale = EMU_VSCALE2;
 #endif

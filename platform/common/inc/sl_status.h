@@ -35,7 +35,9 @@
 
 /*******************************************************************************
  * @addtogroup status Status Codes
- * @brief Status codes
+ * @details Status Codes contains error and status code definitions used by GSDK
+ *          software components and stacks. This module also provides routines to
+ *          read the string linked with the error and status codes.
  * @{
  ******************************************************************************/
 
@@ -215,7 +217,7 @@
 #define SL_STATUS_BT_CTRL_MEMORY_CAPACITY_EXCEEDED                                                       ((sl_status_t)0x1007)      ///< Controller is out of memory.
 #define SL_STATUS_BT_CTRL_CONNECTION_TIMEOUT                                                             ((sl_status_t)0x1008)      ///< Link supervision timeout has expired.
 #define SL_STATUS_BT_CTRL_CONNECTION_LIMIT_EXCEEDED                                                      ((sl_status_t)0x1009)      ///< Controller is at limit of connections it can support.
-#define SL_STATUS_BT_CTRL_SYNCHRONOUS_CONNECTIONTION_LIMIT_EXCEEDED                                      ((sl_status_t)0x100A)     ///< The Synchronous Connection Limit to a Device Exceeded error code indicates that the Controller has reached the limit to the number of synchronous connections that can be achieved to a device.
+#define SL_STATUS_BT_CTRL_SYNCHRONOUS_CONNECTION_LIMIT_EXCEEDED                                          ((sl_status_t)0x100A)     ///< The Synchronous Connection Limit to a Device Exceeded error code indicates that the Controller has reached the limit to the number of synchronous connections that can be achieved to a device.
 #define SL_STATUS_BT_CTRL_ACL_CONNECTION_ALREADY_EXISTS                                                  ((sl_status_t)0x100B)     ///< The ACL Connection Already Exists error code indicates that an attempt to create a new ACL Connection to a device when there is already a connection to this device.
 #define SL_STATUS_BT_CTRL_COMMAND_DISALLOWED                                                             ((sl_status_t)0x100C)     ///< Command requested cannot be executed because the Controller is in a state where it cannot process this command at this time.
 #define SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_LIMITED_RESOURCES                                   ((sl_status_t)0x100D)     ///< The Connection Rejected Due To Limited Resources error code indicates that an incoming connection was rejected due to limited resources.
@@ -298,6 +300,7 @@
 #define SL_STATUS_BT_SMP_NUMERIC_COMPARISON_FAILED                                                       ((sl_status_t)0x120C)     ///< Indicates that the confirm values in the numeric comparison protocol do not match.
 #define SL_STATUS_BT_SMP_BREDR_PAIRING_IN_PROGRESS                                                       ((sl_status_t)0x120D)     ///< Indicates that the pairing over the LE transport failed due to a Pairing Request sent over the BR/EDR transport in process.
 #define SL_STATUS_BT_SMP_CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED                           ((sl_status_t)0x120E)     ///< Indicates that the BR/EDR Link Key generated on the BR/EDR transport cannot be used to derive and distribute keys for the LE transport.
+#define SL_STATUS_BT_SMP_KEY_REJECTED                                                                    ((sl_status_t)0x120F)     ///< Indicates that the device chose not to accept a distributed key.
 
 // Bluetooth Mesh status codes
 #define SL_STATUS_BT_MESH_ALREADY_EXISTS                                                                 ((sl_status_t)0x0501)      ///< Returned when trying to add a key or some other unique resource with an ID which already exists

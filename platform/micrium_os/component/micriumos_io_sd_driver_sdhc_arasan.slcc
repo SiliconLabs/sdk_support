@@ -2,7 +2,7 @@ id: micriumos_io_sd_driver_sdhc_arasan
 label: Micrium OS Input-Output SD Driver for Arasan
 package: micrium-ioxx
 description: Micrium OS IO SD Driver for Arasan
-category: Services|IO
+category: Services|Micrium|IO
 quality: production
 component_root_path: platform/micrium_os/drivers/io
 source:

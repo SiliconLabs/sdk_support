@@ -274,7 +274,6 @@ static void reProgramBLApp(void)
 
   // Initialize filesystem
   res = f_mount(0, &Fatfs);
-
   if (res != FR_OK) {
     printf("FAT-mount failed: %d\n", res);
     return;
@@ -283,7 +282,6 @@ static void reProgramBLApp(void)
   }
 
   gblFound = checkValidGbl(path);
-
   if (gblFound) {
     if (bootloader_setImageToBootload(SLOT_ID) == BOOTLOADER_OK) {
       bootloader_getImageInfo(SLOT_ID, &appinfo, &imgInfoVersion);
@@ -301,13 +299,11 @@ static void reProgramBLApp(void)
   } else {
     printf("No valid GBL file found\n");
   }
-
   // Clean the bootloader storage space
   printf("Erasing the bootloader storage space...\n");
   if (eraseStorageSlot(SLOT_ID) == BOOTLOADER_OK) {
     printf("Erasing the bootloader storage space completed\n");
   }
-
   // UNMOUNT drive
   printf("USB un-mounting...\n");
   if (f_mount(0, NULL) == FR_OK) {
@@ -326,7 +322,6 @@ static int32_t eraseStorageSlot(uint32_t slotID)
   BootloaderStorageInformation_t infoStorage;
   bootloader_getStorageInfo(&infoStorage);
   uint32_t flashPageSize = infoStorage.info->pageSize;
-
   BootloaderStorageSlot_t storageSlot;
   retVal = bootloader_getStorageSlotInfo(slotID, &storageSlot);
   if (retVal != BOOTLOADER_OK) {
@@ -334,7 +329,6 @@ static int32_t eraseStorageSlot(uint32_t slotID)
   }
   uint32_t storageSpaceAddr = storageSlot.address;
   uint8_t storageBuf[1];
-
   while (storageSpaceAddr < (storageSlot.address + storageSlot.length)) {
     bootloader_readRawStorage(storageSpaceAddr, storageBuf, 1);
     if (storageBuf[0] == 0xFF) {
@@ -376,10 +370,8 @@ int main(void)
 
   // Initialize USB HOST stack
   USBH_Init(&is);
-
   bootloader_getInfo(&info);
   printf("\nCurrent Bootloader Version: %lx \n", info.version);
-
   if (info.type == NO_BOOTLOADER) {
     printf("\nNo bootloader is present (first stage or main stage invalid)\n");
     EFM_ASSERT(false);
@@ -394,7 +386,6 @@ int main(void)
     EFM_ASSERT(false);
   }
   printf("\nCurrent APP version: %" PRIu32 "\n", sl_app_properties.app.version);
-
   diskStorage = (uint8_t*)storageSlot.address;
   while (1) {
     // Wait for device connection

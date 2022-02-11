@@ -14,5 +14,4 @@ requires:
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ECDH_C
-  - name: mbedtls_config
-    value: MBEDTLS_ECDH_LEGACY_CONTEXT
+

@@ -49,9 +49,8 @@ typedef struct {
   __IOM uint32_t IEN;                           /**< Interrupt Enable                                   */
   uint32_t       RESERVED1[1U];                 /**< Reserved for future use                            */
   __IOM uint32_t CHIPREVHW;                     /**< Chip Revision, Hard-wired                          */
-  __IOM uint32_t CHIPREV;                       /**< Chip Revision                                      */
-  __IOM uint32_t INSTANCEID;                    /**< Instance ID                                        */
-  uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
+  __IOM uint32_t CHIPREV;                       /**< Part Family and Revision Values                    */
+  uint32_t       RESERVED2[2U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFGSYSTIC;                     /**< SysTick clock source                               */
   uint32_t       RESERVED3[54U];                /**< Reserved for future use                            */
   uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
@@ -62,9 +61,9 @@ typedef struct {
   uint32_t       RESERVED7[64U];                /**< Reserved for future use                            */
   __IOM uint32_t RAMBIASCONF;                   /**< RAM Bias Configuration                             */
   uint32_t       RESERVED8[60U];                /**< Reserved for future use                            */
-  __IOM uint32_t RADIORAMRETNCTRL;              /**< RADIO SEQRAM Retention Control                     */
+  __IOM uint32_t RADIORAMRETNCTRL;              /**< RADIO RAM Retention Control                        */
   uint32_t       RESERVED9[1U];                 /**< Reserved for future use                            */
-  __IOM uint32_t RADIOECCCTRL;                  /**< RADIO SEQRAM ECC Control Register                  */
+  __IOM uint32_t RADIOECCCTRL;                  /**< RADIO RAM ECC Control Register                     */
   uint32_t       RESERVED10[1U];                /**< Reserved for future use                            */
   __IM uint32_t  SEQRAMECCADDR;                 /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR;                 /**< FRCRAM ECC Address                                 */
@@ -75,149 +74,106 @@ typedef struct {
   __IOM uint32_t ROOTDATA1;                     /**< Data Register 1                                    */
   __IM uint32_t  ROOTLOCKSTATUS;                /**< Lock Status                                        */
   __IOM uint32_t ROOTSESWVERSION;               /**< SE SW Version                                      */
-  __IOM uint32_t CFGRPURATD0;                   /**< Root Access Type Descriptor Register               */
   uint32_t       RESERVED12[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD2;                   /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED13[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD4;                   /**< Root Access Type Descriptor Register               */
+  uint32_t       RESERVED13[635U];              /**< Reserved for future use                            */
   uint32_t       RESERVED14[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD6;                   /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED15[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD8;                   /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED16[3U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD12;                  /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED17[623U];              /**< Reserved for future use                            */
-  uint32_t       RESERVED18[1U];                /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flag                                     */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable                                   */
-  uint32_t       RESERVED19[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED15[1U];                /**< Reserved for future use                            */
   __IOM uint32_t CHIPREVHW_SET;                 /**< Chip Revision, Hard-wired                          */
-  __IOM uint32_t CHIPREV_SET;                   /**< Chip Revision                                      */
-  __IOM uint32_t INSTANCEID_SET;                /**< Instance ID                                        */
-  uint32_t       RESERVED20[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t CHIPREV_SET;                   /**< Part Family and Revision Values                    */
+  uint32_t       RESERVED16[2U];                /**< Reserved for future use                            */
   __IOM uint32_t CFGSYSTIC_SET;                 /**< SysTick clock source                               */
-  uint32_t       RESERVED21[54U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED22[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED23[63U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED17[54U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED18[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED19[63U];               /**< Reserved for future use                            */
   __IOM uint32_t CTRL_SET;                      /**< Control                                            */
-  uint32_t       RESERVED24[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED20[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_SET;             /**< DMEM0 Retention Control                            */
-  uint32_t       RESERVED25[64U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED21[64U];               /**< Reserved for future use                            */
   __IOM uint32_t RAMBIASCONF_SET;               /**< RAM Bias Configuration                             */
-  uint32_t       RESERVED26[60U];               /**< Reserved for future use                            */
-  __IOM uint32_t RADIORAMRETNCTRL_SET;          /**< RADIO SEQRAM Retention Control                     */
-  uint32_t       RESERVED27[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t RADIOECCCTRL_SET;              /**< RADIO SEQRAM ECC Control Register                  */
-  uint32_t       RESERVED28[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED22[60U];               /**< Reserved for future use                            */
+  __IOM uint32_t RADIORAMRETNCTRL_SET;          /**< RADIO RAM Retention Control                        */
+  uint32_t       RESERVED23[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t RADIOECCCTRL_SET;              /**< RADIO RAM ECC Control Register                     */
+  uint32_t       RESERVED24[1U];                /**< Reserved for future use                            */
   __IM uint32_t  SEQRAMECCADDR_SET;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_SET;             /**< FRCRAM ECC Address                                 */
   __IOM uint32_t ICACHERAMRETNCTRL_SET;         /**< HOST ICACHERAM Retention Control                   */
   __IOM uint32_t DMEM0PORTMAPSEL_SET;           /**< DMEM0 port remap selection                         */
-  uint32_t       RESERVED29[120U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED25[120U];              /**< Reserved for future use                            */
   __IOM uint32_t ROOTDATA0_SET;                 /**< Data Register 0                                    */
   __IOM uint32_t ROOTDATA1_SET;                 /**< Data Register 1                                    */
   __IM uint32_t  ROOTLOCKSTATUS_SET;            /**< Lock Status                                        */
   __IOM uint32_t ROOTSESWVERSION_SET;           /**< SE SW Version                                      */
-  __IOM uint32_t CFGRPURATD0_SET;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED30[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD2_SET;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED31[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD4_SET;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED32[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD6_SET;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED33[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD8_SET;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED34[3U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD12_SET;              /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED35[623U];              /**< Reserved for future use                            */
-  uint32_t       RESERVED36[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED26[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED27[635U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED28[1U];                /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flag                                     */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable                                   */
-  uint32_t       RESERVED37[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED29[1U];                /**< Reserved for future use                            */
   __IOM uint32_t CHIPREVHW_CLR;                 /**< Chip Revision, Hard-wired                          */
-  __IOM uint32_t CHIPREV_CLR;                   /**< Chip Revision                                      */
-  __IOM uint32_t INSTANCEID_CLR;                /**< Instance ID                                        */
-  uint32_t       RESERVED38[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t CHIPREV_CLR;                   /**< Part Family and Revision Values                    */
+  uint32_t       RESERVED30[2U];                /**< Reserved for future use                            */
   __IOM uint32_t CFGSYSTIC_CLR;                 /**< SysTick clock source                               */
-  uint32_t       RESERVED39[54U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED40[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED41[63U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED31[54U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED32[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED33[63U];               /**< Reserved for future use                            */
   __IOM uint32_t CTRL_CLR;                      /**< Control                                            */
-  uint32_t       RESERVED42[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED34[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_CLR;             /**< DMEM0 Retention Control                            */
-  uint32_t       RESERVED43[64U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED35[64U];               /**< Reserved for future use                            */
   __IOM uint32_t RAMBIASCONF_CLR;               /**< RAM Bias Configuration                             */
-  uint32_t       RESERVED44[60U];               /**< Reserved for future use                            */
-  __IOM uint32_t RADIORAMRETNCTRL_CLR;          /**< RADIO SEQRAM Retention Control                     */
-  uint32_t       RESERVED45[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t RADIOECCCTRL_CLR;              /**< RADIO SEQRAM ECC Control Register                  */
-  uint32_t       RESERVED46[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED36[60U];               /**< Reserved for future use                            */
+  __IOM uint32_t RADIORAMRETNCTRL_CLR;          /**< RADIO RAM Retention Control                        */
+  uint32_t       RESERVED37[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t RADIOECCCTRL_CLR;              /**< RADIO RAM ECC Control Register                     */
+  uint32_t       RESERVED38[1U];                /**< Reserved for future use                            */
   __IM uint32_t  SEQRAMECCADDR_CLR;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_CLR;             /**< FRCRAM ECC Address                                 */
   __IOM uint32_t ICACHERAMRETNCTRL_CLR;         /**< HOST ICACHERAM Retention Control                   */
   __IOM uint32_t DMEM0PORTMAPSEL_CLR;           /**< DMEM0 port remap selection                         */
-  uint32_t       RESERVED47[120U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED39[120U];              /**< Reserved for future use                            */
   __IOM uint32_t ROOTDATA0_CLR;                 /**< Data Register 0                                    */
   __IOM uint32_t ROOTDATA1_CLR;                 /**< Data Register 1                                    */
   __IM uint32_t  ROOTLOCKSTATUS_CLR;            /**< Lock Status                                        */
   __IOM uint32_t ROOTSESWVERSION_CLR;           /**< SE SW Version                                      */
-  __IOM uint32_t CFGRPURATD0_CLR;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED48[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD2_CLR;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED49[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD4_CLR;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED50[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD6_CLR;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED51[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD8_CLR;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED52[3U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD12_CLR;              /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED53[623U];              /**< Reserved for future use                            */
-  uint32_t       RESERVED54[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED40[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED41[635U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED42[1U];                /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version ID                                      */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flag                                     */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable                                   */
-  uint32_t       RESERVED55[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED43[1U];                /**< Reserved for future use                            */
   __IOM uint32_t CHIPREVHW_TGL;                 /**< Chip Revision, Hard-wired                          */
-  __IOM uint32_t CHIPREV_TGL;                   /**< Chip Revision                                      */
-  __IOM uint32_t INSTANCEID_TGL;                /**< Instance ID                                        */
-  uint32_t       RESERVED56[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t CHIPREV_TGL;                   /**< Part Family and Revision Values                    */
+  uint32_t       RESERVED44[2U];                /**< Reserved for future use                            */
   __IOM uint32_t CFGSYSTIC_TGL;                 /**< SysTick clock source                               */
-  uint32_t       RESERVED57[54U];               /**< Reserved for future use                            */
-  uint32_t       RESERVED58[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED59[63U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED45[54U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED46[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED47[63U];               /**< Reserved for future use                            */
   __IOM uint32_t CTRL_TGL;                      /**< Control                                            */
-  uint32_t       RESERVED60[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED48[1U];                /**< Reserved for future use                            */
   __IOM uint32_t DMEM0RETNCTRL_TGL;             /**< DMEM0 Retention Control                            */
-  uint32_t       RESERVED61[64U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED49[64U];               /**< Reserved for future use                            */
   __IOM uint32_t RAMBIASCONF_TGL;               /**< RAM Bias Configuration                             */
-  uint32_t       RESERVED62[60U];               /**< Reserved for future use                            */
-  __IOM uint32_t RADIORAMRETNCTRL_TGL;          /**< RADIO SEQRAM Retention Control                     */
-  uint32_t       RESERVED63[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t RADIOECCCTRL_TGL;              /**< RADIO SEQRAM ECC Control Register                  */
-  uint32_t       RESERVED64[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED50[60U];               /**< Reserved for future use                            */
+  __IOM uint32_t RADIORAMRETNCTRL_TGL;          /**< RADIO RAM Retention Control                        */
+  uint32_t       RESERVED51[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t RADIOECCCTRL_TGL;              /**< RADIO RAM ECC Control Register                     */
+  uint32_t       RESERVED52[1U];                /**< Reserved for future use                            */
   __IM uint32_t  SEQRAMECCADDR_TGL;             /**< SEQRAM ECC Address                                 */
   __IM uint32_t  FRCRAMECCADDR_TGL;             /**< FRCRAM ECC Address                                 */
   __IOM uint32_t ICACHERAMRETNCTRL_TGL;         /**< HOST ICACHERAM Retention Control                   */
   __IOM uint32_t DMEM0PORTMAPSEL_TGL;           /**< DMEM0 port remap selection                         */
-  uint32_t       RESERVED65[120U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED53[120U];              /**< Reserved for future use                            */
   __IOM uint32_t ROOTDATA0_TGL;                 /**< Data Register 0                                    */
   __IOM uint32_t ROOTDATA1_TGL;                 /**< Data Register 1                                    */
   __IM uint32_t  ROOTLOCKSTATUS_TGL;            /**< Lock Status                                        */
   __IOM uint32_t ROOTSESWVERSION_TGL;           /**< SE SW Version                                      */
-  __IOM uint32_t CFGRPURATD0_TGL;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED66[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD2_TGL;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED67[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD4_TGL;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED68[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD6_TGL;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED69[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD8_TGL;               /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED70[3U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGRPURATD12_TGL;              /**< Root Access Type Descriptor Register               */
+  uint32_t       RESERVED54[1U];                /**< Reserved for future use                            */
 } SYSCFG_TypeDef;
 /** @} End of group EFR32MG24_SYSCFG */
 
@@ -435,14 +391,6 @@ typedef struct {
 #define _SYSCFG_CHIPREV_MINOR_MASK                            0xFF000UL                             /**< Bit mask for SYSCFG_MINOR                   */
 #define _SYSCFG_CHIPREV_MINOR_DEFAULT                         0x00000000UL                          /**< Mode DEFAULT for SYSCFG_CHIPREV             */
 #define SYSCFG_CHIPREV_MINOR_DEFAULT                          (_SYSCFG_CHIPREV_MINOR_DEFAULT << 12) /**< Shifted mode DEFAULT for SYSCFG_CHIPREV     */
-
-/* Bit fields for SYSCFG INSTANCEID */
-#define _SYSCFG_INSTANCEID_RESETVALUE                         0x00000000UL                                 /**< Default value for SYSCFG_INSTANCEID         */
-#define _SYSCFG_INSTANCEID_MASK                               0x0000000FUL                                 /**< Mask for SYSCFG_INSTANCEID                  */
-#define _SYSCFG_INSTANCEID_INSTANCEID_SHIFT                   0                                            /**< Shift value for SYSCFG_INSTANCEID           */
-#define _SYSCFG_INSTANCEID_INSTANCEID_MASK                    0xFUL                                        /**< Bit mask for SYSCFG_INSTANCEID              */
-#define _SYSCFG_INSTANCEID_INSTANCEID_DEFAULT                 0x00000000UL                                 /**< Mode DEFAULT for SYSCFG_INSTANCEID          */
-#define SYSCFG_INSTANCEID_INSTANCEID_DEFAULT                  (_SYSCFG_INSTANCEID_INSTANCEID_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_INSTANCEID  */
 
 /* Bit fields for SYSCFG CFGSYSTIC */
 #define _SYSCFG_CFGSYSTIC_RESETVALUE                          0x00000000UL                                    /**< Default value for SYSCFG_CFGSYSTIC          */
@@ -732,160 +680,6 @@ typedef struct {
 #define _SYSCFG_ROOTSESWVERSION_SWVERSION_DEFAULT             0x00000000UL                                     /**< Mode DEFAULT for SYSCFG_ROOTSESWVERSION     */
 #define SYSCFG_ROOTSESWVERSION_SWVERSION_DEFAULT              (_SYSCFG_ROOTSESWVERSION_SWVERSION_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_ROOTSESWVERSION*/
 
-/* Bit fields for SYSCFG CFGRPURATD0 */
-#define _SYSCFG_CFGRPURATD0_RESETVALUE                        0x00000000UL                                            /**< Default value for SYSCFG_CFGRPURATD0        */
-#define _SYSCFG_CFGRPURATD0_MASK                              0x000023CCUL                                            /**< Mask for SYSCFG_CFGRPURATD0                 */
-#define SYSCFG_CFGRPURATD0_RATDIF                             (0x1UL << 2)                                            /**< IF Protection Bit                           */
-#define _SYSCFG_CFGRPURATD0_RATDIF_SHIFT                      2                                                       /**< Shift value for SYSCFG_RATDIF               */
-#define _SYSCFG_CFGRPURATD0_RATDIF_MASK                       0x4UL                                                   /**< Bit mask for SYSCFG_RATDIF                  */
-#define _SYSCFG_CFGRPURATD0_RATDIF_DEFAULT                    0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDIF_DEFAULT                     (_SYSCFG_CFGRPURATD0_RATDIF_DEFAULT << 2)               /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDIEN                            (0x1UL << 3)                                            /**< IEN Protection Bit                          */
-#define _SYSCFG_CFGRPURATD0_RATDIEN_SHIFT                     3                                                       /**< Shift value for SYSCFG_RATDIEN              */
-#define _SYSCFG_CFGRPURATD0_RATDIEN_MASK                      0x8UL                                                   /**< Bit mask for SYSCFG_RATDIEN                 */
-#define _SYSCFG_CFGRPURATD0_RATDIEN_DEFAULT                   0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDIEN_DEFAULT                    (_SYSCFG_CFGRPURATD0_RATDIEN_DEFAULT << 3)              /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDCHIPREV                        (0x1UL << 6)                                            /**< CHIPREV Protection Bit                      */
-#define _SYSCFG_CFGRPURATD0_RATDCHIPREV_SHIFT                 6                                                       /**< Shift value for SYSCFG_RATDCHIPREV          */
-#define _SYSCFG_CFGRPURATD0_RATDCHIPREV_MASK                  0x40UL                                                  /**< Bit mask for SYSCFG_RATDCHIPREV             */
-#define _SYSCFG_CFGRPURATD0_RATDCHIPREV_DEFAULT               0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDCHIPREV_DEFAULT                (_SYSCFG_CFGRPURATD0_RATDCHIPREV_DEFAULT << 6)          /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDINSTANCEID                     (0x1UL << 7)                                            /**< INSTANCEID Protection Bit                   */
-#define _SYSCFG_CFGRPURATD0_RATDINSTANCEID_SHIFT              7                                                       /**< Shift value for SYSCFG_RATDINSTANCEID       */
-#define _SYSCFG_CFGRPURATD0_RATDINSTANCEID_MASK               0x80UL                                                  /**< Bit mask for SYSCFG_RATDINSTANCEID          */
-#define _SYSCFG_CFGRPURATD0_RATDINSTANCEID_DEFAULT            0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDINSTANCEID_DEFAULT             (_SYSCFG_CFGRPURATD0_RATDINSTANCEID_DEFAULT << 7)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB                    (0x1UL << 8)                                            /**< CFGSSTCALIB Protection Bit                  */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB_SHIFT             8                                                       /**< Shift value for SYSCFG_RATDCFGSSTCALIB      */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB_MASK              0x100UL                                                 /**< Bit mask for SYSCFG_RATDCFGSSTCALIB         */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB_DEFAULT           0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB_DEFAULT            (_SYSCFG_CFGRPURATD0_RATDCFGSSTCALIB_DEFAULT << 8)      /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC                     (0x1UL << 9)                                            /**< CFGSSYSTIC Protection Bit                   */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC_SHIFT              9                                                       /**< Shift value for SYSCFG_RATDCFGSSYSTIC       */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC_MASK               0x200UL                                                 /**< Bit mask for SYSCFG_RATDCFGSSYSTIC          */
-#define _SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC_DEFAULT            0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC_DEFAULT             (_SYSCFG_CFGRPURATD0_RATDCFGSSYSTIC_DEFAULT << 9)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-#define SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT                (0x1UL << 13)                                           /**< CFGAHBINTERCNCT Protection Bit              */
-#define _SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT_SHIFT         13                                                      /**< Shift value for SYSCFG_RATDCFGAHBINTERCNCT  */
-#define _SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT_MASK          0x2000UL                                                /**< Bit mask for SYSCFG_RATDCFGAHBINTERCNCT     */
-#define _SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT_DEFAULT       0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD0         */
-#define SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT_DEFAULT        (_SYSCFG_CFGRPURATD0_RATDCFGAHBINTERCNCT_DEFAULT << 13) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD0 */
-
-/* Bit fields for SYSCFG CFGRPURATD2 */
-#define _SYSCFG_CFGRPURATD2_RESETVALUE                        0x00000000UL                                      /**< Default value for SYSCFG_CFGRPURATD2        */
-#define _SYSCFG_CFGRPURATD2_MASK                              0x0000000FUL                                      /**< Mask for SYSCFG_CFGRPURATD2                 */
-#define SYSCFG_CFGRPURATD2_RATDSESYSROMRM                     (0x1UL << 0)                                      /**< SESYSROMRM Protection Bit                   */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSROMRM_SHIFT              0                                                 /**< Shift value for SYSCFG_RATDSESYSROMRM       */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSROMRM_MASK               0x1UL                                             /**< Bit mask for SYSCFG_RATDSESYSROMRM          */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSROMRM_DEFAULT            0x00000000UL                                      /**< Mode DEFAULT for SYSCFG_CFGRPURATD2         */
-#define SYSCFG_CFGRPURATD2_RATDSESYSROMRM_DEFAULT             (_SYSCFG_CFGRPURATD2_RATDSESYSROMRM_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD2 */
-#define SYSCFG_CFGRPURATD2_RATDSEPKEROMRM                     (0x1UL << 1)                                      /**< SEPKEROMRM Protection Bit                   */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKEROMRM_SHIFT              1                                                 /**< Shift value for SYSCFG_RATDSEPKEROMRM       */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKEROMRM_MASK               0x2UL                                             /**< Bit mask for SYSCFG_RATDSEPKEROMRM          */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKEROMRM_DEFAULT            0x00000000UL                                      /**< Mode DEFAULT for SYSCFG_CFGRPURATD2         */
-#define SYSCFG_CFGRPURATD2_RATDSEPKEROMRM_DEFAULT             (_SYSCFG_CFGRPURATD2_RATDSEPKEROMRM_DEFAULT << 1) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD2 */
-#define SYSCFG_CFGRPURATD2_RATDSESYSCTRL                      (0x1UL << 2)                                      /**< SESYSCTRL Protection Bit                    */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSCTRL_SHIFT               2                                                 /**< Shift value for SYSCFG_RATDSESYSCTRL        */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSCTRL_MASK                0x4UL                                             /**< Bit mask for SYSCFG_RATDSESYSCTRL           */
-#define _SYSCFG_CFGRPURATD2_RATDSESYSCTRL_DEFAULT             0x00000000UL                                      /**< Mode DEFAULT for SYSCFG_CFGRPURATD2         */
-#define SYSCFG_CFGRPURATD2_RATDSESYSCTRL_DEFAULT              (_SYSCFG_CFGRPURATD2_RATDSESYSCTRL_DEFAULT << 2)  /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD2 */
-#define SYSCFG_CFGRPURATD2_RATDSEPKECTRL                      (0x1UL << 3)                                      /**< SEPKECTRL Protection Bit                    */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKECTRL_SHIFT               3                                                 /**< Shift value for SYSCFG_RATDSEPKECTRL        */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKECTRL_MASK                0x8UL                                             /**< Bit mask for SYSCFG_RATDSEPKECTRL           */
-#define _SYSCFG_CFGRPURATD2_RATDSEPKECTRL_DEFAULT             0x00000000UL                                      /**< Mode DEFAULT for SYSCFG_CFGRPURATD2         */
-#define SYSCFG_CFGRPURATD2_RATDSEPKECTRL_DEFAULT              (_SYSCFG_CFGRPURATD2_RATDSEPKECTRL_DEFAULT << 3)  /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD2 */
-
-/* Bit fields for SYSCFG CFGRPURATD4 */
-#define _SYSCFG_CFGRPURATD4_RESETVALUE                        0x00000000UL                                         /**< Default value for SYSCFG_CFGRPURATD4        */
-#define _SYSCFG_CFGRPURATD4_MASK                              0x00000005UL                                         /**< Mask for SYSCFG_CFGRPURATD4                 */
-#define SYSCFG_CFGRPURATD4_RATDCTRL                           (0x1UL << 0)                                         /**< CTRL Protection Bit                         */
-#define _SYSCFG_CFGRPURATD4_RATDCTRL_SHIFT                    0                                                    /**< Shift value for SYSCFG_RATDCTRL             */
-#define _SYSCFG_CFGRPURATD4_RATDCTRL_MASK                     0x1UL                                                /**< Bit mask for SYSCFG_RATDCTRL                */
-#define _SYSCFG_CFGRPURATD4_RATDCTRL_DEFAULT                  0x00000000UL                                         /**< Mode DEFAULT for SYSCFG_CFGRPURATD4         */
-#define SYSCFG_CFGRPURATD4_RATDCTRL_DEFAULT                   (_SYSCFG_CFGRPURATD4_RATDCTRL_DEFAULT << 0)          /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD4 */
-#define SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL                  (0x1UL << 2)                                         /**< DMEM0RETNCTRL Protection Bit                */
-#define _SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL_SHIFT           2                                                    /**< Shift value for SYSCFG_RATDDMEM0RETNCTRL    */
-#define _SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL_MASK            0x4UL                                                /**< Bit mask for SYSCFG_RATDDMEM0RETNCTRL       */
-#define _SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL_DEFAULT         0x00000000UL                                         /**< Mode DEFAULT for SYSCFG_CFGRPURATD4         */
-#define SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL_DEFAULT          (_SYSCFG_CFGRPURATD4_RATDDMEM0RETNCTRL_DEFAULT << 2) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD4 */
-
-/* Bit fields for SYSCFG CFGRPURATD6 */
-#define _SYSCFG_CFGRPURATD6_RESETVALUE                        0x00000000UL                                       /**< Default value for SYSCFG_CFGRPURATD6        */
-#define _SYSCFG_CFGRPURATD6_MASK                              0x0000001FUL                                       /**< Mask for SYSCFG_CFGRPURATD6                 */
-#define SYSCFG_CFGRPURATD6_RATDRAMRM                          (0x1UL << 0)                                       /**< RAMRM Protection Bit                        */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRM_SHIFT                   0                                                  /**< Shift value for SYSCFG_RATDRAMRM            */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRM_MASK                    0x1UL                                              /**< Bit mask for SYSCFG_RATDRAMRM               */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRM_DEFAULT                 0x00000000UL                                       /**< Mode DEFAULT for SYSCFG_CFGRPURATD6         */
-#define SYSCFG_CFGRPURATD6_RATDRAMRM_DEFAULT                  (_SYSCFG_CFGRPURATD6_RATDRAMRM_DEFAULT << 0)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD6 */
-#define SYSCFG_CFGRPURATD6_RATDRAMWM                          (0x1UL << 1)                                       /**< RAMWM Protection Bit                        */
-#define _SYSCFG_CFGRPURATD6_RATDRAMWM_SHIFT                   1                                                  /**< Shift value for SYSCFG_RATDRAMWM            */
-#define _SYSCFG_CFGRPURATD6_RATDRAMWM_MASK                    0x2UL                                              /**< Bit mask for SYSCFG_RATDRAMWM               */
-#define _SYSCFG_CFGRPURATD6_RATDRAMWM_DEFAULT                 0x00000000UL                                       /**< Mode DEFAULT for SYSCFG_CFGRPURATD6         */
-#define SYSCFG_CFGRPURATD6_RATDRAMWM_DEFAULT                  (_SYSCFG_CFGRPURATD6_RATDRAMWM_DEFAULT << 1)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD6 */
-#define SYSCFG_CFGRPURATD6_RATDRAMRA                          (0x1UL << 2)                                       /**< RAMRA Protection Bit                        */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRA_SHIFT                   2                                                  /**< Shift value for SYSCFG_RATDRAMRA            */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRA_MASK                    0x4UL                                              /**< Bit mask for SYSCFG_RATDRAMRA               */
-#define _SYSCFG_CFGRPURATD6_RATDRAMRA_DEFAULT                 0x00000000UL                                       /**< Mode DEFAULT for SYSCFG_CFGRPURATD6         */
-#define SYSCFG_CFGRPURATD6_RATDRAMRA_DEFAULT                  (_SYSCFG_CFGRPURATD6_RATDRAMRA_DEFAULT << 2)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD6 */
-#define SYSCFG_CFGRPURATD6_RATDRAMBIASCONF                    (0x1UL << 3)                                       /**< RAMBIASCONF Protection Bit                  */
-#define _SYSCFG_CFGRPURATD6_RATDRAMBIASCONF_SHIFT             3                                                  /**< Shift value for SYSCFG_RATDRAMBIASCONF      */
-#define _SYSCFG_CFGRPURATD6_RATDRAMBIASCONF_MASK              0x8UL                                              /**< Bit mask for SYSCFG_RATDRAMBIASCONF         */
-#define _SYSCFG_CFGRPURATD6_RATDRAMBIASCONF_DEFAULT           0x00000000UL                                       /**< Mode DEFAULT for SYSCFG_CFGRPURATD6         */
-#define SYSCFG_CFGRPURATD6_RATDRAMBIASCONF_DEFAULT            (_SYSCFG_CFGRPURATD6_RATDRAMBIASCONF_DEFAULT << 3) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD6 */
-#define SYSCFG_CFGRPURATD6_RATDRAMLVTEST                      (0x1UL << 4)                                       /**< RAMLVTEST Protection Bit                    */
-#define _SYSCFG_CFGRPURATD6_RATDRAMLVTEST_SHIFT               4                                                  /**< Shift value for SYSCFG_RATDRAMLVTEST        */
-#define _SYSCFG_CFGRPURATD6_RATDRAMLVTEST_MASK                0x10UL                                             /**< Bit mask for SYSCFG_RATDRAMLVTEST           */
-#define _SYSCFG_CFGRPURATD6_RATDRAMLVTEST_DEFAULT             0x00000000UL                                       /**< Mode DEFAULT for SYSCFG_CFGRPURATD6         */
-#define SYSCFG_CFGRPURATD6_RATDRAMLVTEST_DEFAULT              (_SYSCFG_CFGRPURATD6_RATDRAMLVTEST_DEFAULT << 4)   /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD6 */
-
-/* Bit fields for SYSCFG CFGRPURATD8 */
-#define _SYSCFG_CFGRPURATD8_RESETVALUE                        0x00000000UL                                             /**< Default value for SYSCFG_CFGRPURATD8        */
-#define _SYSCFG_CFGRPURATD8_MASK                              0x000000C7UL                                             /**< Mask for SYSCFG_CFGRPURATD8                 */
-#define SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL               (0x1UL << 0)                                             /**< RADIORAMRETNCTRL Protection Bit             */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL_SHIFT        0                                                        /**< Shift value for SYSCFG_RATDRADIORAMRETNCTRL */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL_MASK         0x1UL                                                    /**< Bit mask for SYSCFG_RATDRADIORAMRETNCTRL    */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL_DEFAULT      0x00000000UL                                             /**< Mode DEFAULT for SYSCFG_CFGRPURATD8         */
-#define SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL_DEFAULT       (_SYSCFG_CFGRPURATD8_RATDRADIORAMRETNCTRL_DEFAULT << 0)  /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD8 */
-#define SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE                (0x1UL << 1)                                             /**< RADIORAMFEATURE Protection Bit              */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE_SHIFT         1                                                        /**< Shift value for SYSCFG_RATDRADIORAMFEATURE  */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE_MASK          0x2UL                                                    /**< Bit mask for SYSCFG_RATDRADIORAMFEATURE     */
-#define _SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE_DEFAULT       0x00000000UL                                             /**< Mode DEFAULT for SYSCFG_CFGRPURATD8         */
-#define SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE_DEFAULT        (_SYSCFG_CFGRPURATD8_RATDRADIORAMFEATURE_DEFAULT << 1)   /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD8 */
-#define SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL                   (0x1UL << 2)                                             /**< RADIOECCCTRL Protection Bit                 */
-#define _SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL_SHIFT            2                                                        /**< Shift value for SYSCFG_RATDRADIOECCCTRL     */
-#define _SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL_MASK             0x4UL                                                    /**< Bit mask for SYSCFG_RATDRADIOECCCTRL        */
-#define _SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL_DEFAULT          0x00000000UL                                             /**< Mode DEFAULT for SYSCFG_CFGRPURATD8         */
-#define SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL_DEFAULT           (_SYSCFG_CFGRPURATD8_RATDRADIOECCCTRL_DEFAULT << 2)      /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD8 */
-#define SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL              (0x1UL << 6)                                             /**< ICACHERAMRETNCTRL Protection Bit            */
-#define _SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL_SHIFT       6                                                        /**< Shift value for SYSCFG_RATDICACHERAMRETNCTRL*/
-#define _SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL_MASK        0x40UL                                                   /**< Bit mask for SYSCFG_RATDICACHERAMRETNCTRL   */
-#define _SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL_DEFAULT     0x00000000UL                                             /**< Mode DEFAULT for SYSCFG_CFGRPURATD8         */
-#define SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL_DEFAULT      (_SYSCFG_CFGRPURATD8_RATDICACHERAMRETNCTRL_DEFAULT << 6) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD8 */
-#define SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL                (0x1UL << 7)                                             /**< DMEM0PORTMAPSEL Protection Bit              */
-#define _SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL_SHIFT         7                                                        /**< Shift value for SYSCFG_RATDDMEM0PORTMAPSEL  */
-#define _SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL_MASK          0x80UL                                                   /**< Bit mask for SYSCFG_RATDDMEM0PORTMAPSEL     */
-#define _SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL_DEFAULT       0x00000000UL                                             /**< Mode DEFAULT for SYSCFG_CFGRPURATD8         */
-#define SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL_DEFAULT        (_SYSCFG_CFGRPURATD8_RATDDMEM0PORTMAPSEL_DEFAULT << 7)   /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD8 */
-
-/* Bit fields for SYSCFG CFGRPURATD12 */
-#define _SYSCFG_CFGRPURATD12_RESETVALUE                       0x00000000UL                                            /**< Default value for SYSCFG_CFGRPURATD12       */
-#define _SYSCFG_CFGRPURATD12_MASK                             0x0000000BUL                                            /**< Mask for SYSCFG_CFGRPURATD12                */
-#define SYSCFG_CFGRPURATD12_RATDROOTDATA0                     (0x1UL << 0)                                            /**< DATA0 Protection Bit                        */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA0_SHIFT              0                                                       /**< Shift value for SYSCFG_RATDROOTDATA0        */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA0_MASK               0x1UL                                                   /**< Bit mask for SYSCFG_RATDROOTDATA0           */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA0_DEFAULT            0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD12        */
-#define SYSCFG_CFGRPURATD12_RATDROOTDATA0_DEFAULT             (_SYSCFG_CFGRPURATD12_RATDROOTDATA0_DEFAULT << 0)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD12*/
-#define SYSCFG_CFGRPURATD12_RATDROOTDATA1                     (0x1UL << 1)                                            /**< DATA1 Protection Bit                        */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA1_SHIFT              1                                                       /**< Shift value for SYSCFG_RATDROOTDATA1        */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA1_MASK               0x2UL                                                   /**< Bit mask for SYSCFG_RATDROOTDATA1           */
-#define _SYSCFG_CFGRPURATD12_RATDROOTDATA1_DEFAULT            0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD12        */
-#define SYSCFG_CFGRPURATD12_RATDROOTDATA1_DEFAULT             (_SYSCFG_CFGRPURATD12_RATDROOTDATA1_DEFAULT << 1)       /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD12*/
-#define SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION               (0x1UL << 3)                                            /**< SESWVERSION Protection Bit                  */
-#define _SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION_SHIFT        3                                                       /**< Shift value for SYSCFG_RATDROOTSESWVERSION  */
-#define _SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION_MASK         0x8UL                                                   /**< Bit mask for SYSCFG_RATDROOTSESWVERSION     */
-#define _SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION_DEFAULT      0x00000000UL                                            /**< Mode DEFAULT for SYSCFG_CFGRPURATD12        */
-#define SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION_DEFAULT       (_SYSCFG_CFGRPURATD12_RATDROOTSESWVERSION_DEFAULT << 3) /**< Shifted mode DEFAULT for SYSCFG_CFGRPURATD12*/
-
 /** @} End of group EFR32MG24_SYSCFG_BitFields */
 /** @} End of group EFR32MG24_SYSCFG */
 /**************************************************************************//**
@@ -901,36 +695,28 @@ typedef struct {
   uint32_t       RESERVED1[376U];               /**< Reserved for future use                            */
   __IOM uint32_t ROOTNSDATA0;                   /**< Data Register 0                                    */
   __IOM uint32_t ROOTNSDATA1;                   /**< Data Register 1                                    */
-  __IOM uint32_t CFGNSRPURATD0;                 /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED2[11U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGNSRPURATD12;                /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED3[625U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED3[637U];               /**< Reserved for future use                            */
   uint32_t       RESERVED4[7U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFGNSTCALIB_SET;               /**< Configure Non-Secure Sys-Tick cal.                 */
   uint32_t       RESERVED5[376U];               /**< Reserved for future use                            */
   __IOM uint32_t ROOTNSDATA0_SET;               /**< Data Register 0                                    */
   __IOM uint32_t ROOTNSDATA1_SET;               /**< Data Register 1                                    */
-  __IOM uint32_t CFGNSRPURATD0_SET;             /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED6[11U];                /**< Reserved for future use                            */
-  __IOM uint32_t CFGNSRPURATD12_SET;            /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED7[625U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED7[637U];               /**< Reserved for future use                            */
   uint32_t       RESERVED8[7U];                 /**< Reserved for future use                            */
   __IOM uint32_t CFGNSTCALIB_CLR;               /**< Configure Non-Secure Sys-Tick cal.                 */
   uint32_t       RESERVED9[376U];               /**< Reserved for future use                            */
   __IOM uint32_t ROOTNSDATA0_CLR;               /**< Data Register 0                                    */
   __IOM uint32_t ROOTNSDATA1_CLR;               /**< Data Register 1                                    */
-  __IOM uint32_t CFGNSRPURATD0_CLR;             /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED10[11U];               /**< Reserved for future use                            */
-  __IOM uint32_t CFGNSRPURATD12_CLR;            /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED11[625U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED10[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED11[637U];              /**< Reserved for future use                            */
   uint32_t       RESERVED12[7U];                /**< Reserved for future use                            */
   __IOM uint32_t CFGNSTCALIB_TGL;               /**< Configure Non-Secure Sys-Tick cal.                 */
   uint32_t       RESERVED13[376U];              /**< Reserved for future use                            */
   __IOM uint32_t ROOTNSDATA0_TGL;               /**< Data Register 0                                    */
   __IOM uint32_t ROOTNSDATA1_TGL;               /**< Data Register 1                                    */
-  __IOM uint32_t CFGNSRPURATD0_TGL;             /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED14[11U];               /**< Reserved for future use                            */
-  __IOM uint32_t CFGNSRPURATD12_TGL;            /**< Root Access Type Descriptor Register               */
+  uint32_t       RESERVED14[1U];                /**< Reserved for future use                            */
 } SYSCFG_CFGNS_TypeDef;
 /** @} End of group EFR32MG24_SYSCFG_CFGNS */
 
@@ -942,70 +728,42 @@ typedef struct {
  *****************************************************************************/
 
 /* Bit fields for SYSCFG CFGNSTCALIB */
-#define _SYSCFG_CFGNSTCALIB_RESETVALUE                    0x01004A37UL                              /**< Default value for SYSCFG_CFGNSTCALIB        */
-#define _SYSCFG_CFGNSTCALIB_MASK                          0x03FFFFFFUL                              /**< Mask for SYSCFG_CFGNSTCALIB                 */
-#define _SYSCFG_CFGNSTCALIB_TENMS_SHIFT                   0                                         /**< Shift value for SYSCFG_TENMS                */
-#define _SYSCFG_CFGNSTCALIB_TENMS_MASK                    0xFFFFFFUL                                /**< Bit mask for SYSCFG_TENMS                   */
-#define _SYSCFG_CFGNSTCALIB_TENMS_DEFAULT                 0x00004A37UL                              /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
-#define SYSCFG_CFGNSTCALIB_TENMS_DEFAULT                  (_SYSCFG_CFGNSTCALIB_TENMS_DEFAULT << 0)  /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
-#define SYSCFG_CFGNSTCALIB_SKEW                           (0x1UL << 24)                             /**< Skew                                        */
-#define _SYSCFG_CFGNSTCALIB_SKEW_SHIFT                    24                                        /**< Shift value for SYSCFG_SKEW                 */
-#define _SYSCFG_CFGNSTCALIB_SKEW_MASK                     0x1000000UL                               /**< Bit mask for SYSCFG_SKEW                    */
-#define _SYSCFG_CFGNSTCALIB_SKEW_DEFAULT                  0x00000001UL                              /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
-#define SYSCFG_CFGNSTCALIB_SKEW_DEFAULT                   (_SYSCFG_CFGNSTCALIB_SKEW_DEFAULT << 24)  /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
-#define SYSCFG_CFGNSTCALIB_NOREF                          (0x1UL << 25)                             /**< No Reference                                */
-#define _SYSCFG_CFGNSTCALIB_NOREF_SHIFT                   25                                        /**< Shift value for SYSCFG_NOREF                */
-#define _SYSCFG_CFGNSTCALIB_NOREF_MASK                    0x2000000UL                               /**< Bit mask for SYSCFG_NOREF                   */
-#define _SYSCFG_CFGNSTCALIB_NOREF_DEFAULT                 0x00000000UL                              /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
-#define _SYSCFG_CFGNSTCALIB_NOREF_REF                     0x00000000UL                              /**< Mode REF for SYSCFG_CFGNSTCALIB             */
-#define _SYSCFG_CFGNSTCALIB_NOREF_NOREF                   0x00000001UL                              /**< Mode NOREF for SYSCFG_CFGNSTCALIB           */
-#define SYSCFG_CFGNSTCALIB_NOREF_DEFAULT                  (_SYSCFG_CFGNSTCALIB_NOREF_DEFAULT << 25) /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
-#define SYSCFG_CFGNSTCALIB_NOREF_REF                      (_SYSCFG_CFGNSTCALIB_NOREF_REF << 25)     /**< Shifted mode REF for SYSCFG_CFGNSTCALIB     */
-#define SYSCFG_CFGNSTCALIB_NOREF_NOREF                    (_SYSCFG_CFGNSTCALIB_NOREF_NOREF << 25)   /**< Shifted mode NOREF for SYSCFG_CFGNSTCALIB   */
+#define _SYSCFG_CFGNSTCALIB_RESETVALUE       0x01004A37UL                               /**< Default value for SYSCFG_CFGNSTCALIB        */
+#define _SYSCFG_CFGNSTCALIB_MASK             0x03FFFFFFUL                               /**< Mask for SYSCFG_CFGNSTCALIB                 */
+#define _SYSCFG_CFGNSTCALIB_TENMS_SHIFT      0                                          /**< Shift value for SYSCFG_TENMS                */
+#define _SYSCFG_CFGNSTCALIB_TENMS_MASK       0xFFFFFFUL                                 /**< Bit mask for SYSCFG_TENMS                   */
+#define _SYSCFG_CFGNSTCALIB_TENMS_DEFAULT    0x00004A37UL                               /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
+#define SYSCFG_CFGNSTCALIB_TENMS_DEFAULT     (_SYSCFG_CFGNSTCALIB_TENMS_DEFAULT << 0)   /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
+#define SYSCFG_CFGNSTCALIB_SKEW              (0x1UL << 24)                              /**< Skew                                        */
+#define _SYSCFG_CFGNSTCALIB_SKEW_SHIFT       24                                         /**< Shift value for SYSCFG_SKEW                 */
+#define _SYSCFG_CFGNSTCALIB_SKEW_MASK        0x1000000UL                                /**< Bit mask for SYSCFG_SKEW                    */
+#define _SYSCFG_CFGNSTCALIB_SKEW_DEFAULT     0x00000001UL                               /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
+#define SYSCFG_CFGNSTCALIB_SKEW_DEFAULT      (_SYSCFG_CFGNSTCALIB_SKEW_DEFAULT << 24)   /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
+#define SYSCFG_CFGNSTCALIB_NOREF             (0x1UL << 25)                              /**< No Reference                                */
+#define _SYSCFG_CFGNSTCALIB_NOREF_SHIFT      25                                         /**< Shift value for SYSCFG_NOREF                */
+#define _SYSCFG_CFGNSTCALIB_NOREF_MASK       0x2000000UL                                /**< Bit mask for SYSCFG_NOREF                   */
+#define _SYSCFG_CFGNSTCALIB_NOREF_DEFAULT    0x00000000UL                               /**< Mode DEFAULT for SYSCFG_CFGNSTCALIB         */
+#define _SYSCFG_CFGNSTCALIB_NOREF_REF        0x00000000UL                               /**< Mode REF for SYSCFG_CFGNSTCALIB             */
+#define _SYSCFG_CFGNSTCALIB_NOREF_NOREF      0x00000001UL                               /**< Mode NOREF for SYSCFG_CFGNSTCALIB           */
+#define SYSCFG_CFGNSTCALIB_NOREF_DEFAULT     (_SYSCFG_CFGNSTCALIB_NOREF_DEFAULT << 25)  /**< Shifted mode DEFAULT for SYSCFG_CFGNSTCALIB */
+#define SYSCFG_CFGNSTCALIB_NOREF_REF         (_SYSCFG_CFGNSTCALIB_NOREF_REF << 25)      /**< Shifted mode REF for SYSCFG_CFGNSTCALIB     */
+#define SYSCFG_CFGNSTCALIB_NOREF_NOREF       (_SYSCFG_CFGNSTCALIB_NOREF_NOREF << 25)    /**< Shifted mode NOREF for SYSCFG_CFGNSTCALIB   */
 
 /* Bit fields for SYSCFG ROOTNSDATA0 */
-#define _SYSCFG_ROOTNSDATA0_RESETVALUE                    0x00000000UL                            /**< Default value for SYSCFG_ROOTNSDATA0        */
-#define _SYSCFG_ROOTNSDATA0_MASK                          0xFFFFFFFFUL                            /**< Mask for SYSCFG_ROOTNSDATA0                 */
-#define _SYSCFG_ROOTNSDATA0_DATA_SHIFT                    0                                       /**< Shift value for SYSCFG_DATA                 */
-#define _SYSCFG_ROOTNSDATA0_DATA_MASK                     0xFFFFFFFFUL                            /**< Bit mask for SYSCFG_DATA                    */
-#define _SYSCFG_ROOTNSDATA0_DATA_DEFAULT                  0x00000000UL                            /**< Mode DEFAULT for SYSCFG_ROOTNSDATA0         */
-#define SYSCFG_ROOTNSDATA0_DATA_DEFAULT                   (_SYSCFG_ROOTNSDATA0_DATA_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_ROOTNSDATA0 */
+#define _SYSCFG_ROOTNSDATA0_RESETVALUE       0x00000000UL                               /**< Default value for SYSCFG_ROOTNSDATA0        */
+#define _SYSCFG_ROOTNSDATA0_MASK             0xFFFFFFFFUL                               /**< Mask for SYSCFG_ROOTNSDATA0                 */
+#define _SYSCFG_ROOTNSDATA0_DATA_SHIFT       0                                          /**< Shift value for SYSCFG_DATA                 */
+#define _SYSCFG_ROOTNSDATA0_DATA_MASK        0xFFFFFFFFUL                               /**< Bit mask for SYSCFG_DATA                    */
+#define _SYSCFG_ROOTNSDATA0_DATA_DEFAULT     0x00000000UL                               /**< Mode DEFAULT for SYSCFG_ROOTNSDATA0         */
+#define SYSCFG_ROOTNSDATA0_DATA_DEFAULT      (_SYSCFG_ROOTNSDATA0_DATA_DEFAULT << 0)    /**< Shifted mode DEFAULT for SYSCFG_ROOTNSDATA0 */
 
 /* Bit fields for SYSCFG ROOTNSDATA1 */
-#define _SYSCFG_ROOTNSDATA1_RESETVALUE                    0x00000000UL                            /**< Default value for SYSCFG_ROOTNSDATA1        */
-#define _SYSCFG_ROOTNSDATA1_MASK                          0xFFFFFFFFUL                            /**< Mask for SYSCFG_ROOTNSDATA1                 */
-#define _SYSCFG_ROOTNSDATA1_DATA_SHIFT                    0                                       /**< Shift value for SYSCFG_DATA                 */
-#define _SYSCFG_ROOTNSDATA1_DATA_MASK                     0xFFFFFFFFUL                            /**< Bit mask for SYSCFG_DATA                    */
-#define _SYSCFG_ROOTNSDATA1_DATA_DEFAULT                  0x00000000UL                            /**< Mode DEFAULT for SYSCFG_ROOTNSDATA1         */
-#define SYSCFG_ROOTNSDATA1_DATA_DEFAULT                   (_SYSCFG_ROOTNSDATA1_DATA_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_ROOTNSDATA1 */
-
-/* Bit fields for SYSCFG CFGNSRPURATD0 */
-#define _SYSCFG_CFGNSRPURATD0_RESETVALUE                  0x00000000UL                                         /**< Default value for SYSCFG_CFGNSRPURATD0      */
-#define _SYSCFG_CFGNSRPURATD0_MASK                        0x00000180UL                                         /**< Mask for SYSCFG_CFGNSRPURATD0               */
-#define SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB              (0x1UL << 7)                                         /**< CFGNSTCALIB Protection Bit                  */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB_SHIFT       7                                                    /**< Shift value for SYSCFG_RATDCFGNSTCALIB      */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB_MASK        0x80UL                                               /**< Bit mask for SYSCFG_RATDCFGNSTCALIB         */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB_DEFAULT     0x00000000UL                                         /**< Mode DEFAULT for SYSCFG_CFGNSRPURATD0       */
-#define SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB_DEFAULT      (_SYSCFG_CFGNSRPURATD0_RATDCFGNSTCALIB_DEFAULT << 7) /**< Shifted mode DEFAULT for SYSCFG_CFGNSRPURATD0*/
-#define SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC              (0x1UL << 8)                                         /**< CFGNSSYSTIC Protection Bit                  */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC_SHIFT       8                                                    /**< Shift value for SYSCFG_RATDCFGNSSYSTIC      */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC_MASK        0x100UL                                              /**< Bit mask for SYSCFG_RATDCFGNSSYSTIC         */
-#define _SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC_DEFAULT     0x00000000UL                                         /**< Mode DEFAULT for SYSCFG_CFGNSRPURATD0       */
-#define SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC_DEFAULT      (_SYSCFG_CFGNSRPURATD0_RATDCFGNSSYSTIC_DEFAULT << 8) /**< Shifted mode DEFAULT for SYSCFG_CFGNSRPURATD0*/
-
-/* Bit fields for SYSCFG CFGNSRPURATD12 */
-#define _SYSCFG_CFGNSRPURATD12_RESETVALUE                 0x00000000UL                                          /**< Default value for SYSCFG_CFGNSRPURATD12     */
-#define _SYSCFG_CFGNSRPURATD12_MASK                       0x00000003UL                                          /**< Mask for SYSCFG_CFGNSRPURATD12              */
-#define SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0             (0x1UL << 0)                                          /**< DATA0 Protection Bit                        */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0_SHIFT      0                                                     /**< Shift value for SYSCFG_RATDROOTNSDATA0      */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0_MASK       0x1UL                                                 /**< Bit mask for SYSCFG_RATDROOTNSDATA0         */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0_DEFAULT    0x00000000UL                                          /**< Mode DEFAULT for SYSCFG_CFGNSRPURATD12      */
-#define SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0_DEFAULT     (_SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA0_DEFAULT << 0) /**< Shifted mode DEFAULT for SYSCFG_CFGNSRPURATD12*/
-#define SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1             (0x1UL << 1)                                          /**< DATA1 Protection Bit                        */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1_SHIFT      1                                                     /**< Shift value for SYSCFG_RATDROOTNSDATA1      */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1_MASK       0x2UL                                                 /**< Bit mask for SYSCFG_RATDROOTNSDATA1         */
-#define _SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1_DEFAULT    0x00000000UL                                          /**< Mode DEFAULT for SYSCFG_CFGNSRPURATD12      */
-#define SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1_DEFAULT     (_SYSCFG_CFGNSRPURATD12_RATDROOTNSDATA1_DEFAULT << 1) /**< Shifted mode DEFAULT for SYSCFG_CFGNSRPURATD12*/
+#define _SYSCFG_ROOTNSDATA1_RESETVALUE       0x00000000UL                               /**< Default value for SYSCFG_ROOTNSDATA1        */
+#define _SYSCFG_ROOTNSDATA1_MASK             0xFFFFFFFFUL                               /**< Mask for SYSCFG_ROOTNSDATA1                 */
+#define _SYSCFG_ROOTNSDATA1_DATA_SHIFT       0                                          /**< Shift value for SYSCFG_DATA                 */
+#define _SYSCFG_ROOTNSDATA1_DATA_MASK        0xFFFFFFFFUL                               /**< Bit mask for SYSCFG_DATA                    */
+#define _SYSCFG_ROOTNSDATA1_DATA_DEFAULT     0x00000000UL                               /**< Mode DEFAULT for SYSCFG_ROOTNSDATA1         */
+#define SYSCFG_ROOTNSDATA1_DATA_DEFAULT      (_SYSCFG_ROOTNSDATA1_DATA_DEFAULT << 0)    /**< Shifted mode DEFAULT for SYSCFG_ROOTNSDATA1 */
 
 /** @} End of group EFR32MG24_SYSCFG_CFGNS_BitFields */
 /** @} End of group EFR32MG24_SYSCFG_CFGNS */

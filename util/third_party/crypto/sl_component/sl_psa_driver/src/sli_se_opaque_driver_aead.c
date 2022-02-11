@@ -182,13 +182,10 @@ psa_status_t sli_se_opaque_aead_set_nonce(sli_se_opaque_aead_operation_t *operat
                                       nonce_size);
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_opaque_aead_set_lengths(sli_se_opaque_aead_operation_t *operation,
                                             size_t ad_length,
                                             size_t plaintext_length)
 {
-  // TODO: when implementing AES-CCM, this will need to be fleshed out
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -197,8 +194,6 @@ psa_status_t sli_se_opaque_aead_set_lengths(sli_se_opaque_aead_operation_t *oper
                                         ad_length,
                                         plaintext_length);
 }
-
-#endif //defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_opaque_aead_update_ad(sli_se_opaque_aead_operation_t *operation,
                                           const uint8_t *input,
@@ -251,8 +246,6 @@ psa_status_t sli_se_opaque_aead_finish(sli_se_opaque_aead_operation_t *operation
                                    tag_length);
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_opaque_aead_verify(sli_se_opaque_aead_operation_t *operation,
                                        uint8_t *plaintext,
                                        size_t plaintext_size,
@@ -272,6 +265,7 @@ psa_status_t sli_se_opaque_aead_verify(sli_se_opaque_aead_operation_t *operation
                                    tag,
                                    tag_length);
 }
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_opaque_aead_abort(sli_se_opaque_aead_operation_t *operation)
 {

@@ -51,6 +51,18 @@
 #include "rail_config.h"
 #endif
 
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+  #include "sl_iostream_usart_vcom_config.h"
+#endif
+
+#if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+  #include "sl_iostream_eusart_vcom_config.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /******************************************************************************
  * Macros
  *****************************************************************************/
@@ -125,6 +137,9 @@
     "CAL_NEEDED",                                                       \
     "RF_SENSED",                                                        \
     "PA_PROTECTION",                                                    \
+    "SIGNAL_DETECTED",                                                  \
+    "IEEE802154_MODESWITCH_START",                                      \
+    "IEEE802154_MODESWITCH_END",                                        \
   }
 
 // Since channel hopping is pretty space intensive, put some limitations on it
@@ -140,6 +155,22 @@
 #define CHANNEL_HOPPING_BUFFER_SIZE (200U * MAX_NUMBER_CHANNELS)
 #endif
 
+// Define generic VCOM RX and TX port-pin definitions to use either the USART
+// or the EUSART pins.
+#ifdef SL_CATALOG_IOSTREAM_USART_PRESENT
+#define VCOM_RX_PORT SL_IOSTREAM_USART_VCOM_RX_PORT
+#define VCOM_RX_PIN SL_IOSTREAM_USART_VCOM_RX_PIN
+#define VCOM_TX_PORT SL_IOSTREAM_USART_VCOM_TX_PORT
+#define VCOM_TX_PIN SL_IOSTREAM_USART_VCOM_TX_PIN
+#elif defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+#define VCOM_RX_PORT SL_IOSTREAM_EUSART_VCOM_RX_PORT
+#define VCOM_RX_PIN SL_IOSTREAM_EUSART_VCOM_RX_PIN
+#define VCOM_TX_PORT SL_IOSTREAM_EUSART_VCOM_TX_PORT
+#define VCOM_TX_PIN SL_IOSTREAM_EUSART_VCOM_TX_PIN
+#else
+// No VCOM (no CLI)
+#endif
+
 extern uint32_t channelHoppingBufferSpace[CHANNEL_HOPPING_BUFFER_SIZE];
 
 /******************************************************************************
@@ -147,6 +178,7 @@ extern uint32_t channelHoppingBufferSpace[CHANNEL_HOPPING_BUFFER_SIZE];
  *****************************************************************************/
 
 typedef struct PhySwitchToRx{
+  uint8_t extraDelayUs;
   bool enable;
   bool disableWhitening;
   RAIL_BLE_Phy_t phy;
@@ -293,6 +325,7 @@ typedef struct Counters{
   uint32_t ackTxFpAddrFail;
   // Counts all users transmits that get on-air (when TX_STARTED event enabled)
   uint32_t userTxStarted;
+  uint32_t userTxRemainingErrors;
 
   // Channel busy doesn't differentiate
   // between ack/user packets
@@ -332,8 +365,8 @@ typedef struct Counters{
 typedef RAIL_Status_t (*TxTimestampFunc)(RAIL_Handle_t, RAIL_TxPacketDetails_t *);
 typedef RAIL_Status_t (*RxTimestampFunc)(RAIL_Handle_t, RAIL_RxPacketDetails_t *);
 
-extern const char* eventNames[];
-extern uint8_t numRailEvents;
+extern const char * const eventNames[];
+extern const uint8_t numRailEvents;
 extern bool printingEnabled;
 extern PhySwitchToRx_t phySwitchToRx;
 extern Counters_t counters;
@@ -349,6 +382,7 @@ extern bool enableRandomTxDelay;
 extern int32_t txCount;
 extern int32_t txRepeatCount;
 #define RAIL_Idle txRepeatCount = 0, RAIL_Idle // Ensure explicit idles clear txRepeatCount
+extern int32_t txRemainingCount;
 extern uint32_t txAfterRxDelay;
 extern int32_t txCancelDelay;
 extern RAIL_StopMode_t txCancelMode;
@@ -396,6 +430,9 @@ extern volatile uint16_t rxDataSourceEventState;
 extern uint8_t logLevel;
 extern uint8_t txData[SL_RAIL_TEST_MAX_PACKET_LENGTH];
 extern uint16_t txDataLen;
+extern uint8_t txData_2B[2];
+extern uint8_t txCountAfterModeSwitch;
+extern uint16_t modeSwitchChannel;
 
 extern uint8_t ackData[RAIL_AUTOACK_MAX_LENGTH];
 extern uint8_t ackDataLen;
@@ -511,6 +548,7 @@ void printPacket(char *cmdName,
                  uint8_t *data,
                  uint16_t dataLength,
                  RxPacketData_t *packetInfo);
+void sendPacketIfPending(void);
 
 void updateGraphics(void);
 void enableGraphics(void);
@@ -555,5 +593,9 @@ void getAddressFilter(sl_cli_command_arg_t *args);
 void printTxPacket(sl_cli_command_arg_t *args);
 void resetCounters(sl_cli_command_arg_t *args);
 void getPti(sl_cli_command_arg_t *args);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __APPS_COMMON_H__

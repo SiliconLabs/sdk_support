@@ -53,6 +53,12 @@
 // <i> Default: usartStopbits1
 #define SL_IOSTREAM_UART_INSTANCE_STOP_BITS             usartStopbits1
 
+// <o SL_IOSTREAM_USART_INSTANCE_FLOW_CONTROL_TYPE> Flow control
+// <uartFlowControlNone=> None
+// <uartFlowControlSoftware=> Software Flow control (XON/XOFF)
+// <i> Default: uartFlowControlNone
+#define SL_IOSTREAM_USART_INSTANCE_FLOW_CONTROL_TYPE     uartFlowControlNone
+
 // <o SL_IOSTREAM_UART_INSTANCE_RX_BUFFER_SIZE> Receive buffer size
 // <i> Default: 32
 #define SL_IOSTREAM_UART_INSTANCE_RX_BUFFER_SIZE    32

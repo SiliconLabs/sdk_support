@@ -106,7 +106,7 @@ extern "C" {
 #endif
 #if defined(LESENSE_PRESENT)
 #define CMU_LESENSEHF_BRANCH       22
-#define CMU_LESENSELF_BRANCH       23
+#define CMU_LESENSE_BRANCH         23
 #endif
 #if defined(_CMU_EM01GRPCCLKCTRL_MASK)
 #define CMU_EM01GRPCCLK_BRANCH     24
@@ -158,8 +158,29 @@ typedef enum {
   cmuHFRCODPLLFreq_56M0Hz           = 56000000U,        /**< 56MHz RC band. */
   cmuHFRCODPLLFreq_64M0Hz           = 64000000U,        /**< 64MHz RC band. */
   cmuHFRCODPLLFreq_80M0Hz           = 80000000U,        /**< 80MHz RC band. */
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  cmuHFRCODPLLFreq_100M0Hz          = 100000000U,       /**< 100MHz RC band. */
+#endif
   cmuHFRCODPLLFreq_UserDefined      = 0,
 } CMU_HFRCODPLLFreq_TypeDef;
+
+#if defined(USBPLL_PRESENT)
+/** HFXO reference frequency */
+typedef enum {
+  cmuHFXORefFreq_38M0Hz            = (1UL << _PLL_CTRL_DIVR_SHIFT)
+                                     | (24UL << _PLL_CTRL_DIVX_SHIFT)
+                                     | (19UL << _PLL_CTRL_DIVN_SHIFT), /**< 38MHz input frequency.   */
+  cmuHFXORefFreq_38M4Hz            = (1UL << _PLL_CTRL_DIVR_SHIFT)
+                                     | (25UL << _PLL_CTRL_DIVX_SHIFT)
+                                     | (20UL << _PLL_CTRL_DIVN_SHIFT), /**< 38.4MHz input frequency. */
+  cmuHFXORefFreq_39M0Hz            = (1UL << _PLL_CTRL_DIVR_SHIFT)
+                                     | (16UL << _PLL_CTRL_DIVX_SHIFT)
+                                     | (13UL << _PLL_CTRL_DIVN_SHIFT), /**< 39MHz input frequency.   */
+  cmuHFXORefFreq_40M0Hz            = (1UL << _PLL_CTRL_DIVR_SHIFT)
+                                     | (24UL << _PLL_CTRL_DIVX_SHIFT)
+                                     | (20UL << _PLL_CTRL_DIVN_SHIFT), /**< 40MHz input frequency.   */
+} CMU_HFXORefFreq_TypeDef;
+#endif
 
 /** HFRCODPLL maximum frequency */
 #define CMU_HFRCODPLL_MIN       cmuHFRCODPLLFreq_1M0Hz
@@ -300,16 +321,17 @@ typedef enum {
 #endif
 #if defined(LESENSE_PRESENT)
   cmuClock_LESENSEHFCLK = (CMU_LESENSEHF_BRANCH << CMU_CLK_BRANCH_POS),         /**< LESENSE high frequency clock. */
-  cmuClock_LESENSELFCLK = (CMU_LESENSELF_BRANCH << CMU_CLK_BRANCH_POS),         /**< LESENSE low frequency clock. */
+  cmuClock_LESENSECLK = (CMU_LESENSE_BRANCH << CMU_CLK_BRANCH_POS),             /**< LESENSE low frequency clock. */
 #endif
-  /*********************/
-  /* Peripheral clocks */
-  /*********************/
 
   cmuClock_CORE = (CMU_CORE_BRANCH << CMU_CLK_BRANCH_POS),                      /**< Cortex-M33 core clock. */
 #if defined(PDM_PRESENT)
   cmuClock_PDMREF = (CMU_PDMREF_BRANCH << CMU_CLK_BRANCH_POS),                  /**< PDMREF clock. */
 #endif
+  /*********************/
+  /* Peripheral clocks */
+  /*********************/
+
   cmuClock_LDMA = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                   | (_CMU_CLKEN0_LDMA_SHIFT << CMU_EN_BIT_POS),                 /**< LDMA clock. */
   cmuClock_LDMAXBAR = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
@@ -335,6 +357,27 @@ typedef enum {
   cmuClock_TIMER4 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_TIMER4_SHIFT << CMU_EN_BIT_POS),             /**< TIMER4 clock. */
 #endif
+#if defined(_CMU_CLKEN1_TIMER5_SHIFT)
+  cmuClock_TIMER5 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN1_TIMER5_SHIFT << CMU_EN_BIT_POS),
+#elif defined(_CMU_CLKEN0_TIMER5_SHIFT)
+  cmuClock_TIMER5 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN0_TIMER5_SHIFT << CMU_EN_BIT_POS),
+#endif
+#if defined(_CMU_CLKEN1_TIMER6_SHIFT)
+  cmuClock_TIMER6 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN1_TIMER6_SHIFT << CMU_EN_BIT_POS),
+#elif defined(_CMU_CLKEN0_TIMER6_SHIFT)
+  cmuClock_TIMER6 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN0_TIMER6_SHIFT << CMU_EN_BIT_POS),
+#endif
+#if defined(_CMU_CLKEN1_TIMER7_SHIFT)
+  cmuClock_TIMER7 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN1_TIMER7_SHIFT << CMU_EN_BIT_POS),
+#elif defined(_CMU_CLKEN0_TIMER7_SHIFT)
+  cmuClock_TIMER7 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN0_TIMER7_SHIFT << CMU_EN_BIT_POS),
+#endif
 #if defined(USART_PRESENT) && USART_COUNT > 0
   cmuClock_USART0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_USART0_SHIFT << CMU_EN_BIT_POS),             /**< USART0 clock. */
@@ -343,8 +386,10 @@ typedef enum {
   cmuClock_USART1 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_USART1_SHIFT << CMU_EN_BIT_POS),             /**< USART1 clock. */
 #endif
+#if defined(IADC_PRESENT)
   cmuClock_IADC0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN0_IADC0_SHIFT << CMU_EN_BIT_POS),               /**< IADC0 clock. */
+#endif
   cmuClock_AMUXCP0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN0_AMUXCP0_SHIFT << CMU_EN_BIT_POS),           /**< AMUXCP0 clock. */
 #if defined(LETIMER_PRESENT)
@@ -357,10 +402,14 @@ typedef enum {
   cmuClock_WDOG1 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                    | (_CMU_CLKEN1_WDOG1_SHIFT << CMU_EN_BIT_POS),               /**< WDOG1 clock. */
 #endif
+#if defined(I2C_PRESENT)
   cmuClock_I2C0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                   | (_CMU_CLKEN0_I2C0_SHIFT << CMU_EN_BIT_POS),                 /**< I2C0 clock. */
+#if I2C_COUNT > 1
   cmuClock_I2C1 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                   | (_CMU_CLKEN0_I2C1_SHIFT << CMU_EN_BIT_POS),                 /**< I2C1 clock. */
+#endif
+#endif
   cmuClock_SYSCFG = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
                     | (_CMU_CLKEN0_SYSCFG_SHIFT << CMU_EN_BIT_POS),             /**< SYSCFG clock. */
   cmuClock_DPLL0 = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
@@ -421,6 +470,14 @@ typedef enum {
   cmuClock_EUSART2 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                      | (_CMU_CLKEN1_EUSART2_SHIFT << CMU_EN_BIT_POS),           /**< EUSART2 clock. */
 #endif
+#if defined(EUSART_PRESENT) && EUSART_COUNT > 3
+  cmuClock_EUSART3 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN1_EUSART3_SHIFT << CMU_EN_BIT_POS),           /**< EUSART3 clock. */
+#endif
+#if defined(EUSART_PRESENT) && EUSART_COUNT > 4
+  cmuClock_EUSART4 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN1_EUSART4_SHIFT << CMU_EN_BIT_POS),           /**< EUSART4 clock. */
+#endif
 #if defined(IFADCDEBUG_PRESENT)
   cmuClock_IFADCDEBUG = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
                         | (_CMU_CLKEN1_IFADCDEBUG_SHIFT << CMU_EN_BIT_POS),     /**< IFADCDEBUG clock. */
@@ -440,8 +497,8 @@ typedef enum {
                     | (_CMU_CLKEN1_ICACHE0_SHIFT << CMU_EN_BIT_POS),            /**< ICACHE clock. */
 #endif
 #if defined(LESENSE_PRESENT)
-  cmuClock_LESENSEHF = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
-                       | (_CMU_CLKEN0_LESENSE_SHIFT << CMU_EN_BIT_POS),         /**< LESENSE high frequency clock. */
+  cmuClock_LESENSE = (CMU_CLKEN0_EN_REG << CMU_EN_REG_POS)
+                     | (_CMU_CLKEN0_LESENSE_SHIFT << CMU_EN_BIT_POS),           /**< LESENSE clock. */
 #endif
 #if defined(ACMP_PRESENT)
   cmuClock_ACMP0 = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
@@ -480,7 +537,15 @@ typedef enum {
                  | (_CMU_CLKEN1_MVP_SHIFT << CMU_EN_BIT_POS),                   /**< MVP clock. */
 #endif
   cmuClock_MSC = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
-                 | (_CMU_CLKEN1_MSC_SHIFT << CMU_EN_BIT_POS)                    /**< MSC clock. */
+                 | (_CMU_CLKEN1_MSC_SHIFT << CMU_EN_BIT_POS),                   /**< MSC clock. */
+#if defined(USB_PRESENT)
+  cmuClock_USB = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                 | (_CMU_CLKEN1_USB_SHIFT << CMU_EN_BIT_POS),                   /**< USB clock. */
+#endif
+#if defined(RFFPLL_PRESENT)
+  cmuClock_RFFPLL = (CMU_CLKEN1_EN_REG << CMU_EN_REG_POS)
+                    | (_CMU_CLKEN1_RFFPLL0_SHIFT << CMU_EN_BIT_POS)             /**< RFFPLL clock. */
+#endif
 } CMU_Clock_TypeDef;
 #endif  // (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
 
@@ -553,9 +618,15 @@ typedef enum {
 #if defined(PCNT_PRESENT)
   cmuSelect_PCNTEXTCLK,  /**< Pulse counter external source or PRS as clock.  */
 #endif
-  cmuSelect_TEMPOSC,     /**< Temperatur oscillator. */
+  cmuSelect_TEMPOSC,     /**< Temperature oscillator. */
   cmuSelect_PFMOSC,      /**< PFM oscillator. */
-  cmuSelect_BIASOSC      /**< BIAS oscillator. */
+  cmuSelect_BIASOSC,     /**< BIAS oscillator. */
+#if defined(USBPLL_PRESENT)
+  cmuSelect_PLL0,        /**< PLL clock for USB.  */
+#endif
+#if defined(RFFPLL_PRESENT)
+  cmuSelect_RFFPLLSYS    /**< Radio frequency friendly PLL system clock source.  */
+#endif
 } CMU_Select_TypeDef;
 #endif  // (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
 
@@ -668,7 +739,7 @@ typedef enum {
  ******************************************************************************/
 
 /** LFXO initialization structure. Init values should be obtained from a
-    configuration tool, app. note or xtal datasheet.  */
+    configuration tool, app. note or xtal data sheet.  */
 typedef struct {
   uint8_t   gain;                       /**< Startup gain. */
   uint8_t   capTune;                    /**< Internal capacitance tuning. */
@@ -732,7 +803,7 @@ typedef struct {
   }
 
 /** HFXO initialization structure. Init values should be obtained from a
-    configuration tool, app. note or xtal datasheet. */
+    configuration tool, app. note or xtal data sheet. */
 typedef struct {
   CMU_HfxoCbLsbTimeout_TypeDef        timeoutCbLsb;            /**< Core bias change timeout. */
   CMU_HfxoSteadyStateTimeout_TypeDef  timeoutSteadyFirstLock;  /**< Steady state timeout duration for first lock. */
@@ -759,6 +830,33 @@ typedef struct {
 } CMU_HFXOInit_TypeDef;
 
 #if defined(HFXO_CTRL_EM23ONDEMAND)
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+// See [PM-2871] for details.
+/** Default configuration of fixed tuning capacitance on XI or XO for EFR32XG23. */
+#define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Xo
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)    \
+  && defined(_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
+  && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM == 20)
+// See [PM-5131] for details.
+/**
+ * Default configuration of fixed tuning capacitance on XO for EFR32XG24
+ * when high power PA is present and output dBm equal 20 dBm.
+ */
+#define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Xo
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+// See [PM-5638] for details.
+/**
+ * Default configuration of fixed tuning capacitance on XO for EFR32XG25
+ */
+#define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Xo
+#else
+/**
+ * Default configuration of fixed tuning capacitance on XO and XI.
+ */
+#define CMU_HFXOINIT_CTUNEFIXANA_DEFAULT cmuHfxoCtuneFixCap_Both
+#endif
+
 /** Default HFXO initialization values for XTAL mode. */
 #define CMU_HFXOINIT_DEFAULT                                        \
   {                                                                 \
@@ -770,7 +868,7 @@ typedef struct {
     32U,                        /* coreBiasStartup               */ \
     32U,                        /* imCoreBiasStartup             */ \
     cmuHfxoCoreDegen_None,                                          \
-    cmuHfxoCtuneFixCap_Both,                                        \
+    CMU_HFXOINIT_CTUNEFIXANA_DEFAULT,                               \
     _HFXO_XTALCTRL_CTUNEXOANA_DEFAULT, /* ctuneXoAna             */ \
     _HFXO_XTALCTRL_CTUNEXIANA_DEFAULT, /* ctuneXiAna             */ \
     60U,                        /* coreBiasAna                   */ \
@@ -907,6 +1005,65 @@ typedef struct {
   }
 #endif
 
+#if defined(_HFXO_BUFOUTCTRL_MASK)
+
+/** Crystal sharing timeout start up timeout. */
+typedef enum {
+  startupTimeout42Us  = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T42US,  /**< Timeout set to 42 us. */
+  startupTimeout83Us  = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T83US,  /**< Timeout set to 83 us. */
+  startupTimeout108Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T108US, /**< Timeout set to 108 us. */
+  startupTimeout133Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T133US, /**< Timeout set to 133 us. */
+  startupTimeout158Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T158US, /**< Timeout set to 158 us. */
+  startupTimeout183Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T183US, /**< Timeout set to 183 us. */
+  startupTimeout208Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T208US, /**< Timeout set to 208 us. */
+  startupTimeout233Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T233US, /**< Timeout set to 233 us. */
+  startupTimeout258Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T258US, /**< Timeout set to 258 us. */
+  startupTimeout283Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T283US, /**< Timeout set to 283 us. */
+  startupTimeout333Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T333US, /**< Timeout set to 333 us. */
+  startupTimeout375Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T375US, /**< Timeout set to 375 us. */
+  startupTimeout417Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T417US, /**< Timeout set to 417 us. */
+  startupTimeout458Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T458US, /**< Timeout set to 458 us. */
+  startupTimeout500Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T500US, /**< Timeout set to 500 us. */
+  startupTimeout667Us = _HFXO_BUFOUTCTRL_TIMEOUTSTARTUP_T667US, /**< Timeout set to 667 us. */
+} CMU_BufoutTimeoutStartup_TypeDef;
+
+/** Crystal sharing leader initialization structure. */
+typedef struct {
+  bool                                minimalStartupDelay;  /**< If enabled, bufout won't start until timeout expires. */
+  CMU_BufoutTimeoutStartup_TypeDef    timeoutStartup;       /**< Wait duration of the oscillator startup sequence to prevent bufout starting too early. */
+} CMU_BUFOUTLeaderInit_TypeDef;
+
+/** Default crystal sharing master initialization values. */
+#define CMU_HFXO_CRYSTAL_INIT_LEADER_DEFAULT        \
+  {                                                 \
+    true,                 /* minimalStartupDelay */ \
+    startupTimeout208Us,  /* timeoutStartup      */ \
+  }
+#endif
+
+#if defined(_HFXO_CTRL_PRSSTATUSSEL0_MASK)
+/** PRS status select output signal. */
+typedef enum {
+  PRS_Status_select_0,  /**< PRS status 0 output signal. */
+  PRS_Status_select_1   /**< PRS status 1 output signal. */
+} CMU_PRS_Status_Output_Select_TypeDef;
+
+/** Crystal sharing follower initialization structure. */
+typedef struct {
+  CMU_PRS_Status_Output_Select_TypeDef prsStatusSelectOutput; /**< PRS status output select.  */
+  bool                                 em23OnDemand;          /**< Enable em23 on demand.     */
+  bool                                 regLock;               /**< Lock registers.            */
+} CMU_CrystalSharingFollowerInit_TypeDef;
+
+/** Default crystal sharing follower initialization values. */
+#define CMU_HFXO_CRYSTAL_INIT_Follower_DEFAULT                                \
+  {                                                                           \
+    PRS_Status_select_0,                          /* prsStatusSelectOutput */ \
+    true,                                         /* em23OnDemand          */ \
+    false                                         /* regLock               */ \
+  }
+#endif
+
 /** DPLL initialization structure. Frequency will be Fref*(N+1)/(M+1). */
 typedef struct {
   uint32_t  frequency;                  /**< PLL frequency value, max 80 MHz. */
@@ -916,7 +1073,7 @@ typedef struct {
   CMU_DPLLEdgeSel_TypeDef   edgeSel;    /**< Reference clock edge detect selector. */
   CMU_DPLLLockMode_TypeDef  lockMode;   /**< DPLL lock mode selector.         */
   bool      autoRecover;                /**< Enable automatic lock recovery.  */
-  bool      ditherEn;                   /**< Enable dither functionalityery.  */
+  bool      ditherEn;                   /**< Enable dither functionality.  */
 } CMU_DPLLInit_TypeDef;
 
 /**
@@ -984,6 +1141,112 @@ typedef struct {
     false                         /* Don't enable dither function.      */ \
   }
 
+#if defined(USBPLL_PRESENT)
+/** USB PLL initialization structure. */
+typedef struct {
+  CMU_HFXORefFreq_TypeDef hfxoRefFreq;    /**< HFXO reference frequency.   */
+  bool          shuntRegEn;               /**< Shunt regulator enable.     */
+  bool          disOnDemand;              /**< Disable on-demand requests. */
+  bool          forceEn;                  /**< Force oscillator enable.    */
+  bool          regLock;                  /**< Enable register lock.       */
+} CMU_PLL_Init_TypeDef;
+
+/**
+ * Default configurations for USB PLL initialization if the HFXO frequency is
+ * 38 MHz.
+ */
+#define CMU_PLL_REFFREQ_38MHZ                                              \
+  {                                                                        \
+    cmuHFXORefFreq_38M0Hz,            /* Reference frequency.           */ \
+    false,                            /* Disable shunt regulator.       */ \
+    false,                            /* Disable PLL always on.         */ \
+    false,                            /* Force enable.                  */ \
+    true                              /* Enable register lock.          */ \
+  }
+
+/**
+ * Default configurations for USB PLL initialization if the HFXO frequency is
+ * 38.4 MHz.
+ */
+#define CMU_PLL_REFFREQ_38_4MHZ                                            \
+  {                                                                        \
+    cmuHFXORefFreq_38M4Hz,            /* Reference frequency.           */ \
+    false,                            /* Disable shunt regulator.       */ \
+    false,                            /* Disable PLL always on.         */ \
+    false,                            /* Force enable.                  */ \
+    true                              /* Enable register lock.          */ \
+  }
+
+/**
+ * Default configurations for USB PLL initialization if the HFXO frequency is
+ * 39 MHz.
+ */
+#define CMU_PLL_REFFREQ_39MHZ                                              \
+  {                                                                        \
+    cmuHFXORefFreq_39M0Hz,            /* Reference frequency.           */ \
+    false,                            /* Disable shunt regulator.       */ \
+    false,                            /* Disable PLL always on.         */ \
+    false,                            /* Force enable.                  */ \
+    true                              /* Enable register lock.          */ \
+  }
+
+/**
+ * Default configurations for USB PLL initialization if the HFXO frequency is
+ * 40 MHz.
+ */
+#define CMU_PLL_REFFREQ_40MHZ                                              \
+  {                                                                        \
+    cmuHFXORefFreq_40M0Hz,            /* Reference frequency.           */ \
+    false,                            /* Disable shunt regulator.       */ \
+    false,                            /* Disable PLL always on.         */ \
+    false,                            /* Force enable.                  */ \
+    true                              /* Enable register lock.          */ \
+  }
+#endif
+
+#if defined(RFFPLL_PRESENT)
+/**
+ * RFF PLL initialization structure. When using this structure you need to
+ * modify the X, Y and N factor and the desired frequency to match
+ * the components placed on the board (namely the RFFPLL reference clock).
+ * X, Y, N values for an 39MHz HFXO.
+ * Formula for RFFPLLSYS: freq = HFXOfreq * dividerN / 2 / dividerY
+ */
+typedef struct {
+  uint32_t      frequency;            /**< Target frequency.           */
+  bool          disOnDemand;          /**< Disable on-demand requests. */
+  bool          forceEn;              /**< Force oscillator enable.    */
+  bool          regLock;              /**< Enable register lock.       */
+  uint8_t       dividerY;             /**< Divider Y for digital.      */
+  uint8_t       dividerX;             /**< Divider X for Radio.        */
+  uint8_t       dividerN;             /**< Feedback divider N.         */
+} CMU_RFFPLL_Init_TypeDef;
+
+/** Radio frequency locked loop default initialization values. */
+#define CMU_RFFPLL_DEFAULT                                                \
+  {                                                                       \
+    100000000UL,                       /* Target frequency.            */ \
+    false,                             /* Disable on-demand requests.  */ \
+    false,                             /* Force enable.                */ \
+    true,                              /* Enable register lock.        */ \
+    _RFFPLL_RFFPLLCTRL1_DIVY_DEFAULT,  /* Divider Y for digital.       */ \
+    _RFFPLL_RFFPLLCTRL1_DIVX_DEFAULT,  /* Divider X for Radio.         */ \
+    _RFFPLL_RFFPLLCTRL1_DIVN_DEFAULT   /* Feedback divider N.          */ \
+  }
+
+/** Radio frequency locked loop initialization values for 97.5MHz. */
+#define CMU_RFFPLL_97_5_MHZ_REF_FREQ_39_MHZ                               \
+  {                                                                       \
+    97500000UL,                        /* Target frequency.            */ \
+    false,                             /* Disable on-demand requests.  */ \
+    false,                             /* Force enable.                */ \
+    true,                              /* Enable register lock.        */ \
+    20U,                               /* Divider Y for digital.       */ \
+    6U,                                /* Divider X for Radio.         */ \
+    100U                               /* Feedback divider N.          */ \
+  }
+#endif
+
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
@@ -1001,6 +1264,9 @@ void                       CMU_ClkOutPinConfig(uint32_t           clkno,
 CMU_ClkDiv_TypeDef         CMU_ClockDivGet(CMU_Clock_TypeDef clock);
 void                       CMU_ClockDivSet(CMU_Clock_TypeDef clock,
                                            CMU_ClkDiv_TypeDef div);
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
+void                       CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable);
+#endif
 uint32_t                   CMU_ClockFreqGet(CMU_Clock_TypeDef clock);
 CMU_Select_TypeDef         CMU_ClockSelectGet(CMU_Clock_TypeDef clock);
 void                       CMU_ClockSelectSet(CMU_Clock_TypeDef clock,
@@ -1009,30 +1275,42 @@ uint16_t                   CMU_LF_ClockPrecisionGet(CMU_Clock_TypeDef clock);
 CMU_HFRCODPLLFreq_TypeDef  CMU_HFRCODPLLBandGet(void);
 void                       CMU_HFRCODPLLBandSet(CMU_HFRCODPLLFreq_TypeDef freq);
 bool                       CMU_DPLLLock(const CMU_DPLLInit_TypeDef *init);
+#if defined(USBPLL_PRESENT)
+void                       CMU_USBPLLInit(const CMU_PLL_Init_TypeDef *pllInit);
+#endif
+#if defined(RFFPLL_PRESENT)
+void                       CMU_RFFPLLInit(const CMU_RFFPLL_Init_TypeDef *pllInit);
+#endif
 void                       CMU_HFXOInit(const CMU_HFXOInit_TypeDef *hfxoInit);
+#if defined(HFXO0_BUFOUT)
+void                       CMU_HFXOStartCrystalSharingLeader(const CMU_BUFOUTLeaderInit_TypeDef *bufoutInit,
+                                                             GPIO_Port_TypeDef                   port,
+                                                             unsigned int                        pin);
+#endif
+#if defined(_HFXO_CTRL_PRSSTATUSSEL0_MASK)
+void                       CMU_HFXOCrystalSharingFollowerInit(CMU_PRS_Status_Output_Select_TypeDef  prsStatusSelectOutput,
+                                                              unsigned int                          prsAsyncCh,
+                                                              GPIO_Port_TypeDef                     port,
+                                                              unsigned int                          pin);
+#endif
 #if defined(_SILICON_LABS_32B_SERIES_2)
 void                       CMU_HFXOCTuneDeltaSet(int32_t delta);
 int32_t                    CMU_HFXOCTuneDeltaGet(void);
 #endif
 void                       CMU_LFXOInit(const CMU_LFXOInit_TypeDef *lfxoInit);
 void                       CMU_LFXOPrecisionSet(uint16_t precision);
+#if defined(PLFRCO_PRESENT)
+void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
+#endif
 uint32_t                   CMU_OscillatorTuningGet(CMU_Osc_TypeDef osc);
 void                       CMU_OscillatorTuningSet(CMU_Osc_TypeDef osc,
                                                    uint32_t val);
 void                       CMU_UpdateWaitStates(uint32_t freq, int vscale);
 void                       CMU_PCNTClockExternalSet(unsigned int instance, bool external);
 
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
-void                       CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable);
-#endif
-
 #if defined(HFRCOEM23_PRESENT)
 CMU_HFRCOEM23Freq_TypeDef  CMU_HFRCOEM23BandGet(void);
 void                       CMU_HFRCOEM23BandSet(CMU_HFRCOEM23Freq_TypeDef freq);
-#endif
-
-#if defined(PLFRCO_PRESENT)
-void                       CMU_LFRCOSetPrecision(CMU_Precision_TypeDef precision);
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
@@ -1059,7 +1337,7 @@ __STATIC_INLINE void CMU_ClockEnable(CMU_Clock_TypeDef clock, bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Configures continuous calibration mode.
+ *   Configure continuous calibration mode.
  * @param[in] enable
  *   If true, enables continuous calibration, if false disables continuous
  *   calibration.
@@ -1071,7 +1349,7 @@ __STATIC_INLINE void CMU_CalibrateCont(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Starts calibration.
+ *   Start calibration.
  * @note
  *   This call is usually invoked after @ref CMU_CalibrateConfig() and possibly
  *   @ref CMU_CalibrateCont().
@@ -1200,7 +1478,7 @@ __STATIC_INLINE void CMU_IntSet(uint32_t flags)
  *   unintended modification.
  *
  * @details
- *   Please refer to the reference manual for CMU registers that will be
+ *   See the reference manual for CMU registers that will be
  *   locked.
  *
  * @note
@@ -1272,6 +1550,30 @@ __STATIC_INLINE void CMU_WdogUnlock(void)
 {
   CMU->WDOGLOCK = CMU_WDOGLOCK_LOCKKEY_UNLOCK;
 }
+
+#if defined(USBPLL_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *	Wait for USB PLL lock and ready.
+ ******************************************************************************/
+__STATIC_INLINE void CMU_WaitUSBPLLLock()
+{
+  while ((USBPLL0->STATUS & (PLL_STATUS_PLLRDY | PLL_STATUS_PLLLOCK))
+         != (PLL_STATUS_PLLRDY | PLL_STATUS_PLLLOCK)) ;
+}
+#endif
+
+#if defined(RFFPLL_PRESENT)
+/***************************************************************************//**
+ * @brief
+ *  Wait for RFF PLL lock and ready.
+ ******************************************************************************/
+__STATIC_INLINE void CMU_WaitRFFPLLLock()
+{
+  while ((RFFPLL0->STATUS & (RFFPLL_STATUS_RFFPLLRADIORDY | RFFPLL_STATUS_RFFPLLSYSRDY))
+         != (RFFPLL_STATUS_RFFPLLRADIORDY | RFFPLL_STATUS_RFFPLLSYSRDY)) ;
+}
+#endif
 
 #else // defined(_SILICON_LABS_32B_SERIES_2)
 
@@ -2604,7 +2906,7 @@ typedef enum {
   cmuSelect_HFXO,                       /**< High-frequency crystal oscillator. */
   cmuSelect_HFRCO,                      /**< High-frequency RC oscillator. */
   cmuSelect_HFCLKLE,                    /**< High-frequency LE clock divided by 2 or 4. */
-  cmuSelect_AUXHFRCO,                   /**< Auxilliary clock source can be used for debug clock. */
+  cmuSelect_AUXHFRCO,                   /**< Auxiliary clock source can be used for debug clock. */
   cmuSelect_HFSRCCLK,                   /**< High-frequency source clock. */
   cmuSelect_HFCLK,                      /**< Divided HFCLK on Giant for debug clock, undivided on
                                              Tiny Gecko and for USBC (not used on Gecko). */

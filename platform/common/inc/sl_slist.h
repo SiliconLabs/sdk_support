@@ -31,9 +31,6 @@
 #ifndef SL_SLIST_H
 #define SL_SLIST_H
 
-#include "em_assert.h"
-#include "em_core.h"
-
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -44,7 +41,11 @@ extern "C" {
 
 /*******************************************************************************
  * @addtogroup slist Singly-Linked List
- * @brief Singly-linked list
+ * @brief Singly-linked List module provides APIs to handle singly-linked list
+ *        operations such as insert, push, pop, push back, sort and remove.
+ *
+ * @note The pop operation follows FIFO method.
+ * @n @section slist_usage Singly-Linked List module Usage
  * @{
  ******************************************************************************/
 
@@ -63,8 +64,8 @@ struct sl_slist_node {
 
 #define  SL_SLIST_FOR_EACH(list_head, iterator)       for ((iterator) = (list_head); (iterator) != NULL; (iterator) = (iterator)->node)
 
-#define  SL_SLIST_FOR_EACH_ENTRY(list_head, entry, type, member) for (  (entry) = SL_SLIST_ENTRY(list_head, type, member); \
-                                                                        (type *)(entry) != SL_SLIST_ENTRY(NULL, type, member);    \
+#define  SL_SLIST_FOR_EACH_ENTRY(list_head, entry, type, member) for (  (entry) = SL_SLIST_ENTRY(list_head, type, member);     \
+                                                                        (type *)(entry) != SL_SLIST_ENTRY(NULL, type, member); \
                                                                         (entry) = SL_SLIST_ENTRY((entry)->member.node, type, member))
 #endif
 

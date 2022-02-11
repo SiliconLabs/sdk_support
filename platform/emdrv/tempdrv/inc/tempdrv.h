@@ -42,6 +42,36 @@ extern "C" {
 
 /***************************************************************************//**
  * @addtogroup tempdrv  TEMPDRV  Temperature Driver
+ * @brief TEMPDRV Temperature Driver provides an interface and various
+ *        functionalities to the EMU internal temperature sensor.
+ *        Subsequent sections provide more insight into TEMPDRV driver.
+ *   @details
+ *
+ *   @li @ref tempdrv_intro
+ *   @li @ref tempdrv_usage
+ *
+ *   @n @section tempdrv_intro Introduction
+ *        TEMPDRV provides a user-friendly interface to the EMU internal
+ *        temperature sensor, which is present on the EFR32 and some EFM32
+ *		  devices. TEMPDRV supports application-specific callbacks at given
+ *		  temperature thresholds. EMU internal temperature sensor runs in energy
+ *        modes EM0-EM4 and can wake up the core whenever temperature changes.
+ *        Also, EMU temperature sensor runs continuously and measurements are
+ *        taken every 250 ms.
+ *
+ *        @note TEMPDRV uses the EMU peripheral and not the ADC peripheral. ADC
+ *        contains another internal temperature sensor, which is not touched by
+ *        the TEMPDRV.
+ *
+ *        TEMPDRV provides an important errata fix for the EFR32 first
+ *        generation devices when operating at high temperature environments
+ *        (above 50&deg;C). The "EMU_E201 - High Temperature Operation" errata is
+ *        described in the EFR32 errata. To implement the errata fix in a user
+ *        application, include the TEMPDRV and call @ref TEMPDRV_Init() at the
+ *        start of the program. This will activate the errata fix code, which
+ *        modifies registers based on changes in the EMU temperature.
+ *   @n @section tempdrv_usage TEMPDRV Usage
+ *
  * @{
  ******************************************************************************/
 
@@ -76,7 +106,7 @@ typedef enum TEMPDRV_LimitType{
  *   TEMPDRV temperature limit callback function.
  *
  * @details
- *   This callback function is called from interrupt context. The callback
+ *   Called from the interrupt context. The callback
  *   function is called when the current temperature is equal to or exceeds
  *   one of the temperature limits that have been registered with the driver.
  *
@@ -95,7 +125,7 @@ typedef void (*TEMPDRV_Callback_t)(int8_t temp, TEMPDRV_LimitType_t limit);
  *  TEMPDRV IRQ Handler.
  *
  * @details
- *  This IRQ Handler should be called from within the @ref EMU_IRQHandler in order
+ *  This IRQ Handler should be called from within the @ref EMU_IRQHandler
  *  to enable TEMPDRV callbacks. This is included by default with
  *  EMU_CUSTOM_IRQ_HANDLER defined as false.
  ******************************************************************************/

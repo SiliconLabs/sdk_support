@@ -48,6 +48,10 @@ extern "C" {
  *
  * On Series 2 devices, debugging in EM2 is enabled by default by ensuring
  * that power to the debug power domain is sustained on EM2 entry.
+ * Debugging in EM2 can be disabled through the configuration header. If
+ * using Simplicity Studio, this header can also be configured using the
+ * Project Configurator by selecting the "Device Init: EMU" configuration
+ * component.
  *
  * @note Voltage scaling for Energy Modes 0 to 3 are configured by the
  * @ref power_manager.

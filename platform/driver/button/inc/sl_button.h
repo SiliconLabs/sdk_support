@@ -44,16 +44,17 @@ extern "C" {
 
 typedef uint8_t sl_button_mode_t;       ///< BUTTON mode
 typedef uint8_t sl_button_state_t;      ///< BUTTON state
+typedef struct sl_button sl_button_t;
 
 /// A BUTTON instance
-typedef struct {
+typedef struct sl_button {
   void                  *context;                       ///< The context for this BUTTON instance
-  sl_status_t           (*init)(void *context);         ///< Member function to initialize BUTTON instance
-  void                  (*poll)(void *context);         ///< Member function to poll BUTTON
-  void                  (*enable)(void *context);       ///< Member function to enable BUTTON
-  void                  (*disable)(void *context);      ///< Member function to disable BUTTON
-  sl_button_state_t     (*get_state)(void *context);    ///< Member function to retrieve BUTTON state
-} sl_button_t;
+  sl_status_t           (*init)(const sl_button_t *handle);   ///< Member function to initialize BUTTON instance
+  void                  (*poll)(const sl_button_t *handle);         ///< Member function to poll BUTTON
+  void                  (*enable)(const sl_button_t *handle);       ///< Member function to enable BUTTON
+  void                  (*disable)(const sl_button_t *handle);      ///< Member function to disable BUTTON
+  sl_button_state_t     (*get_state)(const sl_button_t *handle);    ///< Member function to retrieve BUTTON state
+} sl_button;
 
 /*******************************************************************************
  *****************************   PROTOTYPES   **********************************

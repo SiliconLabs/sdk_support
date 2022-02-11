@@ -90,6 +90,56 @@
       instance: mikroe
     path: brd4314a/sl_iostream_usart_mikroe_config.h
   - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: brd4314a/iot_flash_cfg_msc.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: mikroe
+    path: brd4314a/iot_flash_cfg_mikroe.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: mikroe
+    path: brd4314a/iot_i2c_cfg_mikroe.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: qwiic
+    path: brd4314a/iot_i2c_cfg_qwiic.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
+      instance: led0
+    path: brd4314a/iot_pwm_cfg_led0.h
+  - override:
+      component: iot_pwm
+      file_id: iot_pwm_cfg
+      instance: mikroe
+    path: brd4314a/iot_pwm_cfg_mikroe.h
+  - override:
+      component: iot_spi
+      file_id: iot_spi_cfg
+      instance: mikroe
+    path: brd4314a/iot_spi_cfg_mikroe.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: vcom
+    path: brd4314a/iot_uart_cfg_vcom.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: mikroe
+    path: brd4314a/iot_uart_cfg_mikroe.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: loopback
+    path: brd4314a/iot_uart_cfg_loopback.h
+  - override:
       component: pwm
       file_id: pwm_config
       instance: led0
@@ -143,53 +193,3 @@
       file_id: uartdrv_usart_config
       instance: mikroe
     path: brd4314a/sl_uartdrv_usart_mikroe_config.h
-  - override:
-      component: iot_flash
-      file_id: iot_flash_cfg
-      instance: msc
-    path: brd4314a/iot_flash_cfg_msc.h
-  - override:
-      component: iot_flash
-      file_id: iot_flash_cfg
-      instance: mikroe
-    path: brd4314a/iot_flash_cfg_mikroe.h
-  - override:
-      component: iot_i2c
-      file_id: iot_i2c_cfg
-      instance: mikroe
-    path: brd4314a/iot_i2c_cfg_mikroe.h
-  - override:
-      component: iot_i2c
-      file_id: iot_i2c_cfg
-      instance: qwiic
-    path: brd4314a/iot_i2c_cfg_qwiic.h
-  - override:
-      component: iot_pwm
-      file_id: iot_pwm_cfg
-      instance: led0
-    path: brd4314a/iot_pwm_cfg_led0.h
-  - override:
-      component: iot_pwm
-      file_id: iot_pwm_cfg
-      instance: mikroe
-    path: brd4314a/iot_pwm_cfg_mikroe.h
-  - override:
-      component: iot_spi
-      file_id: iot_spi_cfg
-      instance: mikroe
-    path: brd4314a/iot_spi_cfg_mikroe.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: vcom
-    path: brd4314a/iot_uart_cfg_vcom.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: mikroe
-    path: brd4314a/iot_uart_cfg_mikroe.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: loopback
-    path: brd4314a/iot_uart_cfg_loopback.h

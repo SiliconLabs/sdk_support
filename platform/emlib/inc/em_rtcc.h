@@ -390,7 +390,7 @@ typedef struct {
 
 /***************************************************************************//**
  * @brief
- *   Get RTCC compare register value for selected channel.
+ *   Get the RTCC compare register value for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -410,7 +410,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelCompareValueGet(int ch)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC compare register value for selected channel.
+ *   Set the RTCC compare register value for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -430,7 +430,7 @@ __STATIC_INLINE void RTCC_ChannelCompareValueSet(int ch, uint32_t value)
 
 /***************************************************************************//**
  * @brief
- *   Get RTCC input capture register value for selected channel.
+ *   Get the RTCC input capture register value for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -450,7 +450,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelCaptureValueGet(int ch)
 
 /***************************************************************************//**
  * @brief
- *   Get RTCC capture/compare register value for selected channel.
+ *   Get the RTCC capture/compare register value for  a selected channel.
  *   For parts with separate capture compare value registers, this function
  *   returns the compare value.
  *
@@ -467,7 +467,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelCCVGet(int ch)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC capture/compare register value for selected channel.
+ *   Set RTCC capture/compare register value for a selected channel.
  *   For parts with separate capture compare value registers, this function
  *   sets the compare value.
  *
@@ -485,7 +485,7 @@ __STATIC_INLINE void RTCC_ChannelCCVSet(int ch, uint32_t value)
 #if defined (_RTCC_CC_DATE_MASK)
 /***************************************************************************//**
  * @brief
- *   Get the calendar DATE register content for selected channel.
+ *   Get the calendar DATE register content for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -501,7 +501,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelDateGet(int ch)
 
 /***************************************************************************//**
  * @brief
- *   Set calendar DATE register for selected channel.
+ *   Set the calendar DATE register for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -517,7 +517,7 @@ __STATIC_INLINE void RTCC_ChannelDateSet(int ch, uint32_t date)
 
 /***************************************************************************//**
  * @brief
- *   Get calendar TIME register content for selected channel.
+ *   Get the calendar TIME register content for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -533,7 +533,7 @@ __STATIC_INLINE uint32_t RTCC_ChannelTimeGet(int ch)
 
 /***************************************************************************//**
  * @brief
- *   Set calendar TIME register for selected channel.
+ *   Set the calendar TIME register for a selected channel.
  *
  * @param[in] ch
  *   Channel selector.
@@ -550,7 +550,7 @@ __STATIC_INLINE void RTCC_ChannelTimeSet(int ch, uint32_t time)
 
 /***************************************************************************//**
  * @brief
- *   Get combined CNT/PRECNT register content.
+ *   Get the combined CNT/PRECNT register content.
  *
  * @return
  *   CNT/PRECNT register value.
@@ -567,7 +567,7 @@ __STATIC_INLINE uint32_t RTCC_CombinedCounterGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Get RTCC counter value.
+ *   Get the RTCC counter value.
  *
  * @return
  *   Current RTCC counter value.
@@ -584,7 +584,7 @@ __STATIC_INLINE uint32_t RTCC_CounterGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC CNT counter.
+ *   Set the RTCC CNT counter.
  *
  * @param[in] value
  *   CNT value.
@@ -603,7 +603,7 @@ __STATIC_INLINE void RTCC_CounterSet(uint32_t value)
 #if defined (_RTCC_CC_DATE_MASK)
 /***************************************************************************//**
  * @brief
- *   Get DATE register value.
+ *   Get the DATE register value.
  *
  * @return
  *   Current DATE register value.
@@ -615,7 +615,7 @@ __STATIC_INLINE uint32_t RTCC_DateGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC DATE register.
+ *   Set the RTCC DATE register.
  *
  * @param[in] date
  *   DATE value.
@@ -785,7 +785,7 @@ __STATIC_INLINE void RTCC_Lock(void)
 
 /***************************************************************************//**
  * @brief
- *   Get RTCC pre-counter value.
+ *   Get the RTCC pre-counter value.
  *
  * @return
  *   Current RTCC pre-counter value.
@@ -802,7 +802,7 @@ __STATIC_INLINE uint32_t RTCC_PreCounterGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC pre-counter value.
+ *   Set the RTCC pre-counter value.
  *
  * @param[in] preCntVal
  *   RTCC pre-counter value to be set.
@@ -842,7 +842,7 @@ void RTCC_StatusClear(void);
 
 /***************************************************************************//**
  * @brief
- *   Get STATUS register value.
+ *   Get the STATUS register value.
  *
  * @return
  *   Current STATUS register value.
@@ -876,7 +876,7 @@ __STATIC_INLINE void RTCC_SyncWait(void)
 
 /***************************************************************************//**
  * @brief
- *   Start RTCC counter.
+ *   Start the RTCC counter.
  *
  * @details
  *   This function will send a start command to the RTCC peripheral. The RTCC
@@ -916,7 +916,7 @@ __STATIC_INLINE void RTCC_Stop(void)
 #if defined (_RTCC_TIME_MASK)
 /***************************************************************************//**
  * @brief
- *   Get TIME register value.
+ *   Get the TIME register value.
  *
  * @return
  *   Current TIME register value.
@@ -928,7 +928,7 @@ __STATIC_INLINE uint32_t RTCC_TimeGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Set RTCC TIME register.
+ *   Set the RTCC TIME register.
  *
  * @param[in] time
  *   TIME value.

@@ -165,7 +165,7 @@
 // [MODEM]$
 
 // $[PA]
-#define HAL_PA_SELECTION                             (HAL_PA_SELECTION_2P4_MP)
+#define HAL_PA_SELECTION                             (HAL_PA_SELECTION_MP)
 #define BSP_PA_VOLTAGE                               (1800U)
 // [PA]$
 

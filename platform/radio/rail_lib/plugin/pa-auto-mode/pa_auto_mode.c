@@ -31,7 +31,7 @@
 #include "pa_auto_mode.h"
 
 #ifdef RAIL_PA_AUTO_MODE_WEAK
-SL_WEAK
+__WEAK
 #endif
 #if _SILICON_LABS_32B_SERIES_1_CONFIG != 0
 RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
@@ -116,6 +116,16 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
     .band = RAIL_PA_BAND_2P4GIG
   }
 };
+#elif _SILICON_LABS_32B_SERIES_2_CONFIG == 5
+RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
+// todo_sol: PA auto mode
+  {
+    .min = INT16_MIN,
+    .max = INT16_MAX,
+    .mode = 0,
+    .band = RAIL_PA_BAND_SUBGIG
+  }
+};
 #else
 RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
   {
@@ -128,7 +138,7 @@ RAIL_PaAutoModeConfigEntry_t RAIL_PaAutoModeConfig[] = {
 #endif
 
 #ifdef RAIL_PA_AUTO_MODE_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
                                         RAIL_TxPower_t *power,
@@ -139,18 +149,13 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   // provide it in case a custom implementation does.
   (void)railHandle;
   *mode = RAIL_TX_POWER_MODE_NONE;
-  RAIL_PaBand_t band = RAIL_PA_BAND_2P4GIG;
 
-  // We need to consider Sub-GHz on EFR32XG1X, which can support both bands.
+  // We need to consider both bands on all chips which can support both bands.
 #if RAIL_FEAT_DUAL_BAND_RADIO
+  RAIL_PaBand_t band = RAIL_PA_BAND_2P4GIG;
   if ((chCfgEntry != NULL) && (chCfgEntry->baseFrequency < 1000000000UL)) {
     band = RAIL_PA_BAND_SUBGIG;
   }
-  // If the radio is not dual band and is subgig, it doesn't
-  // support 2.4GHz
-#elif RAIL_FEAT_SUBGIG_RADIO
-  (void)chCfgEntry;
-  band = RAIL_PA_BAND_SUBGIG;
 #else
   (void)chCfgEntry;
 #endif
@@ -161,7 +166,11 @@ RAIL_Status_t RAILCb_PaAutoModeDecision(RAIL_Handle_t railHandle,
   // else the loop will wander into uncharted RAM
   for (uint8_t index = 0U; RAIL_PaAutoModeConfig[index].band < RAIL_PA_BAND_COUNT; index++) {
     RAIL_PaAutoModeConfigEntry_t entry = RAIL_PaAutoModeConfig[index];
-    if ((entry.band == band) && (entry.min <= *power) && (entry.max >= *power)) {
+    bool validBand = true;
+#if RAIL_FEAT_DUAL_BAND_RADIO
+    validBand = (entry.band == band);
+#endif
+    if (validBand && (entry.min <= *power) && (entry.max >= *power)) {
       *mode = entry.mode;
       break;
     }

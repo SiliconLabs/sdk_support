@@ -62,12 +62,12 @@ extern "C" {
 typedef struct {
   sl_se_hash_type_t       hash_type;    ///< Hash type
   union {
-    sl_se_sha1_streaming_context_t      sha1_context;
-    sl_se_sha224_streaming_context_t    sha224_context;
-    sl_se_sha256_streaming_context_t    sha256_context;
+    sl_se_sha1_multipart_context_t      sha1_context;
+    sl_se_sha224_multipart_context_t    sha224_context;
+    sl_se_sha256_multipart_context_t    sha256_context;
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
-    sl_se_sha384_streaming_context_t    sha384_context;
-    sl_se_sha512_streaming_context_t    sha512_context;
+    sl_se_sha384_multipart_context_t    sha384_context;
+    sl_se_sha512_multipart_context_t    sha512_context;
 #endif
   } streaming_contexts;
 } sli_se_transparent_hash_operation_t;

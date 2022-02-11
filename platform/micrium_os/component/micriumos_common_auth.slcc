@@ -2,7 +2,7 @@ id: micriumos_common_auth
 label: Micrium OS Common Auth Module
 package: micrium-krnx
 description: Micrium OS Common components
-category: Micrium OS|Common
+category: Services|Micrium|Common
 quality: production
 ui_hints:
   visibility: never

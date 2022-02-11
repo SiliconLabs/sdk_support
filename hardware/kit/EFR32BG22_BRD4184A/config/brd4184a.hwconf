@@ -39,7 +39,7 @@
     <property object="LED" propertyId="LED.BSP_LED_COUNT.INT" value="1"/>
     <property object="LED" propertyId="LED.BSP_LED_ENABLE.ARRAY" value="0"/>
 
-    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_2P4_MP"/>
+    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_HP"/>
     <property object="PA" propertyId="PA.BSP_PA_VOLTAGE.INT" value="1800"/>
 
     <property object="PDM" propertyId="PDM.BSP_PDM_CLK.PIN" value="PC06"/>

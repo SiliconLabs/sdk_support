@@ -2,7 +2,7 @@ id: micriumos_common_oplock
 label: Micrium OS Common OpLock
 package: micrium-krnx
 description: Micrium OS Common OpLock is required by some modules
-category: Micrium OS|Common
+category: Services|Micrium|Common
 quality: production
 ui_hints:
   visibility: never

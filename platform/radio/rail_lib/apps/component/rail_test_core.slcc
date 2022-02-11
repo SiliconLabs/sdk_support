@@ -32,6 +32,13 @@ requires:
   - name: emlib_gpio
   - name: emlib_cmu
   - name: emlib_usart
+    condition:
+      - device_has_uart
+  - name: emlib_eusart
+    condition:
+      - device_has_eusart
+    unless:
+      - device_has_uart
   - name: emlib_prs
   - name: emlib_system
 
@@ -53,20 +60,19 @@ config_file:
       - device_series_1
   - path: platform/radio/rail_lib/apps/railtest/config/efr32xg21/sl_rail_test_config.h
     condition:
-      - device_series_2
       - device_sdid_200
   - path: platform/radio/rail_lib/apps/railtest/config/efr32xg22/sl_rail_test_config.h
     condition:
-      - device_series_2
       - device_sdid_205
   - path: platform/radio/rail_lib/apps/railtest/config/efr32xg23/sl_rail_test_config.h
     condition:
-      - device_series_2
       - device_sdid_210
   - path: platform/radio/rail_lib/apps/railtest/config/efr32xg24/sl_rail_test_config.h
     condition:
-      - device_series_2
       - device_sdid_215
+  - path: platform/radio/rail_lib/apps/railtest/config/efr32xg25/sl_rail_test_config.h
+    condition:
+      - device_sdid_220
 
 include:
   - path: platform/radio/rail_lib/hal
@@ -476,7 +482,7 @@ template_contribution:
         - type: uint32
           help: "0=Disable 1=Enable"
         - type: uint32opt
-          help: "antenna: [0]/1\\n         [uint32opt] mode: [0]/1=phaseNoise"
+          help: "antenna: [0]/1\\n                    [uint32opt] mode: [0]/1=phaseNoise"
 
   - name: cli_command
     value:
@@ -599,7 +605,7 @@ template_contribution:
         - type: string
           help: "rxMethod: 'pkt'/'fifo'"
         - type: uint8opt
-          help: "rxSource: RAIL_RxDataSource_t (>0 requires fifo mode)"
+          help: "RAIL_RxDataSource_t (>0 needs fifo mode)\\n                    [uint8opt] RAIL_TxDataSource_t (>0 needs ping-pong buffer)"
 
   - name: cli_command
     value:
@@ -792,6 +798,12 @@ template_contribution:
           help: "DutyCycling: 0=Disable 1=Enable"
         - type: uint8opt
           help: "ScheduledWakeup: [0=Disable] 1=Enable"
+
+  - name: cli_command
+    value:
+      name: getDefaultRxDutyCycleConfig
+      handler: getDefaultRxDutyCycleConfig
+      help: " Get the default RX duty cycle configuration."
 
   - name: cli_command
     value:
@@ -1082,6 +1094,15 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: set802154CcaMode
+      handler: set802154CcaMode
+      help: "Set 802.15.4 CCA Mode"
+      argument:
+        - type: uint8
+          help: "ccaMode 0=RSSI 1=Signal 2=RSSI|Signal 3=RSSI&Signal 4=Always transmit"
+
+  - name: cli_command
+    value:
       name: _____________________
       handler: cliSeparatorHack
 
@@ -1114,7 +1135,8 @@ template_contribution:
       help: "Configure the radio for 2.4 GHz 802.15.4.\\n                    Use with enable802154."
       argument:
         - type: uint8opt
-          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable"
+          help: "antDiv: [0=Disable] 1=Enable\\n                    [uint8opt] coex: [0=Disable] 1=Enable\\n                    [uint8opt] fem: [0=Disable] 1=Enable\\n                    [uint8opt] custom: [0=None] 1=Custom1"
+
   - name: cli_command
     value:
       name: config863MHz802154
@@ -1126,6 +1148,24 @@ template_contribution:
       name: config915MHz802154
       handler: config915Mhz802154
       help: "Configure the radio for 915 MHz 802.15.4 GB868.\\n                    Use with enable802154."
+
+  - name: cli_command
+    value:
+      name: config863MhzSUNOFDMOpt
+      handler: config863MhzSUNOFDMOpt
+      help: " Configure the radio for 863-876 MHz SUN OFDM modulations"
+      argument:
+        - type: uint8
+          help: "ofdmOption: 1-2-3-4"
+
+  - name: cli_command
+    value:
+      name: config902MhzSUNOFDMOpt
+      handler: config902MhzSUNOFDMOpt
+      help: " Configure the radio for 902-928 MHz SUN OFDM modulations"
+      argument:
+        - type: uint8
+          help: "ofdmOption: 1-2-3-4"
 
   - name: cli_command
     value:
@@ -1262,6 +1302,28 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: set802154PHR
+      handler: ieee802154SetPHR
+      help: "Set PHR (first 1, 2 or 4 bytes) in Tx buffer according to\\n                      the 'format' input parameter.\\n                    PHR 'frameLength' field is derived from TxLength set\\n                      previously with 'setTxLength'\\n                    For PHR fields info, refer to 802.15.4 specification."
+      argument:
+        - type: uint8
+          help: "PHR format : 0=misc IEEE802154 modulations, PHR 1byte\\n                                         1=SUN FSK, PHR 2bytes\\n                                         2=SUN OFDM, PHR 4bytes\\n                                         3=SUN OQPSK, PHR 4bytes"
+        - type: uint8opt
+          help: "For SUN_OFDM : rate\\n                               For SUN_OQPSK: spreadingMode\\n                               For SUN_FSK  : fcsTtype\\n                               For LEG_OQPSK: none\\n                    [uint8opt] For SUN_OFDM : scrambler\\n                               For SUN_OQPSK: rateMode\\n                               For SUN_FSK  : whitening\\n                               For LEG_OQPSK: none"
+
+  - name: cli_command
+    value:
+      name: trigModeSwitchTx
+      handler: trigModeSwitchTx
+      help: "Transmit a Mode Switch packet then transmit packets on the new PHY with current TX options and stay on the new PHY."
+      argument:
+        - type: uint8
+          help: "new PhyModeId, i.e. ID of the PHYMode we are switching to"
+        - type: uint8
+          help: "number of packets transmitted on the new PHY"
+
+  - name: cli_command
+    value:
       name: ________________
       handler: cliSeparatorHack
 
@@ -1305,7 +1367,7 @@ template_contribution:
         - type: uint8
           help: "0=Disable 1=Enable"
         - type: uint32opt
-          help: "phy timeDelta physicalChannel\\n                    [uint32opt] logicalChannel accessAddr crcInit\\n                    [uint32opt] disableWhiten"
+          help: "phy timeDelta physicalChannel\\n                    [uint32opt] logicalChannel accessAddr crcInit\\n                    [uint32opt] disableWhiten\\n                    [uint32opt] extraDelayUs"
 
   - name: cli_command
     value:
@@ -1461,8 +1523,6 @@ template_contribution:
       argument:
         - type: uint8
           help: "0=Disable 1=Enable"
-        - type: uint8opt
-          help: "optionsBitmask"
 
   - name: cli_command
     value:
@@ -1770,6 +1830,31 @@ template_contribution:
 
   - name: cli_command
     value:
+      name: configDirectMode
+      handler: configDirectMode
+      help: "Configure direct mode"
+      argument:
+        - type: uint8
+          help: "syncRx: 0=Disable 1=Enable"
+        - type: uint8
+          help: "syncTx: 0=Disable 1=Enable"
+        - type: uint8
+          help: "doutPort"
+        - type: uint8
+          help: "doutPin"
+        - type: uint8
+          help: "dclkPort"
+        - type: uint8
+          help: "dclkPin"
+        - type: uint8
+          help: "dinPort"
+        - type: uint8
+          help: "dinPin"
+        - type: uint8opt
+          help: "doutLoc\\n                    [uint8opt] dclkLoc\\n                    [uint8opt] dinLoc"
+
+  - name: cli_command
+    value:
       name: directMode
       handler: setDirectMode
       help: "Control direct mode."
@@ -1937,11 +2022,11 @@ template_contribution:
         - type: int32
           help: "idleToRxUs"
         - type: int32
-          help: "rxToTxUs"
+          help: "txToRxUs"
         - type: int32
           help: "idleToTxUs"
         - type: int32opt
-          help: "txToRxUs [0]\\n                    [int32opt] rxSearchTimeoutUs [0]\\n                    [int32opt] txToRxSearchTimeout [0]\\n                    [int32opt] txToTx [0]"
+          help: "rxToTxUs [0]\\n                    [int32opt] rxSearchTimeoutUs [0]\\n                    [int32opt] txToRxSearchTimeout [0]\\n                    [int32opt] txToTx [0]"
 
   - name: cli_command
     value:
@@ -2188,3 +2273,29 @@ template_contribution:
       argument:
         - type: uint8
           help: "optionBitMask: 1=HFXO | 2=HFRCO | 4=DCDC | 8=LCD"
+
+  - name: cli_command
+    value:
+      name: enable802154SignalIdentifier
+      handler: enable802154SignalIdentifier
+      help: " Enable Signal Identifier 2.4Ghz 802.15.4 signal detection"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+
+  - name: cli_command
+    value:
+      name: enableBleSignalIdentifier
+      handler: enableBleSignalIdentifier
+      help: " Enable Signal Identifier for BLE signal detection"
+      argument:
+        - type: uint8
+          help: "0=Disable 1=Enable"
+        - type: uint8
+          help: "Mode 1=BLE1Mbps 2=BLE2Mbps"
+
+  - name: rail_util_ieee802154_phy_select_callbacks
+    value:
+      runtime_phy_select_stack_support: 1
+      update_active_radio_config: sl_railtest_update_154_radio_config
+    priority: -9020

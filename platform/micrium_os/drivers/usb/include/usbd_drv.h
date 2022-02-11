@@ -35,14 +35,15 @@
 /********************************************************************************************************
  *                                   SYNOPSYS DESIGNWARE OTG FS DRIVER
  *
- * Note(s) : (1) The following MCUs are support by USBD_DrvAPI_EFM32_OTG_FS API:
+ * Note(s) : (1) The following MCUs are support by USBD_DrvAPI_EFx32_OTG_FS API:
  *
- *                           Silicon Labs        EFM32 Giant   Gecko series.
- *                           Silicon Labs        EFM32 Wonder  Gecko series.
- *                           Silicon Labs        EFM32 Leopard Gecko series.
+ *                           Silicon Labs Series 1 EFM32 Giant   Gecko series.
+ *                           Silicon Labs Series 1 EFM32 Wonder  Gecko series.
+ *                           Silicon Labs Series 1 EFM32 Leopard Gecko series.
+ *                           Silicon Labs Series 2 EFR32 Flex    Gecko series.
  *******************************************************************************************************/
 
-extern USBD_DRV_API USBD_DrvAPI_EFM32_OTG_FS;
+extern USBD_DRV_API USBD_DrvAPI_EFx32_OTG_FS;
 
 /********************************************************************************************************
  ********************************************************************************************************

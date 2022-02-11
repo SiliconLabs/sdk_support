@@ -92,7 +92,12 @@ typedef struct RAIL_Version {
 
 /**
  * @typedef RAIL_Handle_t
- * @brief A handle of a RAIL instance, as returned from RAIL_Init().
+ * @brief A generic handle to a particular radio (e.g. RAIL_EFR32_HANDLE),
+ *   or a real handle of a RAIL instance, as returned from RAIL_Init().
+ *
+ * Generic handles should be used for certain RAIL APIs that are called
+ * prior to RAIL initialization. However, once RAIL has been initialized,
+ * the real handle returned by RAIL_Init() should be used instead.
  */
 typedef void *RAIL_Handle_t;
 
@@ -111,6 +116,9 @@ RAIL_ENUM(RAIL_Status_t) {
   RAIL_STATUS_INVALID_CALL, /**< RAIL function is called in an invalid order. */
   RAIL_STATUS_SUSPENDED, /**< RAIL function did not finish in the allotted
                               time. */
+  RAIL_STATUS_SCHED_ERROR, /**< RAIL function could not be scheduled
+                                by the Radio scheduler. Only issued when
+                                using a Multiprotocol application. */
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -120,18 +128,33 @@ RAIL_ENUM(RAIL_Status_t) {
 #define RAIL_STATUS_INVALID_STATE     ((RAIL_Status_t) RAIL_STATUS_INVALID_STATE)
 #define RAIL_STATUS_INVALID_CALL      ((RAIL_Status_t) RAIL_STATUS_INVALID_CALL)
 #define RAIL_STATUS_SUSPENDED         ((RAIL_Status_t) RAIL_STATUS_SUSPENDED)
+#define RAIL_STATUS_SCHED_ERROR       ((RAIL_Status_t) RAIL_STATUS_SCHED_ERROR)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * A pointer to init complete callback function
  *
- * @param[in] railHandle A handle for RAIL instance.
+ * @param[in] railHandle The initialized RAIL instance handle.
  *
  */
 typedef void (*RAIL_InitCompleteCallbackPtr_t)(RAIL_Handle_t railHandle);
 
 /** A value to signal that RAIL should not use DMA. */
 #define RAIL_DMA_INVALID (0xFFU)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * A linked list structure for RAIL state buffers which \ref RAIL_Init()
+ * utilizes for managing internal RAIL state.
+ */
+typedef struct RAIL_StateBufferEntry {
+  struct RAIL_StateBufferEntry *next; /**< pointer to next buffer in linked list */
+  uint32_t bufferBytes;               /**< size of the buffer */
+  uint64_t *buffer;                   /**< pointer to the buffer in RAM */
+} RAIL_StateBufferEntry_t;
+
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** @} */ // end of group General
 
@@ -416,86 +439,249 @@ typedef struct RAIL_SchedulerInfo {
   RAIL_Time_t transactionTime;
 } RAIL_SchedulerInfo_t;
 
+/** Radio Scheduler Status mask*/
+#define RAIL_SCHEDULER_STATUS_MASK       0x0FU
+/** Radio Scheduler Status shift*/
+#define RAIL_SCHEDULER_STATUS_SHIFT      0
+
+/** Radio Scheduler Task mask*/
+#define RAIL_SCHEDULER_TASK_MASK         0xF0U
+/** Radio Scheduler Task shift*/
+#define RAIL_SCHEDULER_TASK_SHIFT        4
 /**
  * @enum RAIL_SchedulerStatus_t
  * @brief Multiprotocol scheduler status returned by RAIL_GetSchedulerStatus().
+ *
+ * \ref Multiprotocol scheduler status is a combination of the upper 4 bits which
+ * constitute the type of scheduler task and the lower 4 bits which constitute
+ * the type of scheduler error.
  */
 RAIL_ENUM(RAIL_SchedulerStatus_t) {
+  /** Lower 4 bits of uint8_t capture the different Radio Scheduler errors */
   /** Multiprotocol scheduler reports no error. */
-  RAIL_SCHEDULER_STATUS_NO_ERROR,
+  RAIL_SCHEDULER_STATUS_NO_ERROR = (0U << RAIL_SCHEDULER_STATUS_SHIFT),
   /**
    * The scheduler is disabled or the requested scheduler operation is
    * unsupported.
    */
-  RAIL_SCHEDULER_STATUS_UNSUPPORTED,
+  RAIL_SCHEDULER_STATUS_UNSUPPORTED = (1U << RAIL_SCHEDULER_STATUS_SHIFT),
   /**
-   * The scheduled event was started but was interrupted by a higher-priority
+   * The scheduled task was started but was interrupted by a higher-priority
    * event before it could be completed.
    */
-  RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED,
+  RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED = (2U << RAIL_SCHEDULER_STATUS_SHIFT),
   /**
-   * This task could not be scheduled given its priority and the other tasks
-   * running on the system.
+   * Scheduled task could not be scheduled given its priority and the other
+   * tasks running on the system.
    */
-  RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL,
+  RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL = (3U << RAIL_SCHEDULER_STATUS_SHIFT),
   /**
-   * Calling the scheduled transmit function returned an error code. See
-   * RAIL_StartScheduledTx() for more information about possible errors.
+   * Calling the RAIL API associated with the Radio scheduler task returned
+   * an error code. See \ref RAIL_GetSchedulerStatus or \ref RAIL_GetSchedulerStatusAlt
+   * for more information about \ref RAIL_Status_t status.
    */
-  RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL,
-  /**
-   * Calling the start transmit function returned an error code. See
-   * RAIL_StartTx() for more information about possible errors.
-   */
-  RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL,
-  /**
-   * Calling the CSMA transmit function returned an error code. See
-   * RAIL_StartCcaCsmaTx() for more information about possible errors.
-   */
-  RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL,
-  /**
-   * Calling the LBT transmit function returned an error code. See
-   * RAIL_StartCcaLbtTx() for more information about possible errors.
-   */
-  RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL,
-  /**
-   * Calling the scheduled receive function returned an error code, which
-   * means that the hardware was not set up in
-   * time for this receive.
-   */
-  RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL,
-  /**
-   * Calling the stream transmit function returned an error code. See
-   * RAIL_StartTxStream() for more information about possible errors.
-   */
-  RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL,
-  /**
-   * RSSI averaging failed. If this scheduler status occurs,
-   * RAIL_GetAverageRssi() will return \ref RAIL_RSSI_INVALID until
-   * a RAIL_StartAverageRssi() completes successfully.
-   */
-  RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL,
+  RAIL_SCHEDULER_STATUS_TASK_FAIL = (4U << RAIL_SCHEDULER_STATUS_SHIFT),
   /**
    * An internal error occurred in scheduler data structures, which should
    * not happen and indicates a problem.
    */
-  RAIL_SCHEDULER_STATUS_INTERNAL_ERROR,
+  RAIL_SCHEDULER_STATUS_INTERNAL_ERROR = (5U << RAIL_SCHEDULER_STATUS_SHIFT),
+
+  /** Upper 4 bits of uint8_t capture the different Radio Scheduler tasks */
+  RAIL_SCHEDULER_TASK_EMPTY = (0U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_ScheduleRx(). */
+  RAIL_SCHEDULER_TASK_SCHEDULED_RX = (1U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartScheduledTx(). */
+  RAIL_SCHEDULER_TASK_SCHEDULED_TX = (2U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartTx(). */
+  RAIL_SCHEDULER_TASK_SINGLE_TX = (3U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartCcaCsmaTx(). */
+  RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX = (4U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartCcaLbtTx(). */
+  RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX = (5U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartScheduledCcaCsmaTx(). */
+  RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX = (6U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartScheduledCcaLbtTx(). */
+  RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX = (7U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartTxStream(). */
+  RAIL_SCHEDULER_TASK_TX_STREAM = (8U << RAIL_SCHEDULER_TASK_SHIFT),
+  /** Radio scheduler calls \ref RAIL_StartAverageRssi(). */
+  RAIL_SCHEDULER_TASK_AVERAGE_RSSI = (9U << RAIL_SCHEDULER_TASK_SHIFT),
+
+  /** \ref RAIL_StartScheduledTx() returned error status. */
+  RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
+                                             | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_StartTx() returned error status. */
+  RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL = (RAIL_SCHEDULER_TASK_SINGLE_TX
+                                          | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_StartCcaCsmaTx() returned error status. */
+  RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL = (RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX
+                                            | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_StartCcaLbtTx() returned error status. */
+  RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL = (RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX
+                                           | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_ScheduleRx() returned error status. */
+  RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL = (RAIL_SCHEDULER_TASK_SCHEDULED_RX
+                                             | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_StartTxStream() returned error status. */
+  RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL = (RAIL_SCHEDULER_TASK_TX_STREAM
+                                          | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** \ref RAIL_StartAverageRssi() returned error status. */
+  RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL = (RAIL_SCHEDULER_TASK_AVERAGE_RSSI
+                                             | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+
+  /** Multiprotocol scheduled receive function internal error. */
+  RAIL_SCHEDULER_SCHEDULED_RX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_RX
+                                                | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol scheduled receive scheduling error. */
+  RAIL_SCHEDULER_SCHEDULED_RX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_RX
+                                                  | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_ScheduleRx() operation interrupted */
+  RAIL_SCHEDULER_SCHEDULED_RX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_RX
+                                             | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol scheduled Tx internal error. */
+  RAIL_SCHEDULER_SCHEDULED_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
+                                                | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol scheduled Tx scheduling error. */
+  RAIL_SCHEDULER_SCHEDULED_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
+                                                  | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartScheduledTx() operation interrupted */
+  RAIL_SCHEDULER_SCHEDULED_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_TX
+                                             | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol instantaneous Tx internal error. */
+  RAIL_SCHEDULER_SINGLE_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_TX
+                                             | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol instantaneous Tx scheduling error. */
+  RAIL_SCHEDULER_SINGLE_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_TX
+                                               | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartTx() operation interrupted */
+  RAIL_SCHEDULER_SINGLE_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SINGLE_TX
+                                          | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol single CSMA transmit function internal error. */
+  RAIL_SCHEDULER_SINGLE_CCA_CSMA_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX
+                                                      | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol single CSMA transmit scheduling error. */
+  RAIL_SCHEDULER_SINGLE_CCA_CSMA_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX
+                                                        | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartCcaCsmaTx() operation interrupted */
+  RAIL_SCHEDULER_SINGLE_CCA_CSMA_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX
+                                                   | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol single LBT transmit function internal error. */
+  RAIL_SCHEDULER_SINGLE_CCA_LBT_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX
+                                                     | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol single LBT transmit scheduling error. */
+  RAIL_SCHEDULER_SINGLE_CCA_LBT_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX
+                                                       | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartCcaLbtTx() operation interrupted */
+  RAIL_SCHEDULER_SINGLE_CCA_LBT_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX
+                                                  | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol scheduled CSMA transmit function internal error. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX
+                                                         | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** \ref RAIL_StartScheduledCcaCsmaTx() returned error status. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_FAIL = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX
+                                               | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** Multiprotocol scheduled CSMA transmit scheduling error. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX
+                                                           | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartScheduledCcaCsmaTx() operation interrupted */
+  RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX
+                                                      | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol scheduled LBT transmit function internal error. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX
+                                                        | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** \ref RAIL_StartScheduledCcaLbtTx() returned error status. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_FAIL = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX
+                                              | RAIL_SCHEDULER_STATUS_TASK_FAIL),
+  /** Multiprotocol scheduled LBT transmit scheduling error. */
+  RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX
+                                                          | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartScheduledCcaLbtTx() operation interrupted */
+  RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERRUPTED = (RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX
+                                                     | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol stream transmit function internal error. */
+  RAIL_SCHEDULER_TX_STREAM_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_TX_STREAM
+                                             | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol stream transmit scheduling error. */
+  RAIL_SCHEDULER_TX_STREAM_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_TX_STREAM
+                                               | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartTxStream() operation interrupted */
+  RAIL_SCHEDULER_TX_STREAM_INTERRUPTED = (RAIL_SCHEDULER_TASK_TX_STREAM
+                                          | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
+
+  /** Multiprotocol RSSI averaging function internal error. */
+  RAIL_SCHEDULER_AVERAGE_RSSI_INTERNAL_ERROR = (RAIL_SCHEDULER_TASK_AVERAGE_RSSI
+                                                | RAIL_SCHEDULER_STATUS_INTERNAL_ERROR),
+  /** Multiprotocol RSSI average scheduling error. */
+  RAIL_SCHEDULER_AVERAGE_RSSI_SCHEDULING_ERROR = (RAIL_SCHEDULER_TASK_AVERAGE_RSSI
+                                                  | RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL),
+  /** \ref RAIL_StartAverageRssi() operation interrupted */
+  RAIL_SCHEDULER_AVERAGE_RSSI_INTERRUPTED = (RAIL_SCHEDULER_TASK_AVERAGE_RSSI
+                                             | RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED),
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
-#define RAIL_SCHEDULER_STATUS_NO_ERROR          ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_NO_ERROR)
-#define RAIL_SCHEDULER_STATUS_UNSUPPORTED       ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_UNSUPPORTED)
-#define RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED)
-#define RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL     ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL)
-#define RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL)
-#define RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL)
-#define RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL  ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL)
-#define RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL   ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL)
-#define RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL)
-#define RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL)
-#define RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL)
-#define RAIL_SCHEDULER_STATUS_INTERNAL_ERROR    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_STATUS_NO_ERROR                               ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_NO_ERROR)
+#define RAIL_SCHEDULER_STATUS_UNSUPPORTED                            ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_UNSUPPORTED)
+#define RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_EVENT_INTERRUPTED)
+#define RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL                          ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULE_FAIL)
+#define RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULED_TX_FAIL)
+#define RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL                         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SINGLE_TX_FAIL)
+#define RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL                       ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_CCA_CSMA_TX_FAIL)
+#define RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL                        ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_CCA_LBT_TX_FAIL)
+#define RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_SCHEDULED_RX_FAIL)
+#define RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL                         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_TX_STREAM_FAIL)
+#define RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_AVERAGE_RSSI_FAIL)
+#define RAIL_SCHEDULER_STATUS_INTERNAL_ERROR                         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_STATUS_INTERNAL_ERROR)
+
+#define RAIL_SCHEDULER_TASK_EMPTY                                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_EMPTY)
+#define RAIL_SCHEDULER_TASK_SCHEDULED_RX                             ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SCHEDULED_RX)
+#define RAIL_SCHEDULER_TASK_SCHEDULED_TX                             ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_TX)
+#define RAIL_SCHEDULER_TASK_SINGLE_TX                                ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SINGLE_TX)
+#define RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX                       ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SINGLE_CCA_CSMA_TX)
+#define RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX                        ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SINGLE_CCA_LBT_TX)
+#define RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SCHEDULED_CCA_CSMA_TX)
+#define RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX                     ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_SCHEDULED_CCA_LBT_TX)
+#define RAIL_SCHEDULER_TASK_TX_STREAM                                ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_TX_STREAM)
+#define RAIL_SCHEDULER_TASK_AVERAGE_RSSI                             ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TASK_AVERAGE_RSSI)
+
+#define RAIL_SCHEDULER_SCHEDULED_RX_INTERNAL_ERROR                   ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_RX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_RX_SCHEDULING_ERROR                 ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_RX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_RX_INTERRUPTED                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_RX_INTERRUPTED)
+#define RAIL_SCHEDULER_SCHEDULED_TX_INTERNAL_ERROR                   ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_TX_SCHEDULING_ERROR                 ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_TX_INTERRUPTED                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_SINGLE_TX_INTERNAL_ERROR                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SINGLE_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_SINGLE_TX_SCHEDULING_ERROR                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SINGLE_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_SINGLE_TX_INTERRUPTED                         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SINGLE_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_CCA_CSMA_TX_INTERNAL_ERROR                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_CSMA_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_CCA_CSMA_TX_SCHEDULING_ERROR                  ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_CSMA_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_CCA_CSMA_TX_INTERRUPTED                       ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_CSMA_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_CCA_LBT_TX_INTERNAL_ERROR                     ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_LBT_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_CCA_LBT_TX_SCHEDULING_ERROR                   ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_LBT_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_CCA_LBT_TX_INTERRUPTED                        ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_CCA_LBT_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERNAL_ERROR          ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_FAIL                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_FAIL)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_SCHEDULING_ERROR        ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERRUPTED             ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_CSMA_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERNAL_ERROR           ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_FAIL                     ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_FAIL)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_SCHEDULING_ERROR         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERRUPTED              ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_SCHEDULED_CCA_LBT_TX_INTERRUPTED)
+#define RAIL_SCHEDULER_TX_STREAM_INTERNAL_ERROR                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TX_STREAM_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_TX_STREAM_SCHEDULING_ERROR                    ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TX_STREAM_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_TX_STREAM_INTERRUPTED                         ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_TX_STREAM_INTERRUPTED)
+#define RAIL_SCHEDULER_AVERAGE_RSSI_INTERNAL_ERROR                   ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_AVERAGE_RSSI_INTERNAL_ERROR)
+#define RAIL_SCHEDULER_AVERAGE_RSSI_SCHEDULING_ERROR                 ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_AVERAGE_RSSI_SCHEDULING_ERROR)
+#define RAIL_SCHEDULER_AVERAGE_RSSI_INTERRUPTED                      ((RAIL_SchedulerStatus_t) RAIL_SCHEDULER_AVERAGE_RSSI_INTERRUPTED)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
@@ -639,6 +825,14 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
   RAIL_EVENT_RF_SENSED_SHIFT,
   /** Shift position of \ref RAIL_EVENT_PA_PROTECTION bit */
   RAIL_EVENT_PA_PROTECTION_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_SIGNAL_DETECTED bit */
+  RAIL_EVENT_SIGNAL_DETECTED_SHIFT,
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+  /** Shift position of \ref RAIL_EVENT_IEEE802154_MODESWITCH_START bit */
+  RAIL_EVENT_IEEE802154_MODESWITCH_START_SHIFT,
+  /** Shift position of \ref RAIL_EVENT_IEEE802154_MODESWITCH_END bit */
+  RAIL_EVENT_IEEE802154_MODESWITCH_END_SHIFT,
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 };
 
 // RAIL_Event_t bitmasks
@@ -942,8 +1136,10 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * Indicate a MFM buffer has completely transmitted.
  *
  * This event only occurs if the RAIL MFM functionality is enabled
- * and RAIL_MFM_OPTION_DETECT_TX_BUFFER_DONE is enabled.
+ * and a MFM buffer has completely transmitted.
  *
+ * Following this event, the application can update the MFM buffer
+ * that has transmitted to be used for the next transmission.
  */
 #define RAIL_EVENT_MFM_TX_BUFFER_DONE (1ULL << RAIL_EVENT_MFM_TX_BUFFER_DONE_SHIFT)
 
@@ -1258,6 +1454,29 @@ RAIL_ENUM_GENERIC(RAIL_Events_t, uint64_t) {
  * Occurs when PA protection circuit kicks in.
  */
 #define RAIL_EVENT_PA_PROTECTION (1ULL << RAIL_EVENT_PA_PROTECTION_SHIFT)
+
+/**
+ * Occurs after enabling the signal identifier using \ref RAIL_BLE_EnableSignalIdentifier
+ * or \ref RAIL_IEEE802154_EnableSignalIdentifier when a signal is detected.
+ * This is only used on platforms that support signal identifer, where
+ * RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER or RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
+ * is true.
+ */
+#define RAIL_EVENT_SIGNAL_DETECTED (1ULL << RAIL_EVENT_SIGNAL_DETECTED_SHIFT)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/**
+ * Occurs at the beginning of Wi-SUN's mode switch process, i.e. after the switch to
+ * the new channel has been performed. Applies to RX node that receives the mode switch packet.
+ */
+#define RAIL_EVENT_IEEE802154_MODESWITCH_START (1ULL << RAIL_EVENT_IEEE802154_MODESWITCH_START_SHIFT)
+
+/**
+ * Occurs at the end of the mode switch process, i.e. after the second switch back
+ * to the base channel has been performed. Applies to RX node that receives the mode switch packet.
+ */
+#define RAIL_EVENT_IEEE802154_MODESWITCH_END (1ULL << RAIL_EVENT_IEEE802154_MODESWITCH_END_SHIFT)
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /** A value representing all possible events */
 #define RAIL_EVENTS_ALL 0xFFFFFFFFFFFFFFFFULL
@@ -1654,6 +1873,7 @@ typedef struct RAIL_ChannelMetadata {
  */
 typedef void (*RAIL_RadioConfigChangedCallback_t)(RAIL_Handle_t railHandle,
                                                   const RAIL_ChannelConfigEntry_t *entry);
+
 /** @} */ // end of group Radio_Configuration
 
 /******************************************************************************
@@ -1706,6 +1926,13 @@ RAIL_ENUM(RAIL_PtiProtocol_t) {
  */
 RAIL_ENUM(RAIL_TxDataSource_t) {
   TX_PACKET_DATA, /**< Uses the frame hardware to packetize data. */
+  /** Uses the multi-level frequency modulation data.
+   * @note This is only supported on devices where \ref RAIL_SUPPORTS_MFM
+   *   or \ref RAIL_SupportsMfm() are true.
+   * @note This feature cannot be used with built-in protocols (802.15.4, BLE,
+   *   Z-Wave).
+   */
+  TX_MFM_DATA,
   /** A count of the choices in this enumeration. */
   RAIL_TX_DATA_SOURCE_COUNT // Must be last
 };
@@ -1713,6 +1940,7 @@ RAIL_ENUM(RAIL_TxDataSource_t) {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 // Self-referencing defines minimize compiler complaints when using RAIL_ENUM
 #define TX_PACKET_DATA            ((RAIL_TxDataSource_t) TX_PACKET_DATA)
+#define TX_MFM_DATA               ((RAIL_TxDataSource_t) TX_MFM_DATA)
 #define RAIL_TX_DATA_SOURCE_COUNT ((RAIL_TxDataSource_t) RAIL_TX_DATA_SOURCE_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
@@ -1730,6 +1958,10 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
                           demodulator. */
   RX_IQDATA_FILTMSB, /**< Gets highest 16 bits of I/Q data provided to the
                          demodulator. */
+  RX_DIRECT_MODE_DATA, /**< Gets RX direct mode data output from the demodulator.
+                            Only supported if
+                            \ref RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO
+                            is true. */
   /** A count of the choices in this enumeration. */
   RAIL_RX_DATA_SOURCE_COUNT // Must be last
 };
@@ -1740,6 +1972,7 @@ RAIL_ENUM(RAIL_RxDataSource_t) {
 #define RX_DEMOD_DATA             ((RAIL_RxDataSource_t) RX_DEMOD_DATA)
 #define RX_IQDATA_FILTLSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTLSB)
 #define RX_IQDATA_FILTMSB         ((RAIL_RxDataSource_t) RX_IQDATA_FILTMSB)
+#define RX_DIRECT_MODE_DATA       ((RAIL_RxDataSource_t) RX_DIRECT_MODE_DATA)
 #define RAIL_RX_DATA_SOURCE_COUNT ((RAIL_RxDataSource_t) RAIL_RX_DATA_SOURCE_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
@@ -2737,6 +2970,11 @@ RAIL_ENUM_GENERIC(RAIL_RxOptions_t, uint32_t) {
  * \ref RAIL_RxPacketDetails_t details will not be available for received
  * packets whose \ref RAIL_RxPacketStatus_t is among the RAIL_RX_PACKET_READY_
  * set.
+ *
+ * @warning This option should be changed only when the radio is idle
+ *   and the receive FIFO is empty or has been reset,
+ *   otherwise \ref RAIL_GetRxPacketInfo() and \ref RAIL_GetRxPacketDetails()
+ *   may think appended info is packet data or vice-versa.
  */
 #define RAIL_RX_OPTION_REMOVE_APPENDED_INFO (1UL << RAIL_RX_OPTION_REMOVE_APPENDED_INFO_SHIFT)
 
@@ -3106,10 +3344,18 @@ typedef struct RAIL_RxPacketDetails {
    * was used to receive the packet. Most radio configurations do not have
    * this ability and the subPhyId is set to 0.
    *
-   * Currently, this field is used by the BLE Coded PHY and the BLE Simulscan PHY.
-   * In that case, a value of 0 marks a 500 kbps packet, a value of 1 marks a 125
+   * Currently, this field is used by the BLE Coded PHY, the BLE Simulscan PHY
+   * and the SUN OFDM PHYs.
+   * In BLE cases, a value of 0 marks a 500 kbps packet, a value of 1 marks a 125
    * kbps packet, and a value of 2 marks a 1 Mbps packet.
    * Also, see \ref RAIL_BLE_ConfigPhyCoded and \ref RAIL_BLE_ConfigPhySimulscan.
+   *
+   * In SUN OFDM cases, the value corresponds to the numerical value of the
+   * Modulation and Coding Scheme (MCS) level of the last received packet.
+   * The packet bitrate depends on the MCS value, as well as the OFDM option.
+   * Packets bitrates for SUN OFDM PHYs can be found in 802.15.4-2020 specification,
+   * chapter 20.3, table 20-10.
+   * Ex: Packet bitrate for OFDM option 1 MCS0 is 100kb/s and 2400kb/s for MCS6.
    *
    * It is always available.
    */
@@ -3785,10 +4031,10 @@ typedef struct RAIL_RxChannelHoppingConfig {
    */
   uint32_t *buffer;
   /**
-   * This parameter must be set to the length of the buffer array. This way,
-   * during configuration, the software can confirm it's writing within the
-   * range of the buffer. The configuration API will return an error
-   * if bufferLength is insufficient.
+   * This parameter must be set to the length of the buffer array, in 32 bit
+   * words. This way, during configuration, the software can confirm it's
+   * writing within the range of the buffer. The configuration API will return
+   * an error if bufferLength is insufficient.
    */
   uint16_t bufferLength;
   /**
@@ -3867,6 +4113,8 @@ RAIL_ENUM(RAIL_StreamMode_t) {
   RAIL_STREAM_PN9_STREAM = 1,   /**< PN9 byte sequence. */
   RAIL_STREAM_10_STREAM = 2, /**< 101010 sequence. */
   RAIL_STREAM_CARRIER_WAVE_PHASENOISE = 3, /**< An unmodulated carrier wave with no change to PLL BW. For series-2, same as RAIL_STREAM_CARRIER_WAVE */
+  RAIL_STREAM_RAMP_STREAM = 4, /**< ramp sequence starting at a different offset for consecutive packets. Only available for some modulations. Fall back to RAIL_STREAM_PN9_STREAM if not available. */
+  RAIL_STREAM_CARRIER_WAVE_SHIFTED = 5, /**< An unmodulated carrier wave not centered on DC but shifted roughly by channel_bandwidth/6 allowing an easy check of the residual DC. Only available for OFDM PA. Fall back to RAIL_STREAM_CARRIER_WAVE_PHASENOISE if not available. */
   RAIL_STREAM_MODES_COUNT   /**< A count of the choices in this enumeration. Must be last. */
 };
 
@@ -3876,6 +4124,9 @@ RAIL_ENUM(RAIL_StreamMode_t) {
 #define RAIL_STREAM_PN9_STREAM   ((RAIL_StreamMode_t) RAIL_STREAM_PN9_STREAM)
 #define RAIL_STREAM_10_STREAM   ((RAIL_StreamMode_t) RAIL_STREAM_10_STREAM)
 #define RAIL_STREAM_CARRIER_WAVE_PHASENOISE ((RAIL_StreamMode_t) RAIL_STREAM_CARRIER_WAVE_PHASENOISE)
+#define RAIL_STREAM_RAMP_STREAM   ((RAIL_StreamMode_t) RAIL_STREAM_RAMP_STREAM)
+#define RAIL_STREAM_CARRIER_WAVE_SHIFTED ((RAIL_StreamMode_t) RAIL_STREAM_CARRIER_WAVE_SHIFTED)
+
 #define RAIL_STREAM_MODES_COUNT   ((RAIL_StreamMode_t) RAIL_STREAM_MODES_COUNT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 

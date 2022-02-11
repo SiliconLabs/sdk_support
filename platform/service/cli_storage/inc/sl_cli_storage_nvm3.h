@@ -56,8 +56,8 @@ extern "C" {
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /// Defined in the "NVM3 Default Instance Key Space Regions"
 /// Note: These definitions cannot be changed!
-#define SL_CLI_STORAGE_NVM3_KEY_COUNT    (0x100)
-#define SL_CLI_STORAGE_NVM3_KEY_BEGIN    (0x3000)
+#define SL_CLI_STORAGE_NVM3_KEY_COUNT    SL_CLI_NVM3_KEY_COUNT
+#define SL_CLI_STORAGE_NVM3_KEY_BEGIN    SL_CLI_NVM3_KEY_BEGIN
 #define SL_CLI_STORAGE_NVM3_KEY_END      (SL_CLI_STORAGE_NVM3_KEY_BEGIN + SL_CLI_STORAGE_NVM3_KEY_COUNT)
 /// @endcond
 

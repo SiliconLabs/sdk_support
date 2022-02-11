@@ -130,7 +130,7 @@ void cli_coex_154_get_gpio_input_override(sl_cli_command_arg_t *args)
 {
   sl_rail_util_coex_gpio_index_t gpioIndex = (sl_rail_util_coex_gpio_index_t)sl_cli_get_argument_uint8(args, 0);
   bool enabled = sl_rail_util_coex_get_gpio_input_override(gpioIndex);
-  responsePrint(sl_cli_get_command_string(args, 0), "phySelected:0x%x", enabled);
+  responsePrint(sl_cli_get_command_string(args, 0), "gpioOverride:0x%x", enabled);
 }
 
 void cli_coex_154_set_gpio_input_override(sl_cli_command_arg_t *args)

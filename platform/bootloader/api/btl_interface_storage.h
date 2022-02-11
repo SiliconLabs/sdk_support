@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Application interface to the storage plugin of the bootloader.
+ * @brief Application interface to the storage component of the bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -30,6 +30,8 @@
  * @{
  * @addtogroup StorageInterface Application Storage Interface
  * @brief Application interface for interfacing with the bootloader storage.
+ * @note These Bootloader APIs are not reentrant and should be wrapped in critical section
+ *       where needed.
  * @details The Storage Interface is only available on bootloaders that declare
  *          they support @ref BOOTLOADER_CAPABILITY_STORAGE.
  * @{
@@ -71,23 +73,28 @@ typedef struct {
   /// The total size of the storage in bytes
   uint32_t partSize;
   /// Pointer to a string describing the attached storage
-  const char * const partDescription;
+  char *partDescription;
   /// The number of bytes in a word for the storage
   uint8_t wordSizeBytes;
 } BootloaderStorageImplementationInformation_t;
 
-/// Information about the bootloader storage
+/// Information about the bootloader storage \n
+/// <b>Note:</b> The <b>flashInfo</b> variable is only usable with
+/// Gecko Bootloader version >= 2.0. All previous versions of the
+/// Gecko Bootloader do not support the <b>flashInfo</b> data field.
 typedef struct {
   /// The version of this data structure
   uint32_t version;
-  /// The capabilities of the storage plugin
+  /// The capabilities of the storage component
   uint32_t capabilities;
   /// Type of storage
   BootloaderStorageType_t storageType;
   /// Number of storage slots
   uint32_t numStorageSlots;
-  /// Detailed information about the attached storage
-  const BootloaderStorageImplementationInformation_t *info;
+  /// A pointer to detailed information about the attached storage
+  BootloaderStorageImplementationInformation_t *info;
+  /// Detailed information about the attached storage(<b>available for use only with Gecko Bootloader version >= 2.0</b>)
+  BootloaderStorageImplementationInformation_t flashInfo;
 } BootloaderStorageInformation_t;
 
 /// Erase status struct
@@ -161,12 +168,14 @@ typedef struct BootloaderStorageFunctions {
 #define BOOTLOADER_STORAGE_VERIFICATION_CONTEXT_SIZE            (384)
 #endif
 
+/// Current version of the BootloaderStorageInformation_t struct
+#define BOOTLOADER_STORAGE_INFO_VERSION                         (0x20000U)
 /// Current version of the BootloaderStorageImplementationInformation_t struct
-#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION                    (0x0201)
+#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION                    (0x0201U)
 /// Major version of the BootloaderStorageImplementationInformation_t struct
-#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION_MAJOR              (0x0200)
+#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION_MAJOR              (0x0200U)
 /// Major version mask for @ref BOOTLOADER_STORAGE_IMPL_INFO_VERSION
-#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION_MAJOR_MASK         (0xFF00)
+#define BOOTLOADER_STORAGE_IMPL_INFO_VERSION_MAJOR_MASK         (0xFF00U)
 
 /// Spiflash capability indicating that it supports erase
 #define BOOTLOADER_STORAGE_IMPL_CAPABILITY_ERASE_SUPPORTED      (1 << 0)
@@ -182,9 +191,9 @@ typedef struct BootloaderStorageFunctions {
 // Functions
 
 /***************************************************************************//**
- * Get information about the storage plugin.
+ * Get information about the storage component.
  *
- * @param[out] info Information about the storage plugin.
+ * @param[out] info Information about the storage component.
  ******************************************************************************/
 void bootloader_getStorageInfo(BootloaderStorageInformation_t *info);
 
@@ -241,7 +250,7 @@ int32_t bootloader_writeStorage(uint32_t slotId,
  *
  * @note This function automatically erases the following Flash page whenever
  *       the written data crosses a page boundary. In other words, the function
- *       cannot be used to perform multiple sequential writes to the same
+ *       can't be used to perform multiple sequential writes to the same
  *       address range unless the range starts at a page boundary.
  *       For a sequential write, the first call to this function should have
  *       a start address at a page boundary. Otherwise, the corresponding page
@@ -376,6 +385,7 @@ int32_t bootloader_setImageToBootload(int32_t slotId);
  *       init-and-continue functions is to allow the caller to service system
  *       needs during verification.
  *
+ *
  * @param[in] slotId      ID of the slot to check.
  * @param     context     Pointer to memory used to hold the parser context.
  * @param[in] contextSize Size of the context. An error is returned if the
@@ -407,10 +417,11 @@ int32_t bootloader_initVerifyImage(uint32_t slotId,
  *       init-and-continue functions is to allow the caller to service system
  *       needs during verification.
  *
+ *
  * @param     context          Pointer to a context structure that has
  *                             been initialized by calling
  *                             @ref bootloader_initVerifyImage()
- * @param[in] metadataCallback Function pointer which gets called when
+ * @param[in] metadataCallback Function pointer, which is called when
  *                             the binary metadata in the image is currently
  *                             verified. Set to NULL if not required.
  *
@@ -426,7 +437,7 @@ int32_t bootloader_continueVerifyImage(void                       *context,
  * Verify that the image in the given storage slot is valid.
  *
  * @param[in] slotId ID of the slot to check
- * @param[in] metadataCallback Function pointer which gets called when
+ * @param[in] metadataCallback Function pointer, which is called when
  *                             binary metadata is present in the storage slot.
  *                             Set to NULL if not required.
  *
@@ -500,7 +511,7 @@ int32_t bootloader_writeRawStorage(uint32_t address,
  *
  * @note Erasing storage must adhere to the limitations of the underlying
  *       storage medium, such as requiring full page erases. Use
- *       @ref bootloader_getStorageInfo to learn the limitations of the
+ *       @ref bootloader_getStorageInfo to learn about the limitations of the
  *       configured storage medium.
  *
  * @param[in] address Address to start erasing from
@@ -512,7 +523,7 @@ int32_t bootloader_writeRawStorage(uint32_t address,
 int32_t bootloader_eraseRawStorage(uint32_t address, size_t length);
 
 /***************************************************************************//**
- * Get allocated DMA channel for MSC write
+ * Get allocated DMA channel for MSC write.
  *
  * @return A positive number channel. -1 if DMA-based MSC write
  *         is not enabled. Otherwise, an error code.

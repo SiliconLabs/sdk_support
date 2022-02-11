@@ -34,12 +34,12 @@
 #endif
 
 #ifdef SL_MX25_FLASH_SHUTDOWN_PERIPHERAL
-static void cs_low()
+static void cs_low(void)
 {
   GPIO_PinOutClear(SL_MX25_FLASH_SHUTDOWN_CS_PORT, SL_MX25_FLASH_SHUTDOWN_CS_PIN);
 }
 
-static void cs_high()
+static void cs_high(void)
 {
   GPIO_PinOutSet(SL_MX25_FLASH_SHUTDOWN_CS_PORT, SL_MX25_FLASH_SHUTDOWN_CS_PIN);
 }
@@ -70,21 +70,21 @@ void sl_mx25_flash_shutdown(void)
 
 #ifdef _GPIO_USART_ROUTEEN_MASK
   GPIO->USARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].CLKROUTE  = ((SL_MX25_FLASH_SHUTDOWN_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_CLK_PIN  << _GPIO_USART_CLKROUTE_PIN_SHIFT));
+                                                                      | (SL_MX25_FLASH_SHUTDOWN_CLK_PIN  << _GPIO_USART_CLKROUTE_PIN_SHIFT));
   GPIO->USARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].RXROUTE   = ((SL_MX25_FLASH_SHUTDOWN_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_RX_PIN  << _GPIO_USART_RXROUTE_PIN_SHIFT));
+                                                                      | (SL_MX25_FLASH_SHUTDOWN_RX_PIN  << _GPIO_USART_RXROUTE_PIN_SHIFT));
   GPIO->USARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].TXROUTE   = ((SL_MX25_FLASH_SHUTDOWN_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_TX_PIN  << _GPIO_USART_TXROUTE_PIN_SHIFT));
+                                                                      | (SL_MX25_FLASH_SHUTDOWN_TX_PIN  << _GPIO_USART_TXROUTE_PIN_SHIFT));
   GPIO->USARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].ROUTEEN   = (GPIO_USART_ROUTEEN_RXPEN
-                                                                   | GPIO_USART_ROUTEEN_TXPEN
-                                                                   | GPIO_USART_ROUTEEN_CLKPEN);
+                                                                      | GPIO_USART_ROUTEEN_TXPEN
+                                                                      | GPIO_USART_ROUTEEN_CLKPEN);
 #else
   SL_MX25_FLASH_SHUTDOWN_PERIPHERAL->ROUTELOC0 = ((SL_MX25_FLASH_SHUTDOWN_RX_LOC << _USART_ROUTELOC0_RXLOC_SHIFT)
-                                               | (SL_MX25_FLASH_SHUTDOWN_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT)
-                                               | (SL_MX25_FLASH_SHUTDOWN_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT));
+                                                  | (SL_MX25_FLASH_SHUTDOWN_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT)
+                                                  | (SL_MX25_FLASH_SHUTDOWN_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT));
   SL_MX25_FLASH_SHUTDOWN_PERIPHERAL->ROUTEPEN  = (USART_ROUTEPEN_RXPEN
-                                               | USART_ROUTEPEN_TXPEN
-                                               | USART_ROUTEPEN_CLKPEN);
+                                                  | USART_ROUTEPEN_TXPEN
+                                                  | USART_ROUTEPEN_CLKPEN);
 #endif
 
   // Wait for flash warm-up

@@ -222,6 +222,16 @@ void EUSART_SpiInit(EUSART_TypeDef *eusart, EUSART_SpiInit_TypeDef const *init)
     }
   } else {
     EFM_ASSERT(init->bitRate <= 10000000);
+
+    if (init->advancedSettings && init->advancedSettings->forceLoad) {
+      // If baud-rate is more than 5MHz, a value of 4 is recommended, any values
+      // smaller than that can be tried out but avoid using 0. If baud-rate is less than 5MHz,
+      // value of 5 is recommended, values higher than 5 can be used but it may make the load
+      // error easy to occur. The recommended values for frequency bands should be sufficient
+      // to work all the time.
+      EFM_ASSERT((init->bitRate >= 5000000 && init->advancedSettings->setupWindow <= 4)
+                 || (init->bitRate < 5000000 && init->advancedSettings->setupWindow >= 5));
+    }
   }
 
   EUSART_SyncInitCommon(eusart, init);
@@ -282,7 +292,9 @@ void EUSART_Reset(EUSART_TypeDef *eusart)
   // 1. Properly disable the module
   EUSART_Disable(eusart);
 
-#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)  \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) \
+  || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
   // Manual toggling tx_sclk_mst to synchronize handshake
   // when switching from SPI master to other modes
   // so module is disabling correctly.
@@ -376,6 +388,7 @@ uint8_t EUSART_Rx(EUSART_TypeDef *eusart)
 
   return (uint8_t)eusart->RXDATA;
 }
+
 /***************************************************************************//**
  * Receives one 8-9 bit frame with extended information.
  ******************************************************************************/
@@ -500,13 +513,6 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
   // Prevent dividing by 0.
   EFM_ASSERT(baudrate);
 
-#if defined(EUSART_DALICFG_DALIEN)
-  if (eusart->DALICFG & EUSART_DALICFG_DALIEN) {
-    // adjust for manchester double-clocking scheme
-    baudrate *= 2;
-  }
-#endif /* EUSART_DALICFG_DALIEN */
-
   // Make sure the module exists on the selected chip.
   EFM_ASSERT(EUSART_REF_VALID(eusart));
 
@@ -522,7 +528,11 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
 
     EUSART_Enable_TypeDef txrxEnStatus = eusartDisable;
     bool wasEnabled = (eusart->EN & _EUSART_EN_EN_MASK) == true;
-    clkdiv = refFreq / baudrate - 1;
+    clkdiv = refFreq / baudrate - 1UL;
+
+    // If the desired bit rate requires a divider larger than the Synchronous divider bitfield (CFG2_SDIV),
+    // the resulting spi master bus clock will be undefined because the result will be truncated.
+    EFM_ASSERT(clkdiv <= (_EUSART_CFG2_SDIV_MASK >> _EUSART_CFG2_SDIV_SHIFT));
 
     if (wasEnabled) {
       eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK | _EUSART_SYNCBUSY_TXEN_MASK);
@@ -550,11 +560,18 @@ void EUSART_BaudrateSet(EUSART_TypeDef *eusart,
     if (wasEnabled) {
       EUSART_Enable(eusart, txrxEnStatus);
     }
-  } else // In synchronous mode (ex: UART)
+  } else // In asynchronous mode (ex: UART)
 #endif
   {
     // The peripheral must be enabled to configure the baud rate.
     EFM_ASSERT(eusart->EN == EUSART_EN_EN);
+
+#if defined(EUSART_DALICFG_DALIEN)
+    if (eusart->DALICFG & EUSART_DALICFG_DALIEN) {
+      // adjust for manchester double-clocking scheme
+      baudrate *= 2;
+    }
+#endif
 
     /*
      * Use integer division to avoid forcing in float division
@@ -657,7 +674,7 @@ uint32_t EUSART_BaudrateGet(EUSART_TypeDef *eusart)
     div = (eusart->CFG2 & _EUSART_CFG2_SDIV_MASK) >> _EUSART_CFG2_SDIV_SHIFT;
     br = freq / (div + 1);
   }
-  // In synchronous mode (ex: UART)
+  // In asynchronous mode (ex: UART)
   else
 #endif
   {
@@ -670,7 +687,7 @@ uint32_t EUSART_BaudrateGet(EUSART_TypeDef *eusart)
       // adjust for manchester double-clocking scheme
       br /= 2;
     }
-#endif /* EUSART_DALICFG_DALIEN */
+#endif
   }
 
   return br;
@@ -746,6 +763,7 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
 #if defined(EUART_PRESENT)
   PRS->CONSUMER_EUART0_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUART0_TRIGGER_MASK);
 #else
+
 #if defined(EUSART0)
   if (eusart == EUSART0) {
     PRS->CONSUMER_EUSART0_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART0_TRIGGER_MASK);
@@ -761,7 +779,16 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
     PRS->CONSUMER_EUSART2_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART2_TRIGGER_MASK);
   }
 #endif
-
+#if defined(EUSART3)
+  if (eusart == EUSART3) {
+    PRS->CONSUMER_EUSART3_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART3_TRIGGER_MASK);
+  }
+#endif
+#if defined(EUSART4)
+  if (eusart == EUSART4) {
+    PRS->CONSUMER_EUSART4_TRIGGER = (init->prs_trigger_channel & _PRS_CONSUMER_EUSART4_TRIGGER_MASK);
+  }
+#endif
 #endif
 
   tmp   = ((uint32_t)(init->prs_trigger_enable));
@@ -775,6 +802,10 @@ void EUSART_PrsTriggerEnable(EUSART_TypeDef *eusart,
   eusart->TRIGCTRL_CLR = tmp;
   eusart_sync(eusart, EUSART_SYNCBUSY_RXTEN | EUSART_SYNCBUSY_TXTEN);
 }
+
+/*******************************************************************************
+ **************************   LOCAL FUNCTIONS   ********************************
+ ******************************************************************************/
 
 /***************************************************************************//**
  * Gets the clock associated to the specified EUSART instance.
@@ -805,6 +836,16 @@ static CMU_Clock_TypeDef EUSART_ClockGet(EUSART_TypeDef *eusart)
 #if defined(EUSART2)
   else if (eusart == EUSART2) {
     clock = cmuClock_EUSART2;
+  }
+#endif
+#if defined(EUSART3)
+  else if (eusart == EUSART3) {
+    clock = cmuClock_EUSART3;
+  }
+#endif
+#if defined(EUSART4)
+  else if (eusart == EUSART4) {
+    clock = cmuClock_EUSART4;
   }
 #endif
   else {
@@ -892,10 +933,11 @@ static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
     }
     if (init->advancedSettings->prsRxEnable) {
       eusart->CFG1 |= EUSART_CFG1_RXPRSEN;
-      //Configure PRS channel as input data line for EUSART.
+      // Configure PRS channel as input data line for EUSART.
 #if defined(EUART_PRESENT)
       PRS->CONSUMER_EUART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUART0_RX_MASK);
 #elif defined(EUSART_PRESENT)
+
       if (eusart == EUSART0) {
         PRS->CONSUMER_EUSART0_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART0_RX_MASK);
       }
@@ -907,6 +949,16 @@ static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
 #if defined(EUSART2)
       if (eusart == EUSART2) {
         PRS->CONSUMER_EUSART2_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART2_RX_MASK);
+      }
+#endif
+#if defined(EUSART3)
+      if (eusart == EUSART3) {
+        PRS->CONSUMER_EUSART3_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART3_RX_MASK);
+      }
+#endif
+#if defined(EUSART4)
+      if (eusart == EUSART4) {
+        PRS->CONSUMER_EUSART4_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART4_RX_MASK);
       }
 #endif
 #endif
@@ -986,7 +1038,7 @@ static void EUSART_AsyncInitCommon(EUSART_TypeDef *eusart,
 static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
                                   EUSART_SpiInit_TypeDef const *init)
 {
-  void* advanceSetting_ptr = (void*)init->advancedSettings; // Used to avoid GCC over optimization.
+  void* advancedSetting_ptr = (void*)init->advancedSettings; // Used to avoid GCC over optimization.
 
   // LF register about to be modified requires sync busy check.
   if (eusart->EN) {
@@ -999,24 +1051,32 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
   // Configure global configuration register 2.
   eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_MASTER_MASK
                                    | _EUSART_CFG2_CLKPOL_MASK
-                                   | _EUSART_CFG2_CLKPHA_MASK))
+                                   | _EUSART_CFG2_CLKPHA_MASK
+                                   | _EUSART_CFG2_FORCELOAD_MASK))
                  | (uint32_t)(init->master)
-                 | (uint32_t)(init->clockMode);
+                 | (uint32_t)(init->clockMode)
+                 | (uint32_t)(EUSART_CFG2_FORCELOAD); // Force load feature enabled by default.
 
-  if (advanceSetting_ptr) {
+  if (advancedSetting_ptr) {
     // Configure global configuration register 2.
-    eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_AUTOCS_MASK
+    eusart->CFG2 = (eusart->CFG2 & ~(_EUSART_CFG2_FORCELOAD_MASK
+                                     | _EUSART_CFG2_AUTOCS_MASK
                                      | _EUSART_CFG2_AUTOTX_MASK
                                      | _EUSART_CFG2_CSINV_MASK
                                      | _EUSART_CFG2_CLKPRSEN_MASK))
+                   | (uint32_t)(init->advancedSettings->forceLoad << _EUSART_CFG2_FORCELOAD_SHIFT)
                    | (uint32_t)(init->advancedSettings->autoCsEnable << _EUSART_CFG2_AUTOCS_SHIFT)
                    | (uint32_t)(init->advancedSettings->autoTxEnable << _EUSART_CFG2_AUTOTX_SHIFT)
                    | (uint32_t)(init->advancedSettings->csPolarity)
                    | (uint32_t)(init->advancedSettings->prsClockEnable << _EUSART_CFG2_CLKPRSEN_SHIFT);
 
     // Only applicable to EM2 (low frequency) capable EUSART instances.
-    eusart->CFG1 = (uint32_t)(init->advancedSettings->dmaWakeUpOnRx << _EUSART_CFG1_RXDMAWU_SHIFT)
-                   |  (uint32_t)(init->advancedSettings->prsRxEnable << _EUSART_CFG1_RXPRSEN_SHIFT);
+    eusart->CFG1 = (eusart->CFG1 & ~(_EUSART_CFG1_RXFIW_MASK
+                                     | _EUSART_CFG1_TXFIW_MASK))
+                   | (uint32_t)(init->advancedSettings->RxFifoWatermark)
+                   | (uint32_t)(init->advancedSettings->TxFifoWatermark)
+                   | (uint32_t)(init->advancedSettings->dmaWakeUpOnRx << _EUSART_CFG1_RXDMAWU_SHIFT)
+                   | (uint32_t)(init->advancedSettings->prsRxEnable << _EUSART_CFG1_RXPRSEN_SHIFT);
   }
 
   eusart->CFG0 = (eusart->CFG0 & ~(_EUSART_CFG0_SYNC_MASK
@@ -1024,27 +1084,31 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
                  | (uint32_t)(_EUSART_CFG0_SYNC_SYNC)
                  | (uint32_t)(init->loopbackEnable);
 
-  if (advanceSetting_ptr) {
+  if (advancedSetting_ptr) {
     eusart->CFG0 |= (uint32_t)init->advancedSettings->invertIO & (_EUSART_CFG0_RXINV_MASK | _EUSART_CFG0_TXINV_MASK);
     eusart->CFG0 |= (uint32_t)init->advancedSettings->msbFirst << _EUSART_CFG0_MSBF_SHIFT;
 
     // Configure global configurationTiming register.
     eusart->TIMINGCFG = (eusart->TIMINGCFG & ~(_EUSART_TIMINGCFG_CSSETUP_MASK
                                                | _EUSART_TIMINGCFG_CSHOLD_MASK
-                                               | _EUSART_TIMINGCFG_ICS_MASK))
+                                               | _EUSART_TIMINGCFG_ICS_MASK
+                                               | _EUSART_TIMINGCFG_SETUPWINDOW_MASK))
                         | ((uint32_t)(init->advancedSettings->autoCsSetupTime << _EUSART_TIMINGCFG_CSSETUP_SHIFT)
                            & _EUSART_TIMINGCFG_CSSETUP_MASK)
                         | ((uint32_t)(init->advancedSettings->autoCsHoldTime << _EUSART_TIMINGCFG_CSHOLD_SHIFT)
                            & _EUSART_TIMINGCFG_CSHOLD_MASK)
                         | ((uint32_t)(init->advancedSettings->autoInterFrameTime << _EUSART_TIMINGCFG_ICS_SHIFT)
-                           & _EUSART_TIMINGCFG_ICS_MASK);
+                           & _EUSART_TIMINGCFG_ICS_MASK)
+                        | ((uint32_t)(init->advancedSettings->setupWindow << _EUSART_TIMINGCFG_SETUPWINDOW_SHIFT)
+                           & _EUSART_TIMINGCFG_SETUPWINDOW_MASK)
+    ;
   }
 
   // Configure frame format
   eusart->FRAMECFG = (eusart->FRAMECFG & ~(_EUSART_FRAMECFG_DATABITS_MASK))
                      | (uint32_t)(init->databits);
 
-  if (advanceSetting_ptr) {
+  if (advancedSetting_ptr) {
     eusart->DTXDATCFG = (init->advancedSettings->defaultTxData & _EUSART_DTXDATCFG_MASK);
 
     if (init->advancedSettings->prsRxEnable) {
@@ -1060,6 +1124,16 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
 #if defined(EUSART2)
       if (eusart == EUSART2) {
         PRS->CONSUMER_EUSART2_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART2_RX_MASK);
+      }
+#endif
+#if defined(EUSART3)
+      if (eusart == EUSART3) {
+        PRS->CONSUMER_EUSART3_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART3_RX_MASK);
+      }
+#endif
+#if defined(EUSART4)
+      if (eusart == EUSART4) {
+        PRS->CONSUMER_EUSART4_RX_SET = (init->advancedSettings->prsRxChannel & _PRS_CONSUMER_EUSART4_RX_MASK);
       }
 #endif
     }
@@ -1079,6 +1153,16 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
         PRS->CONSUMER_EUSART2_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART2_CLK_MASK);
       }
 #endif
+#if defined(EUSART3)
+      if (eusart == EUSART3) {
+        PRS->CONSUMER_EUSART3_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART3_CLK_MASK);
+      }
+#endif
+#if defined(EUSART4)
+      if (eusart == EUSART4) {
+        PRS->CONSUMER_EUSART4_CLK_SET = (init->advancedSettings->prsClockChannel & _PRS_CONSUMER_EUSART4_CLK_MASK);
+      }
+#endif
     }
   }
 
@@ -1091,7 +1175,7 @@ static void EUSART_SyncInitCommon(EUSART_TypeDef *eusart,
   // Finally enable the Rx and/or Tx channel (as specified).
   eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
   eusart->CMD = (uint32_t)init->enable;
-  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK); // Wait for low frequency register synchronization.
+  eusart_sync(eusart, _EUSART_SYNCBUSY_RXEN_MASK & _EUSART_SYNCBUSY_TXEN_MASK);
   while (~EUSART_StatusGet(eusart) & (_EUSART_STATUS_RXIDLE_MASK | _EUSART_STATUS_TXIDLE_MASK)) {
   }
 }

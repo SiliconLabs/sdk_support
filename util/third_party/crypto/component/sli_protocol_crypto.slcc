@@ -38,3 +38,7 @@ requires:
 define:
   - name: SLI_RADIOAES_REQUIRES_MASKING
     condition: [device_has_radioaes]
+# Add a component catalog entry to allow build-time detection of protocol crypto presence
+template_contribution:
+  - name: component_catalog
+    value: sli_protocol_crypto

@@ -1,4 +1,4 @@
-id: "freertos_heap_3"
+id: freertos_heap_3
 label: FreeRTOS Heap 3
 package: platform
 description: >
@@ -10,14 +10,15 @@ description: >
   This file can only be used if the linker is configured to to generate
   a heap memory area.
 category: RTOS|FreeRTOS
-quality: "production"
+quality: production
 source:
-  - path: "util/third_party/freertos/kernel/portable/MemMang/heap_3.c"
+  - path: util/third_party/freertos/kernel/portable/MemMang/heap_3.c
 provides:
-  - name: "freertos_heap"
+  - name: freertos_heap
+  - name: freertos_heap_3
 requires:
-  - name: "cmsis_core"
-  - name: "freertos"
+  - name: cmsis_core
+  - name: freertos
 template_contribution:
-  - name: "rte_components"
-    value: "RTE_RTOS_FreeRTOS_HEAP_3"
+  - name: rte_components
+    value: RTE_RTOS_FreeRTOS_HEAP_3

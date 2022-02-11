@@ -37,6 +37,10 @@
 #define COEX_HAL_DISABLED 1
 #endif //RHO_GPIO
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*HalGpioIsr_t)(void);
 typedef void (*HalGpioIntSel_t)(void);
 
@@ -82,4 +86,9 @@ bool COEX_HAL_ConfigPriority(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigGrant(COEX_HAL_GpioConfig_t *gpioConfig);
 uint8_t COEX_HAL_GetDpPulseWidth(void);
 bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif  // __COEXISTENCE_HAL_H__

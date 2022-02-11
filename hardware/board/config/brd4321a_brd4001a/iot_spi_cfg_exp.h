@@ -99,25 +99,30 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,CS> IOT_SPI_CFG_EXP
 // $[USART_IOT_SPI_CFG_EXP]
-#define IOT_SPI_CFG_EXP_PERIPHERAL      USART1
-#define IOT_SPI_CFG_EXP_PERIPHERAL_NO   1
+#define IOT_SPI_CFG_EXP_PERIPHERAL               USART3
+#define IOT_SPI_CFG_EXP_PERIPHERAL_NO            3
 
-#define IOT_SPI_CFG_EXP_TX_PORT         gpioPortA
-#define IOT_SPI_CFG_EXP_TX_PIN          0
-#define IOT_SPI_CFG_EXP_TX_LOC          0
+// USART3 TX on PA0
+#define IOT_SPI_CFG_EXP_TX_PORT                  gpioPortA
+#define IOT_SPI_CFG_EXP_TX_PIN                   0
+#define IOT_SPI_CFG_EXP_TX_LOC                   0
 
-#define IOT_SPI_CFG_EXP_RX_PORT         gpioPortA
-#define IOT_SPI_CFG_EXP_RX_PIN          0
-#define IOT_SPI_CFG_EXP_RX_LOC          0
+// USART3 RX on PA1
+#define IOT_SPI_CFG_EXP_RX_PORT                  gpioPortA
+#define IOT_SPI_CFG_EXP_RX_PIN                   1
+#define IOT_SPI_CFG_EXP_RX_LOC                   0
 
-#define IOT_SPI_CFG_EXP_CLK_PORT        gpioPortA
-#define IOT_SPI_CFG_EXP_CLK_PIN         1
-#define IOT_SPI_CFG_EXP_CLK_LOC         0
+// USART3 CLK on PA2
+#define IOT_SPI_CFG_EXP_CLK_PORT                 gpioPortA
+#define IOT_SPI_CFG_EXP_CLK_PIN                  2
+#define IOT_SPI_CFG_EXP_CLK_LOC                  0
 
-#define IOT_SPI_CFG_EXP_CS_PORT         gpioPortA
-#define IOT_SPI_CFG_EXP_CS_PIN          2
-#define IOT_SPI_CFG_EXP_CS_LOC          0
-// [USART_IOT_SPI_CFG_EXP$
+// USART3 CS on PA3
+#define IOT_SPI_CFG_EXP_CS_PORT                  gpioPortA
+#define IOT_SPI_CFG_EXP_CS_PIN                   3
+#define IOT_SPI_CFG_EXP_CS_LOC                   0
+
+// [USART_IOT_SPI_CFG_EXP]$
 // <<< sl:end pin_tool >>>
 
 /*******************************************************************************

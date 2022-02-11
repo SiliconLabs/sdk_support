@@ -642,11 +642,11 @@ typedef struct {
 #define _AGC_CTRL1_CCAMODE3LOGIC_SHIFT                 17                                       /**< Shift value for AGC_CCAMODE3LOGIC           */
 #define _AGC_CTRL1_CCAMODE3LOGIC_MASK                  0x20000UL                                /**< Bit mask for AGC_CCAMODE3LOGIC              */
 #define _AGC_CTRL1_CCAMODE3LOGIC_DEFAULT               0x00000000UL                             /**< Mode DEFAULT for AGC_CTRL1                  */
-#define _AGC_CTRL1_CCAMODE3LOGIC_OR                    0x00000000UL                             /**< Mode OR for AGC_CTRL1                       */
-#define _AGC_CTRL1_CCAMODE3LOGIC_AND                   0x00000001UL                             /**< Mode AND for AGC_CTRL1                      */
+#define _AGC_CTRL1_CCAMODE3LOGIC_AND                   0x00000000UL                             /**< Mode AND for AGC_CTRL1                      */
+#define _AGC_CTRL1_CCAMODE3LOGIC_OR                    0x00000001UL                             /**< Mode OR for AGC_CTRL1                       */
 #define AGC_CTRL1_CCAMODE3LOGIC_DEFAULT                (_AGC_CTRL1_CCAMODE3LOGIC_DEFAULT << 17) /**< Shifted mode DEFAULT for AGC_CTRL1          */
-#define AGC_CTRL1_CCAMODE3LOGIC_OR                     (_AGC_CTRL1_CCAMODE3LOGIC_OR << 17)      /**< Shifted mode OR for AGC_CTRL1               */
 #define AGC_CTRL1_CCAMODE3LOGIC_AND                    (_AGC_CTRL1_CCAMODE3LOGIC_AND << 17)     /**< Shifted mode AND for AGC_CTRL1              */
+#define AGC_CTRL1_CCAMODE3LOGIC_OR                     (_AGC_CTRL1_CCAMODE3LOGIC_OR << 17)      /**< Shifted mode OR for AGC_CTRL1               */
 #define AGC_CTRL1_CCASWCTRL                            (0x1UL << 18)                            /**< SW control over CCA                         */
 #define _AGC_CTRL1_CCASWCTRL_SHIFT                     18                                       /**< Shift value for AGC_CCASWCTRL               */
 #define _AGC_CTRL1_CCASWCTRL_MASK                      0x40000UL                                /**< Bit mask for AGC_CCASWCTRL                  */

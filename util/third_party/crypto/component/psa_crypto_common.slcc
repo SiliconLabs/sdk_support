@@ -34,9 +34,6 @@ include:
       - path: psa/crypto_struct.h
       - path: psa/crypto_types.h
       - path: psa/crypto_values.h
-  - path: library
-    file_list:
-      - path: psa_crypto_service_integration.h
   - path: ../sl_component/sl_psa_driver/inc
     file_list:
       - path: sli_psa_driver_common.h

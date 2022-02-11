@@ -57,6 +57,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
                                            sl_iostream_uart_context_t *context,
                                            sl_iostream_uart_config_t *config,
                                            sl_status_t (*tx)(void *context, char c),
+                                           void (*tx_completed)(void *context, bool enable),
                                            void (*enable_rx)(void *context),
                                            sl_status_t (*deinit)(void *context),
                                            uint8_t rx_em_req,
@@ -67,8 +68,8 @@ bool sli_uart_is_rx_space_avail(void *context);
 void sli_uart_push_rxd_data(void *context,
                             char c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-bool sli_uart_txc(void *context);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+void sli_uart_txc(void *context);
 #endif
 
 #ifdef __cplusplus

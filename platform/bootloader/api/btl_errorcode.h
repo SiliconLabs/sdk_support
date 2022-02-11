@@ -3,7 +3,7 @@
  * @brief Error codes used and exposed by the bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -43,14 +43,14 @@
 #define BOOTLOADER_ERROR_BOOTLOAD_BASE              0x0500L
 /// Security errors
 #define BOOTLOADER_ERROR_SECURITY_BASE              0x0600L
-/// Communication plugin errors
+/// Communication component errors
 #define BOOTLOADER_ERROR_COMMUNICATION_BASE         0x0700L
 /// XMODEM parser errors
 #define BOOTLOADER_ERROR_XMODEM_BASE                0x0900L
 /// Image file parser errors
 #define BOOTLOADER_ERROR_PARSER_BASE                0x1000L
-/// SPI slave driver errors
-#define BOOTLOADER_ERROR_SPISLAVE_BASE              0x1100L
+/// SPI Peripheral driver errors
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE        0x1100L
 /// UART driver errors
 #define BOOTLOADER_ERROR_UART_BASE                  0x1200L
 /// Compression errors
@@ -71,6 +71,9 @@
 /// Bootloader table invalid
 #define BOOTLOADER_ERROR_INIT_TABLE \
   (BOOTLOADER_ERROR_INIT_BASE | 0x02L)
+/// Bootloader SFDP not supported
+#define BOOTLOADER_ERROR_INIT_SFDP \
+  (BOOTLOADER_ERROR_INIT_BASE | 0x03L)
 
 /** @} addtogroup InitError */
 
@@ -177,8 +180,8 @@
 /** @} addtogroup SecurityError */
 
 /**
- * @addtogroup CommunicationError Communication Plugin Error Codes
- * @brief Bootloader error codes returned by communication plugins.
+ * @addtogroup CommunicationError Communication Component Error Codes
+ * @brief Bootloader error codes returned by communication components.
  * @details
  *    Offset from @ref BOOTLOADER_ERROR_COMMUNICATION_BASE
  * @{
@@ -288,32 +291,32 @@
 /** @} addtogroup ParserError */
 
 /**
- * @addtogroup SpiSlaveError SPI Slave Driver Error Codes
- * @brief Bootloader error codes returned by the SPI slave driver.
+ * @addtogroup SpiPeripheralError SPI Peripheral Driver Error Codes
+ * @brief Bootloader error codes returned by the SPI Peripheral driver.
  * @details
- *    Offset from @ref BOOTLOADER_ERROR_SPISLAVE_BASE
+ *    Offset from @ref BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE
  * @{
  */
 /// Operation not allowed because hardware has not been initialized
-#define BOOTLOADER_ERROR_SPISLAVE_UNINIT \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x01)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_UNINIT \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x01)
 /// Hardware fail during initialization
-#define BOOTLOADER_ERROR_SPISLAVE_INIT \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x02)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_INIT \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x02)
 /// Invalid argument
-#define BOOTLOADER_ERROR_SPISLAVE_ARGUMENT \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x03)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_ARGUMENT \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x03)
 /// Timeout
-#define BOOTLOADER_ERROR_SPISLAVE_TIMEOUT \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x04)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_TIMEOUT \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x04)
 /// Buffer overflow condition
-#define BOOTLOADER_ERROR_SPISLAVE_OVERFLOW \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x05)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_OVERFLOW \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x05)
 /// Busy condition
-#define BOOTLOADER_ERROR_SPISLAVE_BUSY \
-  (BOOTLOADER_ERROR_SPISLAVE_BASE | 0x06)
+#define BOOTLOADER_ERROR_SPI_PERIPHERAL_BUSY \
+  (BOOTLOADER_ERROR_SPI_PERIPHERAL_BASE | 0x06)
 
-/** @} addtogroup SpiSlaveError */
+/** @} addtogroup SpiPeripheralError */
 
 /**
  * @addtogroup UartError UART Driver Error Codes

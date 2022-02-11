@@ -249,6 +249,12 @@ SECTIONS
     KEEP(*(.internal_storage*))
   } > FLASH
 
+  {%- if linker_zwave_nvm is defined %}
+  .zwave_nvm (DSECT) : {
+    KEEP(*(.zwavenvm*))
+  } > FLASH
+  {%- endif %}
+
   .nvm (DSECT) : {
     KEEP(*(.simee*))
   } > FLASH
@@ -256,7 +262,14 @@ SECTIONS
   linker_nvm_end = __main_flash_end__;
   linker_nvm_begin = linker_nvm_end - SIZEOF(.nvm);
   linker_nvm_size = SIZEOF(.nvm);
+  {%- if linker_zwave_nvm is defined %}
+  linker_zwave_nvm_end = linker_nvm_begin;
+  linker_zwave_nvm_begin = linker_zwave_nvm_end - SIZEOF(.zwave_nvm);
+  linker_zwave_nvm_size = SIZEOF(.zwave_nvm);
+  linker_storage_end = linker_zwave_nvm_begin;
+  {%- else %}
   linker_storage_end = linker_nvm_begin;
+  {%- endif %}
   linker_storage_begin = linker_storage_end - SIZEOF(.internal_storage);
   linker_storage_size = SIZEOF(.internal_storage);
   __nvm3Base = linker_nvm_begin;

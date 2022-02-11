@@ -2,7 +2,7 @@ id: micriumos_net_driver_eth_usb_cdc-eem
 label: Network Suite - USB CDC-EEM Ethernet Driver
 package: micrium-tcpx
 description: Micrium OS Network USB CDC-EEM Ethernet Driver
-category: Services|Network Suite|Drivers
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/drivers/net
 source:

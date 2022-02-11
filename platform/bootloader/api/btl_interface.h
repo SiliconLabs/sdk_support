@@ -3,7 +3,7 @@
  * @brief Application interface to the bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -23,7 +23,7 @@
 #include "btl_reset_info.h"
 #include "application_properties.h"
 
-// Include plugin-specific interfaces
+// Include component-specific interfaces
 #include "btl_interface_parser.h"
 #include "btl_interface_storage.h"
 
@@ -46,7 +46,9 @@
  * @{
  * @addtogroup CommonInterface Common Application Interface
  * @brief Generic application interface available on all versions of the
- *        bootloader, regardless of the available plugins.
+ *        bootloader, regardless of the available components.
+ * @note These Bootloader APIs are not reentrant and should be wrapped in critical section
+ *       where needed.
  * @details
  * @{
  ******************************************************************************/
@@ -139,7 +141,7 @@ typedef struct {
                          uint8_t                           data[],
                          size_t                            numBytes);
   // ------------------------------
-  /// Function table for storage plugin
+  /// Function table for storage component
   const BootloaderStorageFunctions_t *storage;
   // ------------------------------
   /// Parse a buffer and get application and bootloader upgrade metadata from the buffer.
@@ -182,12 +184,12 @@ typedef struct {
 /// Bootloader has the capability of being upgraded
 #define BOOTLOADER_CAPABILITY_BOOTLOADER_UPGRADE               (1 << 4)
 
-/// Bootloader has the capability of parsing EBL files
-#define BOOTLOADER_CAPABILITY_EBL                              (1 << 5)
-/// Bootloader has the capability of parsing signed EBL files
-#define BOOTLOADER_CAPABILITY_EBL_SIGNATURE                    (1 << 6)
-/// Bootloader has the capability of parsing encrypted EBL files
-#define BOOTLOADER_CAPABILITY_EBL_ENCRYPTION                   (1 << 7)
+/// Bootloader has the capability of parsing GBL files
+#define BOOTLOADER_CAPABILITY_GBL                              (1 << 5)
+/// Bootloader has the capability of parsing signed GBL files
+#define BOOTLOADER_CAPABILITY_GBL_SIGNATURE                    (1 << 6)
+/// Bootloader has the capability of parsing encrypted GBL files
+#define BOOTLOADER_CAPABILITY_GBL_ENCRYPTION                   (1 << 7)
 /// @brief Bootloader enforces signature verification of the application image
 ///        before every boot using certificate
 #define BOOTLOADER_CAPABILITY_ENFORCE_CERTIFICATE_SECURE_BOOT  (1 << 8)
@@ -303,6 +305,13 @@ typedef struct {
 #define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
                                            - (BTL_FIRST_STAGE_BASE \
                                               + BTL_FIRST_STAGE_SIZE))
+#elif defined(_SILICON_LABS_GECKO_INTERNAL_SDID_220)
+// No bootloader area: Place the bootloader in main flash
+#define BTL_FIRST_STAGE_BASE              FLASH_BASE
+#define BTL_APPLICATION_BASE              (FLASH_BASE + 0x00006000UL)
+#define BTL_MAIN_STAGE_MAX_SIZE           (BTL_APPLICATION_BASE    \
+                                           - (BTL_FIRST_STAGE_BASE \
+                                              + BTL_FIRST_STAGE_SIZE))
 #else
 #error "This part is not supported in this bootloader version."
 #endif
@@ -344,7 +353,7 @@ extern MainBootloaderTable_t *mainBootloaderTable;
 /***************************************************************************//**
  * Get information about the bootloader on this device.
  *
- * The information returned is fetched from the main bootloader
+ * The returned information is fetched from the main bootloader
  * information table.
  *
  * @param[out] info Pointer to the bootloader information struct.
@@ -373,12 +382,12 @@ int32_t bootloader_init(void);
 int32_t bootloader_deinit(void);
 
 /***************************************************************************//**
- * Reboot into the bootloader to install something.
+ * Reboot into the bootloader to perform an install.
  *
- * If there is a storage plugin and a slot is marked for bootload, install
+ * If there is a storage component and a slot is marked for bootload, install
  * the image in that slot after verifying it.
  *
- * If a communication plugin is present, open the communication channel and
+ * If a communication component is present, open the communication channel and
  * receive an image to be installed.
  ******************************************************************************/
 void bootloader_rebootAndInstall(void);
@@ -404,6 +413,7 @@ void bootloader_rebootAndInstall(void);
  * When secure boot is enforced, only ECDSA signed applications with
  * a valid signature are considered valid.
  *
+ *
  * @param[in] startAddress Starting address of the application.
  *
  * @return True if the application is valid, else false.
@@ -411,7 +421,7 @@ void bootloader_rebootAndInstall(void);
 bool bootloader_verifyApplication(uint32_t startAddress);
 
 /***************************************************************************//**
- * Check if signature verification on the application image in internal flash
+ * Check whether signature verification on the application image in internal flash
  * is enforced before every boot.
  *
  * @return True if signature verification is enforced, else false.
@@ -442,8 +452,9 @@ bool bootloader_getCertificateVersion(uint32_t *version);
 /***************************************************************************//**
  * Check if a pointer is valid and if it points to the bootloader first stage.
  *
- * This function can be used to check pointers to bootloader
+ * This function checks pointers to bootloader
  * jump tables.
+ *
  *
  * @param[in] ptr The pointer to check
  *
@@ -478,8 +489,9 @@ __STATIC_INLINE bool bootloader_pointerToFirstStageValid(const void *ptr)
 /***************************************************************************//**
  * Check if a pointer is valid and if it points to the bootloader main stage.
  *
- * This function can be used to check pointers to bootloader
+ * This function checks pointers to bootloader
  * jump tables.
+ *
  *
  * @param[in] ptr The pointer to check
  *

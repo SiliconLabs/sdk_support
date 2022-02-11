@@ -17,7 +17,7 @@ template_contribution:
     value:
       name: set_tx_antenna_mode
       handler: cli_ant_div_set_tx_antenna_mode
-      help: "set the tx antenna mode"
+      help: "Set tx antenna mode"
       argument:
         - type: uint8
           help: "0=Disable 1=ANTENNA1 2=ANTENNA2 3=DIVERSITY"
@@ -25,22 +25,22 @@ template_contribution:
     value:
       name: get_tx_antenna_mode
       handler: cli_ant_div_get_tx_antenna_mode
-      help: "get the tx antenna mode 0=Disable 1=ANTENNA1 2=ANTENNA2 3=DIVERSITY"
+      help: "Get tx antenna mode 0=Disable 1=ANT1 2=ANT2 3=DIVERSITY"
   - name: cli_command
     value:
       name: get_tx_antenna_selected
       handler: cli_ant_div_get_tx_antenna_selected
-      help: "get the currently selected tx antenna 1=ANTENNA1 2=ANTENNA2"
+      help: " Get currently selected tx antenna 1=ANTENNA1 2=ANTENNA2"
   - name: cli_command
     value:
       name: toggle_tx_antenna
       handler: cli_ant_div_toggle_tx_antenna
-      help: "toggle the tx antenna selection"
+      help: "Toggle the tx antenna selection"
   - name: cli_command
     value:
       name: set_rx_antenna_mode
       handler: cli_ant_div_set_rx_antenna_mode
-      help: "set the rx antenna mode"
+      help: "Set rx antenna mode"
       argument:
         - type: uint8
           help: "0=Disable 1=ANTENNA1 2=ANTENNA2 3=DIVERSITY"
@@ -48,9 +48,9 @@ template_contribution:
     value:
       name: get_rx_antenna_mode
       handler: cli_ant_div_get_rx_antenna_mode
-      help: "get the rx antenna mode 0=Disable 1=ANTENNA1 2=ANTENNA2 3=DIVERSITY"
+      help: "Get rx antenna mode 0=Disable 1=ANT1 2=ANT2 3=DIVERSITY"
   - name: cli_command
     value:
       name: get_ant_div_phy_select
       handler: cli_ant_div_get_phy_select
-      help: "get the antenna diversity phy selection"
+      help: " Get the antenna diversity phy selection"

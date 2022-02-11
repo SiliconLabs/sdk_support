@@ -37,17 +37,8 @@
 #include "em_core.h"
 
 #define AES_BLOCK_BYTES       16U
-
-#define BLE_CCM_NONCE_BYTES   13U
-#define BLE_CCM_KEY_BYTES     16U
-#define BLE_CCM_B_BYTES       16U
-#define BLE_CCM_TAG_BYTES      4U
-#define BLE_CCM_VER_BYTES      4U
-#define BLE_CCM_B0_FLAGS    0x49U
-#define BLE_CCM_AUTH_BLOCKS    1U
-
-#define BLE_RPA_KEY_BYTES     16U
-#define BLE_RPA_DATA_BYTES    16U
+#define AES_128_KEY_BYTES     16U
+#define AES_256_KEY_BYTES     32U
 
 #define RADIOAES_CONFIG_BYTES  4U
 
@@ -182,6 +173,8 @@ typedef struct {
   };
 #endif
 
+#define DMA_AXI_DESCR_END_POINTER ((sli_radioaes_dma_descr_t*) DMA_AXI_DESCR_NEXT_STOP)
+
 // Local CCM variables
 static const uint32_t aes_ccm_config_encrypt = AES_MODEID_CCM
                                                | AES_MODEID_NO_CX
@@ -194,34 +187,19 @@ static const uint32_t aes_ccm_config_decrypt = AES_MODEID_CCM
                                                | AES_MODEID_DECRYPT;
 static const uint32_t zeros = 0;
 
-// CONST FETCHERS
-static const sli_radioaes_dma_descr_t ccm_desc_fetcher_tag_padding = {
-  .address       = (uint32_t) &zeros,
-  .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
-  .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_TAG_BYTES) | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-  .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_ISLAST | DMA_SG_TAG_DATATYPE_AESPAYLOAD | DMA_SG_TAG_SETINVALIDBYTES(AES_BLOCK_BYTES - BLE_CCM_TAG_BYTES)
-};
-
-// CONST PUSHERS
-static const sli_radioaes_dma_descr_t ccm_desc_pusher_ver_padding = {
-  .address       = (uint32_t) NULL,
-  .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
-  .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_VER_BYTES) | DMA_AXI_DESCR_DISCARD
-};
-
-static int sli_radioaes_run_operation(sli_radioaes_dma_descr_t *first_fetch_descriptor,
-                                      sli_radioaes_dma_descr_t *first_push_descriptor)
+static sl_status_t sli_radioaes_run_operation(sli_radioaes_dma_descr_t *first_fetch_descriptor,
+                                              sli_radioaes_dma_descr_t *first_push_descriptor)
 {
   sli_radioaes_state_t aes_ctx;
   #if defined(SLI_RADIOAES_REQUIRES_MASKING)
   sli_radioaes_dma_descr_t mask_descr = SLI_RADIOAES_MASK_DESCRIPTOR((uint32_t)first_fetch_descriptor);
   #endif
 
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
+  sl_status_t status = sli_radioaes_acquire();
+  if (status == SL_STATUS_ISR) {
     sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
+  } else if (status != SL_STATUS_OK) {
+    return status;
   }
 
   RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
@@ -238,214 +216,236 @@ static int sli_radioaes_run_operation(sli_radioaes_dma_descr_t *first_fetch_desc
     // Wait for completion
   }
 
-  if (aq > 0) {
+  if (status == SL_STATUS_ISR) {
     sli_radioaes_restore_state(&aes_ctx);
   }
 
   return sli_radioaes_release();
 }
 
-static int aes_ccm_ble(bool                encrypt,
-                       unsigned char       *data,
-                       size_t              length,
-                       const unsigned char *key,
-                       const unsigned char *iv,
-                       unsigned char       header,
-                       unsigned char       *tag)
+// CCM (and CCM-star) implementation
+static sl_status_t aes_ccm_radio(bool                encrypt,
+                                 const unsigned char *add_data,
+                                 size_t              add_length,
+                                 const unsigned char *data_in,
+                                 unsigned char       *data_out,
+                                 size_t              length,
+                                 const unsigned char *key,
+                                 const unsigned char *header,
+                                 size_t              header_length,
+                                 unsigned char       *tag,
+                                 size_t              tag_length)
 
 {
-  volatile uint32_t ver_failed;
-  volatile uint8_t b0b1[BLE_CCM_B_BYTES * 2] = { 0 };
+  // Assumptions:
+  // * There is always header input, but the header input may be block-aligned (BLE-CCM)
+  // * There may not always be ADD input (e.g. BLE-CCM)
+  // * There may not always be data input (e.g. CCM in authenticated-only mode)
+  // * The header input is pre-calculated by the caller of this function
+  // * Data output may be NULL (in which case it is discarded)
+  // * Tag length may be 0 (CCM-star), in which case the tag pointer is also allowed to be NULL
 
-  size_t data_pad_bytes = AES_BLOCK_BYTES - 1 - ((length - 1) % AES_BLOCK_BYTES);
+  // Setup ver_failed output buffer and initialize it in case of decryption to an invalid value
+  volatile uint8_t ver_failed[AES_BLOCK_BYTES] = {[0 ... AES_BLOCK_BYTES - 1] = 0xFF };
 
-  // fetchers
+  // Calculate padding bytes. Since the accelerator expects to see the AESPAYLOAD data type
+  // at least once during the operation, ensure that we're emitting a padding block in case
+  // no input data is present.
+  size_t header_pad_bytes = (AES_BLOCK_BYTES - ((header_length + add_length) % AES_BLOCK_BYTES)) % AES_BLOCK_BYTES;
+  size_t data_pad_bytes = (length > 0 ? (AES_BLOCK_BYTES - (length % AES_BLOCK_BYTES)) % AES_BLOCK_BYTES : 16);
+
+  // Fetchers
+
+  // Tag output. If used, always the last descriptor. Not used for CCM-* without tag, the
+  // accelerator actually looks at the header and figures out whether or not to take in
+  // tag input.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_tag = {
     .address       = (uint32_t) tag,
-    .nextDescr     = (uint32_t) &ccm_desc_fetcher_tag_padding,
-    .lengthAndIrq  = BLE_CCM_TAG_BYTES,
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
+    .nextDescr     = (uint32_t) DMA_AXI_DESCR_END_POINTER,
+    .lengthAndIrq  = (uint32_t) tag_length
+                     | BLOCK_S_INCR_ADDR
+                     | BLOCK_S_REALIGN_DATA,
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISDATA
+                     | DMA_SG_TAG_ISLAST
+                     | DMA_SG_TAG_DATATYPE_AESPAYLOAD
+                     | DMA_SG_TAG_SETINVALIDBYTES(AES_BLOCK_BYTES - tag_length)
   };
 
-  sli_radioaes_dma_descr_t ccm_desc_fetcher_data_padding = {
-    .address       = (uint32_t) &zeros,
-    .nextDescr     = (encrypt ? DMA_AXI_DESCR_NEXT_STOP : (uint32_t) &ccm_desc_fetcher_tag),
-    .lengthAndIrq  = (uint32_t) data_pad_bytes | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD | (encrypt ? DMA_SG_TAG_ISLAST : 0) | DMA_SG_TAG_SETINVALIDBYTES(data_pad_bytes),
-  };
-
+  // Data input. Can be zero-length, in which case we'll issue a bogus descriptor instead.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_data = {
-    .address       = (uint32_t) data,
-    .nextDescr     = ((data_pad_bytes != 0) ? (uint32_t) &ccm_desc_fetcher_data_padding : (encrypt ? DMA_AXI_DESCR_NEXT_STOP : (uint32_t) &ccm_desc_fetcher_tag)),
-    .lengthAndIrq  = length | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD | (((data_pad_bytes == 0) && encrypt) ? DMA_SG_TAG_ISLAST : 0),
+    .address       = (uint32_t) (length > 0 ? data_in : ver_failed),
+    .nextDescr     = (uint32_t) ((encrypt || tag_length == 0) ? DMA_AXI_DESCR_END_POINTER : &ccm_desc_fetcher_tag),
+    .lengthAndIrq  = (uint32_t) (length > 0 ? length : data_pad_bytes)
+                     | BLOCK_S_INCR_ADDR
+                     | BLOCK_S_REALIGN_DATA,
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISDATA
+                     | DMA_SG_TAG_DATATYPE_AESPAYLOAD
+                     | ((encrypt || tag_length == 0) ? DMA_SG_TAG_ISLAST : 0)
+                     | DMA_SG_TAG_SETINVALIDBYTES(data_pad_bytes),
   };
 
-  sli_radioaes_dma_descr_t ccm_desc_fetcher_B0B1 = {
-    .address       = (uint32_t) b0b1,
+  // Possible CCM AAD block (concatenated with the header). Can be zero-length, in which case
+  // this descriptor should not be referenced but rather bypassed to data.
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_add = {
+    .address       = (uint32_t) add_data,
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_data,
-    .lengthAndIrq  = BLE_CCM_B_BYTES * 2 | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESHEADER
+    .lengthAndIrq  = (uint32_t) add_length
+                     | BLOCK_S_INCR_ADDR
+                     | BLOCK_S_REALIGN_DATA,
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISDATA
+                     | DMA_SG_TAG_DATATYPE_AESHEADER
+                     | DMA_SG_TAG_SETINVALIDBYTES(header_pad_bytes)
   };
 
+  // Header input block. Always present.
+  sli_radioaes_dma_descr_t ccm_desc_fetcher_header = {
+    .address       = (uint32_t) header,
+    .nextDescr     = (uint32_t) (add_length > 0 ? &ccm_desc_fetcher_add : &ccm_desc_fetcher_data),
+    .lengthAndIrq  = (uint32_t) header_length
+                     | BLOCK_S_INCR_ADDR
+                     | (add_length > 0 ? 0 : BLOCK_S_REALIGN_DATA),
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISDATA
+                     | DMA_SG_TAG_DATATYPE_AESHEADER
+                     | (add_length > 0 ? 0 : DMA_SG_TAG_SETINVALIDBYTES(header_pad_bytes))
+  };
+
+  // Key input block. Always present.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_key = {
     .address       = (uint32_t) key,
-    .nextDescr     = (uint32_t) &ccm_desc_fetcher_B0B1,
-    .lengthAndIrq  = BLE_CCM_KEY_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
+    .nextDescr     = (uint32_t) &ccm_desc_fetcher_header,
+    .lengthAndIrq  = (uint32_t) AES_128_KEY_BYTES
+                     | BLOCK_S_INCR_ADDR
+                     | BLOCK_S_REALIGN_DATA,
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISCONFIG
+                     | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
   };
 
+  // Operation configuration word block. Always present.
   sli_radioaes_dma_descr_t ccm_desc_fetcher_config = {
     .address       = (uint32_t) (encrypt ? &aes_ccm_config_encrypt : &aes_ccm_config_decrypt),
     .nextDescr     = (uint32_t) &ccm_desc_fetcher_key,
-    .lengthAndIrq  = RADIOAES_CONFIG_BYTES,
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
+    .lengthAndIrq  = (uint32_t) RADIOAES_CONFIG_BYTES
+                     | BLOCK_S_INCR_ADDR
+                     | BLOCK_S_REALIGN_DATA,
+    .tag           = DMA_SG_ENGINESELECT_BA411E
+                     | DMA_SG_TAG_ISCONFIG
+                     | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
   };
 
   // Pushers
-  sli_radioaes_dma_descr_t ccm_desc_pusher_ver = {
-    .address       = (uint32_t) &ver_failed,
-    .nextDescr     = (uint32_t) &ccm_desc_pusher_ver_padding,
-    .lengthAndIrq  = BLE_CCM_VER_BYTES
-  };
 
-  sli_radioaes_dma_descr_t ccm_desc_pusher_tag_padding = {
+  // Tag / verification output padding, only if 0 < tag length < 16 bytes.
+  sli_radioaes_dma_descr_t ccm_desc_pusher_final_padding = {
     .address       = (uint32_t) NULL,
-    .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
-    .lengthAndIrq  = (AES_BLOCK_BYTES - BLE_CCM_TAG_BYTES) | DMA_AXI_DESCR_DISCARD
+    .nextDescr     = (uint32_t) DMA_AXI_DESCR_END_POINTER,
+    .lengthAndIrq  = (uint32_t) (AES_BLOCK_BYTES - tag_length)
+                     | DMA_AXI_DESCR_DISCARD
   };
 
+  // Tag output. Direct into tag buffer for encrypt, into local buffer for
+  // decrypt-and-verify. This descriptor is not referenced with tag_length == 0 (CCM-*)
   sli_radioaes_dma_descr_t ccm_desc_pusher_tag = {
-    .address       = (uint32_t) tag,
-    .nextDescr     = (uint32_t) &ccm_desc_pusher_tag_padding,
-    .lengthAndIrq  = BLE_CCM_TAG_BYTES
+    .address       = (uint32_t) (encrypt ? tag : (unsigned char *)ver_failed),
+    .nextDescr     = (uint32_t) ((AES_BLOCK_BYTES - tag_length) > 0 ? &ccm_desc_pusher_final_padding : DMA_AXI_DESCR_END_POINTER),
+    .lengthAndIrq  = (uint32_t) tag_length
   };
 
+  // Data padding output. There's guaranteed always at least one of data or data padding.
   sli_radioaes_dma_descr_t ccm_desc_pusher_data_padding = {
     .address       = (uint32_t) NULL,
-    .nextDescr     = (uint32_t) (encrypt ? &ccm_desc_pusher_tag : &ccm_desc_pusher_ver),
-    .lengthAndIrq  = (uint32_t) data_pad_bytes | DMA_AXI_DESCR_DISCARD,
+    .nextDescr     = (uint32_t) (tag_length > 0 ? &ccm_desc_pusher_tag : DMA_AXI_DESCR_END_POINTER),
+    .lengthAndIrq  = (uint32_t) data_pad_bytes
+                     | DMA_AXI_DESCR_DISCARD,
   };
 
+  // Data (ciphertext/plaintext) output. Pointer can be NULL, in which case we tell the
+  // DMA to discard the data.
   sli_radioaes_dma_descr_t ccm_desc_pusher_data = {
-    .address       = (uint32_t) data,
-    .nextDescr     = (uint32_t) ((data_pad_bytes != 0) ? &ccm_desc_pusher_data_padding : (encrypt ? &ccm_desc_pusher_tag : &ccm_desc_pusher_ver)),
-    .lengthAndIrq  = (uint32_t) length | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
+    .address       = (uint32_t) data_out,
+    .nextDescr     = (uint32_t) (data_pad_bytes > 0 ? &ccm_desc_pusher_data_padding : (tag_length > 0 ? &ccm_desc_pusher_tag : DMA_AXI_DESCR_END_POINTER)),
+    .lengthAndIrq  = (uint32_t) length
+                     | (data_out == NULL ? DMA_AXI_DESCR_DISCARD : 0),
   };
 
-  sli_radioaes_dma_descr_t ccm_desc_pusher_B0B1 = {
+  // Discard all AAD input (which is reflected back to the output). There's guaranteed always a header.
+  sli_radioaes_dma_descr_t ccm_desc_pusher_header_add = {
     .address       = (uint32_t) NULL,
-    .nextDescr     = (uint32_t) &ccm_desc_pusher_data,
-    .lengthAndIrq  = (BLE_CCM_B_BYTES * 2) | DMA_AXI_DESCR_DISCARD
+    .nextDescr     = (uint32_t) (length > 0 ? &ccm_desc_pusher_data : &ccm_desc_pusher_data_padding),
+    .lengthAndIrq  = (uint32_t) (header_length + add_length + header_pad_bytes)
+                     | DMA_AXI_DESCR_DISCARD
   };
+
+  sl_status_t status = sli_radioaes_run_operation(&ccm_desc_fetcher_config, &ccm_desc_pusher_header_add);
+
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  // Check MIC
+  if (!encrypt) {
+    uint32_t accumulator = 0;
+    for (size_t i = 0; i < tag_length; i++) {
+      accumulator |= ver_failed[i];
+    }
+    if (accumulator != 0) {
+      return SL_STATUS_INVALID_SIGNATURE;
+    }
+  }
+  return SL_STATUS_OK;
+}
+
+// Perform a CCM encrypt/decrypt operation with BLE parameters and input.
+// This means:
+// * 13 bytes IV
+// * 1 byte AAD (parameter 'header')
+// * AES-128 key (16 byte key)
+// * in-place encrypt/decrypt with variable length plain/ciphertext
+//   (up to 64 kB, uint16 overflow)
+// * 4 byte tag
+static sl_status_t aes_ccm_ble(bool                encrypt,
+                               unsigned char       *data,
+                               size_t              length,
+                               const unsigned char *key,
+                               const unsigned char *iv,
+                               unsigned char       header,
+                               unsigned char       *tag)
+
+{
+  uint8_t b0b1[19];
 
   // Fill in B0 block according to BLE spec
-  b0b1[0] = BLE_CCM_B0_FLAGS;
+  b0b1[0] = 0x49U;
 
-  for (size_t i = 0; i < BLE_CCM_NONCE_BYTES; i++) {
+  // Copy in the 13 bytes of nonce
+  for (size_t i = 0; i < 13; i++) {
     b0b1[i + 1] = iv[i];
   }
 
   b0b1[14] = (uint8_t) length >> 8;
   b0b1[15] = (uint8_t) length;
+  b0b1[16] = 0; // upper octet of AAD length
+  b0b1[17] = 1; // lower octet of AAD length (BLE CCM always has only one byte of AAD)
+  b0b1[18] = header; // AAD
 
-  // Fill in B1 block according to BLE spec
-  for (size_t i = BLE_CCM_B_BYTES; i < BLE_CCM_B_BYTES * 2; i++) {
-    b0b1[i] = 0;
-  }
-  b0b1[BLE_CCM_B_BYTES + 1] = BLE_CCM_AUTH_BLOCKS;
-  b0b1[BLE_CCM_B_BYTES + 2] = header;
-
-  int aq = sli_radioaes_run_operation(&ccm_desc_fetcher_config, &ccm_desc_pusher_B0B1);
-
-  // Check MIC
-  if (!encrypt && (ver_failed != 0)) {
-    return SL_STATUS_INVALID_SIGNATURE;
-  }
-  return aq;
+  return aes_ccm_radio(encrypt,
+                       NULL, 0,
+                       data, data, length,
+                       key,
+                       b0b1, sizeof(b0b1),
+                       tag, 4);
 }
 
-int sli_aes_crypt_ctr_ble(const unsigned char    *key,
-                          unsigned int           keybits,
-                          const unsigned char    input[AES_BLOCK_BYTES],
-                          const unsigned char    iv_in[AES_BLOCK_BYTES],
-                          volatile unsigned char iv_out[AES_BLOCK_BYTES],
-                          volatile unsigned char output[AES_BLOCK_BYTES])
-{
-  uint32_t aes_config;
-  static const uint32_t zero = 0;
-
-  switch (keybits) {
-    case 256:
-      aes_config = AES_MODEID_CTR | AES_MODEID_CX_LOAD | (((uint32_t)iv_out != 0) ? AES_MODEID_CX_SAVE : 0) | AES_MODEID_AES256;
-      break;
-    case 192:
-      return SL_STATUS_NOT_SUPPORTED;
-    case 128:
-      aes_config = AES_MODEID_CTR | AES_MODEID_CX_LOAD | (((uint32_t)iv_out != 0) ? AES_MODEID_CX_SAVE : 0) | AES_MODEID_AES128;
-      break;
-    default:
-      return SL_STATUS_INVALID_KEY;
-  }
-
-  sli_radioaes_dma_descr_t aes_desc_pusher_ctx = {
-    .address       = (uint32_t) iv_out,
-    .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
-    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_pusher_data = {
-    .address       = (uint32_t) output,
-    .nextDescr     = (((uint32_t)iv_out != 0) ? (uint32_t) &aes_desc_pusher_ctx : DMA_AXI_DESCR_NEXT_STOP),
-    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISDATA
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_fetcher_data = {
-    .address       = (uint32_t) input,
-    .nextDescr     = DMA_AXI_DESCR_NEXT_STOP,
-    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISLAST | DMA_SG_TAG_ISDATA | DMA_SG_TAG_DATATYPE_AESPAYLOAD
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_fetcher_no_ctx = {
-    .address       = (uint32_t) &zero,
-    .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
-    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_CONST_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_fetcher_ctx = {
-    .address       = (uint32_t) iv_in,
-    .nextDescr     = (uint32_t) &aes_desc_fetcher_data,
-    .lengthAndIrq  = AES_BLOCK_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_IV)
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_fetcher_config = {
-    .address       = (uint32_t) &aes_config,
-    .nextDescr     = (((uint32_t)iv_in != 0) ? (uint32_t) &aes_desc_fetcher_ctx : (uint32_t) &aes_desc_fetcher_no_ctx),
-    .lengthAndIrq  = sizeof(aes_config),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_CFG)
-  };
-
-  sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
-    .address       = (uint32_t) key,
-    .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
-    .lengthAndIrq  = (uint32_t) (keybits / 8) | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
-    .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
-  };
-
-  return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
-}
-
-int sli_aes_crypt_ctr_radio(const unsigned char    *key,
-                            unsigned int           keybits,
-                            const unsigned char    input[AES_BLOCK_BYTES],
-                            const unsigned char    iv_in[AES_BLOCK_BYTES],
-                            volatile unsigned char iv_out[AES_BLOCK_BYTES],
-                            volatile unsigned char output[AES_BLOCK_BYTES])
+sl_status_t sli_aes_crypt_ctr_radio(const unsigned char    *key,
+                                    unsigned int           keybits,
+                                    const unsigned char    input[AES_BLOCK_BYTES],
+                                    const unsigned char    iv_in[AES_BLOCK_BYTES],
+                                    volatile unsigned char iv_out[AES_BLOCK_BYTES],
+                                    volatile unsigned char output[AES_BLOCK_BYTES])
 {
   uint32_t aes_config;
   static const uint32_t zero = 0;
@@ -516,11 +516,11 @@ int sli_aes_crypt_ctr_radio(const unsigned char    *key,
   return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
 }
 
-int sli_aes_crypt_ecb_radio(bool                   encrypt,
-                            const unsigned char    *key,
-                            unsigned int           keybits,
-                            const unsigned char    input[AES_BLOCK_BYTES],
-                            volatile unsigned char output[AES_BLOCK_BYTES])
+sl_status_t sli_aes_crypt_ecb_radio(bool                   encrypt,
+                                    const unsigned char    *key,
+                                    unsigned int           keybits,
+                                    const unsigned char    input[AES_BLOCK_BYTES],
+                                    volatile unsigned char output[AES_BLOCK_BYTES])
 {
   uint32_t aes_config;
 
@@ -571,11 +571,11 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
   return sli_radioaes_run_operation(&aes_desc_fetcher_key, &aes_desc_pusher_data);
 }
 
-int sli_aes_cmac_radio(const unsigned char    *key,
-                       unsigned int           keybits,
-                       const unsigned char    *input,
-                       unsigned int           length,
-                       volatile unsigned char output[16])
+sl_status_t sli_aes_cmac_radio(const unsigned char    *key,
+                               unsigned int           keybits,
+                               const unsigned char    *input,
+                               unsigned int           length,
+                               volatile unsigned char output[16])
 {
   uint32_t aes_config;
 
@@ -639,12 +639,12 @@ int sli_aes_cmac_radio(const unsigned char    *key,
 //
 // CCM buffer authenticated decryption optimized for BLE
 //
-int sli_ccm_auth_decrypt_ble(unsigned char       *data,
-                             size_t              length,
-                             const unsigned char *key,
-                             const unsigned char *iv,
-                             unsigned char       header,
-                             unsigned char       *tag)
+sl_status_t sli_ccm_auth_decrypt_ble(unsigned char       *data,
+                                     size_t              length,
+                                     const unsigned char *key,
+                                     const unsigned char *iv,
+                                     unsigned char       header,
+                                     unsigned char       *tag)
 {
   return aes_ccm_ble(false,
                      data,
@@ -658,12 +658,12 @@ int sli_ccm_auth_decrypt_ble(unsigned char       *data,
 //
 // CCM buffer encryption optimized for BLE
 //
-int sli_ccm_encrypt_and_tag_ble(unsigned char       *data,
-                                size_t              length,
-                                const unsigned char *key,
-                                const unsigned char *iv,
-                                unsigned char       header,
-                                unsigned char       *tag)
+sl_status_t sli_ccm_encrypt_and_tag_ble(unsigned char       *data,
+                                        size_t              length,
+                                        const unsigned char *key,
+                                        const unsigned char *iv,
+                                        unsigned char       header,
+                                        unsigned char       *tag)
 {
   return aes_ccm_ble(true,
                      data,
@@ -674,9 +674,55 @@ int sli_ccm_encrypt_and_tag_ble(unsigned char       *data,
                      tag);
 }
 
+sl_status_t sli_ccm_zigbee(bool encrypt,
+                           const unsigned char *data_in,
+                           unsigned char       *data_out,
+                           size_t              length,
+                           const unsigned char *key,
+                           const unsigned char *iv,
+                           const unsigned char *aad,
+                           size_t              aad_len,
+                           unsigned char       *tag,
+                           size_t              tag_len)
+{
+  // Validated assumption: for ZigBee, the authenticated data
+  // length will always fit into a 16-bit length field, meaning
+  // the header will always be either 16 or 18 bytes long.
+  uint8_t header[18];
+
+  // Start with the 'flags' byte. It encodes whether there is AAD,
+  // and the length of the tag fields
+  header[0] = 0x01 // always 2 bytes of message length
+              | ((aad_len > 0) ? 0x40 : 0x00) // Set 'aflag' bit if there is AAD
+              | ((tag_len >= 4) ? (((tag_len - 2) / 2) << 3) : 0); // Encode tag length
+
+  for (size_t i = 0; i < 13; i++) {
+    header[i + 1] = iv[i];
+  }
+
+  header[14] = (uint8_t) length >> 8;
+  header[15] = (uint8_t) length;
+  if (aad_len > 0) {
+    header[16] = (uint8_t) aad_len >> 8; // upper octet of AAD length
+    header[17] = (uint8_t) aad_len; // lower octet of AAD length
+  }
+
+  return aes_ccm_radio(encrypt,
+                       aad,
+                       aad_len,
+                       data_in,
+                       data_out,
+                       length,
+                       key,
+                       header,
+                       (aad_len > 0 ? 18 : 16),
+                       tag,
+                       tag_len);
+}
+
 //
 // Process a table of BLE RPA device keys and look for a
-// match against the supplied hash
+// match against the supplied hash. Algorithm is AES-128.
 //
 int sli_process_ble_rpa(const unsigned char keytable[],
                         uint32_t            keymask,
@@ -690,8 +736,8 @@ int sli_process_ble_rpa(const unsigned char keytable[],
                                           | AES_MODEID_AES128
                                           | AES_MODEID_ENCRYPT;
 
-  uint32_t rpa_data_in[BLE_RPA_DATA_BYTES / 4] = { 0 };
-  volatile uint32_t rpa_data_out[BLE_RPA_DATA_BYTES / 4];
+  uint32_t rpa_data_in[AES_BLOCK_BYTES / sizeof(uint32_t)] = { 0 };
+  volatile uint32_t rpa_data_out[AES_BLOCK_BYTES / sizeof(uint32_t)];
   sli_radioaes_state_t aes_ctx;
   CORE_DECLARE_IRQ_STATE;
 
@@ -721,16 +767,16 @@ int sli_process_ble_rpa(const unsigned char keytable[],
   volatile sli_radioaes_dma_descr_t aes_desc_fetcher_key = {
     .address       = (uint32_t) NULL, // Filled out in each round of RPA check
     .nextDescr     = (uint32_t) &aes_desc_fetcher_config,
-    .lengthAndIrq  = (uint32_t) BLE_RPA_KEY_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
+    .lengthAndIrq  = (uint32_t) AES_128_KEY_BYTES | (BLOCK_S_INCR_ADDR & BLOCK_S_FLAG_MASK_DMA_PROPS),
     .tag           = DMA_SG_ENGINESELECT_BA411E | DMA_SG_TAG_ISCONFIG | DMA_SG_TAG_SETCFGOFFSET(AES_OFFSET_KEY)
   };
 
   // Start operation
-  int aq = sli_radioaes_acquire();
-  if (aq > 0) {
+  sl_status_t status = sli_radioaes_acquire();
+  if (status == SL_STATUS_ISR) {
     sli_radioaes_save_state(&aes_ctx);
-  } else if (aq < 0) {
-    return aq;
+  } else if (status != SL_STATUS_OK) {
+    return -1;
   }
 
   RADIOAES->CTRL = AES_CTRL_FETCHERSCATTERGATHER | AES_CTRL_PUSHERSCATTERGATHER;
@@ -756,7 +802,7 @@ int sli_process_ble_rpa(const unsigned char keytable[],
       while (RADIOAES->STATUS & AES_STATUS_FETCHERBSY) {
         // Wait for completion
       }
-      aes_desc_fetcher_key.address = (uint32_t) &keytable[block * BLE_RPA_KEY_BYTES];
+      aes_desc_fetcher_key.address = (uint32_t) &keytable[block * AES_128_KEY_BYTES];
       RADIOAES->FETCHADDR = (uint32_t) &aes_desc_fetcher_key;
 
       RADIOAES->CMD = AES_CMD_STARTFETCHER;
@@ -788,7 +834,7 @@ int sli_process_ble_rpa(const unsigned char keytable[],
     // Wait for completion
   }
 
-  if (aq > 0) {
+  if (status == SL_STATUS_ISR) {
     sli_radioaes_restore_state(&aes_ctx);
   }
 

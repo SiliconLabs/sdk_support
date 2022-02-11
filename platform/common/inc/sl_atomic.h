@@ -32,7 +32,8 @@
 
 /*******************************************************************************
  * @addtogroup atomic Atomic Operations
- * @brief Atomic operations
+ * @brief Atomic operations provide RAM store and read functionalities.
+ * @n @section atomic_usage Atomic Operations Usage
  * @{
  ******************************************************************************/
 

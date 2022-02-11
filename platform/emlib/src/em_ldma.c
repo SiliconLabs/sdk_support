@@ -88,6 +88,10 @@ void LDMA_DeInit(void)
 #endif
 #if defined(LDMA_EN_EN)
   LDMA->EN = 0;
+#if defined(LDMA_EN_DISABLING)
+  while (LDMA->EN & _LDMA_EN_DISABLING_MASK) {
+  }
+#endif
 #endif
 
   CMU_ClockEnable(cmuClock_LDMA, false);
@@ -216,6 +220,8 @@ void LDMA_Init(const LDMA_Init_t *init)
  *
  * @param[in] descriptor
  *   The transfer descriptor, which can be an array of descriptors linked together.
+ *   Each descriptor's fields stored in RAM will be loaded into the certain
+ *   hardware registers at the proper time to perform the DMA transfer.
  ******************************************************************************/
 void LDMA_StartTransfer(int ch,
                         const LDMA_TransferCfg_t *transfer,
@@ -265,25 +271,31 @@ void LDMA_StartTransfer(int ch,
   EFM_ASSERT(!(((uint32_t)transfer->ldmaLoopCnt << _LDMA_CH_LOOP_LOOPCNT_SHIFT)
                & ~_LDMA_CH_LOOP_LOOPCNT_MASK));
 
-#if defined(LDMAXBAR)
-  LDMAXBAR->CH[ch].REQSEL = transfer->ldmaReqSel;
-#else
-  LDMA->CH[ch].REQSEL = transfer->ldmaReqSel;
-#endif
-  LDMA->CH[ch].LOOP = (uint32_t)transfer->ldmaLoopCnt << _LDMA_CH_LOOP_LOOPCNT_SHIFT;
-  LDMA->CH[ch].CFG = ((uint32_t)transfer->ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
-                     | ((uint32_t)transfer->ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
-                     | ((uint32_t)transfer->ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT);
-
-  /* Set the descriptor address. */
-  LDMA->CH[ch].LINK = (uint32_t)descriptor & _LDMA_CH_LINK_LINKADDR_MASK;
-
   /* Clear the pending channel interrupt. */
 #if defined (LDMA_HAS_SET_CLEAR)
   LDMA->IF_CLR = chMask;
 #else
   LDMA->IFC = chMask;
 #endif
+
+#if defined(LDMAXBAR)
+  LDMAXBAR->CH[ch].REQSEL = transfer->ldmaReqSel;
+#else
+  LDMA->CH[ch].REQSEL = transfer->ldmaReqSel;
+#endif
+  LDMA->CH[ch].LOOP = transfer->ldmaLoopCnt << _LDMA_CH_LOOP_LOOPCNT_SHIFT;
+  LDMA->CH[ch].CFG = (transfer->ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
+                     | (transfer->ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
+                     | (transfer->ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT)
+#if defined(_LDMA_CH_CFG_SRCBUSPORT_MASK)
+                     | (transfer->ldmaCfgStructBusPort << _LDMA_CH_CFG_STRUCTBUSPORT_SHIFT)
+                     | (transfer->ldmaCfgSrcBusPort << _LDMA_CH_CFG_SRCBUSPORT_SHIFT)
+                     | (transfer->ldmaCfgDstBusPort << _LDMA_CH_CFG_DSTBUSPORT_SHIFT)
+#endif
+  ;
+
+  /* Set the descriptor address. */
+  LDMA->CH[ch].LINK = (uint32_t)descriptor & _LDMA_CH_LINK_LINKADDR_MASK;
 
   /* A critical region. */
   CORE_ENTER_ATOMIC();
@@ -347,6 +359,36 @@ void LDMA_StartTransfer(int ch,
   /* A critical region end. */
   CORE_EXIT_ATOMIC();
 }
+
+#if defined(_LDMA_CH_CTRL_EXTEND_MASK)
+/***************************************************************************//**
+ * @brief
+ *   Start an extended DMA transfer.
+ *
+ * @param[in] ch
+ *   A DMA channel.
+ *
+ * @param[in] transfer
+ *   The initialization structure used to configure the transfer.
+ *
+ * @param[in] descriptor_ext
+ *   The extended transfer descriptor, which can be an array of descriptors
+ *   linked together. Each descriptor's fields stored in RAM will be loaded
+ *   into the certain hardware registers at the proper time to perform the DMA
+ *   transfer.
+ ******************************************************************************/
+void LDMA_StartTransferExtend(int ch,
+                              const LDMA_TransferCfg_t *transfer,
+                              const LDMA_DescriptorExtend_t *descriptor_ext)
+{
+  // Ensure destination interleaving supported for given channel.
+  EFM_ASSERT(((1 << ch) & LDMA_ILCHNL));
+
+  LDMA_StartTransfer(ch,
+                     transfer,
+                     (const LDMA_Descriptor_t *)descriptor_ext);
+}
+#endif
 
 /***************************************************************************//**
  * @brief
@@ -448,6 +490,7 @@ uint32_t LDMA_TransferRemainingCount(int ch)
     return 0;
   }
 
+  /* +1 because XFERCNT is 0-based. */
   return remaining + 1;
 }
 

@@ -21,13 +21,13 @@ include:
       - path: mbedtls/ssl_cache.h
       - path: mbedtls/ssl_ciphersuites.h
       - path: mbedtls/ssl_cookie.h
-      - path: mbedtls/ssl_internal.h
       - path: mbedtls/ssl_ticket.h
       - path: mbedtls/debug.h
       - path: mbedtls/net_sockets.h
   - path: util/third_party/crypto/mbedtls/library
     file_list:
       - path: ssl_invasive.h
+      - path: ssl_misc.h
 provides:
   - name: mbedtls_tls
 requires:

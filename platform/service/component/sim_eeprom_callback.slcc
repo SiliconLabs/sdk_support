@@ -6,6 +6,8 @@ category: Services|Simulated EEPROM
 quality: production
 provides:
   - name: sim_eeprom_callback
+requires:
+  - name: device_series_1
 root_path: ./
 source:
   - path: platform/service/sim_eeprom_callback/src/sl_sim_eeprom_callback.c

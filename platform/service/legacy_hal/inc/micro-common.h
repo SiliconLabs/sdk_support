@@ -63,7 +63,26 @@ bool halInternalWatchDogEnabled(void);
 
 void halResetWatchdog(void);
 
+/**
+ * @brief Change the CTUNE value. Involves switching to HFRCO and turning off
+ * the HFXO temporarily.
+ *
+ * @param tune   Value to set CTUNE to.
+ *
+ */
+void halInternalSetCtune(uint16_t tune);
+
+/**
+ * @brief Get the CTUNE value.
+ *
+ * @return Current CTUNE value.
+ *
+ */
+uint16_t halInternalGetCtune(void);
+
 /** @} (end addtogroup micro) */
 /** @} (end addtogroup legacyhal) */
+
+typedef uint8_t SleepModes;
 
 #endif //__MICRO_COMMON_H__

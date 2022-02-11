@@ -362,7 +362,7 @@ FS_FILE_HANDLE FSFile_Open(FS_WRK_DIR_HANDLE wrk_dir_handle,
                                                        p_err));
               p_file_node->Size = 0u;
 #else
-              RTOS_CRITICAL_FAIL_EXEC(FSFile_NullHandle, RTOS_ERR_ASSERT_CRITICAL_FAIL);
+              RTOS_CRITICAL_FAIL_EXEC(RTOS_ERR_ASSERT_CRITICAL_FAIL, FSFile_NullHandle);
 #endif
             }
           }

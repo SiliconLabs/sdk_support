@@ -53,7 +53,7 @@ template_contribution:
   - name: component_catalog
     value: sleeptimer
 validation_helper:
-  - path: platform/service/sleeptimer/sleeptimer_peripheral_validation.py
+  - path: platform/service/sleeptimer/sleeptimer_peripheral_validation.lua
 documentation:
     docset: gecko-platform
     document: service/api/group-sleeptimer

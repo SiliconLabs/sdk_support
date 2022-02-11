@@ -18,17 +18,19 @@
 #ifndef UPPER_MAC_H
 #define UPPER_MAC_H
 
-#if (defined(PHY_EM3XX) || defined(MAC_DUAL_PRESENT) || SINGLE_PHY_MULTIPAGE_SUPPORT || defined (UNIX) || defined (UNIX_SIMULATION))
+#if (!defined(PHY_NULL) && !defined(ZIGBEE_STACK_ON_HOST)) && (defined(MAC_DUAL_PRESENT) || SINGLE_PHY_MULTIPAGE_SUPPORT || defined (UNIX) || defined (UNIX_SIMULATION))
+#define UPPER_MAC_USING_BASE_PHY
 #include "phy/phy.h"
 #else
 #include "mac-phy.h"
+#include PLATFORM_HEADER
 #endif
 
 #include "buffer_manager/buffer-management.h"
 
 #include "lower-mac.h"
 #include "multi-mac.h"
-#include "multi-network.h"
+#include "mac-multi-network.h"
 #include "sl_status.h"
 
 #define MAC_TX_QUEUE_SIZE 8
@@ -44,7 +46,7 @@
 // It shall place the packet to send in the flat buffer, with the payload at mac_payload_offset.
 // This callback is able to drop a packet by setting the length byte to 0 (flat_packet_buffer[0]) to zero
 // If per device power control is used (such as for GB868, it shall fill in the transmit power to tx_power.
-typedef bool (*sl_mac_prepare_tx_buffer_t) (PacketHeader packet, uint8_t *flat_packet_buffer, uint8_t mac_payload_offset, uint8_t mac_index, uint8_t nwk_index, int8_t *tx_power);
+typedef uint8_t (*sl_mac_prepare_tx_buffer_t) (PacketHeader packet, uint8_t *flat_packet_buffer, uint8_t mac_payload_offset, uint8_t mac_index, uint8_t nwk_index, int8_t *tx_power);
 
 typedef void (*sl_mac_receive_callback_t) (PacketHeader incoming_packet);
 typedef void (*sl_mac_shutdown_callback_t)(uint8_t mac_index);
@@ -62,6 +64,12 @@ typedef enum {
   TRANSMIT_PRIORITY_BYPASS_SHUTDOWN,
 } sl_mac_transmit_priority_t;
 
+typedef enum {
+  SL_MAC_RX_OFF,
+  SL_MAC_RX_ON_WHEN_IDLE,
+  SL_MAC_RX_DUTY_CYCLING,
+} sl_mac_rx_state_t;
+
 typedef void (*sl_mac_transmit_complete_callback_t) (uint8_t mac_index, sl_status_t status, PacketHeader packet, uint8_t tag);
 
 typedef struct {
@@ -73,7 +81,7 @@ typedef struct {
   EmberNodeId parent_node_id;
   EmberEUI64 parent_eui;
   sl_mac_csma_parameters_t csmaParams;
-  bool rx_on_when_idle;
+  sl_mac_rx_state_t rx_state;
   sl_mac_receive_callback_t rx_callback;
   sl_mac_prepare_tx_buffer_t prepare_tx_callback;
   sl_mac_is_passthrough_callback_t passthrough_filter_callback;
@@ -87,6 +95,8 @@ typedef struct {
 } sl_mac_radio_parameters_t;
 
 sl_status_t sl_mac_init(uint8_t mac_index);
+
+sl_status_t sli_enable_rx_duty_cycling(uint8_t mac_index);
 
 void sl_mac_mark_upper_mac_buffers(void);
 
@@ -218,5 +228,7 @@ typedef enum {
 uint8_t sl_mac_get_current_radio_network_index(uint8_t mac_index);
 bool sl_mac_upper_mac_is_empty(uint8_t mac_index);
 bool sl_mac_network_is_active(uint8_t mac_index, uint8_t nwk_index);
+
+uint8_t sli_mac_get_next_sequence(void);
 
 #endif

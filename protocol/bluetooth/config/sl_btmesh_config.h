@@ -57,6 +57,12 @@
 // <i> For a provisioner the value may be over 2.
 #define SL_BTMESH_CONFIG_MAX_PROV_SESSIONS       (2)
 
+// <o SL_BTMESH_CONFIG_MAX_PROV_BEARERS> Maximum number of provisioning bearers allowed
+// <i> Default: 2
+// <i> Define the number of provisioning bearers the application needs.
+// <i> The value is 1 or 2 (depending on whether only one or both of PB-ADV and PB-GATT are used).
+#define SL_BTMESH_CONFIG_MAX_PROV_BEARERS (2)
+
 // <o SL_BTMESH_CONFIG_MAX_GATT_CONNECTIONS> Number of connections to reserve for GATT Proxies <1-2>
 // <i> Default: 2
 // <i> Set to the number of simultaneous GATT Proxy connections the application should support.
@@ -137,6 +143,11 @@
 // stored. For devices that do not use PSA ITS the setting is ignored.
 
 #define SL_BTMESH_CONFIG_ITS_KEY_CACHE_SIZE       (4)
+
+// <o SL_BTMESH_CONFIG_MAX_PROXY_ACCESS_CONTROL_LIST_ENTRIES> Maximum number of proxy access control list entries
+// <i> Default: 8
+// <i> Define the number of proxy access control list entries.
+#define SL_BTMESH_CONFIG_MAX_PROXY_ACCESS_CONTROL_LIST_ENTRIES  (8)
 
 // </h> End Mesh Bluetooth Stack Configuration
 

@@ -50,6 +50,8 @@ extern "C" {
 #if defined(_SILICON_LABS_EFR32_SUBGHZ_HP_PA_PRESENT)
   #if (_SILICON_LABS_EFR32_SUBGHZ_HP_PA_MAX_OUTPUT_DBM == 20)
   #include "efr32xg23/sl_rail_util_pa_curves_20dbm.h"
+  #elif (_SILICON_LABS_EFR32_SUBGHZ_HP_PA_MAX_OUTPUT_DBM == 10)
+  #include "efr32xg23/sl_rail_util_pa_curves_10dbm_434M.h"
   #else
   #include "efr32xg23/sl_rail_util_pa_curves_14dbm.h"
   #endif
@@ -62,6 +64,8 @@ extern "C" {
   #else
   #include "efr32xg24/sl_rail_util_pa_curves_10dbm.h"
   #endif
+#elif defined (_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#include "efr32xg25/sl_rail_util_pa_curves.h"
 #else
 #error "Unsupported platform!"
 #endif

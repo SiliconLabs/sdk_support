@@ -116,7 +116,7 @@ static sl_status_t delta_list_remove_timer(sl_sleeptimer_timer_handle_t *handle)
 
 static void set_comparator_for_next_timer(void);
 
-static void update_first_timer_delta(void);
+static void update_delta_list(void);
 
 __STATIC_INLINE uint32_t div_to_log2(uint32_t div);
 
@@ -179,7 +179,7 @@ sl_status_t sl_sleeptimer_init(void)
     calculated_tick_rest = ((uint64_t)UINT32_MAX + 1) % (uint64_t)timer_frequency;
     calculated_sec_count = (((uint64_t)UINT32_MAX + 1) / (uint64_t)timer_frequency);
 #endif
-    max_millisecond_conversion = ((uint64_t)UINT32_MAX * (uint64_t)1000u) / timer_frequency;
+    max_millisecond_conversion = (uint32_t)(((uint64_t)UINT32_MAX * (uint64_t)1000u) / timer_frequency);
     is_sleeptimer_initialized = true;
   }
   CORE_EXIT_ATOMIC();
@@ -314,8 +314,8 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
     return SL_STATUS_NULL_POINTER;
   }
 
-  CORE_ENTER_ATOMIC();
-  update_first_timer_delta();
+  CORE_ENTER_CRITICAL();
+  update_delta_list();
 
   // If first timer in list, update timer comparator.
   if (timer_head == handle) {
@@ -324,7 +324,7 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
 
   error = delta_list_remove_timer(handle);
   if (error != SL_STATUS_OK) {
-    CORE_EXIT_ATOMIC();
+    CORE_EXIT_CRITICAL();
     return error;
   }
 
@@ -334,7 +334,7 @@ sl_status_t sl_sleeptimer_stop_timer(sl_sleeptimer_timer_handle_t *handle)
     sleeptimer_hal_disable_int(SLEEPTIMER_EVENT_COMP);
   }
 
-  CORE_EXIT_ATOMIC();
+  CORE_EXIT_CRITICAL();
   return SL_STATUS_OK;
 }
 
@@ -380,7 +380,7 @@ sl_status_t sl_sleeptimer_get_timer_time_remaining(sl_sleeptimer_timer_handle_t 
 
   CORE_ENTER_ATOMIC();
 
-  update_first_timer_delta();
+  update_delta_list();
   *time  = handle->delta;
 
   // Retrieve timer in list and add the deltas.
@@ -882,7 +882,7 @@ void sl_sleeptimer_delay_millisecond(uint16_t time_ms)
  ******************************************************************************/
 uint32_t sl_sleeptimer_ms_to_tick(uint16_t time_ms)
 {
-  return (uint32_t)((((uint32_t)time_ms * timer_frequency) / 1000) + 1);
+  return (uint32_t)((((uint32_t)time_ms * timer_frequency) + 999) / 1000);
 }
 
 /*******************************************************************************
@@ -892,7 +892,7 @@ sl_status_t sl_sleeptimer_ms32_to_tick(uint32_t time_ms,
                                        uint32_t *tick)
 {
   if (time_ms <= max_millisecond_conversion) {
-    *tick = (uint32_t)((((uint64_t)time_ms * timer_frequency) / 1000u) + 1);
+    *tick = (uint32_t)((((uint64_t)time_ms * timer_frequency) + 999) / 1000u);
     return SL_STATUS_OK;
   } else {
     return SL_STATUS_INVALID_PARAMETER;
@@ -943,6 +943,7 @@ sl_status_t sl_sleeptimer_tick64_to_ms(uint64_t tick,
     return SL_STATUS_INVALID_PARAMETER;
   }
 }
+
 /*******************************************************************************
  * Process timer interrupt.
  *
@@ -964,7 +965,7 @@ void process_timer_irq(uint8_t local_flag)
 #endif
     overflow_counter++;
 
-    update_first_timer_delta();
+    update_delta_list();
 
     if (timer_head) {
       set_comparator_for_next_timer();
@@ -972,69 +973,88 @@ void process_timer_irq(uint8_t local_flag)
   }
 
   if (local_flag & SLEEPTIMER_EVENT_COMP) {
-    sl_sleeptimer_tick_count_t delta_tot = 0u;
-    sl_sleeptimer_tick_count_t current_cnt = sleeptimer_hal_get_counter();
     sl_sleeptimer_timer_handle_t *current = NULL;
     uint32_t nb_timer_expire = 0u;
-
-    delta_tot = current_cnt - last_delta_update_count;
+    uint16_t option_flags = 0;
 
     CORE_ENTER_ATOMIC();
+    // Make sure the timers list is up to date with the time elapsed since the last update
+    update_delta_list();
+
     // Process all timers that have expired.
-    while ((timer_head) && (delta_tot >= timer_head->delta)) {
-      sl_sleeptimer_tick_count_t new_cnt;
-      sl_sleeptimer_tick_count_t delta_tot_temp = delta_tot;
+    while ((timer_head) && (timer_head->delta == 0)) {
       sl_sleeptimer_timer_handle_t *temp = timer_head;
       current = timer_head;
+      int32_t periodic_correction = 0u;
+      int64_t timeout_temp = 0;
+      bool skip_remove = false;
 
-      last_delta_update_count = current_cnt;
-
-      while ((temp != NULL) && (delta_tot_temp >= temp->delta)) {
+      // Process timers with higher priority first
+      while ((temp != NULL) && (temp->delta == 0)) {
         if (current->priority > temp->priority) {
           current = temp;
         }
-
-        delta_tot_temp -= temp->delta;
         temp = temp->next;
       }
       CORE_EXIT_ATOMIC();
-      delta_tot -= current->delta;
-      current->delta = 0;
 
-      CORE_ENTER_ATOMIC();
-      delta_list_remove_timer(current);
-      CORE_EXIT_ATOMIC();
-
+      // Check if current periodic timer was delayed more than its actual timeout value
+      // and keep it at the head of the timers list if it's the case so that the
+      // callback function can be called the number of required time.
       if (current->timeout_periodic != 0u) {
+        timeout_temp = current->timeout_periodic;
+
+        periodic_correction = sleeptimer_hal_get_counter() - current->timeout_expected_tc;
+        if (periodic_correction > timeout_temp) {
+          skip_remove = true;
+          current->timeout_expected_tc += current->timeout_periodic;
+        }
+      }
+
+      // Remove current timer from timer list except if the current timer is a periodic timer
+      // that was intentionally kept at the head of the timers list.
+      if (skip_remove != true) {
         CORE_ENTER_ATOMIC();
-        delta_list_insert_timer(current, current->timeout_periodic);
+        delta_list_remove_timer(current);
         CORE_EXIT_ATOMIC();
       }
 
+      // Re-insert periodic timer that was previsouly removed from the list
+      // and compensate for any deviation from the periodic timer frequency.
+      if (current->timeout_periodic != 0u && skip_remove != true) {
+        timeout_temp -= periodic_correction;
+        EFM_ASSERT(timeout_temp >= 0);
+        CORE_ENTER_ATOMIC();
+        delta_list_insert_timer(current, (sl_sleeptimer_tick_count_t)timeout_temp);
+        current->timeout_expected_tc += current->timeout_periodic;
+        CORE_EXIT_ATOMIC();
+      }
+
+      // Save current option flag and the number of timers that expired.
+      option_flags = current->option_flags;
+      nb_timer_expire++;
+
+      // Call current timer callback function if any.
       if (current->callback != NULL) {
         current->callback(current, current->callback_data);
       }
 
-      nb_timer_expire++;
-
-      new_cnt = sleeptimer_hal_get_counter();
-      delta_tot += new_cnt - current_cnt;
-      current_cnt = new_cnt;
       CORE_ENTER_ATOMIC();
+
+      // Re-update the list to account for delays during timer's callback.
+      update_delta_list();
     }
 
+    // If the only timer expired is the internal Power Manager one,
+    // from the Sleeptimer perspective, the system can go back to sleep after the ISR handling.
     sleep_on_isr_exit = false;
-    if ((nb_timer_expire == 1u)
-        && current != NULL) {
-      if (current->option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
+    if (nb_timer_expire == 1u) {
+      if (option_flags == SLI_SLEEPTIMER_POWER_MANAGER_EARLY_WAKEUP_TIMER_FLAG) {
         sleep_on_isr_exit = true;
       }
     }
 
     if (timer_head) {
-      timer_head->delta -= delta_tot;
-      last_delta_update_count = current_cnt;
-
       set_comparator_for_next_timer();
     } else {
       sleeptimer_hal_disable_int(SLEEPTIMER_EVENT_COMP);
@@ -1158,36 +1178,46 @@ static sl_status_t delta_list_remove_timer(sl_sleeptimer_timer_handle_t *handle)
  ******************************************************************************/
 static void set_comparator_for_next_timer(void)
 {
-  sl_sleeptimer_tick_count_t compare_value;
+  if (timer_head->delta > 0) {
+    sl_sleeptimer_tick_count_t compare_value;
 
-  compare_value = last_delta_update_count + timer_head->delta;
+    compare_value = last_delta_update_count + timer_head->delta;
 
-  sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
-  sleeptimer_hal_set_compare(compare_value);
+    sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
+    sleeptimer_hal_set_compare(compare_value);
+  } else {
+    // In case timer has already expire, don't attempt to set comparator. Just
+    // trigger compare match interrupt.
+    sleeptimer_hal_enable_int(SLEEPTIMER_EVENT_COMP);
+    sleeptimer_hal_set_int(SLEEPTIMER_EVENT_COMP);
+  }
 
   update_next_timer_to_expire_is_power_manager();
 }
 
 /*******************************************************************************
- * Updates delta of first timer.
+ * Updates timer list's deltas.
  ******************************************************************************/
-static void update_first_timer_delta(void)
+static void update_delta_list(void)
 {
   sl_sleeptimer_tick_count_t current_cnt = sleeptimer_hal_get_counter();
-  sl_sleeptimer_tick_count_t time_diff;
+  sl_sleeptimer_timer_handle_t *timer_handle = timer_head;
+  sl_sleeptimer_tick_count_t time_diff = current_cnt - last_delta_update_count;
 
-  if (timer_head) {
-    time_diff = current_cnt - last_delta_update_count;
-    if (timer_head->delta >= time_diff) {
-      timer_head->delta -= time_diff;
-      last_delta_update_count = current_cnt;
+  // Go through the delta timer list and update every necessary deltas
+  // according to the time elapsed since the last update.
+  while (timer_handle != NULL && time_diff > 0) {
+    if (timer_handle->delta >= time_diff) {
+      timer_handle->delta -= time_diff;
+      time_diff = 0;
     } else {
-      last_delta_update_count = current_cnt - timer_head->delta;
-      timer_head->delta = 0;
+      time_diff -= timer_handle->delta;
+      timer_handle->delta = 0;
     }
-  } else {
-    last_delta_update_count = current_cnt;
+    timer_handle = timer_handle->next;
   }
+
+  last_delta_update_count = current_cnt;
 }
 
 /*******************************************************************************
@@ -1222,6 +1252,7 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
   handle->timeout_periodic = timeout_periodic;
   handle->callback = callback;
   handle->option_flags = option_flags;
+  handle->timeout_expected_tc = sleeptimer_hal_get_counter() + timeout_periodic;
 
   if (timeout_initial == 0) {
     handle->delta = 0;
@@ -1235,8 +1266,8 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
     }
   }
 
-  CORE_ENTER_ATOMIC();
-  update_first_timer_delta();
+  CORE_ENTER_CRITICAL();
+  update_delta_list();
   delta_list_insert_timer(handle, timeout_initial);
 
   // If first timer, update timer comparator.
@@ -1244,7 +1275,7 @@ static sl_status_t create_timer(sl_sleeptimer_timer_handle_t *handle,
     set_comparator_for_next_timer();
   }
 
-  CORE_EXIT_ATOMIC();
+  CORE_EXIT_CRITICAL();
 
   return SL_STATUS_OK;
 }

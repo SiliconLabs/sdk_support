@@ -15,6 +15,7 @@
  * sections of the MSLA applicable to Source Code.
  *
  ******************************************************************************/
+#ifndef EMBER_TEST
 #include "em_device.h"
 #include "sl_token_manager_config.h"
 
@@ -22,4 +23,7 @@
   #include "sl_token_manufacturing_series_2.h"
 #else
   #include "sl_token_manufacturing_series_1.h"
+#endif
+#else
+  #include "sl_token_manufacturing_unix.h"
 #endif

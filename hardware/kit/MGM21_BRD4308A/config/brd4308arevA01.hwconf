@@ -24,7 +24,7 @@
     <property object="LED" propertyId="LED.HAL_LED_COUNT.INT" value="2"/>
     <property object="LED" propertyId="LED.BSP_LED_POLARITY.ENUM" value="0"/>
 
-    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_2P4_MP"/>
+    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_MP"/>
 
     <property object="PTI" propertyId="PTI.BSP_PTI_DFRAME.PIN" value="PC05"/>
     <property object="PTI" propertyId="PTI.BSP_PTI_DOUT.PIN" value="PC04"/>

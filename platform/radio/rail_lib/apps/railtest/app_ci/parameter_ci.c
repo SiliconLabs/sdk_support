@@ -142,18 +142,36 @@ void getPowerLimits(sl_cli_command_arg_t *args)
 void setPowerConfig(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
-  RAIL_TxPowerConfig_t *txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
+  RAIL_TxPowerMode_t mode = sl_cli_get_argument_uint8(args, 0);
+  if (mode >= RAIL_TX_POWER_MODE_NONE) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x13, "Invalid PA enum value selected: %d", mode);
+    return;
+  }
+
+  RAIL_TxPowerConfig_t *txPowerConfigPtr;
+
+#if _SILICON_LABS_EFR32_RADIO_TYPE == _SILICON_LABS_EFR32_RADIO_DUALBAND
+#if defined(_SILICON_LABS_32B_SERIES_1)
+  if (mode >= RAIL_TX_POWER_MODE_SUBGIG) {
+#elif defined(_SILICON_LABS_32B_SERIES_2)
+  if (mode >= RAIL_TX_POWER_MODE_SUBGIG_HP) {
+#endif
+    txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_subghz();
+  } else {
+    txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
+  }
+#elif _SILICON_LABS_EFR32_RADIO_TYPE == _SILICON_LABS_EFR32_RADIO_2G4HZ
+  txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_2p4ghz();
+#elif _SILICON_LABS_EFR32_RADIO_TYPE == _SILICON_LABS_EFR32_RADIO_SUBGHZ
+  txPowerConfigPtr = sl_rail_util_pa_get_tx_power_config_subghz();
+#endif
+
   // Make a backup of the TX Power Config before it's changed.
   RAIL_TxPowerConfig_t txPowerConfigBackup = {
     .mode = txPowerConfigPtr->mode,
     .voltage = txPowerConfigPtr->voltage,
     .rampTime = txPowerConfigPtr->rampTime
   };
-  RAIL_TxPowerMode_t mode = sl_cli_get_argument_uint8(args, 0);
-  if (mode >= RAIL_TX_POWER_MODE_NONE) {
-    responsePrintError(sl_cli_get_command_string(args, 0), 0x13, "Invalid PA enum value selected: %d", mode);
-    return;
-  }
 
   uint16_t voltage = sl_cli_get_argument_uint16(args, 1);
   uint16_t rampTime = sl_cli_get_argument_uint16(args, 2);
@@ -246,32 +264,50 @@ void sweepTxPower(sl_cli_command_arg_t *args)
   switch (txPowerConfig.mode) {
 #ifdef RAIL_TX_POWER_MODE_2P4_HP
     case RAIL_TX_POWER_MODE_2P4_HP:
+      start = RAIL_TX_POWER_LEVEL_2P4_HP_MIN;
       end = RAIL_TX_POWER_LEVEL_2P4_HP_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_2P4_MP
     case RAIL_TX_POWER_MODE_2P4_MP:
+      start = RAIL_TX_POWER_LEVEL_2P4_MP_MIN;
       end = RAIL_TX_POWER_LEVEL_2P4_MP_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_2P4_LP
     case RAIL_TX_POWER_MODE_2P4_LP:
+      start = RAIL_TX_POWER_LEVEL_2P4_LP_MIN;
       end = RAIL_TX_POWER_LEVEL_2P4_LP_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_SUBGIG_HP
     case RAIL_TX_POWER_MODE_SUBGIG_HP:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MIN;
       end = RAIL_TX_POWER_LEVEL_SUBGIG_HP_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_SUBGIG_MP
     case RAIL_TX_POWER_MODE_SUBGIG_MP:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_MP_MIN;
       end = RAIL_TX_POWER_LEVEL_SUBGIG_MP_MAX;
       break;
 #endif
 #ifdef RAIL_TX_POWER_MODE_SUBGIG_LP
     case RAIL_TX_POWER_MODE_SUBGIG_LP:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_LP_MIN;
       end = RAIL_TX_POWER_LEVEL_SUBGIG_LP_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_SUBGIG_LLP
+    case RAIL_TX_POWER_MODE_SUBGIG_LLP:
+      start = RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MIN;
+      end = RAIL_TX_POWER_LEVEL_SUBGIG_LLP_MAX;
+      break;
+#endif
+#ifdef RAIL_TX_POWER_MODE_OFDM_PA
+    case RAIL_TX_POWER_MODE_OFDM_PA:
+      start = RAIL_TX_POWER_LEVEL_OFDM_PA_MIN;
+      end = RAIL_TX_POWER_LEVEL_OFDM_PA_MAX;
       break;
 #endif
     default:
@@ -328,7 +364,11 @@ void setCtune(sl_cli_command_arg_t *args)
     return;
   }
 
-  RAIL_SetTune(railHandle, sl_cli_get_argument_uint32(args, 0));
+  if (RAIL_SetTune(railHandle, sl_cli_get_argument_uint32(args, 0))
+      != RAIL_STATUS_NO_ERROR) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x28, "Invalid CTUNE value provided");
+    return;
+  }
 
   // Read out and print the current CTUNE value
   args->argc = sl_cli_get_command_count(args); /* only reference cmd str */

@@ -5,9 +5,13 @@ description: >-
   This component provides support for operations using RSA keys.
 category: Platform|Security
 quality: alpha
+include:
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: rsa_alt_helpers.h
 source:
   - path: util/third_party/crypto/mbedtls/library/rsa.c
-  - path: util/third_party/crypto/mbedtls/library/rsa_internal.c
+  - path: util/third_party/crypto/mbedtls/library/rsa_alt_helpers.c
 provides:
   - name: mbedtls_rsa
 requires:

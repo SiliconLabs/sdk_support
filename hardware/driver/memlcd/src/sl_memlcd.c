@@ -18,7 +18,12 @@
 #include "sl_memlcd_display.h"
 #include "sl_sleeptimer.h"
 #include "sl_udelay.h"
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(SL_MEMLCD_USE_EUSART)
+#include "sl_power_manager.h"
+#endif
+
 #include "em_gpio.h"
+
 #include <string.h>
 
 #define CMD_UPDATE        0x01
@@ -39,11 +44,6 @@
 static sl_sleeptimer_timer_handle_t extcomin_timer;
 
 static void extcomin_toggle(sl_sleeptimer_timer_handle_t *handle, void *data);
-#endif
-
-#if defined(SL_MEMLCD_LPM013M126A)
-/** Utility function to reverse bits for the LPM013M126A. */
-static uint8_t reverse_bits(uint8_t data);
 #endif
 
 /** Memory lcd instance. This variable will be initialized in the
@@ -86,6 +86,20 @@ static sli_memlcd_spi_handle_t spi_handle = {
 };
 #endif
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(SL_MEMLCD_USE_EUSART)
+static sl_power_manager_em_transition_event_handle_t on_power_manager_event_handle;
+
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to);
+
+static sl_power_manager_em_transition_event_info_t on_power_manager_event_info =
+{
+  .event_mask = (SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2 \
+                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3),
+  .on_event = on_power_manager_event,
+};
+#endif
+
 sl_status_t sl_memlcd_configure(struct sl_memlcd_t *device)
 {
   CMU_ClockEnable(cmuClock_GPIO, true);
@@ -107,6 +121,11 @@ sl_status_t sl_memlcd_configure(struct sl_memlcd_t *device)
   initialized = true;
   sl_memlcd_power_on(device, true);
   sl_memlcd_clear(device);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(SL_MEMLCD_USE_EUSART)
+  // Subscribe to notification to prepare eusart before/after deepsleep.
+  sl_power_manager_subscribe_em_transition_event(&on_power_manager_event_handle, &on_power_manager_event_info);
+#endif
 
   return SL_STATUS_OK;
 }
@@ -175,9 +194,6 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   const uint8_t *p = data;
   uint16_t cmd;
   int row_len;
-#if defined(SL_MEMLCD_LPM013M126A)
-  uint8_t reversed_row;
-#endif
 
   row_len = (device->width * device->bpp) / 8;
   row_start++;
@@ -188,18 +204,8 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   /* SCS setup time */
   sl_udelay_wait(device->setup_us);
 
-#if defined(SL_MEMLCD_LPM013M126A)
-  /* LPM013M126A uses MSB first for the row */
-  reversed_row = reverse_bits((uint8_t)row_start);
-
-  /* Send update command and first line address */
-  /* CMD_UPDATE is only 6 bits and the address line is 10 bits
-     but the first two bits of address are always 00 so this works */
-  cmd = CMD_UPDATE | (reversed_row << 8);
-#else
   /* Send update command and first line address */
   cmd = CMD_UPDATE | (row_start << 8);
-#endif
 
   sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
 
@@ -212,17 +218,7 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
     if (i == row_count - 1) {
       cmd = 0xffff;
     } else {
-#if defined(SL_MEMLCD_LPM013M126A)
-  /* LPM013M126A uses MSB first for the row */
-  reversed_row = reverse_bits((uint8_t)row_start + i + 1);
-
-  /* Send update command and line address */
-  /* CMD_UPDATE is only 6 bits and the address line is 10 bits
-     but the first two bits of address are always 00 so this works */
-      cmd = 0x3f | (reversed_row << 8);
-#else
       cmd = 0xff | ((row_start + i + 1) << 8);
-#endif
     }
     sli_memlcd_spi_tx(&spi_handle, &cmd, 2);
   }
@@ -235,17 +231,43 @@ sl_status_t sl_memlcd_draw(const struct sl_memlcd_t *device, const void *data, u
   /* De-assert SCS */
   GPIO_PinOutClear(SL_MEMLCD_SPI_CS_PORT, SL_MEMLCD_SPI_CS_PIN);
 
+  /* Clean up garbage RX data */
+  /* This is important when paired with others slaves */
+  sli_memlcd_spi_rx_flush(&spi_handle);
+
   return SL_STATUS_OK;
 }
 
 const sl_memlcd_t *sl_memlcd_get(void)
 {
   if (initialized) {
-    return &memlcd_instance; 
+    return &memlcd_instance;
   } else {
     return NULL;
   }
 }
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(SL_MEMLCD_USE_EUSART)
+/***************************************************************************//**
+ * Power Manager callback notification for EUSART.
+ * It is used to prepare EUSART module before/after deepsleeping.
+ ******************************************************************************/
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to)
+{
+  (void)from;
+
+  if (to == SL_POWER_MANAGER_EM1
+      || to == SL_POWER_MANAGER_EM0) {
+    sli_memlcd_spi_exit_em23(&spi_handle);
+  }
+
+  if (to == SL_POWER_MANAGER_EM2
+      || to == SL_POWER_MANAGER_EM3) {
+    sli_memlcd_spi_enter_em23(&spi_handle);
+  }
+}
+#endif
 
 #if defined (SL_MEMLCD_EXTCOMIN_PORT)
 /**************************************************************************//**
@@ -263,25 +285,4 @@ static void extcomin_toggle(sl_sleeptimer_timer_handle_t *handle, void *data)
 
   GPIO_PinOutToggle(SL_MEMLCD_EXTCOMIN_PORT, SL_MEMLCD_EXTCOMIN_PIN);
 }
-
-#if defined(SL_MEMLCD_LPM013M126A)
-/**************************************************************************//**
- * @brief
- *   Reverse the bits of a unit8_t to make the transform from LSB to MSB and
- *   vice-versa.
- *****************************************************************************/
-static uint8_t reverse_bits(uint8_t data)
-{
-    // Ex: data = 0b01101100 ==> data = 0b11000110
-    data = ((data & 0xF0) >> 4) | ((data & 0x0F) << 4);
-
-    // Ex: data = 0b11000110 ==> data = 0b00111001
-    data = ((data & 0xCC) >> 2) | ((data & 0x33) << 2);
-
-    // Ex: data = 0b00111001 ==> data = 0b00110110
-    data = ((data & 0xAA) >> 1) | ((data & 0x55) << 1);
-
-    return data;
-}
-#endif // SL_MEMLCD_LPM013M126A
 #endif

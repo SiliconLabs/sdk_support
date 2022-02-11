@@ -9,7 +9,7 @@ root_path: hardware/driver/si1133
 provides:
   - name: si1133_driver
 requires:
-  - name: i2cspm_core
+  - name: i2cspm
   - name: sleeptimer
   - name: status
 include:

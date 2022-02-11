@@ -133,7 +133,11 @@ static Ecode_t nvm3_halFlashGetInfo(nvm3_HalInfo_t *halInfo)
   SYSTEM_ChipRevision_TypeDef chipRev;
 
   SYSTEM_ChipRevisionGet(&chipRev);
-  halInfo->deviceFamily = chipRev.family;
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+  halInfo->deviceFamilyPartNumber = chipRev.partNumber;
+#else
+  halInfo->deviceFamilyPartNumber = chipRev.family;
+#endif
   halInfo->memoryMapped = 1;
 #if defined(_SILICON_LABS_32B_SERIES_2)
   halInfo->writeSize = NVM3_HAL_WRITE_SIZE_32;

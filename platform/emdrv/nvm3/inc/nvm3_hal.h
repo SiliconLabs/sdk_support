@@ -79,13 +79,13 @@ extern "C" {
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 
-#define nvm3_halOpen(hal, a, b)           hal->open(a, b)
-#define nvm3_halClose(hal)                hal->close()
-#define nvm3_halGetInfo(hal, a)           hal->getInfo(a)
-#define nvm3_halNvmAccess(hal, a)         hal->access(a)
-#define nvm3_halReadWords(hal, a, b, c)   hal->readWords(a, b, c)
-#define nvm3_halWriteWords(hal, a, b, c)  hal->writeWords(a, b, c)
-#define nvm3_halPageErase(hal, a)         hal->pageErase(a)
+#define nvm3_halOpen(hal, a, b)           ((hal)->open((a), (b)))
+#define nvm3_halClose(hal)                ((hal)->close())
+#define nvm3_halGetInfo(hal, a)           ((hal)->getInfo(a))
+#define nvm3_halNvmAccess(hal, a)         ((hal)->access(a))
+#define nvm3_halReadWords(hal, a, b, c)   ((hal)->readWords((a), (b), (c)))
+#define nvm3_halWriteWords(hal, a, b, c)  ((hal)->writeWords((a), (b), (c)))
+#define nvm3_halPageErase(hal, a)         ((hal)->pageErase(a))
 
 /// @endcond
 
@@ -99,11 +99,11 @@ typedef void   *nvm3_HalPtr_t;
 /// @brief Device NVM capabilities
 
 typedef struct nvm3_HalInfo {
-  uint16_t deviceFamily;        ///< Device family.
-  uint8_t writeSize;            ///< Write-size: 0=32-bit, 1=16-bit.
-  uint8_t memoryMapped;         ///< Memory-mapped: 0=not memory mapped, 1=memory mapped.
-  size_t pageSize;              ///< The data storage page size.
-  uint64_t systemUnique;        ///< Obsolete. Was used to support external flash.
+  uint16_t deviceFamilyPartNumber;  ///< Device family or part number.
+  uint8_t writeSize;                ///< Write-size: 0=32-bit, 1=16-bit.
+  uint8_t memoryMapped;             ///< Memory-mapped: 0=not memory mapped, 1=memory mapped.
+  size_t pageSize;                  ///< The data storage page size.
+  uint64_t systemUnique;            ///< Obsolete. Was used to support external flash.
 } nvm3_HalInfo_t;
 
 typedef uint8_t nvm3_HalNvmAccessCode_t; ///< Definition of the access data type.

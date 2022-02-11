@@ -951,6 +951,16 @@ int USBD_Write(int epAddr, void *data, int byteCount,
  * @defgroup usb USB Stacks
  * @{
  * @brief Gecko USB stacks
+ *
+ * @b Note:
+ * The Gecko USB stack is deprecated and will be removed in a future release
+ * of the Gecko SDK. Please consider migrating to the SL-USB stack. The SL-USB
+ * stack has features including integrated class drivers and CMSIS-RTOS support.
+ * Developers who wish to take advantage of the new features
+ * are recommended to rewrite applications from the ground up, as differences
+ * between the two stacks are significant enough to make migration difficult.
+ * For more information, follow the programming guide for the
+ * [Silicon Labs USB Device](https://docs.silabs.com/usb/latest).
  * @}
  ******************************************************************************/
 

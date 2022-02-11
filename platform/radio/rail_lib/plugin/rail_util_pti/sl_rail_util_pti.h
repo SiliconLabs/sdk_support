@@ -31,11 +31,19 @@
 #ifndef SL_RAIL_UTIL_PTI_H
 #define SL_RAIL_UTIL_PTI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the RAIL PTI Utility.
  *
  * @note: This function should be called during application initialization.
  */
 void sl_rail_util_pti_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_PTI_H

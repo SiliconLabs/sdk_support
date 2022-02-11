@@ -23,6 +23,9 @@ source:
 config_file:
   - path: config/sl_icm20648_config.h
     file_id: icm20648_config
+template_contribution:
+  - name: component_catalog
+    value: icm20648_driver
 documentation:
     docset: gecko-platform
     document: hardware-driver/api/group-icm20648

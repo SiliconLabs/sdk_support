@@ -21,7 +21,7 @@
 sl_status_t sl_button_init(const sl_button_t *handle)
 {
   if (handle->init != NULL) {
-    return handle->init(handle->context);
+    return handle->init(handle);
   } else {
     return SL_STATUS_NULL_POINTER;
   }
@@ -30,7 +30,7 @@ sl_status_t sl_button_init(const sl_button_t *handle)
 sl_button_state_t sl_button_get_state(const sl_button_t *handle)
 {
   if (handle->get_state != NULL) {
-    return handle->get_state(handle->context);
+    return handle->get_state(handle);
   } else {
     return (sl_button_state_t)BUTTON_ERROR;
   }
@@ -39,21 +39,21 @@ sl_button_state_t sl_button_get_state(const sl_button_t *handle)
 void sl_button_poll_step(const sl_button_t *handle)
 {
   if (handle->poll != NULL) {
-    handle->poll(handle->context);
+    handle->poll(handle);
   }
 }
 
 void sl_button_enable(const sl_button_t *handle)
 {
   if (handle->enable != NULL) {
-    handle->enable(handle->context);
+    handle->enable(handle);
   }
 }
 
 void sl_button_disable(const sl_button_t *handle)
 {
   if (handle->disable != NULL) {
-    handle->disable(handle->context);
+    handle->disable(handle);
   }
 }
 

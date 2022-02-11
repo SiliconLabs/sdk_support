@@ -1225,7 +1225,8 @@ static void handleOverflow(void)
 /// @{
 ///
 ///   @warning The RTC Driver is marked as deprecated and will be removed in a
-///   later release. Please use the sleep timer service instead.
+///   later release. Use the Sleep Timer service instead. For more information
+///   about Sleep Timer, see Services section.
 ///
 ///   @details
 ///   The rtcdriver.c and rtcdriver.h source files for the RTCDRV device driver library are in the

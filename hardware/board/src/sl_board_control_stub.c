@@ -29,6 +29,11 @@
  ******************************************************************************/
 #include "sl_board_control.h"
 
+sl_status_t sl_board_configure_vcom(void)
+{
+  return SL_STATUS_NOT_AVAILABLE;
+}
+
 sl_status_t sl_board_enable_vcom(void)
 {
   return SL_STATUS_NOT_AVAILABLE;

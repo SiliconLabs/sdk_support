@@ -1,5 +1,5 @@
 id: "bluetooth_crypto"
-label: "Bluetooth Core Crypto"
+label: "Bluetooth Core Crypto Configuration"
 package: "Bluetooth"
 description: >
   Bluetooth Low Energy stack crypto configurations
@@ -53,3 +53,6 @@ requires:
   - name: "sli_protocol_crypto"
 provides:
   - name: "bluetooth_crypto"
+
+ui_hints:
+  visibility: never

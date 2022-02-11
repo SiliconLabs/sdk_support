@@ -493,67 +493,14 @@ static const debugPin_t debugPins[] = {
   },
 };
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-/**
- * Define the pins that are supported for debugging on the EFR32xG2.
- * Along with these pins there are specific ASYNC PRS channels that
- * will be used to output debug information on these pins.
- * This is all for debug and very specific to the EFR32xG2.
- */
-static const debugPin_t debugPins[] = {
-  {
-    .name         = "PA0",      // PA0 (BRD4171A - EXP11)
-    .prsChannel   = 0,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortA,
-    .gpioPin      = 0
-  },
-  {
-    .name         = "PB2",
-    .prsChannel   = 1,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortB,
-    .gpioPin      = 2
-  },
-  {
-    .name         = "PB3",
-    .prsChannel   = 2,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortB,
-    .gpioPin      = 3
-  },
-  {
-    .name         = "PC0",      // PC0 (BRD4171A - EXP3, LED0)
-    .prsChannel   = 6,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortC,
-    .gpioPin      = 0
-  },
-  {
-    .name         = "PC1",      // PC1 (BRD4171A - EXP5, LED1)
-    .prsChannel   = 7,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortC,
-    .gpioPin      = 1
-  },
-  {
-    .name         = "PC2",      // PC2 (BRD4171A - EXP7, BTN0)
-    .prsChannel   = 8,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortC,
-    .gpioPin      = 2
-  },
-  {
-    .name         = "PC3",      // PC3 (BRD4171A - EXP9, BTN1)
-    .prsChannel   = 9,
-    .prsLocation  = 0,
-    .gpioPort     = gpioPortC,
-    .gpioPin      = 3
-  },
-};
+// PRS channels for debug pins are allocated during runtime for series 2
+// Channels 0-5 can route to any pin on PA or PB
+// Channels 6-11 can route to any pin on PC or PD
 #else
 #warning Implement debugPins for this platform
 #endif
 
+#if defined(_SILICON_LABS_32B_SERIES_1)
 const debugPin_t* halGetDebugPins(uint32_t *size)
 {
   if (size != NULL) {
@@ -561,6 +508,7 @@ const debugPin_t* halGetDebugPins(uint32_t *size)
   }
   return debugPins;
 }
+#endif
 
 void halDisablePrs(uint8_t channel)
 {

@@ -17,6 +17,9 @@
  ******************************************************************************/
 
 #include PLATFORM_HEADER
+#ifdef UNIFIED_MAC_SCRIPTED_TEST
+#define EVENT_CONTROL_SYSTEM
+#endif
 #include "hal/hal.h"
 #include "sl_status.h"
 #include "core/ember-stack.h"
@@ -29,7 +32,13 @@
 #include "scan.h"
 #include "mac-command.h"
 #include "event_control/event.h"
-
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+#include "openthread/error.h"
+#include "openthread/platform/radio.h"
+#endif
 #if defined(UNIFIED_MAC_SCRIPTED_TEST)
 #include "scripted_test_framework.h"
 #define energyReadScriptCheck(rssiValue) \
@@ -61,7 +70,25 @@ enum {
 #define ENERGY_SCAN_CHANNEL_OFFSET 1
 #define ENERGY_SCAN_RECORD_SIZE    2
 
+#ifndef EVENT_CONTROL_SYSTEM
+static void mac_scan_event_handler(EmberEvent *event);
+
+EmberEvent sl_mac_scan_event = { {
+                                   &emStackEventQueue,
+                                   mac_scan_event_handler,
+                                   emIsrEventMarker,
+                                   #ifndef EMBER_TEST
+                                   ""
+                                   #else
+                                   "MAC scan"
+                                   #endif
+                                 },
+                                 NULL };
+#define call_scan_event_handler() mac_scan_event_handler(&sl_mac_scan_event)
+#else
 EmberEventControl sl_mac_scan_event;
+#define call_scan_event_handler() sl_mac_scan_event_handler()
+#endif
 Buffer sl_energy_scan_result_summary_buffer = NULL_BUFFER;
 uint8_t energy_scan_result_summary_index = 0;
 
@@ -196,7 +223,7 @@ static void tx_complete_callback(uint8_t mac_index, sl_status_t status, PacketHe
 
     if (3 <= sl_scan_transmit_retries
         || start_channel_scan() != SL_STATUS_OK) {
-      sl_mac_scan_event_handler();
+      call_scan_event_handler();
     }
   }
   return;
@@ -523,15 +550,18 @@ void mac_shutdown_scan_start(uint8_t mac_index)
     // DUAL_PAN - default to setting to the 0th rail index?
     sl_mac_lower_mac_set_pan_id(MAC_INDEX, 0, EMBER_BROADCAST_PAN_ID);
   }
-
-  sl_mac_scan_event_handler();
+  call_scan_event_handler();
 }
 
 // When the event runs we report any new energy results and try the next
 // channel. If there is no next channel we report any errors and shut down.
+#ifndef EVENT_CONTROL_SYSTEM
+void mac_scan_event_handler(EmberEvent *event)
+#else
 void sl_mac_scan_event_handler(void)
+#endif
 {
-  emberEventControlSetInactive(sl_mac_scan_event);
+  sli_mac_inactivate_event(sl_mac_scan_event);
   if (sl_scan_type == SL_ENERGY_SCAN) {
     report_energy_scan_rssi_per_channel();
   }
@@ -634,7 +664,9 @@ void sl_scan_timer_handler(void)
 
   if (next_timeout == 0) {
     // Enable the scan event, which will scan the next channel.
-    emberEventControlSetActive(sl_mac_scan_event);
+    if (!sli_mac_event_is_active(sl_mac_scan_event)) {
+      sli_mac_activate_event(sl_mac_scan_event);
+    }
   } else {
     scan_dwell(sl_scanning_mac_index, next_timeout);
     sl_scan_frame_counter--;
@@ -710,6 +742,7 @@ static sl_status_t start_channel_scan(void)
         status = sl_mac_submit(0, sl_mac_nwk_index(sl_scan_packet), sl_scan_packet, TRANSMIT_PRIORITY_BYPASS_SHUTDOWN, tx_complete_callback, sl_tag);
       }
       sl_next_channel = get_next_scan_channel(sl_next_channel);
+
       UMAC_SCAN_DEBUG(fprintf(stderr, "\n start_channel_scan submit status %x\n", status));
       return status;
     case SL_ENERGY_SCAN:
@@ -721,7 +754,12 @@ static sl_status_t start_channel_scan(void)
         sl_scan_frame_counter * (SYMBOLS_PER_SUPERFRAME
                                  / SYMBOLS_PER_ENERGY_READING) - 1;
 
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+      otError error = otPlatRadioEnergyScan(NULL, sl_next_channel, 200);
+      status = (error == OT_ERROR_NONE ? SL_STATUS_OK : SL_STATUS_FAIL);
+#else
       status = scan_dwell(sl_scanning_mac_index, SYMBOLS_PER_ENERGY_READING);
+#endif
       // energy detection
       sl_next_channel = get_next_scan_channel(sl_next_channel);
       return status;
@@ -759,3 +797,17 @@ static void report_energy_scan_rssi_per_channel(void)
     energy_reads_count = 0;
   }
 }
+
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+void sli_set_energy_scan_results(int8_t rssiValue)
+{
+  energy_reads_average = rssiValue;
+  energy_reads_min = rssiValue;
+  energy_reads_max = rssiValue;
+  energy_reads_count = 1;
+
+  if (!sli_mac_event_is_active(sl_mac_scan_event)) {
+    sli_mac_activate_event(sl_mac_scan_event);
+  }
+}
+#endif

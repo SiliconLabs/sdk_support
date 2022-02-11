@@ -23,12 +23,6 @@
 
 #define SL_BTMESH_FEATURE_BITMASK {{ btmesh_feature_bitmask | sum(attribute='count')}}
 
-{%- if btmesh_feature_gatt_prov_bearer is defined %}
-#define SL_BTMESH_CONFIG_MAX_PROV_BEARERS 2
-{%- else %}
-#define SL_BTMESH_CONFIG_MAX_PROV_BEARERS 1
-{%- endif %}
-
 // Initialize Bluetooth core functionality
 void sl_btmesh_init(void);
 

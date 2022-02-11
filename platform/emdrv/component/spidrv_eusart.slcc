@@ -30,7 +30,7 @@ config_file:
   - path: "config/eusart/s2/sl_spidrv_eusart_{{instance}}_config.h"
     file_id: spidrv_eusart_config
 validation_helper:
-  - path: script/spidrv_eusart_validation.py
+  - path: script/spidrv_eusart_validation.lua
 provides:
   - name: "spidrv_instance"
     allow_multiple: true

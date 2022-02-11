@@ -93,7 +93,7 @@ typedef enum {
 
 #if defined(_WDOG_CTRL_WARNSEL_MASK) \
   || defined(_WDOG_CFG_WARNSEL_MASK)
-/** Select watchdog warning timeout period as percentage of timeout. */
+/** Select Watchdog warning timeout period as percentage of timeout. */
 typedef enum {
   wdogWarnDisable   = 0, /**< Watchdog warning period is disabled. */
   wdogWarnTime25pct = 1, /**< Watchdog warning period is 25% of the timeout. */
@@ -104,7 +104,7 @@ typedef enum {
 
 #if defined(_WDOG_CTRL_WINSEL_MASK) \
   || defined(_WDOG_CFG_WINSEL_MASK)
-/**  Select watchdog illegal window limit. */
+/**  Select Watchdog illegal window limit. */
 typedef enum {
   wdogIllegalWindowDisable     = 0, /**< Watchdog illegal window disabled. */
   wdogIllegalWindowTime12_5pct = 1, /**< Window timeout is 12.5% of the timeout. */
@@ -123,7 +123,7 @@ typedef enum {
 
 /** Watchdog initialization structure. */
 typedef struct {
-  /** Enable watchdog when initialization completed. */
+  /** Enable Watchdog when initialization completed. */
   bool                   enable;
 
   /** Counter keeps running during debug halt. */
@@ -146,7 +146,7 @@ typedef struct {
   /** Block SW from modifying the configuration (a reset is needed to reconfigure). */
   bool                   lock;
 
-  /** Clock source to use for watchdog. */
+  /** Clock source to use for Watchdog. */
 #if defined(_WDOG_CTRL_CLKSEL_MASK)
   WDOG_ClkSel_TypeDef    clkSel;
 #endif
@@ -156,19 +156,19 @@ typedef struct {
 
 #if defined(_WDOG_CTRL_WARNSEL_MASK) \
   || defined(_WDOG_CFG_WARNSEL_MASK)
-  /** Select warning time as % of the watchdog timeout */
+  /** Select warning time as % of the Watchdog timeout */
   WDOG_WarnSel_TypeDef   warnSel;
 #endif
 
 #if defined(_WDOG_CTRL_WINSEL_MASK) \
   || defined(_WDOG_CFG_WINSEL_MASK)
-  /** Select illegal window time as % of the watchdog timeout */
+  /** Select illegal window time as % of the Watchdog timeout */
   WDOG_WinSel_TypeDef    winSel;
 #endif
 
 #if defined(_WDOG_CTRL_WDOGRSTDIS_MASK) \
   || defined(_WDOG_CFG_WDOGRSTDIS_MASK)
-  /** Disable watchdog reset output if true */
+  /** Disable Watchdog reset output if true */
   bool                   resetDisable;
 #endif
 } WDOG_Init_TypeDef;
@@ -177,7 +177,7 @@ typedef struct {
 #if defined(_WDOG_CFG_MASK)
 #define WDOG_INIT_DEFAULT                                                       \
   {                                                                             \
-    true,                     /* Start watchdog when initialization is done. */ \
+    true,                     /* Start Watchdog when initialization is done. */ \
     false,                    /* WDOG is not counting during debug halt. */     \
     false,                    /* WDOG is not counting when in EM2. */           \
     false,                    /* WDOG is not counting when in EM3. */           \
@@ -193,7 +193,7 @@ typedef struct {
   && defined(_WDOG_CTRL_WINSEL_MASK)
 #define WDOG_INIT_DEFAULT                                                       \
   {                                                                             \
-    true,                     /* Start watchdog when initialization is done. */ \
+    true,                     /* Start Watchdog when initialization is done. */ \
     false,                    /* WDOG is not counting during debug halt. */     \
     false,                    /* WDOG is not counting when in EM2. */           \
     false,                    /* WDOG is not counting when in EM3. */           \
@@ -209,7 +209,7 @@ typedef struct {
 #else
 #define WDOG_INIT_DEFAULT                                                       \
   {                                                                             \
-    true,                     /* Start watchdog when initialization is done. */ \
+    true,                     /* Start Watchdog when initialization is done. */ \
     false,                    /* WDOG is not counting during debug halt. */     \
     false,                    /* WDOG is not counting when in EM2. */           \
     false,                    /* WDOG is not counting when in EM3. */           \
@@ -238,7 +238,7 @@ void WDOGn_Unlock(WDOG_TypeDef *wdog);
  *   Clear one or more pending WDOG interrupts.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @param[in] flags
  *   WDOG interrupt sources to clear. Use a set of interrupt flags OR-ed
@@ -258,7 +258,7 @@ __STATIC_INLINE void WDOGn_IntClear(WDOG_TypeDef *wdog, uint32_t flags)
  *   Disable one or more WDOG interrupts.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @param[in] flags
  *   WDOG interrupt sources to disable. Use a set of interrupt flags OR-ed
@@ -283,7 +283,7 @@ __STATIC_INLINE void WDOGn_IntDisable(WDOG_TypeDef *wdog, uint32_t flags)
  *   WDOG_IntClear() prior to enabling the interrupt.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @param[in] flags
  *   WDOG interrupt sources to enable. Use a set of interrupt flags OR-ed
@@ -306,7 +306,7 @@ __STATIC_INLINE void WDOGn_IntEnable(WDOG_TypeDef *wdog, uint32_t flags)
  *   The event bits are not cleared by the use of this function.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @return
  *   Pending WDOG interrupt sources. Returns a set of interrupt flags OR-ed
@@ -325,7 +325,7 @@ __STATIC_INLINE uint32_t WDOGn_IntGet(WDOG_TypeDef *wdog)
  *   Useful for handling more interrupt sources in the same interrupt handler.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @return
  *   Pending and enabled WDOG interrupt sources. Returns a set of interrupt
@@ -346,7 +346,7 @@ __STATIC_INLINE uint32_t WDOGn_IntGetEnabled(WDOG_TypeDef *wdog)
  *   Set one or more pending WDOG interrupts from SW.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @param[in] flags
  *   WDOG interrupt sources to set to pending. Use a set of interrupt flags
@@ -364,13 +364,13 @@ __STATIC_INLINE void WDOGn_IntSet(WDOG_TypeDef *wdog, uint32_t flags)
 
 /***************************************************************************//**
  * @brief
- *   Get enabled status of the watchdog.
+ *   Get enabled status of the Watchdog.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @return
- *   True if watchdog is enabled.
+ *   True if Watchdog is enabled.
  ******************************************************************************/
 __STATIC_INLINE bool WDOGn_IsEnabled(WDOG_TypeDef *wdog)
 {
@@ -383,13 +383,13 @@ __STATIC_INLINE bool WDOGn_IsEnabled(WDOG_TypeDef *wdog)
 
 /***************************************************************************//**
  * @brief
- *   Get locked status of the watchdog.
+ *   Get locked status of the Watchdog.
  *
  * @param[in] wdog
- *   Pointer to WDOG peripheral register block.
+ *   Pointer to the WDOG peripheral register block.
  *
  * @return
- *   True if watchdog is locked.
+ *   True if Watchdog is locked.
  ******************************************************************************/
 __STATIC_INLINE bool WDOGn_IsLocked(WDOG_TypeDef *wdog)
 {
@@ -402,15 +402,15 @@ __STATIC_INLINE bool WDOGn_IsLocked(WDOG_TypeDef *wdog)
 
 /***************************************************************************//**
  * @brief
- *   Enable/disable the watchdog timer.
+ *   Enable/disable the Watchdog timer.
  *
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_Enable().
  *   This function uses @ref DEFAULT_WDOG.
  *
  * @param[in] enable
- *   Set to true to enable watchdog, false to disable. Watchdog cannot be
- *   disabled if watchdog has been locked.
+ *   Set to true to enable Watchdog, false to disable. Watchdog cannot be
+ *   disabled if Watchdog has been locked.
  ******************************************************************************/
 __STATIC_INLINE void WDOG_Enable(bool enable)
 {
@@ -419,7 +419,7 @@ __STATIC_INLINE void WDOG_Enable(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Feed the watchdog.
+ *   Feed the Watchdog.
  *
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_Feed().
@@ -432,7 +432,7 @@ __STATIC_INLINE void WDOG_Feed(void)
 
 /***************************************************************************//**
  * @brief
- *   Initialize watchdog (assuming the watchdog configuration has not been
+ *   Initialize Watchdog (assuming the Watchdog configuration has not been
  *   locked).
  *
  * @deprecated
@@ -440,7 +440,7 @@ __STATIC_INLINE void WDOG_Feed(void)
  *   This function uses @ref DEFAULT_WDOG.
  *
  * @param[in] init
- *   Structure holding watchdog configuration. A default setting
+ *   Structure holding Watchdog configuration. A default setting
  *   #WDOG_INIT_DEFAULT is available for initialization.
  ******************************************************************************/
 __STATIC_INLINE void WDOG_Init(const WDOG_Init_TypeDef *init)
@@ -450,7 +450,7 @@ __STATIC_INLINE void WDOG_Init(const WDOG_Init_TypeDef *init)
 
 /***************************************************************************//**
  * @brief
- *   Lock the watchdog configuration.
+ *   Lock the Watchdog configuration.
  *
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_Lock().
@@ -463,14 +463,14 @@ __STATIC_INLINE void WDOG_Lock(void)
 
 /***************************************************************************//**
  * @brief
- *   Get enabled status of the watchdog.
+ *   Get enabled status of the Watchdog.
  *
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_IsEnabled().
  *   This function uses @ref DEFAULT_WDOG.
  *
  * @return
- *   True if watchdog is enabled.
+ *   True if Watchdog is enabled.
  ******************************************************************************/
 __STATIC_INLINE bool WDOG_IsEnabled(void)
 {
@@ -479,14 +479,14 @@ __STATIC_INLINE bool WDOG_IsEnabled(void)
 
 /***************************************************************************//**
  * @brief
- *   Get locked status of the watchdog.
+ *   Get locked status of the Watchdog.
  *
  * @deprecated
  *   Deprecated function. New code should use @ref WDOGn_IsLocked().
  *   This function uses @ref DEFAULT_WDOG.
  *
  * @return
- *   True if watchdog is locked.
+ *   True if Watchdog is locked.
  ******************************************************************************/
 __STATIC_INLINE bool WDOG_IsLocked(void)
 {

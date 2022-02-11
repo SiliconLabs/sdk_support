@@ -9,6 +9,8 @@ provides:
 requires:
   - name: sim_eeprom_callback
   - name: sim_eeprom_headers
+  - name: token_manager
+  - name: device_series_1
 root_path: ./
 source:
   - path: platform/service/sim_eeprom1/src/sl_sim_eeprom1.c

@@ -94,6 +94,14 @@ define block apploader with alignment = {{ flash_page_size }}
 keep { section .binapploader };
 {%- endif %}
 
+{%- if linker_zwave_nvm is defined %}
+define block zwavenvm with alignment = {{ flash_page_size }}
+{
+  section ZWAVENVM,
+};
+keep { block zwavenvm };
+{%- endif %}
+
 define block nvm with alignment = {{ flash_page_size }}
 {
   section SIMEE,
@@ -152,6 +160,9 @@ place at start of ROM_region { block application };
 "storage_regions":
 place at end of MAIN_FLASH_region {
   block storage,
+{%- if linker_zwave_nvm is defined %}
+  block zwavenvm,
+{%- endif %}
   block nvm
 };
 

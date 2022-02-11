@@ -17,3 +17,5 @@ include:
       - path: os_trace_events.h
 provides:
   - name: segger_systemview_micriumos
+validation_helper:
+  - path: util/third_party/segger/systemview/Sample/MicriumOSKernel/systemview_micriumos_validation.lua

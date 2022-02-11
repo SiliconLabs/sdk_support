@@ -2,8 +2,8 @@ id: micriumos_usbd_class_msc
 label: USB Device Class - MSC
 package: micrium-usbd
 description: Micrium OS USB Device MSC Class
-category: Services|USB|Device
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 component_root_path: platform/micrium_os/usb
 source:
   - path: source/device/class/usbd_msc.c

@@ -47,6 +47,9 @@
  * 2. Device-specific tuning value in User Data page at offset 0x100 (manufacturing token `TOKEN_MFG_CTUNE`)
  * 3. Application-specific tuning value in configuration header `sl_device_init_hfxo_config.h`
  * 4. Default value in EMLIB initialization struct for HFXO
+ *
+ * If using Simplicity Studio, this configuration header is also configurable through the Project Configurator by selecting the
+ * "Device Init: HFXO" configuration component.
  * @{
  */
 

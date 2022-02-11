@@ -21,6 +21,7 @@ provides:
     allow_multiple: true
 requires:
   - name: iostream_uart_core
+  - name: device_series_0
 template_contribution:
   - name: iostream_uart_instances
     value: "{{instance}}"

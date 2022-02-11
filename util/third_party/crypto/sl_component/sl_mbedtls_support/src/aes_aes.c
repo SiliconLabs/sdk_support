@@ -53,6 +53,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 #if defined(MBEDTLS_THREADING_C)

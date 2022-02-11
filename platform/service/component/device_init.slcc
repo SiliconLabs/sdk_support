@@ -18,6 +18,8 @@ requires:
     condition: [device_sdid_205, bluetooth_stack]
   - name: device_init_hfxo
     condition: [hardware_board_has_hfxo]
+  - name: device_init_usbpll
+    condition: [device_has_usbpll]  
   - name: device_init_lfxo
     condition: [hardware_board_has_lfxo]
   - name: device_init_clocks
@@ -28,7 +30,7 @@ requires:
 recommends:
   - id: device_init_hfrco
 validation_helper:
-  - path: "device_init_validation.py"
+  - path: device_init_validation.lua
 documentation:
     docset: gecko-platform
     document: service/api/group-device-init

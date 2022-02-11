@@ -25,13 +25,10 @@
 // <i> Default: 115200
 #define SL_SERIAL_UART_BAUD_RATE              115200
 
-// <o SL_SERIAL_UART_FLOW_CONTROL> Hardware flow control
-// <usartHwFlowControlNone=> None
-// <usartHwFlowControlCts=> CTS
-// <usartHwFlowControlRts=> RTS
-// <usartHwFlowControlCtsAndRts=> CTS/RTS
-// <i> Default: usartHwFlowControlNone
-#define SL_SERIAL_UART_FLOW_CONTROL     usartHwFlowControlNone
+// <e SL_SERIAL_UART_FLOW_CONTROL> Hardware flow control
+// <i> Default: 0
+#define SL_SERIAL_UART_FLOW_CONTROL      0
+// </e>
 
 // <o SL_DRIVER_UART_RX_BUFFER_SIZE> Receive buffer size
 // <0-2048:1>
@@ -55,34 +52,26 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,(CTS),(RTS)> SL_SERIAL_UART
 // $[USART_SL_SERIAL_UART]
-#define SL_SERIAL_UART_PERIPHERAL                USART4
-#define SL_SERIAL_UART_PERIPHERAL_NO             4
+#define SL_SERIAL_UART_PERIPHERAL                USART5
+#define SL_SERIAL_UART_PERIPHERAL_NO             5
 
-// USART4 TX on PH4
-#define SL_SERIAL_UART_TX_PORT                   gpioPortH
-#define SL_SERIAL_UART_TX_PIN                    4
-#define SL_SERIAL_UART_TX_LOC                    4
+// USART5 TX on PE8
+#define SL_SERIAL_UART_TX_PORT                   gpioPortE
+#define SL_SERIAL_UART_TX_PIN                    8
+#define SL_SERIAL_UART_TX_LOC                    0
 
-// USART4 RX on PH5
-#define SL_SERIAL_UART_RX_PORT                   gpioPortH
-#define SL_SERIAL_UART_RX_PIN                    5
-#define SL_SERIAL_UART_RX_LOC                    4
+// USART5 RX on PE9
+#define SL_SERIAL_UART_RX_PORT                   gpioPortE
+#define SL_SERIAL_UART_RX_PIN                    9
+#define SL_SERIAL_UART_RX_LOC                    0
 
-// USART4 CTS on PH8
-#define SL_SERIAL_UART_CTS_PORT                  gpioPortH
-#define SL_SERIAL_UART_CTS_PIN                   8
-#define SL_SERIAL_UART_CTS_LOC                   4
 
-// USART4 RTS on PH9
-#define SL_SERIAL_UART_RTS_PORT                  gpioPortH
-#define SL_SERIAL_UART_RTS_PIN                   9
-#define SL_SERIAL_UART_RTS_LOC                   4
 
 // [USART_SL_SERIAL_UART]$
 
 
 
-// <gpio> SL_VCOM_ENABLE
+// <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
 #define SL_VCOM_ENABLE_PORT                      gpioPortE

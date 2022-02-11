@@ -1,7 +1,7 @@
 id: micriumos_fs_storage_ramdisk
 package: micrium-fsxx
 description: Micrium OS File System Ramdisk Storage
-category: Services|File System|Storage
+category: Services|Micrium|File System
 quality: production
 component_root_path: platform/micrium_os/fs
 source:

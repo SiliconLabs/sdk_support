@@ -61,7 +61,7 @@ extern "C" {
  *   @note The high-level SE API has been moved to the SE manager, and the
  *   implementation in em_se should not be used.
  *
- *   @note Using the SE's mailbox is not thread-safe in emlib, and accessing the
+ *   @note Using the SE's mailbox is not thread-safe in EMLIB, and accessing the
  *   SE's mailbox both in regular and IRQ context is not safe. SE operations
  *   should be performed using the SE manager if possible.
  *
@@ -289,7 +289,7 @@ __STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
  *
  * @deprecated
  *   The following functions have been deprecated and will be removed in a
- *   future version of emlib. All high-level functionality have been moved to
+ *   future version of EMLIB. All high-level functionality have been moved to
  *   the SE manager.
  *
  * @{
@@ -465,7 +465,7 @@ __STATIC_INLINE void SE_enableInterrupt(uint32_t flags)
 #define SE_COMMAND_OPTION_READ              0x00000000UL
 #define SE_COMMAND_OPTION_WRITE             0x00000100UL
 
-/** Magic paramater for deleting user data */
+/** Magic parameter for deleting user data */
 #define SE_COMMAND_OPTION_ERASE_UD          0xDE1E7EADUL
 
 #endif /* SEMAILBOX_PRESENT */

@@ -38,25 +38,72 @@
  ******************************   DEFINES   ************************************
  ******************************************************************************/
 
-// <o SL_CLI_INSTANCE_TASK_PRIORITY> Task priority <0-55>
-// <i> Default: 16
-// <i> Priority of the CLI task using the CMSIS order (55 is highest priority)
-  #define SL_CLI_INSTANCE_TASK_PRIORITY      (16)
+// <o SL_CLI_INSTANCE_TASK_PRIORITY> CLI instance task priority
+// <osPriorityLow1=> low + 1
+// <osPriorityLow2=> low + 2
+// <osPriorityLow3=> low + 3
+// <osPriorityLow4=> low + 4
+// <osPriorityLow5=> low + 5
+// <osPriorityLow6=> low + 6
+// <osPriorityLow7=> low + 7
+// <osPriorityBelowNormal=> below normal
+// <osPriorityBelowNormal1=> below normal + 1
+// <osPriorityBelowNormal2=> below normal + 2
+// <osPriorityBelowNormal3=> below normal + 3
+// <osPriorityBelowNormal4=> below normal + 4
+// <osPriorityBelowNormal5=> below normal + 5
+// <osPriorityBelowNormal6=> below normal + 6
+// <osPriorityBelowNormal7=> below normal + 7
+// <osPriorityNormal=> normal
+// <osPriorityNormal1=> normal + 1
+// <osPriorityNormal2=> normal + 2
+// <osPriorityNormal3=> normal + 3
+// <osPriorityNormal4=> normal + 4
+// <osPriorityNormal5=> normal + 5
+// <osPriorityNormal6=> normal + 6
+// <osPriorityNormal7=> normal + 7
+// <osPriorityAboveNormal => above normal
+// <osPriorityAboveNormal1=> above normal + 1
+// <osPriorityAboveNormal2=> above normal + 2
+// <osPriorityAboveNormal3=> above normal + 3
+// <osPriorityAboveNormal4=> above normal + 4
+// <osPriorityAboveNormal5=> above normal + 5
+// <osPriorityAboveNormal6=> above normal + 6
+// <osPriorityAboveNormal7=> above normal + 7
+// <osPriorityHigh=> high
+// <osPriorityHigh1=> high + 1
+// <osPriorityHigh2=> high + 2
+// <osPriorityHigh3=> high + 3
+// <osPriorityHigh4=> high + 4
+// <osPriorityHigh5=> high + 5
+// <osPriorityHigh6=> high + 6
+// <osPriorityHigh7=> high + 7
+// <osPriorityRealtime=> realtime
+// <osPriorityRealtime1=> realtime + 1
+// <osPriorityRealtime2=> realtime + 2
+// <osPriorityRealtime3=> realtime + 3
+// <osPriorityRealtime4=> realtime + 4
+// <osPriorityRealtime5=> realtime + 5
+// <osPriorityRealtime6=> realtime + 6
+// <osPriorityRealtime7=> realtime + 7
+// <i> Default: osPriorityNormal1
+// <i> Priority of the CLI instance task using the CMSIS order and using the enum name
+  #define SL_CLI_INSTANCE_TASK_PRIORITY      osPriorityNormal1
 
 // <o SL_CLI_INSTANCE_TASK_STACK_SIZE> Task stack size
 // <i> Default: 400
 // <i> Stack size for the CLI task in words.
-  #define SL_CLI_INSTANCE_TASK_STACK_SIZE       (400)
+  #define SL_CLI_INSTANCE_TASK_STACK_SIZE       400
 
 // <o SL_CLI_INSTANCE_TASK_START_DELAY_MS> CLI task start delay
 // <i> Default: 0
 // <i> Specifies the delay in milliseconds before the cli task start to poll for input.
-  #define SL_CLI_INSTANCE_TASK_START_DELAY_MS   (0)
+  #define SL_CLI_INSTANCE_TASK_START_DELAY_MS   0
 
 // <o SL_CLI_INSTANCE_TASK_LOOP_DELAY_MS> CLI task loop delay
 // <i> Default: 50
 // <i> Specifies the delay in milliseconds after the cli task has polled the input.
-  #define SL_CLI_INSTANCE_TASK_LOOP_DELAY_MS    (50)
+  #define SL_CLI_INSTANCE_TASK_LOOP_DELAY_MS    50
 
 // <o SL_CLI_INSTANCE_IOSTREAM_HANDLE> The iostream handle used by the cli instance
 // <i> Default: sl_iostream_get_default()

@@ -77,6 +77,7 @@ struct sl_sleeptimer_timer_handle {
   sl_sleeptimer_timer_callback_t callback; ///< Function to call when timer expires.
   uint32_t timeout_periodic;               ///< Periodic timeout.
   uint32_t delta;                          ///< Delay relative to previous element in list.
+  uint32_t timeout_expected_tc;            ///< Expected tick count of the next timeout (only used for periodic timer).
 };
 
 /// @brief Month enum.
@@ -758,10 +759,14 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_restart_periodic_timer_ms(sl_sleeptime
 /* *INDENT-OFF* */
 /* THE REST OF THE FILE IS DOCUMENTATION ONLY! */
 /// @addtogroup sleeptimer Sleep Timer
-/// @brief Sleep Timer
 /// @{
 ///
 ///   @details
+///   Sleep Timer can be used for creating timers which are tightly integrated with power management.
+///   The Power Manager requires precision timing to have all clocks ready on time, so that wakeup
+///   happens a little bit earlier to prepare the system to be ready at the right time.
+///   Sleep Timer uses one Hardware Timer and creates multiple software timer instances.
+///
 ///   The sleeptimer.c and sleeptimer.h source files for the SLEEPTIMER device driver library are in the
 ///   service/sleeptimer folder.
 ///
@@ -972,34 +977,24 @@ __STATIC_INLINE sl_status_t sl_sleeptimer_restart_periodic_timer_ms(sl_sleeptime
 ///  //Code executed when the timer expire.
 ///}
 ///
-///int main(void)
+///int start_timer(void)
 ///{
 ///  sl_status_t status;
 ///  sl_sleeptimer_timer_handle_t my_timer;
 ///  uint32_t timer_timeout = 300;
 ///
-///  CMU_ClockSelectSet(cmuClock_LFE, cmuSelect_LFRCO);
-///  CMU_ClockEnable(cmuClock_RTCC, true);
-///
-///  status = sl_sleeptimer_init();
-///  if(status != SL_STATUS_OK) {
-///    printf("Sleeptimer init error.\r\n");
-///  }
+///  // We assume the sleeptimer is initialized properly
 ///
 ///  status = sl_sleeptimer_start_timer(&my_timer,
 ///                                     timer_timeout,
 ///                                     my_timer_callback,
 ///                                     (void *)NULL,
-///                                     0
+///                                     0,
 ///                                     0);
 ///  if(status != SL_STATUS_OK) {
-///    printf("Timer not started.\r\n");
+///    return -1;
 ///  }
-///
-///  while(1) {
-///  }
-///
-///  return 0;
+///  return 1;
 ///}
 ///   @endcode
 ///

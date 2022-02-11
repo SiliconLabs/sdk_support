@@ -154,10 +154,6 @@ void disableIncompatibleProtocols(RAIL_PtiProtocol_t newProtocol)
       && RAIL_ZWAVE_IsEnabled(railHandle)) {
     (void) RAIL_ZWAVE_Deinit(railHandle);
   }
-  if ((newProtocol != RAIL_PTI_PROTOCOL_CUSTOM)
-      && RAIL_MFM_IsEnabled(railHandle)) {
-    (void) RAIL_MFM_Deinit(railHandle);
-  }
   (void) RAIL_SetPtiProtocol(railHandle, newProtocol);
 }
 

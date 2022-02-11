@@ -10,8 +10,13 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_ek
+- define:
+  - name: SL_KIT_NAME
+    value: '"BG22-EK4108A"'
+  - name: SL_KIT_REV
+    value: '"A01"'
 - tag:
   - kit:opn:BG22-EK4108A
   - kit:pn:EK4108
   - kit:variant:A
-  - kit:revision:A00
+  - kit:revision:A01

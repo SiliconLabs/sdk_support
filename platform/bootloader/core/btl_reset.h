@@ -3,7 +3,7 @@
  * @brief Reset cause signalling for the Silicon Labs bootloader
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -63,7 +63,7 @@ void reset_enableResetCounter(void);
 void reset_disableResetCounter(void);
 
 /***************************************************************************//**
- * Check if the reset counter is enabled.
+ * Check whether the reset counter is enabled.
  *
  * @return True if reset counter is enabled, else false.
  ******************************************************************************/

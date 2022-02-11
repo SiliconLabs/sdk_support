@@ -3,7 +3,7 @@
  * @brief Configuration for bootloader
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -20,15 +20,8 @@
 //
 // Bootloader Version
 //
-#define BOOTLOADER_VERSION_MAIN_MAJOR             1
-#define BOOTLOADER_VERSION_MAIN_MINOR             12
-#ifndef BOOTLOADER_VERSION_MAIN_CUSTOMER
-#define BOOTLOADER_VERSION_MAIN_CUSTOMER          0
-#endif
-
-#define BOOTLOADER_VERSION_MAIN (BOOTLOADER_VERSION_MAIN_MAJOR   << 24 \
-                                 | BOOTLOADER_VERSION_MAIN_MINOR << 16 \
-                                 | BOOTLOADER_VERSION_MAIN_CUSTOMER)
+#define BOOTLOADER_VERSION_MAIN_MAJOR             2
+#define BOOTLOADER_VERSION_MAIN_MINOR             0
 
 #include "core/btl_util.h"
 
@@ -38,19 +31,38 @@ MISRAC_ENABLE
 
 //
 // Bootloader configuration
-//
-#include BTL_CONFIG_FILE
+#ifdef BTL_CONFIG_FILE
+  #include BTL_CONFIG_FILE
+#else
+#include "btl_core_cfg.h"
+#endif
+
+#ifndef BOOTLOADER_VERSION_MAIN_CUSTOMER
+#define BOOTLOADER_VERSION_MAIN_CUSTOMER          1
+#endif
+
+#define BOOTLOADER_VERSION_MAIN (BOOTLOADER_VERSION_MAIN_MAJOR   << 24 \
+                                 | BOOTLOADER_VERSION_MAIN_MINOR << 16 \
+                                 | BOOTLOADER_VERSION_MAIN_CUSTOMER)
 
 #ifdef BTL_SLOT_CONFIGURATION
   #include BTL_SLOT_CONFIGURATION
 #endif
 
-//
-// HAL Configuration
-//
-#ifndef LIBRARY_BUILD
-#include "hal-config.h"
+#ifndef BOOTLOADER_ENFORCE_SECURE_BOOT
+#define BOOTLOADER_ENFORCE_SECURE_BOOT (true)
 #endif
+
+// Address of bootloader upgrade location
+// Fixed upgrade address for Series 1 devices
+#if defined(_SILICON_LABS_32B_SERIES_1) && !defined(BTL_UPGRADE_LOCATION_BASE)
+#define BTL_UPGRADE_LOCATION_BASE  0x8000UL
+#endif // _SILICON_LABS_32B_SERIES_1
+
+#ifndef BTL_UPGRADE_LOCATION
+#define BTL_UPGRADE_LOCATION (FLASH_BASE + BTL_UPGRADE_LOCATION_BASE)
+#endif
+
 //
 // Option validation
 //

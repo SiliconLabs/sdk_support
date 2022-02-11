@@ -42,6 +42,10 @@
  * precision mode support, the precision mode is configured in the configuration
  * header `sl_device_init_lfrco_config.h`. On other devices, there is nothing
  * to configure.
+ *
+ * If using Simplicity Studio, this configuration header is also configurable
+ * through the Project Configurator, by selecting the "Device Init: LFRCO"
+ * configuration component.
  * @{
  */
 

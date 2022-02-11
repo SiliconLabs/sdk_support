@@ -39,6 +39,9 @@
 #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
 #include "sl_sleeptimer.h"
 #endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+#include "sl_slist.h"
+#endif
 #include "dmadrv.h"
 
 #ifdef __cplusplus
@@ -177,7 +180,9 @@ typedef struct SPIDRV_Init {
 typedef struct SPIDRV_HandleData {
   /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   union {
+#if defined(USART_PRESENT)
     USART_TypeDef           *usartPort;
+#endif
 #if defined(EUSART_PRESENT)
     EUSART_TypeDef          *eusartPort;
 #endif
@@ -199,9 +204,12 @@ typedef struct SPIDRV_HandleData {
   volatile bool             blockingCompleted;
   int                       em1RequestCount;
   SPIDRV_PeripheralType_t   peripheralType;
-  #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
+#if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
   sl_sleeptimer_timer_handle_t timer;
-  #endif
+#endif
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+  sl_slist_node_t           node;
+#endif
   /// @endcond
 } SPIDRV_HandleData_t;
 
@@ -608,7 +616,7 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
     spidrvCsControlAuto,        /* CS controlled by the driver      */ \
     spidrvSlaveStartImmediate   /* Slave start transfers immediately*/ \
   }
-#else /* Series 0 devices */
+#elif defined(USART_PRESENT) || defined(UART_PRESENT) /* Series 0 devices */
 
 /// Configuration data for SPI master using USART0.
 #define SPIDRV_MASTER_USART0                                           \
@@ -782,13 +790,13 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
 #define SPIDRV_MASTER_EUSART0                                        \
   {                                                                  \
     EUSART0,                  /* EUSART port                      */ \
-    gpioPortC,                /* EUSART Tx port location number   */ \
-    gpioPortC,                /* EUSART Rx port location number   */ \
-    gpioPortC,                /* EUSART Clk port location number  */ \
-    gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
+    gpioPortA,                /* EUSART Tx port location number   */ \
+    gpioPortA,                /* EUSART Rx port location number   */ \
+    gpioPortA,                /* EUSART Clk port location number  */ \
+    gpioPortA,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    6,                        /* EUSART Rx port location number   */ \
+    7,                        /* EUSART Clk pin location number   */ \
     5,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
@@ -803,13 +811,13 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
 #define SPIDRV_SLAVE_EUSART0                                         \
   {                                                                  \
     EUSART0,                  /* EUSART port                      */ \
-    gpioPortC,                /* EUSART Tx port location number   */ \
-    gpioPortC,                /* EUSART Rx port location number   */ \
-    gpioPortC,                /* EUSART Clk port location number  */ \
-    gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
+    gpioPortA,                /* EUSART Tx port location number   */ \
+    gpioPortA,                /* EUSART Rx port location number   */ \
+    gpioPortA,                /* EUSART Clk port location number  */ \
+    gpioPortA,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    6,                        /* EUSART Rx port location number   */ \
+    7,                        /* EUSART Clk pin location number   */ \
     5,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
@@ -830,10 +838,10 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
     gpioPortC,                /* EUSART Rx port location number   */ \
     gpioPortC,                /* EUSART Clk port location number  */ \
     gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
-    5,                        /* EUSART Cs pin location number    */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
     0,                        /* Dummy tx value for rx only funcs */ \
@@ -851,10 +859,10 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
     gpioPortC,                /* EUSART Rx port location number   */ \
     gpioPortC,                /* EUSART Clk port location number  */ \
     gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
-    5,                        /* EUSART Cs pin location number    */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
     0,                        /* Dummy tx value for rx only funcs */ \
@@ -874,10 +882,10 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
     gpioPortC,                /* EUSART Rx port location number   */ \
     gpioPortC,                /* EUSART Clk port location number  */ \
     gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
-    5,                        /* EUSART Cs pin location number    */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
     0,                        /* Dummy tx value for rx only funcs */ \
@@ -895,10 +903,98 @@ typedef SPIDRV_HandleData_t * SPIDRV_Handle_t;
     gpioPortC,                /* EUSART Rx port location number   */ \
     gpioPortC,                /* EUSART Clk port location number  */ \
     gpioPortC,                /* EUSART Cs port location number   */ \
-    2,                        /* EUSART Tx port location number   */ \
-    3,                        /* EUSART Rx port location number   */ \
-    4,                        /* EUSART Clk pin location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#endif
+
+#if defined(EUSART3)
+#define SPIDRV_MASTER_EUSART3                                        \
+  {                                                                  \
+    EUSART3,                  /* EUSART port                      */ \
+    gpioPortA,                /* EUSART Tx port location number   */ \
+    gpioPortA,                /* EUSART Rx port location number   */ \
+    gpioPortA,                /* EUSART Clk port location number  */ \
+    gpioPortA,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    6,                        /* EUSART Rx port location number   */ \
+    7,                        /* EUSART Clk pin location number   */ \
     5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART3                                         \
+  {                                                                  \
+    EUSART3,                  /* EUSART port                      */ \
+    gpioPortA,                /* EUSART Tx port location number   */ \
+    gpioPortA,                /* EUSART Rx port location number   */ \
+    gpioPortA,                /* EUSART Clk port location number  */ \
+    gpioPortA,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    6,                        /* EUSART Rx port location number   */ \
+    7,                        /* EUSART Clk pin location number   */ \
+    5,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvSlave,              /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+#endif
+
+#if defined(EUSART4)
+#define SPIDRV_MASTER_EUSART4                                        \
+  {                                                                  \
+    EUSART4,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
+    1000000,                  /* Bitrate                          */ \
+    8,                        /* Frame length                     */ \
+    0,                        /* Dummy tx value for rx only funcs */ \
+    spidrvMaster,             /* SPI mode                         */ \
+    spidrvBitOrderMsbFirst,   /* Bit order on bus                 */ \
+    spidrvClockMode0,         /* SPI clock/phase mode             */ \
+    spidrvCsControlAuto,      /* CS controlled by the driver      */ \
+    spidrvSlaveStartImmediate /* Slave start transfers immediately*/ \
+  }
+
+#define SPIDRV_SLAVE_EUSART4                                         \
+  {                                                                  \
+    EUSART4,                  /* EUSART port                      */ \
+    gpioPortC,                /* EUSART Tx port location number   */ \
+    gpioPortC,                /* EUSART Rx port location number   */ \
+    gpioPortC,                /* EUSART Clk port location number  */ \
+    gpioPortC,                /* EUSART Cs port location number   */ \
+    0,                        /* EUSART Tx port location number   */ \
+    1,                        /* EUSART Rx port location number   */ \
+    2,                        /* EUSART Clk pin location number   */ \
+    3,                        /* EUSART Cs pin location number    */ \
     1000000,                  /* Bitrate                          */ \
     8,                        /* Frame length                     */ \
     0,                        /* Dummy tx value for rx only funcs */ \

@@ -100,7 +100,7 @@ sl_status_t sl_debug_swo_disable_itm(uint32_t channel)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_debug_swo_write(uint32_t channel, uint8_t c)
+sl_status_t sl_debug_swo_write_u8(uint32_t channel, uint8_t byte)
 {
   if (ITM->TCR & ITM_TCR_ITMENA_Msk) {
     do {
@@ -112,7 +112,47 @@ sl_status_t sl_debug_swo_write(uint32_t channel, uint8_t c)
       ITM->TER |= (1UL << channel);
     } while (ITM->PORT[channel].u32 == 0);
 
-    ITM->PORT[channel].u8 = c;
+    ITM->PORT[channel].u8 = byte;
+
+    return SL_STATUS_OK;
+  }
+
+  return SL_STATUS_NOT_INITIALIZED;
+}
+
+sl_status_t sl_debug_swo_write_u16(uint32_t channel, uint16_t half_word)
+{
+  if (ITM->TCR & ITM_TCR_ITMENA_Msk) {
+    do {
+      // Some versions of JLink (erroneously) disable SWO when debug connections
+      // are closed. Re-enabling trace works around this.
+      CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+      // Ensure ITM channel is enabled
+      ITM->TER |= (1UL << channel);
+    } while (ITM->PORT[channel].u32 == 0);
+
+    ITM->PORT[channel].u16 = half_word;
+
+    return SL_STATUS_OK;
+  }
+
+  return SL_STATUS_NOT_INITIALIZED;
+}
+
+sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word)
+{
+  if (ITM->TCR & ITM_TCR_ITMENA_Msk) {
+    do {
+      // Some versions of JLink (erroneously) disable SWO when debug connections
+      // are closed. Re-enabling trace works around this.
+      CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
+
+      // Ensure ITM channel is enabled
+      ITM->TER |= (1UL << channel);
+    } while (ITM->PORT[channel].u32 == 0);
+
+    ITM->PORT[channel].u32 = word;
 
     return SL_STATUS_OK;
   }
@@ -139,10 +179,24 @@ sl_status_t sl_debug_swo_disable_itm(uint32_t channel)
   return SL_STATUS_NOT_SUPPORTED;
 }
 
-sl_status_t sl_debug_swo_write(uint32_t channel, uint8_t c)
+sl_status_t sl_debug_swo_write_u8(uint32_t channel, uint8_t byte)
 {
   (void) channel;
-  (void) c;
+  (void) byte;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+sl_status_t sl_debug_swo_write_u16(uint32_t channel, uint16_t half_word)
+{
+  (void) channel;
+  (void) half_word;
+  return SL_STATUS_NOT_SUPPORTED;
+}
+
+sl_status_t sl_debug_swo_write_u32(uint32_t channel, uint32_t word)
+{
+  (void) channel;
+  (void) word;
   return SL_STATUS_NOT_SUPPORTED;
 }
 

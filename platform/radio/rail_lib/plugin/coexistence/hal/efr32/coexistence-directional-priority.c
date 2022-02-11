@@ -41,7 +41,7 @@
 #include PLATFORM_HEADER
 #endif //PLATFORM_HEADER
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
-#define SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO SL_RAIL_UTIL_COEX_PWM_REQ_INTNO
+
 #ifdef _SILICON_LABS_32B_SERIES_1
 STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT == SL_RAIL_UTIL_COEX_PWM_REQ_PORT, "SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT must match SL_RAIL_UTIL_COEX_PWM_REQ_PORT");
 STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN == SL_RAIL_UTIL_COEX_PWM_REQ_PIN, "SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN must match SL_RAIL_UTIL_COEX_PWM_REQ_PIN");
@@ -50,7 +50,7 @@ STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN == SL_RAIL_UTIL_COEX_PWM_REQ_PI
 #define SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN (SL_RAIL_UTIL_COEX_PWM_REQ_PIN)
 #endif //_SILICON_LABS_32B_SERIES_1
 #else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
-#define SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO SL_RAIL_UTIL_COEX_REQ_INTNO
+
 #ifdef _SILICON_LABS_32B_SERIES_1
 STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT == SL_RAIL_UTIL_COEX_REQ_PORT, "SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT must match SL_RAIL_UTIL_COEX_REQ_PORT");
 STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN == SL_RAIL_UTIL_COEX_REQ_PIN, "SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN must match SL_RAIL_UTIL_COEX_REQ_PIN");
@@ -159,29 +159,21 @@ STATIC_ASSERT(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN == SL_RAIL_UTIL_COEX_REQ_PIN, "
 #define SL_RAIL_UTIL_COEX_DP_TIMER SL_RAIL_UTIL_COEX_DP_TIMER_PERIPHERAL
 #endif //HAL_CONFIG
 
-#define PRS_GPIO_SIGNAL(pin) ((pin) & 7U)
-
-#ifdef _SILICON_LABS_32B_SERIES_1
-#define PRS_GPIO_SOURCE(pin)                  \
-  (((pin) > 7U) ? PRS_CH_CTRL_SOURCESEL_GPIOH \
-   : PRS_CH_CTRL_SOURCESEL_GPIOL)
-#define PRS_CHANNEL_SOURCE(ch)              \
-  (((ch) > 7U) ? PRS_CH_CTRL_SOURCESEL_PRSH \
-   : PRS_CH_CTRL_SOURCESEL_PRSL)
-#else //!_SILICON_LABS_32B_SERIES_1
-#define PRS_GPIO_SOURCE(pin) (PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO)
-#endif //_SILICON_LABS_32B_SERIES_1
-
-#define PRS_CHANNEL_SIGNAL(ch) ((ch) & 7U)
-
 static uint8_t directionalPriorityPulseWidthUs;
 static bool directionalPriorityInitialized = false;
 
 typedef struct PRS_ChannelConfig {
-  uint32_t source;
-  uint32_t signal;
+  union {
+    uint32_t source;
+    uint32_t *sourcePtr;
+  };
+  union {
+    uint32_t signal;
+    uint32_t *signalPtr;
+  };
   uint32_t ctrl;
   uint32_t channel;
+  bool needToDereference;
 } PRS_ChannelConfig_t;
 
 #define TIMER_PRESC_DIV GET_TIMER_REG(TIMER_PRESC_DIV_PREFIX, TIMER_DIVISOR)
@@ -258,13 +250,38 @@ static bool configDpTimer(uint8_t pulseWidthUs)
 __STATIC_INLINE void configPrsChain(PRS_ChannelConfig_t *prsConfig,
                                     unsigned int channelCount)
 {
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
+  // enable ptaPriCfg interrupt if not already enabled
+  if (sli_coex_ptaPriCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, false);
+  }
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  // enable ptaPwmReqCfg interrupt if not already enabled
+  if (sli_coex_ptaPwmReqCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, false);
+  }
+#else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  // enable ptaReqCfg interrupt if not already enabled
+  if (sli_coex_ptaReqCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, false);
+  }
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+
   for (unsigned int ch = 0; ch < channelCount; ++ch) {
 #ifdef _SILICON_LABS_32B_SERIES_1
     PRS->CH[prsConfig[ch].channel].CTRL = 0U;
 #endif //_SILICON_LABS_32B_SERIES_1
-    PRS_SourceAsyncSignalSet(prsConfig[ch].channel,
-                             prsConfig[ch].source,
-                             prsConfig[ch].signal);
+    if (prsConfig[ch].needToDereference) {
+      PRS_SourceAsyncSignalSet(prsConfig[ch].channel,
+                               *(prsConfig[ch].sourcePtr),
+                               *(prsConfig[ch].signalPtr));
+    } else {
+      PRS_SourceAsyncSignalSet(prsConfig[ch].channel,
+                               prsConfig[ch].source,
+                               prsConfig[ch].signal);
+    }
 #ifdef _SILICON_LABS_32B_SERIES_1
     PRS->CH[prsConfig[ch].channel].CTRL |= prsConfig[ch].ctrl;
 #else //!_SILICON_LABS_32B_SERIES_1
@@ -279,54 +296,85 @@ __STATIC_INLINE void configPrsChain(PRS_ChannelConfig_t *prsConfig,
                                                     sizeof(prsChain) / sizeof(prsChain[0])))
 
 PRS_ChannelConfig_t prsChainOff[] = {
-#ifdef SL_RAIL_UTIL_COEX_PRI_INTNO
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_PRI_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_PRI_INTNO),
+    .sourcePtr = &(sli_coex_ptaPriCfg.source),
+    .signalPtr = &(sli_coex_ptaPriCfg.signal),
 #ifndef _SILICON_LABS_32B_SERIES_1
     .ctrl = prsLogic_A,
 #endif
-    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = true
   }
-#elif defined(_SILICON_LABS_32B_SERIES_1) //!defined(SL_RAIL_UTIL_COEX_PRI_INTNO)
+#elif defined(_SILICON_LABS_32B_SERIES_1) //!defined(SL_RAIL_UTIL_COEX_PRI_PORT)
   {
     .source = PRS_CHANNEL_SOURCE(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .signal = PRS_CHANNEL_SIGNAL(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .ctrl = PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = false
   },
   {
     .source = PRS_CHANNEL_SOURCE(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .signal = PRS_CHANNEL_SIGNAL(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .ctrl = PRS_CH_CTRL_ORPREV | PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = false
   },
   {
     .source = PRS_CHANNEL_SOURCE(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .signal = PRS_CHANNEL_SIGNAL(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .ctrl = PRS_CH_CTRL_ORPREV | PRS_CH_CTRL_INV,
-    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = false
   },
-#else //!(defined(_SILICON_LABS_32B_SERIES_1) || defined(SL_RAIL_UTIL_COEX_PRI_INTNO))
+#else //!(defined(_SILICON_LABS_32B_SERIES_1) || defined(SL_RAIL_UTIL_COEX_PRI_PORT))
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
+    .sourcePtr = &(sli_coex_ptaPwmReqCfg.source),
+    .signalPtr = &(sli_coex_ptaPwmReqCfg.signal),
     .ctrl = prsLogic_A,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = true
   },
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
+    .sourcePtr = &(sli_coex_ptaPwmReqCfg.source),
+    .signalPtr = &(sli_coex_ptaPwmReqCfg.signal),
     .ctrl = prsLogic_A,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = true
   },
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
+    .sourcePtr = &(sli_coex_ptaPwmReqCfg.source),
+    .signalPtr = &(sli_coex_ptaPwmReqCfg.signal),
     .ctrl = prsLogic_A_AND_NOT_B,
-    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = true
   }
-#endif //SL_RAIL_UTIL_COEX_PRI_INTNO
+#else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  {
+    .sourcePtr = &(sli_coex_ptaReqCfg.source),
+    .signalPtr = &(sli_coex_ptaReqCfg.signal),
+    .ctrl = prsLogic_A,
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = true
+  },
+  {
+    .sourcePtr = &(sli_coex_ptaReqCfg.source),
+    .signalPtr = &(sli_coex_ptaReqCfg.signal),
+    .ctrl = prsLogic_A,
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = true
+  },
+  {
+    .sourcePtr = &(sli_coex_ptaReqCfg.source),
+    .signalPtr = &(sli_coex_ptaReqCfg.signal),
+    .ctrl = prsLogic_A_AND_NOT_B,
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = true
+  }
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
 };
 
 #ifdef PRS_RACL_PAEN
@@ -335,86 +383,119 @@ PRS_ChannelConfig_t prsChainOff[] = {
 
 #ifndef _SILICON_LABS_32B_SERIES_1
 PRS_ChannelConfig_t prsChainOn[] = {
-#ifdef SL_RAIL_UTIL_COEX_PRI_INTNO
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_PRI_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_PRI_INTNO),
+    .sourcePtr = &(sli_coex_ptaPriCfg.source),
+    .signalPtr = &(sli_coex_ptaPriCfg.signal),
     .ctrl = prsLogic_A,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 3)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 3),
+    .needToDereference = true
   },
   {
     .signal = PRS_CH_CTRL_SIGSEL_TIMERCC0_DP,
     .ctrl = prsLogic_NOT_A_AND_B,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = false
   },
   {
     .signal = PRS_RAC_PAEN,
     .ctrl = prsLogic_A_NOR_B,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = false
   },
-#else //!SL_RAIL_UTIL_COEX_PRI_INTNO
+#else //!SL_RAIL_UTIL_COEX_PRI_PORT
   {
     .signal = PRS_CH_CTRL_SIGSEL_TIMERCC0_DP,
     .ctrl = prsLogic_NOT_A,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = false
   },
   {
     .signal = PRS_RAC_PAEN,
     .ctrl = prsLogic_NOT_A,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = false
   },
-#endif //SL_RAIL_UTIL_COEX_PRI_INTNO
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
+    .sourcePtr = &(sli_coex_ptaPwmReqCfg.source),
+    .signalPtr = &(sli_coex_ptaPwmReqCfg.signal),
     .ctrl = prsLogic_A_AND_NOT_B,
-    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = true
   }
+#else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  {
+    .sourcePtr = &(sli_coex_ptaReqCfg.source),
+    .signalPtr = &(sli_coex_ptaReqCfg.signal),
+    .ctrl = prsLogic_A_AND_NOT_B,
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = true
+  }
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 };
 #else
 PRS_ChannelConfig_t prsChainOn[] = {
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO),
+    .sourcePtr = &(sli_coex_ptaPwmReqCfg.source),
+    .signalPtr = &(sli_coex_ptaPwmReqCfg.signal),
     .ctrl = PRS_CH_CTRL_INV,
-    .channel = SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL,
+    .needToDereference = true
   },
-#ifdef SL_RAIL_UTIL_COEX_PRI_INTNO
+#else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   {
-    .source = PRS_GPIO_SOURCE(SL_RAIL_UTIL_COEX_PRI_INTNO),
-    .signal = PRS_GPIO_SIGNAL(SL_RAIL_UTIL_COEX_PRI_INTNO),
+    .sourcePtr = &(sli_coex_ptaReqCfg.source),
+    .signalPtr = &(sli_coex_ptaReqCfg.signal),
     .ctrl = PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 3)
+    .channel = SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL,
+    .needToDereference = true
+  },
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
+  {
+    .sourcePtr = &(sli_coex_ptaPriCfg.source),
+    .signalPtr = &(sli_coex_ptaPriCfg.signal),
+    .ctrl = PRS_CH_CTRL_INV,
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 3),
+    .needToDereference = true
   },
   {
     .source = PRS_CH_CTRL_SOURCESEL_TIMER_DP,
     .signal = PRS_CH_CTRL_SIGSEL_TIMERCC0_DP,
     .ctrl = PRS_CH_CTRL_ORPREV | PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = false
   },
   {
     .signal = PRS_RAC_PAEN,
     .ctrl = PRS_CH_CTRL_ORPREV | PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = false
   },
-#else //!SL_RAIL_UTIL_COEX_PRI_INTNO
+#else //!SL_RAIL_UTIL_COEX_PRI_PORT
   {
     .source = PRS_CH_CTRL_SOURCESEL_TIMER_DP,
     .signal = PRS_CH_CTRL_SIGSEL_TIMERCC0_DP,
     .ctrl = PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 2),
+    .needToDereference = false
   },
   {
     .signal = PRS_RAC_PAEN,
     .ctrl = PRS_CH_CTRL_INV,
-    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1)
+    .channel = WRAP_PRS_ASYNC(SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL - 1),
+    .needToDereference = false
   },
-#endif //SL_RAIL_UTIL_COEX_PRI_INTNO
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
   {
     .source = PRS_CHANNEL_SOURCE(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .signal = PRS_CHANNEL_SIGNAL(SL_RAIL_UTIL_COEX_DP_REQUEST_INV_CHANNEL),
     .ctrl = PRS_CH_CTRL_ORPREV | PRS_CH_CTRL_INV,
-    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL
+    .channel = SL_RAIL_UTIL_COEX_DP_OUT_CHANNEL,
+    .needToDereference = false
   }
 };
 #endif
@@ -426,20 +507,38 @@ bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs)
   CMU_ClockEnable(cmuClock_PRS, true);
 
 #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
+  if (sli_coex_ptaPriCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaPriCfg), true, false);
+  }
   // Disable priority and request interrupts
   GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_PRI_PORT,
                     SL_RAIL_UTIL_COEX_PRI_PIN,
-                    SL_RAIL_UTIL_COEX_PRI_INTNO,
+                    sli_coex_ptaPriCfg.intNo,
                     false,
                     false,
                     false);
 #endif //SL_RAIL_UTIL_COEX_PRI_PORT
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  if (sli_coex_ptaPwmReqCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaPwmReqCfg), true, false);
+  }
   GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT,
                     SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN,
-                    SL_RAIL_UTIL_COEX_DP_TIMER_CC0_INTNO,
+                    sli_coex_ptaPwmReqCfg.intNo,
                     false,
                     false,
                     false);
+#else //!SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+  if (sli_coex_ptaReqCfg.intNo == INVALID_INTERRUPT) {
+    sli_coex_enableGpioInt(&(sli_coex_ptaReqCfg), true, false);
+  }
+  GPIO_ExtIntConfig(SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PORT,
+                    SL_RAIL_UTIL_COEX_DP_TIMER_CC0_PIN,
+                    sli_coex_ptaReqCfg.intNo,
+                    false,
+                    false,
+                    false);
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   // Common PRS wrap-up (enable PRIORITY GPIO, route PRS output to GPIO)
   // enable PRIORITY output pin with initial value of 0
   GPIO_PinModeSet(SL_RAIL_UTIL_COEX_DP_OUT_PORT,

@@ -23,11 +23,7 @@
 #ifndef MBEDTLS_LIBRARY_COMMON_H
 #define MBEDTLS_LIBRARY_COMMON_H
 
-#if defined(MBEDTLS_CONFIG_FILE)
-#include MBEDTLS_CONFIG_FILE
-#else
-#include "mbedtls/config.h"
-#endif
+#include "mbedtls/build_info.h"
 
 /** Helper to define a function as static except when building invasive tests.
  *
@@ -49,5 +45,25 @@
 #else
 #define MBEDTLS_STATIC_TESTABLE static
 #endif
+
+#if defined(MBEDTLS_TEST_HOOKS)
+extern void (*mbedtls_test_hook_test_fail)( const char * test, int line, const char * file );
+#define MBEDTLS_TEST_HOOK_TEST_ASSERT( TEST ) \
+       do { \
+            if( ( ! ( TEST ) ) && ( ( *mbedtls_test_hook_test_fail ) != NULL ) ) \
+            { \
+              ( *mbedtls_test_hook_test_fail )( #TEST, __LINE__, __FILE__ ); \
+            } \
+    } while( 0 )
+#else
+#define MBEDTLS_TEST_HOOK_TEST_ASSERT( TEST )
+#endif /* defined(MBEDTLS_TEST_HOOKS) */
+
+/** Allow library to access its structs' private members.
+ *
+ * Although structs defined in header files are publicly available,
+ * their members are private and should not be accessed by the user.
+ */
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
 
 #endif /* MBEDTLS_LIBRARY_COMMON_H */

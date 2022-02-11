@@ -25,13 +25,10 @@
 // <i> Default: 115200
 #define SL_SERIAL_EUART_BAUD_RATE              115200
 
-// <o SL_SERIAL_EUART_FLOW_CONTROL> Hardware flow control
-// <eusartHwFlowControlNone=> None
-// <eusartHwFlowControlCts=> CTS
-// <eusartHwFlowControlRts=> RTS
-// <eusartHwFlowControlCtsAndRts=> CTS/RTS
-// <i> Default: eusartHwFlowControlNone
-#define SL_SERIAL_EUART_FLOW_CONTROL     eusartHwFlowControlNone
+// <e SL_SERIAL_EUART_FLOW_CONTROL> Hardware flow control
+// <i> Default: 0
+#define SL_SERIAL_EUART_FLOW_CONTROL     0
+// </e>
 
 // <o SL_DRIVER_EUART_RX_BUFFER_SIZE> Receive buffer size
 // <0-2048:1>
@@ -71,7 +68,7 @@
 // [EUSART_SL_SERIAL_EUART]$
 
 
-// <gpio> SL_VCOM_ENABLE
+// <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
 

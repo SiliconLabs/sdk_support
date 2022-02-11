@@ -42,6 +42,7 @@
 #include "app_trx.h"
 #include "rail_ble.h"
 #include "rail_ieee802154.h"
+#include "response_print.h"
 /******************************************************************************
  * Variables
  *****************************************************************************/
@@ -229,13 +230,16 @@ RAIL_RxPacketHandle_t processRxPacket(RAIL_Handle_t railHandle,
     }
 
     if (phySwitchToRx.enable) {
-      //TODO: packetTime depends on rxTimePosition;
-      //      this code assumes default position (SYNC_END).
-      uint32_t syncTime = rxPacket->rxPacket.appendedInfo.timeReceived.packetTime;
+      // Be careful when setting timeDelta, because it's the delta from
+      // whatever timestamp position is currently configured
+      uint32_t timestamp = rxPacket->rxPacket.appendedInfo.timeReceived.packetTime;
+      if (phySwitchToRx.extraDelayUs > 0) {
+        RAIL_DelayUs(phySwitchToRx.extraDelayUs);
+      }
       (void) RAIL_BLE_PhySwitchToRx(railHandle,
                                     phySwitchToRx.phy,
                                     phySwitchToRx.physicalChannel,
-                                    phySwitchToRx.timeDelta + syncTime,
+                                    phySwitchToRx.timeDelta + timestamp,
                                     phySwitchToRx.crcInit,
                                     phySwitchToRx.accessAddress,
                                     phySwitchToRx.logicalChannel,
@@ -392,6 +396,27 @@ void configRxLengthSetting(uint16_t rxLength)
  *****************************************************************************/
 void RAILCb_TxPacketSent(RAIL_Handle_t railHandle, bool isAck)
 {
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY)
+  if (modeSwitchChannel != 0xFFFFU) {
+    if (RAIL_IsValidChannel(railHandle, modeSwitchChannel)
+        == RAIL_STATUS_NO_ERROR) {
+      changeChannel(modeSwitchChannel);
+      responsePrint("setChannel_ModeSwitch", "ChannelID: %d", modeSwitchChannel);
+    }
+
+    // Restore first 2 bytes overwritten by Mode Switch PHR
+    txData[0] = txData_2B[0];
+    txData[1] = txData_2B[1];
+
+    if (txCountAfterModeSwitch != 0) {
+      txCount = txCountAfterModeSwitch;
+      pendPacketTx();
+      sendPacketIfPending();
+    }
+
+    modeSwitchChannel = 0xFFFFU;
+  }
+#endif
   LedToggle(1);
   updateGraphics();
 

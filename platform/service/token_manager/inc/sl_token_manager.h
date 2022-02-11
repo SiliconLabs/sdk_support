@@ -255,10 +255,20 @@ extern const void * const tokenDefaults[];
 /// rewritten. Manufacturing tokens are stored in dedicated regions of flash
 /// and are not designed to be rewritten.
 ///
-/// By default the Token Manager pulls in the NVM3 component for storage.  If
-/// the SimEE1 or SimEE2 component is added into the project along side the
+/// The NVM3 component is the preferred method and should be
+/// used on its own for data storage if SimEE has not been used.  Token Manager
+/// is not required to access NVM3 data.  The NVM3 system has its own APIs for
+/// interacting with NVM3.
+///
+/// The Token Manager is only used if existing systems already have SimEE.
+/// Token Manager enables SimEE data storage with the same API for accessing
+/// NVM3 or SimEE storage.
+///
+/// By default the Token Manager pulls in the NVM3 component for storage.
+/// The "Token Manager using NVM3" still requires the "Token Manager" component.
+/// If the SimEE1 or SimEE2 component is added into the project alongside the
 /// Token Manager, then SimEE1 or SimEE2 will be used for storage.  If the
-/// Sim EEPROM 2 to NVM3 Upgrade component is added to the project along side
+/// Sim EEPROM 2 to NVM3 Upgrade component is added to the project alongside
 /// the Token Manager, then the upgrade will run at startup to transition
 /// as much stored data as possible into NVM3 format.  When using the upgrade
 /// component don't include NVM3 or SimEE2 components.  Once an upgrade

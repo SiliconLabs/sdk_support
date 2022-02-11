@@ -1,7 +1,7 @@
 id: micriumos_fs_storage_nor
 package: micrium-fsxx
 description: Micrium OS File System NOR Storage
-category: Services|File System|Storage
+category: Services|Micrium|File System
 quality: production
 component_root_path: platform/micrium_os/fs
 source:
@@ -27,4 +27,4 @@ provides:
 requires:
   - name: fs
 validation_helper:
-  - path: fs_nor_driver_validation.py
+  - path: fs_nor_driver_validation.lua

@@ -276,13 +276,9 @@ psa_status_t sli_se_transparent_aead_set_nonce(sli_se_transparent_aead_operation
                                                const uint8_t *nonce,
                                                size_t nonce_length);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_transparent_aead_set_lengths(sli_se_transparent_aead_operation_t *operation,
                                                  size_t ad_length,
                                                  size_t plaintext_length);
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_transparent_aead_update_ad(sli_se_transparent_aead_operation_t *operation,
                                                const uint8_t *input,
@@ -303,14 +299,14 @@ psa_status_t sli_se_transparent_aead_finish(sli_se_transparent_aead_operation_t 
                                             size_t tag_size,
                                             size_t *tag_length);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_transparent_aead_verify(sli_se_transparent_aead_operation_t *operation,
                                             uint8_t *plaintext,
                                             size_t plaintext_size,
                                             size_t *plaintext_length,
                                             const uint8_t *tag,
                                             size_t tag_length);
+
+#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_transparent_aead_abort(sli_se_transparent_aead_operation_t *operation);
 

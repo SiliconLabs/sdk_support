@@ -45,7 +45,7 @@
 // <uartdrvFlowControlHw=> nRTS/nCTS hardware handshake
 // <uartdrvFlowControlHwUart=> UART peripheral controls nRTS/nCTS
 // <i> Default: uartdrvFlowControlHw
-#define SL_UARTDRV_LEUART_VCOM_FLOW_CONTROL_TYPE uartdrvFlowControlNone
+#define SL_UARTDRV_LEUART_VCOM_FLOW_CONTROL_TYPE uartdrvFlowControlSw
 
 // <o SL_UARTDRV_LEUART_VCOM_RX_BUFFER_SIZE> Size of the receive operation queue
 // <i> Default: 6

@@ -36,6 +36,20 @@ sl_status_t sl_btmesh_node_init() {
 
 }
 
+sl_status_t sl_btmesh_node_set_exportable_keys() {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_node_set_exportable_keys_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_node_set_exportable_keys.result;
+
+}
+
 sl_status_t sl_btmesh_node_start_unprov_beaconing(uint8_t bearer) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
@@ -795,16 +809,18 @@ sl_status_t sl_btmesh_prov_create_appkey(uint16_t netkey_index,
 
 }
 
-sl_status_t sl_btmesh_prov_send_oob_pkey_response(size_t pkey_len,
+sl_status_t sl_btmesh_prov_send_oob_pkey_response(uuid_128 uuid,
+                                                  size_t pkey_len,
                                                   const uint8_t* pkey) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
+    cmd->data.cmd_prov_send_oob_pkey_response.uuid=uuid;
     cmd->data.cmd_prov_send_oob_pkey_response.pkey.len=pkey_len;
     memcpy(cmd->data.cmd_prov_send_oob_pkey_response.pkey.data,pkey,pkey_len);
 
-    cmd->header=sl_btmesh_cmd_prov_send_oob_pkey_response_id+(((1+pkey_len)&0xff)<<8)+(((1+pkey_len)&0x700)>>8);
+    cmd->header=sl_btmesh_cmd_prov_send_oob_pkey_response_id+(((17+pkey_len)&0xff)<<8)+(((17+pkey_len)&0x700)>>8);
 
 
     sl_btmesh_host_handle_command();
@@ -812,16 +828,18 @@ sl_status_t sl_btmesh_prov_send_oob_pkey_response(size_t pkey_len,
 
 }
 
-sl_status_t sl_btmesh_prov_send_oob_auth_response(size_t data_len,
+sl_status_t sl_btmesh_prov_send_oob_auth_response(uuid_128 uuid,
+                                                  size_t data_len,
                                                   const uint8_t* data) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
     struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
 
+    cmd->data.cmd_prov_send_oob_auth_response.uuid=uuid;
     cmd->data.cmd_prov_send_oob_auth_response.data.len=data_len;
     memcpy(cmd->data.cmd_prov_send_oob_auth_response.data.data,data,data_len);
 
-    cmd->header=sl_btmesh_cmd_prov_send_oob_auth_response_id+(((1+data_len)&0xff)<<8)+(((1+data_len)&0x700)>>8);
+    cmd->header=sl_btmesh_cmd_prov_send_oob_auth_response_id+(((17+data_len)&0xff)<<8)+(((17+data_len)&0x700)>>8);
 
 
     sl_btmesh_host_handle_command();
@@ -1432,6 +1450,76 @@ sl_status_t sl_btmesh_vendor_model_deinit(uint16_t elem_index,
 
     sl_btmesh_host_handle_command();
     return rsp->data.rsp_vendor_model_deinit.result;
+
+}
+
+sl_status_t sl_btmesh_vendor_model_send_tracked(uint16_t destination_address,
+                                                int8_t va_index,
+                                                uint16_t appkey_index,
+                                                uint16_t elem_index,
+                                                uint16_t vendor_id,
+                                                uint16_t model_id,
+                                                uint8_t nonrelayed,
+                                                uint8_t segment,
+                                                uint8_t opcode,
+                                                uint8_t final,
+                                                size_t payload_len,
+                                                const uint8_t* payload,
+                                                uint16_t *handle) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_vendor_model_send_tracked.destination_address=destination_address;
+    cmd->data.cmd_vendor_model_send_tracked.va_index=va_index;
+    cmd->data.cmd_vendor_model_send_tracked.appkey_index=appkey_index;
+    cmd->data.cmd_vendor_model_send_tracked.elem_index=elem_index;
+    cmd->data.cmd_vendor_model_send_tracked.vendor_id=vendor_id;
+    cmd->data.cmd_vendor_model_send_tracked.model_id=model_id;
+    cmd->data.cmd_vendor_model_send_tracked.nonrelayed=nonrelayed;
+    cmd->data.cmd_vendor_model_send_tracked.segment=segment;
+    cmd->data.cmd_vendor_model_send_tracked.opcode=opcode;
+    cmd->data.cmd_vendor_model_send_tracked.final=final;
+    cmd->data.cmd_vendor_model_send_tracked.payload.len=payload_len;
+    memcpy(cmd->data.cmd_vendor_model_send_tracked.payload.data,payload,payload_len);
+
+    cmd->header=sl_btmesh_cmd_vendor_model_send_tracked_id+(((16+payload_len)&0xff)<<8)+(((16+payload_len)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *handle = rsp->data.rsp_vendor_model_send_tracked.handle;
+    return rsp->data.rsp_vendor_model_send_tracked.result;
+
+}
+
+sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
+                                                           uint16_t vendor_id,
+                                                           uint16_t model_id,
+                                                           uint8_t segment,
+                                                           uint8_t opcode,
+                                                           uint8_t final,
+                                                           size_t payload_len,
+                                                           const uint8_t* payload,
+                                                           uint16_t *handle) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_vendor_model_set_publication_tracked.elem_index=elem_index;
+    cmd->data.cmd_vendor_model_set_publication_tracked.vendor_id=vendor_id;
+    cmd->data.cmd_vendor_model_set_publication_tracked.model_id=model_id;
+    cmd->data.cmd_vendor_model_set_publication_tracked.segment=segment;
+    cmd->data.cmd_vendor_model_set_publication_tracked.opcode=opcode;
+    cmd->data.cmd_vendor_model_set_publication_tracked.final=final;
+    cmd->data.cmd_vendor_model_set_publication_tracked.payload.len=payload_len;
+    memcpy(cmd->data.cmd_vendor_model_set_publication_tracked.payload.data,payload,payload_len);
+
+    cmd->header=sl_btmesh_cmd_vendor_model_set_publication_tracked_id+(((10+payload_len)&0xff)<<8)+(((10+payload_len)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *handle = rsp->data.rsp_vendor_model_set_publication_tracked.handle;
+    return rsp->data.rsp_vendor_model_set_publication_tracked.result;
 
 }
 
@@ -2735,7 +2823,7 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
 
 }
 
-sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
                                             uint16_t netkey_index,
                                             size_t value_len,
                                             const uint8_t* value) {
@@ -2756,7 +2844,7 @@ sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
 
 }
 
-sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
                                             uint16_t netkey_index,
                                             size_t max_data_size,
                                             size_t *data_len,
@@ -3057,6 +3145,193 @@ sl_status_t sl_btmesh_test_set_replay_protection_list_diagnostics(uint8_t enable
 
     sl_btmesh_host_handle_command();
     return rsp->data.rsp_test_set_replay_protection_list_diagnostics.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_model_option(uint16_t elem_index,
+                                            uint16_t vendor_id,
+                                            uint16_t model_id,
+                                            uint8_t option,
+                                            uint32_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_get_model_option.elem_index=elem_index;
+    cmd->data.cmd_test_get_model_option.vendor_id=vendor_id;
+    cmd->data.cmd_test_get_model_option.model_id=model_id;
+    cmd->data.cmd_test_get_model_option.option=option;
+
+    cmd->header=sl_btmesh_cmd_test_get_model_option_id+(((7)&0xff)<<8)+(((7)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_get_model_option.value;
+    return rsp->data.rsp_test_get_model_option.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_default_ttl(uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_test_get_default_ttl_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_get_default_ttl.value;
+    return rsp->data.rsp_test_get_default_ttl.result;
+
+}
+
+sl_status_t sl_btmesh_test_set_default_ttl(uint8_t set_value, uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_set_default_ttl.set_value=set_value;
+
+    cmd->header=sl_btmesh_cmd_test_set_default_ttl_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_set_default_ttl.value;
+    return rsp->data.rsp_test_set_default_ttl.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_gatt_proxy(uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_test_get_gatt_proxy_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_get_gatt_proxy.value;
+    return rsp->data.rsp_test_get_gatt_proxy.result;
+
+}
+
+sl_status_t sl_btmesh_test_set_gatt_proxy(uint8_t set_value, uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_set_gatt_proxy.set_value=set_value;
+
+    cmd->header=sl_btmesh_cmd_test_set_gatt_proxy_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_set_gatt_proxy.value;
+    return rsp->data.rsp_test_set_gatt_proxy.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_identity(uint16_t get_netkey_index,
+                                        uint16_t *netkey_index,
+                                        uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_get_identity.get_netkey_index=get_netkey_index;
+
+    cmd->header=sl_btmesh_cmd_test_get_identity_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *netkey_index = rsp->data.rsp_test_get_identity.netkey_index;
+    *value = rsp->data.rsp_test_get_identity.value;
+    return rsp->data.rsp_test_get_identity.result;
+
+}
+
+sl_status_t sl_btmesh_test_set_identity(uint16_t set_netkey_index,
+                                        uint8_t set_value,
+                                        uint16_t *netkey_index,
+                                        uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_set_identity.set_netkey_index=set_netkey_index;
+    cmd->data.cmd_test_set_identity.set_value=set_value;
+
+    cmd->header=sl_btmesh_cmd_test_set_identity_id+(((3)&0xff)<<8)+(((3)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *netkey_index = rsp->data.rsp_test_set_identity.netkey_index;
+    *value = rsp->data.rsp_test_set_identity.value;
+    return rsp->data.rsp_test_set_identity.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_friend(uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_test_get_friend_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_get_friend.value;
+    return rsp->data.rsp_test_get_friend.result;
+
+}
+
+sl_status_t sl_btmesh_test_set_friend(uint8_t set_value, uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_set_friend.set_value=set_value;
+
+    cmd->header=sl_btmesh_cmd_test_set_friend_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_set_friend.value;
+    return rsp->data.rsp_test_set_friend.result;
+
+}
+
+sl_status_t sl_btmesh_test_get_beacon(uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+
+    cmd->header=sl_btmesh_cmd_test_get_beacon_id+(((0)&0xff)<<8)+(((0)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_get_beacon.value;
+    return rsp->data.rsp_test_get_beacon.result;
+
+}
+
+sl_status_t sl_btmesh_test_set_beacon(uint8_t set_value, uint8_t *value) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_test_set_beacon.set_value=set_value;
+
+    cmd->header=sl_btmesh_cmd_test_set_beacon_id+(((1)&0xff)<<8)+(((1)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    *value = rsp->data.rsp_test_set_beacon.value;
+    return rsp->data.rsp_test_set_beacon.result;
 
 }
 
@@ -5741,7 +6016,7 @@ sl_status_t sl_btmesh_time_server_get_datetime(uint16_t elem_index,
                                                uint8_t *min,
                                                uint8_t *sec,
                                                uint16_t *ms,
-                                               uint16_t *timezone,
+                                               int16_t *timezone,
                                                uint8_t *day_of_week) {
     struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
 
@@ -5763,6 +6038,40 @@ sl_status_t sl_btmesh_time_server_get_datetime(uint16_t elem_index,
     *timezone = rsp->data.rsp_time_server_get_datetime.timezone;
     *day_of_week = rsp->data.rsp_time_server_get_datetime.day_of_week;
     return rsp->data.rsp_time_server_get_datetime.result;
+
+}
+
+sl_status_t sl_btmesh_time_server_publish(uint16_t elem_index) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_time_server_publish.elem_index=elem_index;
+
+    cmd->header=sl_btmesh_cmd_time_server_publish_id+(((2)&0xff)<<8)+(((2)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_time_server_publish.result;
+
+}
+
+sl_status_t sl_btmesh_time_server_status(uint16_t destination_address,
+                                         uint16_t elem_index,
+                                         uint16_t appkey_index) {
+    struct sl_btmesh_packet *cmd = (struct sl_btmesh_packet *)sl_btmesh_cmd_msg;
+
+    struct sl_btmesh_packet *rsp = (struct sl_btmesh_packet *)sl_btmesh_rsp_msg;
+
+    cmd->data.cmd_time_server_status.destination_address=destination_address;
+    cmd->data.cmd_time_server_status.elem_index=elem_index;
+    cmd->data.cmd_time_server_status.appkey_index=appkey_index;
+
+    cmd->header=sl_btmesh_cmd_time_server_status_id+(((6)&0xff)<<8)+(((6)&0x700)>>8);
+
+
+    sl_btmesh_host_handle_command();
+    return rsp->data.rsp_time_server_status.result;
 
 }
 

@@ -63,77 +63,73 @@ typedef struct {
   uint32_t       RESERVED6[7U];                 /**< Reserved for future use                            */
   uint32_t       RESERVED7[1U];                 /**< Reserved for future use                            */
   uint32_t       RESERVED8[7U];                 /**< Reserved for future use                            */
-  __IOM uint32_t RPURATD0;                      /**< Root Access Type Descriptor Register               */
-  __IOM uint32_t RPURATD1;                      /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED9[986U];               /**< Reserved for future use                            */
+  uint32_t       RESERVED9[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED10[987U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IPVERSION                                          */
   __IOM uint32_t CTRL_SET;                      /**< Control                                            */
   __IOM uint32_t EM01CTRL0_SET;                 /**< EM01 Control                                       */
-  uint32_t       RESERVED10[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED11[1U];                /**< Reserved for future use                            */
   __IOM uint32_t EM23CTRL0_SET;                 /**< EM23 Control                                       */
-  uint32_t       RESERVED11[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED12[3U];                /**< Reserved for future use                            */
   __IOM uint32_t PFMXCTRL_SET;                  /**< PFMX Control Register                              */
-  uint32_t       RESERVED12[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED13[1U];                /**< Reserved for future use                            */
   __IOM uint32_t IF_SET;                        /**< Interrupt Flags                                    */
   __IOM uint32_t IEN_SET;                       /**< Interrupt Enable                                   */
   __IM uint32_t  STATUS_SET;                    /**< Status Register                                    */
   __IM uint32_t  SYNCBUSY_SET;                  /**< Syncbusy Status Register                           */
-  uint32_t       RESERVED13[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED14[2U];                /**< Reserved for future use                            */
   __IOM uint32_t LOCK_SET;                      /**< Lock Register                                      */
   __IM uint32_t  LOCKSTATUS_SET;                /**< Lock Status Register                               */
-  uint32_t       RESERVED14[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED15[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED16[7U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED17[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED18[7U];                /**< Reserved for future use                            */
-  __IOM uint32_t RPURATD0_SET;                  /**< Root Access Type Descriptor Register               */
-  __IOM uint32_t RPURATD1_SET;                  /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED19[986U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED15[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED16[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED17[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED18[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED19[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED20[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED21[987U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IPVERSION                                          */
   __IOM uint32_t CTRL_CLR;                      /**< Control                                            */
   __IOM uint32_t EM01CTRL0_CLR;                 /**< EM01 Control                                       */
-  uint32_t       RESERVED20[1U];                /**< Reserved for future use                            */
-  __IOM uint32_t EM23CTRL0_CLR;                 /**< EM23 Control                                       */
-  uint32_t       RESERVED21[3U];                /**< Reserved for future use                            */
-  __IOM uint32_t PFMXCTRL_CLR;                  /**< PFMX Control Register                              */
   uint32_t       RESERVED22[1U];                /**< Reserved for future use                            */
+  __IOM uint32_t EM23CTRL0_CLR;                 /**< EM23 Control                                       */
+  uint32_t       RESERVED23[3U];                /**< Reserved for future use                            */
+  __IOM uint32_t PFMXCTRL_CLR;                  /**< PFMX Control Register                              */
+  uint32_t       RESERVED24[1U];                /**< Reserved for future use                            */
   __IOM uint32_t IF_CLR;                        /**< Interrupt Flags                                    */
   __IOM uint32_t IEN_CLR;                       /**< Interrupt Enable                                   */
   __IM uint32_t  STATUS_CLR;                    /**< Status Register                                    */
   __IM uint32_t  SYNCBUSY_CLR;                  /**< Syncbusy Status Register                           */
-  uint32_t       RESERVED23[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED25[2U];                /**< Reserved for future use                            */
   __IOM uint32_t LOCK_CLR;                      /**< Lock Register                                      */
   __IM uint32_t  LOCKSTATUS_CLR;                /**< Lock Status Register                               */
-  uint32_t       RESERVED24[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED25[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED26[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED26[2U];                /**< Reserved for future use                            */
   uint32_t       RESERVED27[1U];                /**< Reserved for future use                            */
   uint32_t       RESERVED28[7U];                /**< Reserved for future use                            */
-  __IOM uint32_t RPURATD0_CLR;                  /**< Root Access Type Descriptor Register               */
-  __IOM uint32_t RPURATD1_CLR;                  /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED29[986U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED29[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED30[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED31[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED32[987U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IPVERSION                                          */
   __IOM uint32_t CTRL_TGL;                      /**< Control                                            */
   __IOM uint32_t EM01CTRL0_TGL;                 /**< EM01 Control                                       */
-  uint32_t       RESERVED30[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED33[1U];                /**< Reserved for future use                            */
   __IOM uint32_t EM23CTRL0_TGL;                 /**< EM23 Control                                       */
-  uint32_t       RESERVED31[3U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED34[3U];                /**< Reserved for future use                            */
   __IOM uint32_t PFMXCTRL_TGL;                  /**< PFMX Control Register                              */
-  uint32_t       RESERVED32[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED35[1U];                /**< Reserved for future use                            */
   __IOM uint32_t IF_TGL;                        /**< Interrupt Flags                                    */
   __IOM uint32_t IEN_TGL;                       /**< Interrupt Enable                                   */
   __IM uint32_t  STATUS_TGL;                    /**< Status Register                                    */
   __IM uint32_t  SYNCBUSY_TGL;                  /**< Syncbusy Status Register                           */
-  uint32_t       RESERVED33[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED36[2U];                /**< Reserved for future use                            */
   __IOM uint32_t LOCK_TGL;                      /**< Lock Register                                      */
   __IM uint32_t  LOCKSTATUS_TGL;                /**< Lock Status Register                               */
-  uint32_t       RESERVED34[2U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED35[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED36[7U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED37[1U];                /**< Reserved for future use                            */
-  uint32_t       RESERVED38[7U];                /**< Reserved for future use                            */
-  __IOM uint32_t RPURATD0_TGL;                  /**< Root Access Type Descriptor Register               */
-  __IOM uint32_t RPURATD1_TGL;                  /**< Root Access Type Descriptor Register               */
+  uint32_t       RESERVED37[2U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED38[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED39[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED40[1U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED41[7U];                /**< Reserved for future use                            */
+  uint32_t       RESERVED42[1U];                /**< Reserved for future use                            */
 } DCDC_TypeDef;
 /** @} End of group MGM24_DCDC */
 
@@ -292,11 +288,6 @@ typedef struct {
 #define _DCDC_IF_EM4ERR_MASK                        0x80UL                              /**< Bit mask for DCDC_EM4ERR                    */
 #define _DCDC_IF_EM4ERR_DEFAULT                     0x00000000UL                        /**< Mode DEFAULT for DCDC_IF                    */
 #define DCDC_IF_EM4ERR_DEFAULT                      (_DCDC_IF_EM4ERR_DEFAULT << 7)      /**< Shifted mode DEFAULT for DCDC_IF            */
-#define DCDC_IF_PPMODE                              (0x1UL << 8)                        /**< Entered Pulse Pairing mode                  */
-#define _DCDC_IF_PPMODE_SHIFT                       8                                   /**< Shift value for DCDC_PPMODE                 */
-#define _DCDC_IF_PPMODE_MASK                        0x100UL                             /**< Bit mask for DCDC_PPMODE                    */
-#define _DCDC_IF_PPMODE_DEFAULT                     0x00000000UL                        /**< Mode DEFAULT for DCDC_IF                    */
-#define DCDC_IF_PPMODE_DEFAULT                      (_DCDC_IF_PPMODE_DEFAULT << 8)      /**< Shifted mode DEFAULT for DCDC_IF            */
 #define DCDC_IF_PFMXMODE                            (0x1UL << 9)                        /**< Entered PFMX mode                           */
 #define _DCDC_IF_PFMXMODE_SHIFT                     9                                   /**< Shift value for DCDC_PFMXMODE               */
 #define _DCDC_IF_PFMXMODE_MASK                      0x200UL                             /**< Bit mask for DCDC_PFMXMODE                  */
@@ -346,11 +337,6 @@ typedef struct {
 #define _DCDC_IEN_EM4ERR_MASK                       0x80UL                              /**< Bit mask for DCDC_EM4ERR                    */
 #define _DCDC_IEN_EM4ERR_DEFAULT                    0x00000000UL                        /**< Mode DEFAULT for DCDC_IEN                   */
 #define DCDC_IEN_EM4ERR_DEFAULT                     (_DCDC_IEN_EM4ERR_DEFAULT << 7)     /**< Shifted mode DEFAULT for DCDC_IEN           */
-#define DCDC_IEN_PPMODE                             (0x1UL << 8)                        /**< Pulse Pairing Mode Interrupt Enable         */
-#define _DCDC_IEN_PPMODE_SHIFT                      8                                   /**< Shift value for DCDC_PPMODE                 */
-#define _DCDC_IEN_PPMODE_MASK                       0x100UL                             /**< Bit mask for DCDC_PPMODE                    */
-#define _DCDC_IEN_PPMODE_DEFAULT                    0x00000000UL                        /**< Mode DEFAULT for DCDC_IEN                   */
-#define DCDC_IEN_PPMODE_DEFAULT                     (_DCDC_IEN_PPMODE_DEFAULT << 8)     /**< Shifted mode DEFAULT for DCDC_IEN           */
 #define DCDC_IEN_PFMXMODE                           (0x1UL << 9)                        /**< PFMX Mode Interrupt Enable                  */
 #define _DCDC_IEN_PFMXMODE_SHIFT                    9                                   /**< Shift value for DCDC_PFMXMODE               */
 #define _DCDC_IEN_PFMXMODE_MASK                     0x200UL                             /**< Bit mask for DCDC_PFMXMODE                  */
@@ -385,11 +371,6 @@ typedef struct {
 #define _DCDC_STATUS_BYPCMPOUT_MASK                 0x10UL                                /**< Bit mask for DCDC_BYPCMPOUT                 */
 #define _DCDC_STATUS_BYPCMPOUT_DEFAULT              0x00000000UL                          /**< Mode DEFAULT for DCDC_STATUS                */
 #define DCDC_STATUS_BYPCMPOUT_DEFAULT               (_DCDC_STATUS_BYPCMPOUT_DEFAULT << 4) /**< Shifted mode DEFAULT for DCDC_STATUS        */
-#define DCDC_STATUS_PPMODE                          (0x1UL << 8)                          /**< DCDC in pulse-pairing mode                  */
-#define _DCDC_STATUS_PPMODE_SHIFT                   8                                     /**< Shift value for DCDC_PPMODE                 */
-#define _DCDC_STATUS_PPMODE_MASK                    0x100UL                               /**< Bit mask for DCDC_PPMODE                    */
-#define _DCDC_STATUS_PPMODE_DEFAULT                 0x00000000UL                          /**< Mode DEFAULT for DCDC_STATUS                */
-#define DCDC_STATUS_PPMODE_DEFAULT                  (_DCDC_STATUS_PPMODE_DEFAULT << 8)    /**< Shifted mode DEFAULT for DCDC_STATUS        */
 #define DCDC_STATUS_PFMXMODE                        (0x1UL << 9)                          /**< DCDC in PFMX mode                           */
 #define _DCDC_STATUS_PFMXMODE_SHIFT                 9                                     /**< Shift value for DCDC_PFMXMODE               */
 #define _DCDC_STATUS_PFMXMODE_MASK                  0x200UL                               /**< Bit mask for DCDC_PFMXMODE                  */
@@ -447,119 +428,6 @@ typedef struct {
 #define DCDC_LOCKSTATUS_LOCK_DEFAULT                (_DCDC_LOCKSTATUS_LOCK_DEFAULT << 0)  /**< Shifted mode DEFAULT for DCDC_LOCKSTATUS    */
 #define DCDC_LOCKSTATUS_LOCK_UNLOCKED               (_DCDC_LOCKSTATUS_LOCK_UNLOCKED << 0) /**< Shifted mode UNLOCKED for DCDC_LOCKSTATUS   */
 #define DCDC_LOCKSTATUS_LOCK_LOCKED                 (_DCDC_LOCKSTATUS_LOCK_LOCKED << 0)   /**< Shifted mode LOCKED for DCDC_LOCKSTATUS     */
-
-/* Bit fields for DCDC RPURATD0 */
-#define _DCDC_RPURATD0_RESETVALUE                   0x00000000UL                                    /**< Default value for DCDC_RPURATD0             */
-#define _DCDC_RPURATD0_MASK                         0xF0F10FFEUL                                    /**< Mask for DCDC_RPURATD0                      */
-#define DCDC_RPURATD0_RATDCTRL                      (0x1UL << 1)                                    /**< CTRL Protection Bit                         */
-#define _DCDC_RPURATD0_RATDCTRL_SHIFT               1                                               /**< Shift value for DCDC_RATDCTRL               */
-#define _DCDC_RPURATD0_RATDCTRL_MASK                0x2UL                                           /**< Bit mask for DCDC_RATDCTRL                  */
-#define _DCDC_RPURATD0_RATDCTRL_DEFAULT             0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDCTRL_DEFAULT              (_DCDC_RPURATD0_RATDCTRL_DEFAULT << 1)          /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDEM01CTRL0                 (0x1UL << 2)                                    /**< EM01CTRL0 Protection Bit                    */
-#define _DCDC_RPURATD0_RATDEM01CTRL0_SHIFT          2                                               /**< Shift value for DCDC_RATDEM01CTRL0          */
-#define _DCDC_RPURATD0_RATDEM01CTRL0_MASK           0x4UL                                           /**< Bit mask for DCDC_RATDEM01CTRL0             */
-#define _DCDC_RPURATD0_RATDEM01CTRL0_DEFAULT        0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDEM01CTRL0_DEFAULT         (_DCDC_RPURATD0_RATDEM01CTRL0_DEFAULT << 2)     /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDIZCTRL                    (0x1UL << 3)                                    /**< IZCTRL Protection Bit                       */
-#define _DCDC_RPURATD0_RATDIZCTRL_SHIFT             3                                               /**< Shift value for DCDC_RATDIZCTRL             */
-#define _DCDC_RPURATD0_RATDIZCTRL_MASK              0x8UL                                           /**< Bit mask for DCDC_RATDIZCTRL                */
-#define _DCDC_RPURATD0_RATDIZCTRL_DEFAULT           0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDIZCTRL_DEFAULT            (_DCDC_RPURATD0_RATDIZCTRL_DEFAULT << 3)        /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDEM23CTRL0                 (0x1UL << 4)                                    /**< EM23CTRL0 Protection Bit                    */
-#define _DCDC_RPURATD0_RATDEM23CTRL0_SHIFT          4                                               /**< Shift value for DCDC_RATDEM23CTRL0          */
-#define _DCDC_RPURATD0_RATDEM23CTRL0_MASK           0x10UL                                          /**< Bit mask for DCDC_RATDEM23CTRL0             */
-#define _DCDC_RPURATD0_RATDEM23CTRL0_DEFAULT        0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDEM23CTRL0_DEFAULT         (_DCDC_RPURATD0_RATDEM23CTRL0_DEFAULT << 4)     /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDEM01CTRL1                 (0x1UL << 5)                                    /**< EM01CTRL1 Protection Bit                    */
-#define _DCDC_RPURATD0_RATDEM01CTRL1_SHIFT          5                                               /**< Shift value for DCDC_RATDEM01CTRL1          */
-#define _DCDC_RPURATD0_RATDEM01CTRL1_MASK           0x20UL                                          /**< Bit mask for DCDC_RATDEM01CTRL1             */
-#define _DCDC_RPURATD0_RATDEM01CTRL1_DEFAULT        0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDEM01CTRL1_DEFAULT         (_DCDC_RPURATD0_RATDEM01CTRL1_DEFAULT << 5)     /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDEM23CTRL1                 (0x1UL << 6)                                    /**< EM23CTRL1 Protection Bit                    */
-#define _DCDC_RPURATD0_RATDEM23CTRL1_SHIFT          6                                               /**< Shift value for DCDC_RATDEM23CTRL1          */
-#define _DCDC_RPURATD0_RATDEM23CTRL1_MASK           0x40UL                                          /**< Bit mask for DCDC_RATDEM23CTRL1             */
-#define _DCDC_RPURATD0_RATDEM23CTRL1_DEFAULT        0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDEM23CTRL1_DEFAULT         (_DCDC_RPURATD0_RATDEM23CTRL1_DEFAULT << 6)     /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDPPCFG                     (0x1UL << 7)                                    /**< PPCFG Protection Bit                        */
-#define _DCDC_RPURATD0_RATDPPCFG_SHIFT              7                                               /**< Shift value for DCDC_RATDPPCFG              */
-#define _DCDC_RPURATD0_RATDPPCFG_MASK               0x80UL                                          /**< Bit mask for DCDC_RATDPPCFG                 */
-#define _DCDC_RPURATD0_RATDPPCFG_DEFAULT            0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDPPCFG_DEFAULT             (_DCDC_RPURATD0_RATDPPCFG_DEFAULT << 7)         /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDPFMXCTRL                  (0x1UL << 8)                                    /**< PFMXCTRL Protection Bit                     */
-#define _DCDC_RPURATD0_RATDPFMXCTRL_SHIFT           8                                               /**< Shift value for DCDC_RATDPFMXCTRL           */
-#define _DCDC_RPURATD0_RATDPFMXCTRL_MASK            0x100UL                                         /**< Bit mask for DCDC_RATDPFMXCTRL              */
-#define _DCDC_RPURATD0_RATDPFMXCTRL_DEFAULT         0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDPFMXCTRL_DEFAULT          (_DCDC_RPURATD0_RATDPFMXCTRL_DEFAULT << 8)      /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDTRANSCFG                  (0x1UL << 9)                                    /**< TRANSCFG Protection Bit                     */
-#define _DCDC_RPURATD0_RATDTRANSCFG_SHIFT           9                                               /**< Shift value for DCDC_RATDTRANSCFG           */
-#define _DCDC_RPURATD0_RATDTRANSCFG_MASK            0x200UL                                         /**< Bit mask for DCDC_RATDTRANSCFG              */
-#define _DCDC_RPURATD0_RATDTRANSCFG_DEFAULT         0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDTRANSCFG_DEFAULT          (_DCDC_RPURATD0_RATDTRANSCFG_DEFAULT << 9)      /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDIF                        (0x1UL << 10)                                   /**< IF Protection Bit                           */
-#define _DCDC_RPURATD0_RATDIF_SHIFT                 10                                              /**< Shift value for DCDC_RATDIF                 */
-#define _DCDC_RPURATD0_RATDIF_MASK                  0x400UL                                         /**< Bit mask for DCDC_RATDIF                    */
-#define _DCDC_RPURATD0_RATDIF_DEFAULT               0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDIF_DEFAULT                (_DCDC_RPURATD0_RATDIF_DEFAULT << 10)           /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDIEN                       (0x1UL << 11)                                   /**< IEN Protection Bit                          */
-#define _DCDC_RPURATD0_RATDIEN_SHIFT                11                                              /**< Shift value for DCDC_RATDIEN                */
-#define _DCDC_RPURATD0_RATDIEN_MASK                 0x800UL                                         /**< Bit mask for DCDC_RATDIEN                   */
-#define _DCDC_RPURATD0_RATDIEN_DEFAULT              0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDIEN_DEFAULT               (_DCDC_RPURATD0_RATDIEN_DEFAULT << 11)          /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDLOCK                      (0x1UL << 16)                                   /**< LOCK Protection Bit                         */
-#define _DCDC_RPURATD0_RATDLOCK_SHIFT               16                                              /**< Shift value for DCDC_RATDLOCK               */
-#define _DCDC_RPURATD0_RATDLOCK_MASK                0x10000UL                                       /**< Bit mask for DCDC_RATDLOCK                  */
-#define _DCDC_RPURATD0_RATDLOCK_DEFAULT             0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDLOCK_DEFAULT              (_DCDC_RPURATD0_RATDLOCK_DEFAULT << 16)         /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDTRIM0                     (0x1UL << 20)                                   /**< TRIM0 Protection Bit                        */
-#define _DCDC_RPURATD0_RATDTRIM0_SHIFT              20                                              /**< Shift value for DCDC_RATDTRIM0              */
-#define _DCDC_RPURATD0_RATDTRIM0_MASK               0x100000UL                                      /**< Bit mask for DCDC_RATDTRIM0                 */
-#define _DCDC_RPURATD0_RATDTRIM0_DEFAULT            0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDTRIM0_DEFAULT             (_DCDC_RPURATD0_RATDTRIM0_DEFAULT << 20)        /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDTRIM1                     (0x1UL << 21)                                   /**< TRIM1 Protection Bit                        */
-#define _DCDC_RPURATD0_RATDTRIM1_SHIFT              21                                              /**< Shift value for DCDC_RATDTRIM1              */
-#define _DCDC_RPURATD0_RATDTRIM1_MASK               0x200000UL                                      /**< Bit mask for DCDC_RATDTRIM1                 */
-#define _DCDC_RPURATD0_RATDTRIM1_DEFAULT            0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDTRIM1_DEFAULT             (_DCDC_RPURATD0_RATDTRIM1_DEFAULT << 21)        /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDTRIM2                     (0x1UL << 22)                                   /**< TRIM2 Protection Bit                        */
-#define _DCDC_RPURATD0_RATDTRIM2_SHIFT              22                                              /**< Shift value for DCDC_RATDTRIM2              */
-#define _DCDC_RPURATD0_RATDTRIM2_MASK               0x400000UL                                      /**< Bit mask for DCDC_RATDTRIM2                 */
-#define _DCDC_RPURATD0_RATDTRIM2_DEFAULT            0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDTRIM2_DEFAULT             (_DCDC_RPURATD0_RATDTRIM2_DEFAULT << 22)        /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDCFG                       (0x1UL << 23)                                   /**< CFG Protection Bit                          */
-#define _DCDC_RPURATD0_RATDCFG_SHIFT                23                                              /**< Shift value for DCDC_RATDCFG                */
-#define _DCDC_RPURATD0_RATDCFG_MASK                 0x800000UL                                      /**< Bit mask for DCDC_RATDCFG                   */
-#define _DCDC_RPURATD0_RATDCFG_DEFAULT              0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDCFG_DEFAULT               (_DCDC_RPURATD0_RATDCFG_DEFAULT << 23)          /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDDCDCFORCE                 (0x1UL << 28)                                   /**< DCDCFORCE Protection Bit                    */
-#define _DCDC_RPURATD0_RATDDCDCFORCE_SHIFT          28                                              /**< Shift value for DCDC_RATDDCDCFORCE          */
-#define _DCDC_RPURATD0_RATDDCDCFORCE_MASK           0x10000000UL                                    /**< Bit mask for DCDC_RATDDCDCFORCE             */
-#define _DCDC_RPURATD0_RATDDCDCFORCE_DEFAULT        0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDDCDCFORCE_DEFAULT         (_DCDC_RPURATD0_RATDDCDCFORCE_DEFAULT << 28)    /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDDBUSTEST                  (0x1UL << 29)                                   /**< DBUSTEST Protection Bit                     */
-#define _DCDC_RPURATD0_RATDDBUSTEST_SHIFT           29                                              /**< Shift value for DCDC_RATDDBUSTEST           */
-#define _DCDC_RPURATD0_RATDDBUSTEST_MASK            0x20000000UL                                    /**< Bit mask for DCDC_RATDDBUSTEST              */
-#define _DCDC_RPURATD0_RATDDBUSTEST_DEFAULT         0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDDBUSTEST_DEFAULT          (_DCDC_RPURATD0_RATDDBUSTEST_DEFAULT << 29)     /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDDCDCVCMPTEST              (0x1UL << 30)                                   /**< DCDCVCMPTEST Protection Bit                 */
-#define _DCDC_RPURATD0_RATDDCDCVCMPTEST_SHIFT       30                                              /**< Shift value for DCDC_RATDDCDCVCMPTEST       */
-#define _DCDC_RPURATD0_RATDDCDCVCMPTEST_MASK        0x40000000UL                                    /**< Bit mask for DCDC_RATDDCDCVCMPTEST          */
-#define _DCDC_RPURATD0_RATDDCDCVCMPTEST_DEFAULT     0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDDCDCVCMPTEST_DEFAULT      (_DCDC_RPURATD0_RATDDCDCVCMPTEST_DEFAULT << 30) /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-#define DCDC_RPURATD0_RATDIZCTEST                   (0x1UL << 31)                                   /**< IZCTEST Protection Bit                      */
-#define _DCDC_RPURATD0_RATDIZCTEST_SHIFT            31                                              /**< Shift value for DCDC_RATDIZCTEST            */
-#define _DCDC_RPURATD0_RATDIZCTEST_MASK             0x80000000UL                                    /**< Bit mask for DCDC_RATDIZCTEST               */
-#define _DCDC_RPURATD0_RATDIZCTEST_DEFAULT          0x00000000UL                                    /**< Mode DEFAULT for DCDC_RPURATD0              */
-#define DCDC_RPURATD0_RATDIZCTEST_DEFAULT           (_DCDC_RPURATD0_RATDIZCTEST_DEFAULT << 31)      /**< Shifted mode DEFAULT for DCDC_RPURATD0      */
-
-/* Bit fields for DCDC RPURATD1 */
-#define _DCDC_RPURATD1_RESETVALUE                   0x00000000UL                               /**< Default value for DCDC_RPURATD1             */
-#define _DCDC_RPURATD1_MASK                         0x00000001UL                               /**< Mask for DCDC_RPURATD1                      */
-#define DCDC_RPURATD1_RATDDCDCTEST                  (0x1UL << 0)                               /**< DCDCTEST Protection Bit                     */
-#define _DCDC_RPURATD1_RATDDCDCTEST_SHIFT           0                                          /**< Shift value for DCDC_RATDDCDCTEST           */
-#define _DCDC_RPURATD1_RATDDCDCTEST_MASK            0x1UL                                      /**< Bit mask for DCDC_RATDDCDCTEST              */
-#define _DCDC_RPURATD1_RATDDCDCTEST_DEFAULT         0x00000000UL                               /**< Mode DEFAULT for DCDC_RPURATD1              */
-#define DCDC_RPURATD1_RATDDCDCTEST_DEFAULT          (_DCDC_RPURATD1_RATDDCDCTEST_DEFAULT << 0) /**< Shifted mode DEFAULT for DCDC_RPURATD1      */
 
 /** @} End of group MGM24_DCDC_BitFields */
 /** @} End of group MGM24_DCDC */

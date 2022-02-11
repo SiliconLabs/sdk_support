@@ -118,6 +118,11 @@ bool emberEventIsScheduled(EmberEvent *event)
   return event->next != NULL;
 }
 
+bool emberEventQueueIsEmpty(EmberEventQueue *queue)
+{
+  return queue->events == LIST_END;
+}
+
 uint32_t emberEventGetRemainingMs(EmberEvent *event)
 {
   if (event->next == NULL) {
@@ -229,6 +234,7 @@ void emberRunEventQueue(EmberEventQueue *queue)
   queue->running = false;
 }
 
+#ifdef EVENT_QUEUE_SUPPORTS_BUFFER_MARKING
 // Mark any of the events that are also buffers, and call any marker actions.
 
 void emberMarkEventQueue(EmberEventQueue *queue)
@@ -245,6 +251,7 @@ void emberMarkEventQueue(EmberEventQueue *queue)
     }
   }
 }
+#endif // EVENT_QUEUE_SUPPORTS_BUFFER_MARKING
 
 // If the event is ready to run, and the new time doesn't change this,
 // then just leave the event where it is.  This is done to avoid shuffling

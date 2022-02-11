@@ -320,7 +320,8 @@ void halInternalResetWatchDog(void)
   halResetWatchdog();
 }
 
-#ifndef SIMEE2_TO_NVM3_UPGRADE
+#if !defined(SIMEE1_TO_SIMEE2_UPGRADE) && !defined(SIMEE2_TO_NVM3_UPGRADE)
+// Stubs for when not upgrading.
 bool findSimEe1TokenData(void)
 {
   return false;
@@ -341,4 +342,4 @@ void simEe1ReadCounterToken(uint16_t i, uint16_t *oldDataAddress, uint32_t *numb
   (void) oldDataAddress;
   (void) number;
 }
-#endif // SIMEE2_TO_NVM3_UPGRADE
+#endif // !SIMEE1_TO_SIMEE2_UPGRADE && !SIMEE2_TO_NVM3_UPGRADE

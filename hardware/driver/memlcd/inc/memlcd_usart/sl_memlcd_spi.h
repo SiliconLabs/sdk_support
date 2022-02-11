@@ -117,6 +117,15 @@ sl_status_t sli_memlcd_spi_tx(sli_memlcd_spi_handle_t *handle, const void *data,
  *****************************************************************************/
 void sli_memlcd_spi_wait(sli_memlcd_spi_handle_t *handle);
 
+/***************************************************************************//**
+ * @brief
+ *   Empty RX FIFO.
+ *
+ * @param[in] handle
+ *   Handle to the SPI interface.
+ *****************************************************************************/
+void sli_memlcd_spi_rx_flush(sli_memlcd_spi_handle_t *handle);
+
 /** @} */
 #ifdef __cplusplus
 }

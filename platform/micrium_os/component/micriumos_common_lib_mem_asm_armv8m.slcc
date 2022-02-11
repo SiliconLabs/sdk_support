@@ -2,7 +2,7 @@ id: micriumos_lib_mem_port_armv8m
 label: Mem port for ARMv8-M
 package: micrium-krnx
 description: Micrium OS Lib Mem port for ARMv8-M
-category: Micrium OS|Common|Ports
+category: Services|Micrium|Common
 quality: production
 ui_hints:
   visibility: never

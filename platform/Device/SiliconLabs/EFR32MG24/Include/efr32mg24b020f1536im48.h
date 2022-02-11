@@ -121,6 +121,8 @@ typedef enum IRQn{
   SW3_IRQn               = 58, /*!< 58 EFR32 SW3 Interrupt */
   KERNEL0_IRQn           = 59, /*!< 59 EFR32 KERNEL0 Interrupt */
   KERNEL1_IRQn           = 60, /*!< 60 EFR32 KERNEL1 Interrupt */
+  M33CTI0_IRQn           = 61, /*!< 61 EFR32 M33CTI0 Interrupt */
+  M33CTI1_IRQn           = 62, /*!< 62 EFR32 M33CTI1 Interrupt */
   FPUEXH_IRQn            = 63, /*!< 63 EFR32 FPUEXH Interrupt */
   SETAMPERHOST_IRQn      = 64, /*!< 64 EFR32 SETAMPERHOST Interrupt */
   SEMBRX_IRQn            = 65, /*!< 65 EFR32 SEMBRX Interrupt */
@@ -320,12 +322,12 @@ typedef enum IRQn{
 #define GPIO_TRACECLK_PIN                                 4U            /**< Pin of TRACECLK.*/
 #define GPIO_TRACEDATA0_PORT                              GPIO_PA_INDEX /**< Port of TRACEDATA0.*/
 #define GPIO_TRACEDATA0_PIN                               3U            /**< Pin of TRACEDATA0.*/
-#define GPIO_DBG_TRACEDATA1_PORT                          GPIO_PA_INDEX /**< Port of DBG_TRACEDATA1.*/
-#define GPIO_DBG_TRACEDATA1_PIN                           5U            /**< Pin of DBG_TRACEDATA1.*/
-#define GPIO_DBG_TRACEDATA2_PORT                          GPIO_PA_INDEX /**< Port of DBG_TRACEDATA2.*/
-#define GPIO_DBG_TRACEDATA2_PIN                           6U            /**< Pin of DBG_TRACEDATA2.*/
-#define GPIO_DBG_TRACEDATA3_PORT                          GPIO_PA_INDEX /**< Port of DBG_TRACEDATA3.*/
-#define GPIO_DBG_TRACEDATA3_PIN                           7U            /**< Pin of DBG_TRACEDATA3.*/
+#define GPIO_TRACEDATA1_PORT                              GPIO_PA_INDEX /**< Port of TRACEDATA1.*/
+#define GPIO_TRACEDATA1_PIN                               5U            /**< Pin of TRACEDATA1.*/
+#define GPIO_TRACEDATA2_PORT                              GPIO_PA_INDEX /**< Port of TRACEDATA2.*/
+#define GPIO_TRACEDATA2_PIN                               6U            /**< Pin of TRACEDATA2.*/
+#define GPIO_TRACEDATA3_PORT                              GPIO_PA_INDEX /**< Port of TRACEDATA3.*/
+#define GPIO_TRACEDATA3_PIN                               7U            /**< Pin of TRACEDATA3.*/
 #define GPIO_EFP_INT_PORT                                 GPIO_PC_INDEX /**< Port of EFP_INT.*/
 #define GPIO_EFP_INT_PIN                                  5U            /**< Pin of EFP_INT.*/
 #define GPIO_EFP_TX_SCL_PORT                              GPIO_PC_INDEX /**< Port of EFP_TX_SCL.*/
@@ -914,24 +916,24 @@ typedef enum IRQn{
 #define DMEM_BANK13_SIZE                        0x4000UL    /**> Bank13 size */
 #define DMEM_BANK14_SIZE                        0x4000UL    /**> Bank14 size */
 #define DMEM_BANK15_SIZE                        0x4000UL    /**> Bank15 size */
-#define DMEM_BANK16_SIZE                        0x2000UL    /**> Bank16 size */
-#define DMEM_BANK17_SIZE                        0x2000UL    /**> Bank17 size */
-#define DMEM_BANK18_SIZE                        0x2000UL    /**> Bank18 size */
-#define DMEM_BANK19_SIZE                        0x2000UL    /**> Bank19 size */
+#define DMEM_BANK16_SIZE                        0x0UL       /**> Bank16 size */
+#define DMEM_BANK17_SIZE                        0x0UL       /**> Bank17 size */
+#define DMEM_BANK18_SIZE                        0x0UL       /**> Bank18 size */
+#define DMEM_BANK19_SIZE                        0x0UL       /**> Bank19 size */
 #define DMEM_BANK1_SIZE                         0x4000UL    /**> Bank1 size */
-#define DMEM_BANK20_SIZE                        0x2000UL    /**> Bank20 size */
-#define DMEM_BANK21_SIZE                        0x2000UL    /**> Bank21 size */
-#define DMEM_BANK22_SIZE                        0x2000UL    /**> Bank22 size */
-#define DMEM_BANK23_SIZE                        0x2000UL    /**> Bank23 size */
-#define DMEM_BANK24_SIZE                        0x2000UL    /**> Bank24 size */
-#define DMEM_BANK25_SIZE                        0x2000UL    /**> Bank25 size */
-#define DMEM_BANK26_SIZE                        0x2000UL    /**> Bank26 size */
-#define DMEM_BANK27_SIZE                        0x2000UL    /**> Bank27 size */
-#define DMEM_BANK28_SIZE                        0x2000UL    /**> Bank28 size */
-#define DMEM_BANK29_SIZE                        0x2000UL    /**> Bank29 size */
+#define DMEM_BANK20_SIZE                        0x0UL       /**> Bank20 size */
+#define DMEM_BANK21_SIZE                        0x0UL       /**> Bank21 size */
+#define DMEM_BANK22_SIZE                        0x0UL       /**> Bank22 size */
+#define DMEM_BANK23_SIZE                        0x0UL       /**> Bank23 size */
+#define DMEM_BANK24_SIZE                        0x0UL       /**> Bank24 size */
+#define DMEM_BANK25_SIZE                        0x0UL       /**> Bank25 size */
+#define DMEM_BANK26_SIZE                        0x0UL       /**> Bank26 size */
+#define DMEM_BANK27_SIZE                        0x0UL       /**> Bank27 size */
+#define DMEM_BANK28_SIZE                        0x0UL       /**> Bank28 size */
+#define DMEM_BANK29_SIZE                        0x0UL       /**> Bank29 size */
 #define DMEM_BANK2_SIZE                         0x4000UL    /**> Bank2 size */
-#define DMEM_BANK30_SIZE                        0x2000UL    /**> Bank30 size */
-#define DMEM_BANK31_SIZE                        0x2000UL    /**> Bank31 size */
+#define DMEM_BANK30_SIZE                        0x0UL       /**> Bank30 size */
+#define DMEM_BANK31_SIZE                        0x0UL       /**> Bank31 size */
 #define DMEM_BANK3_SIZE                         0x4000UL    /**> Bank3 size */
 #define DMEM_BANK4_SIZE                         0x4000UL    /**> Bank4 size */
 #define DMEM_BANK5_SIZE                         0x4000UL    /**> Bank5 size */
@@ -940,6 +942,7 @@ typedef enum IRQn{
 #define DMEM_BANK8_SIZE                         0x4000UL    /**> Bank8 size */
 #define DMEM_BANK9_SIZE                         0x4000UL    /**> Bank9 size */
 #define DMEM_ECC_EXCLUDE                        0x0UL       /**> ECC exclude */
+#define DMEM_MEM_SIZE                           0x40000UL   /**> Total memory size */
 #define DMEM_NUM_BANKS                          0x10UL      /**> Number of physical SRAM banks */
 #define DMEM_NUM_PORTS                          0x4UL       /**> Number of AHB slave ports */
 #define DMEM_NUM_PORTS_IS_2                     0x0UL       /**> Boolean indicating if NUM_PORTS=2 */
@@ -1196,6 +1199,7 @@ typedef enum IRQn{
 #define RDMEM_FRC_RAM_BWE_WIDTH                 0x27UL      /**> FRCRAM BWE width */
 #define RDMEM_FRC_RAM_DATA_WIDTH                0x27UL      /**> FRC_RAM_DATA_WIDTH */
 #define RDMEM_FRC_RAM_ECC_EN                    0x1UL       /**> FRC RAM ECCEN */
+#define RDMEM_FRC_RAM_TOTAL_SIZE                0x1000UL    /**> FRC_RAM_TOTAL_SIZE */
 #define RDMEM_SEQ_BANK0_SIZE                    0x2000UL    /**> SEQ_RAM_BANK0_SIZE */
 #define RDMEM_SEQ_BANK1_SIZE                    0x2000UL    /**> SEQ_RAM_BANK1_SIZE */
 #define RDMEM_SEQ_BANK2_SIZE                    0x0UL       /**> SEQ_RAM_BANK2_SIZE */
@@ -1211,6 +1215,7 @@ typedef enum IRQn{
 #define RDMEM_SEQ_RAM_BWE_WIDTH                 0x27UL      /**> SEQRAM BWE width */
 #define RDMEM_SEQ_RAM_DATA_WIDTH                0x27UL      /**> SEQ_RAM_DATA_WIDTH */
 #define RDMEM_SEQ_RAM_ECC_EN                    0x1UL       /**> SEQ RAM ECCEN */
+#define RDMEM_SEQ_RAM_TOTAL_SIZE                0x4000UL    /**> SEQ_RAM_TOTAL_SIZE */
 #define FRC_DEMOD_FILT_WIDTH                    0x13UL      /**> New Param */
 #define FRC_FCD_NUM                             0x4UL       /**> None */
 #define FRC_INTELEMENTS                         0x10UL      /**> None */

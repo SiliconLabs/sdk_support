@@ -33,7 +33,17 @@
 #include "em_prs.h"
 #include "gpiointerrupt.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct COEX_HAL_GpioConfig {
+  /** GPIO signal **/
+  uint32_t signal;
+
+  /** GPIO source **/
+  uint32_t source;
+
   /** GPIO port */
   uint8_t port;
 
@@ -53,7 +63,7 @@ typedef struct COEX_HAL_GpioConfig {
   uint8_t mode;
 
   /** GPIO ISR */
-  GPIOINT_IrqCallbackPtr_t isr;
+  GPIOINT_IrqCallbackPtrExt_t isr;
 
   /** GPIO config */
   COEX_GpioConfig_t config;
@@ -68,6 +78,61 @@ bool COEX_HAL_ConfigGrant(COEX_HAL_GpioConfig_t *gpioConfig);
 bool COEX_HAL_ConfigDp(uint8_t pulseWidthUs);
 uint8_t COEX_HAL_GetDpPulseWidth(void);
 bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
+uint16_t COEX_HAL_GetPseudoRandom(uint16_t min_value, uint16_t max_value);
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig);
+bool COEX_HAL_GetWifiTx(void);
+#endif
+void sli_coex_enableGpioInt(COEX_GpioHandle_t gpioHandle,
+                            bool enabled,
+                            bool *wasAsserted);
+
+#define PRS_GPIO_SIGNAL(pin) ((pin) & 7U)
+
+#ifdef _SILICON_LABS_32B_SERIES_1
+#define PRS_GPIO_SOURCE(pin)                  \
+  (((pin) > 7U) ? PRS_CH_CTRL_SOURCESEL_GPIOH \
+   : PRS_CH_CTRL_SOURCESEL_GPIOL)
+#define PRS_CHANNEL_SOURCE(ch)              \
+  (((ch) > 7U) ? PRS_CH_CTRL_SOURCESEL_PRSH \
+   : PRS_CH_CTRL_SOURCESEL_PRSL)
+#else //!_SILICON_LABS_32B_SERIES_1
+#define PRS_GPIO_SOURCE(pin) (PRS_ASYNC_CH_CTRL_SOURCESEL_GPIO)
+#endif //_SILICON_LABS_32B_SERIES_1
+
+#define PRS_CHANNEL_SIGNAL(ch) ((ch) & 7U)
+
+#define INVALID_INTERRUPT 0xFF
+#define INVALID_SOURCE 0U
+#define INVALID_SIGNAL 0U
+
+#ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_phySelectCfg;
+#endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_GNT_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_ptaGntCfg;
+#endif //SL_RAIL_UTIL_COEX_GNT_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_PRI_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_ptaPriCfg;
+#endif //SL_RAIL_UTIL_COEX_PRI_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_REQ_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_ptaReqCfg;
+#endif //SL_RAIL_UTIL_COEX_REQ_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_ptaPwmReqCfg;
+#endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_RHO_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_rhoCfg;
+#endif //SL_RAIL_UTIL_COEX_RHO_PORT
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+extern COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg;
+#endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
 
 #if defined(HAL_COEX_OVERRIDE_GPIO_INPUT) && !defined(SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT)
 #define SL_RAIL_UTIL_COEX_OVERRIDE_GPIO_INPUT HAL_COEX_OVERRIDE_GPIO_INPUT
@@ -90,8 +155,8 @@ bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
 #if defined(HAL_COEX_PWM_DEFAULT_ENABLED) && !defined(SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED)
 #define SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED HAL_COEX_PWM_DEFAULT_ENABLED
 #endif //defined(HAL_COEX_PWM_DEFAULT_ENABLED) and !defined(SL_RAIL_UTIL_COEX_PWM_DEFAULT_ENABLED)
-#if defined(HAL_COEX_TX_ABORT) && !defined(SL_RAIL_UTIL_COEX_TX_ABORT)
-#define SL_RAIL_UTIL_COEX_TX_ABORT HAL_COEX_TX_ABORT
+#if defined(HAL_COEX_TX_ABORT) && !defined(SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT)
+#define SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT HAL_COEX_TX_ABORT
 #endif //defined(HAL_COEX_TX_ABORT) and !defined(SL_RAIL_UTIL_COEX_TX_ABORT)
 #if defined(BSP_COEX_RHO_ASSERT_LEVEL) && !defined(SL_RAIL_UTIL_COEX_RHO_ASSERT_LEVEL)
 #define SL_RAIL_UTIL_COEX_RHO_ASSERT_LEVEL BSP_COEX_RHO_ASSERT_LEVEL
@@ -234,30 +299,6 @@ bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
 
 #define WRAP_PRS_ASYNC(ch) (((ch) + PRS_ASYNC_CHAN_COUNT) % PRS_ASYNC_CHAN_COUNT)
 
-#if defined(SL_RAIL_UTIL_COEX_GNT_PIN) && !defined(SL_RAIL_UTIL_COEX_GNT_INTNO)
-#define SL_RAIL_UTIL_COEX_GNT_INTNO SL_RAIL_UTIL_COEX_GNT_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_GNT_PIN) && !defined(SL_RAIL_UTIL_COEX_GNT_INTNO)
-
-#if defined(SL_RAIL_UTIL_COEX_PRI_PIN) && !defined(SL_RAIL_UTIL_COEX_PRI_INTNO)
-#define SL_RAIL_UTIL_COEX_PRI_INTNO SL_RAIL_UTIL_COEX_PRI_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_PRI_PIN) && !defined(SL_RAIL_UTIL_COEX_PRI_INTNO)
-
-#if defined(SL_RAIL_UTIL_COEX_PWM_REQ_PIN) && !defined(SL_RAIL_UTIL_COEX_PWM_REQ_INTNO)
-#define SL_RAIL_UTIL_COEX_PWM_REQ_INTNO SL_RAIL_UTIL_COEX_PWM_REQ_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_PWM_REQ_PIN) && !defined(SL_RAIL_UTIL_COEX_PWM_REQ_INTNO)
-
-#if defined(SL_RAIL_UTIL_COEX_REQ_PIN) && !defined(SL_RAIL_UTIL_COEX_REQ_INTNO)
-#define SL_RAIL_UTIL_COEX_REQ_INTNO SL_RAIL_UTIL_COEX_REQ_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_REQ_PIN) && !defined(SL_RAIL_UTIL_COEX_REQ_INTNO)
-
-#if defined(SL_RAIL_UTIL_COEX_RHO_PIN) && !defined(SL_RAIL_UTIL_COEX_RHO_INTNO)
-#define SL_RAIL_UTIL_COEX_RHO_INTNO SL_RAIL_UTIL_COEX_RHO_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_RHO_PIN) && !defined(SL_RAIL_UTIL_COEX_RHO_INTNO)
-
-#if defined(SL_RAIL_UTIL_COEX_PHY_SELECT_PIN) && !defined(SL_RAIL_UTIL_COEX_PHY_SELECT_INTNO)
-#define SL_RAIL_UTIL_COEX_PHY_SELECT_INTNO SL_RAIL_UTIL_COEX_PHY_SELECT_PIN
-#endif //defined(SL_RAIL_UTIL_COEX_PHY_SELECT_PIN) && !defined(SL_RAIL_UTIL_COEX_PHY_SELECT_INTNO)
-
 #if defined(PER_REG_BLOCK_SET_OFFSET)
 #define COEX_HAL_GPIO_ADDR(port, polarity) ((uint32_t)&GPIO->P[port].DOUT \
                                             + (polarity                   \
@@ -273,7 +314,11 @@ bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
 #endif //defined(PER_REG_BLOCK_SET_OFFSET) || defined(PER_BITSET_MEM_BASE)
 
 #if defined(SL_RAIL_UTIL_COEX_REQ_PORT) && defined(COEX_HAL_GPIO_ADDR)
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_WIFI_SIMULATOR_PRESENT
+#define COEX_HAL_FAST_REQUEST 0
+#else
 #define COEX_HAL_FAST_REQUEST 1
+#endif
 #define COEX_HAL_ReadGpio(port,                  \
                           pin,                   \
                           polarity)              \
@@ -349,4 +394,9 @@ bool COEX_HAL_SetDpPulseWidth(uint8_t pulseWidthUs);
 #define COEX_HAL_ClearPriority() //no-op
 #endif //defined(SL_RAIL_UTIL_COEX_PRI_PORT)
 #endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) && defined(COEX_HAL_GPIO_ADDR)
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif  // __COEXISTENCE_HAL_H__

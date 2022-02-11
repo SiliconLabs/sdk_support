@@ -36,6 +36,10 @@
 #ifndef  _USBD_CORE_H_
 #define  _USBD_CORE_H_
 
+#if !defined(SL_SUPRESS_MICRIUMOS_USB_DEVICE_DEPRECATION_WARNINGS)
+#warning  Warning: MicriumOS-USB-Device is deprecated and will be removed in an upcoming release; Please consider migrating to sl_usb.
+#endif
+
 /********************************************************************************************************
  ********************************************************************************************************
  *                                               INCLUDE FILES

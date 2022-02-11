@@ -40,6 +40,9 @@
  * @details
  * Configure the frequency band of the HFRCO. The configuration define
  * SL_DEVICE_INIT_HFRCO_BAND is used to configure the frequency.
+ * If using Simplicity Studio, this configuration header is also configurable
+ * through the Project Configurator, by selecting the "Device Init: HFRCO" configuration
+ * component.
  * @{
  */
 

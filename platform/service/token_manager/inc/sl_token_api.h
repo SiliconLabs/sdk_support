@@ -46,6 +46,7 @@ void halInternalAssertFailed(const char * filename, int linenumber);
 #ifndef __SOURCEFILE__
 #define __SOURCEFILE__ __FILE__
 #endif // __SOURCEFILE__
+#undef  assert // Replace assert from #include <assert.h> with this one
 #define assert(condition)  \
   do { if (!(condition)) { \
          ASSERT_HANDLER(__SOURCEFILE__, __LINE__); } } while (0)

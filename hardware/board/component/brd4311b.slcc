@@ -26,6 +26,10 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
@@ -37,13 +41,20 @@
     - btn0
     - btn1
   - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4311B"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD4311
   - board:variant:B
-  - board:revision:A01
+  - board:revision:A02
   - board:device:mgm220pc22hna
   - hardware:has:vcom
   - hardware:has:pti

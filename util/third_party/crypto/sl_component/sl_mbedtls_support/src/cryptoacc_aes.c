@@ -60,6 +60,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 /* Parameter validation macros based on platform_util.h */
@@ -438,11 +439,11 @@ int mbedtls_aes_crypt_ecb(mbedtls_aes_context *ctx,
   }
 
   if (cryptoacc_management_release() != PSA_SUCCESS) {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   } else {
     return 0;
   }
@@ -503,11 +504,11 @@ int mbedtls_aes_crypt_cbc(mbedtls_aes_context *ctx,
   }
 
   if (cryptoacc_management_release() != PSA_SUCCESS) {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   } else {
     return 0;
   }
@@ -588,11 +589,11 @@ int mbedtls_aes_crypt_cfb128(mbedtls_aes_context *ctx,
         }
 
         if (cryptoacc_management_release() != PSA_SUCCESS) {
-          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
         if (sx_ret != CRYPTOLIB_SUCCESS) {
-          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
         processed += iterations * 16;
@@ -738,11 +739,11 @@ int mbedtls_aes_crypt_ctr(mbedtls_aes_context *ctx,
         sx_ret = sx_aes_ctr_encrypt_update((const block_t *)&key, (const block_t *)&data_in, &data_out, (const block_t *)&iv_block, &iv_block);
 
         if (cryptoacc_management_release() != PSA_SUCCESS) {
-          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
         if (sx_ret != CRYPTOLIB_SUCCESS) {
-          return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+          return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
         }
 
         processed += iterations * 16;

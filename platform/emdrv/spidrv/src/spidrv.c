@@ -44,6 +44,9 @@
 #include "spidrv.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
+#if defined(EUSART_PRESENT)
+#include "sl_slist.h"
+#endif
 #endif
 #include <string.h>
 
@@ -80,9 +83,28 @@ typedef struct {
   uint8_t csPin;
 } SPI_Pins_t;
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+static sl_power_manager_em_transition_event_handle_t on_power_manager_event_handle;
+
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to);
+
+static sl_power_manager_em_transition_event_info_t on_power_manager_event_info =
+{
+  .event_mask = (SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM2 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM2 \
+                 | SL_POWER_MANAGER_EVENT_TRANSITION_ENTERING_EM3 | SL_POWER_MANAGER_EVENT_TRANSITION_LEAVING_EM3),
+  .on_event = on_power_manager_event,
+};
+
+// List of EUSART handles
+sl_slist_node_t *eusart_handle_list = NULL;
+#endif
+
 static bool     spidrvIsInitialized = false;
 
+#if defined(USART_PRESENT)
 static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData);
+#endif
 
 #if defined(EUSART_PRESENT)
 static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData);
@@ -130,6 +152,11 @@ static void     WaitForTransferCompletion(SPIDRV_Handle_t handle);
 
 #if defined(EMDRV_SPIDRV_INCLUDE_SLAVE)
 static Ecode_t  WaitForIdleLine(SPIDRV_Handle_t handle);
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle);
+static Ecode_t sli_spidrv_enter_em23(SPIDRV_Handle_t handle);
 #endif
 
 /// @endcond
@@ -200,14 +227,30 @@ static void emRequestDeinit(SPIDRV_Handle_t handle)
 Ecode_t SPIDRV_Init(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 {
 #if defined (EUSART_PRESENT)
+  Ecode_t result = ECODE_EMDRV_SPIDRV_PARAM_ERROR;
+
   if (EUSART_NUM((EUSART_TypeDef*)initData->port) != -1) {
-    return SPIDRV_InitEusart(handle, initData);
+    result = SPIDRV_InitEusart(handle, initData);
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+    // Subscribe to notification to re-enable eusart after deepsleep.
+    if (eusart_handle_list == NULL) {
+      sl_power_manager_subscribe_em_transition_event(&on_power_manager_event_handle, &on_power_manager_event_info);
+    }
+    sl_slist_push(&eusart_handle_list, &handle->node);
+#endif
+
+    return result;
   }
 #endif
 
+#if defined (USART_PRESENT)
   return SPIDRV_InitUsart(handle, initData);
+#else
+  return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
+#endif
 }
 
+#if defined (USART_PRESENT)
 /***************************************************************************//**
  * @brief
  *    Initialize an SPI driver usart instance.
@@ -486,6 +529,7 @@ static Ecode_t SPIDRV_InitUsart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData)
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
+#endif // defined USART_PRESENT
 
 #if defined(EUSART_PRESENT)
 /***************************************************************************//**
@@ -545,6 +589,20 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
     handle->rxDMASignal = dmadrvPeripheralSignal_EUSART2_RXDATAV;
     spiPortNum = 2;
 #endif
+#if defined(EUSART3)
+  } else if (initData->port == EUSART3) {
+    handle->usartClock  = cmuClock_EUSART3;
+    handle->txDMASignal = dmadrvPeripheralSignal_EUSART3_TXBL;
+    handle->rxDMASignal = dmadrvPeripheralSignal_EUSART3_RXDATAV;
+    spiPortNum = 3;
+#endif
+#if defined(EUSART4)
+  } else if (initData->port == EUSART4) {
+    handle->usartClock  = cmuClock_EUSART4;
+    handle->txDMASignal = dmadrvPeripheralSignal_EUSART4_TXBL;
+    handle->rxDMASignal = dmadrvPeripheralSignal_EUSART4_RXDATAV;
+    spiPortNum = 4;
+#endif
   } else {
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
@@ -570,8 +628,15 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
   }
 
   if (initData->type == spidrvSlave) {
+    if (initData->bitRate >= 5000000) {
+      // If baud-rate is more than 5MHz, a value of 4 is required
+      eusartSpiInit.advancedSettings->setupWindow = 4;
+    } else {
+      // If baud-rate is less than 5MHz, a value of 5 is required
+      eusartSpiInit.advancedSettings->setupWindow = 5;
+    }
     eusartSpiInit.master  = false;
-    eusartSpiInit.bitRate = 1000;
+    eusartSpiInit.bitRate = 1000000;
   } else {
     eusartSpiInit.bitRate = initData->bitRate;
   }
@@ -661,6 +726,9 @@ static Ecode_t SPIDRV_InitEusart(SPIDRV_Handle_t handle, SPIDRV_Init_t *initData
  * @brief
  *    Deinitialize an SPI driver instance.
  *
+ * @warning
+ *  This function should only be called with an initialized spidrv instance handle.
+ *
  * @param[in] handle Pointer to an SPI driver handle.
  *
  * @return
@@ -685,9 +753,13 @@ Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
   }
 #endif
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     USART_Reset(handle->peripheral.usartPort);
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     EUSART_Reset(handle->peripheral.eusartPort);
@@ -700,6 +772,14 @@ Ecode_t SPIDRV_DeInit(SPIDRV_Handle_t handle)
   DMADRV_FreeChannel(handle->rxDMACh);
   DMADRV_DeInit();
   emRequestDeinit(handle);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+  // Unsubscribe to notification to re-enable eusart after deepsleep.
+  sl_slist_remove(&eusart_handle_list, &handle->node);
+  if (eusart_handle_list == NULL) {
+    sl_power_manager_unsubscribe_em_transition_event(&on_power_manager_event_handle);
+  }
+#endif
 
   return ECODE_EMDRV_SPIDRV_OK;
 }
@@ -743,6 +823,8 @@ Ecode_t SPIDRV_AbortTransfer(SPIDRV_Handle_t handle)
   handle->transferStatus    = ECODE_EMDRV_SPIDRV_ABORTED;
   handle->blockingCompleted = true;
 
+  em1RequestRemove(handle);
+
   if (handle->userCallback != NULL) {
     handle->userCallback(handle,
                          ECODE_EMDRV_SPIDRV_ABORTED,
@@ -775,9 +857,13 @@ Ecode_t SPIDRV_GetBitrate(SPIDRV_Handle_t handle, uint32_t *bitRate)
     return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
   }
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     *bitRate = USART_BaudrateGet(handle->peripheral.usartPort);
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     *bitRate = EUSART_BaudrateGet(handle->peripheral.eusartPort);
@@ -1197,9 +1283,13 @@ Ecode_t SPIDRV_SetBitrate(SPIDRV_Handle_t handle, uint32_t bitRate)
 
   handle->initData.bitRate = bitRate;
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     USART_BaudrateSyncSet(handle->peripheral.usartPort, 0, bitRate);
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     EUSART_BaudrateSet(handle->peripheral.eusartPort, 0, bitRate);
@@ -1230,13 +1320,17 @@ Ecode_t SPIDRV_SetFramelength(SPIDRV_Handle_t handle, uint32_t frameLength)
     return ECODE_EMDRV_SPIDRV_ILLEGAL_HANDLE;
   }
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     frameLength -= EMDRV_SPIDRV_USART_FRAMELENGTH_REGVALUE_OFFSET;
 
     if ((frameLength < _USART_FRAME_DATABITS_FOUR) || (frameLength > _USART_FRAME_DATABITS_SIXTEEN)) {
       return ECODE_EMDRV_SPIDRV_PARAM_ERROR;
     }
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     frameLength -= EMDRV_SPIDRV_EUSART_FRAMELENGTH_REGVALUE_OFFSET;
@@ -1253,7 +1347,10 @@ Ecode_t SPIDRV_SetFramelength(SPIDRV_Handle_t handle, uint32_t frameLength)
     return ECODE_EMDRV_SPIDRV_BUSY;
   }
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     handle->initData.frameLength = frameLength + EMDRV_SPIDRV_USART_FRAMELENGTH_REGVALUE_OFFSET;
 
     handle->peripheral.usartPort->FRAME = (handle->peripheral.usartPort->FRAME
@@ -1261,6 +1358,7 @@ Ecode_t SPIDRV_SetFramelength(SPIDRV_Handle_t handle, uint32_t frameLength)
                                           | (frameLength
                                              << _USART_FRAME_DATABITS_SHIFT);
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     handle->initData.frameLength = frameLength + EMDRV_SPIDRV_EUSART_FRAMELENGTH_REGVALUE_OFFSET;
@@ -2016,7 +2114,10 @@ static void StartReceiveDMA(SPIDRV_Handle_t handle,
   handle->transferCount      = count;
   handle->userCallback       = callback;
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
     if (handle->initData.frameLength > 9) {
@@ -2030,6 +2131,7 @@ static void StartReceiveDMA(SPIDRV_Handle_t handle,
       txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
     }
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     clearEusartFifos(handle->peripheral.eusartPort);
@@ -2089,7 +2191,10 @@ static void StartTransferDMA(SPIDRV_Handle_t handle,
   handle->transferCount      = count;
   handle->userCallback       = callback;
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
     if (handle->initData.frameLength > 9) {
@@ -2103,6 +2208,7 @@ static void StartTransferDMA(SPIDRV_Handle_t handle,
       txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
     }
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     clearEusartFifos(handle->peripheral.eusartPort);
@@ -2161,7 +2267,10 @@ static void StartTransmitDMA(SPIDRV_Handle_t handle,
   handle->transferCount      = count;
   handle->userCallback       = callback;
 
-  if (handle->peripheralType == spidrvPeripheralTypeUsart) {
+  if (0) {
+  }
+#if defined(USART_PRESENT)
+  else if (handle->peripheralType == spidrvPeripheralTypeUsart) {
     handle->peripheral.usartPort->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
     if (handle->initData.frameLength > 9) {
@@ -2175,6 +2284,7 @@ static void StartTransmitDMA(SPIDRV_Handle_t handle,
       txPort = (void *)&(handle->peripheral.usartPort->TXDATA);
     }
   }
+#endif
 #if defined(EUSART_PRESENT)
   else if (handle->peripheralType == spidrvPeripheralTypeEusart) {
     clearEusartFifos(handle->peripheral.eusartPort);
@@ -2310,6 +2420,62 @@ static Ecode_t WaitForIdleLine(SPIDRV_Handle_t handle)
   }
 
   return ECODE_EMDRV_SPIDRV_OK;
+}
+#endif
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && defined(EUSART_PRESENT)
+/***************************************************************************//**
+ * @brief Enable EUSART and SPI IOs after deepsleep
+ ******************************************************************************/
+static Ecode_t sli_spidrv_exit_em23(SPIDRV_Handle_t handle)
+{
+  EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
+
+  EUSART_Enable(eusart, eusartEnable);
+  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                     GPIO_EUSART_ROUTEEN_TXPEN | GPIO_EUSART_ROUTEEN_SCLKPEN);
+
+  return ECODE_EMDRV_SPIDRV_OK;
+}
+
+/***************************************************************************//**
+ * @brief Disable SPIO IOs before deepsleep
+ ******************************************************************************/
+static Ecode_t sli_spidrv_enter_em23(SPIDRV_Handle_t handle)
+{
+  EUSART_TypeDef *eusart = handle->peripheral.eusartPort;
+
+  BUS_RegMaskedWrite(&GPIO->EUSARTROUTE[EUSART_NUM(eusart)].ROUTEEN,
+                     _GPIO_EUSART_ROUTEEN_TXPEN_MASK | _GPIO_EUSART_ROUTEEN_SCLKPEN_MASK,
+                     0);
+
+  return ECODE_EMDRV_SPIDRV_OK;
+}
+
+/***************************************************************************//**
+ * Power Manager callback notification for EUSART.
+ * It is used to prepare EUSART module before/after deepsleeping.
+ ******************************************************************************/
+static void on_power_manager_event(sl_power_manager_em_t from,
+                                   sl_power_manager_em_t to)
+{
+  (void)from;
+  SPIDRV_Handle_t handle;
+
+  if (to == SL_POWER_MANAGER_EM1
+      || to == SL_POWER_MANAGER_EM0) {
+    SL_SLIST_FOR_EACH_ENTRY(eusart_handle_list, handle, SPIDRV_HandleData_t, node) {
+      sli_spidrv_exit_em23(handle);
+    }
+  }
+
+  if (to == SL_POWER_MANAGER_EM2
+      || to == SL_POWER_MANAGER_EM3) {
+    SL_SLIST_FOR_EACH_ENTRY(eusart_handle_list, handle, SPIDRV_HandleData_t, node) {
+      sli_spidrv_enter_em23(handle);
+    }
+  }
 }
 #endif
 

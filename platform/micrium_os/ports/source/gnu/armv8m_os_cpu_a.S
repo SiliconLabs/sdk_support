@@ -60,6 +60,8 @@
 .equ NVIC_PENDSV_PRI,   0xFF                                    @ PendSV priority value (lowest).
 .equ NVIC_PENDSVSET,    0x10000000                              @ Value to trigger PendSV exception.
 
+.equ FPU_FPCCR,         0xE000EF34                              @ Address of FPU FPCCR register.
+
 @********************************************************************************************************
 @                                     CODE GENERATION DIRECTIVES
 @********************************************************************************************************
@@ -191,21 +193,23 @@ OSIntCtxSw:
 @              a thread or occurs due to an interrupt or exception.
 @
 @           2) Pseudo-code is:
-@              a) Check if current TCB is null (idle). If yes, skip context save and go to f)
-@              b) Get the process SP
-@              c) If FP instructions was used, indicated by the EXEC_RETURN, save remaining FP regs S16-S31.
-@              d) Save remaining regs r4-r11 & r14 on process stack;
-@              e) Save the process SP in its TCB, OSTCBCurPtr->OSTCBStkPtr = SP;
-@              f) Call OSTaskSwHook();
-@              f) Get current high priority, OSPrioCur = OSPrioHighRdy;
-@              g) Get current ready thread TCB, OSTCBCurPtr = OSTCBHighRdyPtr;
-@              h) Check if going to idle. If yes, skip context restore and go to m)
-@              i) Get new process SP from TCB, SP = OSTCBHighRdyPtr->OSTCBStkPtr;
-@              j) Restore R4-R11 and R14 from new process stack;
-@              k) If FP instructions was used, indicated by the EXEC_RETURN, restore FP regs S16-S31.
-@              l) Go to n)
-@              m) Push a fake exception return stack frame on isr stack and use that as MSP for idle context
-@              n) Perform exception return which will restore remaining context.
+@              a) Check if current TCB is null (idle).
+@              b) If yes, clear LSPACT bit of FPU->FPCCR register to make sure that lazy stacking doesnt
+@                 trigger later. Skip context save and got to g).
+@              c) Get the process SP.
+@              d) If FP instructions was used, indicated by the EXEC_RETURN, save remaining FP regs S16-S31.
+@              e) Save remaining regs r4-r11 & r14 on process stack;
+@              f) Save the process SP in its TCB, OSTCBCurPtr->OSTCBStkPtr = SP;
+@              g) Call OSTaskSwHook();
+@              h) Get current high priority, OSPrioCur = OSPrioHighRdy;
+@              i) Get current ready thread TCB, OSTCBCurPtr = OSTCBHighRdyPtr;
+@              j) Check if going to idle. If yes, skip context restore and go to o)
+@              k) Get new process SP from TCB, SP = OSTCBHighRdyPtr->OSTCBStkPtr;
+@              l) Restore R4-R11 and R14 from new process stack;
+@              m) If FP instructions was used, indicated by the EXEC_RETURN, restore FP regs S16-S31.
+@              n) Context restoration is completed, go to end of function.
+@              o) Push a fake exception return stack frame on isr stack and use that as MSP for idle context.
+@              p) Perform exception return which will restore remaining context.
 @
 @           3) On entry into PendSV handler:
 @              a) The following have been saved on the process stack (by processor):
@@ -231,6 +235,15 @@ PendSV_Handler:
     MOVT   R2, #:upper16:OSTCBCurPtr
     LDR    R1, [R2]
     CMP    R1, #0
+
+#if (defined(__VFP_FP__) && !defined(__SOFTFP__))
+    ITTTT  EQ
+    LDREQ  R2, =FPU_FPCCR                                       @ Load FPU->FPCCR register address
+    LDREQ  R3, [R2]
+    BICEQ  R3, R3, #1                                           @ Clear LSPACT bit of LPCCR in case a FPU lazy stacking was active.
+    STREQ  R3, [R2]
+#endif
+
     BEQ   .end_context_save                                     @ Skip context save
 
     MRS     R0, PSP                                             @ PSP is process stack pointer

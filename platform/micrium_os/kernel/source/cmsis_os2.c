@@ -288,7 +288,7 @@ osStatus_t  osKernelGetInfo(osVersion_t   *version,
  *
  * Arguments  : None
  *
- * Returns    : osKernelInactive        The kernel is not ready yet                        (NOT SUPPORTED)
+ * Returns    : osKernelInactive        The kernel is not ready yet
  *              osKernelReady           The kernel is not running yet
  *              osKernelRunning         The kernel is initialized and running
  *              osKernelLocked          The kernel was locked by 'OSKernelLock()'
@@ -927,7 +927,7 @@ uint32_t  osEventFlagsSet(osEventFlagsId_t  ef_id,
 
   CORE_ENTER_ATOMIC();
 
-  new_flags = p_grp->Flags |= flags;                            // New flags after set
+  new_flags = p_grp->Flags | flags;                             // New flags after set
 
   p_tcb = p_grp->PendList.HeadPtr;                              // Loop over pending tasks
   while (p_tcb != DEF_NULL) {
@@ -1377,7 +1377,7 @@ osMutexId_t  osMutexNew(const  osMutexAttr_t  *attr)
     return (osMutexId_t)0;
   }
 
-  if (attr->attr_bits & osMutexRecursive) {
+  if (attr != NULL && attr->attr_bits & osMutexRecursive) {
     p_mutex->recursive = DEF_TRUE;
   } else {
     p_mutex->recursive = DEF_FALSE;
@@ -2261,16 +2261,10 @@ const  char  *osThreadGetName(osThreadId_t  thread_id)
  *
  * Returns    : The thread ID
  *              NULL             upon error
- *
- * Note(s)    : 1) This function CANNOT be called from an ISR
  ****************************************************************************************************
  */
 osThreadId_t  osThreadGetId(void)
 {
-  if (CORE_InIrqContext() == true) {
-    return (osThreadId_t)0;
-  }
-
   if (OSRunning == OS_STATE_OS_RUNNING) {
     return (osThreadId_t)OSTCBCurPtr;
   }
@@ -4163,7 +4157,9 @@ osStatus_t osMessageQueueGet(osMessageQueueId_t mq_id,
   p_msgqueue->msg_tail = (p_msgqueue->msg_tail + 1) %  p_msgqueue->msg_count;
   memcpy(msg_ptr, &p_msgqueue->buf[msg_id * msg_size], msg_size);
   p_msgqueue->msg_queued--;
-  *msg_prio = 0;
+  if (msg_prio != NULL) {
+    *msg_prio = 0;
+  }
   CORE_EXIT_ATOMIC();
 
   OSSemPost(&p_msgqueue->sem_put, OS_OPT_POST_1, &err);

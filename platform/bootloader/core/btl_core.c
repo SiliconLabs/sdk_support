@@ -3,7 +3,7 @@
  * @brief Core functionality for Silicon Labs bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -22,7 +22,7 @@
 #include "em_device.h"
 
 #ifdef BOOTLOADER_SUPPORT_STORAGE
-#include "plugin/storage/btl_storage.h"
+#include "storage/btl_storage.h"
 #endif
 
 int32_t btl_init(void)

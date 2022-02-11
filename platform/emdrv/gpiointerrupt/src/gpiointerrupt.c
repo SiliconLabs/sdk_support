@@ -59,9 +59,12 @@
 typedef struct {
   /* Pin interrupt number in range of 0 to 31 */
   uint32_t intNo;
-
   /* Pointer to the callback function */
-  GPIOINT_IrqCallbackPtr_t callback;
+  void *callback;
+  /* Pointer to the callback context */
+  void *context;
+  /* True if callback takes a context */
+  bool context_flag;
 } GPIOINT_CallbackDesc_t;
 
 /*******************************************************************************
@@ -69,7 +72,7 @@ typedef struct {
  ******************************************************************************/
 
 /* Array of user callbacks. One for each pin interrupt number. */
-static GPIOINT_IrqCallbackPtr_t gpioCallbacks[32] = { 0 };
+static GPIOINT_CallbackDesc_t gpioCallbacks[32] = { 0 };
 
 /*******************************************************************************
  ******************************   PROTOTYPES   *********************************
@@ -118,8 +121,68 @@ void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPt
 {
   CORE_ATOMIC_SECTION(
     /* Dispatcher is used */
-    gpioCallbacks[intNo] = callbackPtr;
+    gpioCallbacks[intNo].callback = (void *)callbackPtr;
+    gpioCallbacks[intNo].context_flag = false;
     )
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Registers user callback for given pin interrupt number.
+ *
+ * @details
+ *   Use this function to register a callback with context which shall be called upon
+ *   interrupt generated for a given pin number.
+ *   The function will return an interrupt number if one is available.
+ *   Interrupt itself must be configured externally.
+ *
+ * @param[in] pin
+ *   Pin number for the callback.
+ * @param[in] callbackPtr
+ *   A pointer to callback function.
+ * @param[in] callbackCtx
+ *   A pointer to the callback context.
+ *
+ * @return
+ *   Interrupt number, or INTERRUPT_UNAVAILABLE if all are in use
+ ******************************************************************************/
+unsigned int GPIOINT_CallbackRegisterExt(uint8_t pin, GPIOINT_IrqCallbackPtrExt_t callbackPtr, void *callbackCtx)
+{
+  CORE_DECLARE_IRQ_STATE;
+  unsigned int intNo = INTERRUPT_UNAVAILABLE;
+
+  CORE_ENTER_ATOMIC();
+
+#if defined(_GPIO_EXTIPINSELL_MASK)
+  uint32_t intToCheck;
+  uint32_t intGroupStart = (pin & 0xFFC);
+  uint32_t intsEnabled = GPIO_EnabledIntGet();
+
+  // loop through the interrupt group, starting
+  // from the pin number, and take
+  // the first available
+  for (uint8_t i = 0; i < 4; i++) {
+    intToCheck = intGroupStart + ((pin + i) & 0x3); // modulo 4
+    if (((intsEnabled >> intToCheck) & 0x1) == 0) {
+      intNo = (unsigned int)intToCheck;
+      break;
+    }
+  }
+#else
+  if (gpioCallbacks[pin].callback == 0) {
+    intNo = (unsigned int)pin;
+  }
+#endif
+
+  if (intNo != INTERRUPT_UNAVAILABLE) {
+    gpioCallbacks[intNo].callback = (void *)callbackPtr;
+    gpioCallbacks[intNo].context = callbackCtx;
+    gpioCallbacks[intNo].context_flag = true;
+  }
+
+  CORE_EXIT_ATOMIC();
+
+  return intNo;
 }
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
@@ -140,7 +203,7 @@ void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPt
 static void GPIOINT_IRQDispatcher(uint32_t iflags)
 {
   uint32_t irqIdx;
-  GPIOINT_IrqCallbackPtr_t callback;
+  GPIOINT_CallbackDesc_t *callback;
 
   /* check for all flags set in IF register */
   while (iflags != 0U) {
@@ -149,10 +212,16 @@ static void GPIOINT_IRQDispatcher(uint32_t iflags)
     /* clear flag*/
     iflags &= ~(1UL << irqIdx);
 
-    callback = gpioCallbacks[irqIdx];
-    if (callback) {
+    callback = &gpioCallbacks[irqIdx];
+    if (callback->callback) {
       /* call user callback */
-      callback((uint8_t)irqIdx);
+      if (callback->context_flag) {
+        GPIOINT_IrqCallbackPtrExt_t func = (GPIOINT_IrqCallbackPtrExt_t)(callback->callback);
+        func((uint8_t)irqIdx, callback->context);
+      } else {
+        GPIOINT_IrqCallbackPtr_t func = (GPIOINT_IrqCallbackPtr_t)(callback->callback);
+        func((uint8_t)irqIdx);
+      }
     }
   }
 }
@@ -228,6 +297,9 @@ void GPIO_ODD_IRQHandler(void)
 ///   registering the callback function for given interrupt number and then configure and
 ///   enabling the interrupt number in the GPIO module.
 ///
+///   The extended function GPIOINT_CallbackRegisterExt() may also be used to register a callback
+///   with context for a given pin number. The first available interrupt number will be returned.
+///
 ///   @n @section gpioint_api The API
 ///   This section contain brief descriptions of the functions in the API. You will
 ///   find detailed information on parameters by clicking on the hyperlinked function names.
@@ -244,12 +316,39 @@ void GPIO_ODD_IRQHandler(void)
 ///   @ref GPIOINT_CallbackUnRegister() @n
 ///    Un-register a callback function on a pin interrupt number.
 ///
+///   @ref GPIOINT_CallbackRegisterExt() @n
+///    Register a callback function with context on a pin number.
+///
+///   @ref GPIOINT_CallbackUnRegisterExt() @n
+///    Un-register a callback function with context on a pin number.
+///
 ///   @n @section gpioint_example Example
 ///   @code{.c}
 ///
-///#include "em_gpio.h"
-///#include "em_int.h"
 ///#include "gpiointerrupt.h"
+///
+///#include "em_chip.h"
+///#include "em_cmu.h"
+///#include "em_gpio.h"
+///
+///// An array to track if given pin callback was called
+///volatile uint8_t pinInt[32];
+///
+///// Gpio callbacks called when pin interrupt was triggered.
+///void gpioCallback1(uint8_t intNo)
+///{
+///  pinInt[intNo]++;
+///}
+///
+///void gpioCallback3(uint8_t intNo)
+///{
+///  pinInt[intNo]++;
+///}
+///
+///void gpioCallback8(uint8_t intNo)
+///{
+///  pinInt[intNo]++;
+///}
 ///
 ///int main(void)
 ///{
@@ -262,8 +361,8 @@ void GPIO_ODD_IRQHandler(void)
 ///  // Register callback functions and enable interrupts
 ///  GPIOINT_CallbackRegister(1, gpioCallback1);
 ///  GPIOINT_CallbackRegister(3, gpioCallback3);
-///  GPIOINT_CallbackRegister(8, gpioCallback8);
-///  GPIO_IntEnable(1<<1 | 1<<3 | 1<<8);
+///  unsigned int intPin8 = GPIOINT_CallbackRegisterExt(8, gpioCallback8, (void *)callback8context);
+///  GPIO_IntEnable(1<<1 | 1<<3 | 1<<intPin8);
 ///
 ///  while(true);
 ///}

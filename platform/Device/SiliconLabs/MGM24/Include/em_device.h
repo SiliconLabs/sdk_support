@@ -41,7 +41,13 @@
 
 #ifndef EM_DEVICE_H
 #define EM_DEVICE_H
-#if defined(MGM240PA22VNA)
+#if defined(MGM240L022RNF)
+#include "mgm240l022rnf.h"
+
+#elif defined(MGM240L022VNF)
+#include "mgm240l022vnf.h"
+
+#elif defined(MGM240PA22VNA)
 #include "mgm240pa22vna.h"
 
 #elif defined(MGM240PA32VNA)
@@ -50,8 +56,20 @@
 #elif defined(MGM240PA32VNN)
 #include "mgm240pa32vnn.h"
 
+#elif defined(MGM240PB22VNA)
+#include "mgm240pb22vna.h"
+
+#elif defined(MGM240PB32VNA)
+#include "mgm240pb32vna.h"
+
+#elif defined(MGM240PB32VNN)
+#include "mgm240pb32vnn.h"
+
 #elif defined(MGM240SA22VNA)
 #include "mgm240sa22vna.h"
+
+#elif defined(MGM240SB22VNA)
+#include "mgm240sb22vna.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

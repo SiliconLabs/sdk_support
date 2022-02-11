@@ -35,12 +35,12 @@
 #endif
 
 #ifdef SL_MX25_FLASH_SHUTDOWN_PERIPHERAL
-static void cs_low()
+static void cs_low(void)
 {
   GPIO_PinOutClear(SL_MX25_FLASH_SHUTDOWN_CS_PORT, SL_MX25_FLASH_SHUTDOWN_CS_PIN);
 }
 
-static void cs_high()
+static void cs_high(void)
 {
   GPIO_PinOutSet(SL_MX25_FLASH_SHUTDOWN_CS_PORT, SL_MX25_FLASH_SHUTDOWN_CS_PIN);
 }
@@ -64,7 +64,7 @@ void sl_mx25_flash_shutdown(void)
   init.bitRate = SL_MX25_FLASH_SHUTDOWN_BAUDRATE;
 
   init.advancedSettings = &advancedInit;
- 
+
   EUSART_SpiInit(SL_MX25_FLASH_SHUTDOWN_PERIPHERAL, &init);
 
   // IO config
@@ -74,14 +74,14 @@ void sl_mx25_flash_shutdown(void)
   GPIO_PinModeSet(SL_MX25_FLASH_SHUTDOWN_CS_PORT, SL_MX25_FLASH_SHUTDOWN_CS_PIN, gpioModePushPull, 1);
 
   GPIO->EUSARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].SCLKROUTE  = ((SL_MX25_FLASH_SHUTDOWN_SCLK_PORT << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_SCLK_PIN  << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT));
+                                                                        | (SL_MX25_FLASH_SHUTDOWN_SCLK_PIN  << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT));
   GPIO->EUSARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].RXROUTE   = ((SL_MX25_FLASH_SHUTDOWN_RX_PORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_RX_PIN  << _GPIO_EUSART_RXROUTE_PIN_SHIFT));
+                                                                       | (SL_MX25_FLASH_SHUTDOWN_RX_PIN  << _GPIO_EUSART_RXROUTE_PIN_SHIFT));
   GPIO->EUSARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].TXROUTE   = ((SL_MX25_FLASH_SHUTDOWN_TX_PORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
-                                                                   | (SL_MX25_FLASH_SHUTDOWN_TX_PIN  << _GPIO_EUSART_TXROUTE_PIN_SHIFT));
+                                                                       | (SL_MX25_FLASH_SHUTDOWN_TX_PIN  << _GPIO_EUSART_TXROUTE_PIN_SHIFT));
   GPIO->EUSARTROUTE[SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO].ROUTEEN   = (GPIO_EUSART_ROUTEEN_RXPEN
-                                                                   | GPIO_EUSART_ROUTEEN_TXPEN
-                                                                   | GPIO_EUSART_ROUTEEN_SCLKPEN);
+                                                                       | GPIO_EUSART_ROUTEEN_TXPEN
+                                                                       | GPIO_EUSART_ROUTEEN_SCLKPEN);
 
   // Wait for flash warm-up
   sl_udelay_wait(800);               // wait for tVSL=800us

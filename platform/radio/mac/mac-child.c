@@ -26,6 +26,12 @@
 #include "mac-header.h"
 #include "mac-child.h"
 
+#ifndef EMBER_STACK_CONNECT
+  #ifndef  ZIGBEE_MAX_NETWORK_ADDRESS
+  #define ZIGBEE_MAX_NETWORK_ADDRESS      0xFFF7
+  #endif
+#endif
+
 sl_mac_child_entry_t *sl_mac_child_table = NULL;
 uint16_t *sl_mac_child_status = NULL;
 uint8_t sl_mac_child_table_size = SL_MAC_MAX_CHILD_TABLE_SIZE;
@@ -197,8 +203,10 @@ uint8_t sl_mac_child_find_long_index(uint8_t startIndex, EmberEUI64 longId)
     return 0xFF;
   }
 
+  // only 0xFF is mostly checked for index as invalid value,
+  // returning this can give false positives.
   if (startIndex >= sl_mac_child_table_size) {
-    return SL_STATUS_INVALID_PARAMETER;
+    return 0xFF;
   }
 
   uint8_t i = 0;
@@ -257,7 +265,11 @@ sl_status_t sl_mac_set_child_id(uint8_t childIndex, EmberNodeId nodeId)
   if (sl_mac_child_table == NULL) {
     return SL_STATUS_INVALID_STATE;
   }
-
+#ifndef EMBER_STACK_CONNECT
+  if (nodeId > ZIGBEE_MAX_NETWORK_ADDRESS) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+#endif
   if (childIndex >= sl_mac_child_table_size) {
     return SL_STATUS_INVALID_PARAMETER;
   }
@@ -344,7 +356,7 @@ bool sl_mac_child_expecting_jit_message(uint8_t childIndex)
   }
 
   if (childIndex >= sl_mac_child_table_size) {
-    return SL_STATUS_INVALID_PARAMETER;
+    return false;
   }
 
   sl_mac_child_entry_t *child_entry = &sl_mac_child_table[childIndex];
@@ -361,7 +373,7 @@ uint8_t sl_mac_get_child_mac_index(uint8_t childIndex)
   }
 
   if (childIndex >= sl_mac_child_table_size) {
-    return SL_STATUS_INVALID_PARAMETER;
+    return 0xFF;
   }
 
   sl_mac_child_entry_t *child_entry = &sl_mac_child_table[childIndex];
@@ -473,13 +485,13 @@ bool sl_mac_check_any_child_flags(sl_mac_child_status_flags_t flags)
 bool sl_mac_child_id_is_sleepy(EmberNodeId id)
 {
   uint8_t childIndex = sl_mac_child_index(id);
-  return (childIndex != 0xFF
+  return (childIndex != SL_MAC_CHILD_INVALID_INDEX
           && sl_mac_child_is_sleepy(childIndex));
 }
 
 bool sl_mac_child_id_is_valid(EmberNodeId id)
 {
-  return (sl_mac_child_index(id) != 0xFF);
+  return (sl_mac_child_index(id) != SL_MAC_CHILD_INVALID_INDEX);
 }
 
 #ifndef EMBER_MULTI_NETWORK_STRIPPED
@@ -490,7 +502,7 @@ static sl_mac_child_table_pointers_t child_table_pointer_stack[MAX_CHILD_TABLE_P
 int8_t current_child_table_pointer_stack_index = -1;
 
 // Noted: the declaration of the following functions are located in
-// platform/radio/mac/multi-network.h where is aware of EMBER_MULTI_NETWORK_STRIPPED
+// platform/radio/mac/mac-multi-network.h where is aware of EMBER_MULTI_NETWORK_STRIPPED
 sl_status_t sli_mac_init_child_table_pointers(uint8_t nwk_index,
                                               sl_mac_child_entry_t *child_table,
                                               uint16_t *child_status)

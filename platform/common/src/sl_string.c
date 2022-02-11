@@ -112,7 +112,10 @@ size_t sl_strnlen(char *str, size_t max_len)
 /***************************************************************************//**
  * Check if string is empty.
  ******************************************************************************/
-extern __INLINE bool sl_str_is_empty(const char *str);
+bool sl_str_is_empty(const char *str)
+{
+  return (str == NULL || *str == '\0');
+}
 
 /***************************************************************************//**
  * Compare two strings, ignoring case.

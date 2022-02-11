@@ -41,6 +41,9 @@
 #include  <common/source/logging/logging_priv.h>
 #include  <em_device.h>
 #include  <em_core.h>
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#include  <em_cmu.h>
+#endif
 
 /********************************************************************************************************
  ********************************************************************************************************
@@ -57,33 +60,58 @@
 /********************************************************************************************************
  *                                   DWC OTG USB DEVICE CONSTRAINTS
  *
- * Note(s) : (1) The USB system features a dedicated data RAM of 1.25Kbytes = 1280 bytes = 320 32-bit words
- *               available for the Tx and Rx endpoints.
+ * Note(s) : (1) The USB system features a dedicated data RAM for endpoints. The endpoints RAM size varies
+ *               according to the SoC.
  *
- *                   (a) RX-FIFO : The USB device uses a single receive FIFO that receiveds the data directed
- *                                   to all OUT enpoints. The size of the receive FIFO is configured with
- *                                   the receive FIFO Size register (GRXFSIZ). The value written to GRXFSIZ is
- *                                   term of 32-bit words.
+ *                   (a) RX-FIFO: The USB device uses a single receive FIFO that receives the data directed
+ *                                to all OUT enpoints. The size of the receive FIFO is configured with
+ *                                the receive FIFO Size register (GRXFSIZ). The value written to GRXFSIZ is
+ *                                32-bit words entries.
  *
- *                   (b) TX-FIFO : The core has a dedicated FIFO for each IN endpoint. These can be configured
- *                                   by writing to DIEPTXF0 for IN endpoint0 and DIEPTXFx for IN endpoint x.
- *                                   The Tx FIFO depth value is in terms of 32-bit words. The minimum RAM space
- *                                   required for each IN endpoint Tx FIFO is 64bytes (Max packet size), which
- *                                   is equal to 16 32-bit words.
+ *                   (b) TX-FIFO: The core has a dedicated FIFO for each IN endpoint. These can be configured
+ *                                by writing to DIEPTXF0 for IN endpoint0 and DIEPTXFx for IN endpoint x.
+ *                                The Tx FIFO depth value is in terms of 32-bit words. The minimum RAM space
+ *                                required for each IN endpoint Tx FIFO is 64bytes (Max packet size), which
+ *                                is equal to 16 32-bit words entries.
+ *
+ *                   (c) EFM32GG11: 2 KB endpoint memory = 2048 bytes = 512 32-bit words distributed as
+ *                                  follows
+ *                                  128 entries for Rx/OUT endpoints
+ *                                  64 entries for each Tx/IN endpoints (max of 6 Tx/IN endpoints)
+ *
+ *                   (d) EFR32FG25: 3 KB endpoint memory = 3072 bytes = 768 32-bit words distributed as
+ *                                  follows
+ *                                  128 entries for Rx/OUT endpoints
+ *                                  64 entries for each Tx/IN endpoints (max of 10 Tx/IN endpoints)
  *******************************************************************************************************/
 
-#define  NBR_EPS                             16u                // Maximum number of endpoints
-#define  NBR_CHANNEL                          8u                // Maximum number of channels
+#define  NBR_EPS_IN_OR_OUT_MAX               16u                // Maximum number of endpoints of type IN or OUT
 #define  DFIFO_SIZE                        1024u                // Number of entries
 #define  MAX_PKT_SIZE                        64u
 
-#define  RXFIFO_SIZE                        128u                // See note #1.
-#define  TXFIFO_EP0_SIZE                     32u
-#define  TXFIFO_EP1_SIZE                     32u
-#define  TXFIFO_EP2_SIZE                     32u
-#define  TXFIFO_EP3_SIZE                     32u
-#define  TXFIFO_EP4_SIZE                     32u
-#define  TXFIFO_EP5_SIZE                     32u
+#define  RXFIFO_SIZE                        128u                // See note #1a.
+#define  TXFIFO_EPx_SIZE                     64u                // See note #1b.
+#define  TXFIFO_EP0_SIZE                     64u
+#define  TXFIFO_EP1_SIZE                     64u
+#define  TXFIFO_EP2_SIZE                     64u
+#define  TXFIFO_EP3_SIZE                     64u
+#define  TXFIFO_EP4_SIZE                     64u
+#define  TXFIFO_EP5_SIZE                     64u
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+#define  TXFIFO_EP6_SIZE                     64u
+#define  TXFIFO_EP7_SIZE                     64u
+#define  TXFIFO_EP8_SIZE                     64u
+#define  TXFIFO_EP9_SIZE                     64u
+
+#define  NBR_EPS_IN          (USBAHB_EP_NUM + 1u)               // +1 for control EP IN.
+#define  NBR_EPS_OUT         (USBAHB_EP_NUM + 1u)               // +1 for control EP OUT.
+#define  NBR_EPS_PHY_MAX     (NBR_EPS_IN + NBR_EPS_OUT)
+#else
+#define  NBR_EPS_IN                           7u
+#define  NBR_EPS_OUT                          7u
+#define  NBR_EPS_PHY_MAX     (NBR_EPS_IN + NBR_EPS_OUT)
+#endif
 
 /********************************************************************************************************
  *                                           REGISTER BIT DEFINES
@@ -122,7 +150,6 @@
 
 #define  GINTSTS_BIT_WKUPINT           DEF_BIT_31
 #define  GINTSTS_BIT_SRQINT            DEF_BIT_30
-#define  GINTSTS_BIT_DISCINT           DEF_BIT_29
 #define  GINTSTS_BIT_CIDSCHG           DEF_BIT_28
 #define  GINTSTS_BIT_RESETDET          DEF_BIT_23
 #define  GINTSTS_BIT_INCOMPISOOUT      DEF_BIT_21
@@ -153,7 +180,6 @@
 
 #define  GINTMSK_BIT_WUIM              DEF_BIT_31
 #define  GINTMSK_BIT_SRQIM             DEF_BIT_30
-#define  GINTMSK_BIT_DISCINT           DEF_BIT_29
 #define  GINTMSK_BIT_CIDSCHGM          DEF_BIT_28
 #define  GINTMSK_BIT_RESETDET          DEF_BIT_23
 #define  GINTMSK_BIT_IISOOXFRM         DEF_BIT_21
@@ -182,8 +208,6 @@
 #define  GRXSTSx_PKTSTS_MASK           DEF_BIT_FIELD(4u, 17u)
 #define  GRXSTSx_EPNUM_MASK            DEF_BIT_FIELD(2u, 0u)
 #define  GRXSTSx_BCNT_MASK             DEF_BIT_FIELD(11u, 4u)
-
-#define  GCCFG_BIT_PWRDWN              DEF_BIT_16
 
 #define  DCFG_PFIVL_80                 DEF_BIT_MASK(0u, 11u)
 #define  DCFG_PFIVL_85                 DEF_BIT_MASK(1u, 11u)
@@ -327,35 +351,36 @@
  *                                         PHY SUSPEND MACROS
  *******************************************************************************************************/
 
-#define  USBD_DRV_PHY_PCGCR_RESUME()               \
-  DEF_BIT_CLR(p_reg->PCGCR, PCGCCTL_BIT_GATEHCLK); \
-  DEF_BIT_CLR(p_reg->PCGCR, PCGCCTL_BIT_STPPCLK)
+#define  USBD_DRV_PHY_PCGCCTL_RESUME()               \
+  DEF_BIT_CLR(p_reg->PCGCCTL, PCGCCTL_BIT_GATEHCLK); \
+  DEF_BIT_CLR(p_reg->PCGCCTL, PCGCCTL_BIT_STPPCLK)
 
-#define  USBD_DRV_PHY_PCGCR_SUSPEND()              \
-  DEF_BIT_SET(p_reg->PCGCR, PCGCCTL_BIT_GATEHCLK); \
-  DEF_BIT_SET(p_reg->PCGCR, PCGCCTL_BIT_STPPCLK)
+#define  USBD_DRV_PHY_PCGCCTL_SUSPEND()              \
+  DEF_BIT_SET(p_reg->PCGCCTL, PCGCCTL_BIT_GATEHCLK); \
+  DEF_BIT_SET(p_reg->PCGCCTL, PCGCCTL_BIT_STPPCLK)
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100)
 #define  USBD_DRV_PHY_RESUME()                               \
   do {                                                       \
-    USBD_DRV_PHY_PCGCR_RESUME();                             \
+    USBD_DRV_PHY_PCGCCTL_RESUME();                           \
     DEF_BIT_SET(USB_REG_DATTRIM1, DATTRIM1_BIT_ENDLYPULLUP); \
   } while (0)
 
 #define  USBD_DRV_PHY_SUSPEND()                              \
   do {                                                       \
     DEF_BIT_CLR(USB_REG_DATTRIM1, DATTRIM1_BIT_ENDLYPULLUP); \
-    USBD_DRV_PHY_PCGCR_SUSPEND();                            \
-  } while (0)
-#else
-#define  USBD_DRV_PHY_RESUME()   \
-  do {                           \
-    USBD_DRV_PHY_PCGCR_RESUME(); \
+    USBD_DRV_PHY_PCGCCTL_SUSPEND();                          \
   } while (0)
 
-#define  USBD_DRV_PHY_SUSPEND()   \
-  do {                            \
-    USBD_DRV_PHY_PCGCR_SUSPEND(); \
+#else
+#define  USBD_DRV_PHY_RESUME()     \
+  do {                             \
+    USBD_DRV_PHY_PCGCCTL_RESUME(); \
+  } while (0)
+
+#define  USBD_DRV_PHY_SUSPEND()     \
+  do {                              \
+    USBD_DRV_PHY_PCGCCTL_SUSPEND(); \
   } while (0)
 #endif
 
@@ -403,69 +428,44 @@ typedef struct usbd_dwc_otg_fs_reg {
   CPU_REG32                  GRXSTSP;                           // Core status read and pop
   CPU_REG32                  GRXFSIZ;                           // Core receive FIFO size
   CPU_REG32                  DIEPTXF0;                          // Endpoint 0 transmit FIFO size
-  CPU_REG32                  HNPTXSTS;                          // Core Non Periodic Tx FIFO/Queue status
-  CPU_REG32                  GI2CCTL;                           // OTG_HS I2C access register
-  CPU_REG32                  RSVD0;
-  CPU_REG32                  GCCFG;                             // General core configuration
-  CPU_REG32                  CID;                               // Core ID register
-
-  CPU_REG32                  RSVD1[48u];
-
-  CPU_REG32                  HPTXFSIZ;                          // Core Host Periodic Tx FIFO size
-  CPU_REG32                  DIEPTXFx[NBR_EPS - 1];             // Device IN endpoint transmit FIFO size
-
-  CPU_REG32                  RSVD2[432u];
+  CPU_REG32                  RSVD0[54u];
+  //                                                               Device IN endpoint transmit FIFO size
+  CPU_REG32                  DIEPTXFx[NBR_EPS_IN_OR_OUT_MAX - 1];
+  CPU_REG32                  RSVD1[432u];
   //                                                               ----- DEVICE MODE CONTROL AND STATUS REGISTERS -----
   CPU_REG32                  DCFG;                              // Device configuration
   CPU_REG32                  DCTL;                              // Device control
   CPU_REG32                  DSTS;                              // Device status
-  CPU_REG32                  RSVD3;
+  CPU_REG32                  RSVD2;
   CPU_REG32                  DIEPMSK;                           // Device IN endpoint common interrupt mask
   CPU_REG32                  DOEPMSK;                           // Device OUT endpoint common interrupt mask
   CPU_REG32                  DAINT;                             // Device All endpoints interrupt
   CPU_REG32                  DAINTMSK;                          // Device All endpoints interrupt mask
-
-  CPU_REG32                  RSVD4[2u];
-
+  CPU_REG32                  RSVD3[2u];
   CPU_REG32                  DVBUSDIS;                          // Device VBUS discharge time
   CPU_REG32                  DVBUSPULSE;                        // Device VBUS pulsing time
-
-  CPU_REG32                  RESVD5;
-
+  CPU_REG32                  RSVD4;
   CPU_REG32                  DIEPEMPMSK;                        // Device IN ep FIFO empty interrupt mask
-
-  CPU_REG32                  EACHHINT;                          // OTG_HS device each endpoint interrupt register
-  CPU_REG32                  EACHHINTMSK;                       // OTG_HS device each endpoint interrupt register mask
-  CPU_REG32                  DIEPEACHMSK1;                      // OTG_HS device each IN endpoint-1 interrupt register
-  CPU_REG32                  RSVD6[15u];
-  CPU_REG32                  DOEPEACHMSK1;                      // OTG_HS device each OUT endpoint-1 interrupt register
-
-  CPU_REG32                  RSVD7[31u];
-
-  USBD_DWC_OTG_FS_IN_EP_REG  DIEP[NBR_EPS];                     // Device IN EP registers
-  USBD_DWC_OTG_FS_OUT_EP_REG DOEP[NBR_EPS];                     // Device OUT EP registers
-
-  CPU_REG32                  RSVD8[64u];
-
-  CPU_REG32                  PCGCR;                             // Power anc clock gating control
-
-  CPU_REG32                  RSVD9[127u];
-
-  USBD_DWC_OTG_FS_DFIFO_REG  DFIFO[NBR_EPS];                    // Data FIFO access registers
+  CPU_REG32                  RSVD5[50u];
+  USBD_DWC_OTG_FS_IN_EP_REG  DIEP[NBR_EPS_IN_OR_OUT_MAX];       // Device IN EP registers
+  USBD_DWC_OTG_FS_OUT_EP_REG DOEP[NBR_EPS_IN_OR_OUT_MAX];       // Device OUT EP registers
+  CPU_REG32                  RSVD6[64u];
+  CPU_REG32                  PCGCCTL;                           // Power anc clock gating control
+  CPU_REG32                  RSVD7[127u];
+  USBD_DWC_OTG_FS_DFIFO_REG  DFIFO[NBR_EPS_IN_OR_OUT_MAX];      // Data FIFO access registers
 } USBD_DWC_OTG_FS_REG;
 
 /********************************************************************************************************
  *                                           DRIVER DATA TYPE
  *******************************************************************************************************/
-
 typedef struct usbd_drv_data_ep {                               // ---------- DEVICE ENDPOINT DATA STRUCTURE ----------
   CPU_INT32U  DataBuf[MAX_PKT_SIZE / 4u];                       // Drv internal aligned buffer.
-  CPU_INT16U  EP_MaxPktSize[NBR_CHANNEL];                       // Max pkt size of opened EPs.
-  CPU_INT16U  EP_PktXferLen[NBR_CHANNEL];                       // EPs current xfer len.
-  CPU_INT08U  *EP_AppBufPtr[NBR_CHANNEL];                       // Ptr to app buffer.
-  CPU_INT16U  EP_AppBufLen[NBR_CHANNEL];                        // Len of app buffer.
+  CPU_INT16U  EP_MaxPktSize[NBR_EPS_PHY_MAX];                   // Max pkt size of opened EPs.
+  CPU_INT16U  EP_PktXferLen[NBR_EPS_PHY_MAX];                   // EPs current xfer len.
+  CPU_INT08U  *EP_AppBufPtr[NBR_EPS_PHY_MAX];                   // Ptr to endpoint app buffer.
+  CPU_INT16U  EP_AppBufLen[NBR_EPS_PHY_MAX];                    // Lenght of endpoint app buffer.
   CPU_INT32U  EP_SetupBuf[2u];                                  // Buffer that contains setup pkt.
-  CPU_BOOLEAN EnumDone;                                         // Indicates if EnumDone ISR occured.
+  CPU_BOOLEAN EnumDone;                                         // Indicates if EnumDone ISR occurred.
 } USBD_DRV_DATA_EP;
 
 /********************************************************************************************************
@@ -563,7 +563,7 @@ static void DWC_EP_InProcess(USBD_DRV *p_drv);
  *******************************************************************************************************/
 
 //                                                                 -------------- EFM32_OTG_FS DRIVER API -------------
-USBD_DRV_API USBD_DrvAPI_EFM32_OTG_FS = { USBD_DrvInit,
+USBD_DRV_API USBD_DrvAPI_EFx32_OTG_FS = { USBD_DrvInit,
                                           USBD_DrvStart,
                                           USBD_DrvStop,
                                           USBD_DrvAddrSet,
@@ -602,6 +602,11 @@ USBD_DRV_API USBD_DrvAPI_EFM32_OTG_FS = { USBD_DrvInit,
  *
  * @note     (1) Since the CPU frequency could be higher than OTG module clock, a timeout is needed
  *               to reset the OTG controller successfully.
+ *
+ *           (2) If a debugger is used to step into the driver, locking the OTG FS registers may make the
+ *               debugger crash if the USB OTG FS register view is opened. Indeed, the various registers
+ *               reads done by the debugger to refresh the registers content may not be properly handled
+ *               while they are locked.
  *******************************************************************************************************/
 static void USBD_DrvInit(USBD_DRV *p_drv,
                          RTOS_ERR *p_err)
@@ -634,6 +639,11 @@ static void USBD_DrvInit(USBD_DRV *p_drv,
                                                                 // ... initialization function.
   }
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  USB_APBS->EN_SET = USB_EN_EN;                                 // Enable the USB IP prior to setting other registers.
+  CMU_WaitUSBPLLLock();                                         // Ensure PLL0 is stable.
+#endif
+
   //                                                               Disable the global interrupt
   DEF_BIT_CLR(p_reg->GAHBCFG, GAHBCFG_BIT_GINTMSK);
 
@@ -652,25 +662,32 @@ static void USBD_DrvInit(USBD_DRV *p_drv,
     reg_to--;
   }
 
-  p_reg->GCCFG = GCCFG_BIT_PWRDWN;
-  p_reg->GUSBCFG |= GUSBCFG_BIT_HNPCAP | GUSBCFG_BIT_SRPCAP;
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  p_reg->GUSBCFG |= GUSBCFG_BIT_HNPCAP                          // Enable Host Negotiation Protocol capabilities.
+                    | GUSBCFG_BIT_SRPCAP;                       // Enable Sessions Request Protocol capabilities.
 
   DEF_BIT_SET(p_reg->GUSBCFG, GUSBCFG_BIT_FDMOD);               // Force the core to device mode
   reg_to = REG_FMOD_TO;                                         // Wait at least 25ms before the change takes effect
   while (reg_to > 0u) {
     reg_to--;
   }
+#endif
 
   //                                                               ------------------- DEVICE INIT --------------------
-  p_reg->PCGCR = DEF_BIT_NONE;                                  // Reset the PHY clock
+  p_reg->PCGCCTL = DEF_BIT_NONE;                                // Reset the PHY clock
   p_reg->GOTGCTL = DEF_BIT_NONE;
 
 #if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_100)
   DEF_BIT_SET(USB_REG_DATTRIM1, DATTRIM1_BIT_ENDLYPULLUP);
 #endif
 
-  p_reg->DCFG = DCFG_PFIVL_80
-                | DCFG_DSPD_FULLSPEED;
+  p_reg->DCFG = DCFG_PFIVL_80                                   // 80% of the frame interval
+                | DCFG_DSPD_FULLSPEED                           // Default to full-speed device
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+                | USBAHB_DCFG_ENA32KHZSUSP                      // Enable PHY clock switched from 48 MHz to 32 KHz during suspend
+                | (10 << _USBAHB_DCFG_RESVALID_SHIFT);          // Set resume period to detect a valid resume event TODO CM see if 10 must be really set or just reset value of 2 is enough
+#endif
+  ;
 
   p_reg->GRSTCTL = GRSTCTL_BIT_TXFFLSH                          // Flush all transmit FIFOs
                    | GRSTCTL_FLUSH_TXFIFO_ALL;
@@ -694,7 +711,7 @@ static void USBD_DrvInit(USBD_DRV *p_drv,
   p_reg->DOEPMSK = DEF_BIT_NONE;                                // Dis. interrupts for the Device OUT Endpoints
   p_reg->DAINTMSK = DEF_BIT_NONE;                               // Dis. interrupts foo all Device Endpoints
 
-  for (ep_nbr = 0u; ep_nbr < NBR_EPS; ep_nbr++) {
+  for (ep_nbr = 0u; ep_nbr < NBR_EPS_IN_OR_OUT_MAX; ep_nbr++) {
     //                                                             ----------------- IN ENDPOINT RESET ----------------
     ctrl_reg = p_reg->DIEP[ep_nbr].CTLx;
     if (DEF_BIT_IS_SET(ctrl_reg, DxEPCTLx_BIT_EPENA)) {
@@ -725,11 +742,14 @@ static void USBD_DrvInit(USBD_DRV *p_drv,
   }
 
   p_reg->GINTMSK = DEF_BIT_NONE;                                // Disable all interrupts
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  USB_APBS->IEN_CLR = USB_IEN_DWCOTG | USB_IEN_VBUS;
+#endif
 
   DEF_BIT_CLR(p_reg->DCFG, DCFG_DAD_MASK);                      // Set Device Address to zero
 
-  p_reg->PCGCR = PCGCCTL_BIT_PWRCLMP
-                 | PCGCCTL_BIT_RSTPDWNMODULE;
+  p_reg->PCGCCTL = PCGCCTL_BIT_PWRCLMP
+                   | PCGCCTL_BIT_RSTPDWNMODULE;                 // Lock access to registers (see Note #2)
 }
 
 /****************************************************************************************************//**
@@ -755,8 +775,8 @@ static void USBD_DrvStart(USBD_DRV *p_drv,
 
   p_drv_data->EnumDone = DEF_NO;
 
-  DEF_BIT_CLR(p_reg->PCGCR, PCGCCTL_BIT_PWRCLMP);
-  DEF_BIT_CLR(p_reg->PCGCR, PCGCCTL_BIT_RSTPDWNMODULE);
+  DEF_BIT_CLR(p_reg->PCGCCTL, PCGCCTL_BIT_PWRCLMP);
+  DEF_BIT_CLR(p_reg->PCGCCTL, PCGCCTL_BIT_RSTPDWNMODULE);       // Unlock registers access to write.
   USBD_DRV_PHY_RESUME();
 
   p_reg->GINTSTS = 0xFFFFFFFFu;                                 // Clear any pending interrupt
@@ -764,11 +784,19 @@ static void USBD_DrvStart(USBD_DRV *p_drv,
   p_reg->GINTMSK = GINTMSK_BIT_USBSUSPM
                    | GINTMSK_BIT_USBRST
                    | GINTMSK_BIT_ENUMDNEM
-                   | GINTMSK_BIT_DISCINT
                    | GINTMSK_BIT_WUIM
                    | GINTMSK_BIT_SRQIM
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
                    | GINTMSK_BIT_OTGINT
+#endif
                    | GINTMSK_BIT_RESETDET;
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  USB_APBS->CTRL_SET = USB_CTRL_VBSSNSHEN;                    // Enable VBUS sense high to detect connection.
+  USB_APBS->CTRL_CLR = USB_CTRL_VBSSNSLEN;                    // Ensure VBUS sense low is disabled.
+  USB_APBS->IEN_SET = USB_IEN_DWCOTG                          // Enable main USB IP interrupt.
+                      | USB_IEN_VBUS;                         // Enable VBUS sense interrupt.
+#endif
 
   //                                                               Enable Global Interrupt
   DEF_BIT_SET(p_reg->GAHBCFG, GAHBCFG_BIT_GINTMSK);
@@ -810,13 +838,13 @@ static void USBD_DrvStop(USBD_DRV *p_drv)
     p_bsp_api->Disconn();
   }
 
-  p_reg->GINTMSK = DEF_BIT_NONE;                                // Disable all interrupts
-  p_reg->GINTSTS = 0xFFFFFFFF;                                  // Clear any pending interrupt
-                                                                // Disable the global interrupt
+  p_reg->GINTMSK = DEF_BIT_NONE;                                // Disable all interrupts.
+  p_reg->GINTSTS = 0xFFFFFFFF;                                  // Clear any pending interrupt.
+                                                                // Disable the global interrupt.
   DEF_BIT_CLR(p_reg->GAHBCFG, GAHBCFG_BIT_GINTMSK);
 
-  DEF_BIT_SET(p_reg->DCTL, DCTL_BIT_SDIS);                      // Generate Device Disconnect event to the USB host
-  DEF_BIT_SET(p_reg->GRSTCTL, GRSTCTL_BIT_CSRST);
+  DEF_BIT_SET(p_reg->DCTL, DCTL_BIT_SDIS);                      // Generate Device Disconnect event to the USB host.
+  DEF_BIT_SET(p_reg->GRSTCTL, GRSTCTL_BIT_CSRST);               // Reset the USB core.
 
   KAL_Dly(1u);                                                  // Disconnect signal for at least 2 us.
 
@@ -827,8 +855,8 @@ static void USBD_DrvStop(USBD_DRV *p_drv)
   }
 
   USBD_DRV_PHY_SUSPEND();
-  DEF_BIT_SET(p_reg->PCGCR, PCGCCTL_BIT_PWRCLMP);
-  DEF_BIT_SET(p_reg->PCGCR, PCGCCTL_BIT_RSTPDWNMODULE);
+  DEF_BIT_SET(p_reg->PCGCCTL, PCGCCTL_BIT_PWRCLMP);
+  DEF_BIT_SET(p_reg->PCGCCTL, PCGCCTL_BIT_RSTPDWNMODULE);
 }
 
 /****************************************************************************************************//**
@@ -1348,6 +1376,7 @@ static CPU_BOOLEAN USBD_DrvEP_Abort(USBD_DRV   *p_drv,
       reg_to--;
     }
   } else {                                                      // ------------------ OUT ENDPOINTS -------------------
+    //                                                             Set Endpoint to NAK mode
     DEF_BIT_SET(p_reg->DOEP[ep_log_nbr].CTLx, DxEPCTLx_BIT_SNAK);
 
     //                                                             Flush EPx RX FIFO
@@ -1440,14 +1469,37 @@ static CPU_BOOLEAN USBD_DrvEP_Stall(USBD_DRV    *p_drv,
 static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
 {
   CPU_INT32U          int_stat;
-  CPU_INT32U          otgint_stat;
   USBD_DWC_OTG_FS_REG *p_reg;
   USBD_DRV_DATA_EP    *p_drv_data;
 
   p_reg = (USBD_DWC_OTG_FS_REG *)p_drv->CfgPtr->BaseAddr;
   p_drv_data = (USBD_DRV_DATA_EP *)p_drv->DataPtr;
-  int_stat = p_reg->GINTSTS;                                    // Read global interrrupt status register
+  int_stat = p_reg->GINTSTS;                                    // Read global interrupt status register
 
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  CPU_INT32U int_status_wrapper = USB_APBS->IF;
+
+  //                                                               ------------------ VBUS INTERRUPT ------------------
+  if (DEF_BIT_IS_SET(int_status_wrapper, _USB_IF_VBUS_MASK) == DEF_YES) {
+    USB_APBS->IF_CLR = USB_IF_VBUS;                             // Clear interrupt.
+    //                                                             Detect VBUS high event.
+    if (DEF_BIT_IS_SET(USB_APBS->STATUS, _USB_STATUS_VBUSVALID_MASK) == DEF_YES) {
+      USBD_DRV_PHY_RESUME();
+
+      USB_APBS->CTRL_CLR = USB_CTRL_VBSSNSHEN;                  // Disable VBUS sense high.
+      USB_APBS->CTRL_SET = USB_CTRL_VBSSNSLEN;                  // Enable VBUS sense low to detect disconnection.
+
+      USBD_EventConn(p_drv);                                    // Notify connect event.
+    } else {
+      USB_APBS->CTRL_CLR = USB_CTRL_VBSSNSLEN;                  // Disable VBUS sense low.
+      USB_APBS->CTRL_SET = USB_CTRL_VBSSNSHEN;                  // Enable VBUS sense high to detect disconnection.
+
+      USBD_EventDisconn(p_drv);                                 // Notify disconnect event.
+      p_drv_data->EnumDone = DEF_NO;
+      USBD_DRV_PHY_SUSPEND();
+    }
+  }
+#else
   //                                                               -------------- SESSION REQ DETECTION ---------------
   if (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_SRQINT) == DEF_YES) {
     USBD_DRV_PHY_RESUME();
@@ -1459,7 +1511,7 @@ static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
 
   //                                                               ------------------ OTG INTERRUPT -------------------
   if (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_OTGINT) == DEF_YES) {
-    otgint_stat = p_reg->GOTGINT;
+    CPU_INT32U otgint_stat = p_reg->GOTGINT;
 
     //                                                             Clear all OTG interrupt sources.
     DEF_BIT_SET(p_reg->GOTGINT, (GOTGINT_BIT_SEDET
@@ -1473,10 +1525,10 @@ static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
       USBD_EventDisconn(p_drv);                                 // Notify disconnect event.
 
       p_drv_data->EnumDone = DEF_NO;
-
       USBD_DRV_PHY_SUSPEND();
     }
   }
+#endif
 
   //                                                               ------------ RX FIFO NON-EMPTY DETECTION -----------
   if (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_RXFLVL) == DEF_YES) {
@@ -1496,6 +1548,9 @@ static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
   //                                                               ---------------- USB RESET DETECTION ---------------
   if ((DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_USBRST) == DEF_YES)
       || (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_RESETDET) == DEF_YES)) {
+    uint8_t ep_ix;
+    uint32_t ep_in_ram_start_address = 0u;
+
     USBD_DRV_PHY_RESUME();
 
     USBD_EventReset(p_drv);                                     // Notify bus reset event.
@@ -1514,28 +1569,12 @@ static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
     USBD_DrvAddrSet(p_drv, 0u);
 
     p_reg->GRXFSIZ = RXFIFO_SIZE;                               // Set Rx FIFO depth
-                                                                // Set EP0 to EP5 Tx FIFO depth
-    p_reg->DIEPTXF0 = (TXFIFO_EP0_SIZE << 16u) |  RXFIFO_SIZE;
-    p_reg->DIEPTXFx[0] = (TXFIFO_EP1_SIZE << 16u) | (RXFIFO_SIZE
-                                                     + TXFIFO_EP0_SIZE);
-    p_reg->DIEPTXFx[1] = (TXFIFO_EP2_SIZE << 16u) | (RXFIFO_SIZE
-                                                     + TXFIFO_EP0_SIZE
-                                                     + TXFIFO_EP1_SIZE);
-    p_reg->DIEPTXFx[2] = (TXFIFO_EP3_SIZE << 16u) | (RXFIFO_SIZE
-                                                     + TXFIFO_EP0_SIZE
-                                                     + TXFIFO_EP1_SIZE
-                                                     + TXFIFO_EP2_SIZE);
-    p_reg->DIEPTXFx[3] = (TXFIFO_EP4_SIZE << 16u) | (RXFIFO_SIZE
-                                                     + TXFIFO_EP0_SIZE
-                                                     + TXFIFO_EP1_SIZE
-                                                     + TXFIFO_EP2_SIZE
-                                                     + TXFIFO_EP3_SIZE);
-    p_reg->DIEPTXFx[4] = (TXFIFO_EP5_SIZE << 16u) | (RXFIFO_SIZE
-                                                     + TXFIFO_EP0_SIZE
-                                                     + TXFIFO_EP1_SIZE
-                                                     + TXFIFO_EP2_SIZE
-                                                     + TXFIFO_EP3_SIZE
-                                                     + TXFIFO_EP4_SIZE);
+    //                                                             Set EP0 to EPx Tx FIFO depth
+    p_reg->DIEPTXF0 = (TXFIFO_EP0_SIZE << 16u) |  RXFIFO_SIZE;  // Control endpoint.
+    for (ep_ix = 0; ep_ix < (NBR_EPS_IN - 1u); ep_ix++) {       // Non-control endpoints.
+      ep_in_ram_start_address = RXFIFO_SIZE + ((ep_ix + 1u) * TXFIFO_EPx_SIZE);
+      p_reg->DIEPTXFx[ep_ix] = (TXFIFO_EPx_SIZE << 16u) | ep_in_ram_start_address;
+    }
 
     p_drv_data->EnumDone = DEF_NO;
   }
@@ -1575,29 +1614,31 @@ static void USBD_DrvISR_Handler(USBD_DRV *p_drv)
 
     if (p_drv_data->EnumDone) {
       USBD_DRV_PHY_SUSPEND();
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+      // TODO CM the clock switch will be handled outside the interrupt by using the power manager PLATFORM_MTL-4674
+//      CMU_ClockSelectSet(cmuClock_USB, cmuSelect_LFXO);         // Select 32KHz LFXO for accurate timing reference.
+#endif
     }
   }
 
   //                                                               ----------------- WAKE-UP DETECTION ----------------
   if (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_WKUPINT) == DEF_YES) {
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+    // TODO CM the clock switch will be handled outside the interrupt by using the power manager PLATFORM_MTL-4674
+//    CMU_ClockSelectSet(cmuClock_USB, cmuSelect_PLL0);           // Select 48MHz clock source.
+#endif
     USBD_DRV_PHY_RESUME();
 
     DEF_BIT_CLR(p_reg->DCTL, DCTL_BIT_RWUSIG);                  // Clear Remote wakeup signaling
     DEF_BIT_SET(p_reg->GINTSTS, GINTSTS_BIT_WKUPINT);           // Clear Remote wakeup interrupt
-
     USBD_EventResume(p_drv);                                    // Notify Resume Event
   }
 
-  //                                                               ----------- DEVICE DISCONNECT DETECTION ------------
-  if (DEF_BIT_IS_SET(int_stat, GINTSTS_BIT_DISCINT)) {
-    USBD_EventDisconn(p_drv);
-
-    DEF_BIT_SET(p_reg->GINTSTS, GINTSTS_BIT_DISCINT);
-
-    p_drv_data->EnumDone = DEF_NO;
-
-    USBD_DRV_PHY_SUSPEND();
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  if (DEF_BIT_IS_SET(int_status_wrapper, _USB_IF_DWCOTG_MASK) == DEF_YES) {
+    USB_APBS->IF_CLR = USB_IF_DWCOTG;                         // Clear main interrupt.
   }
+#endif
 }
 
 /********************************************************************************************************
@@ -1661,7 +1702,7 @@ static void DWC_RxFIFO_Rd(USBD_DRV *p_drv)
         byte_cnt = DEF_MIN(byte_cnt, p_drv_data->EP_AppBufLen[ep_phy_nbr]);
         word_cnt = (byte_cnt / 4u);
 
-        //                                                         Check app buffer alignement.
+        //                                                         Check app buffer alignment.
         if ((((CPU_INT32U)p_drv_data->EP_AppBufPtr[ep_phy_nbr]) % 4u) == 0u) {
           p_data_buf = (CPU_INT32U *)p_drv_data->EP_AppBufPtr[ep_phy_nbr];
         } else {
@@ -1741,7 +1782,7 @@ static void DWC_TxFIFO_Wr(USBD_DRV   *p_drv,
   } while (words_avail < nbr_words);                            // Check if there are enough words to write into FIFO
 
   CORE_ENTER_ATOMIC();
-  if (((CPU_INT32U)p_buf % 4u) == 0u) {                         // Check app buffer alignement.
+  if (((CPU_INT32U)p_buf % 4u) == 0u) {                         // Check app buffer alignment.
     p_data_buf = (CPU_INT32U *)p_buf;
   } else {
     p_data_buf = &p_drv_data->DataBuf[0u];                      // Use drv internal aligned buf if app buf not aligned.
@@ -1796,7 +1837,7 @@ static void DWC_EP_OutProcess(USBD_DRV *p_drv)
       //                                                           Re-enable EP for next setup pkt.
       DEF_BIT_SET(p_reg->DOEP[0u].CTLx, DxEPCTLx_BIT_EPENA);
     }
-
+    //                                                             Set Endpoint to NAK mode
     DEF_BIT_SET(p_reg->DOEP[ep_log_nbr].CTLx, DxEPCTLx_BIT_SNAK);
 
     dev_ep_int = p_reg->DAINT >> 16u;                           // Read all Device OUT Endpoint interrupt

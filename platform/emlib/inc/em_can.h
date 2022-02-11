@@ -165,7 +165,7 @@ typedef struct {
   /** Default Phase Buffer Segment 2. */
   uint8_t   phaseBufferSegment2;
 
-  /** Default Synchronisation Jump Width. */
+  /** Default Synchronization Jump Width. */
   uint8_t   synchronisationJumpWidth;
 } CAN_Init_TypeDef;
 
@@ -321,7 +321,7 @@ __STATIC_INLINE CAN_ErrorCode_TypeDef CAN_GetLastErrorCode(CAN_TypeDef *can)
 
 /***************************************************************************//**
  * @brief
- *   Indicates which message objects have received new data.
+ *   Indicate which message objects have received new data.
  *
  * @param[in] can
  *   A pointer to the CAN peripheral register block.

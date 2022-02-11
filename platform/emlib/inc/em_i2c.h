@@ -165,7 +165,7 @@ typedef enum {
   i2cClockHLRFast      = _I2C_CTRL_CLHR_FAST           /**< Ratio is 11:3 */
 } I2C_ClockHLR_TypeDef;
 
-/** Return codes for single master mode transfer function. */
+/** Return codes for single Controller mode transfer function. */
 typedef enum {
   /* In progress code (>0) */
   i2cTransferInProgress = 1,    /**< Transfer in progress. */
@@ -190,19 +190,19 @@ typedef struct {
   /** Enable I2C peripheral when initialization completed. */
   bool                 enable;
 
-  /** Set to master (true) or slave (false) mode */
+  /** Set to Controller (true) or Target (false) mode */
   bool                 master;
 
   /**
    * I2C reference clock assumed when configuring bus frequency setup.
    * Set it to 0 if currently configured reference clock will be used
-   * This parameter is only applicable if operating in master mode.
+   * This parameter is only applicable if operating in Controller mode.
    */
   uint32_t             refFreq;
 
   /**
    * (Max) I2C bus frequency to use. This parameter is only applicable
-   * if operating in master mode.
+   * if operating in Controller mode.
    */
   uint32_t             freq;
 
@@ -214,7 +214,7 @@ typedef struct {
 #define I2C_INIT_DEFAULT                                                   \
   {                                                                        \
     true,                  /* Enable when initialization done. */          \
-    true,                  /* Set to master mode. */                       \
+    true,                  /* Set to Controller mode. */                   \
     0,                     /* Use currently configured reference clock. */ \
     I2C_FREQ_STANDARD_MAX, /* Set to standard rate assuring being */       \
     /*                        within I2C specification. */                 \
@@ -413,19 +413,19 @@ void I2C_Reset(I2C_TypeDef *i2c);
 
 /***************************************************************************//**
  * @brief
- *   Get slave address used for I2C peripheral (when operating in slave mode).
+ *   Get Target address used for I2C peripheral (when operating in Target mode).
  *
  * @details
  *   For 10-bit addressing mode, the address is split in two bytes, and only
  *   the first byte setting is fetched, effectively only controlling the 2 most
  *   significant bits of the 10-bit address. Full handling of 10-bit addressing
- *   in slave mode requires additional SW handling.
+ *   in Target mode requires additional SW handling.
  *
  * @param[in] i2c
  *   Pointer to I2C peripheral register block.
  *
  * @return
- *   I2C slave address in use. The 7 most significant bits define the actual
+ *   I2C Target address in use. The 7 most significant bits define the actual
  *   address, the least significant bit is reserved and always returned as 0.
  ******************************************************************************/
 __STATIC_INLINE uint8_t I2C_SlaveAddressGet(I2C_TypeDef *i2c)
@@ -435,19 +435,19 @@ __STATIC_INLINE uint8_t I2C_SlaveAddressGet(I2C_TypeDef *i2c)
 
 /***************************************************************************//**
  * @brief
- *   Set slave address to use for I2C peripheral (when operating in slave mode).
+ *   Set Target address to use for I2C peripheral (when operating in Target mode).
  *
  * @details
  *   For 10- bit addressing mode, the address is split in two bytes, and only
  *   the first byte is set, effectively only controlling the 2 most significant
- *   bits of the 10-bit address. Full handling of 10-bit addressing in slave
+ *   bits of the 10-bit address. Full handling of 10-bit addressing in Target
  *   mode requires additional SW handling.
  *
  * @param[in] i2c
  *   Pointer to I2C peripheral register block.
  *
  * @param[in] addr
- *   I2C slave address to use. The 7 most significant bits define the actual
+ *   I2C Target address to use. The 7 most significant bits define the actual
  *   address, the least significant bit is reserved and always set to 0.
  ******************************************************************************/
 __STATIC_INLINE void I2C_SlaveAddressSet(I2C_TypeDef *i2c, uint8_t addr)
@@ -457,14 +457,14 @@ __STATIC_INLINE void I2C_SlaveAddressSet(I2C_TypeDef *i2c, uint8_t addr)
 
 /***************************************************************************//**
  * @brief
- *   Get slave address mask used for I2C peripheral (when operating in slave
+ *   Get Target address mask used for I2C peripheral (when operating in Target
  *   mode).
  *
  * @details
  *   The address mask defines how the comparator works. A bit position with
- *   value 0 means that the corresponding slave address bit is ignored during
+ *   value 0 means that the corresponding Target address bit is ignored during
  *   comparison (don't care). A bit position with value 1 means that the
- *   corresponding slave address bit must match.
+ *   corresponding Target address bit must match.
  *
  *   For 10-bit addressing mode, the address is split in two bytes, and only
  *   the mask for the first address byte is fetched, effectively only
@@ -474,7 +474,7 @@ __STATIC_INLINE void I2C_SlaveAddressSet(I2C_TypeDef *i2c, uint8_t addr)
  *   Pointer to I2C peripheral register block.
  *
  * @return
- *   I2C slave address mask in use. The 7 most significant bits define the
+ *   I2C Target address mask in use. The 7 most significant bits define the
  *   actual address mask, the least significant bit is reserved and always
  *   returned as 0.
  ******************************************************************************/
@@ -485,14 +485,14 @@ __STATIC_INLINE uint8_t I2C_SlaveAddressMaskGet(I2C_TypeDef *i2c)
 
 /***************************************************************************//**
  * @brief
- *   Set slave address mask used for I2C peripheral (when operating in slave
+ *   Set Target address mask used for I2C peripheral (when operating in Target
  *   mode).
  *
  * @details
  *   The address mask defines how the comparator works. A bit position with
- *   value 0 means that the corresponding slave address bit is ignored during
+ *   value 0 means that the corresponding Target address bit is ignored during
  *   comparison (don't care). A bit position with value 1 means that the
- *   corresponding slave address bit must match.
+ *   corresponding Target address bit must match.
  *
  *   For 10-bit addressing mode, the address is split in two bytes, and only
  *   the mask for the first address byte is set, effectively only controlling
@@ -502,7 +502,7 @@ __STATIC_INLINE uint8_t I2C_SlaveAddressMaskGet(I2C_TypeDef *i2c)
  *   Pointer to I2C peripheral register block.
  *
  * @param[in] mask
- *   I2C slave address mask to use. The 7 most significant bits define the
+ *   I2C Target address mask to use. The 7 most significant bits define the
  *   actual address mask, the least significant bit is reserved and should
  *   be 0.
  ******************************************************************************/

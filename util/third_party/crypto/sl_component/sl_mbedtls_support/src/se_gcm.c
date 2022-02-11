@@ -38,19 +38,14 @@
 
 #if defined(SEMAILBOX_PRESENT)
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #if defined(MBEDTLS_GCM_ALT) && defined(MBEDTLS_GCM_C)
-#include "se_management.h"
 #include "mbedtls/gcm.h"
-#include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
-#include "gcm_alt.h"
+#include "mbedtls/error.h"
+#include "se_management.h"
 #include <string.h>
 
 /* Implementation that should never be optimized out by the compiler */
@@ -136,21 +131,17 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
 int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        int mode,
                        const unsigned char *iv,
-                       size_t iv_len,
-                       const unsigned char *add,
-                       size_t add_len)
+                       size_t iv_len)
 {
   int status;
-  SE_Response_t se_response;
 
   /* Check input parameters. */
   if (ctx == NULL
-      || iv == NULL
-      || (add_len > 0 && add == NULL)) {
+      || iv == NULL ) {
     return MBEDTLS_ERR_GCM_BAD_INPUT;
   }
 
-  status = sli_validate_gcm_params(16, iv_len, add_len);
+  status = sli_validate_gcm_params(16, iv_len, 0);
   if (status) {
     return status;
   }
@@ -158,123 +149,154 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   /* Store input in context data structure. */
   ctx->mode = mode;
   ctx->len = 0;
-  ctx->add_len = add_len;
+  ctx->add_len = 0;
   ctx->last_op = false;
+  ctx->iv_len = iv_len;
+  memcpy(ctx->se_ctx_dec, iv, iv_len);
+  memcpy(ctx->se_ctx_enc, iv, iv_len);
 
-  if ( add_len > 0 ) {
-    // Start with encryption
-    // Need to do encryption twice: once to create the context, the other to pre-compute the tag in case there's no more data coming
-    // (SE doesn't support a type of 'finalize' command. All operations with 'END' set need to contain some data.)
-    SE_Command_t gcm_cmd_enc = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | SE_COMMAND_OPTION_CONTEXT_START);
-    SE_Command_t gcm_cmd_enc_full = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | SE_COMMAND_OPTION_CONTEXT_WHOLE);
+  return 0;
+}
 
-    SE_DataTransfer_t key_in = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-    SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
+                          const unsigned char *add,
+                          size_t add_len)
+{
+  int status;
+  SE_Response_t se_response;
 
-    SE_DataTransfer_t key_in_full = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    SE_DataTransfer_t iv_in_full = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-    SE_DataTransfer_t aad_in_full = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+  if (add_len > 0 && add == NULL) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
 
-    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
-    SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+  if (add_len == 0) {
+    return 0;
+  }
 
-    SE_addDataInput(&gcm_cmd_enc, &key_in);
-    SE_addDataInput(&gcm_cmd_enc, &iv_in);
-    SE_addDataInput(&gcm_cmd_enc, &aad_in);
+  // This implementation only supports adding the full AD in one shot
+  if ( ctx->add_len > 0 ) {
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  }
 
-    SE_addDataInput(&gcm_cmd_enc_full, &key_in_full);
-    SE_addDataInput(&gcm_cmd_enc_full, &iv_in_full);
-    SE_addDataInput(&gcm_cmd_enc_full, &aad_in_full);
+  status = sli_validate_gcm_params(16, 12, add_len);
+  if (status) {
+    return status;
+  }
 
-    SE_addDataOutput(&gcm_cmd_enc, &ctx_out);
-    SE_addDataOutput(&gcm_cmd_enc_full, &tag_out);
+  // Start with encryption
+  // Need to do encryption twice: once to create the context, the other to pre-compute the tag in case there's no more data coming
+  // (SE doesn't support a type of 'finalize' command. All operations with 'END' set need to contain some data.)
+  SE_Command_t gcm_cmd_enc = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | SE_COMMAND_OPTION_CONTEXT_START);
+  SE_Command_t gcm_cmd_enc_full = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | SE_COMMAND_OPTION_CONTEXT_WHOLE);
 
-    SE_addParameter(&gcm_cmd_enc, ctx->keybits / 8);
-    SE_addParameter(&gcm_cmd_enc, add_len);
-    SE_addParameter(&gcm_cmd_enc, 0);
+  SE_DataTransfer_t key_in = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+  SE_DataTransfer_t aad_in = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
 
-    SE_addParameter(&gcm_cmd_enc_full, ctx->keybits / 8);
-    SE_addParameter(&gcm_cmd_enc_full, add_len);
-    SE_addParameter(&gcm_cmd_enc_full, 0);
+  SE_DataTransfer_t key_in_full = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+  SE_DataTransfer_t iv_in_full = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+  SE_DataTransfer_t aad_in_full = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+
+  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, sizeof(ctx->se_ctx_enc));
+  SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
+
+  SE_addDataInput(&gcm_cmd_enc, &key_in);
+  SE_addDataInput(&gcm_cmd_enc, &iv_in);
+  SE_addDataInput(&gcm_cmd_enc, &aad_in);
+
+  SE_addDataInput(&gcm_cmd_enc_full, &key_in_full);
+  SE_addDataInput(&gcm_cmd_enc_full, &iv_in_full);
+  SE_addDataInput(&gcm_cmd_enc_full, &aad_in_full);
+
+  SE_addDataOutput(&gcm_cmd_enc, &ctx_out);
+  SE_addDataOutput(&gcm_cmd_enc_full, &tag_out);
+
+  SE_addParameter(&gcm_cmd_enc, ctx->keybits / 8);
+  SE_addParameter(&gcm_cmd_enc, add_len);
+  SE_addParameter(&gcm_cmd_enc, 0);
+
+  SE_addParameter(&gcm_cmd_enc_full, ctx->keybits / 8);
+  SE_addParameter(&gcm_cmd_enc_full, add_len);
+  SE_addParameter(&gcm_cmd_enc_full, 0);
+
+  status = se_management_acquire();
+  if (status != 0) {
+    return status;
+  }
+  /* Execute GCM operation */
+  SE_executeCommand(&gcm_cmd_enc_full);
+  se_response = SE_readCommandResponse();
+  SE_executeCommand(&gcm_cmd_enc);
+  se_response |= SE_readCommandResponse();
+
+  se_management_release();
+
+  // Continue with decryption if needed
+  if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
+    SE_Command_t gcm_cmd_dec = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_DECRYPT | SE_COMMAND_OPTION_CONTEXT_START);
+
+    SE_DataTransfer_t key_in_dec = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
+    SE_DataTransfer_t iv_in_dec = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, ctx->iv_len);
+    SE_DataTransfer_t aad_in_dec = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
+
+    SE_DataTransfer_t ctx_out_dec = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
+
+    SE_addDataInput(&gcm_cmd_dec, &key_in_dec);
+    SE_addDataInput(&gcm_cmd_dec, &iv_in_dec);
+    SE_addDataInput(&gcm_cmd_dec, &aad_in_dec);
+
+    SE_addDataOutput(&gcm_cmd_dec, &ctx_out_dec);
+
+    SE_addParameter(&gcm_cmd_dec, ctx->keybits / 8);
+    SE_addParameter(&gcm_cmd_dec, add_len);
+    SE_addParameter(&gcm_cmd_dec, 0);
 
     status = se_management_acquire();
     if (status != 0) {
       return status;
     }
     /* Execute GCM operation */
-    SE_executeCommand(&gcm_cmd_enc_full);
+    SE_executeCommand(&gcm_cmd_dec);
     se_response = SE_readCommandResponse();
-    SE_executeCommand(&gcm_cmd_enc);
-    se_response |= SE_readCommandResponse();
-
     se_management_release();
-
-    // Continue with decryption if needed
-    if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
-      SE_Command_t gcm_cmd_dec = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_DECRYPT | SE_COMMAND_OPTION_CONTEXT_START);
-
-      SE_DataTransfer_t key_in_dec = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-      SE_DataTransfer_t iv_in_dec = SE_DATATRANSFER_DEFAULT((void*)iv, iv_len);
-      SE_DataTransfer_t aad_in_dec = SE_DATATRANSFER_DEFAULT((void*)add, add_len);
-
-      SE_DataTransfer_t ctx_out_dec = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
-
-      SE_addDataInput(&gcm_cmd_dec, &key_in_dec);
-      SE_addDataInput(&gcm_cmd_dec, &iv_in_dec);
-      SE_addDataInput(&gcm_cmd_dec, &aad_in_dec);
-
-      SE_addDataOutput(&gcm_cmd_dec, &ctx_out_dec);
-
-      SE_addParameter(&gcm_cmd_dec, ctx->keybits / 8);
-      SE_addParameter(&gcm_cmd_dec, add_len);
-      SE_addParameter(&gcm_cmd_dec, 0);
-
-      status = se_management_acquire();
-      if (status != 0) {
-        return status;
-      }
-      /* Execute GCM operation */
-      SE_executeCommand(&gcm_cmd_dec);
-      se_response = SE_readCommandResponse();
-      se_management_release();
-    }
-
-    if (se_response == SE_RESPONSE_OK) {
-      return(0);
-    } else {
-      return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
-    }
-  } else {
-    memcpy(ctx->se_ctx_enc, iv, iv_len);
   }
 
-  return 0;
+  if (se_response == SE_RESPONSE_OK) {
+    ctx->add_len = add_len;
+    return 0;
+  } else {
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
+  }
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
-                       size_t length,
-                       const unsigned char *input,
-                       unsigned char *output)
+                       const unsigned char *input, size_t input_length,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length)
 {
   int status;
   SE_Response_t se_response;
   uint8_t lena_lenc[16];
+  *output_length = 0;
 
   if (ctx == NULL
-      || (length > 0 && input == NULL)
-      || (length > 0 && output == NULL)) {
+      || (input_length > 0 && input == NULL)
+      || (input_length > 0 && output == NULL)) {
     return MBEDTLS_ERR_GCM_BAD_INPUT;
   }
 
-  if (length == 0) {
+  if (input_length > output_size) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
+
+  if (input_length == 0) {
     return 0;
   }
 
   /* Total length is restricted to 2^39 - 256 bits, ie 2^36 - 2^5 bytes
    * Also check for possible overflow */
-  if ( ctx->len + length < ctx->len
-       || (uint64_t) ctx->len + length > 0xFFFFFFFE0ull ) {
+  if ( ctx->len + input_length < ctx->len
+       || (uint64_t) ctx->len + input_length > 0xFFFFFFFE0ull ) {
     return(MBEDTLS_ERR_GCM_BAD_INPUT);
   }
 
@@ -292,26 +314,29 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   // Figure out whether we'll be closing out
   bool first_op = (ctx->add_len == 0 && ctx->len == 0) ? true : false;
 
-  if ( length % 16 != 0) {
+  if ( input_length % 16 != 0) {
     // Indicate that this is our last op
     ctx->last_op = true;
   }
 
   if (first_op && ctx->last_op) {
     // Need to store length in context for later.
-    ctx->len = length;
+    ctx->len = input_length;
     // optimisation: delegate to all-in-one handler
-    return mbedtls_gcm_crypt_and_tag(ctx, ctx->mode, length,
-                                     // Use IV length of 12 bytes
-                                     ctx->se_ctx_enc, 12,
-                                     NULL, 0,
-                                     input, output,
-                                     // Compute max tag size (16 bytes)
-                                     16, ctx->tagbuf);
+    status = mbedtls_gcm_crypt_and_tag(ctx, ctx->mode, input_length,
+                                       ctx->se_ctx_dec, ctx->iv_len,
+                                       NULL, 0,
+                                       input, output,
+                                       // Compute max tag size (16 bytes)
+                                       16, ctx->tagbuf);
+    if (status == 0) {
+      *output_length = input_length;
+    }
+    return status;
   }
 
   sx_math_u64_to_u8array(ctx->add_len << 3, &lena_lenc[0]);
-  sx_math_u64_to_u8array((ctx->len + length) << 3, &lena_lenc[8]);
+  sx_math_u64_to_u8array((ctx->len + input_length) << 3, &lena_lenc[8]);
 
   // Need to be sure we can get the SE before starting to change any context variables
   status = se_management_acquire();
@@ -319,17 +344,17 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     return status;
   }
 
-  ctx->len += length;
+  ctx->len += input_length;
 
   if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
     // Run decryption first
     SE_Command_t gcm_cmd_dec = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_DECRYPT | (first_op ? SE_COMMAND_OPTION_CONTEXT_START : (ctx->last_op ? SE_COMMAND_OPTION_CONTEXT_END : SE_COMMAND_OPTION_CONTEXT_ADD)));
 
     SE_DataTransfer_t key_in_dec = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    SE_DataTransfer_t iv_ctx_in_dec = SE_DATATRANSFER_DEFAULT((first_op ? ctx->se_ctx_enc : ctx->se_ctx_dec), (first_op ? 12 : sizeof(ctx->se_ctx_dec)));
-    SE_DataTransfer_t data_in_dec = SE_DATATRANSFER_DEFAULT((void*)input, length);
+    SE_DataTransfer_t iv_ctx_in_dec = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_dec)));
+    SE_DataTransfer_t data_in_dec = SE_DATATRANSFER_DEFAULT((void*)input, input_length);
     SE_DataTransfer_t lenalenc_in_dec = SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    SE_DataTransfer_t data_out_dec = SE_DATATRANSFER_DEFAULT(output, length);
+    SE_DataTransfer_t data_out_dec = SE_DATATRANSFER_DEFAULT(output, input_length);
     SE_DataTransfer_t ctx_out_dec = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_dec, sizeof(ctx->se_ctx_dec));
     SE_DataTransfer_t mac_in_dec = SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
 
@@ -347,7 +372,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
     SE_addParameter(&gcm_cmd_dec, ctx->keybits / 8);
     SE_addParameter(&gcm_cmd_dec, 0);
-    SE_addParameter(&gcm_cmd_dec, length);
+    SE_addParameter(&gcm_cmd_dec, input_length);
 
     SE_executeCommand(&gcm_cmd_dec);
     se_response = SE_readCommandResponse();
@@ -365,10 +390,10 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     SE_Command_t gcm_cmd_enc_final = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | (first_op ? SE_COMMAND_OPTION_CONTEXT_WHOLE : SE_COMMAND_OPTION_CONTEXT_END));
 
     SE_DataTransfer_t key_in_enc_final = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    SE_DataTransfer_t iv_ctx_in_enc_final = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? 12 : sizeof(ctx->se_ctx_enc)));
+    SE_DataTransfer_t iv_ctx_in_enc_final = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
     SE_DataTransfer_t lenalenc_in_enc_final = SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    SE_DataTransfer_t data_in_enc_final = SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, length);
-    SE_DataTransfer_t data_out_enc_final = SE_DATATRANSFER_DEFAULT(NULL, length);
+    SE_DataTransfer_t data_in_enc_final = SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
+    SE_DataTransfer_t data_out_enc_final = SE_DATATRANSFER_DEFAULT(NULL, input_length);
     data_out_enc_final.length |= SE_DATATRANSFER_DISCARD;
     SE_DataTransfer_t tag_out_final = SE_DATATRANSFER_DEFAULT(ctx->tagbuf, sizeof(ctx->tagbuf));
 
@@ -385,7 +410,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
     SE_addParameter(&gcm_cmd_enc_final, ctx->keybits / 8);
     SE_addParameter(&gcm_cmd_enc_final, 0);
-    SE_addParameter(&gcm_cmd_enc_final, length);
+    SE_addParameter(&gcm_cmd_enc_final, input_length);
 
     SE_executeCommand(&gcm_cmd_enc_final);
     se_response = SE_readCommandResponse();
@@ -400,11 +425,11 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   {
     SE_Command_t gcm_cmd_enc = SE_COMMAND_DEFAULT(SE_COMMAND_AES_GCM_ENCRYPT | (first_op ? SE_COMMAND_OPTION_CONTEXT_START : (ctx->last_op ? SE_COMMAND_OPTION_CONTEXT_END : SE_COMMAND_OPTION_CONTEXT_ADD)));
     SE_DataTransfer_t key_in_enc = SE_DATATRANSFER_DEFAULT(ctx->key, ctx->keybits / 8);
-    SE_DataTransfer_t iv_ctx_in_enc = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? 12 : sizeof(ctx->se_ctx_enc)));
+    SE_DataTransfer_t iv_ctx_in_enc = SE_DATATRANSFER_DEFAULT(ctx->se_ctx_enc, (first_op ? ctx->iv_len : sizeof(ctx->se_ctx_enc)));
     SE_DataTransfer_t lenalenc_in_enc = SE_DATATRANSFER_DEFAULT(lena_lenc, sizeof(lena_lenc));
-    SE_DataTransfer_t data_in_enc = SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, length);
+    SE_DataTransfer_t data_in_enc = SE_DATATRANSFER_DEFAULT(ctx->mode == MBEDTLS_GCM_ENCRYPT ? (void*)input : (void*)output, input_length);
 
-    SE_DataTransfer_t data_out_enc = SE_DATATRANSFER_DEFAULT(output, length);
+    SE_DataTransfer_t data_out_enc = SE_DATATRANSFER_DEFAULT(output, input_length);
     if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
       data_out_enc.data = NULL;
       data_out_enc.length |= SE_DATATRANSFER_DISCARD;
@@ -431,7 +456,7 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
     SE_addParameter(&gcm_cmd_enc, ctx->keybits / 8);
     SE_addParameter(&gcm_cmd_enc, 0);
-    SE_addParameter(&gcm_cmd_enc, length);
+    SE_addParameter(&gcm_cmd_enc, input_length);
 
     SE_executeCommand(&gcm_cmd_enc);
     se_response = SE_readCommandResponse();
@@ -441,17 +466,27 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   se_management_release();
 
   if (se_response == SE_RESPONSE_OK) {
+    *output_length = input_length;
     return(0);
   } else {
-    mbedtls_zeroize(output, length);
-    return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+    mbedtls_zeroize(output, output_size);
+    return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length,
                        unsigned char *tag,
                        size_t tag_len)
 {
+  // Voiding these because our implementation does not support
+  // partial-block input (i.e. passing a partial block to
+  // update() will have caused the operation to finish already)
+  (void) output;
+  (void) output_size;
+  *output_length = 0;
+
   if (ctx == NULL || tag == NULL) {
     return MBEDTLS_ERR_GCM_BAD_INPUT;
   }
@@ -593,7 +628,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
   } else {
     mbedtls_zeroize(output, length);
     mbedtls_zeroize(tagbuf, sizeof(tagbuf));
-    return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+    return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
 
@@ -671,7 +706,7 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
     if (se_response == SE_RESPONSE_INVALID_SIGNATURE) {
       return(MBEDTLS_ERR_GCM_AUTH_FAILED);
     } else {
-      return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+      return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
     }
   }
 }

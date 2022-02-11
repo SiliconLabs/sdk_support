@@ -2,7 +2,7 @@ id: micriumos_can
 label: CAN Bus
 package: micrium-cano
 description: Micrium OS CAN Bus
-category: Services|CANopen
+category: Services|Micrium|CANopen
 quality: production
 component_root_path: platform/micrium_os/can
 source:

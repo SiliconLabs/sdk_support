@@ -3,7 +3,7 @@
  * @brief Representation of Application Properties
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -28,8 +28,8 @@
  *   Applications must contain an @ref ApplicationProperties_t struct declaring
  *   the application version and capabilities, and so on. The metadata contained
  *   in this struct will be extracted from the application by the Simplicity
- *   Commander tool and placed in the EBL upgrade file. If such a struct is not
- *   present in the application image, it will be added to the EBL file by the
+ *   Commander tool and placed in the GBL upgrade file. If this struct is not
+ *   present in the application image, it will be added to the GBL file by the
  *   Simplicity Commander.
  *
  *   The struct is also used to declare whether the application image is signed
@@ -37,7 +37,7 @@
  *   struct is present, the bootloader will assume that the application image
  *   is signed using @ref APPLICATION_SIGNATURE_ECDSA_P256.
  *
- *   For the bootloader to easily locate the ApplicationProperties_t
+ *   To ensure that the bootloader can easily locate the ApplicationProperties_t
  *   struct, if not already done by the linker, Simplicity Commander will modify
  *   word 13 of the application to insert a pointer to the
  *   ApplicationProperties_t struct.

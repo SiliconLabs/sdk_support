@@ -21,11 +21,7 @@
 #ifndef PSA_CRYPTO_CORE_H
 #define PSA_CRYPTO_CORE_H
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include "mbedtls/build_info.h"
 
 #include "psa/crypto.h"
 #include "psa/crypto_se_driver.h"
@@ -107,7 +103,7 @@ typedef struct
  */
 static inline int psa_is_key_slot_occupied( const psa_key_slot_t *slot )
 {
-    return( slot->attr.type != 0 );
+    return( slot->attr.MBEDTLS_PRIVATE(type) != 0 );
 }
 
 /** Test whether a key slot is locked.
@@ -134,7 +130,7 @@ static inline int psa_is_key_slot_locked( const psa_key_slot_t *slot )
 static inline uint16_t psa_key_slot_get_flags( const psa_key_slot_t *slot,
                                                uint16_t mask )
 {
-    return( slot->attr.flags & mask );
+    return( slot->attr.MBEDTLS_PRIVATE(flags) & mask );
 }
 
 /** Set flags in psa_key_slot_t::attr::core::flags.
@@ -147,8 +143,9 @@ static inline void psa_key_slot_set_flags( psa_key_slot_t *slot,
                                            uint16_t mask,
                                            uint16_t value )
 {
-    slot->attr.flags = ( ( ~mask & slot->attr.flags ) |
-                              ( mask & value ) );
+    slot->attr.MBEDTLS_PRIVATE(flags) =
+        ( ( ~mask & slot->attr.MBEDTLS_PRIVATE(flags) ) |
+          ( mask & value ) );
 }
 
 /** Turn on flags in psa_key_slot_t::attr::core::flags.
@@ -159,7 +156,7 @@ static inline void psa_key_slot_set_flags( psa_key_slot_t *slot,
 static inline void psa_key_slot_set_bits_in_flags( psa_key_slot_t *slot,
                                                    uint16_t mask )
 {
-    slot->attr.flags |= mask;
+    slot->attr.MBEDTLS_PRIVATE(flags) |= mask;
 }
 
 /** Turn off flags in psa_key_slot_t::attr::core::flags.
@@ -170,7 +167,7 @@ static inline void psa_key_slot_set_bits_in_flags( psa_key_slot_t *slot,
 static inline void psa_key_slot_clear_bits( psa_key_slot_t *slot,
                                             uint16_t mask )
 {
-    slot->attr.flags &= ~mask;
+    slot->attr.MBEDTLS_PRIVATE(flags) &= ~mask;
 }
 
 #if defined(MBEDTLS_PSA_CRYPTO_SE_C)

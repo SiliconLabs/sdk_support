@@ -302,7 +302,8 @@ sl_status_t sl_mac_radio_receive_mac_header_callback(uint8_t mac_index,
                       && destinationFlags != (TO_OUR_PAN_ID | TO_BROADCAST_ID)))) {
         return SL_STATUS_MAC_UNKNOWN_HEADER_TYPE;
       } else if ((destinationFlags & TO_BROADCAST_ID)
-                 && (!state->nwk_radio_parameters[NWK_INDEX].rx_on_when_idle
+                 && (((state->nwk_radio_parameters[NWK_INDEX].rx_state != SL_MAC_RX_ON_WHEN_IDLE)
+                      && (state->nwk_radio_parameters[NWK_INDEX].rx_state != SL_MAC_RX_DUTY_CYCLING))
                      || sl_mac_lower_mac_is_expecting_data())) {
         // Broadcasts are ignored by sleepy nodes or anyone waiting for data
         // from their parent.

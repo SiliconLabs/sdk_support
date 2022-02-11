@@ -13,6 +13,7 @@ provides:
   - name: flash_storage
 config_file:
   - path: toolchain/config/sl_storage_config.h
+    file_id: storage_config
 source:
   - path: toolchain/src/sl_storage.c
 include:

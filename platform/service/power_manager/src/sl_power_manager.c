@@ -120,6 +120,7 @@ static bool is_actively_waiting_for_clock_restore = false;
 
 // Indicates if the clock restore was completed from the HFXO ISR
 static bool is_restored_from_hfxo_isr = false;
+static bool is_restored_from_hfxo_isr_internal = false;
 
 /*
  *********************************************************************************************************
@@ -132,6 +133,13 @@ bool sl_power_manager_sleep_on_isr_exit(void);
 // Callback to application after wakeup but before restoring interrupts.
 // For internal Silicon Labs use only
 __WEAK void sli_power_manager_on_wakeup(void);
+
+// Hook that can be used by the log outputer to suspend transmission of logs
+// in case it would require energy mode changes while in the sleep loop.
+__WEAK void sli_power_manager_suspend_log_transmission(void);
+
+// Hook that can be used by the log outputer to resume transmission of logs.
+__WEAK void sli_power_manager_resume_log_transmission(void);
 
 // Callback to notify possible transition from EM1P to EM2.
 // For internal Silicon Labs use only
@@ -219,7 +227,10 @@ void sl_power_manager_sleep(void)
 
   CORE_ENTER_CRITICAL();
 
+  sli_power_manager_suspend_log_transmission();
+
   if (sl_power_manager_is_ok_to_sleep() != true) {
+    sli_power_manager_resume_log_transmission();
     CORE_EXIT_CRITICAL();
     return;
   }
@@ -291,6 +302,16 @@ void sl_power_manager_sleep(void)
     CORE_EXIT_CRITICAL();
     CORE_ENTER_CRITICAL();
 
+    // In case the HF restore was completed from the HFXO ISR,
+    // and notification not done elsewhere, do it here
+    if (is_restored_from_hfxo_isr_internal == true) {
+      is_restored_from_hfxo_isr_internal = false;
+      if (current_em == waiting_clock_restore_from_em) {
+        current_em = SL_POWER_MANAGER_EM1;
+        power_manager_notify_em_transition(waiting_clock_restore_from_em, SL_POWER_MANAGER_EM1);
+      }
+    }
+
     // Stop the internal power manager sleeptimer.
     sl_sleeptimer_stop_timer(&clock_wakeup_timer_handle);
   } while (sl_power_manager_sleep_on_isr_exit() == true);
@@ -321,6 +342,8 @@ void sl_power_manager_sleep(void)
   // Indicate back to EM0
   power_manager_notify_em_transition(current_em, SL_POWER_MANAGER_EM0);
   current_em = SL_POWER_MANAGER_EM0;
+
+  sli_power_manager_resume_log_transmission();
 
   CORE_EXIT_CRITICAL();
 }
@@ -920,17 +943,15 @@ static void on_clock_wakeup_timeout(sl_sleeptimer_timer_handle_t *handle,
  ******************************************************************************/
 void sli_hfxo_manager_notify_ready_for_power_manager(void)
 {
-  // Notify transition to EM1 once HFXO is ready
-  // We should only notify here in the case of early wakeup, since we go back
-  // to sleep in EM1 during the wait for HFXO ready.
+  // Complete HF restore and change current Energy mode
+  // The notification will be done once back in the sleep loop
   if (current_em != SL_POWER_MANAGER_EM0
       && is_sleeping_waiting_for_clock_restore == true) {
     sli_power_manager_restore_states();
-    power_manager_notify_em_transition(waiting_clock_restore_from_em, SL_POWER_MANAGER_EM1);
-    current_em = SL_POWER_MANAGER_EM1;
     is_sleeping_waiting_for_clock_restore = false;
     is_states_saved = false;
     is_restored_from_hfxo_isr = true;
+    is_restored_from_hfxo_isr_internal = true;
   }
 }
 

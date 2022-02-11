@@ -25,6 +25,10 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
@@ -35,11 +39,18 @@
     instance:
     - btn0
     - btn1
+  - id: usb_device_driver_dwc_otg_fs
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: component_catalog
     value: wfx_board
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4321A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD4321
   - board:variant:A

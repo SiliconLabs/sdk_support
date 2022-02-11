@@ -20,6 +20,7 @@
   - id: iostream_uart
     instance:
     - vcom
+  - id: bootloader_uart_driver
   - id: simple_led
     instance:
     - led0
@@ -30,7 +31,13 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2001A"'
+  - name: SL_BOARD_REV
+    value: '"B01"'
 - tag:
   - board:pn:BRD2001
   - board:variant:A

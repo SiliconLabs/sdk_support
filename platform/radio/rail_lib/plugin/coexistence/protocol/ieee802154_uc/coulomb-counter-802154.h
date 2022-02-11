@@ -24,6 +24,10 @@
 
 #include "sl_rail_util_ieee802154_stack_event.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Set state for Coulomb Counter, Idle/Awake/Tx/Rx.
  *
@@ -41,6 +45,10 @@ void sl_rail_util_coulomb_counter_on_event(sl_rail_util_ieee802154_stack_event_t
  * @param ccState The current radio state
  */
 void coexCoulombCounterEventCallback(uint16_t ccState);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //COULOMB_COUNTER_802154_H
 

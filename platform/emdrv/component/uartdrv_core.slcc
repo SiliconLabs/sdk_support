@@ -21,6 +21,8 @@ provides:
 requires:
   - name: "device"
   - name: "emlib_usart"
+    condition:
+      - "device_has_uart"
   - name: "emlib_leuart"
     condition:
       - "device_has_leuart"

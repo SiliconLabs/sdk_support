@@ -66,7 +66,6 @@ psa_status_t sli_se_transparent_hash_setup(sli_se_transparent_hash_operation_t *
   memset(&operation->streaming_contexts, 0, sizeof(operation->streaming_contexts));
 
   // create ephemeral contexts
-  sl_se_hash_streaming_context_t ephemeral_hash_ctx;
   sl_se_command_context_t ephemeral_se_ctx;
   sl_status_t status = SL_STATUS_INVALID_PARAMETER;
 
@@ -74,42 +73,37 @@ psa_status_t sli_se_transparent_hash_setup(sli_se_transparent_hash_operation_t *
 #if defined(PSA_WANT_ALG_SHA_1)
     case PSA_ALG_SHA_1:
       operation->hash_type = SL_SE_HASH_SHA1;
-      status = sl_se_hash_sha1_starts(&ephemeral_hash_ctx,
-                                      &ephemeral_se_ctx,
-                                      &(operation->streaming_contexts.sha1_context));
+      status = sl_se_hash_sha1_multipart_starts(&(operation->streaming_contexts.sha1_context),
+                                                &ephemeral_se_ctx);
       break;
 #endif // PSA_WANT_ALG_SHA_1
 #if defined(PSA_WANT_ALG_SHA_224)
     case PSA_ALG_SHA_224:
       operation->hash_type = SL_SE_HASH_SHA224;
-      status = sl_se_hash_sha224_starts(&ephemeral_hash_ctx,
-                                        &ephemeral_se_ctx,
-                                        &(operation->streaming_contexts.sha224_context));
+      status = sl_se_hash_sha224_multipart_starts(&(operation->streaming_contexts.sha224_context),
+                                                  &ephemeral_se_ctx);
       break;
 #endif // PSA_WANT_ALG_SHA_224
 #if defined(PSA_WANT_ALG_SHA_256)
     case PSA_ALG_SHA_256:
       operation->hash_type = SL_SE_HASH_SHA256;
-      status = sl_se_hash_sha256_starts(&ephemeral_hash_ctx,
-                                        &ephemeral_se_ctx,
-                                        &(operation->streaming_contexts.sha256_context));
+      status = sl_se_hash_sha256_multipart_starts(&(operation->streaming_contexts.sha256_context),
+                                                  &ephemeral_se_ctx);
       break;
 #endif // PSA_WANT_ALG_SHA_256
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
 #if defined(PSA_WANT_ALG_SHA_384)
     case PSA_ALG_SHA_384:
       operation->hash_type = SL_SE_HASH_SHA384;
-      status = sl_se_hash_sha384_starts(&ephemeral_hash_ctx,
-                                        &ephemeral_se_ctx,
-                                        &(operation->streaming_contexts.sha384_context));
+      status = sl_se_hash_sha384_multipart_starts(&(operation->streaming_contexts.sha384_context),
+                                                  &ephemeral_se_ctx);
       break;
 #endif // PSA_WANT_ALG_SHA_384
 #if defined(PSA_WANT_ALG_SHA_512)
     case PSA_ALG_SHA_512:
       operation->hash_type = SL_SE_HASH_SHA512;
-      status = sl_se_hash_sha512_starts(&ephemeral_hash_ctx,
-                                        &ephemeral_se_ctx,
-                                        &(operation->streaming_contexts.sha512_context));
+      status = sl_se_hash_sha512_multipart_starts(&(operation->streaming_contexts.sha512_context),
+                                                  &ephemeral_se_ctx);
       break;
 #endif // PSA_WANT_ALG_SHA_512
 #endif // VAULT
@@ -155,13 +149,7 @@ psa_status_t sli_se_transparent_hash_update(sli_se_transparent_hash_operation_t 
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  sl_se_hash_streaming_context_t ephemeral_hash_ctx = {
-    .cmd_ctx = &ephemeral_se_ctx,
-    .hash_type = operation->hash_type,
-    .hash_type_ctx = (void*)&(operation->streaming_contexts)
-  };
-
-  status = sl_se_hash_update(&ephemeral_hash_ctx, input, input_length);
+  status = sl_se_hash_multipart_update((void*)&(operation->streaming_contexts), &ephemeral_se_ctx, input, input_length);
 
   if (status == SL_STATUS_OK) {
     return PSA_SUCCESS;
@@ -204,13 +192,7 @@ psa_status_t sli_se_transparent_hash_finish(sli_se_transparent_hash_operation_t 
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  sl_se_hash_streaming_context_t ephemeral_hash_ctx = {
-    .cmd_ctx = &ephemeral_se_ctx,
-    .hash_type = operation->hash_type,
-    .hash_type_ctx = (void*)&(operation->streaming_contexts)
-  };
-
-  status = sl_se_hash_finish(&ephemeral_hash_ctx, hash, hash_size);
+  status = sl_se_hash_multipart_finish((void*)&(operation->streaming_contexts), &ephemeral_se_ctx, hash, hash_size);
 
   // reset context
   memset(&operation->streaming_contexts, 0, sizeof(operation->streaming_contexts));

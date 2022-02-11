@@ -17,6 +17,11 @@
 
 #ifndef __COEXISTENCE_HAL_CONFIG_H__
 #define __COEXISTENCE_HAL_CONFIG_H__
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef PLATFORM_HEADER
 #define PHY_RAIL 1
 #include <stdint.h>
@@ -110,4 +115,9 @@ typedef uint8_t EmberCounterType;
 #define SL_RAIL_UTIL_COEX_DP_PORT                             (gpioPortD)
 #define SL_RAIL_UTIL_COEX_DP_CHANNEL                          (3)
 #endif //_SILICON_LABS_32B_SERIES_1
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //__COEXISTENCE_HAL_CONFIG_H__

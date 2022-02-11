@@ -2,7 +2,7 @@ id: micriumos_net_app_http_server_ctrl
 label: Network Suite - HTTP Server Control Layer
 package: micrium-tcpx
 description: Micrium OS Network HTTP Server Control Layer
-category: Services|Network Suite|Applications
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/net
 source:

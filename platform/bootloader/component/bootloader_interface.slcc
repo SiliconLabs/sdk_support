@@ -1,6 +1,6 @@
 id: bootloader_interface
 label: Bootloader Application Interface
-package: platform
+package: bootloader
 description: >
   This component must be added to a project in order to use the Gecko Bootloader.
   When this component is part of a project a part of flash memory will be reserved
@@ -26,11 +26,22 @@ provides:
 requires:
   - name: cmsis_core
   - name: device
+  - name: bootloader_app_properties
 template_contribution:
   - name: bootloader_size
     value: 16384
     condition:
     - device_sdid_80
+  - name: bootloader_size
+    value: 18432
+    condition:
+    - device_sdid_89
+    - bootloader_in_main_flash
+  - name: bootloader_size
+    value: 18432
+    condition:
+    - device_sdid_95
+    - bootloader_in_main_flash
   - name: bootloader_size
     value: 16384
     condition:
@@ -47,6 +58,10 @@ template_contribution:
     value: 24576
     condition:
     - device_sdid_215
+  - name: bootloader_size
+    value: 24576
+    condition:
+    - device_sdid_220
 documentation:
   docset: mcu-bootloader
   document: group-Interface

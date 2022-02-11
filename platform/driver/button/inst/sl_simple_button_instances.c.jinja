@@ -39,6 +39,8 @@ const sl_button_t sl_button_{{ inst | lower }} = {
 };
 {%- endfor %}
 
+// the table of buttons and button count are generated as a
+// convenience for the application
 const sl_button_t *sl_simple_button_array[] = {
 {%- for inst in simple_button_instance | sort %}
   &sl_button_{{ inst | lower }}{% if not loop.last %}, {% endif %}

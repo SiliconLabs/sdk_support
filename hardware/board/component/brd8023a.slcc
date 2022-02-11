@@ -12,6 +12,11 @@
   - name: hardware_board_exp
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD8023A"'
+  - name: SL_BOARD_REV
+    value: '"B01"'
 - tag:
   - board:pn:BRD8023
   - board:variant:A

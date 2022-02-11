@@ -185,9 +185,8 @@ psa_status_t sli_crypto_transparent_cipher_encrypt(const psa_key_attributes_t *a
   if (key_buffer == NULL
       || key_buffer_size == 0
       || (input == NULL && input_length > 0)
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -340,6 +339,7 @@ psa_status_t sli_crypto_transparent_cipher_encrypt(const psa_key_attributes_t *a
         goto exit;
       }
 
+      memcpy(output, iv_buf, 16);
       *output_length = input_length + 16;
       break;
 #endif // PSA_WANT_ALG_CFB
@@ -371,6 +371,7 @@ psa_status_t sli_crypto_transparent_cipher_encrypt(const psa_key_attributes_t *a
         goto exit;
       }
 
+      memcpy(output, iv_buf, 16);
       *output_length = input_length + 16;
       break;
 #endif // PSA_WANT_ALG_OFB
@@ -539,9 +540,8 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
   if (key_buffer == NULL
       || key_buffer_size == 0
       || (input == NULL && input_length > 0)
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -644,12 +644,11 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
 #if defined(PSA_WANT_ALG_CTR)
     case PSA_ALG_CTR:
       // Check buffer sizes
-      if (output_size < input_length + 16) {
+      if (output_size < input_length - 16) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
       memcpy(temp_iv, input, 16);
-      uint8_t tmp_buf[16];
 
       // Do decryption
       status = sl_crypto_aes_crypt_ctr(key_buffer,
@@ -657,7 +656,7 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
                                        input_length - 16,
                                        NULL,
                                        temp_iv,
-                                       tmp_buf,
+                                       temp_iv,
                                        &input[16],
                                        output);
 
@@ -667,7 +666,7 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
 #if defined(PSA_WANT_ALG_OFB)
     case PSA_ALG_OFB:
       // Check buffer sizes
-      if (output_size < input_length + 16) {
+      if (output_size < input_length - 16) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
@@ -692,7 +691,7 @@ psa_status_t sli_crypto_transparent_cipher_decrypt(const psa_key_attributes_t *a
 #if defined(PSA_WANT_ALG_CFB)
     case PSA_ALG_CFB:
       // Check buffer sizes
-      if (output_size < input_length + 16) {
+      if (output_size < input_length - 16) {
         return PSA_ERROR_INVALID_ARGUMENT;
       }
 
@@ -1161,12 +1160,15 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
 
     // We know we'll be computing and outputing at least the completed streaming block
     size_t output_blocks = 1;
-    // plus however many full blocks are left over after filling the stream buffer
-    output_blocks += (input_length - bytes_to_boundary) / 16;
-    // If we're caching and the sum of already-input and to-be-input data
-    // ends up at a block boundary, we won't be outputting the last block
-    if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
-      output_blocks -= 1;
+
+    if (input_length > bytes_to_boundary) {
+      // plus however many full blocks are left over after filling the stream buffer
+      output_blocks += (input_length - bytes_to_boundary) / 16;
+      // If we're caching and the sum of already-input and to-be-input data
+      // ends up at a block boundary, we won't be outputting the last block
+      if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
+        output_blocks -= 1;
+      }
     }
 
     if (output_size < (output_blocks * 16)) {
@@ -1277,6 +1279,23 @@ psa_status_t sli_crypto_transparent_cipher_update(sli_crypto_transparent_cipher_
         input += bytes_to_boundary;
         input_length -= bytes_to_boundary;
         operation->processed_length += bytes_to_boundary;
+      } else if (input_length > 0
+                 && cache_full_block
+                 && operation->processed_length > 0) {
+        // We know there's processing to be done, and that we haven't processed
+        // the full block in the streaming buffer yet. Process it now.
+        status = sl_crypto_aes_crypt_cbc(operation->key,
+                                         operation->key_len,
+                                         operation->direction,
+                                         16,
+                                         operation->iv,
+                                         operation->streaming_block,
+                                         output);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
+        output += 16;
+        actual_output_length += 16;
       }
 
       // Do multi-block operation if applicable

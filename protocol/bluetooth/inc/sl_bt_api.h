@@ -136,6 +136,9 @@ typedef struct sl_bt_evt_dfu_boot_failure_s sl_bt_evt_dfu_boot_failure_t;
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_system_reset. New bootloader
+ * versions don't support this command anymore.
+ *
  * Reset the system. The command does not have a response but it triggers one of
  * the boot events (normal reset or boot to DFU mode) after re-boot.
  *
@@ -151,7 +154,7 @@ typedef struct sl_bt_evt_dfu_boot_failure_s sl_bt_evt_dfu_boot_failure_t;
  *     mode
  *
  ******************************************************************************/
-void sl_bt_dfu_reset(uint8_t dfu);
+SL_BGAPI_DEPRECATED void sl_bt_dfu_reset(uint8_t dfu);
 
 /***************************************************************************//**
  *
@@ -214,7 +217,6 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_cmd_system_reset_id                                    0x01010020
 #define sl_bt_cmd_system_halt_id                                     0x0c010020
 #define sl_bt_cmd_system_linklayer_configure_id                      0x0e010020
-#define sl_bt_cmd_system_set_max_tx_power_id                         0x16010020
 #define sl_bt_cmd_system_set_tx_power_id                             0x17010020
 #define sl_bt_cmd_system_get_tx_power_setting_id                     0x18010020
 #define sl_bt_cmd_system_set_identity_address_id                     0x13010020
@@ -232,7 +234,6 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_rsp_system_reset_id                                    0x01010020
 #define sl_bt_rsp_system_halt_id                                     0x0c010020
 #define sl_bt_rsp_system_linklayer_configure_id                      0x0e010020
-#define sl_bt_rsp_system_set_max_tx_power_id                         0x16010020
 #define sl_bt_rsp_system_set_tx_power_id                             0x17010020
 #define sl_bt_rsp_system_get_tx_power_setting_id                     0x18010020
 #define sl_bt_rsp_system_set_identity_address_id                     0x13010020
@@ -245,7 +246,7 @@ sl_status_t sl_bt_dfu_flash_upload_finish();
 #define sl_bt_rsp_system_set_lazy_soft_timer_id                      0x1a010020
 
 /**
- * @brief Specifies the mode that the system will boot into
+ * @brief Specifies the mode that the system will boot into.
  */
 typedef enum
 {
@@ -655,7 +656,7 @@ PACKSTRUCT( struct sl_bt_evt_system_boot_s
   uint16_t minor;      /**< Minor release version */
   uint16_t patch;      /**< Patch release number */
   uint16_t build;      /**< Build number */
-  uint32_t bootloader; /**< Bootloader version */
+  uint32_t bootloader; /**< Unused. Ignore this field. */
   uint16_t hw;         /**< Hardware type */
   uint32_t hash;       /**< Version hash */
 });
@@ -792,7 +793,7 @@ sl_status_t sl_bt_system_hello();
  *
  * If the Bluetooth on-demand start component is not included in the application
  * build, the Bluetooth stack is automatically started at UC initialization
- * time. In this configuration the on-demand start command is not available and
+ * time. In this configuration, the on-demand start command is not available and
  * the command returns the error SL_STATUS_NOT_AVAILABLE.
  *
  * When the Bluetooth on-demand start component is included in the application
@@ -818,7 +819,7 @@ sl_status_t sl_bt_system_start_bluetooth();
  *
  * If the Bluetooth on-demand start component is not included in the application
  * build, the Bluetooth stack is automatically started at UC initialization time
- * and never stopped. In this configuration the stop command is not available
+ * and never stopped. In this configuration, the stop command is not available
  * and the command returns the error SL_STATUS_NOT_AVAILABLE.
  *
  * When the Bluetooth on-demand start component is included in the application
@@ -827,9 +828,9 @@ sl_status_t sl_bt_system_start_bluetooth();
  * Bluetooth to an idle state by disconnecting any active connections and
  * stopping any on-going advertising and scanning. Any resources that were
  * allocated when the stack was started are freed when the stack is stopped.
- * After this command the BGAPI classes other than @ref sl_bt_system become
+ * After this command, the BGAPI classes other than @ref sl_bt_system become
  * unavailable. The application can use the command @ref
- * sl_bt_system_start_bluetooth in order to continue using Bluetooth later.
+ * sl_bt_system_start_bluetooth to continue using Bluetooth later.
  *
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -849,7 +850,7 @@ sl_status_t sl_bt_system_stop_bluetooth();
  * @param[out] minor Minor release version
  * @param[out] patch Patch release number
  * @param[out] build Build number
- * @param[out] bootloader Bootloader version
+ * @param[out] bootloader Unused. Ignore this field.
  * @param[out] hash Version hash
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -986,38 +987,6 @@ sl_status_t sl_bt_system_linklayer_configure(uint8_t key,
 
 /***************************************************************************//**
  *
- * <b>Deprecated</b> and replaced by @ref sl_bt_system_set_tx_power.
- *
- * Set the global maximum radiated TX power for Bluetooth. This returns the
- * selected power level that is radiated from the antenna at TX. The transmitter
- * power at antenna pin will apply the RF TX path gain to match this setting. RF
- * TX path gain can be set in the Bluetooth configuration. If the GATT server
- * contains a TX power service, the TX Power Level attribute will be updated
- * with the selected maximum power level.
- *
- * The selected power level may be less than the specified value if the device
- * does not meet the power requirements. For Bluetooth connections, the maximum
- * TX power is limited to 10 dBm if Adaptive Frequency Hopping (AFH) is not
- * enabled.
- *
- * The maximum TX power level can also be configured in the Bluetooth
- * configuration and passed into the Bluetooth stack initialization. By default,
- * the global maximum TX power is 8 dBm.
- *
- * <b>NOTE:</b> Do not use this command while advertising or scanning.
- * Furthermore, the stack does not allow setting TX powers during connections.
- *
- * @param[in] power The maximum radiated TX power in 0.1 dBm steps. For example,
- *   value 10 means 1 dBm.
- * @param[out] set_power Selected maximum radiated TX power
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_max_tx_power(int16_t power, int16_t *set_power);
-
-/***************************************************************************//**
- *
  * Set the global minimum and maximum radiated TX power levels for Bluetooth.
  * This returns selected power levels that are radiated from the antenna at TX.
  * The transmitter power at antenna pin will apply the RF TX path gain to match
@@ -1025,10 +994,10 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_max_tx_power(int16_t power, int
  * the GATT server contains a TX power service, the TX Power Level attribute
  * will be updated with the selected maximum power level.
  *
- * A selected power level may be different than the requested value if the
- * device cannot meet the requirement. For Bluetooth connections, the maximum
- * radiated TX power is limited to 10 dBm if Adaptive Frequency Hopping (AFH) is
- * not enabled.
+ * A selected power level may be different than the requested value because of
+ * Bluetooth feature restrictions or the device's radio characteristics. For
+ * Bluetooth connections, the maximum radiated TX power is limited to 10 dBm if
+ * Adaptive Frequency Hopping (AFH) is not enabled.
  *
  * The minimum TX power setting is used by LE power control. It has no effect in
  * Bluetooth stack if the LE power control feature is not enabled. However, the
@@ -1231,7 +1200,9 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
 /***************************************************************************//**
  *
  * <b>Deprecated</b> . Use the sleeptimer component (in platform services
- * category) for timers.
+ * category) for timers. As the sleeptimer does not support a timer with slack
+ * yet, the Bluetooth stack will continue to support this command until another
+ * component provides the functionality.
  *
  * Start a software timer with slack. The slack parameter allows the stack to
  * optimize wakeups and save power. The timer event is triggered between time
@@ -1260,7 +1231,7 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_soft_timer(uint32_t time,
  *   - @ref sl_bt_evt_system_soft_timer - Sent after this timer has lapsed.
  *
  ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
+sl_status_t sl_bt_system_set_lazy_soft_timer(uint32_t time,
                                              uint32_t slack,
                                              uint8_t handle,
                                              uint8_t single_shot);
@@ -1292,11 +1263,10 @@ typedef enum
 {
   sl_bt_gap_public_address               = 0x0, /**< (0x0) Public device address */
   sl_bt_gap_static_address               = 0x1, /**< (0x1) Static device address */
-  sl_bt_gap_random_resolvable_address    = 0x2, /**< (0x2) Private resolvable
+  sl_bt_gap_random_resolvable_address    = 0x2, /**< (0x2) Resolvable private
                                                      random address */
-  sl_bt_gap_random_nonresolvable_address = 0x3  /**< (0x3) Private
-                                                     non-resolvable random
-                                                     address */
+  sl_bt_gap_random_nonresolvable_address = 0x3  /**< (0x3) Non-resolvable
+                                                     private random address */
 } sl_bt_gap_address_type_t;
 
 /**
@@ -1326,11 +1296,22 @@ typedef enum
  * Enable or disable the privacy feature on all GAP roles. New privacy mode will
  * take effect for advertising next time advertising is enabled, for scanning
  * next time scanning is enabled, and for initiating on the next open connection
- * command. When privacy is enabled and the device is advertising or scanning,
- * the stack will maintain a periodic timer with the specified time interval as
- * a timeout value. At each timeout, the stack will generate a new private
- * resolvable address and use it in advertising data packets and scanning
- * requests.
+ * command.
+ *
+ * When privacy is enabled and the device is advertising or scanning, the stack
+ * will maintain a periodic timer with the specified time interval as a timeout
+ * value. At each timeout, the stack generates a new resolvable private address
+ * and uses it in scanning requests. For advertisers, the stack generates a new
+ * resolvable or non-resolvable private address and uses it in advertising data
+ * packets for each advertising set if its address is not application-managed,
+ * i.e., the address was not set by the application (with the @ref
+ * sl_bt_advertiser_set_random_address command). The application is fully
+ * responsible for application-managed advertiser addresses. For an
+ * application-managed resolvable private address, the application should
+ * schedule periodic address updates for enhancing the privacy. It is
+ * recommended to use different schedules for different advertising sets.
+ *
+ * Disabling the privacy during active advertising or scanning is not allowed.
  *
  * By default, privacy feature is disabled.
  *
@@ -1394,60 +1375,88 @@ sl_status_t sl_bt_gap_enable_whitelisting(uint8_t enable);
  *
  * @brief Advertiser
  *
- * The commands and events in this class are related to advertising
- * functionalities in GAP peripheral and broadcaster roles.
+ * This is the base class of legacy, extended, and periodic advertisings for
+ * common functionalities including advertising set management, TX power
+ * setting, advertising address, and so on.
+ *
+ * On an advertising set, either the legacy or extended advertising can be
+ * enabled at a time but they cannot be enabled simultaneously on the same
+ * advertising set. For example, the following sequence shows how to start the
+ * legacy advertising on an advertising set. Starting the extended advertising
+ * is similar. The only difference is to use the extended_advertiser API class.
+ *   1. Create an advertise set with the @ref sl_bt_advertiser_create_set
+ *      command.
+ *   2. Configure and set advertising parameters for the advertising set as
+ *      needed.
+ *   3. Set the advertising data with the @ref sl_bt_legacy_advertiser_set_data
+ *      or @ref sl_bt_legacy_advertiser_generate_data command.
+ *   4. Start the legacy advertising with the @ref sl_bt_legacy_advertiser_start
+ *      command.
+ *
+ * Periodic advertising can be enabled independently on the advertising set
+ * regardless of the state of the legacy or extended advertising. However, to
+ * ensure that scanners can find the periodic advertising information and
+ * establish a synchronization, the extended advertising must be enabled
+ * simultaneously with the periodic advertising.
+ *
+ * When the legacy_advertiser or extended_advertiser API class is included by
+ * the application, some commands in this class are not supported. Calling them
+ * will receive SL_STATUS_NOT_SUPPORTED error code. These commands are as
+ * follows: @ref sl_bt_advertiser_set_phy, @ref
+ * sl_bt_advertiser_set_configuration, @ref
+ * sl_bt_advertiser_clear_configuration, @ref sl_bt_advertiser_set_data, @ref
+ * sl_bt_advertiser_set_long_data, @ref sl_bt_advertiser_start, @ref
+ * sl_bt_advertiser_start_periodic_advertising, and @ref
+ * sl_bt_advertiser_stop_periodic_advertising. See the command descriptions for
+ * the replacements.
  */
 
 /* Command and Response IDs */
 #define sl_bt_cmd_advertiser_create_set_id                           0x01040020
+#define sl_bt_cmd_advertiser_configure_id                            0x12040020
 #define sl_bt_cmd_advertiser_set_timing_id                           0x03040020
-#define sl_bt_cmd_advertiser_set_phy_id                              0x06040020
 #define sl_bt_cmd_advertiser_set_channel_map_id                      0x04040020
 #define sl_bt_cmd_advertiser_set_tx_power_id                         0x0b040020
 #define sl_bt_cmd_advertiser_set_report_scan_request_id              0x05040020
 #define sl_bt_cmd_advertiser_set_random_address_id                   0x10040020
 #define sl_bt_cmd_advertiser_clear_random_address_id                 0x11040020
+#define sl_bt_cmd_advertiser_stop_id                                 0x0a040020
+#define sl_bt_cmd_advertiser_delete_set_id                           0x02040020
+#define sl_bt_cmd_advertiser_set_phy_id                              0x06040020
 #define sl_bt_cmd_advertiser_set_configuration_id                    0x07040020
 #define sl_bt_cmd_advertiser_clear_configuration_id                  0x08040020
 #define sl_bt_cmd_advertiser_set_data_id                             0x0f040020
 #define sl_bt_cmd_advertiser_set_long_data_id                        0x0e040020
 #define sl_bt_cmd_advertiser_start_id                                0x09040020
-#define sl_bt_cmd_advertiser_stop_id                                 0x0a040020
 #define sl_bt_cmd_advertiser_start_periodic_advertising_id           0x0c040020
 #define sl_bt_cmd_advertiser_stop_periodic_advertising_id            0x0d040020
-#define sl_bt_cmd_advertiser_delete_set_id                           0x02040020
 #define sl_bt_rsp_advertiser_create_set_id                           0x01040020
+#define sl_bt_rsp_advertiser_configure_id                            0x12040020
 #define sl_bt_rsp_advertiser_set_timing_id                           0x03040020
-#define sl_bt_rsp_advertiser_set_phy_id                              0x06040020
 #define sl_bt_rsp_advertiser_set_channel_map_id                      0x04040020
 #define sl_bt_rsp_advertiser_set_tx_power_id                         0x0b040020
 #define sl_bt_rsp_advertiser_set_report_scan_request_id              0x05040020
 #define sl_bt_rsp_advertiser_set_random_address_id                   0x10040020
 #define sl_bt_rsp_advertiser_clear_random_address_id                 0x11040020
+#define sl_bt_rsp_advertiser_stop_id                                 0x0a040020
+#define sl_bt_rsp_advertiser_delete_set_id                           0x02040020
+#define sl_bt_rsp_advertiser_set_phy_id                              0x06040020
 #define sl_bt_rsp_advertiser_set_configuration_id                    0x07040020
 #define sl_bt_rsp_advertiser_clear_configuration_id                  0x08040020
 #define sl_bt_rsp_advertiser_set_data_id                             0x0f040020
 #define sl_bt_rsp_advertiser_set_long_data_id                        0x0e040020
 #define sl_bt_rsp_advertiser_start_id                                0x09040020
-#define sl_bt_rsp_advertiser_stop_id                                 0x0a040020
 #define sl_bt_rsp_advertiser_start_periodic_advertising_id           0x0c040020
 #define sl_bt_rsp_advertiser_stop_periodic_advertising_id            0x0d040020
-#define sl_bt_rsp_advertiser_delete_set_id                           0x02040020
 
 /**
- * @brief 
-                These values define the available connectable modes, which indicate whether the device accepts
-                connection requests or scan requests.
-            
+ * @brief These values define the available connection modes, which indicate
+ * whether the device accepts connection requests or scan requests.
  */
 typedef enum
 {
   sl_bt_advertiser_non_connectable           = 0x0, /**< (0x0) Non-connectable
-                                                         non-scannable. */
-  sl_bt_advertiser_directed_connectable      = 0x1, /**< (0x1) Directed
-                                                         connectable
-                                                         <b>(RESERVED, DO NOT
-                                                         USE)</b> */
+                                                         non-scannable */
   sl_bt_advertiser_connectable_scannable     = 0x2, /**< (0x2) Undirected
                                                          connectable scannable.
                                                          This mode can only be
@@ -1464,21 +1473,20 @@ typedef enum
                                                          mode can only be used
                                                          in extended advertising
                                                          PDUs. */
-} sl_bt_advertiser_connectable_mode_t;
+} sl_bt_advertiser_connection_mode_t;
 
 /**
- * @brief 
-                These values define the available Discoverable Modes, which dictate how the device is visible to other
-                devices.
-            
+ * @brief These values define the available discovery modes, which dictate how
+ * the device is visible to other devices in the legacy and extended
+ * advertising.
  */
 typedef enum
 {
   sl_bt_advertiser_non_discoverable     = 0x0, /**< (0x0) Not discoverable */
-  sl_bt_advertiser_limited_discoverable = 0x1, /**< (0x1) Discoverable using
-                                                    both limited and general
+  sl_bt_advertiser_limited_discoverable = 0x1, /**< (0x1) Discoverable by both
+                                                    limited and general
                                                     discovery procedures */
-  sl_bt_advertiser_general_discoverable = 0x2, /**< (0x2) Discoverable using
+  sl_bt_advertiser_general_discoverable = 0x2, /**< (0x2) Discoverable by the
                                                     general discovery procedure */
   sl_bt_advertiser_broadcast            = 0x3, /**< (0x3) Device is not
                                                     discoverable in either
@@ -1489,13 +1497,12 @@ typedef enum
   sl_bt_advertiser_user_data            = 0x4  /**< (0x4) Send advertising
                                                     and/or scan response data
                                                     defined by the user. The
-                                                    limited/general discoverable
-                                                    flags are defined by the
-                                                    user. */
-} sl_bt_advertiser_discoverable_mode_t;
+                                                    discovery mode is defined by
+                                                    the user. */
+} sl_bt_advertiser_discovery_mode_t;
 
 /**
- * @brief Address type to use for advertising
+ * @brief Address type to use for the legacy and extended advertising
  */
 typedef enum
 {
@@ -1503,17 +1510,57 @@ typedef enum
                                                 device address, or an identity
                                                 address if privacy mode is
                                                 enabled. */
-  sl_bt_advertiser_non_resolvable   = 0x1  /**< (0x1) Use non resolvable address
-                                                type; advertising mode must also
-                                                be non-connectable. */
+  sl_bt_advertiser_non_resolvable   = 0x1  /**< (0x1) Use non-resolvable address
+                                                type; the advertising must be
+                                                non-connectable. */
 } sl_bt_advertiser_adv_address_type_t;
+
+/**
+ * @brief These values define the packet types in legacy and extended
+ * advertising.
+ */
+typedef enum
+{
+  sl_bt_advertiser_advertising_data_packet = 0x0, /**< (0x0) Advertising data
+                                                       packet */
+  sl_bt_advertiser_scan_response_packet    = 0x1  /**< (0x1) Scan response
+                                                       packet */
+} sl_bt_advertiser_packet_type_t;
+
+/**
+ * @addtogroup sl_bt_advertiser_flags Generic Advertising Configuration Flags
+ * @{
+ *
+ * This enum defines configuration flags common for legacy and extended
+ * advertisings.
+ */
+
+/** Use a non-resolvable private address managed by the stack. The advertising
+ * must be non-connectable when using this configuration. The stack generates a
+ * non-resolvable private address for the advertising set and the stack will
+ * update the address periodically in the privacy mode. By default this flag is
+ * not set, i.e., the advertising address uses the device identity address. This
+ * configuration has no effect if the advertising address has been set with the
+ * @ref sl_bt_advertiser_set_random_address command. */
+#define SL_BT_ADVERTISER_USE_NONRESOLVABLE_ADDRESS      0x4       
+
+/** Use the device identity address when the privacy mode is enabled. By
+ * default, this flag is not set, i.e., the advertising address uses a
+ * resolvable private address managed by the stack in the privacy mode. This
+ * configuration has no effect if the @ref
+ * SL_BT_ADVERTISER_USE_NONRESOLVABLE_ADDRESS flag is set or the advertising
+ * address has been set with the @ref sl_bt_advertiser_set_random_address
+ * command. */
+#define SL_BT_ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY 0x10      
+
+/** @} */ // end Generic Advertising Configuration Flags
 
 /**
  * @addtogroup sl_bt_evt_advertiser_timeout sl_bt_evt_advertiser_timeout
  * @{
- * @brief Indicates the advertising of an advertising set has stopped, because
- * the advertiser has completed the configured number of advertising events or
- * the advertising has reached the configured duration
+ * @brief Indicates the legacy or extended advertising on an advertising set has
+ * stopped because the advertiser has completed the configured number of
+ * advertising events or the advertising has reached the configured duration
  *
  * The maximum number of advertising events or advertising duration can be
  * configured by the @p maxevents or @p duration parameter in the command @ref
@@ -1538,10 +1585,10 @@ typedef struct sl_bt_evt_advertiser_timeout_s sl_bt_evt_advertiser_timeout_t;
 /**
  * @addtogroup sl_bt_evt_advertiser_scan_request sl_bt_evt_advertiser_scan_request
  * @{
- * @brief Reports any scan request received in advertising mode if the scan
- * request notification is enabled
+ * @brief Reports a scan request received during the legacy or extended
+ * advertising advertising if the scan request notification is enabled
  *
- * Do not confuse this event with the scan response.
+ * Do not confuse this event with the @ref sl_bt_evt_scanner_scan_report event.
  */
 
 /** @brief Identifier of the scan_request event */
@@ -1552,9 +1599,9 @@ typedef struct sl_bt_evt_advertiser_timeout_s sl_bt_evt_advertiser_timeout_t;
  ******************************************************************************/
 PACKSTRUCT( struct sl_bt_evt_advertiser_scan_request_s
 {
-  uint8_t handle;       /**< Advertising set handle where scan request was
+  uint8_t handle;       /**< Advertising set handle where the scan request was
                              received */
-  bd_addr address;      /**< Bluetooth address of the scanning device */
+  bd_addr address;      /**< Bluetooth address of the scanner */
   uint8_t address_type; /**< Scanner address type. Values:
                                - <b>0:</b> Public address
                                - <b>1:</b> Random address */
@@ -1569,39 +1616,14 @@ typedef struct sl_bt_evt_advertiser_scan_request_s sl_bt_evt_advertiser_scan_req
 
 /** @} */ // end addtogroup sl_bt_evt_advertiser_scan_request
 
-/**
- * @cond RESTRICTED
- *
- * @addtogroup sl_bt_evt_advertiser_periodic_advertising_status sl_bt_evt_advertiser_periodic_advertising_status
- * @{
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * @brief This event indicates a status update in the periodic advertising.
- */
-
-/** @brief Identifier of the periodic_advertising_status event */
-#define sl_bt_evt_advertiser_periodic_advertising_status_id          0x030400a0
-
-/***************************************************************************//**
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * @brief Data structure of the periodic_advertising_status event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_advertiser_periodic_advertising_status_s
-{
-  uint8_t  sid;    /**< The advertising set handle */
-  uint32_t status; /**< Reserved for future */
-});
-
-typedef struct sl_bt_evt_advertiser_periodic_advertising_status_s sl_bt_evt_advertiser_periodic_advertising_status_t;
-
-/** @} */ // end addtogroup sl_bt_evt_advertiser_periodic_advertising_status
-/** @endcond */ // end restricted event
-
 /***************************************************************************//**
  *
- * Create an advertising set. The handle of the created advertising set is
- * returned in response.
+ * Create an advertising set that can be used for legacy, extended, or periodic
+ * advertising. The handle of the created advertising set is returned in
+ * response if the operation succeeds.
+ *
+ * The maximum number of advertising sets for user advertisers is limited by the
+ * SL_BT_CONFIG_USER_ADVERTISERS configuration.
  *
  * @param[out] handle Advertising set handle
  *
@@ -1612,21 +1634,40 @@ sl_status_t sl_bt_advertiser_create_set(uint8_t *handle);
 
 /***************************************************************************//**
  *
- * Set the advertising timing parameters of the given advertising set. This
- * setting will take effect next time that advertising is enabled.
+ * Configure the legacy and extended advertising on an advertising set. The
+ * configuration will take effect next time the legacy or extended advertising
+ * is enabled.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] flags @parblock
+ *   Configuration flags. Value: 0 or bitmask of @ref sl_bt_advertiser_flags
+ *
+ *   Default value: 0
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_advertiser_configure(uint8_t advertising_set, uint32_t flags);
+
+/***************************************************************************//**
+ *
+ * Set the timing parameters for legacy or extended advertising on an
+ * advertising set. This setting will take effect next time the legacy or
+ * extended advertising is enabled.
+ *
+ * @param[in] advertising_set Advertising set handle
  * @param[in] interval_min @parblock
  *   Minimum advertising interval. Value in units of 0.625 ms
- *     - Range: 0x20 to 0xFFFF
- *     - Time range: 20 ms to 40.96 s
+ *     - Range: 0x20 to 0xFFFFFF
+ *     - Time range: 20 ms to 10485.759375 s
  *
  *   Default value: 100 ms
  *   @endparblock
  * @param[in] interval_max @parblock
  *   Maximum advertising interval. Value in units of 0.625 ms
- *     - Range: 0x20 to 0xFFFF
- *     - Time range: 20 ms to 40.96 s
+ *     - Range: 0x20 to 0xFFFFFF
+ *     - Time range: 20 ms to 10485.759375 s
  *     - Note: interval_max should be bigger than interval_min
  *
  *   Default value: 200 ms
@@ -1652,7 +1693,7 @@ sl_status_t sl_bt_advertiser_create_set(uint8_t *handle);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_timing(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_timing(uint8_t advertising_set,
                                         uint32_t interval_min,
                                         uint32_t interval_max,
                                         uint16_t duration,
@@ -1660,44 +1701,11 @@ sl_status_t sl_bt_advertiser_set_timing(uint8_t handle,
 
 /***************************************************************************//**
  *
- * Set advertising PHYs of the given advertising set. This setting will take
- * effect next time that advertising is enabled. The invalid parameter error is
- * returned if a PHY value is invalid or the device does not support a given
- * PHY.
+ * Set the primary advertising channel map on an advertising set. This setting
+ * will take effect next time when the legacy or extended advertising is
+ * enabled.
  *
- * @param[in] handle Advertising set handle
- * @param[in] primary_phy @parblock
- *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
- *   transmitted on the primary advertising channel. If legacy advertising PDUs
- *   are used, 1M PHY must be used. Values:
- *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
- *
- *   Default value: @ref sl_bt_gap_phy_1m
- *   @endparblock
- * @param[in] secondary_phy @parblock
- *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
- *   transmitted on the secondary advertising channel. Values:
- *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
- *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
- *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8) or 500k (S=2)
- *
- *   Default value: @ref sl_bt_gap_phy_1m
- *   @endparblock
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_phy(uint8_t handle,
-                                     uint8_t primary_phy,
-                                     uint8_t secondary_phy);
-
-/***************************************************************************//**
- *
- * Set the primary advertising channel map of the given advertising set. This
- * setting will take effect next time that advertising is enabled.
- *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] channel_map @parblock
  *   Advertising channel map which determines which of the three channels will
  *   be used for advertising. This value is given as a bitmask. Values:
@@ -1717,23 +1725,24 @@ sl_status_t sl_bt_advertiser_set_phy(uint8_t handle,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_channel_map(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_channel_map(uint8_t advertising_set,
                                              uint8_t channel_map);
 
 /***************************************************************************//**
  *
- * Limit the maximum advertising TX power on the given advertising set. If the
- * value goes over the global value that was set using @ref
- * sl_bt_system_set_max_tx_power command, the global value will be the maximum
+ * Limit the maximum advertising TX power on an advertising set. If the value
+ * goes over the global value that was set using the @ref
+ * sl_bt_system_set_tx_power command, the global value will be the maximum
  * limit. The maximum TX power of legacy advertising is further constrained to
  * be less than +10 dBm. Extended advertising TX power can be +10 dBm and over
  * if Adaptive Frequency Hopping is enabled.
  *
- * This setting will take effect next time advertising is enabled.
+ * This setting will take effect next time the legacy or extended advertising is
+ * enabled.
  *
  * By default, maximum advertising TX power is limited by the global value.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] power TX power in 0.1 dBm steps. For example, the value of 10 is 1
  *   dBm and 55 is 5.5 dBm.
  * @param[out] set_power The selected maximum advertising TX power
@@ -1741,16 +1750,17 @@ sl_status_t sl_bt_advertiser_set_channel_map(uint8_t handle,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_tx_power(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_tx_power(uint8_t advertising_set,
                                           int16_t power,
                                           int16_t *set_power);
 
 /***************************************************************************//**
  *
- * Enable or disable the scan request notification of a given advertising set.
- * This setting will take effect next time that advertising is enabled.
+ * Enable or disable the scan request notification on an advertising set. This
+ * setting will take effect next time the legacy or extended advertising is
+ * enabled.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] report_scan_req @parblock
  *   If non-zero, enables scan request notification and scan requests will be
  *   reported as events.
@@ -1766,7 +1776,7 @@ sl_status_t sl_bt_advertiser_set_tx_power(uint8_t handle,
  *     by this command.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t advertising_set,
                                                      uint8_t report_scan_req);
 
 /***************************************************************************//**
@@ -1776,35 +1786,40 @@ sl_status_t sl_bt_advertiser_set_report_scan_request(uint8_t handle,
  * address programmed at production or the address written into persistent
  * storage using @ref sl_bt_system_set_identity_address command. This setting is
  * stored in RAM only and does not change the identity address in persistent
- * storage.
+ * storage. In privacy mode, the stack does not change an advertiser address set
+ * by this command. To ensure that the stack can manage the address update
+ * periodically in privacy mode, the address setting should be removed with the
+ * @ref sl_bt_advertiser_clear_random_address command.
  *
  * When setting a resolvable random address, the address parameter is ignored.
- * The stack generates a private resolvable random address and set it as the
- * advertiser address. The generated address is returned in the response.
+ * The stack generates one and set it as the advertiser address. The generated
+ * address is returned in the response. To enhance the privacy, the application
+ * should schedule periodic address updates by calling this command
+ * periodically. Use different schedules for different advertising sets.
  *
  * To use the default advertiser address, remove this setting using @ref
  * sl_bt_advertiser_clear_random_address command.
  *
  * Wrong state error is returned if advertising has been enabled on the
  * advertising set. Invalid parameter error is returned if the advertising set
- * handle is invalid or the address does not conforms to the Bluetooth
+ * handle is invalid or the address does not conform to the Bluetooth
  * specification.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] addr_type Address type:
  *     - <b>1:</b> Static device address
- *     - <b>2:</b> Private resolvable random address
- *     - <b>3:</b> Private non-resolvable random address. This type can only be
+ *     - <b>2:</b> Resolvable private random address
+ *     - <b>3:</b> Non-resolvable private random address. This type can only be
  *       used for non-connectable advertising.
  * @param[in] address The random address to set. Ignore this field when setting
  *   a resolvable random address.
- * @param[out] address_out The resolvable random address set for the advetiser.
- *   Ignore this field when setting other types of random address.
+ * @param[out] address_out The resolvable random address set for the advertiser.
+ *   Ignore this field when setting other types of random addresses.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_random_address(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_random_address(uint8_t advertising_set,
                                                 uint8_t addr_type,
                                                 bd_addr address,
                                                 bd_addr *address_out);
@@ -1812,7 +1827,7 @@ sl_status_t sl_bt_advertiser_set_random_address(uint8_t handle,
 /***************************************************************************//**
  *
  * Clear the random address previously set for the advertiser address on an
- * advertising set. A random address can be set using @ref
+ * advertising set. To set a random address, use @ref
  * sl_bt_advertiser_set_random_address command. The default advertiser address
  * will be used after this operation.
  *
@@ -1820,32 +1835,108 @@ sl_status_t sl_bt_advertiser_set_random_address(uint8_t handle,
  * on the advertising set. An invalid parameter error is returned if the
  * advertising set handle is invalid.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_clear_random_address(uint8_t handle);
+sl_status_t sl_bt_advertiser_clear_random_address(uint8_t advertising_set);
 
 /***************************************************************************//**
  *
- * Enable advertising configuration flags on the given advertising set. The
- * configuration change will take effect next time that advertising is enabled.
+ * Stop the legacy or extended advertising on an advertising set. Counterpart
+ * with @ref sl_bt_legacy_advertiser_start or @ref
+ * sl_bt_extended_advertiser_start.
  *
- * These configuration flags can be disabled using @ref
- * sl_bt_advertiser_clear_configuration.
+ * This command does not affect the enable state of the periodic advertising on
+ * the advertising set, i.e., periodic advertising is not stopped.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_advertiser_stop(uint8_t advertising_set);
+
+/***************************************************************************//**
+ *
+ * Delete an advertising set. Any enabled legacy, extended, or periodic
+ * advertising is stopped before the deletion.
+ *
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_advertiser_delete_set(uint8_t advertising_set);
+
+/***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_extended_advertiser_set_phy
+ * command.
+ *
+ * Set extended advertising PHYs on an advertising set. This setting will take
+ * effect next time the extended advertising is enabled. When advertising on the
+ * LE Coded PHY, coding scheme S=8 is used. The invalid parameter error is
+ * returned if a PHY value is invalid or the device does not support a given
+ * PHY.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] primary_phy @parblock
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the primary advertising channel. If legacy advertising PDUs
+ *   are used, 1M PHY must be used. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
+ *
+ *   Default value: @ref sl_bt_gap_phy_1m
+ *   @endparblock
+ * @param[in] secondary_phy @parblock
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the secondary advertising channel. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
+ *
+ *   Default value: @ref sl_bt_gap_phy_1m
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_advertiser_set_phy(uint8_t advertising_set,
+                                     uint8_t primary_phy,
+                                     uint8_t secondary_phy);
+
+/***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_advertiser_configure command.
+ *
+ * Enable advertising configuration flags on an advertising set. The
+ * configuration change will take effect next time the legacy or extended
+ * advertising is enabled.
+ *
+ * @param[in] advertising_set Advertising set handle
  * @param[in] configurations @parblock
  *   Advertising configuration flags to enable. This value can be a bitmask of
  *   multiple flags. Flags:
  *     - <b>1 (Bit 0):</b> Use legacy advertising PDUs.
  *     - <b>2 (Bit 1):</b> Omit advertiser's address from all PDUs (anonymous
  *       advertising). This flag is effective only in extended advertising.
- *     - <b>4 (Bit 2):</b> Use gap_non_resolvable address type. Advertising must
- *       be in non-connectable mode if this configuration is enabled.
+ *     - <b>4 (Bit 2):</b> Use a non-resolvable private address. When this
+ *       configuration is enabled, the advertising must use non-connectable
+ *       mode. The stack generates a non-resolvable private address for the
+ *       advertising set and the stack will update the address periodically when
+ *       the privacy mode is enabled. This configuration is ignored if the
+ *       advertiser address has been set with the @ref
+ *       sl_bt_advertiser_set_random_address command.
  *     - <b>8 (Bit 3):</b> Include TX power in advertising packets. This flag is
  *       effective only in extended advertising.
+ *     - <b>16 (Bit 4):</b> Use the device identity address when the privacy
+ *       mode is enabled in the stack. This configuration is ignored if the
+ *       configuration of using non-resolvable private address is enabled or the
+ *       advertising address has been set with the @ref
+ *       sl_bt_advertiser_set_random_address command.
  *
  *   Default value: 1
  *   @endparblock
@@ -1853,18 +1944,18 @@ sl_status_t sl_bt_advertiser_clear_random_address(uint8_t handle);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_configuration(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_configuration(uint8_t advertising_set,
                                                uint32_t configurations);
 
 /***************************************************************************//**
  *
- * Disable advertising configuration flags on the given advertising set. The
- * configuration change will take effect next time that advertising is enabled.
+ * <b>Deprecated</b> and replaced by @ref sl_bt_advertiser_configure command.
  *
- * These configuration flags can be enabled using @ref
- * sl_bt_advertiser_set_configuration.
+ * Disable advertising configuration flags on an advertising set. The
+ * configuration change will take effect next time the legacy or extended
+ * advertising is enabled.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] configurations Advertising configuration flags to disable. This
  *   value can be a bitmask of multiple flags. See @ref
  *   sl_bt_advertiser_set_configuration for possible flags.
@@ -1872,10 +1963,15 @@ sl_status_t sl_bt_advertiser_set_configuration(uint8_t handle,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_clear_configuration(uint8_t handle,
+sl_status_t sl_bt_advertiser_clear_configuration(uint8_t advertising_set,
                                                  uint32_t configurations);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref sl_bt_legacy_advertiser_set_data for
+ * legacy advertising PDUs, @ref sl_bt_extended_advertiser_set_data for extended
+ * advertising PDUs, and @ref sl_bt_periodic_advertiser_set_data for periodic
+ * advertising PDUs.
  *
  * Set user-defined data in advertising packets, scan response packets, or
  * periodic advertising packets. Maximum 31 bytes of data can be set for legacy
@@ -1893,15 +1989,15 @@ sl_status_t sl_bt_advertiser_clear_configuration(uint8_t handle,
  *   - Data length is more than 31 bytes but the advertiser can only advertise
  *     using legacy advertising PDUs.
  *   - Data is too long to fit into a single advertisement.
- *   - Set data of the advertising data packet when the advertiser is
- *     advertising in scannable mode using extended advertising PDUs.
- *   - Set data of the scan response data packet when the advertiser is
- *     advertising in connectable mode using extended advertising PDUs.
+ *   - Set data of the advertising data packet when the scannable advertising is
+ *     enabled using extended advertising PDUs.
+ *   - Set data of the scan response data packet when the connectable
+ *     advertising is enabled using extended advertising PDUs.
  *
  * Note that the user-defined data may be overwritten by the system when the
- * advertising is later enabled in a discoverable mode other than user_data.
+ * advertising is later enabled in a discovery mode other than user_data.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] packet_type This value selects whether data is intended for
  *   advertising packets, scan response packets, or periodic advertising
  *   packets.
@@ -1914,12 +2010,16 @@ sl_status_t sl_bt_advertiser_clear_configuration(uint8_t handle,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_data(uint8_t handle,
+sl_status_t sl_bt_advertiser_set_data(uint8_t advertising_set,
                                       uint8_t packet_type,
                                       size_t adv_data_len,
                                       const uint8_t* adv_data);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> and replaced by @ref
+ * sl_bt_extended_advertiser_set_long_data for extended advertising PDUs and
+ * @ref sl_bt_periodic_advertiser_set_long_data for periodic advertising PDUs.
  *
  * Set advertising data for a specified packet type and advertising set. Data
  * currently in the system data buffer will be extracted as the advertising
@@ -1937,7 +2037,7 @@ sl_status_t sl_bt_advertiser_set_data(uint8_t handle,
  *
  * See @ref sl_bt_advertiser_set_data for more details on advertising data.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] packet_type This value selects whether data is intended for
  *   advertising packets, scan response packets, or periodic advertising
  *   packets. Values:
@@ -1948,47 +2048,50 @@ sl_status_t sl_bt_advertiser_set_data(uint8_t handle,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_set_long_data(uint8_t handle, uint8_t packet_type);
+sl_status_t sl_bt_advertiser_set_long_data(uint8_t advertising_set,
+                                           uint8_t packet_type);
 
 /***************************************************************************//**
  *
- * Start advertising of a given advertising set with specified discoverable and
- * connectable modes.
+ * <b>Deprecated</b> and replaced by @ref sl_bt_legacy_advertiser_start and @ref
+ * sl_bt_extended_advertiser_start commands.
  *
- * The number of concurrent advertising is limited by MAX_ADVERTISERS
- * configuration.
+ * Start the legacy or extended advertising on an advertising set with specified
+ * discovery and connection modes.
  *
- * The number of concurrent connectable advertising is also limited by
- * MAX_CONNECTIONS configuration. For example, only one connectable advertising
- * can be enabled if the device has (MAX_CONNECTIONS - 1) connections when this
- * command is called. The limitation does not apply to non-connectable
- * advertising.
+ * The number of concurrent connectable advertisings is limited by the number of
+ * connections reserved by the user application (the
+ * SL_BT_CONFIG_MAX_CONNECTIONS configuration) and the number reserved by other
+ * software components (the SL_BT_COMPONENT_CONNECTIONS configuration). This
+ * command fails with the connection limit exceeded error if it may cause the
+ * number of connections exceeding the configured value in future. For example,
+ * only one connectable advertising can be enabled if the device has
+ * (SL_BT_CONFIG_MAX_CONNECTIONS + SL_BT_COMPONENT_CONNECTIONS - 1) connections.
+ * This limitation does not apply to non-connectable advertising.
  *
  * The default advertising configuration in the stack is set to using legacy
  * advertising PDUs on 1M PHY. The stack will automatically select extended
  * advertising PDUs if either of the following has occurred with the default
  * configuration:
- *   1. The connectable mode is set to advertiser_connectable_non_scannable.
+ *   1. The connection mode is set to @ref
+ *      sl_bt_advertiser_connectable_non_scannable.
  *   2. The primary advertising PHY is set to Coded PHY by @ref
  *      sl_bt_advertiser_set_phy.
  *   3. The user advertising data length is more than 31 bytes.
  *   4. Periodic advertising is enabled.
  *
- * If the currently set parameters can't be used, an error is returned.
- * Specifically, this command fails with the connection limit exceeded error if
- * it causes the number of connections exceeding the configured MAX_CONNECTIONS
- * value. It fails with the invalid parameter error if one of the following use
+ * This command fails with the invalid parameter error if one of the following
  * cases occurs:
- *   1. Non-resolvable random address is used but the connectable mode is
+ *   1. Non-resolvable random address is used but the connection mode is
  *      advertiser_connectable_scannable or
  *      advertiser_connectable_non_scannable.
- *   2. advertiser_connectable_non_scannable is the connectable mode but using
+ *   2. advertiser_connectable_non_scannable is the connection mode but using
  *      legacy advertising PDUs has been explicitly enabled with command @ref
  *      sl_bt_advertiser_set_configuration.
  *   3. Coded PHY is the primary advertising PHY but using legacy advertising
  *      PDUs has been explicitly enabled with command @ref
  *      sl_bt_advertiser_set_configuration.
- *   4. advertiser_connectable_scannable is the connectable mode but using
+ *   4. advertiser_connectable_scannable is the connection mode but using
  *      extended advertising PDUs has been explicitly enabled or the primary
  *      advertising PHY is set to Coded PHY.
  *
@@ -2019,33 +2122,31 @@ sl_status_t sl_bt_advertiser_set_long_data(uint8_t handle, uint8_t packet_type);
  *      name is added to scan response data.
  *
  * Event @ref sl_bt_evt_connection_opened will be received when a remote device
- * opens a connection to the advertiser on this advertising set and also
- * advertising on the given set stops.
+ * opens a connection to the advertiser on this advertising set. As a result,
+ * the advertising stops.
  *
  * Event @ref sl_bt_evt_advertiser_timeout will be received when the number of
  * advertising events set by @ref sl_bt_advertiser_set_timing command is done
- * and advertising with the current set has stopped.
+ * and the advertising has stopped.
  *
- * @param[in] handle Advertising set handle
- * @param[in] discover Enum @ref sl_bt_advertiser_discoverable_mode_t.
- *   Discoverable mode. Values:
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] discover Enum @ref sl_bt_advertiser_discovery_mode_t. Discovery
+ *   mode. Values:
  *     - <b>sl_bt_advertiser_non_discoverable (0x0):</b> Not discoverable
- *     - <b>sl_bt_advertiser_limited_discoverable (0x1):</b> Discoverable using
+ *     - <b>sl_bt_advertiser_limited_discoverable (0x1):</b> Discoverable by
  *       both limited and general discovery procedures
- *     - <b>sl_bt_advertiser_general_discoverable (0x2):</b> Discoverable using
+ *     - <b>sl_bt_advertiser_general_discoverable (0x2):</b> Discoverable by the
  *       general discovery procedure
  *     - <b>sl_bt_advertiser_broadcast (0x3):</b> Device is not discoverable in
  *       either limited or generic discovery procedure but may be discovered
  *       using the Observation procedure.
  *     - <b>sl_bt_advertiser_user_data (0x4):</b> Send advertising and/or scan
- *       response data defined by the user. The limited/general discoverable
- *       flags are defined by the user.
- * @param[in] connect Enum @ref sl_bt_advertiser_connectable_mode_t. Connectable
+ *       response data defined by the user. The discovery mode is defined by the
+ *       user.
+ * @param[in] connect Enum @ref sl_bt_advertiser_connection_mode_t. Connection
  *   mode. Values:
  *     - <b>sl_bt_advertiser_non_connectable (0x0):</b> Non-connectable
- *       non-scannable.
- *     - <b>sl_bt_advertiser_directed_connectable (0x1):</b> Directed
- *       connectable <b>(RESERVED, DO NOT USE)</b>
+ *       non-scannable
  *     - <b>sl_bt_advertiser_connectable_scannable (0x2):</b> Undirected
  *       connectable scannable. This mode can only be used in legacy advertising
  *       PDUs.
@@ -2060,35 +2161,22 @@ sl_status_t sl_bt_advertiser_set_long_data(uint8_t handle, uint8_t packet_type);
  * @b Events
  *   - @ref sl_bt_evt_advertiser_timeout - Triggered when the number of
  *     advertising events set by @ref sl_bt_advertiser_set_timing command is
- *     done and advertising has stopped on the given advertising set.
+ *     done and advertising has stopped on an advertising set.
  *   - @ref sl_bt_evt_connection_opened - Triggered when a remote device opens a
- *     connection to the advertiser on the specified advertising set and also
- *     advertising with the current set stops.
+ *     connection to the advertiser and the advertising has stopped.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_start(uint8_t handle,
+sl_status_t sl_bt_advertiser_start(uint8_t advertising_set,
                                    uint8_t discover,
                                    uint8_t connect);
 
 /***************************************************************************//**
  *
- * Stop the advertising of the given advertising set. Counterpart with @ref
- * sl_bt_advertiser_start.
+ * <b>Deprecated</b> and replaced by @ref sl_bt_periodic_advertiser_start
+ * command.
  *
- * This command does not affect the enable state of the periodic advertising
- * set, i.e., periodic advertising is not stopped.
- *
- * @param[in] handle Advertising set handle
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_advertiser_stop(uint8_t handle);
-
-/***************************************************************************//**
- *
- * Start periodic advertising on the given advertising set. The stack enables
- * the advertising set automatically if the set was not enabled and the set can
+ * Start periodic advertising on an advertising set. The stack enables the
+ * advertising set automatically if the set was not enabled and the set can
  * advertise using extended advertising PDUs beside the syncInfo, which is
  * needed for the periodic advertising.
  *
@@ -2100,7 +2188,7 @@ sl_status_t sl_bt_advertiser_stop(uint8_t handle);
  * sl_bt_advertiser_stop_periodic_advertising command with the handle received
  * in response from this command.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  * @param[in] interval_min @parblock
  *   Minimum periodic advertising interval. Value in units of 1.25 ms
  *     - Range: 0x06 to 0xFFFF
@@ -2123,38 +2211,682 @@ sl_status_t sl_bt_advertiser_stop(uint8_t handle);
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t handle,
+sl_status_t sl_bt_advertiser_start_periodic_advertising(uint8_t advertising_set,
                                                         uint16_t interval_min,
                                                         uint16_t interval_max,
                                                         uint32_t flags);
 
 /***************************************************************************//**
  *
- * Stop the periodic advertising on the given advertising set. Counterpart with
- * @ref sl_bt_advertiser_start_periodic_advertising.
+ * <b>Deprecated</b> and replaced by @ref sl_bt_periodic_advertiser_stop
+ * command.
+ *
+ * Stop periodic advertising on an advertising set. Counterpart with @ref
+ * sl_bt_advertiser_start_periodic_advertising.
  *
  * This command does not affect the enable state of the advertising set, i.e.,
  * legacy or extended advertising is not stopped.
  *
- * @param[in] handle Advertising set handle
+ * @param[in] advertising_set Advertising set handle
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_stop_periodic_advertising(uint8_t handle);
+sl_status_t sl_bt_advertiser_stop_periodic_advertising(uint8_t advertising_set);
+
+/** @} */ // end addtogroup sl_bt_advertiser
+
+/**
+ * @addtogroup sl_bt_legacy_advertiser Legacy Advertiser
+ * @{
+ *
+ * @brief Legacy Advertiser
+ *
+ * The commands and events in this class are related to legacy advertising
+ * functionalities.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_legacy_advertiser_set_data_id                      0x00560020
+#define sl_bt_cmd_legacy_advertiser_generate_data_id                 0x01560020
+#define sl_bt_cmd_legacy_advertiser_start_id                         0x02560020
+#define sl_bt_cmd_legacy_advertiser_start_directed_id                0x03560020
+#define sl_bt_rsp_legacy_advertiser_set_data_id                      0x00560020
+#define sl_bt_rsp_legacy_advertiser_generate_data_id                 0x01560020
+#define sl_bt_rsp_legacy_advertiser_start_id                         0x02560020
+#define sl_bt_rsp_legacy_advertiser_start_directed_id                0x03560020
+
+/**
+ * @brief These values define the available connection modes of undirected
+ * legacy advertising.
+ */
+typedef enum
+{
+  sl_bt_legacy_advertiser_non_connectable = 0x0, /**< (0x0) Undirected
+                                                      non-connectable and
+                                                      non-scannable legacy
+                                                      advertising */
+  sl_bt_legacy_advertiser_connectable     = 0x2, /**< (0x2) Undirected
+                                                      connectable and scannable
+                                                      legacy advertising */
+  sl_bt_legacy_advertiser_scannable       = 0x3  /**< (0x3) Undirected scannable
+                                                      and non-connectable legacy
+                                                      advertising */
+} sl_bt_legacy_advertiser_connection_mode_t;
+
+/**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ * @brief These values define the available connection modes of directed legacy
+ * advertising.
+ */
+typedef enum
+{
+  sl_bt_legacy_advertiser_high_duty_directed_connectable = 0x1, /**< (0x1) High
+                                                                     duty cycle
+                                                                     directed
+                                                                     connectable
+                                                                     legacy
+                                                                     advertising */
+  sl_bt_legacy_advertiser_low_duty_directed_connectable  = 0x5  /**< (0x5) Low
+                                                                     duty cycle
+                                                                     directed
+                                                                     connectable
+                                                                     legacy
+                                                                     advertising */
+} sl_bt_legacy_advertiser_directed_connection_mode_t;
+/** @endcond */ // end restricted enum type
 
 /***************************************************************************//**
  *
- * Delete an advertising set.
+ * Set user-defined advertising data packet or scan response packet on an
+ * advertising set. This overwrites the existing advertising data packet and
+ * scan response packet on this advertising set regardless of whether the data
+ * was set for the legacy or extended advertising. Maximum 31 bytes of data can
+ * be set with this command.
  *
- * @param[in] handle Advertising set handle
+ * If advertising mode is currently enabled, the new advertising data will be
+ * used immediately. Advertising mode can be enabled using command @ref
+ * sl_bt_legacy_advertiser_start.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] type Enum @ref sl_bt_advertiser_packet_type_t. The advertising
+ *   packet type
+ * @param[in] data_len Length of data in @p data
+ * @param[in] data Data to set
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_bt_advertiser_delete_set(uint8_t handle);
+sl_status_t sl_bt_legacy_advertiser_set_data(uint8_t advertising_set,
+                                             uint8_t type,
+                                             size_t data_len,
+                                             const uint8_t* data);
 
-/** @} */ // end addtogroup sl_bt_advertiser
+/***************************************************************************//**
+ *
+ * Ask the stack to generate the advertising data packet and scan response
+ * packet on an advertising set. Alternatively, the user-defined advertising
+ * data can be set using the @ref sl_bt_legacy_advertiser_set_data command.
+ *
+ * This overwrites the existing advertising data packet and scan response packet
+ * on this advertising set regardless of whether the data was set for the legacy
+ * or extended advertising.
+ *
+ * If advertising mode is currently enabled, the new advertising data will be
+ * used immediately. To enable advertising mode, use command @ref
+ * sl_bt_legacy_advertiser_start.
+ *
+ * The stack generates the advertising data and scan response packet using the
+ * following logic.
+ *   1. Add a flags field to advertising data.
+ *   2. Add a TX power level field to advertising data if the TX power service
+ *      exists in the local GATT database.
+ *   3. Add a peripheral connection interval range field to advertising data if
+ *      the GAP peripheral preferred connection parameters characteristic exists
+ *      in the local GATT database.
+ *   4. Add a list of 16-bit service UUIDs to advertising data if there are one
+ *      or more 16-bit service UUIDs to advertise. The list is complete if all
+ *      advertised 16-bit UUIDs are in advertising data. Otherwise, the list is
+ *      incomplete.
+ *   5. Add a list of 128-bit service UUIDs to advertising data if there are one
+ *      or more 128-bit service UUIDs to advertise and there is still free space
+ *      for this field. The list is complete if all advertised 128-bit UUIDs are
+ *      in advertising data. Otherwise, the list is incomplete. Note that an
+ *      advertising data packet can contain at most one 128-bit service UUID.
+ *   6. Try to add the full local name to advertising data if the device is not
+ *      in privacy mode. If the full local name does not fit into the remaining
+ *      free space, the advertised name is a shortened version by cutting off
+ *      the end if the free space has at least 6 bytes. Otherwise, the local
+ *      name is added to scan response data.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] discover Enum @ref sl_bt_advertiser_discovery_mode_t. The
+ *   discovery mode for the Flags data field in the packet. Values:
+ *     - <b>sl_bt_advertiser_non_discoverable (0x0):</b> Not discoverable
+ *     - <b>sl_bt_advertiser_limited_discoverable (0x1):</b> Discoverable by
+ *       both limited and general discovery procedures
+ *     - <b>sl_bt_advertiser_general_discoverable (0x2):</b> Discoverable by the
+ *       general discovery procedure
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_legacy_advertiser_generate_data(uint8_t advertising_set,
+                                                  uint8_t discover);
+
+/***************************************************************************//**
+ *
+ * Start undirected legacy advertising on an advertising set with the specified
+ * connection mode. Use @ref sl_bt_advertiser_stop to stop the advertising.
+ *
+ * Use the @ref sl_bt_legacy_advertiser_set_data or @ref
+ * sl_bt_legacy_advertiser_generate_data comamnd to set the advertising data
+ * before calling this command. The advertising data is added into the
+ * advertising data packet and scan response packet if the connection mode is
+ * connectable and/or scannable. The data is only added into the advertising
+ * data packet when the connection mode is non-connectable and non-scannable.
+ *
+ * The number of concurrent connectable advertisings is limited by the number of
+ * connections reserved by the user application (the
+ * SL_BT_CONFIG_MAX_CONNECTIONS configuration) and the number reserved by other
+ * software components (the SL_BT_COMPONENT_CONNECTIONS configuration). This
+ * command fails with the connection limit exceeded error if it may cause the
+ * number of connections exceeding the configured value in future. For example,
+ * only one connectable advertising can be enabled if the device has
+ * (SL_BT_CONFIG_MAX_CONNECTIONS + SL_BT_COMPONENT_CONNECTIONS - 1) connections.
+ * This limitation does not apply to non-connectable advertising.
+ *
+ * This command fails with the invalid parameter error if non-resolvable random
+ * address is used but the connection mode is @ref
+ * sl_bt_legacy_advertiser_connectable.
+ *
+ * Event @ref sl_bt_evt_connection_opened will be received when a remote device
+ * opens a connection to the advertiser on this advertising set. As a result,
+ * the advertising stops.
+ *
+ * Event @ref sl_bt_evt_advertiser_timeout will be received when the number of
+ * advertising events set by @ref sl_bt_advertiser_set_timing command is done
+ * and the advertising has stopped.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] connect Enum @ref sl_bt_legacy_advertiser_connection_mode_t.
+ *   Connection mode. Values:
+ *     - <b>sl_bt_legacy_advertiser_non_connectable (0x0):</b> Undirected
+ *       non-connectable and non-scannable legacy advertising
+ *     - <b>sl_bt_legacy_advertiser_connectable (0x2):</b> Undirected
+ *       connectable and scannable legacy advertising
+ *     - <b>sl_bt_legacy_advertiser_scannable (0x3):</b> Undirected scannable
+ *       and non-connectable legacy advertising
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_advertiser_timeout - Triggered when the number of
+ *     advertising events set by @ref sl_bt_advertiser_set_timing command is
+ *     done and the advertising has stopped.
+ *   - @ref sl_bt_evt_connection_opened - Triggered when a remote device opens a
+ *     connection to the advertiser and the advertising has stopped.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_legacy_advertiser_start(uint8_t advertising_set,
+                                          uint8_t connect);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Start directed legacy advertising on an advertising set with the specified
+ * peer target device and connection mode. Use @ref sl_bt_advertiser_stop to
+ * stop the advertising.
+ *
+ * Directed legacy advertising does not allow any advertising data. When the
+ * connection mode is @ref
+ * sl_bt_legacy_advertiser_high_duty_directed_connectable, the stack defaults
+ * the advertising duration to 0.64 s if the application has not set the
+ * parameter. The duration is reduced to 1.28 s if the application has set a
+ * larger duration value.
+ *
+ * The number of concurrent connectable advertisings is limited by the
+ * connection number configuration. See @ref sl_bt_legacy_advertiser_start for
+ * more details.
+ *
+ * This command fails with the invalid parameter error if non-resolvable random
+ * address is set as the advertising address.
+ *
+ * Event @ref sl_bt_evt_connection_opened will be received when the target
+ * device opens a connection to the advertiser on this advertising set. As a
+ * result, the advertising stops.
+ *
+ * Event @ref sl_bt_evt_advertiser_timeout will be received when the advertising
+ * stops and no Bluetooth connection is opened to it.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] connect Enum @ref
+ *   sl_bt_legacy_advertiser_directed_connection_mode_t. Connection mode.
+ *   Values:
+ *     - <b>sl_bt_legacy_advertiser_high_duty_directed_connectable (0x1):</b>
+ *       High duty cycle directed connectable legacy advertising
+ *     - <b>sl_bt_legacy_advertiser_low_duty_directed_connectable (0x5):</b> Low
+ *       duty cycle directed connectable legacy advertising
+ * @param[in] peer_addr Address of the peer target device the advertising is
+ *   directed to
+ * @param[in] peer_addr_type Peer target device address type. Values:
+ *     - <b>0:</b> Public address
+ *     - <b>1:</b> Random address
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_advertiser_timeout - Triggered when the number of
+ *     advertising events set by @ref sl_bt_advertiser_set_timing command is
+ *     done and the advertising has stopped.
+ *   - @ref sl_bt_evt_connection_opened - Triggered when a remote device opens a
+ *     connection to the advertiser and the advertising has stopped.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_bt_legacy_advertiser_start_directed(uint8_t advertising_set,
+                                                   uint8_t connect,
+                                                   bd_addr peer_addr,
+                                                   uint8_t peer_addr_type);
+
+/** @} */ // end addtogroup sl_bt_legacy_advertiser
+
+/**
+ * @addtogroup sl_bt_extended_advertiser Extended Advertiser
+ * @{
+ *
+ * @brief Extended Advertiser
+ *
+ * The commands and events in this class are related to extended advertising
+ * functionalities in GAP peripheral and broadcaster roles.
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_extended_advertiser_set_phy_id                     0x00570020
+#define sl_bt_cmd_extended_advertiser_set_data_id                    0x01570020
+#define sl_bt_cmd_extended_advertiser_set_long_data_id               0x02570020
+#define sl_bt_cmd_extended_advertiser_generate_data_id               0x03570020
+#define sl_bt_cmd_extended_advertiser_start_id                       0x04570020
+#define sl_bt_rsp_extended_advertiser_set_phy_id                     0x00570020
+#define sl_bt_rsp_extended_advertiser_set_data_id                    0x01570020
+#define sl_bt_rsp_extended_advertiser_set_long_data_id               0x02570020
+#define sl_bt_rsp_extended_advertiser_generate_data_id               0x03570020
+#define sl_bt_rsp_extended_advertiser_start_id                       0x04570020
+
+/**
+ * @brief These values define the available connection modes in extended
+ * advertising.
+ */
+typedef enum
+{
+  sl_bt_extended_advertiser_non_connectable = 0x0, /**< (0x0) Non-connectable
+                                                        and non-scannable
+                                                        extended advertising */
+  sl_bt_extended_advertiser_scannable       = 0x3, /**< (0x3) Scannable extended
+                                                        advertising */
+  sl_bt_extended_advertiser_connectable     = 0x4  /**< (0x4) Connectable
+                                                        extended advertising */
+} sl_bt_extended_advertiser_connection_mode_t;
+
+/**
+ * @addtogroup sl_bt_extended_advertiser_flags Extended Advertising Configuration Flags
+ * @{
+ *
+ * This enum defines configuration flags for the extended advertising.
+ */
+
+/** Omit advertiser's address from all PDUs (anonymous advertising). The
+ * advertising cannot be connectable or scannable if this flag is set. */
+#define SL_BT_EXTENDED_ADVERTISER_ANONYMOUS_ADVERTISING 0x1       
+
+/** Include the TX power in advertising packets. */
+#define SL_BT_EXTENDED_ADVERTISER_INCLUDE_TX_POWER      0x2       
+
+/** @} */ // end Extended Advertising Configuration Flags
+
+/***************************************************************************//**
+ *
+ * Set advertising PHYs of the extended advertising on an advertising set. This
+ * setting will take effect next time the advertising is enabled. When
+ * advertising on the LE Coded PHY, coding scheme S=8 is used. The invalid
+ * parameter error is returned if a PHY value is invalid or the device does not
+ * support a given PHY.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] primary_phy @parblock
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the primary advertising channel. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
+ *
+ *   Default value: @ref sl_bt_gap_phy_1m
+ *   @endparblock
+ * @param[in] secondary_phy @parblock
+ *   Enum @ref sl_bt_gap_phy_t. The PHY on which the advertising packets are
+ *   transmitted on the secondary advertising channel. Values:
+ *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_gap_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_gap_phy_coded (0x4):</b> Coded PHY, 125k (S=8)
+ *
+ *   Default value: @ref sl_bt_gap_phy_1m
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_extended_advertiser_set_phy(uint8_t advertising_set,
+                                              uint8_t primary_phy,
+                                              uint8_t secondary_phy);
+
+/***************************************************************************//**
+ *
+ * Set user-defined data for extended advertising. This overwrites the existing
+ * advertising data packet and scan response packet on this advertising set
+ * regardless of whether the data was set for the legacy or extended
+ * advertising. Maximum 191 bytes of data can be set for connectable extended
+ * advertising. Maximum 253 bytes of data can be set for non-connectable
+ * extended advertising. For setting longer advertising data, use command @ref
+ * sl_bt_extended_advertiser_set_long_data.
+ *
+ * If advertising mode is currently enabled, the new advertising data will be
+ * used immediately. Advertising mode can be enabled using command @ref
+ * sl_bt_extended_advertiser_start.
+ *
+ * The invalid parameter error is returned if the data is too long to fit into a
+ * single advertisement.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] data_len Length of data in @p data
+ * @param[in] data Data to be set
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_extended_advertiser_set_data(uint8_t advertising_set,
+                                               size_t data_len,
+                                               const uint8_t* data);
+
+/***************************************************************************//**
+ *
+ * Set long user-defined data for extended advertising. This overwrites the
+ * existing advertising data packet and scan response packet on this advertising
+ * set regardless of whether the data was set for the legacy or extended
+ * advertising.
+ *
+ * Prior to calling this command, add data to the buffer with one or multiple
+ * calls to @ref sl_bt_system_data_buffer_write. When this command is called,
+ * the data in the system data buffer is extracted as the advertising data. The
+ * buffer will be emptied after this command regardless of the completion
+ * status.
+ *
+ * Maximum 191 bytes of data can be set for connectable extended advertising.
+ * Maximum 1650 bytes of data can be set for non-connectable extended
+ * advertising. Advertising parameters may limit the amount of data that can be
+ * sent in a single advertisement. See @ref sl_bt_extended_advertiser_set_data
+ * for more details.
+ *
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_extended_advertiser_set_long_data(uint8_t advertising_set);
+
+/***************************************************************************//**
+ *
+ * Ask the stack to generate the extended advertising data on an advertising
+ * set. Alternatively, user-defined advertising data can be set using the @ref
+ * sl_bt_extended_advertiser_set_data command.
+ *
+ * This overwrites the existing advertising data packet and scan response packet
+ * on this advertising set regardless of whether the data was set for the legacy
+ * or extended advertising.
+ *
+ * If advertising mode is currently enabled, the new advertising data will be
+ * used immediately. To enable advertising mode, use command @ref
+ * sl_bt_legacy_advertiser_start.
+ *
+ * See @ref sl_bt_legacy_advertiser_generate_data for the advertising data
+ * generation logic.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] discover Enum @ref sl_bt_advertiser_discovery_mode_t. The
+ *   discovery mode for the Flags data field in the packet. Values:
+ *     - <b>sl_bt_advertiser_non_discoverable (0x0):</b> Not discoverable
+ *     - <b>sl_bt_advertiser_limited_discoverable (0x1):</b> Discoverable by
+ *       both limited and general discovery procedures
+ *     - <b>sl_bt_advertiser_general_discoverable (0x2):</b> Discoverable by the
+ *       general discovery procedure
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_extended_advertiser_generate_data(uint8_t advertising_set,
+                                                    uint8_t discover);
+
+/***************************************************************************//**
+ *
+ * Start undirected extended advertising on an advertising set with the
+ * specified connection mode. Use @ref sl_bt_advertiser_stop to stop the
+ * advertising.
+ *
+ * Use the @ref sl_bt_extended_advertiser_set_data or @ref
+ * sl_bt_extended_advertiser_generate_data command to set the advertising data
+ * before calling this command. Advertising data is added into the scan response
+ * packet if the connection mode is scannable. Otherwise, data is in the
+ * advertising data packet.
+ *
+ * The number of concurrent connectable advertisings is limited by the
+ * connection number configuration. See @ref sl_bt_legacy_advertiser_start for
+ * more details.
+ *
+ * This command fails with the invalid parameter error if non-resolvable random
+ * address is used but the connection mode is @ref
+ * sl_bt_extended_advertiser_connectable.
+ *
+ * Event @ref sl_bt_evt_connection_opened will be received when a remote device
+ * opens a connection to the advertiser on this advertising set. As a result,
+ * the advertising stops.
+ *
+ * Event @ref sl_bt_evt_advertiser_timeout will be received when the number of
+ * advertising events set by @ref sl_bt_advertiser_set_timing command is done
+ * and the advertising has stopped.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] connect Enum @ref sl_bt_extended_advertiser_connection_mode_t.
+ *   Connection mode. Values:
+ *     - <b>sl_bt_extended_advertiser_non_connectable (0x0):</b> Non-connectable
+ *       and non-scannable extended advertising
+ *     - <b>sl_bt_extended_advertiser_scannable (0x3):</b> Scannable extended
+ *       advertising
+ *     - <b>sl_bt_extended_advertiser_connectable (0x4):</b> Connectable
+ *       extended advertising
+ * @param[in] flags Additional extended advertising options. Value: 0 or bitmask
+ *   of @ref sl_bt_extended_advertiser_flags
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_advertiser_timeout - Triggered when the number of
+ *     advertising events set by @ref sl_bt_advertiser_set_timing command is
+ *     done and advertising has stopped on an advertising set.
+ *   - @ref sl_bt_evt_connection_opened - Triggered when a remote device opens a
+ *     connection to the advertiser and the advertising has stopped.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_extended_advertiser_start(uint8_t advertising_set,
+                                            uint8_t connect,
+                                            uint32_t flags);
+
+/** @} */ // end addtogroup sl_bt_extended_advertiser
+
+/**
+ * @addtogroup sl_bt_periodic_advertiser Periodic Advertiser
+ * @{
+ *
+ * @brief Periodic Advertiser
+ */
+
+/* Command and Response IDs */
+#define sl_bt_cmd_periodic_advertiser_set_data_id                    0x00580020
+#define sl_bt_cmd_periodic_advertiser_set_long_data_id               0x01580020
+#define sl_bt_cmd_periodic_advertiser_start_id                       0x02580020
+#define sl_bt_cmd_periodic_advertiser_stop_id                        0x03580020
+#define sl_bt_rsp_periodic_advertiser_set_data_id                    0x00580020
+#define sl_bt_rsp_periodic_advertiser_set_long_data_id               0x01580020
+#define sl_bt_rsp_periodic_advertiser_start_id                       0x02580020
+#define sl_bt_rsp_periodic_advertiser_stop_id                        0x03580020
+
+/**
+ * @addtogroup sl_bt_periodic_advertiser_flags Periodic Advertising Configuration Flags
+ * @{
+ *
+ * This enum defines configuration flags for the periodic advertising.
+ */
+
+/** Include the TX power in advertising packets. */
+#define SL_BT_PERIODIC_ADVERTISER_INCLUDE_TX_POWER                0x1       
+
+/** Automatically start the extended advertising on the advertising set. The
+ * advertising will be started in non-connectable and non-scannable mode. */
+#define SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING 0x2       
+
+/** @} */ // end Periodic Advertising Configuration Flags
+
+/**
+ * @cond RESTRICTED
+ *
+ * @addtogroup sl_bt_evt_periodic_advertiser_status sl_bt_evt_periodic_advertiser_status
+ * @{
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * @brief This event indicates a status update in the periodic advertising.
+ */
+
+/** @brief Identifier of the status event */
+#define sl_bt_evt_periodic_advertiser_status_id                      0x005800a0
+
+/***************************************************************************//**
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * @brief Data structure of the status event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_bt_evt_periodic_advertiser_status_s
+{
+  uint8_t  advertising_set; /**< The advertising set handle */
+  uint32_t status;          /**< Reserved for future */
+});
+
+typedef struct sl_bt_evt_periodic_advertiser_status_s sl_bt_evt_periodic_advertiser_status_t;
+
+/** @} */ // end addtogroup sl_bt_evt_periodic_advertiser_status
+/** @endcond */ // end restricted event
+
+/***************************************************************************//**
+ *
+ * Set the data for periodic advertising on an advertising set. Maximum 254
+ * bytes of data can be set with this command. For setting longer advertising
+ * data, use command @ref sl_bt_periodic_advertiser_set_long_data.
+ *
+ * If the periodic advertising is currently enabled, the new advertising data
+ * will be used immediately. Periodic advertising can be enabled using the
+ * command @ref sl_bt_periodic_advertiser_start.
+ *
+ * The invalid parameter error will be returned if the data is too long to fit
+ * into the advertisement.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] data_len Length of data in @p data
+ * @param[in] data Data to be set
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_periodic_advertiser_set_data(uint8_t advertising_set,
+                                               size_t data_len,
+                                               const uint8_t* data);
+
+/***************************************************************************//**
+ *
+ * Set data for periodic advertising on an advertising set. Data currently in
+ * the system data buffer will be extracted as the advertising data. The buffer
+ * will be emptied after this command regardless of the completion status.
+ *
+ * Prior to calling this command, add data to the buffer with one or multiple
+ * calls to @ref sl_bt_system_data_buffer_write.
+ *
+ * Maximum 1650 bytes of data can be set for periodic advertising. Advertising
+ * parameters may limit the amount of data that can be sent.
+ *
+ * See @ref sl_bt_periodic_advertiser_set_data for more details.
+ *
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_periodic_advertiser_set_long_data(uint8_t advertising_set);
+
+/***************************************************************************//**
+ *
+ * Start periodic advertising on an advertising set.
+ *
+ * When the flag @ref SL_BT_PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING
+ * is set, the stack will start the extended advertising and will return the
+ * invalid parameter error if the extended advertising cannot be started for
+ * some reason.
+ *
+ * Use @ref sl_bt_periodic_advertiser_stop command to stop the periodic
+ * advertising.
+ *
+ * @param[in] advertising_set Advertising set handle
+ * @param[in] interval_min @parblock
+ *   Minimum periodic advertising interval. Value in units of 1.25 ms
+ *     - Range: 0x06 to 0xFFFF
+ *     - Time range: 7.5 ms to 81.92 s
+ *
+ *   Default value: 100 ms
+ *   @endparblock
+ * @param[in] interval_max @parblock
+ *   Maximum periodic advertising interval. Value in units of 1.25 ms
+ *     - Range: 0x06 to 0xFFFF
+ *     - Time range: 7.5 ms to 81.92 s
+ *     - Note: interval_max should be bigger than interval_min
+ *
+ *   Default value: 200 ms
+ *   @endparblock
+ * @param[in] flags Additional periodic advertising options. Value: 0 or bitmask
+ *   of @ref sl_bt_periodic_advertiser_flags
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_periodic_advertiser_start(uint8_t advertising_set,
+                                            uint16_t interval_min,
+                                            uint16_t interval_max,
+                                            uint32_t flags);
+
+/***************************************************************************//**
+ *
+ * Stop the periodic advertising on an advertising set. Counterpart to @ref
+ * sl_bt_periodic_advertiser_start.
+ *
+ * This command does not affect the enable state of the legacy or extended
+ * advertising on the advertising set, i.e., the legacy or extended advertising
+ * is not stopped..
+ *
+ * @param[in] advertising_set Advertising set handle
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_periodic_advertiser_stop(uint8_t advertising_set);
+
+/** @} */ // end addtogroup sl_bt_periodic_advertiser
 
 /**
  * @addtogroup sl_bt_scanner Scanner
@@ -2177,17 +2909,18 @@ sl_status_t sl_bt_advertiser_delete_set(uint8_t handle);
 #define sl_bt_rsp_scanner_stop_id                                    0x05050020
 
 /**
- * @brief 
-                These values indicate which Bluetooth discovery mode to use when scanning for advertising devices.
-            
+ * @brief These values indicate which Bluetooth discovery mode to use when
+ * scanning for advertising devices.
  */
 typedef enum
 {
   sl_bt_scanner_discover_limited     = 0x0, /**< (0x0) Discover only limited
                                                  discoverable devices. */
   sl_bt_scanner_discover_generic     = 0x1, /**< (0x1) Discover limited and
-                                                 generic discoverable devices. */
-  sl_bt_scanner_discover_observation = 0x2  /**< (0x2) Discover all devices. */
+                                                 general discoverable devices. */
+  sl_bt_scanner_discover_observation = 0x2  /**< (0x2) Discover
+                                                 non-discoverable, limited and
+                                                 general discoverable devices. */
 } sl_bt_scanner_discover_mode_t;
 
 /**
@@ -2394,8 +3127,9 @@ sl_status_t sl_bt_scanner_set_mode(uint8_t phys, uint8_t scan_mode);
  *     - <b>sl_bt_scanner_discover_limited (0x0):</b> Discover only limited
  *       discoverable devices.
  *     - <b>sl_bt_scanner_discover_generic (0x1):</b> Discover limited and
- *       generic discoverable devices.
- *     - <b>sl_bt_scanner_discover_observation (0x2):</b> Discover all devices.
+ *       general discoverable devices.
+ *     - <b>sl_bt_scanner_discover_observation (0x2):</b> Discover
+ *       non-discoverable, limited and general discoverable devices.
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -2432,15 +3166,31 @@ sl_status_t sl_bt_scanner_stop();
 /* Command and Response IDs */
 #define sl_bt_cmd_sync_set_parameters_id                             0x02420020
 #define sl_bt_cmd_sync_open_id                                       0x00420020
+#define sl_bt_cmd_sync_set_reporting_mode_id                         0x03420020
 #define sl_bt_cmd_sync_close_id                                      0x01420020
 #define sl_bt_rsp_sync_set_parameters_id                             0x02420020
 #define sl_bt_rsp_sync_open_id                                       0x00420020
+#define sl_bt_rsp_sync_set_reporting_mode_id                         0x03420020
 #define sl_bt_rsp_sync_close_id                                      0x01420020
 
 /**
- * @brief 
-                These values indicate the advertiser clock accuracy in a periodic advertising synchronization.
-            
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ * @brief Specifies the mode for periodic advertising reports.
+ */
+typedef enum
+{
+  sl_bt_sync_report_none = 0x0, /**< (0x0) Data received in periodic advertising
+                                     trains is not reported to the application. */
+  sl_bt_sync_report_all  = 0x1  /**< (0x1) Data received in periodic advertising
+                                     trains is reported to the application. */
+} sl_bt_sync_reporting_mode_t;
+/** @endcond */ // end restricted enum type
+
+/**
+ * @brief These values indicate the advertiser clock accuracy in a periodic
+ * advertising synchronization.
  */
 typedef enum
 {
@@ -2569,10 +3319,10 @@ typedef struct sl_bt_evt_sync_closed_s sl_bt_evt_sync_closed_t;
  * established synchronization.
  *
  * The application should determine skip and timeout values based on the
- * periodic advertising interval provided by the advertiser. It is recommended
- * to use a long enough timeout that allows multiple receives. If @p skip and @p
- * timeout are used, select appropriate values so that they allow a few
- * receiving attempts. Periodic advertising intervals are reported in event @ref
+ * periodic advertising interval provided by the advertiser. Ensure that you use
+ * a long enough timeout to allow multiple receives. If @p skip and @p timeout
+ * are used, select appropriate values so that they allow a few receiving
+ * attempts. Periodic advertising intervals are reported in event @ref
  * sl_bt_evt_scanner_scan_report.
  *
  * @param[in] skip The maximum number of periodic advertising packets that can
@@ -2634,9 +3384,31 @@ sl_status_t sl_bt_sync_open(bd_addr address,
                             uint16_t *sync);
 
 /***************************************************************************//**
+ * @cond RESTRICTED
  *
- * Closes a periodic advertising synchronization or cancels an ongoing attempt
- * of establishing a synchronization.
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set data reporting mode of the periodic advertising synchronization.
+ *
+ * @param[in] sync Periodic advertising synchronization handle
+ * @param[in] reporting_mode Enum @ref sl_bt_sync_reporting_mode_t. Specifies
+ *   the mode for reporting data received in the PA train. Values:
+ *     - <b>sl_bt_sync_report_none (0x0):</b> Data received in periodic
+ *       advertising trains is not reported to the application.
+ *     - <b>sl_bt_sync_report_all (0x1):</b> Data received in periodic
+ *       advertising trains is reported to the application.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_bt_sync_set_reporting_mode(uint16_t sync,
+                                          uint8_t reporting_mode);
+
+/***************************************************************************//**
+ *
+ * Close a periodic advertising synchronization or cancel an ongoing attempt of
+ * establishing a synchronization.
  *
  * @param[in] sync Periodic advertising synchronization handle
  *
@@ -2708,9 +3480,8 @@ typedef enum
 } sl_bt_connection_security_t;
 
 /**
- * @brief 
-                These values define transmit power reporting modes in LE power control.
-            
+ * @brief These values define transmit power reporting modes in LE power
+ * control.
  */
 typedef enum
 {
@@ -2721,12 +3492,12 @@ typedef enum
 } sl_bt_connection_power_reporting_mode_t;
 
 /**
- * @brief 
-                Transmit power level flags
-            
+ * @brief This enum defines the flag values for a reported transmit power level.
  */
 typedef enum
 {
+  sl_bt_connection_tx_power_flag_none  = 0x0, /**< (0x0) No flag is defined for
+                                                   the reported TX power level */
   sl_bt_connection_tx_power_at_minimum = 0x1, /**< (0x1) Transmit power level is
                                                    at minimum level. */
   sl_bt_connection_tx_power_at_maximum = 0x2  /**< (0x2) Transmit power level is
@@ -2782,9 +3553,9 @@ PACKSTRUCT( struct sl_bt_evt_connection_opened_s
                                - <b>sl_bt_gap_static_address (0x1):</b> Static
                                  device address
                                - <b>sl_bt_gap_random_resolvable_address
-                                 (0x2):</b> Private resolvable random address
+                                 (0x2):</b> Resolvable private random address
                                - <b>sl_bt_gap_random_nonresolvable_address
-                                 (0x3):</b> Private non-resolvable random
+                                 (0x3):</b> Non-resolvable private random
                                  address */
   uint8_t master;       /**< Device role in connection. Values:
                                - <b>0:</b> Peripheral
@@ -2938,6 +3709,9 @@ PACKSTRUCT( struct sl_bt_evt_connection_get_remote_tx_power_completed_s
   uint8_t  flags;       /**< Enum @ref sl_bt_connection_tx_power_flag_t.
                              Transmit power level flags. Ignore this field if @p
                              power_level is set to 0x7E or 0x7F. Values:
+                               - <b>sl_bt_connection_tx_power_flag_none
+                                 (0x0):</b> No flag is defined for the reported
+                                 TX power level
                                - <b>sl_bt_connection_tx_power_at_minimum
                                  (0x1):</b> Transmit power level is at minimum
                                  level.
@@ -2996,6 +3770,9 @@ PACKSTRUCT( struct sl_bt_evt_connection_tx_power_s
   uint8_t flags;       /**< Enum @ref sl_bt_connection_tx_power_flag_t. Transmit
                             power level flags. Ignore this field if @p
                             power_level is set to 0x7E or 0x7F. Values:
+                              - <b>sl_bt_connection_tx_power_flag_none
+                                (0x0):</b> No flag is defined for the reported
+                                TX power level
                               - <b>sl_bt_connection_tx_power_at_minimum
                                 (0x1):</b> Transmit power level is at minimum
                                 level.
@@ -3057,6 +3834,9 @@ PACKSTRUCT( struct sl_bt_evt_connection_remote_tx_power_s
   uint8_t flags;       /**< Enum @ref sl_bt_connection_tx_power_flag_t. Transmit
                             power level flags. Ignore this field if @p
                             power_level is set to 0x7E or 0x7F. Values:
+                              - <b>sl_bt_connection_tx_power_flag_none
+                                (0x0):</b> No flag is defined for the reported
+                                TX power level
                               - <b>sl_bt_connection_tx_power_at_minimum
                                 (0x1):</b> Transmit power level is at minimum
                                 level.
@@ -3128,10 +3908,19 @@ typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_
 
 /***************************************************************************//**
  *
- * Set the default Bluetooth connection parameters. The values are valid for all
- * subsequent connections initiated by this device. To change parameters of an
- * already established connection, use the command @ref
- * sl_bt_connection_set_parameters.
+ * Set default Bluetooth connection parameters. The values are valid for all
+ * subsequent connections initiated by this device.
+ *
+ * @p min_ce_length and @p max_ce_length specify the preference of the
+ * connection event length so that the Link Layer can prioritize tasks
+ * accordingly in simultaneous connections, or scanning and so on. A connection
+ * event starts at an anchor point of a connection interval and lasts until the
+ * lesser of @p max_ce_length and the actual connection interval. Packets that
+ * do not fit into the connection event will be sent in the next connection
+ * interval.
+ *
+ * To change parameters of an already established connection, use the command
+ * @ref sl_bt_connection_set_parameters.
  *
  * @param[in] min_interval @parblock
  *   Minimum value for the connection event interval. This must be set less than
@@ -3154,7 +3943,7 @@ typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_
  * @param[in] latency @parblock
  *   Peripheral latency, which defines how many connection intervals the
  *   peripheral can skip if it has no data to send
- *     - Range: 0x0000 to 0x01f4
+ *     - Range: 0x0000 to 0x01f3
  *
  *   Default value: 0
  *   @endparblock
@@ -3174,18 +3963,40 @@ typedef struct sl_bt_evt_connection_remote_used_features_s sl_bt_evt_connection_
  *   Default value: 1000 ms
  *   @endparblock
  * @param[in] min_ce_length @parblock
- *   Minimum value for the connection event length. This must be set be less
- *   than or equal to @p max_ce_length.
+ *   Minimum length of the connection event. It must be less than or equal to @p
+ *   max_ce_length.
+ *
+ *   This value defines the minimum time that should be given to the connection
+ *   event in a situation where other tasks need to run immediately after the
+ *   connection event. When the value is very small, the connection event still
+ *   has at least one TX/RX operation. If this value is increased, more time is
+ *   reserved for the connection event so it can transmit and receive more
+ *   packets in a connection interval.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
+ *
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
  *   Default value: 0x0000
- *
- *   Value is not currently used and is reserved for future. Set to 0.
  *   @endparblock
  * @param[in] max_ce_length @parblock
- *   Maximum value for the connection event length. This must be set greater
- *   than or equal to @p min_ce_length.
+ *   Maximum length of the connection event. It must be greater than or equal to
+ *   @p min_ce_length.
+ *
+ *   This value is used for limiting the connection event length so that a
+ *   connection that has large amounts of data to transmit or receive doesn't
+ *   block other tasks. Limiting the connection event is a hard stop. If there
+ *   is no enough time to send or receive a packet, the connection event will be
+ *   closed.
+ *
+ *   If the value is set to 0, the connection event still has at least one TX/RX
+ *   operation. This is useful to limit power consumption or leave more time to
+ *   other tasks.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
@@ -3281,10 +4092,10 @@ sl_status_t sl_bt_connection_set_default_preferred_phy(uint8_t preferred_phy,
  *   the device to connect to. Values:
  *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
  *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
- *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Private resolvable
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
  *       random address
- *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Private
- *       non-resolvable random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
  * @param[in] initiating_phy Enum @ref sl_bt_gap_phy_t. The initiating PHY.
  *   Values:
  *     - <b>sl_bt_gap_phy_1m (0x1):</b> 1M PHY
@@ -3312,6 +4123,14 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *
  * Request a change in the connection parameters of a Bluetooth connection.
  *
+ * @p min_ce_length and @p max_ce_length specify the preference of the
+ * connection event length so that the Link Layer can prioritize tasks
+ * accordingly in simultaneous connections, or scanning and so on. A connection
+ * event starts at an anchor point of a connection interval and lasts until the
+ * lesser of @p max_ce_length and the actual connection interval. Packets that
+ * do not fit into the connection event will be sent in the next connection
+ * interval.
+ *
  * @param[in] connection Connection Handle
  * @param[in] min_interval Minimum value for the connection event interval. This
  *   must be set less than or equal to @p max_interval.
@@ -3323,13 +4142,9 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *     - Time = Value x 1.25 ms
  *     - Range: 0x0006 to 0x0c80
  *     - Time Range: 7.5 ms to 4 s
- * @param[in] latency @parblock
- *   Peripheral latency, which defines how many connection intervals the
- *   peripheral can skip if it has no data to send
- *     - Range: 0x0000 to 0x01f4
- *
- *   Use 0x0000 for default value
- *   @endparblock
+ * @param[in] latency Peripheral latency, which defines how many connection
+ *   intervals the peripheral can skip if it has no data to send
+ *     - Range: 0x0000 to 0x01f3
  * @param[in] timeout @parblock
  *   Supervision timeout, which defines the time that the connection is
  *   maintained although the devices can't communicate at the currently
@@ -3344,20 +4159,44 @@ sl_status_t sl_bt_connection_open(bd_addr address,
  *   over at least a few connection intervals.
  *   @endparblock
  * @param[in] min_ce_length @parblock
- *   Minimum value for the connection event length. This must be set less than
- *   or equal to @p max_ce_length.
+ *   Minimum length of the connection event. It must be less than or equal to @p
+ *   max_ce_length.
+ *
+ *   This value defines the minimum time that should be given to the connection
+ *   event in a situation where other tasks need to run immediately after the
+ *   connection event. When the value is very small, the connection event still
+ *   has at least one TX/RX operation. If this value is increased, more time is
+ *   reserved for the connection event so it can transmit and receive more
+ *   packets in a connection interval.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
+ *
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
- *   Value is not currently used and is reserved for future. Set to 0.
+ *   Default value: 0x0000
  *   @endparblock
  * @param[in] max_ce_length @parblock
- *   Maximum value for the connection event length. This must be set greater
- *   than or equal to @p min_ce_length.
+ *   Maximum length of the connection event. It must be greater than or equal to
+ *   @p min_ce_length.
+ *
+ *   This value is used for limiting the connection event length so that a
+ *   connection that has large amounts of data to transmit or receive doesn't
+ *   block other tasks. Limiting the connection event is a hard stop. If there
+ *   is no enough time to send or receive a packet, the connection event will be
+ *   closed.
+ *
+ *   If the value is set to 0, the connection event still has at least one TX/RX
+ *   operation. This is useful to limit power consumption or leave more time to
+ *   other tasks.
+ *
+ *   Use the default value if the application doesn't care about the connection
+ *   event length or doesn't want to do fine tuning.
  *     - Time = Value x 0.625 ms
  *     - Range: 0x0000 to 0xffff
  *
- *   Use 0xffff for no limitation.
+ *   Default value: 0xffff
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -3377,7 +4216,7 @@ sl_status_t sl_bt_connection_set_parameters(uint8_t connection,
 
 /***************************************************************************//**
  *
- * Sets preferred and accepted PHYs for the given connection. Event @ref
+ * Set preferred and accepted PHYs for a given connection. Event @ref
  * sl_bt_evt_connection_phy_status is received when PHY update procedure is
  * completed. Non-preferred PHY can also be set if remote device does not accept
  * any of the preferred PHYs.
@@ -3422,7 +4261,7 @@ sl_status_t sl_bt_connection_set_preferred_phy(uint8_t connection,
 /***************************************************************************//**
  *
  * Temporarily enable or disable peripheral latency. Used only when Bluetooth
- * device is acting as peripheral. When peripheral latency is disabled, the
+ * device is acting as a peripheral. When peripheral latency is disabled, the
  * peripheral latency connection parameter is not set to 0 but the device will
  * wake up on every connection interval to receive and send packets.
  *
@@ -3485,7 +4324,7 @@ sl_status_t sl_bt_connection_read_channel_map(uint8_t connection,
  * sl_bt_evt_connection_tx_power is generated when transmit power on the local
  * device changes.
  *
- * By default power reporting for local device is enabled.
+ * By default, power reporting for local device is enabled.
  *
  * @param[in] connection Handle of the connection
  * @param[in] mode Enum @ref sl_bt_connection_power_reporting_mode_t. Transmit
@@ -3665,9 +4504,8 @@ sl_status_t sl_bt_connection_read_remote_used_features(uint8_t connection);
 #define sl_bt_rsp_gatt_write_descriptor_value_id                     0x0f090020
 
 /**
- * @brief 
-                These values indicate which attribute request or response has caused the event.
-            
+ * @brief These values indicate which attribute request or response has caused
+ * the event.
  */
 typedef enum
 {
@@ -3693,10 +4531,8 @@ typedef enum
 } sl_bt_gatt_att_opcode_t;
 
 /**
- * @brief 
-                These values define whether the client is to receive notifications or indications from a remote GATT
-                server.
-            
+ * @brief These values define whether the client is to receive notifications or
+ * indications from a remote GATT server.
  */
 typedef enum
 {
@@ -3707,10 +4543,8 @@ typedef enum
 } sl_bt_gatt_client_config_flag_t;
 
 /**
- * @brief 
-                These values define whether the GATT server is to cancel all queued writes or commit all queued writes
-                to a remote database.
-            
+ * @brief These values define whether the GATT server is to cancel all queued
+ * writes or commit all queued writes to a remote database.
  */
 typedef enum
 {
@@ -3746,7 +4580,7 @@ typedef struct sl_bt_evt_gatt_mtu_exchanged_s sl_bt_evt_gatt_mtu_exchanged_t;
 /**
  * @addtogroup sl_bt_evt_gatt_service sl_bt_evt_gatt_service
  * @{
- * @brief Indicate that a GATT service in the remote GATT database was
+ * @brief Indicates that a GATT service in the remote GATT database was
  * discovered
  *
  * This event is generated after issuing either the @ref
@@ -4543,9 +5377,7 @@ sl_status_t sl_bt_gatt_write_descriptor_value(uint8_t connection,
 #define sl_bt_rsp_gattdb_abort_id                                    0x10460020
 
 /**
- * @brief 
-                This enum defines GATT service types.
-            
+ * @brief This enum defines GATT service types.
  */
 typedef enum
 {
@@ -4554,9 +5386,7 @@ typedef enum
 } sl_bt_gattdb_service_type_t;
 
 /**
- * @brief 
-                This enum defines characteristic and descriptor value types.
-            
+ * @brief This enum defines characteristic and descriptor value types.
  */
 typedef enum
 {
@@ -4696,7 +5526,7 @@ typedef enum
 /***************************************************************************//**
  *
  * Start a new GATT database update session. If the operation is successful, the
- * Bluetooth stack returns a session ID, with which, the GATT database can be
+ * Bluetooth stack returns a session ID, with which the GATT database can be
  * updated by calling other database management APIs of this class. Changes in
  * the database are not immediately saved. Unsaved changes are invisible to a
  * connected remote GATT client.
@@ -4704,7 +5534,7 @@ typedef enum
  * After all changes were performed successfully, commit the changes using the
  * @ref sl_bt_gattdb_commit command. The Bluetooth stack will save the changes
  * and handle GATT caching as needed. Unsaved database changes can also be
- * cancelled by calling the @ref sl_bt_gattdb_abort command. In either case,
+ * canceled by calling the @ref sl_bt_gattdb_abort command. In either case,
  * after a commit or abort command is called, the current session is closed and
  * the session ID becomes invalid.
  *
@@ -4720,11 +5550,11 @@ sl_status_t sl_bt_gattdb_new_session(uint16_t *session);
 
 /***************************************************************************//**
  *
- * Add a service into the local GATT database. On success, the service is
+ * Add a service into the local GATT database. When successful, the service is
  * appended to the service list and is in stopped state. Use @ref
  * sl_bt_gattdb_start_service command to set it visible to remote GATT clients.
  *
- * It is not allowed to add the Generic Attribute Profile service. If the
+ * You are not allowed to add the Generic Attribute Profile service. If the
  * application needs GATT caching, enable the feature in the configuration of
  * this component and the GATT server will handle GATT caching according to the
  * procedures specified by the Bluetooth core specification.
@@ -4868,9 +5698,9 @@ sl_status_t sl_bt_gattdb_add_uuid16_characteristic(uint16_t session,
 
 /***************************************************************************//**
  *
- * Add a 128-bits UUID characteristic to a service. On success, the
- * characteristic is appended to the characteristic list of the service and it
- * inherits the started or stopped state of the service. In addition, it can be
+ * Add a 128-bits UUID characteristic to a service. When successful, the
+ * characteristic is appended to the characteristic list of the service and
+ * inherits the started or stopped state of the service. Additionally, it can be
  * started and stopped separately with the @ref
  * sl_bt_gattdb_start_characteristic and @ref sl_bt_gattdb_stop_characteristic
  * commands.
@@ -4950,13 +5780,13 @@ sl_status_t sl_bt_gattdb_remove_characteristic(uint16_t session,
 
 /***************************************************************************//**
  *
- * Add a 16-bits UUID descriptor to a characteristic. On success, the descriptor
- * is appended to the descriptor list of the characteristic and it inherits the
- * started or stopped state of the characteristic.
+ * Add a 16-bits UUID descriptor to a characteristic. When successful, the
+ * descriptor is appended to the descriptor list of the characteristic and
+ * inherits the started or stopped state of the characteristic.
  *
  * This command does not support adding Characteristic Extended Properties
  * descriptors. This descriptor is automatically added if the characteristic
- * value has the reliable-write property, or when a Characteristic User
+ * value has the reliable-write property or when a Characteristic User
  * Description descriptor is added and the user description has the write
  * property.
  *
@@ -5012,13 +5842,13 @@ sl_status_t sl_bt_gattdb_add_uuid16_descriptor(uint16_t session,
 
 /***************************************************************************//**
  *
- * Add a 128-bits UUID descriptor to a characteristic. On success, the
- * descriptor is appended to the descriptor list of the characteristic and it
+ * Add a 128-bits UUID descriptor to a characteristic. When successful, the
+ * descriptor is appended to the descriptor list of the characteristic and
  * inherits the started or stopped state of the characteristic.
  *
  * This command does not support adding Characteristic Extended Properties
  * descriptors. This descriptor is automatically added if the characteristic
- * value has the reliable-write property, or when a Characteristic User
+ * value has the reliable-write property or when a Characteristic User
  * Description descriptor is added and the user description has the write
  * property.
  *
@@ -5086,7 +5916,7 @@ sl_status_t sl_bt_gattdb_remove_descriptor(uint16_t session,
 
 /***************************************************************************//**
  *
- * Start a service so that the service and its attributes including
+ * Start a service, so that the service and its attributes including
  * characteristics and descriptors become visible to remote GATT clients after
  * this change has been committed.
  *
@@ -5100,7 +5930,7 @@ sl_status_t sl_bt_gattdb_start_service(uint16_t session, uint16_t service);
 
 /***************************************************************************//**
  *
- * Stop a service so that the service and its attributes including
+ * Stop a service, so that the service and its attributes including
  * characteristics and descriptors become invisible to remote GATT clients after
  * this change has been committed.
  *
@@ -5114,9 +5944,10 @@ sl_status_t sl_bt_gattdb_stop_service(uint16_t session, uint16_t service);
 
 /***************************************************************************//**
  *
- * Start a characteristic so that the characteristic and its attributes become
- * visible to remote GATT clients after this change has been committed. Error
- * SL_STATUS_INVALID_STATE is returned if the parent service is not started.
+ * Start a characteristic, so that the characteristic and its attributes become
+ * visible to remote GATT clients after this change has been committed.
+ * SL_STATUS_INVALID_STATE error is returned if the parent service is not
+ * started.
  *
  * @param[in] session The database update session ID
  * @param[in] characteristic The characteristic value attribute handle of the
@@ -5130,7 +5961,7 @@ sl_status_t sl_bt_gattdb_start_characteristic(uint16_t session,
 
 /***************************************************************************//**
  *
- * Stop a characteristic so that the characteristic and its attributes become
+ * Stop a characteristic, so that the characteristic and its attributes become
  * invisible to remote GATT clients after this change has been committed.
  *
  * @param[in] session The database update session ID
@@ -5145,8 +5976,8 @@ sl_status_t sl_bt_gattdb_stop_characteristic(uint16_t session,
 
 /***************************************************************************//**
  *
- * Save all changes performed in current session and close the session. The
- * stack will assign final handles to new and affected attributes, and handle
+ * Save all changes performed in the current session and close the session. The
+ * stack will assign final handles to new and affected attributes and handle
  * GATT caching as needed. The stack removes the client characteristic
  * configurations of non-connected GATT clients except the service-changed
  * configuration. For connected GATT clients during this database change, the
@@ -5170,10 +6001,10 @@ sl_status_t sl_bt_gattdb_commit(uint16_t session);
 
 /***************************************************************************//**
  *
- * Cancel all changes performed in current session and close the session. The
- * database remains at the same state as just before the session was started.
- * The session ID and all temporary attribute handles returned during this
- * session are invalidated.
+ * Cancel all changes performed in the current session and close the session.
+ * The database remains in the same state it was in just before the session was
+ * started. The session ID and all temporary attribute handles returned during
+ * this session are invalidated.
  *
  * @param[in] session The database update session ID
  *
@@ -5203,7 +6034,6 @@ sl_status_t sl_bt_gattdb_abort(uint16_t session);
 #define sl_bt_cmd_gatt_server_write_attribute_value_id               0x020a0020
 #define sl_bt_cmd_gatt_server_send_user_read_response_id             0x030a0020
 #define sl_bt_cmd_gatt_server_send_user_write_response_id            0x040a0020
-#define sl_bt_cmd_gatt_server_send_characteristic_notification_id    0x050a0020
 #define sl_bt_cmd_gatt_server_send_notification_id                   0x0f0a0020
 #define sl_bt_cmd_gatt_server_send_indication_id                     0x100a0020
 #define sl_bt_cmd_gatt_server_notify_all_id                          0x110a0020
@@ -5222,7 +6052,6 @@ sl_status_t sl_bt_gattdb_abort(uint16_t session);
 #define sl_bt_rsp_gatt_server_write_attribute_value_id               0x020a0020
 #define sl_bt_rsp_gatt_server_send_user_read_response_id             0x030a0020
 #define sl_bt_rsp_gatt_server_send_user_write_response_id            0x040a0020
-#define sl_bt_rsp_gatt_server_send_characteristic_notification_id    0x050a0020
 #define sl_bt_rsp_gatt_server_send_notification_id                   0x0f0a0020
 #define sl_bt_rsp_gatt_server_send_indication_id                     0x100a0020
 #define sl_bt_rsp_gatt_server_notify_all_id                          0x110a0020
@@ -5235,10 +6064,8 @@ sl_status_t sl_bt_gattdb_abort(uint16_t session);
 #define sl_bt_rsp_gatt_server_read_client_supported_features_id      0x150a0020
 
 /**
- * @brief 
-                These values define whether the server is to sent notifications or indications to a remote GATT
-                server.
-            
+ * @brief These values define whether the server is to sent notifications or
+ * indications to a remote GATT server.
  */
 typedef enum
 {
@@ -5261,10 +6088,8 @@ typedef enum
 } sl_bt_gatt_server_client_configuration_t;
 
 /**
- * @brief 
-                These values describe whether the characteristic client configuration was changed or whether a
-                characteristic confirmation was received.
-            
+ * @brief These values describe whether the characteristic client configuration
+ * was changed or whether a characteristic confirmation was received.
  */
 typedef enum
 {
@@ -5442,8 +6267,8 @@ typedef struct sl_bt_evt_gatt_server_characteristic_status_s sl_bt_evt_gatt_serv
 /**
  * @addtogroup sl_bt_evt_gatt_server_execute_write_completed sl_bt_evt_gatt_server_execute_write_completed
  * @{
- * @brief Execute write completed event indicates that the execute write command
- * from a remote GATT client has completed with the given result
+ * @brief Indicates that the execute write command from a remote GATT client has
+ * completed with the given result
  */
 
 /** @brief Identifier of the execute_write_completed event */
@@ -5465,8 +6290,8 @@ typedef struct sl_bt_evt_gatt_server_execute_write_completed_s sl_bt_evt_gatt_se
 /**
  * @addtogroup sl_bt_evt_gatt_server_indication_timeout sl_bt_evt_gatt_server_indication_timeout
  * @{
- * @brief This event indicates confirmation from the remote GATT client has not
- * been received within 30 seconds after an indication was sent
+ * @brief Indicates confirmation from the remote GATT client has not been
+ * received within 30 seconds after an indication was sent
  *
  * Furthermore, the stack does not allow GATT transactions over this connection.
  */
@@ -5670,53 +6495,7 @@ sl_status_t sl_bt_gatt_server_send_user_write_response(uint8_t connection,
 
 /***************************************************************************//**
  *
- * <b>Deprecated</b> and replaced by @ref sl_bt_gatt_server_send_notification,
- * @ref sl_bt_gatt_server_send_indication and @ref sl_bt_gatt_server_notify_all
- * commands.
- *
- * A notification or indication is sent only if the client has enabled it by
- * setting the corresponding flag to the Client Characteristic Configuration
- * descriptor. If the Client Characteristic Configuration descriptor supports
- * both notifications and indications, the stack will always send a notification
- * even when the client has enabled both.
- *
- * Send notifications or indications to one or more remote GATT clients. At
- * most, ATT_MTU - 3 amount of data can be sent one time.
- *
- * A new indication to a GATT client can't be sent until an outstanding
- * indication procedure with the same client has completed. The procedure is
- * completed when a confirmation from the client is received. The confirmation
- * is indicated by @ref sl_bt_evt_gatt_server_characteristic_status.
- *
- * The error SL_STATUS_INVALID_STATE is returned if the characteristic does not
- * have the notification property, or if the client has not enabled the
- * notification. The same applies to the indication property, and in addition,
- * SL_STATUS_INVALID_STATE is returned if an indication procedure with the same
- * client is outstanding. Always check the response for this command for errors
- * before trying to send more data.
- *
- * @param[in] connection A handle of the connection over which the notification
- *   or indication is sent. Values:
- *     - <b>0xff:</b> Sends notification or indication to all connected devices.
- *     - <b>Other:</b> Connection handle
- * @param[in] characteristic Characteristic handle
- * @param[in] value_len Length of data in @p value
- * @param[in] value Value to be notified or indicated
- * @param[out] sent_len The length of data sent if only one connected device is
- *   the receiver; otherwise an unused value.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_gatt_server_send_characteristic_notification(uint8_t connection,
-                                                               uint16_t characteristic,
-                                                               size_t value_len,
-                                                               const uint8_t* value,
-                                                               uint16_t *sent_len);
-
-/***************************************************************************//**
- *
- * Send a notification to a remote GATT client. At most ATT_MTU - 3 amount of
+ * Send a notification to a remote GATT client. At most, ATT_MTU - 3 amount of
  * data can be sent in a notification. An error SL_STATUS_COMMAND_TOO_LONG is
  * returned if the given value length exceeds ATT_MTU - 3.
  *
@@ -5786,7 +6565,7 @@ sl_status_t sl_bt_gatt_server_send_indication(uint8_t connection,
 /***************************************************************************//**
  *
  * Send notifications or indications to all connected remote GATT clients. At
- * most ATT_MTU - 3 amount of data can be sent in a notification or indication.
+ * most, ATT_MTU - 3 amount of data can be sent in a notification or indication.
  * If the given value length exceeds the limit, first ATT_MTU - 3 bytes will be
  * sent without error, and rest of data will be ignored.
  *
@@ -6065,19 +6844,17 @@ sl_status_t sl_bt_nvm_erase_all();
  */
 
 /* Command and Response IDs */
-#define sl_bt_cmd_test_dtm_tx_id                                     0x000e0020
 #define sl_bt_cmd_test_dtm_tx_v4_id                                  0x030e0020
+#define sl_bt_cmd_test_dtm_tx_cw_id                                  0x040e0020
 #define sl_bt_cmd_test_dtm_rx_id                                     0x010e0020
 #define sl_bt_cmd_test_dtm_end_id                                    0x020e0020
-#define sl_bt_rsp_test_dtm_tx_id                                     0x000e0020
 #define sl_bt_rsp_test_dtm_tx_v4_id                                  0x030e0020
+#define sl_bt_rsp_test_dtm_tx_cw_id                                  0x040e0020
 #define sl_bt_rsp_test_dtm_rx_id                                     0x010e0020
 #define sl_bt_rsp_test_dtm_end_id                                    0x020e0020
 
 /**
- * @brief 
-                Test packet types supported by the stack
-            
+ * @brief Test packet types supported by the stack
  */
 typedef enum
 {
@@ -6136,66 +6913,6 @@ typedef struct sl_bt_evt_test_dtm_completed_s sl_bt_evt_test_dtm_completed_t;
 
 /***************************************************************************//**
  *
- * <b>Deprecated</b> and replaced by @ref sl_bt_test_dtm_tx_v4 command.
- *
- * Start a transmitter test against a separate Bluetooth tester device. When the
- * command is processed by the radio, a @ref sl_bt_evt_test_dtm_completed event
- * is triggered. This event indicates whether the test started successfully.
- *
- * In the transmitter test, the device sends packets continuously with a fixed
- * interval. The type and length of each packet is set by @p packet_type and @p
- * length parameters. The parameter @p phy specifies which PHY is used to
- * transmit the packets. All devices support at least 1M PHY. A special packet
- * type, @p test_pkt_carrier, can be used to transmit continuous unmodulated
- * carrier. The @p length field is ignored in this mode.
- *
- * The test may be stopped using the @ref sl_bt_test_dtm_end command.
- *
- * @param[in] packet_type Enum @ref sl_bt_test_packet_type_t. Packet type to
- *   transmit. Values:
- *     - <b>sl_bt_test_pkt_prbs9 (0x0):</b> PRBS9 packet payload
- *     - <b>sl_bt_test_pkt_11110000 (0x1):</b> 11110000 packet payload
- *     - <b>sl_bt_test_pkt_10101010 (0x2):</b> 10101010 packet payload
- *     - <b>sl_bt_test_pkt_11111111 (0x4):</b> 11111111 packet payload
- *     - <b>sl_bt_test_pkt_00000000 (0x5):</b> 00000000 packet payload
- *     - <b>sl_bt_test_pkt_00001111 (0x6):</b> 00001111 packet payload
- *     - <b>sl_bt_test_pkt_01010101 (0x7):</b> 01010101 packet payload
- *     - <b>sl_bt_test_pkt_pn9 (0xfd):</b> PN9 continuously modulated output
- *     - <b>sl_bt_test_pkt_carrier (0xfe):</b> Unmodulated carrier
- * @param[in] length @parblock
- *   Packet length in bytes
- *
- *   <b>Range:</b> 0-255
- *   @endparblock
- * @param[in] channel @parblock
- *   Bluetooth channel
- *
- *   <b>Range:</b> 0-39
- *
- *   Channel is (F - 2402) / 2,
- *
- *   where F is frequency in MHz
- *   @endparblock
- * @param[in] phy Enum @ref sl_bt_test_phy_t. PHY to use. Values:
- *     - <b>sl_bt_test_phy_1m (0x1):</b> 1M PHY
- *     - <b>sl_bt_test_phy_2m (0x2):</b> 2M PHY
- *     - <b>sl_bt_test_phy_125k (0x3):</b> 125k Coded PHY
- *     - <b>sl_bt_test_phy_500k (0x4):</b> 500k Coded PHY
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- * @b Events
- *   - @ref sl_bt_evt_test_dtm_completed - This event is received when the
- *     command is processed.
- *
- ******************************************************************************/
-SL_BGAPI_DEPRECATED sl_status_t sl_bt_test_dtm_tx(uint8_t packet_type,
-                              uint8_t length,
-                              uint8_t channel,
-                              uint8_t phy);
-
-/***************************************************************************//**
- *
  * Start a transmitter test against a separate Bluetooth tester device. When the
  * command is processed by the radio, a @ref sl_bt_evt_test_dtm_completed event
  * is triggered. This event indicates whether the test started successfully.
@@ -6205,8 +6922,9 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_test_dtm_tx(uint8_t packet_type,
  * length parameters. The parameter @p phy specifies which PHY is used to
  * transmit the packets. All devices support at least 1M PHY. A special packet
  * type, <b>test_pkt_carrier</b> , can be used to transmit continuous
- * unmodulated carrier. The <b>length</b> and <b>power_level</b> field are
- * ignored in this mode.
+ * unmodulated carrier. The <b>length</b> field is ignored in this mode. As this
+ * command has the limitation within the value of @p power_level, use of @ref
+ * sl_bt_test_dtm_tx_cw for custom waves is recommended.
  *
  * Stop the test using the @ref sl_bt_test_dtm_end command.
  *
@@ -6240,7 +6958,8 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_test_dtm_tx(uint8_t packet_type,
  *     - <b>sl_bt_test_phy_2m (0x2):</b> 2M PHY
  *     - <b>sl_bt_test_phy_125k (0x3):</b> 125k Coded PHY
  *     - <b>sl_bt_test_phy_500k (0x4):</b> 500k Coded PHY
- * @param[in] power_level TX power level in unit dBm. Values:
+ * @param[in] power_level @parblock
+ *   TX power level in unit dBm. Values:
  *     - <b>-127 to +20:</b> Use specified or the nearest TX power level. The
  *       minimum -127 dBm is specified in the Bluetooth specification. However,
  *       a device may not support this low TX power. In addition, only some
@@ -6248,6 +6967,12 @@ SL_BGAPI_DEPRECATED sl_status_t sl_bt_test_dtm_tx(uint8_t packet_type,
  *     - <b>0x7E:</b> Use minimum TX power level the device supports.
  *     - <b>0x7F:</b> Use the smallest of the maximum TX power level the device
  *       supports and the global maximum TX power setting in stack.
+ *
+ *   For continuous unmodulated carrier mode, the values are set in 0.1 dBm
+ *   unit. If the value exceeds the range of power level value allowed by the
+ *   device, the command will adjust the power level to the closest minimum or
+ *   maximum value.
+ *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -6261,6 +6986,57 @@ sl_status_t sl_bt_test_dtm_tx_v4(uint8_t packet_type,
                                  uint8_t channel,
                                  uint8_t phy,
                                  int8_t power_level);
+
+/***************************************************************************//**
+ *
+ * Start a transmitter test for a custom wave. When the command is processed by
+ * the radio, a @ref sl_bt_evt_test_dtm_completed event is triggered. This event
+ * indicates whether the test started successfully.
+ *
+ * In the custom wave transmitter test, the device continuously transmits the
+ * career. The parameter @p packet_type specifies the packet type. The parameter
+ * @p phy specifies which PHY is used to transmit the packets. All devices
+ * support at least 1M PHY.
+ *
+ * Stop the test using the @ref sl_bt_test_dtm_end command.
+ *
+ * @param[in] packet_type Enum @ref sl_bt_test_packet_type_t. Packet type to
+ *   transmit. Values:
+ *     - <b>sl_bt_test_pkt_pn9 (0xfd):</b> PN9 continuously modulated output
+ *     - <b>sl_bt_test_pkt_carrier (0xfe):</b> Unmodulated carrier
+ * @param[in] channel @parblock
+ *   Bluetooth channel
+ *
+ *   <b>Range:</b> 0-39
+ *
+ *   Channel is (F - 2402) / 2,
+ *
+ *   where F is frequency in MHz
+ *   @endparblock
+ * @param[in] phy Enum @ref sl_bt_test_phy_t. PHY to use. Values:
+ *     - <b>sl_bt_test_phy_1m (0x1):</b> 1M PHY
+ *     - <b>sl_bt_test_phy_2m (0x2):</b> 2M PHY
+ *     - <b>sl_bt_test_phy_125k (0x3):</b> 125k Coded PHY
+ *     - <b>sl_bt_test_phy_500k (0x4):</b> 500k Coded PHY
+ * @param[in] power_level @parblock
+ *   TX power level. Unit: 0.1 dBm.
+ *
+ *   If the value exceeds the range of power level value, allowed by the device,
+ *   the command will adjust the power level to the closest minimum or maximum
+ *   value.
+ *   @endparblock
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_bt_evt_test_dtm_completed - This event is received when the
+ *     command is processed.
+ *
+ ******************************************************************************/
+sl_status_t sl_bt_test_dtm_tx_cw(uint8_t packet_type,
+                                 uint8_t channel,
+                                 uint8_t phy,
+                                 int16_t power_level);
 
 /***************************************************************************//**
  *
@@ -6343,8 +7119,8 @@ sl_status_t sl_bt_test_dtm_end();
  *     requirements and I/O capabilities of this device.
  *   - Use the command @ref sl_bt_sm_set_bondable_mode to set this device into
  *     bondable mode.
- *   - Use the command @ref sl_bt_advertiser_start to set this device into
- *     advertising and connectable mode.
+ *   - Use the command @ref sl_bt_advertiser_start to start connectable
+ *     advertising.
  *   - Open a connection to this device from the remote device.
  *   - After the connection is open, start the bonding process on the remote
  *     device.
@@ -6380,6 +7156,7 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_cmd_sm_set_legacy_oob_id                               0x190f0020
 #define sl_bt_cmd_sm_set_oob_id                                      0x1a0f0020
 #define sl_bt_cmd_sm_set_remote_oob_id                               0x1b0f0020
+#define sl_bt_cmd_sm_set_bonding_data_id                             0x1c0f0020
 #define sl_bt_rsp_sm_configure_id                                    0x010f0020
 #define sl_bt_rsp_sm_set_minimum_key_size_id                         0x140f0020
 #define sl_bt_rsp_sm_set_debug_mode_id                               0x0f0f0020
@@ -6404,14 +7181,14 @@ sl_status_t sl_bt_test_dtm_end();
 #define sl_bt_rsp_sm_set_legacy_oob_id                               0x190f0020
 #define sl_bt_rsp_sm_set_oob_id                                      0x1a0f0020
 #define sl_bt_rsp_sm_set_remote_oob_id                               0x1b0f0020
+#define sl_bt_rsp_sm_set_bonding_data_id                             0x1c0f0020
 
 /**
  * @cond RESTRICTED
  *
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
- * @brief 
-                These values define the bonding keys of the bonded device stored in the persistent store.
-            
+ * @brief These values define the bonding keys of the bonded device stored in
+ * the persistent store.
  */
 typedef enum
 {
@@ -6429,9 +7206,40 @@ typedef enum
 /** @endcond */ // end restricted enum type
 
 /**
- * @brief 
-                These values define the security management related I/O capabilities supported by the device.
-            
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ * @brief These values define the bonding data types, which are stored in the
+ * persistent store.
+ */
+typedef enum
+{
+  sl_bt_sm_bonding_data_remote_address       = 0x0, /**< (0x0) Identity address
+                                                         of the remote device */
+  sl_bt_sm_bonding_data_remote_ltk           = 0x1, /**< (0x1) LTK used as
+                                                         central device */
+  sl_bt_sm_bonding_data_local_ltk            = 0x2, /**< (0x2) LTK used as
+                                                         peripheral device */
+  sl_bt_sm_bonding_data_remote_master_inf    = 0x3, /**< (0x3) Idenfication info
+                                                         used as central device */
+  sl_bt_sm_bonding_data_local_master_inf     = 0x4, /**< (0x4) Idenfication info
+                                                         used as central device */
+  sl_bt_sm_bonding_data_irk                  = 0x5, /**< (0x5) IRK of the remote
+                                                         device */
+  sl_bt_sm_bonding_data_meta                 = 0x6, /**< (0x6) Metadata about
+                                                         the bonding */
+  sl_bt_sm_bonding_data_gatt_client_config   = 0x7, /**< (0x7) GATT database
+                                                         client configuration */
+  sl_bt_sm_bonding_data_gatt_client_features = 0x8, /**< (0x8) GATT client
+                                                         supported features */
+  sl_bt_sm_bonding_data_gatt_db_hash         = 0x9  /**< (0x9) GATT database
+                                                         hash */
+} sl_bt_sm_bonding_data_t;
+/** @endcond */ // end restricted enum type
+
+/**
+ * @brief These values define the security management related I/O capabilities
+ * supported by the device.
  */
 typedef enum
 {
@@ -6667,8 +7475,9 @@ typedef struct sl_bt_evt_sm_list_bonding_entry_s sl_bt_evt_sm_list_bonding_entry
  *   Security requirement bitmask.
  *
  *   Bit 0:
- *     - <b>0:</b> Allow bonding without MITM protection
- *     - <b>1:</b> Bonding requires MITM protection
+ *     - <b>0:</b> Allow bonding without authentication
+ *     - <b>1:</b> Bonding requires authentication (Man-in-the-Middle
+ *       protection)
  *
  *   Bit 1:
  *     - <b>0:</b> Allow encryption without bonding
@@ -6688,7 +7497,13 @@ typedef struct sl_bt_evt_sm_list_bonding_entry_s sl_bt_evt_sm_list_bonding_entry
  *     - <b>0:</b> Allow all connections
  *     - <b>1:</b> Allow connections only from bonded devices
  *
- *   Bit 5 to 7: Reserved
+ *   Bit 5:
+ *     - <b>0:</b> Prefer just works pairing when both options are possible
+ *       based on the settings.
+ *     - <b>1:</b> Prefer authenticated pairing when both options are possible
+ *       based on the settings.
+ *
+ *   Bit 6 to 7: Reserved
  *
  *   Default value: 0x00
  *   @endparblock
@@ -6746,10 +7561,10 @@ sl_status_t sl_bt_sm_set_debug_mode();
  *   the device added to accept list. Values:
  *     - <b>sl_bt_gap_public_address (0x0):</b> Public device address
  *     - <b>sl_bt_gap_static_address (0x1):</b> Static device address
- *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Private resolvable
+ *     - <b>sl_bt_gap_random_resolvable_address (0x2):</b> Resolvable private
  *       random address
- *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Private
- *       non-resolvable random address
+ *     - <b>sl_bt_gap_random_nonresolvable_address (0x3):</b> Non-resolvable
+ *       private random address
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
@@ -6995,10 +7810,15 @@ sl_status_t sl_bt_sm_delete_bondings();
 
 /***************************************************************************//**
  *
- * Get number of entries saved in bonding database and bitmask of their handles.
- * The entry in bonding database can be either bonding or accept list filtering
- * device. Use @ref sl_bt_sm_get_bonding_details to find the type of bonding
- * entry and the device's address.
+ * Get number of entries and bitmask of their handles saved in the bonding
+ * database. The entry in the bonding database can be either bonding or accept
+ * list filtering device.
+ *
+ * To get the bonding type and peer device address of a bonding, use the @ref
+ * sl_bt_sm_get_bonding_details command. The bonding handle can be calculated
+ * from the handle bitmask returned by this command, or alternatively, repeat
+ * calling the @ref sl_bt_sm_get_bonding_details command to get the detailed
+ * information of all bondings.
  *
  * @param[in] reserved Use the value 0 on this reserved field. Do not use
  *   none-zero values because they are reserved for future use.
@@ -7023,9 +7843,14 @@ sl_status_t sl_bt_sm_get_bonding_handles(uint32_t reserved,
 
 /***************************************************************************//**
  *
- * Get the detailed information for bonding entry. The data includes remote
- * device address and address type as well as security mode for bonding and used
+ * Get the detailed information for a bonding entry. Data includes remote device
+ * address and address type as well as security mode for bonding and a used
  * encryption key length.
+ *
+ * To get the detailed information of all bondings, repeat calling this command
+ * starting from 0 as the bonding handle value until the maximum number of
+ * configured bondings are reached. Use 32 as the maximum number if the
+ * configured number is unknown.
  *
  * @param[in] bonding Bonding handle
  * @param[out] address Bluetooth address of the remote device
@@ -7057,7 +7882,7 @@ sl_status_t sl_bt_sm_get_bonding_details(uint32_t bonding,
 
 /***************************************************************************//**
  *
- * Find the bonding or accept list filtering entry by a Bluetooth device
+ * Find the bonding or accept list filtering entry by using a Bluetooth device
  * address.
  *
  * @param[in] address The Bluetooth device address
@@ -7115,10 +7940,10 @@ sl_status_t sl_bt_sm_set_bonding_key(uint32_t bonding,
 
 /***************************************************************************//**
  *
- * Set OOB data (out-of-band encryption data) for legacy pairing for a device.
- * OOB data may be, for example, a PIN code exchanged over an alternate path,
- * such as NFC. The device will not allow any other bonding if OOB data is set.
- * OOB data can't be set simultaneously with secure connections OOB data.
+ * Set Out-Of-Band (OOB) encryption data for a legacy pairing of a device. OOB
+ * data may be, for example, a PIN code exchanged over an alternate path, such
+ * as NFC. The device will not allow any other bonding if OOB data is set. OOB
+ * data can't be set simultaneously with secure connections OOB data.
  *
  * @param[in] enable Enable OOB with legacy pairing. Values:
  *     - <b>0:</b> disable
@@ -7132,10 +7957,10 @@ sl_status_t sl_bt_sm_set_legacy_oob(uint8_t enable, aes_key_128 oob_data);
 
 /***************************************************************************//**
  *
- * Enable the use of OOB data (out-of-band encryption data) for a device for
- * secure connections pairing. Enabling will generate new OOB data and confirm
- * values, which can be sent to the remote device. After enabling the secure
- * connections OOB data, the remote devices OOB data can be set with @ref
+ * Enable the use of Out-Of-Band (OOB) encryption data for a device for secure
+ * connections pairing. Enabling will generate new OOB data and confirm values,
+ * which can be sent to the remote device. After enabling the secure connections
+ * OOB data, the remote devices OOB data can be set with @ref
  * sl_bt_sm_set_remote_oob. Calling this function will erase any set remote
  * device OOB data and confirm values. The device will not allow any other
  * bonding if OOB data is set. The secure connections OOB data cannot be enabled
@@ -7158,9 +7983,9 @@ sl_status_t sl_bt_sm_set_oob(uint8_t enable,
 
 /***************************************************************************//**
  *
- * Set OOB data and confirm values (out-of-band encryption) received from the
- * remote device for secure connections pairing. OOB data must be enabled with
- * @ref sl_bt_sm_set_oob before setting the remote device OOB data.
+ * Set Out-Of-Band (OOB) data and confirm values received from the remote device
+ * for secure connections pairing. OOB data must be enabled with @ref
+ * sl_bt_sm_set_oob before setting the remote device OOB data.
  *
  * @param[in] enable Enable remote device OOB data with secure connections
  *   pairing. Values:
@@ -7177,6 +8002,44 @@ sl_status_t sl_bt_sm_set_oob(uint8_t enable,
 sl_status_t sl_bt_sm_set_remote_oob(uint8_t enable,
                                     aes_key_128 random,
                                     aes_key_128 confirm);
+
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Set bonding data for connection from external bonding database.
+ *
+ * @param[in] connection Connection handle
+ * @param[in] type Enum @ref sl_bt_sm_bonding_data_t. Bonding data type. Values:
+ *     - <b>sl_bt_sm_bonding_data_remote_address (0x0):</b> Identity address of
+ *       the remote device
+ *     - <b>sl_bt_sm_bonding_data_remote_ltk (0x1):</b> LTK used as central
+ *       device
+ *     - <b>sl_bt_sm_bonding_data_local_ltk (0x2):</b> LTK used as peripheral
+ *       device
+ *     - <b>sl_bt_sm_bonding_data_remote_master_inf (0x3):</b> Idenfication info
+ *       used as central device
+ *     - <b>sl_bt_sm_bonding_data_local_master_inf (0x4):</b> Idenfication info
+ *       used as central device
+ *     - <b>sl_bt_sm_bonding_data_irk (0x5):</b> IRK of the remote device
+ *     - <b>sl_bt_sm_bonding_data_meta (0x6):</b> Metadata about the bonding
+ *     - <b>sl_bt_sm_bonding_data_gatt_client_config (0x7):</b> GATT database
+ *       client configuration
+ *     - <b>sl_bt_sm_bonding_data_gatt_client_features (0x8):</b> GATT client
+ *       supported features
+ *     - <b>sl_bt_sm_bonding_data_gatt_db_hash (0x9):</b> GATT database hash
+ * @param[in] data_len Length of data in @p data
+ * @param[in] data Bonding data.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_bt_sm_set_bonding_data(uint8_t connection,
+                                      uint8_t type,
+                                      size_t data_len,
+                                      const uint8_t* data);
 
 /** @} */ // end addtogroup sl_bt_sm
 
@@ -7462,7 +8325,8 @@ typedef enum
 
 /**
  * Restricted/experimental API. Contact Silicon Labs sales for more information.
- * @brief Command codes describe which of the request commands has been rejected.
+ * @brief Command codes describe which of the request commands has been
+ * rejected.
  */
 typedef enum
 {
@@ -8358,7 +9222,7 @@ sl_status_t sl_bt_cte_receiver_configure(uint8_t flags);
  *
  * @param[in] connection Connection handle
  * @param[in] interval Measurement interval. CTE requests may be sent less
- *   often. For example, if a connetion event is missed for some reason, the CTE
+ *   often. For example, if a connection event is missed for any reason, the CTE
  *   request will be sent in the next connection event.
  *     - <b>0:</b> No interval. The request is initiated only once.
  *     - <b>Other values N:</b> Initiate the request every N-th connection
@@ -8486,206 +9350,13 @@ sl_status_t sl_bt_cte_receiver_disable_silabs_cte();
 /** @} */ // end addtogroup sl_bt_cte_receiver
 
 /**
- * @cond RESTRICTED
- * @addtogroup sl_bt_memory_profiler Memory Profiler
- * @{
- *
- * @brief Memory Profiler
- *
- * The commands and events in this class enable reading data collected by the
- * memory profiler and controlling the memory profiler to reset counters and
- * errors.
- */
-
-/* Command and Response IDs */
-#define sl_bt_cmd_memory_profiler_get_status_id                      0x00fd0020
-#define sl_bt_cmd_memory_profiler_reset_id                           0x01fd0020
-#define sl_bt_cmd_memory_profiler_list_ram_usage_id                  0x02fd0020
-#define sl_bt_rsp_memory_profiler_get_status_id                      0x00fd0020
-#define sl_bt_rsp_memory_profiler_reset_id                           0x01fd0020
-#define sl_bt_rsp_memory_profiler_list_ram_usage_id                  0x02fd0020
-
-/**
- * @addtogroup sl_bt_memory_profiler_error_flags Memory profiler error flags
- * @{
- *
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * Flags to specify errors detected by the memory profiler. The memory profiler
- * may set other error bits that are not documented here. Error bits that are
- * not documented here indicate internal implementation-specific errors. Their
- * meaning is described in the memory profiler implementation.
- */
-
-/** The number of created trackers has exceeded the configured maximum of
- * SL_MEMORY_PROFILER_MAX_TRACKERS. One or more trackers are therefore missing
- * in the report that can be obtained with the command @ref
- * sl_bt_memory_profiler_list_ram_usage, but their memory usage is included in
- * the total RAM consumption. */
-#define SL_BT_MEMORY_PROFILER_ERROR_TOO_MANY_TRACKERS         0x1       
-
-/** The number of live allocations has exceeded the configured maximum of
- * SL_MEMORY_PROFILER_MAX_LIVE_ALLOCATIONS. One or more allocations could not be
- * tracked and their memory usage was not counted. The report that can be
- * obtained with command @ref sl_bt_memory_profiler_list_ram_usage will
- * therefore not truthfully reflect the total memory consumption. */
-#define SL_BT_MEMORY_PROFILER_ERROR_TOO_MANY_LIVE_ALLOCATIONS 0x2       
-
-/** @} */ // end Memory profiler error flags
-
-/**
- * @addtogroup sl_bt_memory_profiler_reset_flags Memory profiler reset flags
- * @{
- *
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * Flags to specify which memory profiler items to reset
- */
-
-/** Reset the common error flags that can be read with command @ref
- * sl_bt_memory_profiler_get_status. */
-#define SL_BT_MEMORY_PROFILER_RESET_ERROR_FLAGS    0x1       
-
-/** Reset the allocation failure counts in every memory tracker. */
-#define SL_BT_MEMORY_PROFILER_RESET_ALLOC_FAILURES 0x2       
-
-/** @} */ // end Memory profiler reset flags
-
-/**
- * @addtogroup sl_bt_evt_memory_profiler_ram_usage_entry sl_bt_evt_memory_profiler_ram_usage_entry
- * @{
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * @brief Triggered by the command @ref sl_bt_memory_profiler_list_ram_usage
- */
-
-/** @brief Identifier of the ram_usage_entry event */
-#define sl_bt_evt_memory_profiler_ram_usage_entry_id                 0x00fd00a0
-
-/***************************************************************************//**
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * @brief Data structure of the ram_usage_entry event
- ******************************************************************************/
-PACKSTRUCT( struct sl_bt_evt_memory_profiler_ram_usage_entry_s
-{
-  uint32_t   depth;                  /**< Depth in the memory hierarchy */
-  uint32_t   total_size;             /**< The total number of bytes allocated
-                                          from the parent memory. For memory
-                                          pools, this is the total size of the
-                                          pool allocated at initialization time.
-                                          For memory trackers that are not
-                                          memory pools, the total size allocated
-                                          from the parent matches the current
-                                          number of bytes allocated, i.e., field
-                                          bytes_allocated. */
-  uint32_t   num_allocations;        /**< Number of allocations currently active */
-  uint32_t   num_failed_allocations; /**< Number of allocations that have failed
-                                          since boot or when the counters were
-                                          last reset with command @ref
-                                          sl_bt_memory_profiler_reset. */
-  uint32_t   bytes_allocated;        /**< Number of bytes currently allocated */
-  uint32_t   peak_bytes_allocated;   /**< Peak number of bytes allocated */
-  uint8array description;            /**< Short text describing the RAM usage */
-});
-
-typedef struct sl_bt_evt_memory_profiler_ram_usage_entry_s sl_bt_evt_memory_profiler_ram_usage_entry_t;
-
-/** @} */ // end addtogroup sl_bt_evt_memory_profiler_ram_usage_entry
-
-/**
- * @addtogroup sl_bt_evt_memory_profiler_list_ram_usage_complete sl_bt_evt_memory_profiler_list_ram_usage_complete
- * @{
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * @brief Triggered by the command @ref sl_bt_memory_profiler_list_ram_usage and
- * follows @ref sl_bt_evt_memory_profiler_ram_usage_entry events
- */
-
-/** @brief Identifier of the list_ram_usage_complete event */
-#define sl_bt_evt_memory_profiler_list_ram_usage_complete_id         0x01fd00a0
-
-/** @} */ // end addtogroup sl_bt_evt_memory_profiler_list_ram_usage_complete
-
-/***************************************************************************//**
- *
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * Get the status of the memory profiler. The command fails with error code
- * SL_STATUS_NOT_AVAILABLE if the software configuration has not enabled the
- * memory profiling feature.
- *
- * @param[out] num_memory_trackers Number of created memory trackers
- * @param[out] num_live_allocations Number of currently live memory allocations
- * @param[out] peak_live_allocations Peak number of live memory allocations
- * @param[out] num_heap_bytes_used Number of bytes currently used in the heap
- * @param[out] peak_heap_bytes_used Peak number of bytes used in the C heap
- * @param[out] peak_stack_bytes_used Peak number of bytes used in the C stack
- * @param[out] errors Flag bits to indicate detected errors. See @ref
- *   sl_bt_memory_profiler_error_flags for the specified flag bits.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_memory_profiler_get_status(uint32_t *num_memory_trackers,
-                                             uint32_t *num_live_allocations,
-                                             uint32_t *peak_live_allocations,
-                                             uint32_t *num_heap_bytes_used,
-                                             uint32_t *peak_heap_bytes_used,
-                                             uint32_t *peak_stack_bytes_used,
-                                             uint32_t *errors);
-
-/***************************************************************************//**
- *
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * Reset the specified items in the memory profiler. The command fails with
- * error code SL_STATUS_NOT_AVAILABLE if the SW configuration has not enabled
- * the memory profiling feature.
- *
- * @param[in] flags Flag bits to specify which items to reset. See @ref
- *   sl_bt_memory_profiler_reset_flags for the available flags.
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- ******************************************************************************/
-sl_status_t sl_bt_memory_profiler_reset(uint32_t flags);
-
-/***************************************************************************//**
- *
- * Restricted/experimental API. Contact Silicon Labs sales for more information.
- *
- * List the device RAM usage. Entries are reported by the @ref
- * sl_bt_evt_memory_profiler_ram_usage_entry event for each line of RAM usage
- * report and the report is ended with @ref
- * sl_bt_evt_memory_profiler_list_ram_usage_complete event. The command fails
- * with error code SL_STATUS_NOT_AVAILABLE if the SW configuration has not
- * enabled the memory profiling feature. Only one command may be pending at any
- * time. If another command is issued before the previous report is ended with
- * @ref sl_bt_evt_memory_profiler_list_ram_usage_complete event, the command
- * fails with error code SL_STATUS_BUSY.
- *
- *
- * @return SL_STATUS_OK if successful. Error code otherwise.
- *
- * @b Events
- *   - @ref sl_bt_evt_memory_profiler_ram_usage_entry
- *   - @ref sl_bt_evt_memory_profiler_list_ram_usage_complete
- *
- ******************************************************************************/
-sl_status_t sl_bt_memory_profiler_list_ram_usage();
-
-/** @} */ // end addtogroup sl_bt_memory_profiler
-/** @endcond */ // end restricted class
-
-/**
  * @addtogroup sl_bt_user User Messaging
  * @{
  *
  * @brief User Messaging
  *
- * This class provides one command and one event which can be used by a NCP host
- * and target to implement a communication mechanism with a custom proprietary
+ * This class provides commands and events which can be used by a NCP host and
+ * target to implement a communication mechanism with a custom proprietary
  * protocol. An application must decide whether and how the command and event
  * are used. The stack does not produce or consume any messages belonging to
  * this class.
@@ -8789,7 +9460,7 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer; /**< Data field for system soft_timer event*/
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout; /**< Data field for advertiser timeout event*/
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request; /**< Data field for advertiser scan_request event*/
-    sl_bt_evt_advertiser_periodic_advertising_status_t           evt_advertiser_periodic_advertising_status; /**< Data field for advertiser periodic_advertising_status event*/
+    sl_bt_evt_periodic_advertiser_status_t                       evt_periodic_advertiser_status; /**< Data field for periodic_advertiser status event*/
     sl_bt_evt_scanner_scan_report_t                              evt_scanner_scan_report; /**< Data field for scanner scan_report event*/
     sl_bt_evt_sync_opened_t                                      evt_sync_opened; /**< Data field for sync opened event*/
     sl_bt_evt_sync_data_t                                        evt_sync_data; /**< Data field for sync data event*/
@@ -8834,7 +9505,6 @@ PACKSTRUCT( struct sl_bt_msg {
     sl_bt_evt_cte_receiver_connection_iq_report_t                evt_cte_receiver_connection_iq_report; /**< Data field for cte_receiver connection_iq_report event*/
     sl_bt_evt_cte_receiver_connectionless_iq_report_t            evt_cte_receiver_connectionless_iq_report; /**< Data field for cte_receiver connectionless_iq_report event*/
     sl_bt_evt_cte_receiver_silabs_iq_report_t                    evt_cte_receiver_silabs_iq_report; /**< Data field for cte_receiver silabs_iq_report event*/
-    sl_bt_evt_memory_profiler_ram_usage_entry_t                  evt_memory_profiler_ram_usage_entry; /**< Data field for memory_profiler ram_usage_entry event*/
     sl_bt_evt_user_message_to_host_t                             evt_user_message_to_host; /**< Data field for user message_to_host event*/
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;
@@ -8943,9 +9613,12 @@ void sl_bt_priority_handle(void);
  *
  * @param signals is a bitmask defining active signals that are reported back to
  *   the application by system_external_signal-event.
- *
+ * @return SL_STATUS_OK if the operation is successful,
+ *   SL_STATUS_NO_MORE_RESOURCE indicating the request could not be processed
+ *   due to resource limitation at the moment, or SL_STATUS_INVALID_STATE when
+ *   the on-demand start feature is used and the stack is currently stopped.
  */
-void sl_bt_external_signal(uint32_t signals);
+sl_status_t sl_bt_external_signal(uint32_t signals);
 
 /**
  * Signals stack to send system_awake event when application received wakeup

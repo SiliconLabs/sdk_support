@@ -143,7 +143,7 @@
 
 #elif defined(_MPAHBRAM_CTRL_MASK)
 
-/* On Series 2 Config 3, aka EFR32XG23, ECC is now standalone in the
+/* From Series 2 Config 3, aka EFR32XG23, ECC is now standalone in the
  * MPAHBRAM module */
 #define ECC_RAM0_SYNDROMES_INIT (MPAHBRAM_CTRL_ECCWEN)
 #define ECC_RAM0_CORRECTION_EN  (MPAHBRAM_CTRL_ECCEN)
@@ -167,8 +167,8 @@
 #endif /* #if defined(if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) */
 
 #define ECC_RAM_SIZE_MAX   (RAM_MEM_SIZE)
-#define ECC_RAM0_MEM_BASE  (RAM_MEM_BASE)
-#define ECC_RAM0_MEM_SIZE  (RAM_MEM_SIZE)
+#define ECC_RAM0_MEM_BASE  (SRAM_BASE)
+#define ECC_RAM0_MEM_SIZE  (SRAM_SIZE)
 
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
 #define ECC_CTRL_REG       (SYSCFG->DMEM0ECCCTRL)

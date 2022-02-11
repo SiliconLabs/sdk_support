@@ -106,7 +106,7 @@ void DBG_DisableDebugAccess(DBG_LockMode_TypeDef lockMode);
  *   (powers down the EFR). Execute Simplicity Commander with command line
  *   parameters:
  *     "./commander.exe device recover"
- *   and then immediately move the switch to the AEM postion. An additional
+ *   and then immediately move the switch to the AEM position. An additional
  *     "./commander.exe device masserase"
  *   command completes the recovery procedure.
  *

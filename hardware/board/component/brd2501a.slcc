@@ -20,6 +20,10 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
@@ -30,7 +34,13 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2501A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD2501
   - board:variant:A

@@ -1,5 +1,5 @@
 id: "bluetooth_feature_ota_config"
-label: "OTA"
+label: "OTA Configuration"
 package: "Bluetooth"
 description: >
   OTA configuration

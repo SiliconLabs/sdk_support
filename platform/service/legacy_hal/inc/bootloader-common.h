@@ -33,7 +33,7 @@ typedef uint8_t EmberStatus;
 #define IMAGE_INFO_MAXLEN_OLD             32U
 #define IMAGE_INFO_MAXLEN                 16U
 #define AAT_MAX_SIZE                      128U
-#define NONCE_LENGTH                      12U
+#define BTL_NONCE_LENGTH                  12U
 
 #define BL_SUCCESS                        0U
 #define BL_EBL_CONTINUE                   0x50U
@@ -61,7 +61,7 @@ typedef struct eblHdr3xx_s {
 
 typedef struct ccmState_s {
   uint32_t msgLen;                     /* Length of the encrypted data */
-  uint8_t nonce[NONCE_LENGTH];         /* The random nonce for this message */
+  uint8_t nonce[BTL_NONCE_LENGTH];     /* The random nonce for this message */
   uint8_t mac[SECURITY_BLOCK_SIZE];    /* The full rolling MAC value */
   uint32_t blockCount;                 /* Current AES block we're processing in this message */
   uint8_t blockOffset;                 /* Offset within the current AES block [0, SECURITY_BLOCK_SIZE] */

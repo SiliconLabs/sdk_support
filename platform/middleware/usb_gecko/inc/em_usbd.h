@@ -23,6 +23,10 @@
 #include "em_usb.h"
 #if defined(USB_DEVICE)
 
+#if !defined(SL_SUPRESS_GECKO_USB_DEPRECATION_WARNINGS)
+#warning  Warning: Gecko USB is deprecated and will be removed in an upcoming release; Please consider migrating to sl_usb.
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif

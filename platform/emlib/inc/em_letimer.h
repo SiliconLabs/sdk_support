@@ -285,7 +285,7 @@ __STATIC_INLINE void LETIMER_IntSet(LETIMER_TypeDef *letimer, uint32_t flags)
 #if defined(_LETIMER_LOCK_MASK)
 /***************************************************************************//**
  * @brief
- *   Locks LETIMER registers.
+ *   Lock LETIMER registers.
  *
  * @param[in] letimer
  *   Pointer to LETIMER peripheral register block.
@@ -304,7 +304,7 @@ __STATIC_INLINE void LETIMER_Lock(LETIMER_TypeDef *letimer)
 #if defined(_LETIMER_LOCK_MASK)
 /***************************************************************************//**
  * @brief
- *   Unlocks LETIMER registers.
+ *   Unlock LETIMER registers.
  *
  * @param[in] letimer
  *   Pointer to LETIMER peripheral register block.

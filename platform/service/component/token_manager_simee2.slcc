@@ -11,6 +11,8 @@ requires:
   - name: emlib_msc
   - name: ecode
   - name: sim_eeprom2
+  - name: token_manager
+  - name: device_series_1
 define:
   - name: USE_SIMEE2
 template_contribution:

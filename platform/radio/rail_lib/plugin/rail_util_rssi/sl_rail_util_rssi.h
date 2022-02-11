@@ -31,6 +31,10 @@
 #ifndef SL_RAIL_UTIL_RSSI_H
 #define SL_RAIL_UTIL_RSSI_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the default RSSI.
  *
@@ -38,5 +42,9 @@
  *        before \ref RAIL_Init has been called.
  */
 void sl_rail_util_rssi_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_RSSI_H

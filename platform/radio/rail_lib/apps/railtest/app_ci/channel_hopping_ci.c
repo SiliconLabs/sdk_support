@@ -287,6 +287,24 @@ void configRxDutyCycle(sl_cli_command_arg_t *args)
                 config.rssiThresholdDbm);
 }
 
+void getDefaultRxDutyCycleConfig(sl_cli_command_arg_t *args)
+{
+  RAIL_RxDutyCycleConfig_t config = { 0 };
+
+  CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
+
+  RAIL_Status_t status = RAIL_GetDefaultRxDutyCycleConfig(railHandle,
+                                                          &config);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "Success:%s,Mode:0x%x,Parameter:%u,Delay:%d,Options:%u,rssiThreshold:%d",
+                status == RAIL_STATUS_NO_ERROR ? "True" : "False",
+                config.mode,
+                config.parameter,
+                config.delay,
+                config.options,
+                config.rssiThresholdDbm);
+}
+
 void enableRxDutyCycle(sl_cli_command_arg_t *args)
 {
   CHECK_RAIL_HANDLE(sl_cli_get_command_string(args, 0));
@@ -469,6 +487,12 @@ void configRxDutyCycle(sl_cli_command_arg_t *args)
 }
 
 void enableRxDutyCycle(sl_cli_command_arg_t *args)
+{
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  channelHoppingNotSupported(args);
+}
+
+void getDefaultRxDutyCycleConfig(sl_cli_command_arg_t *args)
 {
   args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
   channelHoppingNotSupported(args);

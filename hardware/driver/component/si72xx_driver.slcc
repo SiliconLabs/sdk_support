@@ -15,7 +15,7 @@ include:
 source:
   - path: src/sl_si72xx.c
 requires:
-  - name: i2cspm_core
+  - name: i2cspm
 documentation:
     docset: gecko-platform
     document: hardware-driver/api/group-si72xx

@@ -1,9 +1,9 @@
 id: micriumos_usbh_class_usb2ser_ftdi
-label: USB Host Class - USB-to-Serial for FTDI adapters
+label: Micrium-USB Host Class - USB-to-Serial for FTDI adapters
 package: micrium-usbh
 description: Micrium OS USB Host USB-to-Serial Class - Driver for FTDI adapters
-category: Services|USB|Host
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 source:
   - path: platform/micrium_os/usb/source/host/class/usbh_usb2ser_ftdi.c
 include:

@@ -389,12 +389,11 @@ psa_status_t sli_se_driver_mac_update(sli_se_driver_mac_operation_t *operation,
         goto exit;
       }
 
-      operation->ctx.cmac.cmd_ctx = &cmd_ctx;
-      operation->ctx.cmac.key = key_desc;
-
-      status = sl_se_cmac_update(&operation->ctx.cmac,
-                                 input,
-                                 input_length);
+      status = sl_se_cmac_multipart_update(&operation->ctx.cmac,
+                                           &cmd_ctx,
+                                           key_desc,
+                                           input,
+                                           input_length);
       if (status == SL_STATUS_FAIL) {
         psa_status = PSA_ERROR_DOES_NOT_EXIST;
         goto exit;
@@ -463,10 +462,7 @@ psa_status_t sli_se_driver_mac_sign_finish(sli_se_driver_mac_operation_t *operat
       return PSA_ERROR_HARDWARE_FAILURE;
     }
 
-    operation->ctx.cmac.cmd_ctx = &cmd_ctx;
-    operation->ctx.cmac.key = key_desc;
-
-    status = sl_se_cmac_finish(&operation->ctx.cmac, tmp_mac);
+    status = sl_se_cmac_multipart_finish(&operation->ctx.cmac, &cmd_ctx, key_desc, tmp_mac);
     if (status != SL_STATUS_OK) {
       *mac_length = 0;
       return PSA_ERROR_HARDWARE_FAILURE;

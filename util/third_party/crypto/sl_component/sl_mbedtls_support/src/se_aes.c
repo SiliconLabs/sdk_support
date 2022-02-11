@@ -59,6 +59,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 /* Parameter validation macros based on platform_util.h */

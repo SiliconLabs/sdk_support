@@ -1,5 +1,5 @@
 id: segger_systemview_no_os_m
-label: EGGER SystemView for No OS on Cortex-M
+label: SEGGER SystemView for No OS on Cortex-M
 package: platform
 description: SEGGER SystemView sample for No OS on Cortex-M0
 category: Platform|Utilities|SystemView

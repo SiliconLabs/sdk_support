@@ -43,6 +43,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include "em_device.h"
 
 #if defined(CRYPTO_PRESENT)

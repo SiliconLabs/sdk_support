@@ -84,10 +84,10 @@ typedef struct sli_coulomb_counter_handle {
   unsigned int cal_nreq_low;   ///< nreq value for calibration with low current.
   unsigned int cal_nreq_high;  ///< nreq value for calibration with high current.
   unsigned int cal_count_low;  ///< Number of pulses for calibration with low current.
-  unsigned int cal_count_high; ///< Number of pulses for calibraiton with high current.
+  unsigned int cal_count_high; ///< Number of pulses for calibration with high current.
   bool em2_requested;          ///< True if last mode requested to user is EM2.
-  int cal_em0_vscale;          ///< Vscale programmed for EM0.
-  int cal_em2_vscale;          ///< Vscale programmed for EM2.
+  int cal_em0_vscale;          ///< Voltage scaling programmed for EM0.
+  int cal_em2_vscale;          ///< Voltage scaling programmed for EM2.
 } sli_coulomb_counter_handle_t;
 
 /***************************************************************************//**

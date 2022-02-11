@@ -49,9 +49,39 @@
 #include "sli_cli_input.h"
 #include <string.h>
 
+#if !defined(__linux__)
+#include "em_device.h"
+#endif
+
 #if defined(SL_CATALOG_CLI_STORAGE_NVM3_PRESENT)
 #include "sl_cli_storage_nvm3.h"
 #endif
+
+#ifndef __WEAK
+#define __WEAK          __attribute__((weak))
+#endif
+
+/*******************************************************************************
+ ****************************   HOOK REFERENCES   ******************************
+ ******************************************************************************/
+
+/***************************************************************************//**
+ * @brief
+ *   Notify activity on the session (data received).
+ *
+ * @details
+ *   This function should be used to reset the session inactivity, if implemented.
+ *
+ * @param[in] handle
+ *   A handle to a CLI instance; Use session_data pointer for accessing instance's
+ *   session data.
+ *
+ * @return SL_STATUS_OK if user can access the CLI instance, an error code otherwise .
+ ******************************************************************************/
+__WEAK void sli_cli_session_activity_notification(sl_cli_handle_t handle)
+{
+  (void) handle;
+}
 
 /*******************************************************************************
  ****************************   STATIC VARIABLES   *****************************
@@ -79,7 +109,7 @@ sl_cli_command_group_t *sl_cli_default_command_group;
  ******************************************************************************/
 static const char *status_to_string(sl_status_t status)
 {
-  char *string;
+  const char *string;
 
   switch (status) {
     case SL_STATUS_OK:
@@ -110,12 +140,13 @@ static const char *status_to_string(sl_status_t status)
 
 /***************************************************************************//**
  * @brief
- *   Handle handle_input_and_history.
+ *   Handle sli_cli_handle_input_and_history.
  *   Updates the history buffer, executes the function and clears the input
  *   string.
  ******************************************************************************/
-static void handle_input_and_history(sl_cli_handle_t handle)
+void sli_cli_handle_input_and_history(sl_cli_handle_t handle)
 {
+  handle->req_prompt = true;
   if (strlen(handle->input_buffer) > 0) {
     sli_cli_input_update_history(handle);
     sl_cli_handle_input(handle, handle->input_buffer);
@@ -125,18 +156,68 @@ static void handle_input_and_history(sl_cli_handle_t handle)
 
 /***************************************************************************//**
  * @brief
+ *   Initialize session for a CLI instance.
+ *
+ * @details
+ *   This function is called when initializing a CLI instance. It allows a security
+ *   submodule to initialize its data, retrieve information and set state before the
+ *   cli instance start.
+ *
+ * @param[in, out] handle
+ *   A handle to a CLI instance;
+ *   Should set session_data pointer for storing data which can be retrieved in the
+ *   subsequent calls. The same function is called for all instances, the function must
+ *   handle the different instance.
+ *
+ * @return SL_STATUS_OK if successful, an error code otherwise .
+ ******************************************************************************/
+__WEAK sl_status_t sli_cli_session_init(sl_cli_handle_t handle)
+{
+  (void)handle;
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * @brief
+ *   Handle Session; Authentication/logging/logout/lockup, etc.
+ *
+ * @details
+ *   This function is called everytime the CLI tick function is executed. It doesn't
+ *   mean an activity occured on the session (data received). This function can write
+ *   and read iostream and the default stream. The CLI takes care of switching the default
+ *   stream for every instance.
+ *
+ * @param[in] handle
+ *   A handle to a CLI instance; Use session_data pointer for accessing instance's
+ *   session data.
+ *
+ * @return SL_STATUS_OK if user can access the CLI instance, an error code otherwise .
+ ******************************************************************************/
+__WEAK sl_status_t sli_cli_session_handler(sl_cli_handle_t handle)
+{
+  (void)handle;
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * @brief
  *   Common tick function.
  *   Checks for new input, and acts according to the possible input.
  ******************************************************************************/
-static bool tick(sl_cli_handle_t handle)
+__WEAK bool sli_cli_tick(sl_cli_handle_t handle)
 {
   int c;
   bool newline = false;
   bool no_valid_input = false;
 
   if (handle->tick_in_progress) {
-    return no_valid_input;
+    return false;
   }
+
+  if (sli_cli_session_handler(handle) != SL_STATUS_OK) {
+    return false;
+  }
+
   handle->tick_in_progress = true;
 
   if (handle->req_prompt) {
@@ -158,6 +239,7 @@ static bool tick(sl_cli_handle_t handle)
       c = sli_cli_io_getchar();
     }
     if (c != EOF) {
+      sli_cli_session_activity_notification(handle);
       newline = sl_cli_input_char(handle, (char)c);
     } else {
       no_valid_input = true;
@@ -165,12 +247,15 @@ static bool tick(sl_cli_handle_t handle)
   } while ((c != EOF) && (!newline));
 
   if (newline) {
-    handle_input_and_history(handle);
+    sli_cli_handle_input_and_history(handle);
 #if defined(SL_CLI_ACTIVE_FLAG_EN)
     handle->req_prompt = true;
     handle->active = true;
 #else
-    sli_cli_io_printf("%s", handle->prompt_string);
+    if (handle->req_prompt) {
+      sli_cli_io_printf("%s", handle->prompt_string);
+      handle->req_prompt = false;
+    }
 #endif
   }
   handle->tick_in_progress = false;
@@ -185,7 +270,7 @@ static bool tick(sl_cli_handle_t handle)
  ******************************************************************************/
 static void tick_task(void *arg)
 {
-  sl_cli_handle_t handle = (sl_cli_handle_t)arg;
+  sl_cli_handle_t handle = (sl_cli_handle_t) arg;
 
   sl_iostream_set_default(handle->iostream_handle);
 
@@ -198,7 +283,7 @@ static void tick_task(void *arg)
   while (1) {
     bool no_valid_input;
 
-    no_valid_input = tick(handle);
+    no_valid_input = sli_cli_tick(handle);
     if (no_valid_input) {
       EFM_ASSERT(osDelay(handle->loop_delay_tick) == osOK);
     }
@@ -303,6 +388,15 @@ sl_status_t sl_cli_instance_init(sl_cli_handle_t handle,
   handle->input_char = EOF;
 #endif
 
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
+  status = sli_cli_session_init(handle);
+  if (status != SL_STATUS_OK) {
+    return status;
+  }
+
 #if defined(SL_CLI_ACTIVE_FLAG_EN)
   handle->active = true;
 #endif
@@ -317,6 +411,9 @@ bool sl_cli_is_ok_to_sleep(sl_cli_handle_t handle)
     handle->input_char = sli_cli_io_getchar();
   }
   if (handle->input_char != EOF) {
+    return false;
+  }
+  if (handle->block_sleep) {
     return false;
   }
 
@@ -344,6 +441,6 @@ void sl_cli_tick_instance(sl_cli_handle_t handle)
     return;
   }
 #endif
-  tick(handle);
+  sli_cli_tick(handle);
 }
 #endif

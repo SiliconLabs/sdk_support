@@ -34,11 +34,19 @@
 #include "rail.h"
 #include "sl_rail_util_dma_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the RAIL DMA Utility.
  *
  * @note: This function should be called during application initialization.
  */
 void sl_rail_util_dma_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_DMA_H

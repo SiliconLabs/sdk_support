@@ -51,120 +51,82 @@ extern "C" {
  */
 
 /**
- * @def EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
- * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
- *   RAIL multiprotocol internal state for the EFR32XG1 series.
- */
-#define EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
-
-/**
- * @def EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
- * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
- *   RAIL multiprotocol internal state for the EFR32XG12 series.
- */
-#define EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
-
-/**
- * @def EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
- * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
- *   RAIL multiprotocol internal state for the EFR32XG13 series.
- */
-#define EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
-
-/**
- * @def EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
- * @brief The size in 32-bit words of RAIL_SchedulerStateBuffer_t to store
- *   RAIL multiprotocol internal state for the EFR32XG14 series.
- */
-#define EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE 27
-
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
-#define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG1_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 2)
-#define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG12_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 3)
-#define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG13_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 4)
-#define RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE EFR32XG14_RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE
-#else
-#error "Unsupported platform!"
-#endif //_SILICON_LABS_32B_SERIES_1_CONFIG
-
-/**
- * @typedef RAIL_SchedulerStateBuffer_t
- * @brief A buffer used to store multiprotocol scheduler internal state.
+ * A placeholder for a chip-specific RAIL handle. Using NULL as a RAIL handle is
+ * not recommended. As a result, another value that can't be de-referenced is used.
  *
- * This buffer must be allocated in application global read-write memory
- * that persists for the duration of RAIL usage. It cannot be allocated
- * in read-only memory or on the call stack.
+ * This generic handle can and should be used for RAIL APIs that are called
+ * prior to RAIL initialization.
  */
-typedef uint32_t RAIL_SchedulerStateBuffer_t[RAIL_SCHEDULER_STATE_UINT32_BUFFER_SIZE];
+#define RAIL_EFR32_HANDLE ((RAIL_Handle_t)0xFFFFFFFFUL)
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * @def RAIL_EFR32XG1_STATE_BUFFER_BYTES
+ * @brief The EFR32XG1 series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ */
+#define RAIL_EFR32XG1_STATE_BUFFER_BYTES 472
+
+/**
+ * @def RAIL_EFR32XG12_STATE_BUFFER_BYTES
+ * @brief The EFR32XG12 series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ */
+#define RAIL_EFR32XG12_STATE_BUFFER_BYTES 488
+
+/**
+ * @def RAIL_EFR32XG13_STATE_BUFFER_BYTES
+ * @brief The EFR32XG13 series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ */
+#define RAIL_EFR32XG13_STATE_BUFFER_BYTES 488
+
+/**
+ * @def RAIL_EFR32XG14_STATE_BUFFER_BYTES
+ * @brief The EFR32XG14 series size needed for
+ *   \ref RAIL_StateBufferEntry_t::bufferBytes.
+ */
+#define RAIL_EFR32XG14_STATE_BUFFER_BYTES 496
+
+/**
+ * @def RAIL_STATE_BUFFER_BYTES
+ * @brief The size needed for \ref RAIL_StateBufferEntry_t::bufferBytes
+ *   on this platform for this radio. This compile-time size may be slightly
+ *   larger than what \ref RAIL_GetStateBufferSize() determines at run-time.
+ */
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
+#define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG1_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 2)
+#define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG12_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 3)
+#define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG13_STATE_BUFFER_BYTES
+#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 4)
+#define RAIL_STATE_BUFFER_BYTES RAIL_EFR32XG14_STATE_BUFFER_BYTES
+#else
+#define RAIL_STATE_BUFFER_BYTES 0 // Sate Doxygen
+#error "Unsupported platform!"
+#endif
+
+#endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /**
  * @struct RAILSched_Config_t
- * @brief A multiprotocol scheduler configuration and internal state.
- *
- * This buffer must be allocated in application global read-write memory
- * that persists for the duration of RAIL usage. It cannot be allocated
- * in read-only memory or on the call stack.
+ * @brief Provided for backwards compatibility.
  */
 typedef struct RAILSched_Config {
-  RAIL_SchedulerStateBuffer_t buffer; /**< An internal state buffer. */
+  uint8_t buffer[1]; /**< Dummy buffer no longer used. */
 } RAILSched_Config_t;
 
 /**
- * @def EFR32XG1_RAIL_STATE_UINT32_BUFFER_SIZE
- * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
- *   internal state for the EFR32XG1 series.
- */
-#define EFR32XG1_RAIL_STATE_UINT32_BUFFER_SIZE 88
-
-/**
- * @def EFR32XG12_RAIL_STATE_UINT32_BUFFER_SIZE
- * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
- *   internal state for the EFR32XG12 series.
- */
-#define EFR32XG12_RAIL_STATE_UINT32_BUFFER_SIZE 94
-
-/**
- * @def EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE
- * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
- *   internal state for the EFR32XG13 series.
- */
-#define EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE 94
-
-/**
- * @def EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE
- * @brief The size, in 32-bit words, of RAIL_StateBuffer_t to store RAIL
- *   internal state for the EFR32XG14 series.
- */
-#define EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE 94
-
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG == 1)
-#define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG1_RAIL_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 2)
-#define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG12_RAIL_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 3)
-#define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG13_RAIL_STATE_UINT32_BUFFER_SIZE
-#elif (_SILICON_LABS_32B_SERIES_1_CONFIG == 4)
-#define RAIL_STATE_UINT32_BUFFER_SIZE EFR32XG14_RAIL_STATE_UINT32_BUFFER_SIZE
-#else
-#error "Unsupported platform!"
-#endif //_SILICON_LABS_32B_SERIES_1_CONFIG
-
-/**
  * @typedef RAIL_StateBuffer_t
- * @brief A buffer to store RAIL internal state.
+ * @brief Provided for backwards compatibility.
  */
-typedef uint32_t RAIL_StateBuffer_t[RAIL_STATE_UINT32_BUFFER_SIZE];
+typedef uint8_t RAIL_StateBuffer_t[1];
 
 /**
  * @struct RAIL_Config_t
- * @brief RAIL configuration and internal state structure.
- *
- * This structure must be allocated in application global read-write memory
- * that persists for the duration of RAIL usage. It cannot be allocated
- * in read-only memory or on the call stack.
+ * @brief RAIL configuration structure.
  */
 typedef struct RAIL_Config {
   /**
@@ -177,24 +139,15 @@ typedef struct RAIL_Config {
    */
   void (*eventsCallback)(RAIL_Handle_t railHandle, RAIL_Events_t events);
   /**
-   * Pointer to a structure to hold state information required by the \ref
-   * Protocol_Specific APIs. If needed, this structure must be allocated in
-   * global read-write memory and initialized to all zeros.
-   *
-   * Currently, this is only required when using the \ref BLE APIs and should be
-   * set to point to a \ref RAIL_BLE_State_t structure. When using \ref
-   * IEEE802_15_4 or \ref Z_Wave this should be set to NULL.
+   * Provided for backwards compatibility. Ignored.
    */
   void *protocol;
   /**
-   * A pointer to a RAIL scheduler state object allocated in global read-write
-   * memory and initialized to all zeros. When not using a multiprotocol
-   * scheduler, it should be NULL.
+   * Provided for backwards compatibility. Ignored.
    */
   RAILSched_Config_t *scheduler;
   /**
-   * A structure for RAIL to maintain its internal state, which must be
-   * initialized to all zeros.
+   * Provided for backwards compatibility. Ignored.
    */
   RAIL_StateBuffer_t buffer;
 } RAIL_Config_t;
@@ -216,12 +169,6 @@ typedef struct RAIL_Config {
  * @brief Time it takes to take care of protocol switching.
  */
 #define TRANSITION_TIME_US 430
-
-/**
- * A placeholder for a chip-specific RAIL handle. Using NULL as a RAIL handle is
- * not recommended. As a result, another value that can't be de-referenced is used.
- */
-#define RAIL_EFR32_HANDLE ((RAIL_Handle_t)0xFFFFFFFFUL)
 
 /** @} */ // end of group Multiprotocol_EFR32
 
@@ -309,7 +256,9 @@ typedef struct RAIL_AntennaConfig {
 /** EFR32-specific temperature calibration bit */
 #define RAIL_CAL_TEMP_VCO         (0x00000001U)
 /** EFR32-specific IR calibration bit */
-#define RAIL_CAL_ONETIME_IRCAL    (0x00010000U)
+#define RAIL_CAL_RX_IRCAL         (0x00010000U)
+/** EFR32-specific IR calibration bit */
+#define RAIL_CAL_ONETIME_IRCAL    (RAIL_CAL_RX_IRCAL)
 
 /** A mask to run temperature-dependent calibrations */
 #define RAIL_CAL_TEMP             (RAIL_CAL_TEMP_VCO)
@@ -352,6 +301,13 @@ typedef uint32_t RAIL_IrCalValues_t[RAIL_RF_PATHS];
 #define RAIL_IRCALVALUES_UNINIT { \
     RAIL_CAL_INVALID_VALUE,       \
 }
+
+/**
+ * A define allowing Rx calibration value access compatibility
+ * between series 1 and series 2.
+ */
+#define RAIL_IRCALVAL(irCalStruct, rfPath) \
+  ((irCalStruct)[(rfPath)])
 
 /**
  * @struct RAIL_ChannelConfigEntryAttr
@@ -522,7 +478,7 @@ RAIL_Status_t RAIL_BLE_CalibrateIr(RAIL_Handle_t railHandle,
 RAIL_Status_t RAIL_CalibrateTemp(RAIL_Handle_t railHandle);
 
 /**
- * @struct RAIL_CalValues_t
+ * @typedef RAIL_CalValues_t
  * @brief A calibration value structure.
  *
  * This structure contains the set of persistent calibration values for
@@ -530,9 +486,7 @@ RAIL_Status_t RAIL_CalibrateTemp(RAIL_Handle_t railHandle);
  * time required to compute them. Any of these values may be set to
  * RAIL_CAL_INVALID_VALUE to force the code to compute that calibration value.
  */
-typedef struct RAIL_CalValues {
-  uint32_t imageRejection; /**< An Image Rejection (IR) calibration value */
-} RAIL_CalValues_t;
+typedef RAIL_IrCalValues_t RAIL_CalValues_t;
 
 /**
  * A define to set all RAIL_CalValues_t values to uninitialized.
@@ -540,9 +494,7 @@ typedef struct RAIL_CalValues {
  * This define can be used when you have no data to pass to the calibration
  * routines but wish to compute and save all possible calibrations.
  */
-#define RAIL_CALVALUES_UNINIT (RAIL_CalValues_t){ \
-    RAIL_CAL_INVALID_VALUE,                       \
-}
+#define RAIL_CALVALUES_UNINIT RAIL_IRCALVALUES_UNINIT
 
 /** @} */ // end of group Calibration_EFR32
 
@@ -584,6 +536,43 @@ typedef int16_t RAIL_FrequencyOffset_t;
  * call \ref RAIL_GetRxFreqOffset() at an invalid time.
  */
 #define RAIL_FREQUENCY_OFFSET_INVALID ((RAIL_FrequencyOffset_t) 0x8000)
+
+/**
+ * @struct RAIL_DirectModeConfig_t
+ * @brief Chip-specific type that allows the user to specify direct mode
+ *   parameters using \ref RAIL_ConfigDirectMode().
+ */
+typedef struct RAIL_DirectModeConfig {
+  /** Enable synchronous RX DOUT using DCLK vs. asynchronous RX DOUT. */
+  bool syncRx;
+  /** Enable synchronous TX DIN using DCLK vs. asynchronous TX DIN. */
+  bool syncTx;
+
+  /** Only used with directRx */
+  /** Data output (DOUT) GPIO port */
+  uint8_t doutPort;
+  /** Data output (DOUT) GPIO pin */
+  uint8_t doutPin;
+
+  /** Only used in synchronous mode */
+  /** Data clock (DCLK) GPIO port. Only used in synchronous mode */
+  uint8_t dclkPort;
+  /** Data clock (DCLK) GPIO pin. Only used in synchronous mode */
+  uint8_t dclkPin;
+
+  /** Only used with directTx */
+  /** Data frame (DIN) GPIO port */
+  uint8_t dinPort;
+  /** Data frame (DIN) GPIO pin */
+  uint8_t dinPin;
+
+  /** Data output (DOUT) location for pin/port. */
+  uint8_t doutLoc;
+  /** Data clock (DCLK) location for pin/port. */
+  uint8_t dclkLoc;
+  /** Data frame (DIN) location for pin/port. */
+  uint8_t dinLoc;
+} RAIL_DirectModeConfig_t;
 
 /** @} */ // end of group Diagnostic_EFR32
 

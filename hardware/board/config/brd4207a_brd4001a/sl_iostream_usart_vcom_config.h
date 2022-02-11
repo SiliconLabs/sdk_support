@@ -54,11 +54,12 @@
 // <i> Default: usartStopbits1
 #define SL_IOSTREAM_USART_VCOM_STOP_BITS             usartStopbits1
 
-// <o SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE> Hardware flow control
+// <o SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE> Flow control
 // <usartHwFlowControlNone=> None
 // <usartHwFlowControlCts=> CTS
 // <usartHwFlowControlRts=> RTS
 // <usartHwFlowControlCtsAndRts=> CTS/RTS
+// <uartFlowControlSoftware=> Software Flow control (XON/XOFF)
 // <i> Default: usartHwFlowControlNone
 #define SL_IOSTREAM_USART_VCOM_FLOW_CONTROL_TYPE     usartHwFlowControlNone
 

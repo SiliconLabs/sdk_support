@@ -179,7 +179,7 @@ typedef struct EventQueue_s {
  *
  * Events with this in their type may only be scheduled with a zero delay.
  */
-void emIsrEventMarker(struct Event_s *);
+void emIsrEventMarker(struct Event_s *event);
 
 /**
  * Initialize 'queue'.  This must be called before any use of 'queue'
@@ -271,6 +271,11 @@ void emberEventSetInactive(EmberEvent *event);
  * Return true if the event is scheduled to run.
  */
 bool emberEventIsScheduled(EmberEvent *event);
+
+/**
+ * Return true if the event queue is empty.
+ */
+bool emberEventQueueIsEmpty(EmberEventQueue *queue);
 
 /**
  * Return the number of milliseconds before 'event' runs, or -1 if 'event'

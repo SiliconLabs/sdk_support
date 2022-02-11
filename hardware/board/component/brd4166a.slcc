@@ -25,6 +25,11 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
+  - id: pressure_driver_bmp280
   - id: mic_i2s_driver
   - id: simple_led
     instance:
@@ -35,7 +40,15 @@
     - btn0
     - btn1
   - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: bootloader_spi_peripheral_usart_driver
+  - id: imu_driver_icm20648
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4166A"'
+  - name: SL_BOARD_REV
+    value: '"D03"'
 - tag:
   - board:pn:BRD4166
   - board:variant:A
@@ -53,3 +66,4 @@
   - hardware:has:led:2
   - hardware:has:button:2
   - hardware:has:memory:spi:mx25r8035f
+  - hardware:has:imu

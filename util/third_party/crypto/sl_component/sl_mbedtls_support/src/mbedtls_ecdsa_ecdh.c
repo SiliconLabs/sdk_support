@@ -77,6 +77,7 @@
 #include "mbedtls/ecdsa.h"
 #include "mbedtls/platform_util.h"
 #include "mbedtls/bignum.h"
+#include "mbedtls/error.h"
 #include "psa/crypto.h"
 
 // Parameter validation macros based on platform_util.h
@@ -99,11 +100,11 @@ static int psa_status_to_mbedtls(psa_status_t status)
     case PSA_ERROR_INVALID_SIGNATURE:
       return MBEDTLS_ERR_ECP_VERIFY_FAILED;
     case PSA_ERROR_HARDWARE_FAILURE:
-      return MBEDTLS_ERR_ECP_HW_ACCEL_FAILED;
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     case PSA_ERROR_NOT_SUPPORTED:
-      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     default:
-      return MBEDTLS_ERR_ECP_BAD_INPUT_DATA;
+      return MBEDTLS_ERR_ERROR_GENERIC_ERROR;
   }
 }
 
@@ -112,37 +113,37 @@ static int mbedtls_grp_to_psa_attr(mbedtls_ecp_group_id id,
 {
   switch (id) {
     case MBEDTLS_ECP_DP_SECP192R1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 192);
       break;
 #if defined(CRYPTOACC_PRESENT)
     case MBEDTLS_ECP_DP_SECP224R1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 224);
       break;
     case MBEDTLS_ECP_DP_SECP256K1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_K1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_K1);
       psa_set_key_bits(attr, 256);
       break;
 #endif
     case MBEDTLS_ECP_DP_SECP256R1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 256);
       break;
     case MBEDTLS_ECP_DP_SECP384R1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 384);
       break;
     case MBEDTLS_ECP_DP_SECP521R1:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_SECP_R1);
       psa_set_key_bits(attr, 521);
       break;
     case MBEDTLS_ECP_DP_CURVE25519:
-      attr->core.type = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_MONTGOMERY);
+      attr->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = PSA_KEY_TYPE_ECC_KEY_PAIR(PSA_ECC_FAMILY_MONTGOMERY);
       psa_set_key_bits(attr, 255);
       break;
     default:
-      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
   return PSA_SUCCESS;
 }
@@ -189,12 +190,12 @@ static int ecc_keygen(mbedtls_ecp_group *grp, mbedtls_mpi *d, mbedtls_ecp_point 
   }
 
   if ( PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr)) == PSA_ECC_FAMILY_MONTGOMERY ) {
-    mbedtls_mpi_read_binary_le(&Q->X, keybuf, keybytes);
+    mbedtls_mpi_read_binary_le(&Q->MBEDTLS_PRIVATE(X), keybuf, keybytes);
   } else {
     // The first byte is used to store uncompressed representation byte.
-    mbedtls_mpi_read_binary(&Q->X, keybuf + 1u, keybytes / 2);
-    mbedtls_mpi_read_binary(&Q->Y, keybuf + keybytes / 2 + 1u, keybytes / 2);
-    mbedtls_mpi_lset(&Q->Z, 1);
+    mbedtls_mpi_read_binary(&Q->MBEDTLS_PRIVATE(X), keybuf + 1u, keybytes / 2);
+    mbedtls_mpi_read_binary(&Q->MBEDTLS_PRIVATE(Y), keybuf + keybytes / 2 + 1u, keybytes / 2);
+    mbedtls_mpi_lset(&Q->MBEDTLS_PRIVATE(Z), 1);
   }
 
   return status;
@@ -216,9 +217,9 @@ int mbedtls_ecdsa_genkey(mbedtls_ecdsa_context *ctx, mbedtls_ecp_group_id gid,
   ECDSA_VALIDATE_RET(ctx   != NULL);
   ECDSA_VALIDATE_RET(f_rng != NULL);
 
-  mbedtls_ecp_group_load(&ctx->grp, gid);
+  mbedtls_ecp_group_load(&ctx->MBEDTLS_PRIVATE(grp), gid);
 
-  return ecc_keygen(&ctx->grp, &ctx->d, &ctx->Q);
+  return ecc_keygen(&ctx->MBEDTLS_PRIVATE(grp), &ctx->MBEDTLS_PRIVATE(d), &ctx->MBEDTLS_PRIVATE(Q));
 }
 #endif /* MBEDTLS_ECDSA_GENKEY_ALT */
 
@@ -309,7 +310,8 @@ int mbedtls_ecdsa_verify(mbedtls_ecp_group *grp,
     return PSA_ERROR_NOT_SUPPORTED;
   }
 
-  attr.core.type = PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr)));
+  attr.MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) =
+    PSA_KEY_TYPE_ECC_PUBLIC_KEY(PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr)));
 
   size_t keybytes = PSA_BITS_TO_BYTES(psa_get_key_bits(&attr));
 
@@ -318,8 +320,8 @@ int mbedtls_ecdsa_verify(mbedtls_ecp_group *grp,
   mbedtls_mpi_write_binary(s, &signature[keybytes], keybytes);
 
   pub[0] = 0x04; // Uncompressed public key
-  mbedtls_mpi_write_binary(&Q->X, &pub[1u], keybytes);
-  mbedtls_mpi_write_binary(&Q->Y, &pub[keybytes + 1u], keybytes);
+  mbedtls_mpi_write_binary(&Q->MBEDTLS_PRIVATE(X), &pub[1u], keybytes);
+  mbedtls_mpi_write_binary(&Q->MBEDTLS_PRIVATE(Y), &pub[keybytes + 1u], keybytes);
 
   return psa_status_to_mbedtls(
     ECDSA_VERIFY_FCT(&attr,
@@ -384,13 +386,13 @@ int mbedtls_ecdh_compute_shared(mbedtls_ecp_group *grp, mbedtls_mpi *z,
   if (PSA_KEY_TYPE_ECC_GET_FAMILY(psa_get_key_type(&attr)) == PSA_ECC_FAMILY_MONTGOMERY) {
     publen = keylen;
     mbedtls_mpi_write_binary_le(d, priv, keylen);
-    mbedtls_mpi_write_binary_le(&Q->X, pub, keylen);
+    mbedtls_mpi_write_binary_le(&Q->MBEDTLS_PRIVATE(X), pub, keylen);
   } else {
     publen = 2 * keylen + 1u;
     mbedtls_mpi_write_binary(d, priv, keylen);
     pub[0] = 0x04; // uncompressed public key
-    mbedtls_mpi_write_binary(&Q->X, pub + 1u, keylen);
-    mbedtls_mpi_write_binary(&Q->Y, pub + keylen + 1u, keylen);
+    mbedtls_mpi_write_binary(&Q->MBEDTLS_PRIVATE(X), pub + 1u, keylen);
+    mbedtls_mpi_write_binary(&Q->MBEDTLS_PRIVATE(Y), pub + keylen + 1u, keylen);
   }
 
   status = psa_status_to_mbedtls(

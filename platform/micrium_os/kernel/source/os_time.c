@@ -97,6 +97,7 @@ OS_RATE_HZ OSTimeTickRateHzGet(RTOS_ERR *p_err)
  *                       - RTOS_ERR_OS_SCHED_LOCKED
  *                       - RTOS_ERR_NOT_READY
  *                       - RTOS_ERR_INVALID_STATE
+ *                       - RTOS_ERR_NOT_INIT
  *******************************************************************************************************/
 void OSTimeDly(OS_TICK  dly,
                OS_OPT   opt,
@@ -125,6 +126,11 @@ void OSTimeDly(OS_TICK  dly,
     return;
   }
 
+  if (OS_SleeptimerFrequency_Hz == 0u) {
+    RTOS_ERR_SET(*p_err, RTOS_ERR_NOT_INIT);
+    return;
+  }
+
   //                                                               Validate 'opt'
   OS_ASSERT_DBG_ERR_SET(((opt == OS_OPT_TIME_DLY)
                          || (opt == OS_OPT_TIME_TIMEOUT)
@@ -141,7 +147,7 @@ void OSTimeDly(OS_TICK  dly,
     OS_TICK tick_os_temp;
 
     tick_ctr = sl_sleeptimer_get_tick_count();
-    tick_os_temp = (uint64_t)((uint64_t)tick_ctr * (uint64_t)OSCfg_TickRate_Hz) / sl_sleeptimer_get_timer_frequency();
+    tick_os_temp = (uint64_t)((uint64_t)tick_ctr * (uint64_t)OSCfg_TickRate_Hz) / OS_SleeptimerFrequency_Hz;
 
     if (OSTCBCurPtr->IsTickCtrPrevValid) {
       CPU_INT32S diff;
@@ -170,7 +176,7 @@ void OSTimeDly(OS_TICK  dly,
       return;
     }
 
-    delay = (uint64_t)(((uint64_t)delay_ticks * (uint64_t)sl_sleeptimer_get_timer_frequency()) + (OSCfg_TickRate_Hz - 1u)) / OSCfg_TickRate_Hz;
+    delay = (uint64_t)(((uint64_t)delay_ticks * (uint64_t)OS_SleeptimerFrequency_Hz) + (OSCfg_TickRate_Hz - 1u)) / OSCfg_TickRate_Hz;
 
     CORE_ENTER_ATOMIC();
 
@@ -397,16 +403,27 @@ void OSTimeDlyResume(OS_TCB   *p_tcb,
  * @param    p_err   Pointer to the variable that will receive one of the following error code(s)
  *                   from this function:
  *                       - RTOS_ERR_NONE
+ *                       - RTOS_ERR_NOT_INIT
  *
  * @return   The current tick count.
+ *
+ * @note     (1) The conversion is based on a 64 bits large hardware tick counter. The overflow of the
+ *               64 bits counter during the calculation is not handle in this function.
+ *               It is assumed that with a 64 bits counter running on a LF clock the calculation would
+ *               overflow in millions of years making it acceptable.
  *******************************************************************************************************/
 OS_TICK OSTimeGet(RTOS_ERR *p_err)
 {
-  uint32_t timer_ticks;
+  CPU_INT64U timer_ticks;
   OS_TICK ticks;
 
-  timer_ticks = (OS_TICK)sl_sleeptimer_get_tick_count();
-  ticks = (uint64_t)((uint64_t)timer_ticks * (uint64_t)OSCfg_TickRate_Hz) / sl_sleeptimer_get_timer_frequency();
+  if (OS_SleeptimerFrequency_Hz == 0u) {
+    RTOS_ERR_SET(*p_err, RTOS_ERR_NOT_INIT);
+    return (0u);
+  }
+
+  timer_ticks = sl_sleeptimer_get_tick_count64();
+  ticks = (CPU_INT64U)(timer_ticks * (CPU_INT64U)OSCfg_TickRate_Hz) / OS_SleeptimerFrequency_Hz;
 
   RTOS_ERR_SET(*p_err, RTOS_ERR_NONE);
 

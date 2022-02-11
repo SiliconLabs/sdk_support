@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Functions to use the parser plugin to parse an image
+ * @brief Functions to use the parser component to parse an image
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -17,8 +17,8 @@
 #ifndef BTL_PARSE_H
 #define BTL_PARSE_H
 
-#include "plugin/parser/btl_image_parser.h"
-#include "plugin/security/btl_security_types.h"
+#include "parser/gbl/btl_gbl_parser.h"
+#include "security/btl_security_types.h"
 
 /// Context used by bootloader image parser to store parser state
 struct BootloaderParserContext {

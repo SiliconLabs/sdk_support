@@ -14,9 +14,7 @@ description: >
   into the attribute table after the static ones.
 
   Dynamically-created services and characteristics do not support the capability
-  feature (Polymorphic GATT), which was originally designed for the static database.
-  The capability feature will be deprecated in a future SDK release. It is
-  recommended to migrate the usage to this new feature.
+  feature (Polymorphic GATT) that was designed for the static database solution.
 
   See the configuration of this component and the Bluetooth API reference manual
   section "GATT Database" for more details.

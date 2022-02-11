@@ -21,3 +21,8 @@
       component: rail_util_pa
       file_id: rail_util_pa_config
     path: ZGM230SA27HNN/sl_rail_util_pa_config.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: ZGM230SA27HNN/iot_flash_cfg_msc.h

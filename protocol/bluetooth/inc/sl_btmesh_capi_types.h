@@ -267,6 +267,8 @@ typedef struct {
   uint8_t oob_auth_output_size; /**< Output OOB size */
   uint8_t oob_auth_input_actions; /**< Input OOB actions supported bitmask */
   uint8_t oob_auth_input_size; /**< Input OOB size */
+  uint16_t allowed_algorithms; /**< Allowed provisioning algorithms; set
+                                  to bitmask containing #MESH_PROV_FLAG_ALGORITHM_FIPS_P256 */
 } mesh_device_config_t;
 
 /** Device UUID length */
@@ -358,7 +360,10 @@ typedef void* mesh_tx_handle_t;
 
 /** Transport layer Tx related event types */
 enum mesh_trans_tx_event_type {
-  mesh_trans_tx_event_obo_ack /**< OBO acknowledgement (friend) */
+  mesh_trans_tx_event_obo_ack, /**< OBO acknowledgement (friend) */
+  mesh_trans_tx_event_sdu_send_started, /**< Segmented TX started */
+  mesh_trans_tx_event_sdu_send_completed, /**< TX completed */
+  mesh_trans_tx_event_sdu_send_failed, /**< TX Failed */
 };
 
 /** Transport layer Tx related event reporting structure */
@@ -370,6 +375,8 @@ typedef struct {
     } obo_ack; /**< On-behalf-of acknowledgement received */
   };
 } mesh_trans_tx_event_t;
+
+typedef uint8_t mesh_uuid_t[16]; /**< UUID */
 
 /** Callback for events related to transport layer sending */
 typedef void (*mesh_trans_tx_event_cb)(mesh_trans_tx_event_t *event,
@@ -438,10 +445,11 @@ typedef void (*mesh_gatt_cb)(mesh_gatt_handle_t handle,
 
 /** Mesh AES cryptographic key type */
 typedef enum {
-  MESH_CRYPTO_KEY_NET = 0, /**< Network key */
-  MESH_CRYPTO_KEY_APP, /**< Application key */
-  MESH_CRYPTO_KEY_DEV, /**< Device key */
-  MESH_CRYPTO_KEY_NONE, /**< AES key with no mesh context */
+  MESH_CRYPTO_KEY_NET = 0, /**< 128 bit network key */
+  MESH_CRYPTO_KEY_APP, /**< 128 bit application key */
+  MESH_CRYPTO_KEY_DEV, /**< 128 bit device key */
+  MESH_CRYPTO_KEY_NONE, /**< 128 bit AES key with no mesh context */
+  MESH_CRYPTO_KEY_NONE_256, /**< 256 bit AES key with no mesh context */
 } mesh_crypto_key_type_t;
 
 /** Key refresh phase */
@@ -461,14 +469,14 @@ typedef uint16_t mesh_crypto_key_index_t;
 /** Mesh AES cryptographic key length */
 #define MESH_CRYPTO_KEY_LEN 16
 
+/** Mesh AES 256 bit cryptographic key length */
+#define MESH_CRYPTO_KEY_256_LEN 32
+
 /** Mesh AES cryptographic key opaque structure */
 struct mesh_crypto_key;
 
 /** Mesh AES cryptographic key handle */
 typedef struct mesh_crypto_key mesh_crypto_key_t;
-
-/** Mesh AES cryptographic MAC opaque structure */
-struct mesh_crypto_mac;
 
 /** Mesh AES MAC data maximum length */
 #define MESH_CRYPTO_MAC_LEN 16
@@ -480,6 +488,25 @@ struct mesh_crypto_mac {
 
 /** Mesh AES cryptographic MAC type */
 typedef struct mesh_crypto_mac mesh_crypto_mac_t;
+
+/** Mesh HMAC-SHA-256 data length */
+#define MESH_CRYPTO_HMAC_SHA_256_LEN 32
+
+/** Mesh HMAC-SHA-256 structure */
+struct  mesh_crypto_hmac_sha_256 {
+  uint8_t data[MESH_CRYPTO_HMAC_SHA_256_LEN]; /**< HMAC-SHA-256 data */
+};
+
+/** Mesh HMAC-SHA-256 type */
+typedef struct mesh_crypto_hmac_sha_256 mesh_crypto_hmac_sha_256_t;
+
+/** Mesh SHA-1 data length */
+#define MESH_CRYPTO_SHA_1_LEN 20
+
+/** Mesh SHA-1 MAC type */
+typedef struct {
+  uint8_t data[MESH_CRYPTO_SHA_1_LEN]; /**< SHA-1 digest */
+} mesh_crypto_sha1_t;
 
 /** Mesh elliptic curve cryptographic public key length */
 #define MESH_CRYPTO_EC_PUBLIC_KEY_LEN 64
@@ -497,6 +524,9 @@ struct mesh_crypto_ecdh_secret;
 
 /** Mesh EC Diffie-Hellman shared secret handle */
 typedef struct mesh_crypto_ecdh_secret mesh_crypto_ecdh_secret_t;
+
+/** Mesh provisioning authentication data length */
+#define MESH_CRYPTO_AUTH_LEN 16
 
 /** Incoming packet */
 #define MESH_PACKET_DIR_IN      0
@@ -560,6 +590,8 @@ typedef enum {
 
 /** Use extended packet size instead of standard */
 #define MESH_MESSAGE_FLAG_EXTENDED 0x40
+/** long delay needed in sending two messages in reply that need to be sent in order */
+#define MESH_MESSAGE_FLAG_LONG_DELAY  0x80
 
 /** Bearer layer message sending callback signature
  *  When the bearer packet has been sent, the callback
@@ -1001,13 +1033,27 @@ typedef sl_status_t (*mesh_app_send_fn)(mesh_crypto_key_type_t app_key_type,
 typedef  enum {
   mesh_prov_capabilites_evt = 100,
   mesh_prov_provisioning_suspended_evt,
+  mesh_prov_provisioning_start_evt,
+  mesh_prov_rfu_1_evt,
+  mesh_prov_rfu_2_evt,
+  mesh_prov_rfu_3_evt,
+  mesh_prov_rfu_4_evt,
+  mesh_prov_rfu_5_evt,
 } mesh_prov_event_type_t;
+
 /**
  * reason code indicating why provisioning was suspended
  */
 typedef enum {
   mesh_prov_reason_capabilities = 0,
+  mesh_prov_reason_link_open = 1,
 } mesh_prov_suspension_reason_t;
+
+/** Suspend provisioning when Capabilities PDU has been received */
+#define MESH_PROV_SUSPENSION_FLAG_CAPABILITIES (1 << 0)
+
+/** Suspend provisioning when provisioning session is open */
+#define MESH_PROV_SUSPENSION_FLAG_LINK_OPEN (1 << 1)
 
 /**
  * call back to carry events
@@ -1016,5 +1062,4 @@ typedef void (*provisioner_event_handler_cb)(mesh_prov_event_type_t event_type,
                                              const uint8_t *uuid,
                                              uint8_t len,
                                              const uint8_t *data);
-
 #endif

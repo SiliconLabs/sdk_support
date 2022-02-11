@@ -37,6 +37,11 @@ requires:
   - name: printf_integration
 recommends:
   - id: printf
+library:
+  - system: pthread
+    condition:
+      - linux
+      - device_host
 template_file:
   - path: template/sl_cli_command_table.c.jinja
   - path: template/sl_cli_command_table.html.jinja
@@ -50,7 +55,7 @@ template_contribution:
       event: service_init
       include: sl_cli_instances.h
       handler: sl_cli_instances_init
-    priority: 1
+    priority: 5
   - name: event_handler
     value:
       event: service_process_action

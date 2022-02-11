@@ -10,17 +10,19 @@ config_file:
   - path: "config/sl_bluetooth_connection_config.h"
 requires:
   - name: "bluetooth_controller"
+  - name: "bluetooth_feature_connection_creation"
 provides:
   - name: "bluetooth_feature_connection"
-validation_helper:
-  - path: "component/bluetooth_feature_connection_validate.py"
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_connection
   - name: bluetooth_controller_init
     value:
       include: "sl_bluetooth_connection_config.h"
+      function: sl_btctrl_init_conn()
+    priority: 5
   - name: bluetooth_bgapi_class
     value:
       class: "connection"
     priority: 4
+

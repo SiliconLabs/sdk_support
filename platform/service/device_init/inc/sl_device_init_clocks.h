@@ -86,6 +86,9 @@
  * used as the clock source for low frequency clock trees.
  * Otherwise, the **LFRCO** oscillator is used.
  *
+ * @note This module has a limited configurability. Users can override the code
+ *       based on the project ask.
+ *
  * @{
  */
 

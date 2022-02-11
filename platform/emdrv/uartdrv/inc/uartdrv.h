@@ -39,7 +39,9 @@
 #endif
 
 #include "em_device.h"
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
 #include "em_usart.h"
+#endif
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
 #include "em_leuart.h"
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
@@ -126,7 +128,9 @@ typedef enum UARTDRV_AbortType{
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 /// Type of a UART peripheral
 typedef enum UARTDRV_UartType{
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
   uartdrvUartTypeUart = 0,         ///< USART/UART peripheral
+#endif
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0)
   uartdrvUartTypeLeuart = 1         ///< LEUART peripheral
 #elif (defined(EUART_COUNT) && (EUART_COUNT > 0)) || (defined(EUSART_COUNT) && (EUSART_COUNT > 0))
@@ -180,7 +184,7 @@ typedef struct {
   UARTDRV_Buffer_t fifo[1];                ///< FIFO of queued data. Actual size varies.
 } UARTDRV_Buffer_FifoQueue_t;
 
-/// Macros to define FIFO and buffer queues. typedef can't be used becuase the size
+/// Macros to define FIFO and buffer queues. typedef can't be used because the size
 /// of the FIFO array in the queues can change.
 #define DEFINE_BUF_QUEUE(qSize, qName) \
   typedef struct {                     \
@@ -198,6 +202,7 @@ typedef struct {
     .size = qSize,                     \
   }
 
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
 /// A UART driver instance initialization structure.
 /// Contains a number of UARTDRV configuration options.
 /// It is required for driver instance initialization.
@@ -242,6 +247,7 @@ typedef struct {
 /// @deprecated This structure is deprecated. Use UARTDRV_InitUart_t instead.
 typedef UARTDRV_InitUart_t UARTDRV_Init_t;
 /// @endcond
+#endif
 
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
 /// LEUART driver instance initialization structure.
@@ -305,7 +311,9 @@ typedef struct {
 typedef struct UARTDRV_HandleData{
   /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
   union {
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
     USART_TypeDef * uart;
+#endif
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
     LEUART_TypeDef * leuart;
 #endif
@@ -313,7 +321,7 @@ typedef struct UARTDRV_HandleData{
     EUSART_TypeDef * euart;
 #endif
   } peripheral;
-#if defined(_GPIO_USART_ROUTEEN_MASK) || defined(_GPIO_EUART_ROUTEEN_MASK)
+#if defined(_GPIO_USART_ROUTEEN_MASK) || defined(_GPIO_EUART_ROUTEEN_MASK) || defined(_GPIO_EUSART_ROUTEEN_MASK)
   uint8_t                    uartNum;           // UART instance number
 #endif
   unsigned int               txDmaCh;           // A DMA ch assigned to Tx
@@ -354,8 +362,10 @@ typedef struct UARTDRV_HandleData{
 /// Handle pointer
 typedef UARTDRV_HandleData_t * UARTDRV_Handle_t;
 
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
 Ecode_t UARTDRV_InitUart(UARTDRV_Handle_t handle,
                          const UARTDRV_InitUart_t * initData);
+#endif
 
 #if defined(LEUART_COUNT) && (LEUART_COUNT > 0) && !defined(_SILICON_LABS_32B_SERIES_2)
 Ecode_t UARTDRV_InitLeuart(UARTDRV_Handle_t handle,
@@ -446,10 +456,12 @@ Ecode_t UARTDRV_FlowControlIgnoreRestrain(UARTDRV_Handle_t handle);
  *    @ref ECODE_EMDRV_UARTDRV_OK on success. On failure, an appropriate
  *    UARTDRV @ref Ecode_t is returned.
  ******************************************************************************/
+#if (defined(UART_COUNT) && (UART_COUNT > 0)) || (defined(USART_COUNT) && (USART_COUNT > 0))
 __STATIC_INLINE Ecode_t UARTDRV_Init(UARTDRV_Handle_t handle, UARTDRV_InitUart_t *initData)
 {
   return UARTDRV_InitUart(handle, initData);
 }
+#endif
 
 /// Set to 1 to include flow control support.
 /// @deprecated EMDRV_UARTDRV_HW_FLOW_CONTROL_ENABLE changed to

@@ -120,7 +120,7 @@ typedef struct {
   uint16_t version;
 
 #if SL_EMBER_BOOTLOADER_TYPE == SL_EMBER_BOOTLOADER_TYPE_APPLICATION
-  /** A bitmask describing the capabilites of this particular external EEPROM */
+  /** A bitmask describing the capabilities of this particular external EEPROM */
   uint16_t capabilitiesMask;
 
   /** Maximum time it takes to erase a page. (in 1024Hz Milliseconds) */
@@ -286,7 +286,7 @@ int32_t bootloader_init(void);
 
 /***************************************************************************//**
  * De-initialize components of the bootloader that were previously initialized.
- * For application bootloaders, this powers down the external serial memory if 
+ * For application bootloaders, this powers down the external serial memory if
  * supported and de-initializes the serial peripheral used for communication.
  *
  * @return Error code. @ref BOOTLOADER_OK on success, else error code in
@@ -295,12 +295,12 @@ int32_t bootloader_init(void);
 int32_t bootloader_deinit(void);
 
 /***************************************************************************//**
- * Reboot into the bootloader to install something.
+ * Reboot into the bootloader to perform an install.
  *
- * If there is a storage plugin and a slot is marked for bootload, install
+ * If there is a storage component and a slot is marked for bootload, install
  * the image in that slot after verifying it.
  *
- * If a communication plugin is present, open the communication channel and
+ * If a communication component is present, open the communication channel and
  * receive an image to be installed.
  ******************************************************************************/
 void bootloader_rebootAndInstall(void);

@@ -343,6 +343,8 @@ RAIL_Status_t RAIL_IEEE802154_Init(RAIL_Handle_t railHandle,
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle);
 
@@ -357,6 +359,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadio(RAIL_Handle_t railHandle);
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDiv(RAIL_Handle_t railHandle);
 
@@ -372,6 +376,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDiv(RAIL_Handle_t railHandle);
  * the place of calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(RAIL_Handle_t railHandle);
 
@@ -386,6 +392,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoex(RAIL_Handle_t railHand
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoex(RAIL_Handle_t railHandle);
 
@@ -400,6 +408,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoex(RAIL_Handle_t railHandle);
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioFem(RAIL_Handle_t railHandle);
 
@@ -415,6 +425,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioFem(RAIL_Handle_t railHandle);
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivFem(RAIL_Handle_t railHandle);
 
@@ -430,6 +442,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivFem(RAIL_Handle_t railHandl
  * calling \ref RAIL_ConfigChannels. After this call,
  * channels 11-26 will be available, giving the frequencies of those channels
  * on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoexFem(RAIL_Handle_t railHandle);
 
@@ -445,8 +459,28 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCoexFem(RAIL_Handle_t railHandle)
  * It takes the place of calling \ref RAIL_ConfigChannels.
  * After this call, channels 11-26 will be available, giving the frequencies of
  * those channels on channel page 0, as defined by IEEE 802.15.4-2011 section 8.1.2.2.
+ *
+ * @note This call implicitly disables all \ref RAIL_IEEE802154_GOptions_t.
  */
 RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railHandle);
+
+/**
+ * Configures the radio for 2.4GHz 802.15.4 operation with custom
+ * settings. This enables better interoperability with some proprietary
+ * PHYs, but doesn't guarantee datasheet performance.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for 2.4GHz operation with
+ * custom settings. It replaces needing to call
+ * \ref RAIL_ConfigChannels.
+ * Do not call this function unless instructed by Silicon Labs.
+ *
+ * @note  This feature is only available on platforms where
+ * \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY is true.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioCustom1(RAIL_Handle_t railHandle);
 
 /**
  * Configure the radio for SubGHz GB868 863 MHz 802.15.4 operation.
@@ -460,6 +494,8 @@ RAIL_Status_t RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem(RAIL_Handle_t railH
  * and 30 -- logical channels 0x80..0x9A, 0xA0..0xA8, 0xC0..0xDA, respectively)
  * will be available, as defined by Rev 22 of the Zigbee Specification, 2017
  * document 05-3474-22, section D.10.2.1.3.2.
+ *
+ * @note This call implicitly enables \ref RAIL_IEEE802154_G_OPTION_GB868.
  */
 RAIL_Status_t RAIL_IEEE802154_ConfigGB863MHzRadio(RAIL_Handle_t railHandle);
 
@@ -474,8 +510,69 @@ RAIL_Status_t RAIL_IEEE802154_ConfigGB863MHzRadio(RAIL_Handle_t railHandle);
  * After this call, GB868 channels in the 915 MHz band (channel page 31 --
  * logical channels 0xE0..0xFA) will be available, as defined by Rev 22 of
  * the Zigbee Specification, 2017 document 05-3474-22, section D.10.2.1.3.2.
+ *
+ * @note This call implicitly enables \ref RAIL_IEEE802154_G_OPTION_GB868.
  */
 RAIL_Status_t RAIL_IEEE802154_ConfigGB915MHzRadio(RAIL_Handle_t railHandle);
+
+/**
+ * @enum RAIL_IEEE802154_OFDMOption_t
+ * @brief OFDM options for SUN OFDM phy.
+ */
+RAIL_ENUM(RAIL_IEEE802154_OFDMOption_t) {
+  RAIL_IEEE802154_OFDMOption1 = 1,
+  RAIL_IEEE802154_OFDMOption2,
+  RAIL_IEEE802154_OFDMOption3,
+  RAIL_IEEE802154_OFDMOption4,
+  RAIL_IEEE802154_OFDMOptionCount
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_IEEE802154_OFDMOption1 ((RAIL_IEEE802154_OFDMOption_t) RAIL_IEEE802154_OFDMOption1)
+#define RAIL_IEEE802154_OFDMOption2 ((RAIL_IEEE802154_OFDMOption_t) RAIL_IEEE802154_OFDMOption2)
+#define RAIL_IEEE802154_OFDMOption3 ((RAIL_IEEE802154_OFDMOption_t) RAIL_IEEE802154_OFDMOption3)
+#define RAIL_IEEE802154_OFDMOption4 ((RAIL_IEEE802154_OFDMOption_t) RAIL_IEEE802154_OFDMOption4)
+#define RAIL_IEEE802154_OFDMOptionCount ((RAIL_IEEE802154_OFDMOption_t) RAIL_IEEE802154_OFDMOptionCount)
+#endif // DOXYGEN_SHOULD_SKIP_THIS
+
+/**
+ * Configure the radio for a SubGHz 863-876 MHz SUN OFDM PHY on a given option.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] ofdmOption The ofdm option to configure.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for a specific option of a 863-876 MHz SUN OFDM PHY
+ * as defined by IEEE 802.15.4-2020 section 20.
+ * There are four OFDM options, referenced in \ref RAIL_IEEE802154_OFDMOption_t.
+ * They offer various data rates as defined by IEEE 802.15.4-2020 section 20.3
+ * on table 20-10.
+ * This function takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels on 863 MHz to 876 MHz band will be available,
+ * as defined by Rev 1 VA1 of the Wi-SUN PHY Technical Profile Specification
+ * 09/06/2020, section 5.4 table 7.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config863MHzSUNOFDMOptRadio(RAIL_Handle_t railHandle, RAIL_IEEE802154_OFDMOption_t ofdmOption);
+
+/**
+ * Configure the radio for a SubGHz 902-928 MHz SUN OFDM PHY on a given option.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] ofdmOption The ofdm option to configure.
+ * @return A status code indicating success of the function call.
+ *
+ * This initializes the radio for a specific option of a 902-928 MHz SUN OFDM PHY
+ * as defined by IEEE 802.15.4-2020 section 20.
+ * There are four OFDM options, referenced in \ref RAIL_IEEE802154_OFDMOption_t.
+ * They offer various data rates as defined by IEEE 802.15.4-2020 section 20.3
+ * on table 20-10.
+ * This function takes the place of calling \ref RAIL_ConfigChannels.
+ * After this call, channels on 902 MHz to 928 MHz band will be available,
+ * as defined by Rev 1 VA1 of the Wi-SUN PHY Technical Profile Specification
+ * 09/06/2020, section 5.4 table 7.
+ */
+RAIL_Status_t RAIL_IEEE802154_Config902MHzSUNOFDMOptRadio(RAIL_Handle_t railHandle, RAIL_IEEE802154_OFDMOption_t ofdmOption);
 
 /**
  * De-initialize IEEE802.15.4 hardware acceleration.
@@ -559,6 +656,70 @@ RAIL_ENUM(RAIL_IEEE802154_PtiRadioConfig_t) {
    * External 915MHz Zigbee R23 802.15.4 NA radio configuration.
    */
   RAIL_IEEE802154_PTI_RADIO_CONFIG_915MHZ_R23_NA_EXT = 0x97U,
+  /**
+   * 863MHz SUN OFDM Option 1 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT1_863MHZ = 0x42,
+  /**
+   * 902MHz SUN OFDM Option 1 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT1_902MHZ = 0x43,
+  /**
+   * 863MHz SUN OFDM Option 2 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT2_863MHZ = 0x52,
+  /**
+   * 902MHz SUN OFDM Option 2 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT2_902MHZ = 0x53,
+  /**
+   * 863MHz SUN OFDM Option 3 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT3_863MHZ = 0x62,
+  /**
+   * 902MHz SUN OFDM Option 3 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT3_902MHZ = 0x63,
+  /**
+   * 863MHz SUN OFDM Option 4 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT4_863MHZ = 0x72,
+  /**
+   * 902MHz SUN OFDM Option 4 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OFDM_OPT4_902MHZ = 0x73,
+  /**
+   * 868MHz SUN OQPSK 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OQPSK_868MHZ = 0x44,
+  /**
+   * 915MHz SUN OQPSK 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_OQPSK_915MHZ = 0x45,
+  /**
+   * 863MHz SUN FSK FEC 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_FEC_863MHZ = 0x46,
+  /**
+   * 902MHz SUN FSK FEC 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_FEC_902MHZ = 0x47,
+  /**
+   * 863MHz SUN FSK NO FEC 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_NOFEC_863MHZ = 0x56,
+  /**
+   * 902MHz SUN FSK NO FEC 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_SUN_FSK_NOFEC_902MHZ = 0x57,
+  /**
+   * 868MHz Legacy OQPSK 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_LEG_OQPSK_868MHZ = 0x48,
+  /**
+   * 915MHz Legacy OQPSK 802.15.4 radio configuration.
+   */
+  RAIL_IEEE802154_PTI_RADIO_CONFIG_LEG_OQPSK_915MHZ = 0x49
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -815,6 +976,10 @@ RAIL_Status_t RAIL_IEEE802154_ConfigEOptions(RAIL_Handle_t railHandle,
 RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
   /** Shift position of \ref RAIL_IEEE802154_G_OPTION_GB868 bit. */
   RAIL_IEEE802154_G_OPTION_GB868_SHIFT = 0,
+  /** Shift position of \ref RAIL_IEEE802154_G_OPTION_DYNFEC bit. */
+  RAIL_IEEE802154_G_OPTION_DYNFEC_SHIFT,
+  /** Shift position of \ref RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH bit. */
+  RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH_SHIFT,
 };
 
 /** A value representing no options enabled. */
@@ -857,6 +1022,24 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
  *   packet's PHY header Data Whitening flag.
  */
 #define RAIL_IEEE802154_G_OPTION_GB868 (1UL << RAIL_IEEE802154_G_OPTION_GB868_SHIFT)
+/**
+ * An option to enable/disable 802.15.4G dynamic FEC feature (SUN FSK only).
+ * The syncWord, called start-of-frame delimiter (SFD) in the 15.4 spec, indicates whether
+ * the rest of the packet is FEC encoded or not. This feature requires per-packet
+ * dual syncWord detection and specific receiver pausing.
+ * Note that this feature is only available on platforms where
+ * \ref RAIL_IEEE802154_SUPPORTS_G_DYNFEC is true.
+ */
+#define RAIL_IEEE802154_G_OPTION_DYNFEC (1UL << RAIL_IEEE802154_G_OPTION_DYNFEC_SHIFT)
+/**
+ * An option to enable/disable Wi-SUN Mode Switch feature.
+ * This feature consists in switching to a new PHY mode with a higher rate typically,
+ * by sending/receiving a specific Mode Switch packet that indicates the incoming new PHY mode.
+ * The Mode Switch packet is an FSK-modulated 2-byte PHY Header with no payload.
+ * Since this feature relies on specific receiver pausing, note that it is only available
+ * on platforms where \ref RAIL_IEEE802154_SUPPORTS_G_DYNFEC is true.
+ */
+#define RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH (1UL << RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH_SHIFT)
 
 /** A value representing all possible options. */
 #define RAIL_IEEE802154_G_OPTIONS_ALL 0xFFFFFFFFUL
@@ -879,6 +1062,34 @@ RAIL_ENUM_GENERIC(RAIL_IEEE802154_GOptions_t, uint32_t) {
 RAIL_Status_t RAIL_IEEE802154_ConfigGOptions(RAIL_Handle_t railHandle,
                                              RAIL_IEEE802154_GOptions_t mask,
                                              RAIL_IEEE802154_GOptions_t options);
+
+/**
+ * @struct RAIL_IEEE802154_ModeSwitchPhr_t
+ * @brief A structure containing the PHYModeID value and the corresponding mode
+ *   switch PHR as defined in Wi-SUN spec.
+ *   These structures are usually generated by the radio configurator.
+ */
+typedef struct RAIL_IEEE802154_ModeSwitchPhr {
+  uint8_t phyModeId; /**< PHY mode Id */
+  uint16_t phr;      /**< Corresponding Mode Switch PHY header */
+} RAIL_IEEE802154_ModeSwitchPhr_t;
+
+/**
+ * Compute channel to switch to given a targeted PhyMode ID.
+ * in the context of Wi-SUN mode switching.
+ *
+ * @param[in] railHandle A handle of RAIL instance.
+ * @param[in] newPhyModeId A targeted PhyMode ID.
+ * @param[out] pChannel A pointer to the channel to switch to.
+ * @return A status code indicating success of the function call.
+ *
+ * This function will fail if the targeted PhyModeID is the same as the
+ * current PhyMode ID, or if called on a platform that lacks
+ * \ref RAIL_IEEE802154_SUPPORTS_G_MODESWITCH.
+ */
+RAIL_Status_t RAIL_IEEE802154_ComputeChannelFromPhyModeId(RAIL_Handle_t railHandle,
+                                                          uint8_t newPhyModeId,
+                                                          uint16_t *pChannel);
 
 /// When receiving packets, accept 802.15.4 BEACON frame types.
 #define RAIL_IEEE802154_ACCEPT_BEACON_FRAMES       (0x01)
@@ -1103,6 +1314,109 @@ uint8_t RAIL_IEEE802154_ConvertRssiToLqi(uint8_t origLqi, int8_t rssiDbm);
  *   sensitivity range.
  */
 uint8_t RAIL_IEEE802154_ConvertRssiToEd(int8_t rssiDbm);
+
+/**
+ * @enum RAIL_IEEE802154_CcaMode_t
+ * @brief Available CCA modes.
+ */
+RAIL_ENUM(RAIL_IEEE802154_CcaMode_t) {
+  /**
+   * RSSI based CCA. CCA shall report a busy medium upon detecting any energy
+   * above \ref RAIL_CsmaConfig_t.ccaThreshold.
+   */
+  RAIL_IEEE802154_CCA_MODE_RSSI = 0,
+  /**
+   * Signal Identifier based CCA. CCA shall report a busy medium only upon the
+   * detection of a signal compliant with this standard with the same modulation
+   * and spreading characteristics of the PHY that is currently in use.
+   */
+  RAIL_IEEE802154_CCA_MODE_SIGNAL,
+  /**
+   * RSSI or signal identifier based CCA. CCA shall report a busy medium on
+   * either detecting any energy above \ref RAIL_CsmaConfig_t.ccaThreshold
+   * or detection of a signal compliant with this standard with the same
+   * modulation and spreading characteristics of the PHY that is currently in use.
+   */
+  RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI,
+  /**
+   * RSSI and signal identifier based CCA. CCA shall report a busy medium only
+   * on detecting any energy above \ref RAIL_CsmaConfig_t.ccaThreshold of a
+   * signal compliant with this standard with the same modulation and spreading
+   * characteristics of the PHY that is currently in use.
+   */
+  RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI,
+  /**
+   * ALOHA. Always transmit CCA=1. CCA shall always report an idle medium.
+   */
+  RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT
+};
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+// Self-referencing defines minimize compiler complaints when using RAIL_ENUM
+#define RAIL_IEEE802154_CCA_MODE_RSSI              ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_RSSI)
+#define RAIL_IEEE802154_CCA_MODE_SIGNAL            ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_SIGNAL)
+#define RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI    ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI)
+#define RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI   ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI)
+#define RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT   ((RAIL_IEEE802154_CcaMode_t)RAIL_IEEE802154_CCA_MODE_ALWAYS_TRANSMIT)
+#endif
+
+/**
+ * Configure signal identifier for 802.15.4 signal detection.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ *
+ * This features allows detection of 2.4Ghz 802.15.4 signal on air. This
+ * function must be called once before \ref RAIL_IEEE802154_EnableSignalIdentifier
+ * to configure signal identifier.
+ * Subsequent calls to this to function to reconfigure the signal identifier
+ * require a new call to \ref RAIL_IEEE802154_EnableSignalIdentifier() to
+ * re-enable the signal identifier.
+ *
+ * To enable event for signal detection \ref RAIL_ConfigEvents() must be called
+ * for enabling \ref RAIL_EVENT_SIGNAL_DETECTED.
+ *
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_IEEE802154_ConfigSignalIdentifier(RAIL_Handle_t railHandle);
+
+/**
+ * Enable or Disable signal identifier for 802.15.4 signal detection.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] enable Signal Identifer is enabled if true, disabled if false.
+ *
+ * \ref RAIL_IEEE802154_ConfigSignalIdentifier must be called once before calling
+ * this function to configure the signal identifier.
+ * Once a signal is detected signal identifier will be turned off
+ * and this function should be called to re-enable the signal identifier without
+ * needing to call \ref RAIL_IEEE802154_ConfigSignalIdentifier if the signal
+ * identifier is already configured.
+ *
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_IEEE802154_EnableSignalIdentifier(RAIL_Handle_t railHandle,
+                                                     bool enable);
+
+/**
+ * Set 802.15.4 CCA mode
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @param[in] ccaMode Mode of CCA operation.
+ *
+ * This function allows to set the CCA mode \ref RAIL_IEEE802154_CcaMode_t.
+ * If not called RAIL_IEEE802154_CCA_MODE_RSSI (RSSI based CCA) is used for CCA.
+ *
+ * In RAIL_IEEE802154_CCA_MODE_SIGNAL, RAIL_IEEE802154_CCA_MODE_SIGNAL_OR_RSSI and
+ * RAIL_IEEE802154_CCA_MODE_SIGNAL_AND_RSSI signal identifer is enabled and remains
+ * enabled to detect the signal.
+ *
+ * On platforms that don't support different CCA modes, a call to this function
+ * will do nothing.
+ *
+ * @return Status code indicating success of the function call.
+ */
+RAIL_Status_t RAIL_IEEE802154_ConfigCcaMode(RAIL_Handle_t railHandle,
+                                            const RAIL_IEEE802154_CcaMode_t ccaMode);
 
 /** @} */ // end of IEEE802.15.4
 

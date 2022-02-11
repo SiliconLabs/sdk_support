@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*            (c) 1995 - 2019 SEGGER Microcontroller GmbH             *
+*            (c) 1995 - 2021 SEGGER Microcontroller GmbH             *
 *                                                                    *
 *       www.segger.com     Support: support@segger.com               *
 *                                                                    *
@@ -42,14 +42,14 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       SystemView version: 3.10                                    *
+*       SystemView version: 3.30                                    *
 *                                                                    *
 **********************************************************************
 -------------------------- END-OF-HEADER -----------------------------
 
 File    : SEGGER_SYSVIEW.c
 Purpose : System visualization API implementation.
-Revision: $Rev: 17331 $
+Revision: $Rev: 22278 $
 
 Additional information:
   Packet format:
@@ -138,11 +138,13 @@ Additional information:
 **********************************************************************
 */
 
-#include "SEGGER_SYSVIEW_Int.h"
-#include "SEGGER_RTT.h"
+#define SEGGER_SYSVIEW_C  // For EXTERN statements in SEGGER_SYSVIEW.h
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include "SEGGER_SYSVIEW_Int.h"
+#include "SEGGER_RTT.h"
 
 /*********************************************************************
 *
@@ -162,6 +164,12 @@ Additional information:
 #else
   #define CHANNEL_ID_UP   _SYSVIEW_Globals.UpChannel
   #define CHANNEL_ID_DOWN _SYSVIEW_Globals.DownChannel
+#endif
+
+#if SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE
+  #if (SEGGER_SYSVIEW_RTT_BUFFER_SIZE % SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE)
+    #error "SEGGER_SYSVIEW_RTT_BUFFER_SIZE must be a multiple of SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE"
+  #endif
 #endif
 
 /*********************************************************************
@@ -249,6 +257,94 @@ static void _SendPacket(U8* pStartPacket, U8* pEndPacket, unsigned int EventId);
 */
 static const U8 _abSync[10] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
+#if SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE
+  #ifdef SEGGER_SYSVIEW_SECTION
+    //
+    // Alignment + special section required
+    //
+    #if (defined __GNUC__)
+      __attribute__ ((section (SEGGER_SYSVIEW_SECTION), aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE))) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((section (SEGGER_SYSVIEW_SECTION), aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE))) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __ICCARM__) || (defined __ICCRX__)
+      #pragma location=SEGGER_SYSVIEW_SECTION
+      #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+      static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        #pragma location=SEGGER_SYSVIEW_SECTION
+        #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+        static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __CC_ARM)
+      __attribute__ ((section (SEGGER_SYSVIEW_SECTION), aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE), zero_init)) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((section (SEGGER_SYSVIEW_SECTION), aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE), zero_init)) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #else
+      #error "Do not know how to place SystemView buffers in specific section"
+    #endif
+  #else
+    //
+    // Only alignment required
+    //
+    #if (defined __GNUC__)
+      __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE))) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE))) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __ICCARM__) || (defined __ICCRX__)
+      #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+      static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+        static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __CC_ARM)
+      __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE), zero_init)) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE), zero_init)) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #else
+      #error "Do not know how to align SystemView buffers to cache line size"
+    #endif
+  #endif
+#else
+  #ifdef SEGGER_SYSVIEW_SECTION
+    //
+    // Only special section required
+    //
+    #if (defined __GNUC__)
+      __attribute__ ((section (SEGGER_SYSVIEW_SECTION))) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((section (SEGGER_SYSVIEW_SECTION))) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __ICCARM__) || (defined __ICCRX__)
+      #pragma location=SEGGER_SYSVIEW_SECTION
+      static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        #pragma location=SEGGER_SYSVIEW_SECTION
+        static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined __CC_ARM)
+      __attribute__ ((section (SEGGER_SYSVIEW_SECTION), zero_init)) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        __attribute__ ((section (SEGGER_SYSVIEW_SECTION), zero_init)) static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #else
+      #error "Do not know how to place SystemView buffers in specific section"
+    #endif
+  #else
+    //
+    // Neither special section nor alignment required
+    //
+    static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+    #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+      static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+    #endif
+  #endif
+#endif
+
 #ifdef SEGGER_SYSVIEW_SECTION
   #if (defined __GNUC__)
     __attribute__ ((section (SEGGER_SYSVIEW_SECTION))) static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
@@ -272,10 +368,28 @@ static const U8 _abSync[10] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
     #endif
   #endif
 #else
+  #if SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE
+    #if (defined __GNUC__)
+      static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE] __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE)));
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        static char _DownBuffer[8] __attribute__ ((aligned (SEGGER_SYSVIEW_CPU_CACHE_LINE_SIZE)));  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #elif (defined(__ICCARM__))
+      #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+      static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
+      #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
+        #pragma data_alignment=SEGGER_RTT_CPU_CACHE_LINE_SIZE
+        static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      #endif
+    #else
+      #error "Don't know how to place _SEGGER_RTT, _acUpBuffer, _acDownBuffer cache-line aligned"
+    #endif
+  #else
     static char _UpBuffer  [SEGGER_SYSVIEW_RTT_BUFFER_SIZE];
     #if (SEGGER_SYSVIEW_POST_MORTEM_MODE != 1)
-    static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
+      static char _DownBuffer[8];  // Small, fixed-size buffer, for back-channel comms
     #endif
+  #endif
 #endif
 
 static SEGGER_SYSVIEW_GLOBALS _SYSVIEW_Globals;
@@ -385,11 +499,13 @@ static U8 *_EncodeStr(U8 *pPayload, const char *pText, unsigned int Limit) {
   // Compute string len
   //
   Len = 0;
-  while(*(pText + Len) != 0) {
-    Len++;
-  }
-  if (Len > Limit) {
-    Len = Limit;
+  if (pText != NULL) {
+    while(*(pText + Len) != 0) {
+      Len++;
+    }
+    if (Len > Limit) {
+      Len = Limit;
+    }
   }
   //
   // Write Len
@@ -480,6 +596,8 @@ static void _HandleIncomingPacket(void) {
       if (Status > 0) {
         SEGGER_SYSVIEW_SendModule(Cmd);
       }
+      break;
+    case SEGGER_SYSVIEW_COMMAND_ID_HEARTBEAT:
       break;
     default:
       if (Cmd >= 128) { // Unknown extended command. Dummy read its parameter.

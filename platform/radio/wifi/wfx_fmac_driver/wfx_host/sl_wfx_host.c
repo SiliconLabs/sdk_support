@@ -188,7 +188,10 @@ sl_status_t sl_wfx_host_allocate_buffer(void **buffer,
   }
   *buffer = Mem_DynPoolBlkGet(&host_context.buf_pool, &err);
   if (RTOS_ERR_CODE_GET(err) != RTOS_ERR_NONE) {
+#ifdef DEBUG
     printf("Mem_DynPoolBlkGet error control buffer\r\n");
+#endif
+    return SL_STATUS_ALLOCATION_FAILED;
   }
 
   return SL_STATUS_OK;

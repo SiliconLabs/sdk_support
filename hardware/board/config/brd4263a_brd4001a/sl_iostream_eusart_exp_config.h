@@ -58,11 +58,12 @@
 // <i> Default: eusartStopbits1
 #define SL_IOSTREAM_EUSART_EXP_STOP_BITS             eusartStopbits1
 
-// <o SL_IOSTREAM_EUSART_EXP_FLOW_CONTROL_TYPE> Hardware flow control
+// <o SL_IOSTREAM_EUSART_EXP_FLOW_CONTROL_TYPE> Flow control
 // <eusartHwFlowControlNone=> None
 // <eusartHwFlowControlCts=> CTS
 // <eusartHwFlowControlRts=> RTS
 // <eusartHwFlowControlCtsAndRts=> CTS/RTS
+// <uartFlowControlSoftware=> Software Flow control (XON/XOFF)
 // <i> Default: eusartHwFlowControlNone
 #define SL_IOSTREAM_EUSART_EXP_FLOW_CONTROL_TYPE     eusartHwFlowControlNone
 

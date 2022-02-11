@@ -118,6 +118,10 @@
 #define OS_CFG_TICK_EN OS_CFG_TASK_TICK_EN
 #endif
 
+#ifndef OS_CFG_ERRNO_EN
+#define OS_CFG_ERRNO_EN  0
+#endif
+
 #if (OS_CFG_TICK_EN == DEF_ENABLED)
 #include  <sl_sleeptimer.h>
 #endif
@@ -748,10 +752,7 @@ struct os_tcb {
 
   OS_TCB       *NextPtr;                                        ///< Pointer to next     TCB in the TCB list
   OS_TCB       *PrevPtr;                                        ///< Pointer to previous TCB in the TCB list
-
-#if ((OS_CFG_DBG_EN == DEF_ENABLED) || (OS_CFG_STAT_TASK_STK_CHK_EN == DEF_ENABLED) || (OS_CFG_TASK_STK_REDZONE_EN == DEF_ENABLED))
-  CPU_STK *StkBasePtr;                                          ///< Pointer to base address of stack
-#endif
+  CPU_STK      *StkBasePtr;                                     ///< Pointer to base address of stack
 
 #if defined(OS_CFG_TLS_TBL_SIZE) && (OS_CFG_TLS_TBL_SIZE > 0u)
   OS_TLS TLS_Tbl[OS_CFG_TLS_TBL_SIZE];
@@ -775,9 +776,7 @@ struct os_tcb {
   OS_MUTEX    *MutexGrpHeadPtr;                                 ///< Owned mutex group head pointer
 #endif
 
-#if ((OS_CFG_DBG_EN == DEF_ENABLED) || (OS_CFG_STAT_TASK_STK_CHK_EN == DEF_ENABLED) || (OS_CFG_TASK_STK_REDZONE_EN == DEF_ENABLED))
   CPU_STK_SIZE StkSize;                                         ///< Size of task stack (in number of stack elements)
-#endif
 
   OS_OPT       Opt;                                             ///< Task options as passed by OSTaskCreate()
 
@@ -864,6 +863,10 @@ struct os_tcb {
 
 #if (OS_CFG_TRACE_EN == DEF_ENABLED)
   CPU_INT16U TaskID;                                            ///< Unique ID for third-party debuggers and tracers.
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+  int local_errno;
 #endif
 };
 
@@ -1124,6 +1127,7 @@ extern CPU_STK *OSCfg_TmrTaskStk;
 
 #if (OS_CFG_TICK_EN == DEF_ENABLED)
 extern OS_RATE_HZ OS_CONST   OSCfg_TickRate_Hz;
+extern CPU_INT32U OS_SleeptimerFrequency_Hz;
 #endif
 
 extern CPU_INT32U OSDelayMaxMilli;

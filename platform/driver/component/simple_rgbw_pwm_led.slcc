@@ -9,8 +9,8 @@ description: >
 
   This component is instantiable, meaning that several named instances can be 
   created. For each instance a configuration is generated along with an 
-  initialization struct set according to this configuration. These instance
-  defines and variables are available in a generated header file, 
+  initialization struct set according to this configuration. These instances,
+  defines, and variables are available in a generated header file,
   sl_simple_rgbw_pwm_led_instances.h.
 
 
@@ -38,8 +38,6 @@ provides:
     allow_multiple: true
 requires:
   - name: simple_rgbw_pwm_led_core
-  - name: simple_rgbw_pwm_led_s2
-    condition: [device_series_2]
 template_contribution:
   - name: simple_rgbw_pwm_led_instance
     value: "{{instance}}"

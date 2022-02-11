@@ -80,12 +80,14 @@
   - name: device
   - name: device_series_2
   - name: device_sdid_200
+  - name: device_generic_family_efr32xg21
   - name: device_family_efr32mg21
   - name: device_cortexm
   - name: device_arm
   - name: cortexm33
   - name: armv8m.main
   - name: device_security_vault
+  - name: device_pa_10dbm
   - name: device_has_acmp
   - name: device_has_acmp0
   - name: device_has_acmp1

@@ -14,7 +14,5 @@ requires:
 template_contribution:
   - name: mbedtls_config
     value: MBEDTLS_ECP_DP_CURVE25519_ENABLED
-  - name: mbedtls_ecc_bits
-    value: 256
   - name: mbedtls_mpi_max
     value: 32

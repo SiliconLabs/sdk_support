@@ -66,9 +66,9 @@ static void sl_wfx_task_entry(void *p_arg)
   while (1) {
 #ifdef SLEEP_ENABLED
 #ifdef SL_WFX_USE_SPI
-    if (GPIO_PinInGet(SL_WFX_HOST_CFG_SPI_WIRQPORT, SL_WFX_HOST_CFG_SPI_WIRQPIN)) //wfx messages pending
+    if (GPIO_PinInGet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN)) //wfx messages pending
 #else
-    if (GPIO_PinInGet(SL_WFX_HOST_CFG_WIRQPORT, SL_WFX_HOST_CFG_WIRQPIN))
+    if (GPIO_PinInGet(SL_WFX_HOST_PINOUT_GPIO_WIRQ_PORT, SL_WFX_HOST_PINOUT_GPIO_WIRQ_PIN))
 #endif
     {
       OSFlagPost(&bus_events, SL_WFX_BUS_EVENT_FLAG_RX, OS_OPT_POST_FLAG_SET, &err);

@@ -31,11 +31,17 @@
     instance:
     - btn0
     - btn1
+  - id: usb_device_driver_dwc_otg_fs
 - template_contribution:
   - name: component_catalog
     value: wfx_board
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4321A"'
+  - name: SL_BOARD_REV
+    value: '"A01"'
 - tag:
   - board:pn:BRD4321
   - board:variant:A

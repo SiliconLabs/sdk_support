@@ -134,6 +134,15 @@ static uint32_t cmu_status;
  ******************************************************************************/
 void sli_power_manager_init_hardware(void)
 {
+  // Validate that HFXO auto-start and auto-select feature is disabled
+  // since they are not compatible with Power Manager
+#if defined(_CMU_HFXOCTRL_AUTOSTARTEM0EM1_MASK)
+  EFM_ASSERT((CMU->HFXOCTRL & _CMU_HFXOCTRL_AUTOSTARTEM0EM1_MASK) == 0);
+#endif
+#if defined(_CMU_HFXOCTRL_AUTOSTARTSELEM0EM1_MASK)
+  EFM_ASSERT((CMU->HFXOCTRL & _CMU_HFXOCTRL_AUTOSTARTSELEM0EM1_MASK) == 0);
+#endif
+
   // Initializes EMU (voltage scaling in EM2/3)
 #if defined(EMU_VSCALE_PRESENT)
   EMU_EM01Init_TypeDef em01_init = EMU_EM01INIT_DEFAULT;

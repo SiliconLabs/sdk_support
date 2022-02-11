@@ -58,11 +58,12 @@
 // <i> Default: eusartStopbits1
 #define SL_IOSTREAM_EUSART_VCOM_STOP_BITS             eusartStopbits1
 
-// <o SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE> Hardware flow control
+// <o SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE> Flow control
 // <eusartHwFlowControlNone=> None
 // <eusartHwFlowControlCts=> CTS
 // <eusartHwFlowControlRts=> RTS
 // <eusartHwFlowControlCtsAndRts=> CTS/RTS
+// <uartFlowControlSoftware=> Software Flow control (XON/XOFF)
 // <i> Default: eusartHwFlowControlNone
 #define SL_IOSTREAM_EUSART_VCOM_FLOW_CONTROL_TYPE     eusartHwFlowControlCtsAndRts
 
@@ -87,22 +88,22 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_IOSTREAM_EUSART_VCOM
 // $[EUSART_SL_IOSTREAM_EUSART_VCOM]
-#define SL_IOSTREAM_EUSART_VCOM_PERIPHERAL       EUSART1
-#define SL_IOSTREAM_EUSART_VCOM_PERIPHERAL_NO    1
+#define SL_IOSTREAM_EUSART_VCOM_PERIPHERAL       EUSART0
+#define SL_IOSTREAM_EUSART_VCOM_PERIPHERAL_NO    0
 
-// EUSART1 TX on PA08
+// EUSART0 TX on PA08
 #define SL_IOSTREAM_EUSART_VCOM_TX_PORT          gpioPortA
 #define SL_IOSTREAM_EUSART_VCOM_TX_PIN           8
 
-// EUSART1 RX on PA09
+// EUSART0 RX on PA09
 #define SL_IOSTREAM_EUSART_VCOM_RX_PORT          gpioPortA
 #define SL_IOSTREAM_EUSART_VCOM_RX_PIN           9
 
-// EUSART1 CTS on PB05
+// EUSART0 CTS on PB05
 #define SL_IOSTREAM_EUSART_VCOM_CTS_PORT         gpioPortB
 #define SL_IOSTREAM_EUSART_VCOM_CTS_PIN          5
 
-// EUSART1 RTS on PA00
+// EUSART0 RTS on PA00
 #define SL_IOSTREAM_EUSART_VCOM_RTS_PORT         gpioPortA
 #define SL_IOSTREAM_EUSART_VCOM_RTS_PIN          0
 

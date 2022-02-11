@@ -62,6 +62,17 @@ SL_ENUM_GENERIC(sl_board_oscillator_t, int) {
 };
 
 /***************************************************************************//**
+ * @brief Configure Virtual COM UART.
+ *
+ * @return Status code
+ * @retval SL_STATUS_OK VCOM was successfully enabled
+ * @retval SL_STATUS_FAIL Enabling VCOM failed
+ * @retval SL_STATUS_NOT_AVAILABLE VCOM control is not available on this board
+ * @retval SL_STATUS_NOT_SUPPORTED VCOM enabled was not configured
+ ******************************************************************************/
+sl_status_t sl_board_configure_vcom(void);
+
+/***************************************************************************//**
  * @brief Enable Virtual COM UART.
  *
  * @return Status code

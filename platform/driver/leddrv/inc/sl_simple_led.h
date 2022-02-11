@@ -29,7 +29,9 @@
 
 /***************************************************************************//**
  * @addtogroup simple_led Simple LED Driver
- * @brief Simple LED Driver
+ * @brief Simple LED Driver can be used to execute basic LED functionalities
+ *        such as on, off, toggle, or retrive the on/off status on Silicon Labs
+ *        devices. Subsequent sections provide more insight into this module.
  * @{
  ******************************************************************************/
 

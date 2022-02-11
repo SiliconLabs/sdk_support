@@ -60,6 +60,10 @@
 static sl_status_t usart_tx(void *context,
                             char c);
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+static void usart_tx_completed(void *context, bool enable);
+#endif
+
 static void usart_enable_rx(void *context);
 
 static sl_status_t usart_deinit(void *context);
@@ -83,7 +87,19 @@ sl_status_t sl_iostream_usart_init(sl_iostream_uart_t *iostream_uart,
   bool rts = false;
 #endif
 
-  status = sli_iostream_uart_context_init(iostream_uart, &usart_context->context, uart_config, usart_tx, usart_enable_rx, usart_deinit, 1, 1);
+  status = sli_iostream_uart_context_init(iostream_uart,
+                                          &usart_context->context,
+                                          uart_config,
+                                          usart_tx,
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+                                          usart_tx_completed,
+#else
+                                          NULL,
+#endif
+                                          usart_enable_rx,
+                                          usart_deinit,
+                                          1,
+                                          1);
   if (status != SL_STATUS_OK) {
     return status;
   }
@@ -223,14 +239,13 @@ void sl_iostream_usart_irq_handler(void *stream_context)
       USART_IntDisable(usart_context->usart, USART_IF_RXDATAV);
     }
   }
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   if (usart_context->usart->IF & USART_IF_TXC) {
-    bool idle;
     USART_IntClear(usart_context->usart, USART_IF_TXC);
-    USART_IntDisable(usart_context->usart, USART_IF_TXC);
-    idle = sli_uart_txc(stream_context);
-    if (idle == false) {
-      USART_IntEnable(usart_context->usart, USART_IF_TXC);
+    // Check if the Status register has the TXC flag as well since the flag will clean itself
+    // if other transmissions are queued contrary to the IF flag
+    if ((USART_StatusGet(usart_context->usart) & _USART_STATUS_TXC_MASK) != 0) {
+      sli_uart_txc(stream_context);
     }
   }
 #endif
@@ -250,11 +265,6 @@ static sl_status_t usart_tx(void *context,
 
   USART_Tx(usart_context->usart, (uint8_t)c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
-  // Enable TX interrupts
-  USART_IntEnable(usart_context->usart, USART_IF_TXC);
-#endif
-
 #if defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   /* Wait until transmit buffer is empty */
   while (!(USART_StatusGet(usart_context->usart) & USART_STATUS_TXBL)) ;
@@ -262,6 +272,26 @@ static sl_status_t usart_tx(void *context,
 
   return SL_STATUS_OK;
 }
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+/***************************************************************************//**
+ * Enable/Disable USART Tx Complete (TXC) Interrupt
+ ******************************************************************************/
+static void usart_tx_completed(void *context, bool enable)
+{
+  (void)context;
+  (void)enable;
+
+  sl_iostream_usart_context_t *usart_context = (sl_iostream_usart_context_t *)context;
+  if (enable) {
+    USART_IntEnable(usart_context->usart, USART_IF_TXC);
+  } else {
+    USART_IntDisable(usart_context->usart, USART_IF_TXC);
+    USART_IntClear(usart_context->usart, USART_IF_TXC);
+  }
+}
+#endif
+
 /***************************************************************************//**
  * Enable ISR on Rx
  ******************************************************************************/
@@ -288,10 +318,10 @@ static sl_status_t usart_deinit(void *context)
 
 #if (_SILICON_LABS_32B_SERIES > 0)
   // De-Configure Flow Control GPIOs
-  if (usart_context->flags && SLI_IOSTREAM_UART_FLAG_CTS) {
+  if (usart_context->flags & SLI_IOSTREAM_UART_FLAG_CTS) {
     GPIO_PinModeSet(usart_context->cts_port, usart_context->cts_pin, gpioModeDisabled, 0);
   }
-  if (usart_context->flags && SLI_IOSTREAM_UART_FLAG_RTS) {
+  if (usart_context->flags & SLI_IOSTREAM_UART_FLAG_RTS) {
     GPIO_PinModeSet(usart_context->rts_port, usart_context->rts_pin, gpioModeDisabled, 0);
   }
 #endif

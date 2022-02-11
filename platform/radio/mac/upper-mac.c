@@ -16,7 +16,9 @@
  ******************************************************************************/
 
 #include PLATFORM_HEADER
-
+#ifdef UNIFIED_MAC_SCRIPTED_TEST
+#define EVENT_CONTROL_SYSTEM
+#endif
 #include "hal/hal.h"
 #include "event_control/event.h"
 #include "core/ember-stack.h"
@@ -30,7 +32,7 @@
 #include "mac-header.h"
 #include "mac-command.h"
 #include "mac-child.h"
-#include "multi-network.h"
+#include "mac-multi-network.h"
 #include "indirect-queue.h"
 
 // On Lynx (MG22), the TX buffer needs to be 32 bit aligned
@@ -52,6 +54,10 @@ static uint8_t mac_outgoing_sequence_number = 0;
 uint8_t emGetActiveAlwaysOnNetworkIndex(void);
 extern uint8_t emZcAndZrCount;
 #endif
+
+// mfglib related external variables
+extern uint8_t emMfglibMode;
+extern void (*emMfglibRxCallback)(uint8_t *packet, uint8_t linkQuality, int8_t rssi);
 
 // To use either negotiated power by link power delta or fixed power value provided by user
 // while forming/joining a network for packet transmissions on subghz interface.
@@ -92,7 +98,7 @@ sl_status_t sl_mac_init(uint8_t mac_index)
     state->nwk_radio_parameters[i].local_node_id = EMBER_USE_LONG_ADDRESS;
     state->nwk_radio_parameters[i].parent_node_id = EMBER_USE_LONG_ADDRESS;
     state->nwk_radio_parameters[i].pan_id = EMBER_BROADCAST_PAN_ID;
-    state->nwk_radio_parameters[i].rx_on_when_idle = false;
+    state->nwk_radio_parameters[i].rx_state = SL_MAC_RX_OFF;
   }
   MEMSET(state->outgoing_flat_packet, 0, MAX_FLAT_PACKET_SIZE);
   state->unsent_message_count = 0;
@@ -154,7 +160,7 @@ static uint8_t concurrent_rx_on_nwks(uint8_t mac_index)
   uint8_t rx_on_count = 0;
   for (uint8_t i = 0; i < SL_MAC_MAX_SUPPORTED_NETWORKS; i++) {
     sl_mac_radio_parameters_t *nwk = state->nwk_radio_parameters + i;
-    if (nwk->rx_on_when_idle) {
+    if (nwk->rx_state == SL_MAC_RX_ON_WHEN_IDLE) {
       rx_on_count++;
     }
   }
@@ -170,8 +176,8 @@ sl_status_t sl_mac_set_nwk_radio_parameters(uint8_t mac_index, uint8_t nwk_index
 
   // check rx_on_when_idle
   for (uint8_t i = 0; i < SL_MAC_MAX_SUPPORTED_NETWORKS; i++) {
-    if (s.nwk_radio_parameters[i].rx_on_when_idle
-        && radio_parameters->rx_on_when_idle
+    if ((s.nwk_radio_parameters[i].rx_state == SL_MAC_RX_ON_WHEN_IDLE)
+        && (radio_parameters->rx_state == SL_MAC_RX_ON_WHEN_IDLE)
         && (i != nwk_index)) {
       // mn-ipd-esi fails without the last condition above,
       //  may be instead we should turn off rx_on_when_idle for old network index when we change the always_on_nwk_index
@@ -250,6 +256,19 @@ static void set_lower_mac_address_parameters(uint8_t mac_index,
   sl_mac_lower_mac_set_eui64(mac_index, radio_index, nwk_params->local_eui);
 }
 
+static sl_status_t set_lower_mac_rx_duty_cycling(uint8_t mac_index,
+                                                 sl_mac_radio_parameters_t *radio_params)
+{
+  sl_status_t p_status = SL_STATUS_FAIL;
+
+  if ( sl_mac_lower_mac_is_idle(mac_index)
+       && (p_status = sl_mac_enable_duty_cycling()) != SL_STATUS_OK) {
+    return p_status;
+  }
+
+  return SL_STATUS_OK;
+}
+
 static sl_status_t set_lower_mac_radio_parameters(uint8_t mac_index,
                                                   sl_mac_radio_parameters_t *radio_params)
 {
@@ -301,7 +320,7 @@ sl_status_t sli_set_lower_mac_params_to_concurrent_networks(uint8_t mac_index)
   // iterate through all of the always on networks and push the address params down
   for (uint8_t i = 0; i < SL_MAC_MAX_SUPPORTED_NETWORKS; i++) {
     nwk = state->nwk_radio_parameters + i;
-    if (nwk->rx_on_when_idle) {
+    if (nwk->rx_state == SL_MAC_RX_ON_WHEN_IDLE) {
       set_lower_mac_address_parameters(mac_index, i, nwk);
     }
   }
@@ -334,6 +353,26 @@ sl_status_t sli_set_lower_mac_params_to_current_network(uint8_t mac_index)
   set_lower_mac_address_parameters(mac_index, 0, current_nwk_radio_params);
 
   p_status = set_lower_mac_radio_parameters(mac_index, current_nwk_radio_params);
+
+  return p_status;
+}
+
+sl_status_t sli_enable_rx_duty_cycling(uint8_t mac_index)
+{
+  sl_mac_upper_mac_state_t *state = sl_mac_upper_mac_state + mac_index;
+#ifdef EMBER_MULTI_NETWORK_STRIPPED
+  sl_mac_radio_parameters_t *current_nwk_radio_params = state->nwk_radio_parameters;
+#else
+  sl_mac_radio_parameters_t *current_nwk_radio_params = state->nwk_radio_parameters + state->current_nwk;
+#endif
+
+  if (mac_index >= MAX_MAC_INDEX || state->current_nwk >= SL_MAC_MAX_SUPPORTED_NETWORKS) {
+    return SL_STATUS_FAIL;
+  }
+
+  sl_status_t p_status = SL_STATUS_FAIL;
+
+  p_status = set_lower_mac_rx_duty_cycling(mac_index, current_nwk_radio_params);
 
   return p_status;
 }
@@ -436,7 +475,53 @@ sl_status_t sl_mac_resume_operation(uint8_t mac_index)
 }
 
 // This event is used to defer the lower MAC idle notification.
+#ifndef EVENT_CONTROL_SYSTEM
 
+#ifdef MAC_DUAL_PRESENT
+void upperMacEventHandler0(EmberEvent *event);
+void upperMacEventHandler1(EmberEvent *event);
+EmberEvent emUpperMacEvents[2] = { {
+                                     { &emStackEventQueue,
+                                       upperMacEventHandler0,
+                                       emIsrEventMarker,
+                                       #ifndef EMBER_TEST
+                                       ""
+                                       #else
+                                       "upper MAC0"
+                                       #endif
+                                     },
+                                     NULL
+                                   },
+                                   {
+                                     {
+                                       &emStackEventQueue,
+                                       upperMacEventHandler1,
+                                       emIsrEventMarker,
+                                       #ifndef EMBER_TEST
+                                       ""
+                                       #else
+                                       "upper MAC1"
+                                       #endif
+                                     },
+                                     NULL
+                                   } };
+#else
+void upperMacEventHandler(EmberEvent *event);
+EmberEvent emUpperMacEvent = {
+  {
+    &emStackEventQueue,
+    upperMacEventHandler,
+    emIsrEventMarker,
+    #ifndef EMBER_TEST
+    ""
+    #else
+    "upper MAC"
+    #endif
+  },
+  NULL
+};
+#endif //MAC_DUAL_PRESENT
+#else //EVENT_CONTROL_SYSTEM
 #ifdef MAC_DUAL_PRESENT
 EmberEventControl emUpperMacEvents[2];
 #else
@@ -448,13 +533,19 @@ EmberEventData upperMacEvents[] =
   { NULL, NULL }       // terminator
 };
 #endif
+#endif//EVENT_CONTROL_SYSTEM
 
 static void mac_really_kickstart(uint8_t mac_index)
 {
+  if (emMfglibMode != 0U) {
+    // mfglib has hijacked the radio, so do nothing
+    return;
+  }
+
 #ifdef MAC_DUAL_PRESENT
-  emberEventControlSetInactive(emUpperMacEvents[MAC_INDEX_ARGUMENT_SOLO]);
+  sli_mac_inactivate_event(emUpperMacEvents[MAC_INDEX_ARGUMENT_SOLO]);
 #else
-  emberEventControlSetInactive(emUpperMacEvent);
+  sli_mac_inactivate_event(emUpperMacEvent);
 #endif
   if (sl_mac_lower_mac_is_idle(MAC_INDEX)) {
     // First we send out any polls that must transmit ASAP
@@ -499,6 +590,23 @@ static void mac_really_kickstart(uint8_t mac_index)
   }
 }
 
+#ifndef EVENT_CONTROL_SYSTEM
+#ifdef MAC_DUAL_PRESENT
+void upperMacEventHandler0(EmberEvent *event)
+{
+  mac_really_kickstart(0);
+}
+void upperMacEventHandler1(EmberEvent *event)
+{
+  mac_really_kickstart(1);
+}
+#else
+void upperMacEventHandler(EmberEvent *event)
+{
+  mac_really_kickstart(0);
+}
+#endif
+#else //EVENT_CONTROL_SYSTEM
 #ifdef MAC_DUAL_PRESENT
 void emUpperMacEventHandler0(void)
 {
@@ -514,13 +622,18 @@ void emUpperMacEventHandler(void)
 {
   mac_really_kickstart(0);
 }
+#endif //EVENT_CONTROL_SYSTEM
 
 void sl_mac_kickstart(uint8_t mac_index)
 {
 #ifdef MAC_DUAL_PRESENT
-  emberEventControlSetActive(emUpperMacEvents[MAC_INDEX_ARGUMENT_SOLO]);
+  if (!sli_mac_event_is_active(emUpperMacEvents[MAC_INDEX_ARGUMENT_SOLO])) {
+    sli_mac_activate_event(emUpperMacEvents[MAC_INDEX_ARGUMENT_SOLO]);
+  }
 #else
-  emberEventControlSetActive(emUpperMacEvent);
+  if (!sli_mac_event_is_active(emUpperMacEvent)) {
+    sli_mac_activate_event(emUpperMacEvent);
+  }
 #endif
 }
 
@@ -567,7 +680,8 @@ sl_status_t sl_mac_submit(uint8_t mac_index,
   }
 
   uint8_t index;
-  if ( s.mac_shutdown_callback != NULL
+  if ( emMfglibMode != 0U   // mfglib has hijacked the radio
+       || s.mac_shutdown_callback != NULL
        || (s.mac_is_shutdown && priority != TRANSMIT_PRIORITY_BYPASS_SHUTDOWN)) {
     return SL_STATUS_FAIL;
   }
@@ -618,14 +732,14 @@ static void send_frame(uint8_t mac_index)
   // Convert the packet and potential payload buffer to a flat buffer and
   // prepend the PHY header
   uint8_t mac_payload_offset = sl_mac_prepare_transmit(NWK_INDEX, packet, s.outgoing_flat_packet);
-  bool use_csma = true;
+  sl_mac_tx_options_bitmask_t tx_options = EMBER_MAC_USE_CSMA;
   if (s.nwk_radio_parameters[NWK_INDEX].prepare_tx_callback != NULL) {
-    use_csma = s.nwk_radio_parameters[NWK_INDEX].prepare_tx_callback(packet,
-                                                                     s.outgoing_flat_packet,
-                                                                     mac_payload_offset,
-                                                                     MAC_INDEX,
-                                                                     NWK_INDEX,
-                                                                     &tx_power);
+    tx_options = s.nwk_radio_parameters[NWK_INDEX].prepare_tx_callback(packet,
+                                                                       s.outgoing_flat_packet,
+                                                                       mac_payload_offset,
+                                                                       MAC_INDEX,
+                                                                       NWK_INDEX,
+                                                                       &tx_power);
     // Use link power only on SubGhz network.
     #if SINGLE_PHY_MULTIPAGE_SUPPORT
     if (useNegotiatedPowerbyLinkPowerDelta) {// changed from zigbee
@@ -648,19 +762,26 @@ static void send_frame(uint8_t mac_index)
     sl_mac_packet_send_complete_callback(MAC_INDEX, SL_STATUS_OK);
     sl_mac_kickstart(MAC_INDEX);
   } else {
-    sl_mac_lower_mac_send(MAC_INDEX, s.outgoing_flat_packet, use_csma);
+    sl_mac_lower_mac_send(MAC_INDEX, s.outgoing_flat_packet, tx_options);
   }
 }
 
 void sl_mac_packet_send_complete_callback(uint8_t mac_index, sl_status_t status)
 {
+  if (emMfglibMode != 0U) {
+    // mfglib has hijacked the radio, so do nothing
+    return;
+  }
+
   assert(MAC_INDEX < MAX_MAC_INDEX);
+  assert(s.current_outgoing_frame.packet != NULL_BUFFER);
 
   sl_mac_transmit_complete_callback_t callback = s.current_outgoing_frame.tx_complete_callback;
   if (callback != NULL) {
     callback(MAC_INDEX, status, s.current_outgoing_frame.packet, s.current_outgoing_frame.tag);
   }
   s.current_outgoing_frame.packet = NULL_BUFFER;
+  s.current_outgoing_frame.tx_complete_callback = NULL;
 
   // If the last packet sent was not a poll and we have a poll waiting, elevate
   // it now. This allows us to interleave transmissions of non-polls and polls.
@@ -680,8 +801,6 @@ void sl_mac_notify_mac_is_idle(uint8_t mac_index)
 
   sl_mac_kickstart(MAC_INDEX);
 }
-extern uint8_t emMfglibMode;
-extern void (*emMfglibRxCallback)(uint8_t *packet, uint8_t linkQuality, int8_t rssi);
 
 sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawHeader)
 {
@@ -700,11 +819,6 @@ sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawHeader)
   uint8_t phyPacketLength = rawHeaderContents[0];
   uint16_t internalMacFcf = HIGH_LOW_TO_INT(rawHeaderContents[2], rawHeaderContents[1]);
 
-  if ((internalMacFcf & EMBER_MAC_HEADER_FC_FRAME_TYPE_MASK) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
-    // drop 15.4 ACKs in MAC mode.
-    return SL_STATUS_FAIL;
-  }
-
   // Get the appended info
   uint8_t appendedInfo[NUM_APPENDED_INFO_BYTES] = { 0 };
   MEMCOPY(appendedInfo,
@@ -722,9 +836,15 @@ sl_status_t sl_mac_receive_callback(uint8_t mac_index, PacketHeader rawHeader)
       (*emMfglibRxCallback)(rawHeaderContents,
                             appendedInfo[APPENDED_INFO_LQI_BYTE_INDEX],
                             (int8_t) appendedInfo[APPENDED_INFO_RSSI_BYTE_INDEX]);
-      return SL_STATUS_OK;
     }
+    return SL_STATUS_OK;
   }
+
+  if ((internalMacFcf & EMBER_MAC_HEADER_FC_FRAME_TYPE_MASK) == EMBER_MAC_HEADER_FC_FRAME_TYPE_ACK) {
+    // drop 15.4 ACKs in MAC mode.
+    return SL_STATUS_FAIL;
+  }
+
   uint8_t rawMacHeaderLength = sl_mac_flat_mac_header_length(rawMacHeader, false);
 
   // Expect a valid packet
@@ -922,9 +1042,18 @@ RadioPowerMode sl_mac_get_radio_idle_mode(uint8_t mac_index)
   // TODO: We currently don't have control of the idle mode on shutdown operations
   // This might not enumerate every possible case where we need the radio on, but
   // this works for Zigbee, so leaving it as it is for now.
-  return ((s.nwk_radio_parameters[s.current_nwk].rx_on_when_idle || s.mac_is_shutdown)
+  return (((s.nwk_radio_parameters[s.current_nwk].rx_state == SL_MAC_RX_ON_WHEN_IDLE) || s.mac_is_shutdown)
           ? EMBER_RADIO_POWER_MODE_RX_ON
+#ifndef UPPER_MAC_USING_BASE_PHY
+          // TODO: right now make test uses base's phy/phy.h, which doesn't define
+          // EMBER_RADIO_POWER_MODE_DC_RX; only mac-phy.h defines it.
+          // Eventually zigbee will stop using base's phy.h and this should be
+          // reverted
+          : ((s.nwk_radio_parameters[s.current_nwk].rx_state == SL_MAC_RX_DUTY_CYCLING)
+             ? EMBER_RADIO_POWER_MODE_DC_RX : EMBER_RADIO_POWER_MODE_OFF));
+#else // EMBER_TEST
           : EMBER_RADIO_POWER_MODE_OFF);
+#endif // EMBER_TEST
 }
 
 uint8_t sl_mac_get_current_radio_network_index(uint8_t mac_index)
@@ -937,8 +1066,8 @@ bool sl_mac_upper_mac_is_empty(uint8_t mac_index)
   #ifdef MAC_DUAL_PRESENT
   return (!s.mac_is_shutdown   //primarily to keep us awake while scanning
           && sl_mac_lower_mac_is_idle(PHY_INDEX_NATIVE) && sl_mac_lower_mac_is_idle(PHY_INDEX_PRO2PLUS)
-          && !emberEventControlGetActive(emUpperMacEvents[PHY_INDEX_NATIVE])
-          && !emberEventControlGetActive(emUpperMacEvents[PHY_INDEX_PRO2PLUS])
+          && !sli_mac_event_is_active(emUpperMacEvents[PHY_INDEX_NATIVE])
+          && !sli_mac_event_is_active(emUpperMacEvents[PHY_INDEX_PRO2PLUS])
           && !sl_mac_upper_mac_state[PHY_INDEX_NATIVE].pending_tasks_bitmask
           && sl_mac_upper_mac_state[PHY_INDEX_NATIVE].unsent_message_count == 0
           && !sl_mac_upper_mac_state[PHY_INDEX_PRO2PLUS].pending_tasks_bitmask
@@ -946,7 +1075,7 @@ bool sl_mac_upper_mac_is_empty(uint8_t mac_index)
   #else
   return (!s.mac_is_shutdown   //primarily to keep us awake while scanning
           && sl_mac_lower_mac_is_idle(0)
-          && !emberEventControlGetActive(emUpperMacEvent)
+          && !sli_mac_event_is_active(emUpperMacEvent)
           && !s.pending_tasks_bitmask
           && s.unsent_message_count == 0);
   #endif
@@ -1013,3 +1142,9 @@ uint8_t sl_mac_get_nwk_index_matching_pan(uint8_t mac_index,
   return 0xFF;
 }
 #endif // EMBER_MULTI_NETWORK_STRIPPED
+
+// Returns current sequence and bumps it for the next get
+uint8_t sli_mac_get_next_sequence(void)
+{
+  return mac_outgoing_sequence_number++;
+}

@@ -8,20 +8,29 @@ quality: production
 component_root_path: "platform/emlib"
 source:
   - path: "src/em_core.c"
+    unless: [device_host]
 include:
   - path: "inc"
     file_list:
     - path: "em_core.h"
+      unless: [device_host]
+  - path: "host/inc"
+    file_list:
+    - path: "em_core.h"
+      condition: [device_host]
 config_file:
   - path: "config/emlib_core_debug_config.h"
 validation_helper:
-  - path: emlib_core_validation.py
+  - path: emlib_core_validation.lua
 provides:
   - name: emlib_core
 requires:
   - name: device
+    unless: [device_host]
   - name: emlib_common
+    unless: [device_host]
   - name: cmsis_core
+    unless: [device_host]
 template_contribution:
   - name: component_catalog
     value: emlib_core_debug_config

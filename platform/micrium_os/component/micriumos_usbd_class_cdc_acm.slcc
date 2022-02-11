@@ -2,8 +2,8 @@ id: micriumos_usbd_class_cdc_acm
 label: USB Device Class - CDC ACM
 package: micrium-usbd
 description: Micrium OS USB Device CDC ACM Class
-category: Services|USB|Device
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 source:
   - path: platform/micrium_os/usb/source/device/class/usbd_cdc.c
   - path: platform/micrium_os/usb/source/device/class/usbd_cdc_acm_serial.c

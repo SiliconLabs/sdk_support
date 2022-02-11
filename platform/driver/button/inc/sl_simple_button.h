@@ -27,7 +27,9 @@
 
 /***************************************************************************//**
  * @addtogroup simple_button Simple Button Driver
- * @brief Simple Button Driver
+ * @details Simple Button Driver module provides APIs to initalize and read
+ *          simple buttons. Subsequent sections provide more insight into button
+ *          driver configuration and usage.
  * @{
  ******************************************************************************/
 
@@ -43,7 +45,7 @@
 #define SL_SIMPLE_BUTTON_PRESSED                 1U   ///< BUTTON state is pressed
 #define SL_SIMPLE_BUTTON_RELEASED                0U   ///< BUTTON state is released
 
-#define SL_SIMPLE_BUTTON_GET_STATE(context) (sl_simple_button_get_state((context)))             ///< BUTTON member function to get state
+#define SL_SIMPLE_BUTTON_GET_STATE(context) (((sl_simple_button_context_t *)(context))->state)  ///< BUTTON member function to get state
 #define SL_SIMPLE_BUTTON_GET_PORT(context)  (((sl_simple_button_context_t *)(context))->port)   ///< BUTTON member function to get port
 #define SL_SIMPLE_BUTTON_GET_PIN(context)   (((sl_simple_button_context_t *)(context))->pin)    ///< BUTTON member function to get pin
 #define SL_SIMPLE_BUTTON_GET_MODE(context)  (((sl_simple_button_context_t *)(context))->mode)   ///< BUTTON member function to get mode
@@ -68,49 +70,49 @@ typedef struct {
 /***************************************************************************//**
  * Initialize the simple button driver.
  *
- * @param[in] context           Pointer to simple-button specific data:
- *                                - sl_simple_button_context_t
+ * @param[in] handle           Pointer to button handle:
+ *                                - sl_button_t
  *
  * @return    Status Code:
  *              - SL_STATUS_OK
  ******************************************************************************/
-sl_status_t sl_simple_button_init(void *context);
+sl_status_t sl_simple_button_init(const sl_button_t *handle);
 
 /***************************************************************************//**
  * Get the current state of the simple button.
  *
- * @param[in] context           Pointer to simple-button specific data
- *                                - sl_simple_button_context_t
+ * @param[in] handle           Pointer to button handle:
+ *                                - sl_button_t
  *
  * @return    Button State:     Current state of the button
  *              - SL_SIMPLE_BUTTON_PRESSED
  *              - SL_SIMPLE_BUTTON_RELEASED
  ******************************************************************************/
-sl_button_state_t sl_simple_button_get_state(void *context);
+sl_button_state_t sl_simple_button_get_state(const sl_button_t *handle);
 
 /***************************************************************************//**
  * Poll the simple button. (button mode - poll / poll and debonuce)
  *
- * @param[in] context           Pointer to simple-button specific data
- *                                - sl_simple_button_context_t
+ * @param[in] handle           Pointer to button handle:
+ *                                - sl_button_t
  ******************************************************************************/
-void sl_simple_button_poll_step(void *context);
+void sl_simple_button_poll_step(const sl_button_t *handle);
 
 /***************************************************************************//**
  * Enable the simple button.
  *
- * @param[in] context           Pointer to simple-button specific data
- *                                - sl_simple_button_context_t
+ * @param[in] handle           Pointer to button handle:
+ *                                - sl_button_t
  ******************************************************************************/
-void sl_simple_button_enable(void *context);
+void sl_simple_button_enable(const sl_button_t *handle);
 
 /***************************************************************************//**
  * Disable the simple button.
  *
- * @param[in] context           Pointer to simple-button specific data
- *                                - sl_simple_button_context_t
+ * @param[in] handle           Pointer to button handle:
+ *                                - sl_button_t
  ******************************************************************************/
-void sl_simple_button_disable(void *context);
+void sl_simple_button_disable(const sl_button_t *handle);
 
 /** @} (end addtogroup simple_button) */
 /** @} (end addtogroup button) */

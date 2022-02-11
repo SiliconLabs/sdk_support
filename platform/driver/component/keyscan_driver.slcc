@@ -11,6 +11,7 @@ requires:
   - name: emlib_common
   - name: peripheral_keyscan
   - name: status
+  - name: slist
 include:
   - path: inc
     file_list:

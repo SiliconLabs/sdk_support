@@ -2,7 +2,7 @@ id: micriumos_io_serial_driver_silabs_gecko_sdk
 label: Micrium OS Input-Output Silicon Labs Serial Driver
 package: micrium-ioxx
 description: Micrium OS IO Silicon Labs Serial Driver
-category: Services|IO
+category: Services|Micrium|IO
 quality: production
 component_root_path: platform/micrium_os/drivers/io
 source:

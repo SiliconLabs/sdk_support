@@ -50,6 +50,7 @@ include:
   - path: platform/radio/rail_lib/common
     file_list:
       - path: rail.h
+      - path: rail_mfm.h
       - path: rail_assert_error_codes.h
       - path: rail_types.h
       - path: rail_features.h
@@ -62,9 +63,6 @@ include:
   - path: platform/radio/rail_lib/protocol/zwave
     file_list:
       - path: rail_zwave.h
-  - path: platform/radio/rail_lib/protocol/mfm
-    file_list:
-      - path: rail_mfm.h
   - path: platform/radio/rail_lib/chip/efr32/efr32xg1x
     file_list:
       - path: rail_chip_specific.h

@@ -33,6 +33,10 @@
 
 #include "rail.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * An internal callback, called on RAIL init completion.
  *
@@ -69,5 +73,9 @@ void sli_rail_util_on_channel_config_change(RAIL_Handle_t rail_handle,
  */
 void sli_rail_util_on_event(RAIL_Handle_t rail_handle,
                             RAIL_Events_t events);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SLI_RAIL_UTIL_CALLBACKS_H

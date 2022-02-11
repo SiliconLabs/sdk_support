@@ -1,24 +1,10 @@
-What's new in Gecko Platform 3.2.1.0
-* Selected quality improvements and bug fixes
+Gecko Platform 4.0.1.0
+- CMSIS: Added module- and part-specific DCDC initialization headers to have more control on DCDC configuration.
+- Security: X25519 and Ed25519 algorithms, along with related key management functionality, are now accelerated on Series-2 Secure Vault Mid devices.
+- Operating System: Added new errno module. 
+- Boards and External Devices: Created pressure driver that abstracts bmp280 and bmp3xx.
+- RAIL Library:
+  - Restricted the SL_RAIL_UTIL_PA_RAMP_TIME_US to 10 us on some EFR32 modules to match the certification conditions.
+  - Updated the Z-Wave PHYs for the EFR32xG23 to prevent a sensitivity degradation on the R2 (9.6 kbps) PHY.
+- Selected quality improvements and bug fixes throughout.
 
-What's new in Gecko Platform 3.2.0.0
-* Peripherals
-  * EFP Voltage scaling and Direct mode on EFR32xG22 and EFM32xG22.
-  * EFP Coulomb counter
-* Services
-  * Several fixes related to Power Manager
-* Middleware
-  * CSLIB can now be used with the Gecko SDK components
-* Security
-  * Mbed TLS library updated to v2.26.0
-* Operating System
-  * Added more NOR Flash options for Micrium OS FS
-* Examples
-  * Coulomb Counter
-  * CLI & I2C
-* Boards and External Devices
-  * Added support for several new boards
-* Other Platform Components
-  * Updated IAR compiler to version 8.50.9.
-  * Updated GCC compiler to version 10.2.
-  * Amazon FreeRTOS Libraries have been added to the Gecko SDK.

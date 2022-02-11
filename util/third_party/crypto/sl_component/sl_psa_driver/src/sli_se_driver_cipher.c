@@ -175,10 +175,12 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   && defined(PSA_WANT_ALG_STREAM_CIPHER))
 
 #if defined(MBEDTLS_PSA_CRYPTO_C)
-#if defined(PSA_WANT_KEY_TYPE_AES) \
-  && (defined(PSA_WANT_ALG_CTR)    \
-  || defined(PSA_WANT_ALG_CFB)     \
-  || defined(PSA_WANT_ALG_OFB))
+#if defined(PSA_WANT_KEY_TYPE_AES)        \
+  && (defined(PSA_WANT_ALG_CTR)           \
+  || defined(PSA_WANT_ALG_CFB)            \
+  || defined(PSA_WANT_ALG_OFB)            \
+  || defined(PSA_WANT_ALG_CBC_NO_PADDING) \
+  || defined(PSA_WANT_ALG_CBC_PKCS7))
   uint8_t tmp_buf[16] = { 0 };
 #endif
 #if ((defined(PSA_WANT_KEY_TYPE_AES)                                           \
@@ -205,10 +207,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   // Argument check
   if (key_buffer == NULL
       || key_buffer_size == 0
-      || input == NULL
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (input == NULL && input_length > 0)
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -236,6 +237,11 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
   psa_status = validate_key_type(&key_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
+  }
+
+  if (input_length == 0) {
+    *output_length = 0;
+    return PSA_SUCCESS;
   }
 
   // Our drivers only support full or no overlap between input and output
@@ -474,6 +480,9 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
         return psa_status;
       }
 
+      // Write IV to temporary buf to be used internally by sl_se_aes_crypt_cbf128.
+      memcpy(tmp_buf, iv_buf, 16);
+
       // Store last block (if non-blocksize input-length) to temporary buffer to be used in padding.
       if (alg == PSA_ALG_CBC_PKCS7) {
         memcpy(final_block, &input[input_length & ~0xF], input_length & 0xF);
@@ -485,7 +494,7 @@ psa_status_t sli_se_driver_cipher_encrypt(const psa_key_attributes_t *attributes
                                      &key_desc,
                                      SL_SE_ENCRYPT,
                                      input_length & ~0xF,
-                                     iv_buf,
+                                     tmp_buf,
                                      input,
                                      &output[16]);
         if (status != SL_STATUS_OK) {
@@ -675,11 +684,9 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   // Argument check.
   if (key_buffer == NULL
       || key_buffer_size == 0
-      || input == NULL
-      || input_length == 0
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (input == NULL && input_length > 0)
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -707,6 +714,11 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
   psa_status = validate_key_type(&key_desc);
   if (psa_status != PSA_SUCCESS) {
     return psa_status;
+  }
+
+  if (input_length == 0) {
+    *output_length = 0;
+    return PSA_SUCCESS;
   }
 
   // Our drivers only support full or no overlap between input and output
@@ -847,10 +859,13 @@ psa_status_t sli_se_driver_cipher_decrypt(const psa_key_attributes_t *attributes
         }
         full_blocks = (input_length - 16) / 16;
       } else {
-        // Check output has enough room for at least n-1 blocks.
+        // Check correct input amount
         if (input_length < 32
-            || ((input_length & 0xF) != 0)
-            || output_size < (input_length - 32)) {
+            || ((input_length & 0xF) != 0)) {
+          return PSA_ERROR_INVALID_ARGUMENT;
+        }
+        // Check output has enough room for at least n-1 blocks.
+        if (output_size < (input_length - 32)) {
           return PSA_ERROR_BUFFER_TOO_SMALL;
         }
         full_blocks = (input_length - 32) / 16;
@@ -1238,12 +1253,15 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
 
     // We know we'll be computing and outputing at least the completed streaming block
     size_t output_blocks = 1;
-    // plus however many full blocks are left over after filling the stream buffer
-    output_blocks += (input_length - bytes_to_boundary) / 16;
-    // If we're caching and the sum of already-input and to-be-input data
-    // ends up at a block boundary, we won't be outputting the last block
-    if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
-      output_blocks -= 1;
+
+    if (input_length > bytes_to_boundary) {
+      // plus however many full blocks are left over after filling the stream buffer
+      output_blocks += (input_length - bytes_to_boundary) / 16;
+      // If we're caching and the sum of already-input and to-be-input data
+      // ends up at a block boundary, we won't be outputting the last block
+      if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
+        output_blocks -= 1;
+      }
     }
 
     if (output_size < (output_blocks * 16)) {
@@ -1359,6 +1377,23 @@ psa_status_t sli_se_driver_cipher_update(sli_se_driver_cipher_operation_t *opera
         input += bytes_to_boundary;
         input_length -= bytes_to_boundary;
         operation->processed_length += bytes_to_boundary;
+      } else if (input_length > 0
+                 && cache_full_block
+                 && operation->processed_length > 0) {
+        // We know there's processing to be done, and that we haven't processed
+        // the full block in the streaming buffer yet. Process it now.
+        status = sl_se_aes_crypt_cbc(&cmd_ctx,
+                                     key_desc,
+                                     operation->direction,
+                                     16,
+                                     operation->iv,
+                                     operation->streaming_block,
+                                     output);
+        if (status != PSA_SUCCESS) {
+          goto exit;
+        }
+        output += 16;
+        actual_output_length += 16;
       }
 
       // Do multi-block operation if applicable

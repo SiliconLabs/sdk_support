@@ -478,7 +478,7 @@ __STATIC_INLINE void LCD_LoadBusyWait(void)
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
- *    Waits for the LCD to complete resetting or disabling procedure.
+ *    Wait for the LCD to complete resetting or disabling procedure.
  ******************************************************************************/
 __STATIC_INLINE void LCD_ReadyWait(void)
 {
@@ -540,14 +540,14 @@ __STATIC_INLINE void LCD_Reset(void)
 {
   LCD->SWRST_SET = LCD_SWRST_SWRST;
 
-  /* Wait for reset to complete. s*/
+  /* Wait for reset to complete. */
   while ((LCD->SWRST & _LCD_SWRST_RESETTING_MASK)) ;
 }
 #endif
 
 /***************************************************************************//**
  * @brief
- *   Enables or disables LCD Animation feature.
+ *   Enable or disable LCD Animation feature.
  *
  * @param[in] enable
  *   Boolean true enables animation, false disables animation.
@@ -571,7 +571,7 @@ __STATIC_INLINE void LCD_AnimEnable(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Enables or disables LCD blink.
+ *   Enable or disable the LCD blink.
  *
  * @param[in] enable
  *   Boolean true enables blink, false disables blink.
@@ -595,7 +595,7 @@ __STATIC_INLINE void LCD_BlinkEnable(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Disables all segments, while keeping segment state.
+ *   Disable all segments while keeping segment state.
  *
  * @param[in] enable
  *   Boolean true clears all segments, boolean false restores all segment lines.
@@ -619,7 +619,7 @@ __STATIC_INLINE void LCD_BlankEnable(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Enables or disables LCD Frame counter.
+ *   Enable or disable LCD Frame counter.
  *
  * @param[in] enable
  *   Boolean true enables frame counter, false disables frame counter.
@@ -649,7 +649,7 @@ __STATIC_INLINE void LCD_FrameCountEnable(bool enable)
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
- *   Enables or disables LCD Display counter.
+ *   Enable or disable the LCD Display counter.
  *
  * @param[in] enable
  *   Boolean true enables display counter, false disables display counter.
@@ -669,7 +669,7 @@ __STATIC_INLINE void LCD_DisplayCountEnable(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Returns current animation state.
+ *   Return the current animation state.
  *
  * @return
  *   Animation state, in range 0-15.
@@ -681,7 +681,7 @@ __STATIC_INLINE int LCD_AnimState(void)
 
 /***************************************************************************//**
  * @brief
- *   Returns current blink state.
+ *   Return the current blink state.
  *
  * @return
  *   Return value is 1 if segments are enabled, 0 if disabled.
@@ -713,7 +713,7 @@ __STATIC_INLINE void LCD_FreezeEnable(bool enable)
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
- *   Returns SYNCBUSY bits, indicating which registers have pending updates.
+ *   Return SYNCBUSY bits, indicating which registers have pending updates.
  *
  * @return
  *   Bit fields for LCD registers that have pending updates.
@@ -727,7 +727,7 @@ __STATIC_INLINE uint32_t LCD_SyncBusyGet(void)
 #if defined(_SILICON_LABS_32B_SERIES_0) || defined(_SILICON_LABS_32B_SERIES_1)
 /***************************************************************************//**
  * @brief
- *   Polls LCD SYNCBUSY flags, until flag has been cleared.
+ *   Poll LCD SYNCBUSY flags until the flag has been cleared.
  *
  * @param[in] flags
  *   Bit fields for LCD registers that will be updated before we continue.
@@ -830,7 +830,7 @@ __STATIC_INLINE uint32_t LCD_IntGetEnabled(void)
 {
   uint32_t ien;
 
-  /* Stores LCD->IEN in temporary variable in order to define explicit order
+  /* Store the LCD->IEN in temporary variable to define the explicit order
    * of volatile accesses. */
   ien = LCD->IEN;
 

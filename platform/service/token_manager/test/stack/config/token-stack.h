@@ -136,6 +136,7 @@
 #define CREATOR_USER_TEST_TOK_01      0x0002
 #define CREATOR_USER_TEST_TOK_02      0x0010
 #define CREATOR_USER_TEST_TOK_COUNTER 0x0020
+#define CREATOR_USER_TEST_TOK_MAX_KEY 0xfffc
 
 /** @} END Creator Codes  */
 
@@ -288,9 +289,11 @@ DEFINE_INDEXED_TOKEN(USER_TEST_TOK_02,
 DEFINE_COUNTER_TOKEN(USER_TEST_TOK_COUNTER,
                      tokTypeTestCounter,
                      0)
+#if defined(USE_NVM3)
 DEFINE_BASIC_TOKEN(USER_TEST_TOK_MAX_KEY,
                    tokTypeTestTokMaxKey,
                    0x0000)
+#endif // defined(USE_NVM3)
 #endif //DEFINETOKENS
 
 #ifdef MAC_DEBUG_TOKEN

@@ -99,25 +99,30 @@
 // <<< sl:start pin_tool >>>
 // <usart signal=TX,RX,CLK,CS> IOT_SPI_CFG_LOOPBACK
 // $[USART_IOT_SPI_CFG_LOOPBACK]
-#define IOT_SPI_CFG_LOOPBACK_PERIPHERAL      USART1
-#define IOT_SPI_CFG_LOOPBACK_PERIPHERAL_NO   1
+#define IOT_SPI_CFG_LOOPBACK_PERIPHERAL          USART2
+#define IOT_SPI_CFG_LOOPBACK_PERIPHERAL_NO       2
 
-#define IOT_SPI_CFG_LOOPBACK_TX_PORT         gpioPortA
-#define IOT_SPI_CFG_LOOPBACK_TX_PIN          0
-#define IOT_SPI_CFG_LOOPBACK_TX_LOC          0
+// USART2 TX on PK0
+#define IOT_SPI_CFG_LOOPBACK_TX_PORT             gpioPortK
+#define IOT_SPI_CFG_LOOPBACK_TX_PIN              0
+#define IOT_SPI_CFG_LOOPBACK_TX_LOC              29
 
-#define IOT_SPI_CFG_LOOPBACK_RX_PORT         gpioPortA
-#define IOT_SPI_CFG_LOOPBACK_RX_PIN          0
-#define IOT_SPI_CFG_LOOPBACK_RX_LOC          0
+// USART2 RX on PK2
+#define IOT_SPI_CFG_LOOPBACK_RX_PORT             gpioPortK
+#define IOT_SPI_CFG_LOOPBACK_RX_PIN              2
+#define IOT_SPI_CFG_LOOPBACK_RX_LOC              30
 
-#define IOT_SPI_CFG_LOOPBACK_CLK_PORT        gpioPortA
-#define IOT_SPI_CFG_LOOPBACK_CLK_PIN         1
-#define IOT_SPI_CFG_LOOPBACK_CLK_LOC         0
+// USART2 CLK on PF7
+#define IOT_SPI_CFG_LOOPBACK_CLK_PORT            gpioPortF
+#define IOT_SPI_CFG_LOOPBACK_CLK_PIN             7
+#define IOT_SPI_CFG_LOOPBACK_CLK_LOC             18
 
-#define IOT_SPI_CFG_LOOPBACK_CS_PORT         gpioPortA
-#define IOT_SPI_CFG_LOOPBACK_CS_PIN          2
-#define IOT_SPI_CFG_LOOPBACK_CS_LOC          0
-// [USART_IOT_SPI_CFG_LOOPBACK$
+// USART2 CS on PA5
+#define IOT_SPI_CFG_LOOPBACK_CS_PORT             gpioPortA
+#define IOT_SPI_CFG_LOOPBACK_CS_PIN              5
+#define IOT_SPI_CFG_LOOPBACK_CS_LOC              29
+
+// [USART_IOT_SPI_CFG_LOOPBACK]$
 // <<< sl:end pin_tool >>>
 
 /*******************************************************************************

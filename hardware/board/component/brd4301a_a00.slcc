@@ -31,6 +31,11 @@
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4301A"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
 - tag:
   - board:pn:BRD4301
   - board:variant:A

@@ -135,11 +135,13 @@ void sli_power_manager_init_hardware(void)
 #endif
 
   // Initializes EMU (voltage scaling in EM2/3)
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
   EMU_EM01Init_TypeDef em01_init = EMU_EM01INIT_DEFAULT;
 
   EMU_EM01Init(&em01_init);
+#endif
 
+#if defined(EMU_VSCALE_PRESENT)
 #if defined(SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP)
 #if (SL_POWER_MANAGER_CONFIG_VOLTAGE_SCALING_FAST_WAKEUP == 0)
   sli_power_manager_em23_voltage_scaling_enable_fast_wakeup(false);

@@ -53,8 +53,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_eusart IO Stream EUSART
- * @brief IO Stream EUSART
+ * @addtogroup iostream_eusart I/O Stream EUSART
+ * @brief I/O Stream EUSART
  * @details
  * ## Overview
  *
@@ -73,7 +73,7 @@ extern "C" {
  *
  * ## Power manager integration
  *
- *   On transmission side, IO Stream-EUSART adds a requirement on EM1 or EM2, depending on
+ *   On transmission side, I/O Stream-EUSART adds a requirement on EM1 or EM2, depending on
  *   the frequency mode, until the transmit is really completed. Once the transmit is
  *   completed the requirement is removed and the system can go to a lower energy mode if allowed.
  *
@@ -89,7 +89,7 @@ extern "C" {
  *
  * @{
  ******************************************************************************/
-/// @brief Struct representing an IO Stream EUSART configuration.
+/// @brief Struct representing an I/O Stream EUSART configuration.
 typedef struct {
   EUSART_TypeDef *eusart;                       ///< Pointer to EUSART peripheral
   EUSART_HwFlowControl_TypeDef flow_control;    ///< Flow control
@@ -108,7 +108,7 @@ typedef struct {
   unsigned int rts_pin;                         ///< Flow control, RTS pin
 } sl_iostream_eusart_config_t;
 
-/// @brief Struct representing an IO Stream EUSART context.
+/// @brief Struct representing an I/O Stream EUSART context.
 typedef struct {
   sl_iostream_uart_context_t context;           ///< context
   EUSART_TypeDef *eusart;                       ///< eusart
@@ -133,9 +133,9 @@ typedef struct {
 /***************************************************************************//**
  * EUSART Stream init.
  *
- * @param[in] iostream_uart  IO Stream UART handle.
+ * @param[in] iostream_uart  I/O Stream UART handle.
  *
- * @param[in] uart_config  IO Stream UART config.
+ * @param[in] uart_config  I/O Stream UART config.
  *
  * @param[in] init  UART initialization modes.
  *

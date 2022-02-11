@@ -43,7 +43,9 @@
 
 #include "sl_status.h"
 
-#if defined(SL_SE_MANAGER_THREADING)
+#if (defined(SL_CATALOG_MICRIUMOS_KERNEL_PRESENT) || defined(SL_CATALOG_FREERTOS_KERNEL_PRESENT)) \
+  && (defined(SL_SE_MANAGER_THREADING)                                                            \
+  || defined(SL_SE_MANAGER_YIELD_WHILE_WAITING_FOR_COMMAND_COMPLETION))
 // Include CMSIS RTOS2 kernel abstraction layer:
   #include "sli_se_manager_osal_cmsis_rtos2.h"
 #else

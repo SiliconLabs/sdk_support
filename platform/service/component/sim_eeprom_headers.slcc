@@ -6,6 +6,9 @@ category: Services|Simulated EEPROM
 quality: production
 provides:
   - name: sim_eeprom_headers
+requires:
+  - name: token_manager
+  - name: device_series_1
 root_path: ./
 include:
   - path: platform/service/sim_eeprom_headers/inc

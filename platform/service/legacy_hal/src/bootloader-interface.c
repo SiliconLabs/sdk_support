@@ -43,10 +43,7 @@ NO_STRIPPING const ApplicationProperties_t appProperties = {
   .longTokenSectionAddress = (uint8_t *)LONG_TOKEN_BASE,
 };
 
-#if defined GECKO_INFO_PAGE_BTL      \
-  || defined APP_GECKO_INFO_PAGE_BTL \
-  || defined STA_GECKO_INFO_PAGE_BTL \
-  || defined LOCAL_STORAGE_GECKO_INFO_PAGE_BTL
+#if !defined _SILICON_LABS_32B_SERIES_1_CONFIG_1
 #define NO_BAT
 
 static bool bootloaderIsCommonBootloader(void)
@@ -95,10 +92,7 @@ BlBaseType halBootloaderGetType(void)
   // Deprecated
   BLDEBUG_PRINT("built for SERIAL OTA standalone bootloader\r\n");
   return BL_TYPE_STANDALONE;
-  #elif defined GECKO_INFO_PAGE_BTL  \
-  || defined APP_GECKO_INFO_PAGE_BTL \
-  || defined STA_GECKO_INFO_PAGE_BTL \
-  || defined LOCAL_STORAGE_GECKO_INFO_PAGE_BTL
+  #elif !defined _SILICON_LABS_32B_SERIES_1_CONFIG_1
   BLDEBUG_PRINT("built for Gecko info page bootloader\r\n");
   return BL_TYPE_STANDALONE;
   #else

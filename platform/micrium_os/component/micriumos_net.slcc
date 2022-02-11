@@ -1,8 +1,8 @@
 id: micriumos_net
-label: Network Suite
+label: Micrium-Network Suite
 package: micrium-tcpx
 description: Micrium OS Network
-category: Services|Network Suite
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/net
 config_file:
@@ -173,6 +173,7 @@ provides:
 requires:
   - name: micriumos_kernel
   - name: common_platform_manager
+  - name: sleeptimer
   - name: net_driver
     condition:
       - device_has_eth

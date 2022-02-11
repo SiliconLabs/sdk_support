@@ -31,6 +31,10 @@
 #ifndef __RAILAPP_ERROR_RATE_H__
 #define __RAILAPP_ERROR_RATE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct BerStatus{
   uint32_t bytesTotal; /**< Number of bytes to receive */
   uint32_t bytesTested; /**< Number of bytes currently tested */
@@ -45,5 +49,9 @@ BerStatus_t RAILAPP_BerStatusGet(void);
 void RAILAPP_ResetCounters(void);
 static void RAILAPP_BerSource_RxFifoAlmostFull(uint16_t bytesAvailable);
 void RAILCb_BerRxFifoAlmostFull(RAIL_Handle_t railHandle);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__RAILAPP_ERROR_RATE_H__

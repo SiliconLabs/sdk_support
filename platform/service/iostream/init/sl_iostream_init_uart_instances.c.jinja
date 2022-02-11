@@ -81,6 +81,15 @@ sl_status_t sl_iostream_uart_init_{{ instance }}(void)
     .rx_buffer_length = SL_IOSTREAM_UART_{{ instance | upper }}_RX_BUFFER_SIZE,
     .lf_to_crlf = SL_IOSTREAM_UART_{{ instance | upper }}_CONVERT_BY_DEFAULT_LF_TO_CRLF,
     .rx_when_sleeping = SL_IOSTREAM_UART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
+#if defined(SL_IOSTREAM_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+#if (SL_IOSTREAM_UART_{{ instance | upper }}_FLOW_CONTROL_TYPE == uartFlowControlSoftware)
+    .sw_flow_control = true,
+#else
+    .sw_flow_control = false,
+#endif
+#else
+    .sw_flow_control = false,
+#endif
   };
   // Instantiate usart instance {# Initialize usart instance #}
   status = sl_iostream_usart_init(&sl_iostream_{{ instance }},

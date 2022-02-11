@@ -16,12 +16,15 @@
  ******************************************************************************/
 #include PLATFORM_HEADER
 #include "hal.h"
-#include "sl_iostream.h"
 #include "cortexm3/diagnostic.h"
 #include "micro.h"
 
 #include "em_emu.h"
 #include "em_rmu.h"
+
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+#include "sl_iostream.h"
+#endif
 
 // Crash info live in noinit RAM segment that is not modified during startup.
 NO_INIT(HalCrashInfoType halCrashInfo);
@@ -49,6 +52,8 @@ extern void emRadioSleep(void);
 
 //------------------------------------------------------------------------------
 // Local Variables
+
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
 
 static const char * const cfsrBits[] =
 {
@@ -391,6 +396,157 @@ static const char * const intActiveBits[] =
   "DCDC_IRQn",              // B61
   "EUART0_RX_IRQn",         // B62
   "EUART0_TX_IRQn",         // B63
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  "SMU_SECURE_IRQn",        // B0
+  "SMU_PRIVILEGED_IRQn",    // B1
+  "SMU_NS_PRIVILEGED_IRQn", // B2
+  "EMU_IRQn",               // B3
+  "TIMER0_IRQn",            // B4
+  "TIMER1_IRQn",            // B5
+  "TIMER2_IRQn",            // B6
+  "TIMER3_IRQn",            // B7
+  "TIMER4_IRQn",            // B8
+  "USART0_RX_IRQn",         // B9
+  "USART0_TX_IRQn",         // B10
+  "EUSART0_RX_IRQn",        // B11
+  "EUSART0_TX_IRQn",        // B12
+  "EUSART1_RX_IRQn",        // B13
+  "EUSART1_TX_IRQn",        // B14
+  "EUSART2_RX_IRQn",        // B15
+  "EUSART2_TX_IRQn",        // B16
+  "ICACHE0_IRQn",           // B17
+  "BURTC_IRQn",             // B18
+  "LETIMER0_IRQn",          // B19
+  "SYSCFG_IRQn",            // B20
+  "MPAHBRAM_IRQn",          // B21
+  "LDMA_IRQn",              // B22
+  "LFXO_IRQn",              // B23
+  "LFRCO_IRQn",             // B24
+  "ULFRCO_IRQn",            // B25
+  "GPIO_ODD_IRQn",          // B26
+  "GPIO_EVEN_IRQn",         // B27
+  "I2C0_IRQn",              // B28
+  "I2C1_IRQn",              // B29
+  "EMUDG_IRQn",             // B30
+  "AGC_IRQn",               // B31
+  "BUFC_IRQn",              // B32
+  "FRC_PRI_IRQn",           // B33
+  "FRC_IRQn",               // B34
+  "MODEM_IRQn",             // B35
+  "PROTIMER_IRQn",          // B36
+  "RAC_RSM_IRQn",           // B37
+  "RAC_SEQ_IRQn",           // B38
+  "HOSTMAILBOX_IRQn",       // B39
+  "SYNTH_IRQn",             // B40
+  "ACMP0_IRQn",             // B41
+  "ACMP1_IRQn",             // B42
+  "WDOG0_IRQn",             // B43
+  "WDOG1_IRQn",             // B44
+  "HFXO0_IRQn",             // B45
+  "HFRCO0_IRQn",            // B46
+  "HFRCOEM23_IRQn",         // B47
+  "CMU_IRQn",               // B48
+  "AES_IRQn",               // B49
+  "IADC_IRQn",              // B50
+  "MSC_IRQn",               // B51
+  "DPLL0_IRQn",             // B52
+  "EMUEFP_IRQn",            // B53
+  "DCDC_IRQn",              // B54
+  "VDAC_IRQn",              // B55
+  "PCNT0_IRQn",             // B56
+  "SW0_IRQn",               // B57
+  "SW1_IRQn",               // B58
+  "SW2_IRQn",               // B59
+  "SW3_IRQn",               // B60
+  "KERNEL0_IRQn",           // B61
+  "KERNEL1_IRQn",           // B62
+  "M33CTI0_IRQn",           // B63
+  "M33CTI1_IRQn",           // B64
+  "FPUEXH_IRQn",            // B65
+  "SEMBRX_IRQn",            // B67
+  "SEMBTX_IRQn",            // B68
+  "LESENSE_IRQn",           // B69
+  "SYSRTC_APP_IRQn",        // B70
+  "SYSRTC_SEQ_IRQn",        // B71
+  "LCD_IRQn",               // B72
+  "KEYSCAN_IRQn",           // B73
+  "RFECA0_IRQn",            // B74
+  "RFECA1_IRQn",            // B75
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  "SMU_SECURE_IRQn",        // B0
+  "SMU_PRIVILEGED_IRQn",    // B1
+  "SMU_NS_PRIVILEGED_IRQn", // B2
+  "EMU_IRQn",               // B3
+  "TIMER0_IRQn",            // B4
+  "TIMER1_IRQn",            // B5
+  "TIMER2_IRQn",            // B6
+  "TIMER3_IRQn",            // B7
+  "TIMER4_IRQn",            // B8
+  "USART0_RX_IRQn",         // B9
+  "USART0_TX_IRQn",         // B10
+  "EUSART0_RX_IRQn",        // B11
+  "EUSART0_TX_IRQn",        // B12
+  "EUSART1_RX_IRQn",        // B13
+  "EUSART1_TX_IRQn",        // B14
+  "MVP_IRQn",               // B15
+  "ICACHE0_IRQn",           // B16
+  "BURTC_IRQn",             // B17
+  "LETIMER0_IRQn",          // B18
+  "SYSCFG_IRQn",            // B19
+  "MPAHBRAM_IRQn",          // B20
+  "LDMA_IRQn",              // B21
+  "LFXO_IRQn",              // B22
+  "LFRCO_IRQn",             // B23
+  "ULFRCO_IRQn",            // B24
+  "GPIO_ODD_IRQn",          // B25
+  "GPIO_EVEN_IRQn",         // B26
+  "I2C0_IRQn",              // B27
+  "I2C1_IRQn",              // B28
+  "EMUDG_IRQn",             // B29
+  "AGC_IRQn",               // B30
+  "BUFC_IRQn",              // B31
+  "FRC_PRI_IRQn",           // B32
+  "FRC_IRQn",               // B33
+  "MODEM_IRQn",             // B34
+  "PROTIMER_IRQn",          // B35
+  "RAC_RSM_IRQn",           // B36
+  "RAC_SEQ_IRQn",           // B37
+  "HOSTMAILBOX_IRQn",       // B38
+  "SYNTH_IRQn",             // B39
+  "ACMP0_IRQn",             // B40
+  "ACMP1_IRQn",             // B41
+  "WDOG0_IRQn",             // B42
+  "WDOG1_IRQn",             // B43
+  "HFXO0_IRQn",             // B44
+  "HFRCO0_IRQn",            // B45
+  "HFRCOEM23_IRQn",         // B46
+  "CMU_IRQn",               // B47
+  "AES_IRQn",               // B48
+  "IADC_IRQn",              // B49
+  "MSC_IRQn",               // B50
+  "DPLL0_IRQn",             // B51
+  "EMUEFP_IRQn",            // B52
+  "DCDC_IRQn",              // B53
+  "PCNT0_IRQn",             // B54
+  "SW0_IRQn",               // B55
+  "SW1_IRQn",               // B56
+  "SW2_IRQn",               // B57
+  "SW3_IRQn",               // B58
+  "KERNEL0_IRQn",           // B59
+  "KERNEL1_IRQn",           // B60
+  "FPUEXH_IRQn",            // B61
+  "SETAMPERHOST_IRQn",      // B62
+  "SEMBRX_IRQn",            // B63
+  "SEMBTX_IRQn",            // B64
+  "SYSRTC_APP_IRQn",        // B65
+  "SYSRTC_SEQ_IRQn",        // B66
+  "KEYSCAN_IRQn",           // B67
+  "RFECA0_IRQn",            // B68
+  "RFECA1_IRQn",            // B69
+  "VDAC0_IRQn",             // B70
+  "VDAC1_IRQn",             // B71
+  "AHB2AHB0_IRQn",          // B72
+  "AHB2AHB1_IRQn"           // B73
   #endif
 #elif defined (CORTEXM3_EFM32_MICRO)
   "DMA",            // B0
@@ -467,15 +623,19 @@ static const char nameStrings[] = "R0\0R1\0R2\0R3\0"
                                   "Ret0\0Ret1\0Ret2\0Ret3\0"
                                   "Ret4\0Ret5\0Dat0\0Dat1\0";
 
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
 static uint16_t savedResetCause;
 static HalAssertInfoType savedAssertInfo;
 
 //------------------------------------------------------------------------------
 // Functions
+
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
+
 void halPrintCrashData(uint8_t port)
 {
   (void)port;
-
   uint32_t *data = (uint32_t*)&halCrashInfo.R0;
   char const *name = nameStrings;
   char const *separator;
@@ -648,6 +808,8 @@ void halPrintCrashSummary(uint8_t port)
   sl_iostream_printf(SL_IOSTREAM_STDOUT, "\n");
 }
 
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
+
 void halStartPCDiagnostics(void)
 {
 }
@@ -761,6 +923,39 @@ const HalAssertInfoType *halGetAssertInfo(void)
 uint8_t halGetResetInfo(void)
 {
   return RESET_BASE_TYPE(savedResetCause);
+}
+
+// Translate EM3xx reset codes to the codes previously used by the EM2xx.
+// If there is no corresponding code, return the EM3xx base code with bit 7 set.
+uint8_t halGetEm2xxResetInfo(void)
+{
+  uint8_t reset = halGetResetInfo();
+
+  // Any reset with an extended value field of zero is considered an unknown
+  // reset, except for FIB resets.
+  if ((RESET_EXTENDED_FIELD(halGetExtendedResetInfo()) == 0)
+      && (reset != RESET_FIB)) {
+    return EM2XX_RESET_UNKNOWN;
+  }
+
+  switch (reset) {
+    case RESET_UNKNOWN:
+      return EM2XX_RESET_UNKNOWN;
+    case RESET_BOOTLOADER:
+      return EM2XX_RESET_BOOTLOADER;
+    case RESET_EXTERNAL:    // map pin resets to poweron for EM2xx compatibility
+//    return EM2XX_RESET_EXTERNAL;
+    case RESET_POWERON:
+      return EM2XX_RESET_POWERON;
+    case RESET_WATCHDOG:
+      return EM2XX_RESET_WATCHDOG;
+    case RESET_SOFTWARE:
+      return EM2XX_RESET_SOFTWARE;
+    case RESET_CRASH:
+      return EM2XX_RESET_ASSERT;
+    default:
+      return (reset | 0x80);    // set B7 for all other reset codes
+  }
 }
 
 const char * halGetResetString(void)
@@ -895,7 +1090,9 @@ void halInternalAssertFailed(const char * filename, int linenumber)
   halResetWatchdog();              // In case we're close to running out.
   INTERRUPTS_OFF();
 
+#if defined(SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT)
   sl_iostream_printf(SL_IOSTREAM_STDOUT, "\r\n[ASSERT:%s:%d]\r\n", filename, linenumber);
+#endif // SL_CATALOG_IOSTREAM_UART_COMMON_PRESENT
 
 #if defined (__ICCARM__) || defined (__GNUC__)
   // We can use the special fault mechanism to preserve more assert
@@ -968,7 +1165,7 @@ uint16_t halInternalCrashHandler(void)
 
   // If the stack pointer is valid, read and save the stacked PC and xPSR
   if ((sp >= stackBottom)
-      && (sp <= (stackTop - 8))) {
+      && ((sp + 8) <= stackTop)) {
     sp += 6; // Skip over R0,R1,R2,R3,R12,LR
     c->PC = *sp++;
     c->xPSR.word = *sp++;

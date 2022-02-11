@@ -165,7 +165,9 @@ __STATIC_INLINE void CHIP_Init(void)
   prodRev = SYSTEM_GetProdRev();
   SYSTEM_ChipRevisionGet(&chipRev);
 
-  if ((prodRev >= 16) && (chipRev.minor >= 3)) {
+  // All Giant and Leopard parts except Leopard Rev E
+  if ((prodRev >= 16) && (chipRev.minor >= 3)
+      && !((chipRev.major == 2) && (chipRev.minor == 4))) {
     /* This fixes an issue with the LFXO on high temperatures. */
     *(volatile uint32_t*)0x400C80C0 =
       (*(volatile uint32_t*)0x400C80C0 & ~(1 << 6) ) | (1 << 4);
@@ -179,7 +181,7 @@ __STATIC_INLINE void CHIP_Init(void)
 
   if (prodRev <= 129) {
     /* This fixes a mistaken internal connection between PC0 and PC4. */
-    /* This disables an internal pulldown on PC4. */
+    /* This disables an internal pull-down on PC4. */
     *(volatile uint32_t*)(0x400C6018) = (1 << 26) | (5 << 0);
     /* This disables an internal LDO test signal driving PC4. */
     *(volatile uint32_t*)(0x400C80E4) &= ~(1 << 24);
@@ -375,6 +377,27 @@ __STATIC_INLINE void CHIP_Init(void)
     }
     if (syscfgClkIsOff) {
       CMU->CLKEN0_CLR = CMU_CLKEN0_SYSCFG;
+    }
+  }
+#endif
+
+/* PM-5163 */
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_215)    \
+  && defined(_SILICON_LABS_EFR32_2G4HZ_HP_PA_PRESENT) \
+  && (_SILICON_LABS_EFR32_2G4HZ_HP_PA_MAX_OUTPUT_DBM == 20)
+  SYSTEM_ChipRevision_TypeDef chipRev;
+  SYSTEM_ChipRevisionGet(&chipRev);
+
+  if (chipRev.major == 0x01 && chipRev.minor == 0x00) {
+    bool hfxo0ClkIsOff = (CMU->CLKEN0 & CMU_CLKEN0_HFXO0) == 0;
+    CMU->CLKEN0_SET = CMU_CLKEN0_HFXO0;
+
+    *(volatile uint32_t*)(HFXO0_BASE + 0x0034UL) =
+      (*(volatile uint32_t*)(HFXO0_BASE + 0x0034UL) & 0xE3FFFFFFUL)
+      | 0x0C000000UL;
+
+    if (hfxo0ClkIsOff) {
+      CMU->CLKEN0_CLR = CMU_CLKEN0_HFXO0;
     }
   }
 #endif

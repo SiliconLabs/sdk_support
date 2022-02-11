@@ -20,6 +20,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef SL_WEAK
 #define SL_WEAK __attribute__ ((weak))
 #endif
@@ -113,5 +117,9 @@ void emberAfPluginCommandCoulombCounterResetEnergyUsage(void);
  * and makes sure we periodically write it to flash.
  */
 void emberAfPluginCoulombCounterTick(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //SILABS_COULOMB_COUNTER_H

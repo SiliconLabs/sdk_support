@@ -72,7 +72,7 @@ typedef enum {
   burtcClkSelULFRCO = BURTC_CTRL_CLKSEL_ULFRCO,
   /** Low frequency RC oscillator. */
   burtcClkSelLFRCO  = BURTC_CTRL_CLKSEL_LFRCO,
-  /** Low frequency crystal osciallator. */
+  /** Low frequency crystal oscillator. */
   burtcClkSelLFXO   = BURTC_CTRL_CLKSEL_LFXO
 } BURTC_ClkSel_TypeDef;
 
@@ -113,7 +113,7 @@ typedef struct {
   BURTC_ClkSel_TypeDef clkSel;       /**< Select clock source. */
   uint32_t             clkDiv;       /**< Clock divider; for ULFRCO 1Khz or 2kHz operation. */
 
-  uint32_t             lowPowerComp; /**< Number of least significantt clock bits to ignore in low power mode. */
+  uint32_t             lowPowerComp; /**< Number of least significant clock bits to ignore in low power mode. */
   bool                 timeStamp;    /**< Enable time stamp on entering backup power domain. */
 
   bool                 compare0Top;  /**< Set if Compare Value 0 is also top value (counter restart). */
@@ -282,7 +282,7 @@ __STATIC_INLINE void BURTC_IntSet(uint32_t flags)
  * @brief
  *   Status of BURTC RAM, timestamp and LP Mode
  *
- * @return A mask logially OR-ed status bits
+ * @return A mask logically OR-ed status bits
  ******************************************************************************/
 __STATIC_INLINE uint32_t BURTC_Status(void)
 {
@@ -357,7 +357,7 @@ __STATIC_INLINE void BURTC_Stop(void)
 #endif
 
 /***************************************************************************//**
- * @brief Get BURTC counter
+ * @brief Get BURTC counter.
  *
  * @return
  *   BURTC counter value
@@ -369,7 +369,7 @@ __STATIC_INLINE uint32_t BURTC_CounterGet(void)
 
 #if defined(_SILICON_LABS_32B_SERIES_0)
 /***************************************************************************//**
- * @brief Get BURTC timestamp for entering BU
+ * @brief Get BURTC timestamp for entering BU.
  *
  * @return
  *   BURTC Time Stamp value
@@ -380,7 +380,7 @@ __STATIC_INLINE uint32_t BURTC_TimestampGet(void)
 }
 
 /***************************************************************************//**
- * @brief Freeze register updates until enabled
+ * @brief Freeze register updates until enabled.
  * @param[in] enable If true, registers are not updated until enabled again.
  ******************************************************************************/
 __STATIC_INLINE void BURTC_FreezeEnable(bool enable)
@@ -389,11 +389,11 @@ __STATIC_INLINE void BURTC_FreezeEnable(bool enable)
 }
 
 /***************************************************************************//**
- * @brief Shut down power to rentention register bank.
+ * @brief Shut down power to retention register bank.
  * @param[in] enable
  *     If true, shuts off power to retention registers.
  * @note
- *    When power rentention is disabled, it cannot be enabled again (until
+ *    When power retention is disabled, it can't be enabled again (until
  *    reset).
  ******************************************************************************/
 __STATIC_INLINE void BURTC_Powerdown(bool enable)
@@ -403,7 +403,7 @@ __STATIC_INLINE void BURTC_Powerdown(bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Set a value in one of the retention registers
+ *   Set a value in one of the retention registers.
  *
  * @param[in] num
  *   Register to set
@@ -419,7 +419,7 @@ __STATIC_INLINE void BURTC_RetRegSet(uint32_t num, uint32_t data)
 
 /***************************************************************************//**
  * @brief
- *   Read a value from one of the retention registers
+ *   Read a value from one of the retention registers.
  *
  * @param[in] num
  *   Retention Register to read
@@ -437,7 +437,7 @@ __STATIC_INLINE uint32_t BURTC_RetRegGet(uint32_t num)
 
 /***************************************************************************//**
  * @brief
- *   Lock BURTC registers, will protect from writing new config settings
+ *   Lock BURTC registers, which will protect from writing new config settings.
  ******************************************************************************/
 __STATIC_INLINE void BURTC_Lock(void)
 {
@@ -446,7 +446,7 @@ __STATIC_INLINE void BURTC_Lock(void)
 
 /***************************************************************************//**
  * @brief
- *   Unlock BURTC registers, enable write access to change configuration
+ *   Unlock BURTC registers, which will enable write access to change configuration.
  ******************************************************************************/
 __STATIC_INLINE void BURTC_Unlock(void)
 {

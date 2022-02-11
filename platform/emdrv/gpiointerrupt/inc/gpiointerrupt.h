@@ -41,6 +41,11 @@ extern "C" {
  * @addtogroup gpioint
  * @{
  ******************************************************************************/
+/*******************************************************************************
+ *****************************   DEFINITIONS   *********************************
+ ******************************************************************************/
+
+#define INTERRUPT_UNAVAILABLE                         (0xFF)
 
 /*******************************************************************************
  *******************************   TYPEDEFS   **********************************
@@ -55,11 +60,22 @@ extern "C" {
  */
 typedef void (*GPIOINT_IrqCallbackPtr_t)(uint8_t intNo);
 
+/**
+ * @brief
+ *  Extended GPIO interrupt callback function pointer.
+ * @details
+ *   Parameters:
+ *   @li intNo - The pin interrupt number the callback function is invoked for.
+ *   @li ctx   - Pointer to callback context.
+ */
+typedef void (*GPIOINT_IrqCallbackPtrExt_t)(uint8_t intNo, void *ctx);
+
 /*******************************************************************************
  ******************************   PROTOTYPES   *********************************
  ******************************************************************************/
 void GPIOINT_Init(void);
 void GPIOINT_CallbackRegister(uint8_t intNo, GPIOINT_IrqCallbackPtr_t callbackPtr);
+unsigned int GPIOINT_CallbackRegisterExt(uint8_t pin, GPIOINT_IrqCallbackPtrExt_t callbackPtr, void *callbackCtx);
 __STATIC_INLINE void GPIOINT_CallbackUnRegister(uint8_t intNo);
 
 /***************************************************************************//**

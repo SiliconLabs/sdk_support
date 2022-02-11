@@ -1,7 +1,7 @@
 id: token_manager
 label: Token Manager
 package: platform
-description: Token Manager. This component requires a compatible stack.
+description: Token Manager. This component requires a compatible stack which are ZigBee or Connect.
 category: Services|Token Manager
 quality: production
 requires:
@@ -19,6 +19,9 @@ config_file:
   - path: platform/service/token_manager/config/sl_token_manager_config.h
   - path: platform/service/token_manager/config/sl_custom_token_header.h
   - path: platform/service/token_manager/config/sl_custom_manufacturing_token_header.h
+define:
+  - name: CUSTOM_TOKEN_HEADER
+    value: '"sl_token_manager_af_token_header.h"'
 source:
   - path: platform/service/token_manager/src/sl_token_def.c
   - path: platform/service/token_manager/src/sl_token_manager.c
@@ -28,6 +31,7 @@ include:
     file_list:
       - path: sl_token_api.h
       - path: sl_token_manager.h
+      - path: sl_token_manager_af_token_header.h
       - path: sl_token_manufacturing.h
       - path: sl_token_manufacturing_api.h
       - path: sl_token_manufacturing_series_1.h

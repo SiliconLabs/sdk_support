@@ -23,11 +23,11 @@ config_file:
     condition:
       - device_series_2
       - device_sdid_210
-  - path: platform/radio/rail_lib/plugin/rail_util_rf_path/config/efr32xg24/sl_rail_util_rf_path_config.h
+  - path: platform/radio/rail_lib/plugin/rail_util_rf_path/config/efr32xg25/sl_rail_util_rf_path_config.h
     file_id: rail_util_rf_path_config
     condition:
       - device_series_2
-      - device_sdid_215
+      - device_sdid_220
 include:
   - path: platform/radio/rail_lib/plugin/rail_util_rf_path
     file_list:

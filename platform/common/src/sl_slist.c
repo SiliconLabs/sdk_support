@@ -29,7 +29,6 @@
  ******************************************************************************/
 
 #include "em_assert.h"
-#include "em_core.h"
 #include "sl_slist.h"
 #include <stdbool.h>
 #include <stdlib.h>
@@ -53,8 +52,7 @@ void sl_slist_init(sl_slist_node_t **head)
 void sl_slist_push(sl_slist_node_t **head,
                    sl_slist_node_t *item)
 {
-  EFM_ASSERT((item != NULL)
-			 && (head != NULL));
+  EFM_ASSERT((item != NULL) && (head != NULL));
 
   item->node = *head;
   *head = item;
@@ -68,8 +66,7 @@ void sl_slist_push_back(sl_slist_node_t **head,
 {
   sl_slist_node_t **node_ptr = head;
 
-  EFM_ASSERT((item != NULL)
-             && (head != NULL));
+  EFM_ASSERT((item != NULL) && (head != NULL));
 
   while (*node_ptr != NULL) {
     node_ptr = &((*node_ptr)->node);
@@ -106,8 +103,7 @@ sl_slist_node_t *sl_slist_pop(sl_slist_node_t **head)
 void sl_slist_insert(sl_slist_node_t *item,
                      sl_slist_node_t *pos)
 {
-  EFM_ASSERT((item != NULL)
-		     && (pos != NULL));
+  EFM_ASSERT((item != NULL) && (pos != NULL));
 
   item->node = pos->node;
   pos->node = item;
@@ -121,8 +117,7 @@ void sl_slist_remove(sl_slist_node_t **head,
 {
   sl_slist_node_t **node_ptr;
 
-  EFM_ASSERT((item != NULL)
-		     && (head != NULL));
+  EFM_ASSERT((item != NULL) && (head != NULL));
 
   for (node_ptr = head; *node_ptr != NULL; node_ptr = &((*node_ptr)->node)) {
     if (*node_ptr == item) {
@@ -144,8 +139,7 @@ void sl_slist_sort(sl_slist_node_t **head,
   bool  swapped;
   sl_slist_node_t **pp_item_l;
 
-  EFM_ASSERT((head != NULL)
-             && (cmp_fnct != NULL));
+  EFM_ASSERT((head != NULL) && (cmp_fnct != NULL));
 
   do {
     swapped = false;

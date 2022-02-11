@@ -36,17 +36,23 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h> Coexistence IEEE802.15.4 PHY Configuration
 // <q SL_RAIL_UTIL_COEX_PHY_ENABLED> True: Optimize for Wi-Fi Blocker; False: Optimize for 15.4 Radio Blocker
+// <i> True: Optimize for Wi-Fi Blocker; False: Optimize for 15.4 Radio Blocker
 // <i> Default: 1
 #define SL_RAIL_UTIL_COEX_PHY_ENABLED 1
 // <h> Phy Select Signal (Phy Select) Configuration
 // <e SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT> Enable/Disable
+// <i> True: Runtime Optimization; False: No Runtime Optimization
 // <i> Default: 0
 #define SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT 0
-// <q SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL> Polarity of PHY Select signal level
+// <o SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL> Polarity of PHY Select signal level
+//   <1=> High
+//   <0=> Low
+// <i> Polarity of PHY Select signal
 // <i> Default: 1
 #define SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL 1
 // <o SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT> Wi-Fi Optimization will be selected for 1-254 ms after 'Wi-Fi Select' deasserted
 // <0-255:1>
+// <i> Wi-Fi Optimization will be selected for 1-254 ms after 'Wi-Fi Select' deasserted
 // <i> Default: 0
 #define SL_RAIL_UTIL_COEX_DEFAULT_PHY_SELECT_TIMEOUT 0
 // </e>

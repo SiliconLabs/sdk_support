@@ -319,14 +319,8 @@ void emEndBufferUsage(void);
 //----------------------------------------------------------------
 // The heap is allocated elsewhere.
 
-#ifdef EMBER_STACK_CONNECT
-// temporary workaround for merging unified mac without merging flex
 extern uint16_t heapMemory[];
 extern const uint32_t heapMemorySize;
-#else
-extern uint16_t *heapMemory;
-extern uint32_t heapMemorySize;
-#endif
 
 // This is a no-op on real hardware.  It only has an effect in simulation.
 void emResizeHeap(uint32_t newSize);

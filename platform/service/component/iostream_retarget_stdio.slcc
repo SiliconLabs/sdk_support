@@ -13,3 +13,6 @@ provides:
     allow_multiple: true
 requires:
   - name: iostream
+template_contribution:
+  - name: component_catalog
+    value: retarget_stdio

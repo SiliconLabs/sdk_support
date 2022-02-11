@@ -68,9 +68,9 @@ extern "C" {
  *
  *   The main purpose of em_crypto.h is to implement a thin software interface
  *   for the CRYPTO hardware functions especially for the accelerated APIs of
- *   the mbedTLS library. Additionally em_crypto.h implement the AES API of the
- *   em_aes.h (supported by classic EFM32) for backwards compatibility. The
- *   following list summarizes the em_crypto.h inteface:
+ *   the mbedTLS library. Additionally, em_crypto.h implement the AES API of the
+ *   em_aes.h (supported by classic EFM32) for backward compatibility. The
+ *   following list summarizes the em_crypto.h interface:
  *   @li AES (Advanced Encryption Standard) @ref crypto_aes
  *   @li SHA (Secure Hash Algorithm) @ref crypto_sha
  *   @li Big Integer multiplier @ref crypto_mul
@@ -85,20 +85,20 @@ extern "C" {
  *   @li ECB - Electronic Code Book mode
  *   @li OFB - Output Feedback mode
  *
- *   For the AES APIs input/output data (plaintext, ciphertext, key, and so on) are
+ *   For the AES APIs, input/output data (plaintext, ciphertext, key, and so on) are
  *   treated as byte arrays, starting with most significant byte. In other words, 32 bytes
  *   of plaintext (B0...B31) is located in memory in the same order, with B0 at
  *   the lower address and B31 at the higher address.
  *
- *   Byte arrays must always be a multiple of AES block size, ie. a multiple
+ *   Byte arrays must always be a multiple of AES block size, i.e., a multiple
  *   of 16. Padding, if required, is done at the end of the byte array.
  *
- *   Byte arrays should be word (32 bit) aligned for performance
+ *   Byte arrays should be word (32 bit)-aligned for performance
  *   considerations, since the array is accessed with 32 bit access type.
- *   The core MCUs supports unaligned accesses, but with a performance penalty.
+ *   The core MCUs supports unaligned accesses but with a performance penalty.
  *
- *   It is possible to specify the same output buffer as input buffer as long
- *   as they point to the same address. In that case the provided input buffer
+ *   You can specify the same output buffer as input buffer as long
+ *   as they point to the same address. In that case, the provided input buffer
  *   is replaced with the encrypted/decrypted output. Notice that the buffers
  *   must be exactly overlapping. If partly overlapping, the behavior is
  *   undefined.
@@ -141,19 +141,19 @@ extern "C" {
  *   huge amount of multiplication and square operations to
  *   implement modular exponentiation.
  *   Some RSA implementations use a number representation including arrays
- *   of 32bit words of variable size. Compile with
- *   -D USE_VARIABLE_SIZED_DATA_LOADS in order to load these numbers
+ *   of 32-bit words of variable size. Compile with
+ *   -D USE_VARIABLE_SIZED_DATA_LOADS to load these numbers
  *   directly into CRYPTO without converting the number representation.
  *
  *   @n @section crypto_exec Load and Execute Instruction Sequences
  *   The functions for loading data and executing instruction sequences can
- *   be used to implement complex algorithms like elliptic curve cryptography
+ *   be used to implement complex algorithms, such as elliptic curve cryptography
  *   (ECC)) and authenticated encryption algorithms. There are two typical
- *   modes of operation:
+ *   modes of operation, as follows:
  *   @li Multi-sequence operation
  *   @li Single static instruction sequence operation
  *
- *   In multi-sequence mode the software starts by loading input data,
+ *   In multi-sequence mode, the software starts by loading input data,
  *   an instruction sequence, execute, and finally read the result. This
  *   process is repeated until the full crypto operation is complete.
  *
@@ -170,7 +170,7 @@ extern "C" {
  *   @li @ref CRYPTO_DDataWrite - Write 256 bits to a DDATA register.
  *   @li @ref CRYPTO_QDataWrite - Write 512 bits to a QDATA register.
  *
- *   In order to read output data from the CRYPTO module use any of the
+ *   To read output data from the CRYPTO module use any of the
  *   following functions:
  *   @li @ref CRYPTO_DataRead  - Read 128 bits from a DATA register.
  *   @li @ref CRYPTO_DDataRead - Read 256 bits from a DDATA register.
@@ -772,7 +772,7 @@ CRYPTO_WARNINGS_NO_CAST_ALIGN
 __STATIC_INLINE void CRYPTO_DataWriteUnaligned(volatile uint32_t * reg,
                                                const uint8_t * val)
 {
-  /* Check data is 32bit aligned, if not move to temporary buffer before
+  /* Check data is 32-bit aligned, if not move to temporary buffer before
      writing.*/
   if ((uintptr_t)val & 0x3) {
     uint32_t temp[4];

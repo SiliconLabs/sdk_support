@@ -78,7 +78,11 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
   init_{{ instance }}.parity = SL_IOSTREAM_USART_{{ instance | upper }}_PARITY;
   init_{{ instance }}.stopbits = SL_IOSTREAM_USART_{{ instance | upper }}_STOP_BITS;
 #if (_SILICON_LABS_32B_SERIES > 0)
+#if (SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE != uartFlowControlSoftware)
   init_{{ instance }}.hwFlowControl = SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE;
+#else
+  init_{{ instance }}.hwFlowControl = usartHwFlowControlNone;
+#endif
 #endif
   sl_iostream_usart_config_t config_{{ instance }} = { {# create init struct #}
     .usart = SL_IOSTREAM_USART_{{ instance | upper }}_PERIPHERAL,
@@ -119,6 +123,15 @@ sl_status_t sl_iostream_usart_init_{{ instance }}(void)
     .rx_buffer_length = SL_IOSTREAM_USART_{{ instance | upper }}_RX_BUFFER_SIZE,
     .lf_to_crlf = SL_IOSTREAM_USART_{{ instance | upper }}_CONVERT_BY_DEFAULT_LF_TO_CRLF,
     .rx_when_sleeping = SL_IOSTREAM_USART_{{ instance | upper }}_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION,
+#if defined(SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE)
+#if (SL_IOSTREAM_USART_{{ instance | upper }}_FLOW_CONTROL_TYPE == uartFlowControlSoftware)
+    .sw_flow_control = true,
+#else
+    .sw_flow_control = false,
+#endif
+#else
+    .sw_flow_control = false,
+#endif
   };
   // Instantiate usart instance {# Initialize usart instance #}
   status = sl_iostream_usart_init(&sl_iostream_{{ instance }},

@@ -9,6 +9,12 @@
 #include <common/include/rtos_utils.h>
 #include <common/include/rtos_err.h>
 
+#if SL_WFX_SLK_CURVE25519
+// Use ECDH legacy context format
+#define MBEDTLS_ECP_RESTARTABLE
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
+#endif
+
 #include "mbedtls/ecdh.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"

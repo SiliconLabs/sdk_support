@@ -29,11 +29,13 @@
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup mpu MPU RAM execution disable utilities
- * @brief Simple utilities to disable execution on certain memory regions
+ * @addtogroup mpu RAM execution disable
+ * @brief RAM execution disable utilities can be used to disable execution from
+ *        RAM and other selected memory regions.
  * @details
- *   Simple utilities to disable execution from RAM and other selected memory
- *   regions. Useful to protect against code injection attacks.
+ *   RAM execution disable utilities are useful to protect against code injection attacks.
+ *   These utilities make use of MPU to disable execution from RAM and other selected
+ *   memory regions.
  *
  * @{
  ******************************************************************************/

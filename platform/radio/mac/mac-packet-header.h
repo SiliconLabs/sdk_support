@@ -21,6 +21,7 @@
 
 //------------------------------------------------------------------------------
 // MAC Info definitions
+#include PLATFORM_HEADER
 
 // These are from 802.15.4 except that we shift them up by two bits to fit
 // where we put them in MAC info byte.

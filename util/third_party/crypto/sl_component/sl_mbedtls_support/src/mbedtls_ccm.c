@@ -45,6 +45,7 @@
 #if defined(MBEDTLS_AES_C) && defined(MBEDTLS_CCM_C) && defined(MBEDTLS_CCM_ALT)
 
 #include "mbedtls/ccm.h"
+#include "mbedtls/error.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -93,9 +94,9 @@ static int psa_status_to_mbedtls(psa_status_t status)
     case PSA_ERROR_INVALID_SIGNATURE:
       return MBEDTLS_ERR_CCM_AUTH_FAILED;
     case PSA_ERROR_HARDWARE_FAILURE:
-      return MBEDTLS_ERR_CIPHER_HW_ACCEL_FAILED;
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     case PSA_ERROR_NOT_SUPPORTED:
-      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     default:
       return MBEDTLS_ERR_CCM_BAD_INPUT;
   }

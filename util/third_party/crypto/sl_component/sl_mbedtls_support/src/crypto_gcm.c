@@ -62,6 +62,7 @@
 #include "mbedtls/gcm.h"
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
+#include "mbedtls/error.h"
 #include <string.h>
 
 /*
@@ -198,36 +199,6 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
   return(0);
 }
 
-// Read value of a CRYPTO DATA register into an unaligned RAM buffer
-static inline void crypto_data_read_unaligned(volatile uint32_t * reg,
-                                              uint8_t * buf)
-{
-  // Check buffer pointer is 32bit-aligned, if not, read into temporary buffer
-  // and then move to user buffer.
-  if ((uint32_t)buf & 0x3) {
-    uint32_t temp[4];
-    CRYPTO_DataRead(reg, temp);
-    memcpy(buf, temp, 16);
-  } else {
-    CRYPTO_DataRead(reg, (uint32_t *)buf);
-  }
-}
-
-// Write data in an unaligned RAM buffer into CRYPTO DATA register
-__STATIC_INLINE void crypto_data_write_unaligned(volatile uint32_t * reg,
-                                                 const uint8_t * buf)
-{
-  // Check if buffer pointer is 32bit-aligned, if not move to temporary buffer
-  // before writing.
-  if ((uint32_t)buf & 0x3) {
-    uint32_t temp[4];
-    memcpy(temp, buf, 16);
-    CRYPTO_DataWrite(reg, temp);
-  } else {
-    CRYPTO_DataWrite(reg, (const uint32_t *)buf);
-  }
-}
-
 // Write data in an unaligned RAM buffer into CRYPTO DATA register
 __STATIC_INLINE void gcm_restore_crypto_state(mbedtls_gcm_context *ctx,
                                               CRYPTO_TypeDef *crypto)
@@ -265,20 +236,16 @@ __STATIC_INLINE void gcm_restore_crypto_state(mbedtls_gcm_context *ctx,
 int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        int mode,
                        const unsigned char *iv,
-                       size_t iv_len,
-                       const unsigned char *add,
-                       size_t add_len)
+                       size_t iv_len)
 {
   bool            store_state_and_release;
   CRYPTO_TypeDef *crypto;
-  uint32_t        temp[4];
   CORE_DECLARE_IRQ_STATE;
 
   GCM_VALIDATE_RET(ctx != NULL);
   GCM_VALIDATE_RET(iv != NULL);
-  GCM_VALIDATE_RET(add_len == 0 || add != NULL);
 
-  int status = sli_validate_gcm_params(16, iv_len, add_len);
+  int status = sli_validate_gcm_params(16, iv_len, 0);
   if (status) {
     return status;
   }
@@ -345,20 +312,87 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
 
   CORE_EXIT_CRITICAL();
 
-  // Remember mode and additional authentication length
+  // Set mode and initial lengths
   ctx->mode = mode;
-  ctx->add_len = add_len;
-  /* Reset data length to zero. */
+  ctx->add_len = 0;
   ctx->len = 0;
 
+  if (store_state_and_release) {
+    CORE_ENTER_CRITICAL();
+    // Move GHASH state in DDATA0 temporarily to DATA0 (in DDATA2) in order to
+    // read only the 128 bits value (since DDATA0 is 256 bits wide).
+    crypto->CMD = CRYPTO_CMD_INSTR_DDATA0TODDATA2;
+    CRYPTO_DataRead(&crypto->DATA0, ctx->ghash_state);
+    CRYPTO_DataRead(&crypto->DATA2, ctx->ghash_key);
+    CORE_EXIT_CRITICAL();
+
+    crypto_management_release(crypto);
+    ctx->device = 0;
+  }
+
+  return(0);
+}
+
+int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
+                          const unsigned char *add,
+                          size_t add_len)
+{
+  bool            restore_state_and_release;
+  CRYPTO_TypeDef *crypto;
+  uint32_t        temp[4];
+  unsigned int    complete_blocks_in_bytes;
+  bool            last_block_is_incomplete;
+  CORE_DECLARE_IRQ_STATE;
+
+  GCM_VALIDATE_RET(add_len == 0 || add != NULL);
+
+  int status = sli_validate_gcm_params(16, 12, add_len);
+  if (status) {
+    return status;
+  }
+
+  if (add_len == 0) {
+    return 0;
+  }
+
+  if (ctx->add_len % 16 != 0) {
+    // Cannot update AD anymore after a non-block-aligned input
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  }
+
+  // Check if this context has already acquired a crypto device, which means
+  // the caller should be mbedtls_gcm_crypt_and_tag() which will perform GCM
+  // on a full block and call starts, update, finish in a sequence meaning we
+  // will not need to store the state in between.
+  if (ctx->device == 0) {
+    ctx->device = crypto_management_acquire();
+    crypto = ctx->device;
+    restore_state_and_release = true;
+    gcm_restore_crypto_state(ctx, crypto);
+  } else {
+    restore_state_and_release = false;
+    crypto = ctx->device;
+  }
+
+  ctx->add_len += add_len;
+
   // Process additional authentication data if present.
-  if (add_len) {
-    crypto->SEQCTRLB = 0; // Sequence B is not used for auth data
+  crypto->SEQCTRLB = 0; // Sequence B is not used for auth data
+  while (add_len) {
+    if (add_len > (_CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u)) {
+      complete_blocks_in_bytes = _CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u;
+      last_block_is_incomplete = false;
+      add_len -= complete_blocks_in_bytes;
+    } else {
+      // Calculate total sequence length 16*num_complete_blocks, plus 16 if
+      // there is an incomplete block at the end.
+      last_block_is_incomplete = add_len & 0xF;
+      complete_blocks_in_bytes = add_len & 0xFFFFFFF0u;
+      add_len = add_len & 0xF;
+    }
 
     // Set SEQCTRL_LENGTHA to loop through all blocks
-    // We need to do set SEQCTRL_LENGTHA to 16*num_complete_blocks, plus 16 if
-    // there is an in-complete block at the end.
-    crypto->SEQCTRL = (add_len & 0xFFFFFFF0) + ((add_len & 0xF) ? 16 : 0);
+    crypto->SEQCTRL = complete_blocks_in_bytes + (last_block_is_incomplete ? 16 : 0);
 
     CORE_ENTER_CRITICAL();
 
@@ -376,20 +410,23 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                      CRYPTO_CMD_INSTR_BBSWAP128
                      );
 
-    // First loop through and write data for all complete blocks
-    while (add_len >= 16) {
-      add_len  -= 16;
+    // Loop through all complete blocks and write additional auth data to CRYPTO.
+    while (complete_blocks_in_bytes >= 16) {
+      complete_blocks_in_bytes  -= 16;
       // Wait for sequencer to accept data
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-      crypto_data_write_unaligned(&crypto->DATA0, add);
+      CRYPTO_DataWriteUnaligned(&crypto->DATA0, add);
       add      += 16;
     }
-    if (add_len > 0) {
-      // For last in-complete block, use temporary buffer for zero padding.
+    if (last_block_is_incomplete) {
+      // For last incomplete block, use temporary buffer for zero padding.
       memset(temp, 0, 16);
       memcpy(temp, add, add_len);
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
       CRYPTO_DataWrite(&crypto->DATA0, temp);
+
+      // Done,, set add_len to zero to exit loop.
+      add_len = 0;
     }
     // Wait for completion
     while (!CRYPTO_InstructionSequenceDone(crypto)) ;
@@ -397,7 +434,7 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
     CORE_EXIT_CRITICAL();
   }
 
-  if (store_state_and_release) {
+  if (restore_state_and_release) {
     CORE_ENTER_CRITICAL();
     // Move GHASH state in DDATA0 temporarily to DATA0 (in DDATA2) in order to
     // read only the 128 bits value (since DDATA0 is 256 bits wide).
@@ -416,29 +453,36 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
 // Update a GCM streaming operation with more input data to be
 // encrypted or decrypted.
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
-                       size_t length,
-                       const unsigned char *input,
-                       unsigned char *output)
+                       const unsigned char *input, size_t input_length,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length)
 {
   bool            restore_state_and_release;
   CRYPTO_TypeDef *crypto;
   uint32_t        temp[4];
-  unsigned int    sequence_loop_length;
+  unsigned int    complete_blocks_in_bytes;
   bool            last_block_is_incomplete;
   CORE_DECLARE_IRQ_STATE;
 
   GCM_VALIDATE_RET(ctx != NULL);
-  GCM_VALIDATE_RET(length == 0 || input != NULL);
-  GCM_VALIDATE_RET(length == 0 || output != NULL);
+  GCM_VALIDATE_RET(input_length == 0 || input != NULL);
+  GCM_VALIDATE_RET(input_length == 0 || output != NULL);
 
-  if (length == 0) {
+  // Set output length to zero initially
+  *output_length = 0;
+
+  if (input_length > output_size) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
+
+  if (input_length == 0) {
     return 0;
   }
 
   // Total length is restricted to 2^39 - 256 bits, ie 2^36 - 2^5 bytes
   // Also check for possible overflow.
-  if (ctx->len + length < ctx->len
-      || (uint64_t) ctx->len + length > 0xFFFFFFFE0ull) {
+  if (ctx->len + input_length < ctx->len
+      || (uint64_t) ctx->len + input_length > 0xFFFFFFFE0ull) {
     return(MBEDTLS_ERR_GCM_BAD_INPUT);
   }
 
@@ -456,122 +500,131 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     crypto = ctx->device;
   }
 
-  ctx->len += length;
+  ctx->len += input_length;
 
-  // Calculate total sequence length 16*num_complete_blocks, plus 16 if
-  // there is an in-complete block at the end.
-  last_block_is_incomplete = length & 0xF;
-  sequence_loop_length =
-    (length & 0xFFFFFFF0) + (last_block_is_incomplete ? 16 : 0);
-
-  CORE_ENTER_CRITICAL();
-
-  if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
-    crypto->SEQCTRL  = sequence_loop_length;
-    crypto->SEQCTRLB = 0;
-
-    // Start decryption sequence
-    CRYPTO_EXECUTE_14(crypto,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Ciphertext
-
-                      // GHASH_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
-                      CRYPTO_CMD_INSTR_XOR,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-                      CRYPTO_CMD_INSTR_DDATA0TODDATA1,
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
-                      CRYPTO_CMD_INSTR_MMUL,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-
-                      // GCTR_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_DATA0TODATA3,
-                      CRYPTO_CMD_INSTR_DATA1INC,
-                      CRYPTO_CMD_INSTR_DATA1TODATA0,
-                      CRYPTO_CMD_INSTR_AESENC,
-                      CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
-                      CRYPTO_CMD_INSTR_DATATODMA0   // Store Plaintext
-                      );
-  } else {
-    // For encryption we need to handle the last block differently if it is
-    // incomplete. We need to zeroize bits outside len(PT) in DATA0 before
-    // the GHASH operation. We do this by using a DMA0TODATA instruction in
-    // the B sequence, meaning that the sequencer will wait for the MCU core
-    // to zeroize bits and write them back to DATA0.
-    if (last_block_is_incomplete) {
-      crypto->SEQCTRL  = sequence_loop_length - 16;
-      crypto->SEQCTRLB = 16;
+  while (input_length) {
+    if (input_length > (_CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u)) {
+      last_block_is_incomplete = false;
+      complete_blocks_in_bytes = _CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u;
+      input_length -= complete_blocks_in_bytes;
     } else {
-      crypto->SEQCTRL  = sequence_loop_length;
+      // Calculate total sequence length 16*num_complete_blocks, plus 16 if
+      // there is an incomplete block at the end.
+      last_block_is_incomplete = input_length & 0xF;
+      complete_blocks_in_bytes = input_length & 0xFFFFFFF0u;
+      input_length = input_length & 0xF; // length of last incomplete block
+    }
+
+    CORE_ENTER_CRITICAL();
+
+    if (ctx->mode == MBEDTLS_GCM_DECRYPT) {
+      crypto->SEQCTRL  = complete_blocks_in_bytes + (last_block_is_incomplete ? 16 : 0);
       crypto->SEQCTRLB = 0;
+
+      // Start decryption sequence
+      CRYPTO_EXECUTE_14(crypto,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Ciphertext
+
+                        // GHASH_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
+                        CRYPTO_CMD_INSTR_XOR,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+                        CRYPTO_CMD_INSTR_DDATA0TODDATA1,
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
+                        CRYPTO_CMD_INSTR_MMUL,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+
+                        // GCTR_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_DATA0TODATA3,
+                        CRYPTO_CMD_INSTR_DATA1INC,
+                        CRYPTO_CMD_INSTR_DATA1TODATA0,
+                        CRYPTO_CMD_INSTR_AESENC,
+                        CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
+                        CRYPTO_CMD_INSTR_DATATODMA0   // Store Plaintext
+                        );
+    } else {
+      // For encryption we need to handle the last block differently if it is
+      // incomplete. We need to zeroize bits outside len(PT) in DATA0 before
+      // the GHASH operation. We do this by using a DMA0TODATA instruction in
+      // the B sequence, meaning that the sequencer will wait for the MCU core
+      // to zeroize bits and write them back to DATA0.
+      crypto->SEQCTRL  = complete_blocks_in_bytes;
+      crypto->SEQCTRLB = last_block_is_incomplete ? 16 : 0;
+
+      // Start encryption sequence
+      CRYPTO_EXECUTE_17(crypto,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Plaintext
+
+                        // GCTR_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_DATA0TODATA3,
+                        CRYPTO_CMD_INSTR_DATA1INC,
+                        CRYPTO_CMD_INSTR_DATA1TODATA0,
+                        CRYPTO_CMD_INSTR_AESENC,
+                        CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
+                        CRYPTO_CMD_INSTR_DATATODMA0,  // Store Ciphertext
+
+                        CRYPTO_CMD_INSTR_EXECIFB,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load X XOR MSB(CIPH(CB))
+                        CRYPTO_CMD_INSTR_EXECALWAYS,
+
+                        // GHASH_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
+                        CRYPTO_CMD_INSTR_XOR,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+                        CRYPTO_CMD_INSTR_DDATA0TODDATA1,
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
+                        CRYPTO_CMD_INSTR_MMUL,
+                        CRYPTO_CMD_INSTR_BBSWAP128
+                        );
     }
 
-    // Start encryption sequence
-    CRYPTO_EXECUTE_17(crypto,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Plaintext
+    // Loop through all complete blocks, write input data and read output data.
+    while (complete_blocks_in_bytes >= 16) {
+      complete_blocks_in_bytes -= 16;
+      // Wait for sequencer to accept data
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      CRYPTO_DataWriteUnaligned(&crypto->DATA0, input);
+      input   += 16;
+      // Wait for sequencer to finish iteration and make data available
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      CRYPTO_DataReadUnaligned(&crypto->DATA0, output);
+      output  += 16;
+      *output_length += 16;
+    }
 
-                      // GCTR_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_DATA0TODATA3,
-                      CRYPTO_CMD_INSTR_DATA1INC,
-                      CRYPTO_CMD_INSTR_DATA1TODATA0,
-                      CRYPTO_CMD_INSTR_AESENC,
-                      CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
-                      CRYPTO_CMD_INSTR_DATATODMA0,  // Store Ciphertext
+    if (last_block_is_incomplete) {
+      // The last block is incomplete, so we need to zero pad bits outside len(PT)
+      // Use temporary buffer for zero padding
+      memset(temp, 0, 16);
+      memcpy(temp, input, input_length);
 
-                      CRYPTO_CMD_INSTR_EXECIFB,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load X XOR MSB(CIPH(CB))
-                      CRYPTO_CMD_INSTR_EXECALWAYS,
-
-                      // GHASH_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
-                      CRYPTO_CMD_INSTR_XOR,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-                      CRYPTO_CMD_INSTR_DDATA0TODDATA1,
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
-                      CRYPTO_CMD_INSTR_MMUL,
-                      CRYPTO_CMD_INSTR_BBSWAP128
-                      );
-  }
-
-  while (length >= 16) {
-    length  -= 16;
-    // Wait for sequencer to accept data
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    crypto_data_write_unaligned(&crypto->DATA0, input);
-    input   += 16;
-    // Wait for sequencer to finish iteration and make data available
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    crypto_data_read_unaligned(&crypto->DATA0, output);
-    output  += 16;
-  }
-
-  if (length > 0) {
-    // The last block is incomplete, so we need to zero pad bits outside len(PT)
-    // Use temporary buffer for zero padding
-    memset(temp, 0, 16);
-    memcpy(temp, input, length);
-
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    // Write last input data (PT/CT)
-    CRYPTO_DataWrite(&crypto->DATA0, temp);
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    // Read last output data (CT/PT)
-    CRYPTO_DataRead(&crypto->DATA0, temp);
-
-    if (ctx->mode == MBEDTLS_GCM_ENCRYPT) {
-      // For encryption, when the last block is incomplete we need to
-      // zeroize bits outside len(PT) in DATA0 before the GHASH operation.
-      memset(&((uint8_t*)temp)[length], 0, 16 - length);
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      // Write last input data (PT/CT)
       CRYPTO_DataWrite(&crypto->DATA0, temp);
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      // Read last output data (CT/PT)
+      CRYPTO_DataRead(&crypto->DATA0, temp);
+
+      if (ctx->mode == MBEDTLS_GCM_ENCRYPT) {
+        // For encryption, when the last block is incomplete we need to
+        // zeroize bits outside len(PT) in DATA0 before the GHASH operation.
+        memset(&((uint8_t*)temp)[input_length], 0, 16 - input_length);
+        CRYPTO_DataWrite(&crypto->DATA0, temp);
+      }
+
+      // Copy to output buffer now while CRYPTO performs GHASH.
+      memcpy(output, temp, input_length);
+      *output_length += input_length;
+
+      // Done,, set input_length to zero to exit loop.
+      input_length = 0;
     }
 
-    // Copy to output buffer now while CRYPTO performs GHASH.
-    memcpy(output, temp, length);
+    // Wait for completion
+    while (!CRYPTO_InstructionSequenceDone(crypto)) ;
+
+    CORE_EXIT_CRITICAL();
   }
-
-  // Wait for completion
-  while (!CRYPTO_InstructionSequenceDone(crypto)) ;
-
-  CORE_EXIT_CRITICAL();
 
   if (restore_state_and_release) {
     CORE_ENTER_CRITICAL();
@@ -591,9 +644,18 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
 
 // Finish GCM streaming operation
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length,
                        unsigned char *tag,
                        size_t tag_len)
 {
+  // Voiding these because our implementation does not support
+  // partial-block input (i.e. passing a partial block to
+  // update() will have caused the operation to finish already)
+  (void) output;
+  (void) output_size;
+  *output_length = 0;
+
   bool            restore_state_and_release;
   uint64_t        bit_len;
   uint32_t        temp[4];
@@ -701,26 +763,33 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
                               unsigned char *tag)
 {
   int ret;
+  size_t olen;
 
   ctx->device = crypto_management_acquire();
 
-  ret = mbedtls_gcm_starts(ctx, mode, iv, iv_len, add, add_len);
+  ret = mbedtls_gcm_starts(ctx, mode, iv, iv_len);
   if (ret != 0) {
     goto exit;
   }
 
-  ret = mbedtls_gcm_update(ctx, length, input, output);
+  ret = mbedtls_gcm_update_ad(ctx, add, add_len);
   if (ret != 0) {
     goto exit;
   }
 
-  ret = mbedtls_gcm_finish(ctx, tag, tag_len);
+  ret = mbedtls_gcm_update(ctx, input, length, output, length, &olen);
+  if (ret != 0) {
+    goto exit;
+  }
+
+  ret = mbedtls_gcm_finish(ctx, NULL, 0, &olen, tag, tag_len);
   if (ret != 0) {
     goto exit;
   }
 
   exit:
   crypto_management_release(ctx->device);
+  ctx->device = NULL;
   return(ret);
 }
 

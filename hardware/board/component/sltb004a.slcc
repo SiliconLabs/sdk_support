@@ -10,8 +10,13 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_tb
+- define:
+  - name: SL_KIT_NAME
+    value: '"SLTB004A"'
+  - name: SL_KIT_REV
+    value: '"B06"'
 - tag:
   - kit:opn:SLTB004A
   - kit:pn:TB004
   - kit:variant:A
-  - kit:revision:B05
+  - kit:revision:B06

@@ -8,10 +8,9 @@
 #  *      is mounted onto the board you are trying to characterize.
 #  *   2. In railtest, run the "sweepTxPower" command. As you sweep through
 #  *      the power levels, record the dBm output from a spectrum analyzer
-#  *      into SubgigPowerMapping.csv or 2p4PowerMapping.csv, depending
+#  *      into the chip specific csv file, depending
 #  *      on the PA you are trying to characterize.
-#  *   3. Run this python script from the same directory as 2p4PowerMapping.csv
-#  *      and SubgigPowerMapping.csv.
+#  *   3. Run this python script from the same directory as the csv file.
 #  *   4. Make a copy of pa_curves_efr32.h, copy the results of this python
 #  *      script into the appropriate macro in that file. If you only need one
 #  *      PA, you only need to copy the data for that PA, not both.

@@ -31,6 +31,10 @@
 #ifndef SL_RAIL_UTIL_PROTOCOL_TYPES_H
 #define SL_RAIL_UTIL_PROTOCOL_TYPES_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum sl_rail_util_protocol_type{
   SL_RAIL_UTIL_PROTOCOL_PROPRIETARY, /* use rail_config.c/h */
   SL_RAIL_UTIL_PROTOCOL_BLE_1MBPS,
@@ -91,5 +95,9 @@ typedef enum sl_rail_util_protocol_type{
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR1) \
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR2) \
    || (x == SL_RAIL_UTIL_PROTOCOL_ZWAVE_US_LR_END_DEVICE))
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_PROTOCOL_TYPES_H

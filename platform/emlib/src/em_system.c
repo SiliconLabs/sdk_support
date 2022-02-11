@@ -38,6 +38,19 @@
  ******************************************************************************/
 
 /*******************************************************************************
+ *********************************   DEFINES   *********************************
+ ******************************************************************************/
+
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+/* Bit mask used to extract the part number value without the new naming
+ * bitfield. */
+#define SYSCFG_CHIPREV_PARTNUMBER1  0xFE0
+#define SYSCFG_CHIPREV_PARTNUMBER0  0xF
+
+/** @endcond */
+
+/*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
  ******************************************************************************/
 
@@ -50,13 +63,17 @@
  ******************************************************************************/
 void SYSTEM_ChipRevisionGet(SYSTEM_ChipRevision_TypeDef *rev)
 {
-#if defined(_SYSCFG_CHIPREV_FAMILY_MASK)
+#if defined(_SYSCFG_CHIPREV_FAMILY_MASK) || defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
   /* On series-2 (and higher) the revision info is in the SYSCFG->CHIPREV register. */
 #if defined(CMU_CLKEN0_SYSCFG)
   CMU->CLKEN0_SET = CMU_CLKEN0_SYSCFG;
 #endif
   uint32_t chiprev = SYSCFG->CHIPREV;
+#if defined(_SYSCFG_CHIPREV_PARTNUMBER_MASK)
+  rev->partNumber = ((chiprev & SYSCFG_CHIPREV_PARTNUMBER1) >> 5) | (chiprev & SYSCFG_CHIPREV_PARTNUMBER0);
+#else
   rev->family = (chiprev & _SYSCFG_CHIPREV_FAMILY_MASK) >> _SYSCFG_CHIPREV_FAMILY_SHIFT;
+#endif
   rev->major  = (chiprev & _SYSCFG_CHIPREV_MAJOR_MASK)  >> _SYSCFG_CHIPREV_MAJOR_SHIFT;
   rev->minor  = (chiprev & _SYSCFG_CHIPREV_MINOR_MASK)  >> _SYSCFG_CHIPREV_MINOR_SHIFT;
 #else
@@ -139,6 +156,7 @@ bool SYSTEM_GetCalibrationValue(volatile uint32_t *regAddress)
 SYSTEM_SecurityCapability_TypeDef SYSTEM_GetSecurityCapability(void)
 {
   SYSTEM_SecurityCapability_TypeDef sc;
+
 #if (_SILICON_LABS_32B_SERIES == 0)
   sc = securityCapabilityNA;
 #elif (_SILICON_LABS_32B_SERIES == 1)

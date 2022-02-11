@@ -15,31 +15,58 @@
  *
  ******************************************************************************/
 
+#include "rail.h"
 #include "em_core.h"
 #include "em_cmu.h"
 #include "em_prs.h"
 #include "coexistence-hal.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_WIFI_SIMULATOR_PRESENT
+#include "coexistence_wifi_simulator.h"
+#endif
+
 #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
-static COEX_HAL_GpioConfig_t phySelectCfg = {
+COEX_HAL_GpioConfig_t sli_coex_phySelectCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_PHY_SELECT_PORT,
   .pin = SL_RAIL_UTIL_COEX_PHY_SELECT_PIN,
-  .intNo = SL_RAIL_UTIL_COEX_PHY_SELECT_INTNO,
   .polarity = SL_RAIL_UTIL_COEX_PHY_SELECT_ASSERT_LEVEL
 };
 #endif //SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
 
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+COEX_HAL_GpioConfig_t sli_coex_wifiTxCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
+  .port = SL_RAIL_UTIL_COEX_WIFI_TX_PORT,
+  .pin = SL_RAIL_UTIL_COEX_WIFI_TX_PIN,
+  .polarity = SL_RAIL_UTIL_COEX_WIFI_TX_ASSERT_LEVEL
+};
+#endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+
 #ifdef SL_RAIL_UTIL_COEX_GNT_PORT
-static COEX_HAL_GpioConfig_t ptaGntCfg = {
+COEX_HAL_GpioConfig_t sli_coex_ptaGntCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_GNT_PORT,
   .pin = SL_RAIL_UTIL_COEX_GNT_PIN,
-  .intNo = SL_RAIL_UTIL_COEX_GNT_INTNO,
   .polarity = SL_RAIL_UTIL_COEX_GNT_ASSERT_LEVEL
 };
 #endif //SL_RAIL_UTIL_COEX_GNT_PORT
 
 #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
-static COEX_HAL_GpioConfig_t ptaPriCfg = {
+COEX_HAL_GpioConfig_t sli_coex_ptaPriCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_PRI_PORT,
   .pin = SL_RAIL_UTIL_COEX_PRI_PIN,
   .polarity = SL_RAIL_UTIL_COEX_PRI_ASSERT_LEVEL
@@ -47,28 +74,34 @@ static COEX_HAL_GpioConfig_t ptaPriCfg = {
 #endif //SL_RAIL_UTIL_COEX_PRI_PORT
 
 #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
-static COEX_HAL_GpioConfig_t ptaReqCfg = {
+COEX_HAL_GpioConfig_t sli_coex_ptaReqCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_REQ_PORT,
   .pin = SL_RAIL_UTIL_COEX_REQ_PIN,
-  .intNo = SL_RAIL_UTIL_COEX_REQ_INTNO,
   .polarity = SL_RAIL_UTIL_COEX_REQ_ASSERT_LEVEL
 };
 #endif //SL_RAIL_UTIL_COEX_REQ_PORT
 
 #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
-static COEX_HAL_GpioConfig_t ptaPwmReqCfg = {
+COEX_HAL_GpioConfig_t sli_coex_ptaPwmReqCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_PWM_REQ_PORT,
   .pin = SL_RAIL_UTIL_COEX_PWM_REQ_PIN,
-  .intNo = SL_RAIL_UTIL_COEX_PWM_REQ_INTNO,
   .polarity = SL_RAIL_UTIL_COEX_PWM_REQ_ASSERT_LEVEL
 };
 #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
 
 #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
-static COEX_HAL_GpioConfig_t rhoCfg = {
+COEX_HAL_GpioConfig_t sli_coex_rhoCfg = {
+  .signal = INVALID_SIGNAL,
+  .source = INVALID_SOURCE,
+  .intNo = INVALID_INTERRUPT,
   .port = SL_RAIL_UTIL_COEX_RHO_PORT,
   .pin = SL_RAIL_UTIL_COEX_RHO_PIN,
-  .intNo = SL_RAIL_UTIL_COEX_RHO_INTNO,
   .polarity = SL_RAIL_UTIL_COEX_RHO_ASSERT_LEVEL
 };
 #endif //SL_RAIL_UTIL_COEX_RHO_PORT
@@ -79,30 +112,50 @@ static void (*reqCallback)(void) = NULL;
 static void (*gntCallback)(void) = NULL;
 static void (*rhoCallback)(void) = NULL;
 static void (*phySelectCallback)(void) = NULL;
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void (*wifiTxCallback)(void) = NULL;
+#endif
 
-static void COEX_HAL_REQ_ISR(uint8_t pin)
+static void COEX_HAL_REQ_ISR(uint8_t pin, void *callbackCtx)
 {
   (void)pin;
+  (void)callbackCtx;
+
   reqCallback();
 }
 
-static void COEX_HAL_GNT_ISR(uint8_t pin)
+static void COEX_HAL_GNT_ISR(uint8_t pin, void *callbackCtx)
 {
   (void)pin;
+  (void)callbackCtx;
+
   gntCallback();
 }
 
-static void COEX_HAL_RHO_ISR(uint8_t pin)
+static void COEX_HAL_RHO_ISR(uint8_t pin, void *callbackCtx)
 {
   (void)pin;
+  (void)callbackCtx;
+
   rhoCallback();
 }
 
-static void COEX_HAL_PHY_SELECT_ISR(uint8_t pin)
+static void COEX_HAL_PHY_SELECT_ISR(uint8_t pin, void *callbackCtx)
 {
   (void)pin;
+  (void)callbackCtx;
+
   phySelectCallback();
 }
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+static void COEX_HAL_WIFI_TX_ISR(uint8_t pin, void *callbackCtx)
+{
+  (void)pin;
+  (void)callbackCtx;
+  wifiTxCallback();
+}
+#endif
 
 static void setGpioConfig(COEX_GpioHandle_t gpioHandle)
 {
@@ -119,9 +172,9 @@ static void setGpioConfig(COEX_GpioHandle_t gpioHandle)
 
 static bool isGpioInSet(COEX_GpioHandle_t gpioHandle, bool defaultValue);
 
-static void enableGpioInt(COEX_GpioHandle_t gpioHandle,
-                          bool enabled,
-                          bool *wasAsserted)
+void sli_coex_enableGpioInt(COEX_GpioHandle_t gpioHandle,
+                            bool enabled,
+                            bool *wasAsserted)
 {
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
@@ -131,18 +184,29 @@ static void enableGpioInt(COEX_GpioHandle_t gpioHandle,
     bool intDeasserted = (coexGpio->options & COEX_GPIO_OPTION_INT_DEASSERTED) != 0U;
 
     if (enabled) {
-      // Disable triggering and clear any stale events
-      GPIO_ExtIntConfig((GPIO_Port_TypeDef)gpio->port,
-                        gpio->pin,
-                        gpio->intNo,
-                        false,
-                        false,
-                        false);
+      if (gpio->intNo != INVALID_INTERRUPT) {
+        // Disable triggering and clear any stale events
+        GPIO_ExtIntConfig((GPIO_Port_TypeDef)gpio->port,
+                          gpio->pin,
+                          gpio->intNo,
+                          false,
+                          false,
+                          false);
+      }
       if (wasAsserted != NULL) {
         *wasAsserted = false; // Ensures we won't miss GNT assertion
       }
-      // Register callbacks before setting up and enabling pin interrupt
-      GPIOINT_CallbackRegister(gpio->intNo, gpio->isr);
+
+      // Register callbacks and get the interrupt number before setting up and
+      // enabling pin interrupt. assert if no intNo was set
+      gpio->intNo = GPIOINT_CallbackRegisterExt(gpio->pin, gpio->isr, (void *)NULL);
+      EFM_ASSERT(gpio->intNo != INVALID_INTERRUPT);
+
+      // set up source and signal
+      GPIO_IntClear(GPIO_FLAG(gpio->intNo));
+      gpio->source = PRS_GPIO_SOURCE(gpio->intNo);
+      gpio->signal = PRS_GPIO_SIGNAL(gpio->intNo);
+
       // Enable both edges' interrupt
       GPIO_ExtIntConfig((GPIO_Port_TypeDef)gpio->port,
                         gpio->pin,
@@ -151,8 +215,16 @@ static void enableGpioInt(COEX_GpioHandle_t gpioHandle,
                         gpio->polarity ? intDeasserted : intAsserted,
                         true);
     } else {
-      GPIO_IntDisable(GPIO_FLAG(gpio->intNo));
-      GPIO_IntClear(GPIO_FLAG(gpio->intNo));
+      if (gpio->intNo != INVALID_INTERRUPT) {
+        GPIO_IntDisable(GPIO_FLAG(gpio->intNo));
+        GPIO_IntClear(GPIO_FLAG(gpio->intNo));
+        GPIOINT_CallbackUnRegister(gpio->intNo);
+
+        // reset source, signal, and intno to invalid
+        gpio->source = INVALID_SOURCE;
+        gpio->signal = INVALID_SIGNAL;
+        gpio->intNo = INVALID_INTERRUPT;
+      }
     }
   }
 }
@@ -167,6 +239,9 @@ static void setGpio(COEX_GpioHandle_t gpioHandle, bool enabled)
     } else {
       GPIO_PinOutClear((GPIO_Port_TypeDef)gpio->port, gpio->pin);
     }
+#ifdef SL_CATALOG_RAIL_UTIL_COEX_WIFI_SIMULATOR_PRESENT
+    sl_coex_wifi_sim_set_gpio_output(gpioHandle, enabled);
+#endif
   }
 }
 
@@ -206,10 +281,12 @@ static void setGpioFlag(COEX_GpioHandle_t gpioHandle, bool enabled)
   if (gpioHandle != NULL) {
     COEX_HAL_GpioConfig_t *gpio = (COEX_HAL_GpioConfig_t*)gpioHandle;
 
-    if (enabled) {
-      GPIO_IntSet(GPIO_FLAG(gpio->intNo));
-    } else {
-      GPIO_IntClear(GPIO_FLAG(gpio->intNo));
+    if (gpio->intNo != INVALID_INTERRUPT) {
+      if (enabled) {
+        GPIO_IntSet(GPIO_FLAG(gpio->intNo));
+      } else {
+        GPIO_IntClear(GPIO_FLAG(gpio->intNo));
+      }
     }
   }
 }
@@ -243,7 +320,7 @@ static bool isGpioInSet(COEX_GpioHandle_t gpioHandle, bool defaultValue)
 static const COEX_HalCallbacks_t coexHalCallbacks = {
   .setGpio = &setGpio,
   .setGpioFlag = &setGpioFlag,
-  .enableGpioInt = &enableGpioInt,
+  .enableGpioInt = &sli_coex_enableGpioInt,
   .configGpio = &configGpio,
   .isGpioOutSet = &isGpioOutSet,
   .isGpioInSet = &isGpioInSet
@@ -277,6 +354,25 @@ bool COEX_HAL_ConfigPhySelect(COEX_HAL_GpioConfig_t *gpioConfig)
   }
   return status;
 }
+
+#ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+bool COEX_HAL_ConfigWifiTx(COEX_HAL_GpioConfig_t *gpioConfig)
+{
+  bool status = false;
+
+  gpioConfig->isr = &COEX_HAL_WIFI_TX_ISR;
+  status = COEX_ConfigWifiTx(gpioConfig);
+  if (status) {
+    wifiTxCallback = gpioConfig->config.cb;
+  }
+  return status;
+}
+
+bool COEX_HAL_GetWifiTx(void)
+{
+  return isGpioInSet((COEX_GpioHandle_t)&sli_coex_wifiTxCfg, false);
+}
+#endif
 
 bool COEX_HAL_ConfigRequest(COEX_HAL_GpioConfig_t *gpioConfig)
 {
@@ -371,31 +467,109 @@ bool COEX_HAL_ConfigPwmRequest(COEX_HAL_GpioConfig_t *gpioConfig)
   return COEX_ConfigPwmRequest(gpioConfig);
 }
 
+#if SL_RAIL_UTIL_COEX_REQ_BACKOFF
+static uint16_t randomSeed[2];
+static bool pseudoRandomSeeded = false;
+
+/***************************************************************************//**
+ * This function performs a linear feedback shift.
+ * @param val Pointer to random seed to update
+ * @param taps The feedback polynomial mask
+ *
+ * @return Returns a 16 bit random value.
+ *
+ ******************************************************************************/
+static uint16_t linearFeedbackShift(uint16_t *val, uint16_t taps)
+{
+  uint16_t newVal = *val;
+
+  if ((newVal & 0x8000U) != 0U) {
+    newVal ^= taps;
+  }
+  *val = newVal << 1;
+  return newVal;
+}
+
+/*******************************************************************************
+ * This function seeds the pseudo random number.
+ *
+ ******************************************************************************/
+static void seedPseudoRandom(void)
+{
+  randomSeed[0] = (uint16_t)DEVINFO->EUI48L;
+  pseudoRandomSeeded = true;
+}
+
+/***************************************************************************//**
+ * This function generates a pseudo random number using LFSR.
+ *
+ * @return Returns a 16 bit random value.
+ *
+ ******************************************************************************/
+static uint16_t getPseudoRandom(void)
+{
+  if (!pseudoRandomSeeded) {
+    seedPseudoRandom();
+  }
+  return (linearFeedbackShift(&randomSeed[0], 0x0062) ^ linearFeedbackShift(&randomSeed[1], 0x100B));
+}
+
+uint16_t COEX_HAL_GetPseudoRandom(uint16_t min_value, uint16_t max_value)
+{
+  return (min_value + getPseudoRandom() % (max_value - min_value + 1));
+}
+
+static void randomDelayCallback(uint16_t randomDelayMaskUs)
+{
+  RAIL_DelayUs(getPseudoRandom() & randomDelayMaskUs);
+}
+#endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
+
+static bool coex_hal_initialized;
+
 void COEX_HAL_Init(void)
 {
+  if (coex_hal_initialized) {
+    return;
+  }
+  coex_hal_initialized = true;
   COEX_SetHalCallbacks(&coexHalCallbacks);
   COEX_InitHalConfigOptions();
   GPIOINT_InitSafe();
+  RAIL_ConfigMultiTimer(true);
+
+  #ifdef SL_CATALOG_RAIL_UTIL_COEX_PRESENT
+  #if SL_RAIL_UTIL_COEX_REQ_BACKOFF
+  COEX_SetRandomDelayCallback(&randomDelayCallback);
+  #endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
+  COEX_SetRadioCallback(&COEX_on_event);
+  #endif // SL_CATALOG_RAIL_UTIL_COEX_PRESENT
 
   #ifdef SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
   COEX_HAL_ConfigRxActive();
   #endif //SL_RAIL_UTIL_COEX_RX_ACTIVE_PORT
   #ifdef SL_RAIL_UTIL_COEX_PHY_SELECT_PORT
-  COEX_HAL_ConfigPhySelect(&phySelectCfg);
+  COEX_HAL_ConfigPhySelect(&sli_coex_phySelectCfg);
   #endif //SL_RAIL_UTIL_COEX_PHY_ENABLE_PORT
+  #ifdef SL_RAIL_UTIL_COEX_WIFI_TX_PORT
+  COEX_HAL_ConfigWifiTx(&sli_coex_wifiTxCfg);
+  #endif //SL_RAIL_UTIL_COEX_WIFI_TX_PORT
   #ifdef SL_RAIL_UTIL_COEX_REQ_PORT
-  COEX_HAL_ConfigRequest(&ptaReqCfg);
+  COEX_HAL_ConfigRequest(&sli_coex_ptaReqCfg);
   #endif //SL_RAIL_UTIL_COEX_REQ_PORT
   #ifdef SL_RAIL_UTIL_COEX_PRI_PORT
-  COEX_HAL_ConfigPriority(&ptaPriCfg);
+  COEX_HAL_ConfigPriority(&sli_coex_ptaPriCfg);
   #endif //SL_RAIL_UTIL_COEX_PRI_PORT
   #ifdef SL_RAIL_UTIL_COEX_PWM_REQ_PORT
-  COEX_HAL_ConfigPwmRequest(&ptaPwmReqCfg);
+  COEX_HAL_ConfigPwmRequest(&sli_coex_ptaPwmReqCfg);
   #endif //SL_RAIL_UTIL_COEX_PWM_REQ_PORT
   #ifdef SL_RAIL_UTIL_COEX_GNT_PORT
-  COEX_HAL_ConfigGrant(&ptaGntCfg);
+  COEX_HAL_ConfigGrant(&sli_coex_ptaGntCfg);
   #endif //SL_RAIL_UTIL_COEX_GNT_PORT
   #ifdef SL_RAIL_UTIL_COEX_RHO_PORT
-  COEX_HAL_ConfigRadioHoldOff(&rhoCfg);
+  COEX_HAL_ConfigRadioHoldOff(&sli_coex_rhoCfg);
   #endif //SL_RAIL_UTIL_COEX_RHO_PORT
+  #if SL_RAIL_UTIL_COEX_DP_ENABLED
+  COEX_HAL_ConfigDp(SL_RAIL_UTIL_COEX_DP_PULSE_WIDTH_US);
+  #endif
 }

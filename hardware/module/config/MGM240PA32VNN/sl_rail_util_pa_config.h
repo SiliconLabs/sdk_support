@@ -31,7 +31,7 @@
 #ifndef SL_RAIL_UTIL_PA_CONFIG_H
 #define SL_RAIL_UTIL_PA_CONFIG_H
 
-#include "rail_chip_specific.h"
+#include "rail_types.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
 // <h>PA configuration
@@ -41,7 +41,7 @@
 #define SL_RAIL_UTIL_PA_POWER_DECI_DBM      100
 
 // <o SL_RAIL_UTIL_PA_RAMP_TIME_US> PA Ramp Time (microseconds)
-// <0-65535:1>
+// <10-10:1>
 // <i> Default: 10
 #define SL_RAIL_UTIL_PA_RAMP_TIME_US        10
 
@@ -53,7 +53,6 @@
 // <o SL_RAIL_UTIL_PA_SELECTION_2P4GHZ> 2.4 GHz PA Selection
 // <RAIL_TX_POWER_MODE_2P4GIG_HIGHEST=> Highest Possible
 // <RAIL_TX_POWER_MODE_2P4GIG_HP=> High Power (chip-specific)
-// <RAIL_TX_POWER_MODE_2P4GIG_MP=> Medium Power (chip-specific)
 // <RAIL_TX_POWER_MODE_2P4GIG_LP=> Low Power
 // <RAIL_TX_POWER_MODE_NONE=> Disable
 // <i> Default: RAIL_TX_POWER_MODE_2P4GIG_HIGHEST

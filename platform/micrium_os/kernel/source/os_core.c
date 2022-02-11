@@ -37,7 +37,7 @@
 
 #include  <em_core.h>
 
-#if (OS_CFG_TICK_EN == DEF_ENABLED)
+#if ((OS_CFG_TICK_EN == DEF_ENABLED) || (OS_CFG_SCHED_ROUND_ROBIN_EN == DEF_ENABLED))
 #include  <sl_sleeptimer.h>
 #endif
 
@@ -112,6 +112,12 @@ OS_TCB                       *OSRoundRobinCurTCB;
 #if (OS_CFG_TICK_EN == DEF_ENABLED)
 CPU_INT32U OSDelayMaxMilli = 0u;
 OS_TICK OSDelayMaxTick = 0u;
+CPU_INT32U OS_SleeptimerFrequency_Hz = 0u;
+#endif
+
+#if (OS_CFG_ERRNO_EN == 1)
+// Errno Variable
+int micriumos_errno;
 #endif
 
 /*
@@ -431,12 +437,14 @@ void OSInit(RTOS_ERR *p_err)
     return;
   }
 
-  OS_ASSERT_DBG_ERR_SET((OSCfg_TickRate_Hz <= sl_sleeptimer_get_timer_frequency()), *p_err, RTOS_ERR_INVALID_CFG,; )
+  OS_SleeptimerFrequency_Hz = (CPU_INT32U)sl_sleeptimer_get_timer_frequency();
 
-  if (OSCfg_TickRate_Hz == sl_sleeptimer_get_timer_frequency()) {
+  OS_ASSERT_DBG_ERR_SET((OSCfg_TickRate_Hz <= OS_SleeptimerFrequency_Hz), *p_err, RTOS_ERR_INVALID_CFG,; )
+
+  if (OSCfg_TickRate_Hz == OS_SleeptimerFrequency_Hz) {
     OSDelayMaxTick =  0u;                                       // There is no limit for delay ticks
   } else {
-    OSDelayMaxTick = (DEF_INT_OS_TICK_MAX_VAL / sl_sleeptimer_get_timer_frequency()) * OSCfg_TickRate_Hz;
+    OSDelayMaxTick = (DEF_INT_OS_TICK_MAX_VAL / OS_SleeptimerFrequency_Hz) * OSCfg_TickRate_Hz;
   }
 
   if (OSCfg_TickRate_Hz <= 1000u) {

@@ -101,9 +101,9 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
                                           psa_get_key_bits(attributes),
                                           alg);
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -118,7 +118,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -343,9 +343,9 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
     plaintext = ciphertext;
   }
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -366,7 +366,7 @@ psa_status_t sli_crypto_transparent_aead_encrypt_tag(const psa_key_attributes_t 
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0): {
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0): {
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -493,9 +493,9 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
   uint8_t calc_tag[16] = { 0 };
   uint32_t diff = 0;
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -536,7 +536,7 @@ psa_status_t sli_crypto_transparent_aead_decrypt_tag(const psa_key_attributes_t 
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0): {
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0): {
       // Verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -832,7 +832,7 @@ static psa_status_t ccm_auth_crypt(const unsigned char *key_buffer, size_t key_b
                               : cryptoKey256Bits);
 
   // Clear tag register (DATA2)
-  for (uint32_t j = 0; j < 4; ++j) {
+  for (uint32_t i = 0; i < 4; ++i) {
     crypto->DATA2 = 0;
   }
 
@@ -1079,6 +1079,8 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
 #endif
   CRYPTO_TypeDef *crypto;
   uint32_t        temp[4];
+  unsigned int    complete_blocks_in_bytes;
+  bool            last_block_is_incomplete;
   CORE_DECLARE_IRQ_STATE;
 
   (void) iv_len; // checked in check_aead_parameters()
@@ -1193,7 +1195,7 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
       iv += 16;
     }
     if (iv_bytes_left > 0) {
-      // For last in-complete block, use temporary buffer for zero padding.
+      // For last incomplete block, use temporary buffer for zero padding.
       memset(temp, 0, 16);
       memcpy(temp, iv, iv_bytes_left);
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
@@ -1232,13 +1234,22 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
   operation->processed_len = 0;
 
   // Process additional authentication data if present.
-  if (add_len) {
-    crypto->SEQCTRLB = 0; // Sequence B is not used for auth data
+  crypto->SEQCTRLB = 0; // Sequence B is not used for auth data
+  while (add_len) {
+    if (add_len > (_CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u)) {
+      complete_blocks_in_bytes = _CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u;
+      last_block_is_incomplete = false;
+      add_len -= complete_blocks_in_bytes;
+    } else {
+      // Calculate total sequence length 16*num_complete_blocks, plus 16 if
+      // there is an incomplete block at the end.
+      last_block_is_incomplete = add_len & 0xF;
+      complete_blocks_in_bytes = add_len & 0xFFFFFFF0u;
+      add_len = add_len & 0xF;
+    }
 
     // Set SEQCTRL_LENGTHA to loop through all blocks
-    // We need to do set SEQCTRL_LENGTHA to 16*num_complete_blocks, plus 16 if
-    // there is an in-complete block at the end.
-    crypto->SEQCTRL = (add_len & 0xFFFFFFF0u) + ((add_len & 0xF) ? 16 : 0);
+    crypto->SEQCTRL = complete_blocks_in_bytes + (last_block_is_incomplete ? 16 : 0);
 
     CORE_ENTER_CRITICAL();
 
@@ -1256,20 +1267,23 @@ static void sli_gcm_starts(sli_crypto_transparent_aead_operation_t *operation,
                      CRYPTO_CMD_INSTR_BBSWAP128
                      );
 
-    // First loop through and write data for all complete blocks
-    while (add_len >= 16) {
-      add_len  -= 16;
+    // Loop through all complete blocks and write additional auth data to CRYPTO.
+    while (complete_blocks_in_bytes >= 16) {
+      complete_blocks_in_bytes  -= 16;
       // Wait for sequencer to accept data
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
       CRYPTO_DataWriteUnaligned(&crypto->DATA0, add);
       add      += 16;
     }
-    if (add_len > 0) {
-      // For last in-complete block, use temporary buffer for zero padding.
+    if (last_block_is_incomplete) {
+      // For last incomplete block, use temporary buffer for zero padding.
       memset(temp, 0, 16);
       memcpy(temp, add, add_len);
       while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
       CRYPTO_DataWrite(&crypto->DATA0, temp);
+
+      // Done,, set add_len to zero to exit loop.
+      add_len = 0;
     }
     // Wait for completion
     while (!CRYPTO_InstructionSequenceDone(crypto)) ;
@@ -1307,7 +1321,7 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
 #endif
   CRYPTO_TypeDef *crypto;
   uint32_t        temp[4];
-  unsigned int    sequence_loop_length;
+  unsigned int    complete_blocks_in_bytes;
   bool            last_block_is_incomplete;
   CORE_DECLARE_IRQ_STATE;
 
@@ -1345,120 +1359,127 @@ static void sli_gcm_update(sli_crypto_transparent_aead_operation_t *operation,
 
   operation->processed_len += length;
 
-  // Calculate total sequence length 16*num_complete_blocks, plus 16 if
-  // there is an in-complete block at the end.
-  last_block_is_incomplete = length & 0xF;
-  sequence_loop_length =
-    (length & 0xFFFFFFF0u) + (last_block_is_incomplete ? 16 : 0);
-
-  CORE_ENTER_CRITICAL();
-
-  if (operation->direction == PSA_CRYPTO_DRIVER_DECRYPT) {
-    crypto->SEQCTRL  = sequence_loop_length;
-    crypto->SEQCTRLB = 0;
-
-    // Start decryption sequence
-    CRYPTO_EXECUTE_14(crypto,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Ciphertext
-
-                      // GHASH_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
-                      CRYPTO_CMD_INSTR_XOR,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-                      CRYPTO_CMD_INSTR_DDATA0TODDATA1,
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
-                      CRYPTO_CMD_INSTR_MMUL,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-
-                      // GCTR_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_DATA0TODATA3,
-                      CRYPTO_CMD_INSTR_DATA1INC,
-                      CRYPTO_CMD_INSTR_DATA1TODATA0,
-                      CRYPTO_CMD_INSTR_AESENC,
-                      CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
-                      CRYPTO_CMD_INSTR_DATATODMA0   // Store Plaintext
-                      );
-  } else {
-    // For encryption we need to handle the last block differently if it is
-    // incomplete. We need to zeroize bits outside len(PT) in DATA0 before
-    // the GHASH operation. We do this by using a DMA0TODATA instruction in
-    // the B sequence, meaning that the sequencer will wait for the MCU core
-    // to zeroize bits and write them back to DATA0.
-    if (last_block_is_incomplete) {
-      crypto->SEQCTRL  = sequence_loop_length - 16;
-      crypto->SEQCTRLB = 16;
+  while (length) {
+    if (length > (_CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u)) {
+      last_block_is_incomplete = false;
+      complete_blocks_in_bytes = _CRYPTO_SEQCTRL_LENGTHA_MASK & 0xFFFFFFF0u;
+      length -= complete_blocks_in_bytes;
     } else {
-      crypto->SEQCTRL  = sequence_loop_length;
+      // Calculate total sequence length 16*num_complete_blocks, plus 16 if
+      // there is an incomplete block at the end.
+      last_block_is_incomplete = length & 0xF;
+      complete_blocks_in_bytes = length & 0xFFFFFFF0u;
+      length = length & 0xF; // length of last incomplete block
+    }
+
+    CORE_ENTER_CRITICAL();
+
+    if (operation->direction == PSA_CRYPTO_DRIVER_DECRYPT) {
+      crypto->SEQCTRL  = complete_blocks_in_bytes + (last_block_is_incomplete ? 16 : 0);
       crypto->SEQCTRLB = 0;
+
+      // Start decryption sequence
+      CRYPTO_EXECUTE_14(crypto,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Ciphertext
+
+                        // GHASH_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
+                        CRYPTO_CMD_INSTR_XOR,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+                        CRYPTO_CMD_INSTR_DDATA0TODDATA1,
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
+                        CRYPTO_CMD_INSTR_MMUL,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+
+                        // GCTR_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_DATA0TODATA3,
+                        CRYPTO_CMD_INSTR_DATA1INC,
+                        CRYPTO_CMD_INSTR_DATA1TODATA0,
+                        CRYPTO_CMD_INSTR_AESENC,
+                        CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
+                        CRYPTO_CMD_INSTR_DATATODMA0   // Store Plaintext
+                        );
+    } else {
+      // For encryption we need to handle the last block differently if it is
+      // incomplete. We need to zeroize bits outside len(PT) in DATA0 before
+      // the GHASH operation. We do this by using a DMA0TODATA instruction in
+      // the B sequence, meaning that the sequencer will wait for the MCU core
+      // to zeroize bits and write them back to DATA0.
+      crypto->SEQCTRL  = complete_blocks_in_bytes;
+      crypto->SEQCTRLB = last_block_is_incomplete ? 16 : 0;
+
+      // Start encryption sequence
+      CRYPTO_EXECUTE_17(crypto,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Plaintext
+
+                        // GCTR_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_DATA0TODATA3,
+                        CRYPTO_CMD_INSTR_DATA1INC,
+                        CRYPTO_CMD_INSTR_DATA1TODATA0,
+                        CRYPTO_CMD_INSTR_AESENC,
+                        CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
+                        CRYPTO_CMD_INSTR_DATATODMA0,  // Store Ciphertext
+
+                        CRYPTO_CMD_INSTR_EXECIFB,
+                        CRYPTO_CMD_INSTR_DMA0TODATA,  // Load X XOR MSB(CIPH(CB))
+                        CRYPTO_CMD_INSTR_EXECALWAYS,
+
+                        // GHASH_SEQUENCE (see desc above)
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
+                        CRYPTO_CMD_INSTR_XOR,
+                        CRYPTO_CMD_INSTR_BBSWAP128,
+                        CRYPTO_CMD_INSTR_DDATA0TODDATA1,
+                        CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
+                        CRYPTO_CMD_INSTR_MMUL,
+                        CRYPTO_CMD_INSTR_BBSWAP128
+                        );
     }
 
-    // Start encryption sequence
-    CRYPTO_EXECUTE_17(crypto,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load Plaintext
+    // Loop through all complete blocks, write input data and read output data.
+    while (complete_blocks_in_bytes >= 16) {
+      complete_blocks_in_bytes -= 16;
+      // Wait for sequencer to accept data
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      CRYPTO_DataWriteUnaligned(&crypto->DATA0, input);
+      input   += 16;
+      // Wait for sequencer to finish iteration and make data available
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      CRYPTO_DataReadUnaligned(&crypto->DATA0, output);
+      output  += 16;
+    }
 
-                      // GCTR_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_DATA0TODATA3,
-                      CRYPTO_CMD_INSTR_DATA1INC,
-                      CRYPTO_CMD_INSTR_DATA1TODATA0,
-                      CRYPTO_CMD_INSTR_AESENC,
-                      CRYPTO_CMD_INSTR_DATA3TODATA0XOR,
-                      CRYPTO_CMD_INSTR_DATATODMA0,  // Store Ciphertext
+    if (last_block_is_incomplete) {
+      // The last block is incomplete, so we need to zero pad bits outside len(PT)
+      // Use temporary buffer for zero padding
+      memset(temp, 0, 16);
+      memcpy(temp, input, length);
 
-                      CRYPTO_CMD_INSTR_EXECIFB,
-                      CRYPTO_CMD_INSTR_DMA0TODATA,  // Load X XOR MSB(CIPH(CB))
-                      CRYPTO_CMD_INSTR_EXECALWAYS,
-
-                      // GHASH_SEQUENCE (see desc above)
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA2,
-                      CRYPTO_CMD_INSTR_XOR,
-                      CRYPTO_CMD_INSTR_BBSWAP128,
-                      CRYPTO_CMD_INSTR_DDATA0TODDATA1,
-                      CRYPTO_CMD_INSTR_SELDDATA0DDATA3,
-                      CRYPTO_CMD_INSTR_MMUL,
-                      CRYPTO_CMD_INSTR_BBSWAP128
-                      );
-  }
-
-  while (length >= 16) {
-    length  -= 16;
-    // Wait for sequencer to accept data
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    CRYPTO_DataWriteUnaligned(&crypto->DATA0, input);
-    input   += 16;
-    // Wait for sequencer to finish iteration and make data available
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    CRYPTO_DataReadUnaligned(&crypto->DATA0, output);
-    output  += 16;
-  }
-
-  if (length > 0) {
-    // The last block is incomplete, so we need to zero pad bits outside len(PT)
-    // Use temporary buffer for zero padding
-    memset(temp, 0, 16);
-    memcpy(temp, input, length);
-
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    // Write last input data (PT/CT)
-    CRYPTO_DataWrite(&crypto->DATA0, temp);
-    while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
-    // Read last output data (CT/PT)
-    CRYPTO_DataRead(&crypto->DATA0, temp);
-
-    if (operation->direction == PSA_CRYPTO_DRIVER_ENCRYPT) {
-      // For encryption, when the last block is incomplete we need to
-      // zeroize bits outside len(PT) in DATA0 before the GHASH operation.
-      memset(&((uint8_t*)temp)[length], 0, 16 - length);
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      // Write last input data (PT/CT)
       CRYPTO_DataWrite(&crypto->DATA0, temp);
+      while (!(crypto->STATUS & CRYPTO_STATUS_DMAACTIVE)) ;
+      // Read last output data (CT/PT)
+      CRYPTO_DataRead(&crypto->DATA0, temp);
+
+      if (operation->direction == PSA_CRYPTO_DRIVER_ENCRYPT) {
+        // For encryption, when the last block is incomplete we need to
+        // zeroize bits outside len(PT) in DATA0 before the GHASH operation.
+        memset(&((uint8_t*)temp)[length], 0, 16 - length);
+        CRYPTO_DataWrite(&crypto->DATA0, temp);
+      }
+
+      // Copy to output buffer now while CRYPTO performs GHASH.
+      memcpy(output, temp, length);
+
+      // Done,, set length to zero to exit loop.
+      length = 0;
     }
 
-    // Copy to output buffer now while CRYPTO performs GHASH.
-    memcpy(output, temp, length);
+    // Wait for completion
+    while (!CRYPTO_InstructionSequenceDone(crypto)) ;
+
+    CORE_EXIT_CRITICAL();
   }
-
-  // Wait for completion
-  while (!CRYPTO_InstructionSequenceDone(crypto)) ;
-
-  CORE_EXIT_CRITICAL();
 
 #if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
   if (restore_state_and_release) {

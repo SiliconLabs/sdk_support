@@ -25,6 +25,10 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: mic_pdm_driver
   - id: simple_led
     instance:
@@ -33,6 +37,9 @@
     instance:
     - btn0
   - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: bootloader_spi_peripheral_usart_driver
+  - id: imu_driver_icm20648
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_sensor(SL_BOARD_SENSOR_RHT)
@@ -40,6 +47,11 @@
     value: sl_board_disable_sensor(SL_BOARD_SENSOR_IMU)
   - name: board_default_init
     value: sl_board_disable_sensor(SL_BOARD_SENSOR_MICROPHONE)
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4184A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD4184
   - board:variant:A
@@ -55,3 +67,4 @@
   - hardware:has:led:1
   - hardware:has:button:1
   - hardware:has:memory:spi:mx25r8035f
+  - hardware:has:imu

@@ -59,6 +59,10 @@
 static sl_status_t leuart_tx(void *context,
                              char c);
 
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+static void leuart_tx_completed(void *context, bool enable);
+#endif
+
 static void leuart_enable_rx(void *context);
 
 static sl_status_t leuart_deinit(void *context);
@@ -82,6 +86,11 @@ sl_status_t sl_iostream_leuart_init(sl_iostream_uart_t *iostream_uart,
                                           &leuart_context->context,
                                           uart_config,
                                           leuart_tx,
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+                                          leuart_tx_completed,
+#else
+                                          NULL,
+#endif
                                           leuart_enable_rx,
                                           leuart_deinit,
                                           2,
@@ -158,14 +167,13 @@ void sl_iostream_leuart_irq_handler(void *stream_context)
     }
   }
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   if (leuart_context->leuart->IF & LEUART_IF_TXC) {
-    bool idle;
     LEUART_IntClear(leuart_context->leuart, LEUART_IF_TXC);
-    LEUART_IntDisable(leuart_context->leuart, LEUART_IF_TXC);
-    idle = sli_uart_txc(stream_context);
-    if (idle == false) {
-      LEUART_IntEnable(leuart_context->leuart, LEUART_IF_TXC);
+    // Check if the Status register has the TXC flag as well since the flag will clean itself
+    // if other transmissions are queued contrary to the IF flag
+    if ((LEUART_StatusGet(leuart_context->leuart) & _LEUART_STATUS_TXC_MASK) != 0) {
+      sli_uart_txc(stream_context);
     }
   }
 #endif
@@ -185,11 +193,6 @@ static sl_status_t leuart_tx(void *context,
 
   LEUART_Tx(leuart_context->leuart, (uint8_t)c);
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
-  // Enable TX interrupts
-  LEUART_IntEnable(leuart_context->leuart, LEUART_IF_TXC);
-#endif
-
 #if defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
   /* Wait until transmit buffer is empty */
   while (!(LEUART_StatusGet(leuart_context->leuart) & LEUART_STATUS_TXBL)) ;
@@ -197,6 +200,25 @@ static sl_status_t leuart_tx(void *context,
 
   return SL_STATUS_OK;
 }
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+/***************************************************************************//**
+ * Enable/Disable LEUART Tx Complete (TXC) Interrupt
+ ******************************************************************************/
+static void leuart_tx_completed(void *context, bool enable)
+{
+  (void)context;
+  (void)enable;
+
+  sl_iostream_leuart_context_t *leuart_context = (sl_iostream_leuart_context_t *)context;
+  if (enable) {
+    LEUART_IntEnable(leuart_context->leuart, LEUART_IF_TXC);
+  } else {
+    LEUART_IntDisable(leuart_context->leuart, LEUART_IF_TXC);
+    LEUART_IntClear(leuart_context->leuart, LEUART_IF_TXC);
+  }
+}
+#endif
 
 /***************************************************************************//**
  * Enable ISR on Rx

@@ -11,8 +11,6 @@ provides:
     allow_multiple: true
   - name: iostream_transport
     allow_multiple: true
-  - name: iostream_transport
-    allow_multiple: true
 requires:
   - name: iostream
   - name: segger_rtt
@@ -25,6 +23,7 @@ include:
       - path: sl_iostream_vuart.h
       - path: sl_iostream_swo_itm_8.h
       - path: sli_iostream_swo_itm_8.h
+      - path: sl_iostream_swo.h
 source:
   - path: src/sl_iostream_vuart.c
   - path: src/sl_iostream_swo_itm_8.c

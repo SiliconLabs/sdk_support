@@ -11,9 +11,9 @@ category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto
 source:
-  - path: sl_component/sl_alt/source/sl_entropy_adc.c
+  - path: sl_component/sl_mbedtls_support/src/sl_entropy_adc.c
 include:
-  - path: sl_component/sl_alt/include
+  - path: sl_component/sl_mbedtls_support/inc
     file_list:
       - path: sl_entropy_adc.h
 provides:

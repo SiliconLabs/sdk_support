@@ -34,7 +34,6 @@
 
 #include "em_cmu.h"
 #include "em_gpio.h"
-#include "em_usart.h"
 
 #include "gpiointerrupt.h"
 #include "hal_common.h"
@@ -45,7 +44,7 @@
 #include "sl_component_catalog.h"
 
 #if defined(SL_RAIL_TEST_GRAPHICS_SUPPORT_ENABLE)
-  #include "sl_rail_test_graphics.h"
+#include "sl_rail_test_graphics.h"
 #endif
 
 #if defined(SL_CATALOG_SIMPLE_LED_PRESENT)
@@ -57,17 +56,27 @@
 #endif
 
 #if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
-  #include "sl_iostream_usart_vcom_config.h"
+#include "em_usart.h"
+#include "sl_iostream_usart_vcom_config.h"
+#endif
+
+#if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+#include "em_eusart.h"
+#include "sl_iostream_eusart_vcom_config.h"
 #endif
 
 volatile bool serEvent = false;
 // Used for wakeup from sleep
 volatile bool buttonWakeEvent = false;
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) || defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
 static void gpioSerialWakeupCallback(uint8_t pin)
 {
+#ifdef SL_CATALOG_IOSTREAM_USART_PRESENT
   if (pin == SL_IOSTREAM_USART_VCOM_RX_PIN) {
+#elif defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+  if (pin == SL_IOSTREAM_EUSART_VCOM_RX_PIN) {
+#endif
     serEvent = true;
   }
 }
@@ -84,11 +93,16 @@ void appHalInit(void)
   GPIO_PinModeSet(SL_RAIL_TEST_PER_PORT, SL_RAIL_TEST_PER_PIN, gpioModePushPull, 1);
 #endif // SL_RAIL_TEST_PER_PORT && SL_RAIL_TEST_PER_PIN
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) || defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
   // For 'sleep'
   GPIOINT_Init();
+#ifdef SL_CATALOG_IOSTREAM_USART_PRESENT
   GPIOINT_CallbackRegister(SL_IOSTREAM_USART_VCOM_RX_PIN, gpioSerialWakeupCallback);
-#endif // SL_CATALOG_IOSTREAM_USART_PRESENT
+#endif
+#ifdef SL_CATALOG_IOSTREAM_EUSART_PRESENT
+  GPIOINT_CallbackRegister(SL_IOSTREAM_EUSART_VCOM_RX_PIN, gpioSerialWakeupCallback);
+#endif
+#endif // SL_CATALOG_IOSTREAM_USART_PRESENT || SL_CATALOG_IOSTREAM_EUSART_PRESENT
 #endif // !SL_RAIL_UTIL_IC_SIMULATION_BUILD
 }
 
@@ -121,11 +135,16 @@ void usDelay(uint32_t microseconds)
 
 void serialWaitForTxIdle(void)
 {
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
   // Wait for the serial output to have completely cleared the UART
   // before sleeping.
+#ifdef SL_CATALOG_IOSTREAM_USART_PRESENT
   while ((USART_StatusGet(SL_IOSTREAM_USART_VCOM_PERIPHERAL)
           & USART_STATUS_TXIDLE) == 0) {
+  }
+#endif
+#ifdef SL_CATALOG_IOSTREAM_EUSART_PRESENT
+  while ((EUSART_StatusGet(SL_IOSTREAM_EUSART_VCOM_PERIPHERAL)
+          & EUSART_STATUS_TXIDLE) == 0) {
   }
 #endif
 }

@@ -17,6 +17,11 @@
   - name: hardware_board_from_efm32lg-dk3650
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD3601A"'
+  - name: SL_BOARD_REV
+    value: '"B01"'
 - tag:
   - board:pn:BRD3601
   - board:variant:A

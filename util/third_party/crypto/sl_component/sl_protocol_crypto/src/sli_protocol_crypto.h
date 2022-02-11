@@ -58,14 +58,14 @@ extern "C" {
  * @param iv_out   16-byte counter/IV output after block round
  * @param output   16-byte output block
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_aes_crypt_ctr_radio(const unsigned char    *key,
-                            unsigned int           keybits,
-                            const unsigned char    input[16],
-                            const unsigned char    iv_in[16],
-                            volatile unsigned char iv_out[16],
-                            volatile unsigned char output[16]);
+sl_status_t sli_aes_crypt_ctr_radio(const unsigned char    *key,
+                                    unsigned int           keybits,
+                                    const unsigned char    input[16],
+                                    const unsigned char    iv_in[16],
+                                    volatile unsigned char iv_out[16],
+                                    volatile unsigned char output[16]);
 
 /***************************************************************************//**
  * @brief          AES-ECB block encryption/decryption optimized for radio
@@ -76,13 +76,13 @@ int sli_aes_crypt_ctr_radio(const unsigned char    *key,
  * @param input    16-byte input block
  * @param output   16-byte output block
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_aes_crypt_ecb_radio(bool                   encrypt,
-                            const unsigned char    *key,
-                            unsigned int           keybits,
-                            const unsigned char    input[16],
-                            volatile unsigned char output[16]);
+sl_status_t sli_aes_crypt_ecb_radio(bool                   encrypt,
+                                    const unsigned char    *key,
+                                    unsigned int           keybits,
+                                    const unsigned char    input[16],
+                                    volatile unsigned char output[16]);
 
 #if defined(RADIOAES_PRESENT)
 /***************************************************************************//**
@@ -94,13 +94,13 @@ int sli_aes_crypt_ecb_radio(bool                   encrypt,
  * @param length   Amount of bytes in the input buffer
  * @param output   16-byte output block for calculated CMAC
  *
- * @return         0 if successful, negative on error
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_aes_cmac_radio(const unsigned char    *key,
-                       unsigned int           keybits,
-                       const unsigned char    *input,
-                       unsigned int           length,
-                       volatile unsigned char output[16]);
+sl_status_t sli_aes_cmac_radio(const unsigned char    *key,
+                               unsigned int           keybits,
+                               const unsigned char    *input,
+                               unsigned int           length,
+                               volatile unsigned char output[16]);
 #endif
 
 /***************************************************************************//**
@@ -113,15 +113,16 @@ int sli_aes_cmac_radio(const unsigned char    *key,
  * @param header   header of BLE packet (1 byte)
  * @param tag      authentication tag of BLE packet (4 bytes)
  *
- * @return         0 if successful and authenticated,
- *                 SL_STATUS_INVALID_SIGNATURE if tag does not match payload
+ * @return         SL_STATUS_OK if successful and authenticated,
+ *                 SL_STATUS_INVALID_SIGNATURE if tag does not match payload,
+ *                 relevant status code on other error
  ******************************************************************************/
-int sli_ccm_auth_decrypt_ble(unsigned char       *data,
-                             size_t              length,
-                             const unsigned char *key,
-                             const unsigned char *iv,
-                             unsigned char       header,
-                             unsigned char       *tag);
+sl_status_t sli_ccm_auth_decrypt_ble(unsigned char       *data,
+                                     size_t              length,
+                                     const unsigned char *key,
+                                     const unsigned char *iv,
+                                     unsigned char       header,
+                                     unsigned char       *tag);
 
 /***************************************************************************//**
  * @brief          CCM buffer encryption optimized for BLE
@@ -133,14 +134,41 @@ int sli_ccm_auth_decrypt_ble(unsigned char       *data,
  * @param header   header of BLE packet (1 byte)
  * @param tag      buffer where the BLE packet tag (4 bytes) will be written
  *
- * @return         0 if successful
+ * @return         SL_STATUS_OK if successful, relevant status code on error
  ******************************************************************************/
-int sli_ccm_encrypt_and_tag_ble(unsigned char       *data,
-                                size_t              length,
-                                const unsigned char *key,
-                                const unsigned char *iv,
-                                unsigned char       header,
-                                unsigned char       *tag);
+sl_status_t sli_ccm_encrypt_and_tag_ble(unsigned char       *data,
+                                        size_t              length,
+                                        const unsigned char *key,
+                                        const unsigned char *iv,
+                                        unsigned char       header,
+                                        unsigned char       *tag);
+
+/***************************************************************************//**
+ * @brief          CCM buffer authenticated decryption optimized for Zigbee
+ *
+ * @param data     Input/output buffer of payload data (decrypt-in-place)
+ * @param length   length of input data
+ * @param iv       nonce (initialization vector)
+ *                 must be 13 bytes
+ * @param aad      Input buffer of Additional Authenticated Data
+ * @param aad_len  Length of buffer @p aad
+ * @param tag      authentication tag
+ * @param tag_len  Length of authentication tag
+ *
+ * @return         SL_STATUS_OK if successful and authenticated,
+ *                 SL_STATUS_INVALID_SIGNATURE if tag does not match payload,
+ *                 relevant status code on other error
+ ******************************************************************************/
+sl_status_t sli_ccm_zigbee(bool encrypt,
+                           const unsigned char *data_in,
+                           unsigned char       *data_out,
+                           size_t              length,
+                           const unsigned char *key,
+                           const unsigned char *iv,
+                           const unsigned char *aad,
+                           size_t              aad_len,
+                           unsigned char       *tag,
+                           size_t              tag_len);
 
 /***************************************************************************//**
  * @brief          Process a table of BLE RPA device keys and look for a

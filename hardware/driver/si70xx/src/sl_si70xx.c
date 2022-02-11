@@ -378,7 +378,7 @@ static sl_status_t sl_si70xx_write_user_register_2(sl_i2cspm_t *i2cspm, uint8_t 
   seq.flags = I2C_FLAG_WRITE;
   /* Select command to issue */
   i2c_write_data[0] = 0x50;
-  i2c_write_data[1] = data;
+  i2c_write_data[1] = (uint8_t)data;
   seq.buf[0].data   = i2c_write_data;
   seq.buf[0].len    = 2;
   /* Select location/length of data to be read */

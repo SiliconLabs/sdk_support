@@ -58,9 +58,9 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
                                           psa_get_key_bits(attributes),
                                           alg);
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -75,7 +75,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
       }
@@ -512,9 +512,9 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
   block_t data_out = block_t_convert(ciphertext, plaintext_length);
   block_t tag_block = block_t_convert(tag, *tag_length);
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
 
       // Check length of plaintext.
     {
@@ -545,7 +545,7 @@ psa_status_t sli_cryptoacc_transparent_aead_encrypt_tag(const psa_key_attributes
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (nonce_length == AES_IV_GCM_SIZE) {
         uint8_t tagbuf[16];
         tag_block = block_t_convert(tagbuf, sizeof(tagbuf));
@@ -685,9 +685,9 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
   block_t nonce_internal = NULL_blk;
   block_t data_in = NULL_blk;
   block_t data_out = NULL_blk;
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
 
     {
       // Check length of ciphertext.
@@ -727,7 +727,7 @@ psa_status_t sli_cryptoacc_transparent_aead_decrypt_tag(const psa_key_attributes
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
     {
       uint8_t tagbuf[16];
       uint32_t diff = 0;

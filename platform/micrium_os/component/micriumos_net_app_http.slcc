@@ -2,7 +2,7 @@ id: micriumos_net_app_http
 label: Network Suite - HTTP core code
 package: micrium-tcpx
 description: Micrium OS Network HTTP core code
-category: Services|Network Suite|Applications
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/net
 source:
@@ -20,3 +20,4 @@ provides:
   - name: net_app_http
 requires:
   - name: net
+  - name: sleeptimer

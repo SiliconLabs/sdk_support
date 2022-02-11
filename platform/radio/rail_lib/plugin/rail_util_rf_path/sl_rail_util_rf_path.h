@@ -33,11 +33,19 @@
 
 #include "rail.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the RAIL RF Path Utility.
  *
  * @note: This function should be called during application initialization.
  */
 void sl_rail_util_rf_path_init(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_RF_PATH_H

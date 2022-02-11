@@ -35,6 +35,10 @@
 #include "sl_rail_util_protocol_types.h"
 #include "sl_rail_util_protocol_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize and configure the radio for use.
  *
@@ -44,5 +48,9 @@
  */
 RAIL_Status_t sl_rail_util_protocol_config(RAIL_Handle_t handle,
                                            sl_rail_util_protocol_type_t protocol);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_PROTOCOL_H

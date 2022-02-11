@@ -41,6 +41,10 @@
  * Configures and locks the Digital PLL using the configuration in the
  * configuration header `sl_device_init_dpll_config.h`, where settings including
  * reference frequency, target frequency and lock mode are available.
+ *
+ * If using Simplicity Studio, this configuration header is also configurable
+ * through the Project Configurator, by selecting the "Device Init: DPLL" configuration component.
+ *
  * @{
  */
 

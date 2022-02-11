@@ -48,7 +48,7 @@
 #define DMACTRL_CH_CNT      8
 #define DMACTRL_ALIGNMENT   256
 
-#elif ( (DMA_CHAN_COUNT > 8) && (DMA_CHAN_COUNT <= 12) )
+#elif ( (DMA_CHAN_COUNT > 8) && (DMA_CHAN_COUNT <= 16) )
 #define DMACTRL_CH_CNT      16
 #define DMACTRL_ALIGNMENT   256
 

@@ -37,13 +37,36 @@
 
 #include "rail.h"
 #include "rail_ieee802154.h"
-
 #include "app_common.h"
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+  #include "sl_component_catalog.h"
+#endif
 
 bool ieee802154EnhAckEnabled = false;
 uint8_t ieee802154PhrLen = 1U; // Default is 1-byte PHY Header (length byte)
 bool setFpByDefault = false;
 uint32_t dataReqLatencyUs = 0U;
+
+RAIL_Handle_t emPhyRailHandle;
+
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+extern RAIL_Status_t sl_rail_util_ieee802154_config_radio(RAIL_Handle_t railHandle);
+#endif // SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+
+void sl_railtest_update_154_radio_config(void)
+{
+#ifdef SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+  if (RAIL_IEEE802154_IsEnabled(railHandle)) {
+    RAIL_RadioState_t currentState = RAIL_GetRadioState(railHandle);
+    RAIL_Idle(railHandle, RAIL_IDLE_ABORT, false);
+    sl_rail_util_ieee802154_config_radio(railHandle);
+    if (currentState != RAIL_RF_STATE_IDLE) {
+      RAIL_StartRx(railHandle, channel, NULL);
+    }
+  }
+#endif //SL_CATALOG_RAIL_UTIL_IEEE802154_STACK_EVENT_PRESENT
+}
 
 void ieee802154Enable(sl_cli_command_arg_t *args)
 {
@@ -126,6 +149,7 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
   if (status != RAIL_STATUS_NO_ERROR) {
     responsePrintError(sl_cli_get_command_string(args, 0), status, "Call to RAIL_IEEE802154_Init returned an error");
   } else {
+    emPhyRailHandle = railHandle;
     responsePrint(sl_cli_get_command_string(args, 0),
                   "802.15.4:%s,"
                   "rxDefaultState:%s,"
@@ -144,12 +168,16 @@ void ieee802154Enable(sl_cli_command_arg_t *args)
   }
 }
 
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT (0U)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT   (1U)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT    (2U)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV       (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT)
-#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM          (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT    (0U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT      (1U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT       (2U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV          (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_ANTDIV_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX            (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_COEX_SHIFT)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM             (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM_SHIFT)
+#if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT   (3U)
+#define RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY         (1U << RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY_SHIFT)
+#endif
 
 typedef RAIL_Status_t (*RAIL_IEEE802154_2p4GHzRadioConfig_t)(RAIL_Handle_t railHandle);
 static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
@@ -161,6 +189,9 @@ static RAIL_IEEE802154_2p4GHzRadioConfig_t ieee802154Configs[] = {
   &RAIL_IEEE802154_Config2p4GHzRadioAntDivFem,
   &RAIL_IEEE802154_Config2p4GHzRadioCoexFem,
   &RAIL_IEEE802154_Config2p4GHzRadioAntDivCoexFem,
+#if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
+  &RAIL_IEEE802154_Config2p4GHzRadioCustom1,
+#endif
 };
 
 void config2p4Ghz802154(sl_cli_command_arg_t *args)
@@ -186,6 +217,16 @@ void config2p4Ghz802154(sl_cli_command_arg_t *args)
       && (sl_cli_get_argument_uint8(args, 2) != 0U)) {
     ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_FEM;
   }
+#if RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
+  if ((sl_cli_get_argument_count(args) >= 4)
+      && (sl_cli_get_argument_uint8(args, 3) != 0U)) {
+    ieee802154Config |= RAIL_IEEE802154_CONFIG_2P4GHZ_RADIO_CUSTOM1_PHY;
+  }
+  if (ieee802154Config >= COUNTOF(ieee802154Configs)) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 1,
+                       "Cannot set antdiv, coex or fem options when custom is set");
+  }
+#endif //RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY
   status = (*ieee802154Configs[ieee802154Config])(railHandle);
   if (status == RAIL_STATUS_NO_ERROR) {
     ieee802154PhrLen = 1U;
@@ -234,6 +275,46 @@ void config915Mhz802154(sl_cli_command_arg_t *args)
     }
   }
   responsePrint(sl_cli_get_command_string(args, 0), "802.15.4:%s", status ? "Disabled" : "Enabled");
+}
+
+void config863MhzSUNOFDMOpt(sl_cli_command_arg_t *args)
+{
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+  disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
+
+  RAIL_IEEE802154_OFDMOption_t ofdmOption = sl_cli_get_argument_uint8(args, 0);
+  if ((ofdmOption != 0) && (ofdmOption < RAIL_IEEE802154_OFDMOptionCount)) {
+    RAIL_Status_t status = RAIL_IEEE802154_Config863MHzSUNOFDMOptRadio(railHandle, ofdmOption);
+
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "SUN OFDM:%s,Option:%u", (status != RAIL_STATUS_NO_ERROR) ? "Disabled" : "Enabled", ofdmOption);
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x20,
+                       "OFDM option must be between %u and %u",
+                       RAIL_IEEE802154_OFDMOption1, RAIL_IEEE802154_OFDMOptionCount - 1);
+  }
+}
+
+void config902MhzSUNOFDMOpt(sl_cli_command_arg_t *args)
+{
+  if (!inRadioState(RAIL_RF_STATE_IDLE, sl_cli_get_command_string(args, 0))) {
+    return;
+  }
+  disableIncompatibleProtocols(RAIL_PTI_PROTOCOL_ZIGBEE);
+
+  RAIL_IEEE802154_OFDMOption_t ofdmOption = sl_cli_get_argument_uint8(args, 0);
+  if ((ofdmOption != 0) && (ofdmOption < RAIL_IEEE802154_OFDMOptionCount)) {
+    RAIL_Status_t status = RAIL_IEEE802154_Config902MHzSUNOFDMOptRadio(railHandle, ofdmOption);
+
+    responsePrint(sl_cli_get_command_string(args, 0),
+                  "SUN OFDM:%s,Option:%u", (status != RAIL_STATUS_NO_ERROR) ? "Disabled" : "Enabled", ofdmOption);
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x20,
+                       "OFDM option must be between %u and %u",
+                       RAIL_IEEE802154_OFDMOption1, RAIL_IEEE802154_OFDMOptionCount - 1);
+  }
 }
 
 void ieee802154AcceptFrames(sl_cli_command_arg_t *args)
@@ -431,8 +512,12 @@ void ieee802154SetG(sl_cli_command_arg_t *args)
                         ? 2U : 1U);
   }
   responsePrint(sl_cli_get_command_string(args, 0),
-                "15.4G_GB868:%s",
-                (options & RAIL_IEEE802154_G_OPTION_GB868) ? "True" : "False");
+                "15.4G_GB868:%s,"
+                "15.4G_DynamicFEC:%s,"
+                "Wi-SUN_ModeSwitch:%s",
+                (options & RAIL_IEEE802154_G_OPTION_GB868) ? "True" : "False",
+                (options & RAIL_IEEE802154_G_OPTION_DYNFEC) ? "True" : "False",
+                (options & RAIL_IEEE802154_G_OPTION_WISUN_MODESWITCH) ? "True" : "False");
 }
 
 void ieee802154SetFpMode(sl_cli_command_arg_t *args)
@@ -459,6 +544,180 @@ void ieee802154SetFpMode(sl_cli_command_arg_t *args)
 
   responsePrint(sl_cli_get_command_string(args, 0), "EarlyFp:%s,DataFp:%s", earlyDisplay, dataDisplay);
 }
+
+//PHR types known by ieee802154SetPHR()
+RAIL_ENUM(IEEE802154_PHRType_t) {
+  /* Legacy PHRs */
+  MISC_MOD_PHR1BYTE,
+  SUNFSK_PHR2BYTES,
+  /* New Modem PHRs are 4 bytes long */
+  SUNOFDM_PHR4BYTES,
+  SUNOQPSK_PHR4BYTES,
+  SUNFSK_PHR4BYTES,
+  LEGOQPSK_PHR4BYTE, //802.15.4 O-QPSK (other than SUN O-QPSK)
+  IEEE802154_NB_PHR_TYPE // Must be last
+};
+
+void ieee802154SetPHR(sl_cli_command_arg_t *args)
+{
+  /*
+     This function sets the PHR for 802.15.4 frames. It must be used with the Tx buffer size
+     (set by setTxLength command). It does NOT take into account the PHY loaded.
+   */
+  uint8_t param1, param2;
+  uint8_t phrType = sl_cli_get_argument_uint8(args, 0);
+  uint8_t phrSizeByte = 0;
+  uint16_t frameLength = 0;
+  uint8_t fcsSizeByte = 0;
+  uint32_t phr = 0;
+
+  if (IEEE802154_NB_PHR_TYPE <= phrType) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 31, "invalid PHR type: %d", phrType);
+    return;
+  }
+
+  //no other input params for MISC_MOD_PHR1BYTE
+  //and 2 for other modes
+  if (MISC_MOD_PHR1BYTE != phrType) {
+    if (sl_cli_get_argument_count(args) >= 3) {
+      param1 = sl_cli_get_argument_uint8(args, 1);
+      param2 = sl_cli_get_argument_uint8(args, 2);
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 31, "invalid number of arguments");
+      return;
+    }
+  }
+
+  if (MISC_MOD_PHR1BYTE == phrType) { // All modulations in PHR 1 byte
+    // Non SUN modulation: no need to flip the PHR bits
+    phrSizeByte = 1;
+    fcsSizeByte = 2;
+    phr = (txDataLen - phrSizeByte + fcsSizeByte) & 0x7F;
+  } else if (SUNFSK_PHR2BYTES == phrType) { // This is Legacy demod case
+    phrSizeByte = 2;
+    bool fcsType = (bool) param1;
+    bool whitening = (bool) param2;
+    fcsSizeByte = fcsType ? 2 : 4; //FCS type = 0 => fcsSizeByte = 4
+    frameLength = (txDataLen - phrSizeByte + fcsSizeByte) & 0x7FF;
+    phr = ((fcsType << 12) | (whitening << 11) | frameLength);
+    // Flip bits of the 2 bytes PHR as it is a SUN modulation
+    phr = (uint16_t) (__RBIT(phr) >> 16);
+  } else { // If the new modem is used
+    /*
+       If the new modem is used, assume that txDataLen contains the PHR AND the FCS (2 or 4 bytes).
+       Then the frame length programmed is just txDataLen - PhrSizeByte.
+       Note that in normal cases, frame length is programmed as txDataLen - PhrSizeByte + fcsSizeByte.
+       However, the fcs type is unknown at this stage in many cases (OFDM, SUN O-QPSK).
+     */
+    phrSizeByte = 4;
+    frameLength = (txDataLen - phrSizeByte) & 0x7FF; // FrameLength in byte
+
+    switch (phrType) {
+      case SUNOFDM_PHR4BYTES:
+      {
+        uint8_t rate = (param1 & 0x1F);     // rate: 5 bits wide
+        uint8_t scrambler = (param2 & 0x3); // scrambler: 2 bits wide
+
+        phr = (rate << 19) | (frameLength << 7) | (scrambler << 3);
+        break;
+      }
+      case SUNOQPSK_PHR4BYTES:
+      {
+        bool spreadingMode = (bool) param1;
+        uint8_t rateMode = (param2 & 0x3); // rateMode: 2 bits wide
+
+        phr = (spreadingMode << 15) | (rateMode << 13) | frameLength;
+        break;
+      }
+      case SUNFSK_PHR4BYTES:
+      {
+        bool fcsType   = (bool) param1;
+        bool whitening = (bool) param2;
+
+        phr = (fcsType << 12) | (whitening << 11) | frameLength;
+        break;
+      }
+      case LEGOQPSK_PHR4BYTE:
+        phr = (frameLength & 0x7F) << 24;
+        break;
+      default:
+        break;
+    }
+
+    // Only Legacy O-QPSK modulation should not be swapped
+    if (LEGOQPSK_PHR4BYTE != phrType) {
+      // Flip the 32 bits for all SUN modulations
+      phr = __RBIT(phr);
+    }
+  }
+
+  if (phrSizeByte != 0) {
+    // Write the phr in the payload
+    for (uint8_t index = 0; index < phrSizeByte; index++) {
+      txData[index] = ((phr & (0xFF << index * 8)) >> index * 8);
+    }
+
+    if (railDataConfig.txMethod == PACKET_MODE) {
+      RAIL_WriteTxFifo(railHandle, txData, txDataLen, true);
+    }
+
+    responsePrint(sl_cli_get_command_string(args, 0), "PhrSize:%d,PHR:0x%x", phrSizeByte, phr);
+    printTxPacket(args);
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 31, "PHR write failed");
+  }
+}
+
+#if RAIL_IEEE802154_SUPPORTS_G_MODESWITCH && defined(WISUN_MODESWITCHPHRS_ARRAY)
+
+uint16_t modeSwitchChannel = 0xFFFFU;
+#define MSPHR_LENGTH 2
+uint8_t txData_2B[2] = { 0, 0 };
+uint8_t txCountAfterModeSwitch;
+
+void trigModeSwitchTx(sl_cli_command_arg_t *args)
+{
+  uint8_t newPhyModeId = sl_cli_get_argument_uint32(args, 0);
+  txCountAfterModeSwitch = sl_cli_get_argument_uint32(args, 1);
+  uint8_t i;
+  uint8_t numPhrsInArray = sizeof(wisun_modeSwitchPhrs) / sizeof(RAIL_IEEE802154_ModeSwitchPhr_t);
+
+  // Retrieve PHR to send from RAIL config table
+  for (i = 0; i < numPhrsInArray; i++) {
+    if (wisun_modeSwitchPhrs[i].phyModeId == newPhyModeId) {
+      txData_2B[0] = txData[0];
+      txData_2B[1] = txData[1];
+      memcpy(txData, &(wisun_modeSwitchPhrs[i].phr), MSPHR_LENGTH);
+      break;
+    }
+  }
+
+  if (i < numPhrsInArray) {
+    // Compute channel to switch to
+    modeSwitchChannel = 0xFFFFU;
+    RAIL_Status_t status = RAIL_IEEE802154_ComputeChannelFromPhyModeId(railHandle, newPhyModeId, &modeSwitchChannel);
+
+    if (status == RAIL_STATUS_NO_ERROR) {
+      // Sends Mode Switch packet
+      radioTransmit(1, "txModeSwitch");
+      // Proper channel switch + sending packets on the new PHY moved to RAILCb_TxPacketSent()
+    } else {
+      responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switch failed: same PhyModeId or no channel found");
+    }
+  } else {
+    responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switch failed: no PHR found");
+  }
+}
+
+#else//!RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
+
+void trigModeSwitchTx(sl_cli_command_arg_t *args)
+{
+  args->argc = sl_cli_get_command_count(args); /* only reference cmd str */
+  responsePrintError(sl_cli_get_command_string(args, 0), 31, "Mode switching not supported on this chip");
+}
+
+#endif//RAIL_IEEE802154_SUPPORTS_G_MODESWITCH
 
 // 802.15.4-2015 Frame Control Field definitions for Beacon, Ack, Data, Command
 #define MAC_FRAME_SOURCE_MODE_MASK          0xC000U
@@ -805,4 +1064,51 @@ void RAILCb_IEEE802154_DataRequestCommand(RAIL_Handle_t railHandle)
       counters.ackTxFpFail++;
     }
   }
+}
+
+void set802154CcaMode(sl_cli_command_arg_t *args)
+{
+#if RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
+  RAIL_IEEE802154_CcaMode_t ccaMode = sl_cli_get_argument_uint8(args, 0);
+  RAIL_IEEE802154_ConfigCcaMode(railHandle, ccaMode);
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "ccaMode:%u",
+                ccaMode);
+#else
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "CCA modes unsupported");
+#endif
+}
+
+void enable802154SignalIdentifier(sl_cli_command_arg_t *args)
+{
+#if RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER
+  RAIL_Status_t status;
+  bool enable = sl_cli_get_argument_uint8(args, 0);
+  if (enable) {
+    if (RAIL_IEEE802154_IsEnabled(railHandle)) {
+      RAIL_IEEE802154_PtiRadioConfig_t radioConfig = RAIL_IEEE802154_GetPtiRadioConfig(railHandle);
+      if (radioConfig < RAIL_IEEE802154_PTI_RADIO_CONFIG_863MHZ_GB868) {
+        status = RAIL_IEEE802154_ConfigSignalIdentifier(railHandle);
+        status = RAIL_IEEE802154_EnableSignalIdentifier(railHandle, enable);
+      } else {
+        RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
+        status = RAIL_STATUS_INVALID_CALL;
+      }
+    } else {
+      RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
+      status = RAIL_STATUS_INVALID_CALL;
+    }
+  } else {
+    status = RAIL_IEEE802154_EnableSignalIdentifier(railHandle, false);
+  }
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
+                ((status == RAIL_STATUS_NO_ERROR) ? "Success"
+                 : (status == RAIL_STATUS_INVALID_CALL) ? "Invalid Call"
+                 : "Failure"
+                ));
+#else
+  responsePrint(sl_cli_get_command_string(args, 0),
+                "Signal identifier unsupported");
+#endif
 }

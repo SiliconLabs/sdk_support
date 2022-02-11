@@ -2,7 +2,7 @@ id: micriumos_net_secure_mbedtls
 label: Network Suite - Secure port for mbedTLS
 package: micrium-tcpx
 description: Micrium OS Network Secure port for mbedTLS
-category: Services|Network Suite
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/net
 #config_file:

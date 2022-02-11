@@ -25,13 +25,10 @@
 // <i> Default: 115200
 #define SL_SERIAL_EUART_BAUD_RATE              115200
 
-// <o SL_SERIAL_EUART_FLOW_CONTROL> Hardware flow control
-// <eusartHwFlowControlNone=> None
-// <eusartHwFlowControlCts=> CTS
-// <eusartHwFlowControlRts=> RTS
-// <eusartHwFlowControlCtsAndRts=> CTS/RTS
-// <i> Default: eusartHwFlowControlNone
-#define SL_SERIAL_EUART_FLOW_CONTROL     eusartHwFlowControlNone
+// <e SL_SERIAL_EUART_FLOW_CONTROL> Hardware flow control
+// <i> Default: 0
+#define SL_SERIAL_EUART_FLOW_CONTROL     0
+// </e>
 
 // <o SL_DRIVER_EUART_RX_BUFFER_SIZE> Receive buffer size
 // <0-2048:1>
@@ -55,29 +52,29 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_SERIAL_EUART
 // $[EUSART_SL_SERIAL_EUART]
-#define SL_SERIAL_EUART_PERIPHERAL               EUSART1
-#define SL_SERIAL_EUART_PERIPHERAL_NO            1
+#define SL_SERIAL_EUART_PERIPHERAL               EUSART0
+#define SL_SERIAL_EUART_PERIPHERAL_NO            0
 
-// EUSART1 TX on PA08
+// EUSART0 TX on PA08
 #define SL_SERIAL_EUART_TX_PORT                  gpioPortA
 #define SL_SERIAL_EUART_TX_PIN                   8
 
-// EUSART1 RX on PA09
+// EUSART0 RX on PA09
 #define SL_SERIAL_EUART_RX_PORT                  gpioPortA
 #define SL_SERIAL_EUART_RX_PIN                   9
 
-// EUSART1 CTS on PB05
+// EUSART0 CTS on PB05
 #define SL_SERIAL_EUART_CTS_PORT                 gpioPortB
 #define SL_SERIAL_EUART_CTS_PIN                  5
 
-// EUSART1 RTS on PA00
+// EUSART0 RTS on PA00
 #define SL_SERIAL_EUART_RTS_PORT                 gpioPortA
 #define SL_SERIAL_EUART_RTS_PIN                  0
 
 // [EUSART_SL_SERIAL_EUART]$
 
 
-// <gpio> SL_VCOM_ENABLE
+// <gpio optional=true> SL_VCOM_ENABLE
 
 // $[GPIO_SL_VCOM_ENABLE]
 #define SL_VCOM_ENABLE_PORT                      gpioPortB

@@ -9,12 +9,12 @@ category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto/
 include:
-  - path: sl_component/sl_alt/include
+  - path: sl_component/sl_psa_driver/inc
     file_list:
       - path: psa/internal_trusted_storage.h
       - path: psa/error.h
 source:
-  - path: sl_component/sl_alt/source/sl_psa_its_nvm3.c
+  - path: sl_component/sl_psa_driver/src/sl_psa_its_nvm3.c
 provides:
   - name: psa_its
 requires:

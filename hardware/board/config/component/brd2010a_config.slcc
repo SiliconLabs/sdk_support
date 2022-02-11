@@ -26,9 +26,9 @@
       file_id: btl_gpio_activation_cfg
     path: brd2010a/btl_gpio_activation_cfg.h
   - override:
-      component: bootloader_spi_slave_driver
-      file_id: btl_spi_slave_driver_cfg
-    path: brd2010a/btl_spi_slave_driver_cfg.h
+      component: bootloader_spi_peripheral_usart_driver
+      file_id: btl_spi_peripheral_usart_driver_cfg
+    path: brd2010a/btl_spi_peripheral_usart_driver_cfg.h
   - override:
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg
@@ -78,6 +78,50 @@
       instance: exp
     path: brd2010a/sl_iostream_usart_exp_config.h
   - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: msc
+    path: brd2010a/iot_flash_cfg_msc.h
+  - override:
+      component: iot_flash
+      file_id: iot_flash_cfg
+      instance: exp
+    path: brd2010a/iot_flash_cfg_exp.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: sensor
+    path: brd2010a/iot_i2c_cfg_sensor.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: exp
+    path: brd2010a/iot_i2c_cfg_exp.h
+  - override:
+      component: iot_i2c
+      file_id: iot_i2c_cfg
+      instance: test
+    path: brd2010a/iot_i2c_cfg_test.h
+  - override:
+      component: iot_spi
+      file_id: iot_spi_cfg
+      instance: exp
+    path: brd2010a/iot_spi_cfg_exp.h
+  - override:
+      component: iot_spi
+      file_id: iot_spi_cfg
+      instance: loopback
+    path: brd2010a/iot_spi_cfg_loopback.h
+  - override:
+      component: iot_uart
+      file_id: iot_uart_cfg
+      instance: exp
+    path: brd2010a/iot_uart_cfg_exp.h
+  - override:
+      component: legacy_ncp_spi
+      file_id: legacy_ncp_spi_config
+    path: brd2010a/legacy_ncp_spi_config.h
+  - override:
       component: memlcd_usart
       file_id: sl_memlcd_usart_config
     path: brd2010a/sl_memlcd_usart_config.h
@@ -126,43 +170,3 @@
       file_id: uartdrv_usart_config
       instance: exp
     path: brd2010a/sl_uartdrv_usart_exp_config.h
-  - override:
-      component: iot_flash
-      file_id: iot_flash_cfg
-      instance: msc
-    path: brd2010a/iot_flash_cfg_msc.h
-  - override:
-      component: iot_flash
-      file_id: iot_flash_cfg
-      instance: exp
-    path: brd2010a/iot_flash_cfg_exp.h
-  - override:
-      component: iot_i2c
-      file_id: iot_i2c_cfg
-      instance: sensor
-    path: brd2010a/iot_i2c_cfg_sensor.h
-  - override:
-      component: iot_i2c
-      file_id: iot_i2c_cfg
-      instance: exp
-    path: brd2010a/iot_i2c_cfg_exp.h
-  - override:
-      component: iot_i2c
-      file_id: iot_i2c_cfg
-      instance: test
-    path: brd2010a/iot_i2c_cfg_test.h
-  - override:
-      component: iot_spi
-      file_id: iot_spi_cfg
-      instance: exp
-    path: brd2010a/iot_spi_cfg_exp.h
-  - override:
-      component: iot_spi
-      file_id: iot_spi_cfg
-      instance: loopback
-    path: brd2010a/iot_spi_cfg_loopback.h
-  - override:
-      component: iot_uart
-      file_id: iot_uart_cfg
-      instance: exp
-    path: brd2010a/iot_uart_cfg_exp.h

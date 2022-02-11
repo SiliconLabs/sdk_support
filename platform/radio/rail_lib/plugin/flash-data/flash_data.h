@@ -36,6 +36,10 @@
 
 #include "rail_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Return a pointer to a valid byte array in flash.
  *
@@ -92,5 +96,9 @@ uint32_t FD_GetLength(void);
  * @return The max byte array length in bytes available for use.
  */
 uint32_t FD_GetMaxLength(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // __FLASHDATA_PLUGIN_H__

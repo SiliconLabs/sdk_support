@@ -60,8 +60,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_uart IO Stream UART
- * @brief IO Stream UART
+ * @addtogroup iostream_uart I/O Stream UART
+ * @brief I/O Stream UART
  * @details
  * ## Overview
  *
@@ -77,7 +77,10 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Data Types
 
-/// @brief IO Stream UART stream object
+#define uartFlowControlNone  0
+#define uartFlowControlSoftware    0xFFFF
+
+/// @brief I/O Stream UART stream object
 typedef struct {
   sl_iostream_t stream;                                               ///< stream
   sl_status_t (*deinit)(void *stream);                                ///< uart deinit
@@ -96,7 +99,7 @@ typedef struct {
 #endif
 } sl_iostream_uart_t;
 
-/// @brief IO Stream UART config
+/// @brief I/O Stream UART config
 typedef struct {
   IRQn_Type rx_irq_number;  ///< rx_irq_number
   IRQn_Type tx_irq_number;  ///< tx_irq_number
@@ -104,11 +107,13 @@ typedef struct {
   size_t rx_buffer_length;  ///< rx_buffer_length
   bool lf_to_crlf;          ///< lf_to_crlf
   bool rx_when_sleeping;    ///< rx_when_sleeping
+  bool sw_flow_control;     ///< sw_flow_control
 } sl_iostream_uart_config_t;
 
-/// @brief IO Stream UART context
+/// @brief I/O Stream UART context
 typedef struct {
   sl_status_t (*tx)(void *context, char c); ///< Tx function pointer
+  void (*tx_completed)(void *context, bool enable); ///< Pointer to a function handling the Tx Completed event
   void (*enable_rx)(void *context);         ///< Pointer to a function determining whether rx is enabled
   sl_status_t (*deinit)(void *context);     ///< DeInit function pointer
   uint32_t rx_read_index;                   ///< Index in buffer to be read
@@ -117,10 +122,13 @@ typedef struct {
   uint8_t *rx_buffer;                       ///< buffer to store data
   size_t rx_buffer_length;                  ///< rx_buffer_length
   bool lf_to_crlf;                          ///< lf_to_crlf
+  bool sw_flow_control;                     ///< software flow control
+  bool xon;                                 ///< Transmitter enabled
+  bool remote_xon;                          ///< Remote Transmitter enabled
   IRQn_Type rx_irq_number;                  ///< Receive IRQ Number
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   IRQn_Type tx_irq_number;                  ///< Transmit IRQ Number
-  bool tx_idle;                             ///< tx_idle. Available only when Power Manager present.
+  volatile bool tx_idle;                    ///< tx_idle. Available only when Power Manager present.
   bool em_req_added;                        ///< em_req_added. Available only when Power Manager present.
   sl_power_manager_em_t rx_em;              ///< rx_em. Available only when Power Manager present.
   sl_power_manager_em_t tx_em;              ///< tx_em. Available only when Power Manager present.
@@ -148,7 +156,7 @@ typedef struct {
  *
  * @return Status result
  ******************************************************************************/
-__INLINE sl_status_t sl_iostream_uart_deinit(sl_iostream_uart_t *iostream_uart)
+__STATIC_INLINE sl_status_t sl_iostream_uart_deinit(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->deinit(iostream_uart);
 }
@@ -160,8 +168,8 @@ __INLINE sl_status_t sl_iostream_uart_deinit(sl_iostream_uart_t *iostream_uart)
  *
  * @param[in] on  If true, automatic LF to CRLF conversion will be enabled.
  ******************************************************************************/
-__INLINE void sl_iostream_uart_set_auto_cr_lf(sl_iostream_uart_t *iostream_uart,
-                                              bool on)
+__STATIC_INLINE void sl_iostream_uart_set_auto_cr_lf(sl_iostream_uart_t *iostream_uart,
+                                                     bool on)
 {
   iostream_uart->set_auto_cr_lf(iostream_uart->stream.context, on);
 }
@@ -173,7 +181,7 @@ __INLINE void sl_iostream_uart_set_auto_cr_lf(sl_iostream_uart_t *iostream_uart,
  *
  * @return Auto-conversion mode.
  ******************************************************************************/
-__INLINE bool sl_iostream_uart_get_auto_cr_lf(sl_iostream_uart_t *iostream_uart)
+__STATIC_INLINE bool sl_iostream_uart_get_auto_cr_lf(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->get_auto_cr_lf(iostream_uart->stream.context);
 }
@@ -189,8 +197,8 @@ __INLINE bool sl_iostream_uart_get_auto_cr_lf(sl_iostream_uart_t *iostream_uart)
  *                affects the lowest power level that the system can go.
  *                Otherwise, it might not be possible to receive data when sleeping.
  ******************************************************************************/
-__INLINE void sl_iostream_uart_set_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart,
-                                                              bool on)
+__STATIC_INLINE void sl_iostream_uart_set_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart,
+                                                                     bool on)
 {
   iostream_uart->set_rx_energy_mode_restriction(iostream_uart->stream.context, on);
 }
@@ -202,7 +210,7 @@ __INLINE void sl_iostream_uart_set_rx_energy_mode_restriction(sl_iostream_uart_t
  *
  * @return Sleep configuration.
  ******************************************************************************/
-__INLINE bool sl_iostream_uart_get_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart)
+__STATIC_INLINE bool sl_iostream_uart_get_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->get_rx_energy_mode_restriction(iostream_uart->stream.context);
 }
@@ -217,8 +225,8 @@ __INLINE bool sl_iostream_uart_get_rx_energy_mode_restriction(sl_iostream_uart_t
  * @param[in] on  If false, the read API will be non-blocking. Otherwise the
  *                read API will block until data is received.
  ******************************************************************************/
-__INLINE void sl_iostream_uart_set_read_block(sl_iostream_uart_t *iostream_uart,
-                                              bool on)
+__STATIC_INLINE void sl_iostream_uart_set_read_block(sl_iostream_uart_t *iostream_uart,
+                                                     bool on)
 {
   iostream_uart->set_read_block(iostream_uart->stream.context, on);
 }
@@ -230,7 +238,7 @@ __INLINE void sl_iostream_uart_set_read_block(sl_iostream_uart_t *iostream_uart,
  *
  * @return Block mode.
  ******************************************************************************/
-__INLINE bool sl_iostream_uart_get_read_block(sl_iostream_uart_t *iostream_uart)
+__STATIC_INLINE bool sl_iostream_uart_get_read_block(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->get_read_block(iostream_uart->stream.context);
 }
@@ -247,7 +255,7 @@ __INLINE bool sl_iostream_uart_get_read_block(sl_iostream_uart_t *iostream_uart)
  *            SL_POWER_MANAGER_WAKEUP; UART generated the ISR and the system must wakeup
  *            SL_POWER_MANAGER_SLEEP; UART generated the ISR and the system can go back to sleep.
  ******************************************************************************/
-__INLINE sl_power_manager_on_isr_exit_t sl_iostream_uart_sleep_on_isr_exit(sl_iostream_uart_t *iostream_uart)
+__STATIC_INLINE sl_power_manager_on_isr_exit_t sl_iostream_uart_sleep_on_isr_exit(sl_iostream_uart_t *iostream_uart)
 {
   return iostream_uart->sleep_on_isr_exit(iostream_uart->stream.context);
 }

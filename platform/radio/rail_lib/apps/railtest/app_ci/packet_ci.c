@@ -210,12 +210,19 @@ void dataConfig(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "Invalid Data Method selection.");
   }
 
-  // newConfig.txSource is unchanged
-
   newConfig.rxSource = RX_PACKET_DATA; // Default
   if (sl_cli_get_argument_count(args) >= 3) {
     newConfig.rxSource = (RAIL_RxDataSource_t)sl_cli_get_argument_uint8(args, 2);
   }
+
+#if RAIL_SUPPORTS_MFM
+  newConfig.txSource = TX_PACKET_DATA; // Default
+  if (sl_cli_get_argument_count(args) >= 4) {
+    newConfig.txSource = (RAIL_TxDataSource_t)sl_cli_get_argument_uint8(args, 3);
+  }
+#else
+  // newConfig.txSource is unchanged
+#endif
 
   RAIL_Status_t status = RAIL_ConfigData(railHandle, &newConfig);
   if (status != RAIL_STATUS_NO_ERROR) {

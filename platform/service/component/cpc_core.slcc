@@ -12,6 +12,7 @@ source:
   - path: src/sl_cpc_hdlc.c
   - path: src/sl_cpc_crc.c
   - path: src/sl_cpc_memory.c
+  - path: src/sl_cpc_dispatcher.c
   - path: inc/sli_cpc_crc.h
   - path: inc/sli_cpc_hdlc.h
   - path: inc/sli_cpc_drv.h
@@ -22,16 +23,17 @@ include:
     file_list:
       - path: sl_cpc.h
       - path: sl_cpc_system_common.h
-      - path: sl_cpc_security_common.h
 provides:
   - name: cpc_core
 requires:
   - name: sleeptimer
   - name: status
   - name: slist
+  - name: emlib_core
   - name: emlib_gpcrc
   - name: component_catalog
   - name: mem_pool
+  - name: cpc_security_secondary
 documentation:
     docset: gecko-platform
     document: service/api/group-cpc
@@ -43,7 +45,7 @@ template_contribution:
       event: service_init
       include: sl_cpc.h
       handler: sl_cpc_init
-      priority: -1  
+      priority: -1
   - name: event_handler
     value:
       event: service_process_action

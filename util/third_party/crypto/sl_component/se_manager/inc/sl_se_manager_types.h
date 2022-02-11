@@ -78,6 +78,7 @@ typedef uint8_t sl_se_tamper_filter_period_t;
 
 /// Number of tamper counts to trigger the filter signal
 typedef uint8_t sl_se_tamper_filter_threshold_t;
+#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
 
 /// Certificate size data structure
 typedef struct {
@@ -88,7 +89,6 @@ typedef struct {
 
 /// SE certificate types
 typedef uint8_t sl_se_cert_type_t;
-#endif // _SILICON_LABS_SECURITY_FEATURE_VAULT
 
 /// OTP initialization data structure
 typedef struct {
@@ -331,15 +331,36 @@ typedef enum {
 
 /// CMAC streaming context
 typedef struct {
-  sl_se_command_context_t      *cmd_ctx;        ///< Pointer to command context object
-  const sl_se_key_descriptor_t *key;            ///< Pointer to key object
   uint8_t                      state[16];       ///< CMAC state
   uint8_t                      data_in[16];     ///< Unprocessed data
   uint8_t                      data_out[16];    ///< Last 16 bytes of cipher-text
   size_t                       length;          ///< Length of all processed and unprocessed data
+} sl_se_cmac_multipart_context_t;
+
+/// CMAC streaming context. Deprecated.
+typedef struct {
+  sl_se_command_context_t      *cmd_ctx;        ///< Pointer to command context object
+  const sl_se_key_descriptor_t *key;            ///< Pointer to key object
+  sl_se_cmac_multipart_context_t cmac_ctx;    ///< CMAC streaming context
 } sl_se_cmac_streaming_context_t;
 
-/// GCM streaming context
+/// CCM streaming context.
+typedef struct {
+  uint32_t message_length;          ///< Current length of the encrypted/decrypted data
+  uint32_t total_message_length;    ///< Total length of data to be encrypted/decrypted
+  uint8_t  iv[13];                  ///< Nonce (MAX size is 13 bytes)
+  uint8_t  se_ctx[32];              ///< SE encryption state
+  uint32_t tag_len;                 ///< Tag length
+  sl_se_cipher_operation_t     mode;///< CCM mode (decrypt or encrypt)
+  union {
+    uint8_t tagbuf[16];             ///< Tag
+    uint8_t final_data[16];         ///< Input data saved for finish operation
+  } mode_specific_buffer;
+  uint8_t final_data_length;        ///< Length of data saved
+  bool    last_update_operation;    ///< Last operation / update
+} sl_se_ccm_multipart_context_t;
+
+/// GCM streaming context. Deprecated.
 typedef struct {
   sl_se_command_context_t *cmd_ctx; ///< Pointer to command context object
   const sl_se_key_descriptor_t *key;///< Pointer to key object
@@ -351,6 +372,20 @@ typedef struct {
   int      mode;                    ///< GCM mode
   bool     last_op;                 ///< Last operation / update
 } sl_se_gcm_streaming_context_t;
+
+typedef struct {
+  uint64_t len;                     ///< Total length of the encrypted data
+  uint64_t add_len;                 ///< Total length of the additional data
+  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  uint8_t  tagbuf[16];              ///< Tag
+  uint8_t previous_se_ctx[32];      ///< SE state from previous operation
+  #endif
+  uint8_t se_ctx[32];               ///< SE state
+  uint8_t final_data[16];           ///< Input data saved for finish operation
+  uint8_t final_data_length;        ///< Length of data saved
+  sl_se_cipher_operation_t     mode;///< GCM mode
+  bool    first_operation;          ///< First operation
+} sl_se_gcm_multipart_context_t;
 
 /// @} (end addtogroup sl_se_manager_cipher)
 
@@ -369,7 +404,7 @@ typedef enum {
 #endif
 } sl_se_hash_type_t;
 
-/// Generic hash streaming context
+/// Generic hash streaming context. Deprecated.
 typedef struct {
   sl_se_command_context_t *cmd_ctx;   ///< Pointer to command context object
   sl_se_hash_type_t        hash_type; ///< Hash type
@@ -377,21 +412,45 @@ typedef struct {
   void                    *hash_type_ctx; ///< Pointer to hash specific context
 } sl_se_hash_streaming_context_t;
 
-/// SHA-1 streaming context
+/// SHA-1 streaming context. Safe to use.
+typedef struct {
+  sl_se_hash_type_t      hash_type; ///< Hash streaming context
+  uint32_t total[2];                ///< number of bytes processed
+  uint8_t  state[32];               ///< intermediate digest state
+  uint8_t  buffer[64];              ///< data block being processed
+} sl_se_sha1_multipart_context_t;
+
+/// SHA-1 streaming context. Deprecated.
 typedef struct {
   uint32_t total[2];                ///< number of bytes processed
   uint8_t  state[32];               ///< intermediate digest state
   uint8_t  buffer[64];              ///< data block being processed
 } sl_se_sha1_streaming_context_t;
 
-/// SHA-224 streaming context
+/// SHA-224 streaming context. Safe to use.
+typedef struct {
+  sl_se_hash_type_t      hash_type; ///< Hash streaming context
+  uint32_t total[2];                ///< Number of bytes processed
+  uint8_t  state[32];               ///< Intermediate digest state
+  uint8_t  buffer[64];              ///< Data block being processed
+} sl_se_sha224_multipart_context_t;
+
+/// SHA-224 streaming context. Deprecated.
 typedef struct {
   uint32_t total[2];                ///< Number of bytes processed
   uint8_t  state[32];               ///< Intermediate digest state
   uint8_t  buffer[64];              ///< Data block being processed
 } sl_se_sha224_streaming_context_t;
 
-/// SHA-256 streaming context
+/// SHA-256 streaming context. Safe to use.
+typedef struct {
+  sl_se_hash_type_t      hash_type; ///< Hash streaming context
+  uint32_t total[2];                ///< Number of bytes processed
+  uint8_t  state[32];               ///< Intermediate digest state
+  uint8_t  buffer[64];              ///< Data block being processed
+} sl_se_sha256_multipart_context_t;
+
+/// SHA-256 streaming context. Deprecated.
 typedef struct {
   uint32_t total[2];                ///< Number of bytes processed
   uint8_t  state[32];               ///< Intermediate digest state
@@ -399,14 +458,30 @@ typedef struct {
 } sl_se_sha256_streaming_context_t;
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
-/// SHA-384 streaming context
+/// SHA-384 streaming context. Safe to use.
+typedef struct {
+  sl_se_hash_type_t      hash_type; ///< Hash streaming context
+  uint32_t total[4];                ///< Number of bytes processed
+  uint8_t  state[64];               ///< Intermediate digest state
+  uint8_t  buffer[128];             ///< Data block being processed
+} sl_se_sha384_multipart_context_t;
+
+/// SHA-384 streaming context. Deprecated.
 typedef struct {
   uint32_t total[4];                ///< Number of bytes processed
   uint8_t  state[64];               ///< Intermediate digest state
   uint8_t  buffer[128];             ///< Data block being processed
 } sl_se_sha384_streaming_context_t;
 
-/// SHA-512 streaming context
+/// SHA-512 streaming context. Safe to use.
+typedef struct {
+  sl_se_hash_type_t      hash_type; ///< Hash streaming context
+  uint32_t total[4];                ///< Number of bytes processed
+  uint8_t  state[64];               ///< Intermediate digest state
+  uint8_t  buffer[128];             ///< Data block being processed
+} sl_se_sha512_multipart_context_t;
+
+/// SHA-512 streaming context. Deprecated.
 typedef struct {
   uint32_t total[4];                ///< Number of bytes processed
   uint8_t  state[64];               ///< Intermediate digest state
@@ -451,6 +526,13 @@ typedef struct {
   uint8_t Xp2[64];                    ///< Their point 2 (round 1)
   uint8_t Xp[64];                     ///< Their point (round 2)
 } sl_se_ecjpake_context_t;
+
+#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
+/// Typedef sl_se_pbkdf2_prf_type_t to sl_se_hash_type_t in order to maintain
+/// backward compatibility. Defines for mapping the PRF identifiers to the
+/// underlying hash enum values exists in sl_se_manager_defines.h.
+typedef sl_se_hash_type_t sl_se_pbkdf2_prf_type_t;
+#endif
 
 /// @} (end addtogroup sl_se_manager_key_derivation)
 

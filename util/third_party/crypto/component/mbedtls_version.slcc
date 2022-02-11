@@ -7,7 +7,7 @@ category: Platform|Security
 quality: production
 source:
   - path: util/third_party/crypto/mbedtls/library/version.c
-  - path: util/third_party/crypto/mbedtls/library/version_features.c
+  - path: util/third_party/crypto/sl_component/sl_mbedtls_support/src/version_features.c
 include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:

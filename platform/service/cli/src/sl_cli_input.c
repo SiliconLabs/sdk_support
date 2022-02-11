@@ -68,7 +68,7 @@
  * @brief
  *   Move the arrow one position left in the terminal
  ******************************************************************************/
-static void write_left_arrow()
+static void write_left_arrow(void)
 {
   input_putchar('\b');
 }

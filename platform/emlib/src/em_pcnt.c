@@ -770,6 +770,7 @@ void PCNT_Init(PCNT_TypeDef *pcnt, const PCNT_Init_TypeDef *init)
 
   PCNT_CounterTopSet(pcnt, init->counter, init->top);
   PCNT_TopBufferSet(pcnt, init->top);
+
   /* Save values of primary and auxiliary counter event. */
   initCntEvent = init->cntEvent;
   initAuxCntEvent = init->auxCntEvent;

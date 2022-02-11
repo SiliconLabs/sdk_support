@@ -5,6 +5,9 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdbool.h>
+#ifdef EZSP_HOST
+  #include <assert.h>
+#endif // EZSP_HOST
 
 // Standard program memory delcaration.
 #define PGM     const
@@ -334,6 +337,7 @@ extern uint32_t linker_nvm_begin, linker_nvm_end;
 #define timeGTorEqualInt32u(t1, t2) \
   (elapsedTimeInt32u(t2, t1) <= (HALF_MAX_INT32U_VALUE))
 
+#ifndef EMBER_TEST
 #include "em_core.h"
 
 // -----------------------------------------------------------------------------
@@ -402,6 +406,71 @@ extern uint32_t linker_nvm_begin, linker_nvm_end;
  */
  #define HANDLE_PENDING_INTERRUPTS() CORE_YIELD_ATOMIC()
 
+#else
+ #include <stdio.h>
+ #define ATOMIC_LITE(blah) ATOMIC(blah)
+#define DECLARE_INTERRUPT_STATE_LITE DECLARE_INTERRUPT_STATE
+#define DISABLE_INTERRUPTS_LITE()
+#define RESTORE_INTERRUPTS_LITE()
+
+#define DECLARE_INTERRUPT_STATE
+
+/**
+ * @brief Disable interrupts, saving the previous state so it can be
+ * later restored with RESTORE_INTERRUPTS().
+ * \note Do not fail to call RESTORE_INTERRUPTS().
+ * \note It is safe to nest this call.
+ */
+#define DISABLE_INTERRUPTS()
+
+/**
+ * @brief Restore the global interrupt state previously saved by
+ * DISABLE_INTERRUPTS()
+ * \note Do not call without having first called DISABLE_INTERRUPTS()
+ * to have saved the state.
+ * \note It is safe to nest this call.
+ */
+ #define RESTORE_INTERRUPTS()
+
+/**
+ * @brief Enable global interrupts without regard to the current or
+ * previous state.
+ */
+ #define INTERRUPTS_ON()
+
+/**
+ * @brief Disable global interrupts without regard to the current or
+ * previous state.
+ */
+ #define INTERRUPTS_OFF()
+
+/**
+ * @returns true if global interrupts are disabled.
+ */
+ #define INTERRUPTS_ARE_OFF() false
+
+/**
+ * @returns true if global interrupt flag was enabled when
+ * ::DISABLE_INTERRUPTS() was called.
+ */
+ #define INTERRUPTS_WERE_ON() true
+
+/**
+ * @brief A block of code may be made atomic by wrapping it with this
+ * macro.  Something which is atomic cannot be interrupted by interrupts.
+ */
+ #define ATOMIC(blah) blah
+
+/**
+ * @brief Allows any pending interrupts to be executed. Usually this
+ * would be called at a safe point while interrupts are disabled (such as
+ * within an ISR).
+ *
+ * Takes no action if interrupts are already enabled.
+ */
+ #define HANDLE_PENDING_INTERRUPTS()
+
+#endif //EMBER_TEST
 #define MILLISECOND_TICKS_PER_SECOND 1000UL
 
 #ifndef MILLISECOND_TICKS_PER_DECISECOND
@@ -501,8 +570,12 @@ void token_manager_test_assert_handler(const char *filename, int linenumber);
 void halInternalAssertFailed(const char * filename, int linenumber);
 #define ASSERT_HANDLER halInternalAssertFailed
 #endif
+#ifndef EZSP_HOST
+
+#undef assert
 #define assert(condition)  \
   do { if (!(condition)) { \
          ASSERT_HANDLER(__SOURCEFILE__, __LINE__); } } while (0)
+#endif // EZSP_HOST
 
 #endif // PLATFORM_HEADER_H

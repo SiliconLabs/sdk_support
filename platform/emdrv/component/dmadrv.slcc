@@ -43,6 +43,8 @@ config_file:
   condition: [ 'device_sdid_210' ]
 - path: "platform/emdrv/dmadrv/config/s2_8ch/dmadrv_config.h"
   condition: [ 'device_sdid_215' ]
+- path: "platform/emdrv/dmadrv/config/s2_16ch/dmadrv_config.h"
+  condition: [ 'device_sdid_220' ]
 source:
 - path: "platform/emdrv/dmadrv/src/dmadrv.c"
 - path: "platform/emdrv/dmadrv/src/dmactrl.c"

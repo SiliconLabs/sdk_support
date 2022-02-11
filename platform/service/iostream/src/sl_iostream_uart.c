@@ -58,6 +58,9 @@
 #include "em_core.h"
 #include "em_gpio.h"
 
+#define XON     0x11
+#define XOFF    0x13
+
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
@@ -100,30 +103,9 @@ static bool get_read_block(void *context);
 static void set_rx_sem_count(sl_iostream_uart_context_t *uart_context);
 #endif
 
-extern __INLINE sl_status_t sl_iostream_uart_deinit(sl_iostream_uart_t *iostream_uart);
-
-extern __INLINE void sl_iostream_uart_set_auto_cr_lf(sl_iostream_uart_t *iostream_uart,
-                                                     bool on);
-
-extern __INLINE bool sl_iostream_uart_get_auto_cr_lf(sl_iostream_uart_t *iostream_uart);
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-extern __INLINE void sl_iostream_uart_set_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart,
-                                                                     bool on);
-
-extern __INLINE bool sl_iostream_uart_get_rx_energy_mode_restriction(sl_iostream_uart_t *iostream_uart);
-
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
-extern __INLINE sl_power_manager_on_isr_exit_t sl_iostream_uart_sleep_on_isr_exit(sl_iostream_uart_t *iostream_uart);
-#endif
-#endif
-
-#if defined(SL_CATALOG_KERNEL_PRESENT)
-extern __INLINE void sl_iostream_uart_set_read_block(sl_iostream_uart_t *iostream_uart,
-                                                     bool on);
-
-extern __INLINE bool sl_iostream_uart_get_read_block(sl_iostream_uart_t *iostream_uart);
-#endif
+static sl_status_t nolock_uart_write(void *context,
+                                     const void *buffer,
+                                     size_t buffer_length);
 
 /*******************************************************************************
  **************************   GLOBAL FUNCTIONS   *******************************
@@ -136,6 +118,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
                                            sl_iostream_uart_context_t *context,
                                            sl_iostream_uart_config_t *config,
                                            sl_status_t (*tx)(void *context, char c),
+                                           void (*tx_completed)(void *context, bool enable),
                                            void (*enable_rx)(void *context),
                                            sl_status_t (*deinit)(void *context),
                                            uint8_t rx_em_req,
@@ -156,7 +139,11 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   context->rx_buffer = config->rx_buffer;
   context->rx_buffer_length = config->rx_buffer_length;
   context->lf_to_crlf = config->lf_to_crlf;
+  context->sw_flow_control = config->sw_flow_control;
+  context->xon = true;
+  context->remote_xon = true;
   context->tx = tx;
+  context->tx_completed = tx_completed;
   context->enable_rx = enable_rx;
   context->deinit = deinit;
   context->rx_irq_number = config->rx_irq_number;
@@ -177,6 +164,7 @@ sl_status_t sli_iostream_uart_context_init(sl_iostream_uart_t *uart,
   context->block = true;
 
   osMutexAttr_t m_attr;
+  m_attr.name = "Read Lock";
   m_attr.attr_bits = 0u;
   m_attr.cb_mem = context->read_lock_cb;
   m_attr.cb_size = osMutexCbSize;
@@ -332,10 +320,14 @@ static bool get_read_block(void *context)
 bool sli_uart_is_rx_space_avail(void *context)
 {
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
+  CORE_DECLARE_IRQ_STATE;
 
+  CORE_ENTER_ATOMIC();
   if (uart_context->rx_count < uart_context->rx_buffer_length) {
+    CORE_EXIT_ATOMIC();
     return true;
   }
+  CORE_EXIT_ATOMIC();
   return false;
 }
 
@@ -346,6 +338,20 @@ void sli_uart_push_rxd_data(void *context,
                             char c)
 {
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
+  CORE_DECLARE_IRQ_STATE;
+
+  CORE_ENTER_ATOMIC();
+  if (uart_context->sw_flow_control) {
+    if (c == XOFF) {
+      uart_context->xon = false;
+      CORE_EXIT_ATOMIC();
+      return;
+    } else if (c == XON) {
+      uart_context->xon = true;
+      CORE_EXIT_ATOMIC();
+      return;
+    }
+  }
 
   EFM_ASSERT(uart_context->rx_count < uart_context->rx_buffer_length);
   uart_context->rx_buffer[uart_context->rx_write_index] = c;
@@ -354,6 +360,7 @@ void sli_uart_push_rxd_data(void *context,
   if (uart_context->rx_write_index == uart_context->rx_buffer_length) {
     uart_context->rx_write_index = 0;
   }
+  CORE_EXIT_ATOMIC();
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   {
     osKernelState_t state = osKernelGetState();
@@ -364,25 +371,31 @@ void sli_uart_push_rxd_data(void *context,
 #elif defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   uart_context->sleep = SL_POWER_MANAGER_WAKEUP;
 #endif
+
+  if (uart_context->rx_count == uart_context->rx_buffer_length) {
+    uint8_t xoff = XOFF;
+    nolock_uart_write(context, &xoff, sizeof(xoff));
+    uart_context->remote_xon = false;
+  }
 }
 
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
 /**************************************************************************//**
  * Signal transmit complete
  *****************************************************************************/
-bool sli_uart_txc(void *context)
+void sli_uart_txc(void *context)
 {
   sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
 
   if (uart_context->tx_idle == false) {
+    EFM_ASSERT(uart_context->tx_completed != NULL);
+    uart_context->tx_completed(context, false);
     uart_context->tx_idle = true;
     sl_power_manager_remove_em_requirement(uart_context->tx_em);
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
     uart_context->sleep = SL_POWER_MANAGER_SLEEP;
 #endif
   }
-
-  return uart_context->tx_idle;
 }
 #endif
 
@@ -448,19 +461,78 @@ static sl_status_t uart_deinit(void *stream)
 /***************************************************************************//**
  * Internal stream write implementation
  ******************************************************************************/
+static sl_status_t nolock_uart_write(void *context,
+                                     const void *buffer,
+                                     size_t buffer_length)
+{
+  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
+  char *c = (char *)buffer;
+  bool cr_to_crlf = false;
+  sl_status_t status = SL_STATUS_FAIL;
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  CORE_DECLARE_IRQ_STATE;
+#endif
+
+  sl_atomic_load(cr_to_crlf, uart_context->lf_to_crlf);
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  CORE_ENTER_ATOMIC();
+  if (uart_context->tx_idle == true) {
+    CORE_EXIT_ATOMIC();
+    sl_power_manager_add_em_requirement(uart_context->tx_em);
+    CORE_ENTER_ATOMIC();
+    uart_context->tx_idle = false;
+  }
+  CORE_EXIT_ATOMIC();
+#endif
+
+  if (cr_to_crlf == false) {
+    uint32_t i = 0;
+    while (i < buffer_length) {
+      bool xon = false;
+      sl_atomic_load(xon, uart_context->xon);
+      if (xon) {
+        status = uart_context->tx(uart_context, *c);
+        if (status != SL_STATUS_OK) {
+          return status;
+        }
+        c++;
+        i++;
+      } // Active wait if xon is false
+    }
+  } else {
+    uint32_t i = 0;
+    while (i < buffer_length) {
+      bool xon = false;
+      sl_atomic_load(xon, uart_context->xon);
+      if (xon) {
+        if (*c == '\n') {
+          status = uart_context->tx(uart_context, '\r');
+        }
+        status = uart_context->tx(uart_context, *c);
+        c++;
+        i++;
+      } // Active wait if xon is false
+    }
+  }
+
+#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
+  uart_context->tx_completed(context, true);
+#endif
+
+  return status;
+}
+
+/***************************************************************************//**
+ * Internal stream write implementation
+ ******************************************************************************/
 static sl_status_t uart_write(void *context,
                               const void *buffer,
                               size_t buffer_length)
 {
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  CORE_DECLARE_IRQ_STATE;
-  bool idle;
-#endif
-  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
-  char *c = (char *)buffer;
-  bool cr_to_crlf = false;
 #if (defined(SL_CATALOG_KERNEL_PRESENT))
   osStatus_t status;
+  sl_iostream_uart_context_t *uart_context = (sl_iostream_uart_context_t *)context;
   if (osKernelGetState() == osKernelRunning) {
     // Bypass lock if we print before the kernel is running
     status = osMutexAcquire(uart_context->write_lock, osWaitForever);
@@ -471,37 +543,7 @@ static sl_status_t uart_write(void *context,
   }
 #endif
 
-  sl_atomic_load(cr_to_crlf, uart_context->lf_to_crlf);
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-  CORE_ENTER_CRITICAL();
-  idle = uart_context->tx_idle;
-  uart_context->tx_idle = true;
-  CORE_EXIT_CRITICAL();
-  if (idle == false) {
-    sl_power_manager_remove_em_requirement(uart_context->tx_em);
-  }
-#endif
-
-  if (cr_to_crlf == false) {
-    for (uint32_t i = 0; i < buffer_length; i++) {
-      uart_context->tx(context, *c);
-      c++;
-    }
-  } else {
-    for (uint32_t i = 0; i < buffer_length; i++) {
-      if (*c == '\n') {
-        uart_context->tx(context, '\r');
-      }
-      uart_context->tx(context, *c);
-      c++;
-    }
-  }
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT) && !defined(SL_IOSTREAM_UART_FLUSH_TX_BUFFER)
-  sl_power_manager_add_em_requirement(uart_context->tx_em);
-  uart_context->tx_idle = false;
-#endif
+  nolock_uart_write(context, buffer, buffer_length);
 
 #if (defined(SL_CATALOG_KERNEL_PRESENT))
   if (osKernelGetState() == osKernelRunning) {
@@ -550,6 +592,11 @@ static sl_status_t uart_read(void *context,
   }
 
   exit:
+  if (uart_context->remote_xon == false) {
+    uint8_t xon = XON;
+    uart_write(context, &xon, sizeof(xon));
+    uart_context->remote_xon = true;
+  }
 #if (defined(SL_CATALOG_KERNEL_PRESENT))
   set_rx_sem_count(uart_context);
   if (osKernelGetState() == osKernelRunning) {
@@ -576,9 +623,9 @@ static uint32_t pop_byte_from_read_fifo(sl_iostream_uart_context_t *uart_context
 
   CORE_ENTER_ATOMIC();
   rx_count = uart_context->rx_count;
-  CORE_EXIT_ATOMIC();
 
   if (rx_count == 0) {
+    CORE_EXIT_ATOMIC();
     return rx_count;
   }
 
@@ -589,7 +636,6 @@ static uint32_t pop_byte_from_read_fifo(sl_iostream_uart_context_t *uart_context
     uart_context->rx_read_index = 0;
   }
 
-  CORE_ENTER_ATOMIC();
   uart_context->rx_count--;
   CORE_EXIT_ATOMIC();
 

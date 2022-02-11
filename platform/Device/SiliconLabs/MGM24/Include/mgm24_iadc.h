@@ -375,16 +375,6 @@ typedef struct {
 #define _IADC_STATUS_SCANFIFODV_MASK                    0x200UL                                          /**< Bit mask for IADC_SCANFIFODV                */
 #define _IADC_STATUS_SCANFIFODV_DEFAULT                 0x00000000UL                                     /**< Mode DEFAULT for IADC_STATUS                */
 #define IADC_STATUS_SCANFIFODV_DEFAULT                  (_IADC_STATUS_SCANFIFODV_DEFAULT << 9)           /**< Shifted mode DEFAULT for IADC_STATUS        */
-#define IADC_STATUS_SCANDATADV                          (0x1UL << 10)                                    /**< SCANDATA DV                                 */
-#define _IADC_STATUS_SCANDATADV_SHIFT                   10                                               /**< Shift value for IADC_SCANDATADV             */
-#define _IADC_STATUS_SCANDATADV_MASK                    0x400UL                                          /**< Bit mask for IADC_SCANDATADV                */
-#define _IADC_STATUS_SCANDATADV_DEFAULT                 0x00000000UL                                     /**< Mode DEFAULT for IADC_STATUS                */
-#define IADC_STATUS_SCANDATADV_DEFAULT                  (_IADC_STATUS_SCANDATADV_DEFAULT << 10)          /**< Shifted mode DEFAULT for IADC_STATUS        */
-#define IADC_STATUS_SINGLEDATADV                        (0x1UL << 11)                                    /**< SINGLEDATA DV                               */
-#define _IADC_STATUS_SINGLEDATADV_SHIFT                 11                                               /**< Shift value for IADC_SINGLEDATADV           */
-#define _IADC_STATUS_SINGLEDATADV_MASK                  0x800UL                                          /**< Bit mask for IADC_SINGLEDATADV              */
-#define _IADC_STATUS_SINGLEDATADV_DEFAULT               0x00000000UL                                     /**< Mode DEFAULT for IADC_STATUS                */
-#define IADC_STATUS_SINGLEDATADV_DEFAULT                (_IADC_STATUS_SINGLEDATADV_DEFAULT << 11)        /**< Shifted mode DEFAULT for IADC_STATUS        */
 #define IADC_STATUS_SINGLEFIFOFLUSHING                  (0x1UL << 14)                                    /**< The Single FIFO is flushing                 */
 #define _IADC_STATUS_SINGLEFIFOFLUSHING_SHIFT           14                                               /**< Shift value for IADC_SINGLEFIFOFLUSHING     */
 #define _IADC_STATUS_SINGLEFIFOFLUSHING_MASK            0x4000UL                                         /**< Bit mask for IADC_SINGLEFIFOFLUSHING        */
@@ -684,14 +674,12 @@ typedef struct {
 #define _IADC_CFG_ANALOGGAIN_SHIFT                      12                                        /**< Shift value for IADC_ANALOGGAIN             */
 #define _IADC_CFG_ANALOGGAIN_MASK                       0x7000UL                                  /**< Bit mask for IADC_ANALOGGAIN                */
 #define _IADC_CFG_ANALOGGAIN_DEFAULT                    0x00000002UL                              /**< Mode DEFAULT for IADC_CFG                   */
-#define _IADC_CFG_ANALOGGAIN_ANAGAIN0P25                0x00000000UL                              /**< Mode ANAGAIN0P25 for IADC_CFG               */
 #define _IADC_CFG_ANALOGGAIN_ANAGAIN0P5                 0x00000001UL                              /**< Mode ANAGAIN0P5 for IADC_CFG                */
 #define _IADC_CFG_ANALOGGAIN_ANAGAIN1                   0x00000002UL                              /**< Mode ANAGAIN1 for IADC_CFG                  */
 #define _IADC_CFG_ANALOGGAIN_ANAGAIN2                   0x00000003UL                              /**< Mode ANAGAIN2 for IADC_CFG                  */
 #define _IADC_CFG_ANALOGGAIN_ANAGAIN3                   0x00000004UL                              /**< Mode ANAGAIN3 for IADC_CFG                  */
 #define _IADC_CFG_ANALOGGAIN_ANAGAIN4                   0x00000005UL                              /**< Mode ANAGAIN4 for IADC_CFG                  */
 #define IADC_CFG_ANALOGGAIN_DEFAULT                     (_IADC_CFG_ANALOGGAIN_DEFAULT << 12)      /**< Shifted mode DEFAULT for IADC_CFG           */
-#define IADC_CFG_ANALOGGAIN_ANAGAIN0P25                 (_IADC_CFG_ANALOGGAIN_ANAGAIN0P25 << 12)  /**< Shifted mode ANAGAIN0P25 for IADC_CFG       */
 #define IADC_CFG_ANALOGGAIN_ANAGAIN0P5                  (_IADC_CFG_ANALOGGAIN_ANAGAIN0P5 << 12)   /**< Shifted mode ANAGAIN0P5 for IADC_CFG        */
 #define IADC_CFG_ANALOGGAIN_ANAGAIN1                    (_IADC_CFG_ANALOGGAIN_ANAGAIN1 << 12)     /**< Shifted mode ANAGAIN1 for IADC_CFG          */
 #define IADC_CFG_ANALOGGAIN_ANAGAIN2                    (_IADC_CFG_ANALOGGAIN_ANAGAIN2 << 12)     /**< Shifted mode ANAGAIN2 for IADC_CFG          */
@@ -930,7 +918,6 @@ typedef struct {
 #define _IADC_SINGLE_PORTNEG_MASK                       0xF0UL                               /**< Bit mask for IADC_PORTNEG                   */
 #define _IADC_SINGLE_PORTNEG_DEFAULT                    0x00000000UL                         /**< Mode DEFAULT for IADC_SINGLE                */
 #define _IADC_SINGLE_PORTNEG_GND                        0x00000000UL                         /**< Mode GND for IADC_SINGLE                    */
-#define _IADC_SINGLE_PORTNEG_RSV0                       0x00000001UL                         /**< Mode RSV0 for IADC_SINGLE                   */
 #define _IADC_SINGLE_PORTNEG_DAC1                       0x00000002UL                         /**< Mode DAC1 for IADC_SINGLE                   */
 #define _IADC_SINGLE_PORTNEG_PADANA1                    0x00000004UL                         /**< Mode PADANA1 for IADC_SINGLE                */
 #define _IADC_SINGLE_PORTNEG_PADANA3                    0x00000005UL                         /**< Mode PADANA3 for IADC_SINGLE                */
@@ -940,7 +927,6 @@ typedef struct {
 #define _IADC_SINGLE_PORTNEG_PORTD                      0x0000000BUL                         /**< Mode PORTD for IADC_SINGLE                  */
 #define IADC_SINGLE_PORTNEG_DEFAULT                     (_IADC_SINGLE_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SINGLE        */
 #define IADC_SINGLE_PORTNEG_GND                         (_IADC_SINGLE_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SINGLE            */
-#define IADC_SINGLE_PORTNEG_RSV0                        (_IADC_SINGLE_PORTNEG_RSV0 << 4)     /**< Shifted mode RSV0 for IADC_SINGLE           */
 #define IADC_SINGLE_PORTNEG_DAC1                        (_IADC_SINGLE_PORTNEG_DAC1 << 4)     /**< Shifted mode DAC1 for IADC_SINGLE           */
 #define IADC_SINGLE_PORTNEG_PADANA1                     (_IADC_SINGLE_PORTNEG_PADANA1 << 4)  /**< Shifted mode PADANA1 for IADC_SINGLE        */
 #define IADC_SINGLE_PORTNEG_PADANA3                     (_IADC_SINGLE_PORTNEG_PADANA3 << 4)  /**< Shifted mode PADANA3 for IADC_SINGLE        */
@@ -1000,7 +986,6 @@ typedef struct {
 #define _IADC_SCAN_PORTNEG_MASK                         0xF0UL                             /**< Bit mask for IADC_PORTNEG                   */
 #define _IADC_SCAN_PORTNEG_DEFAULT                      0x00000000UL                       /**< Mode DEFAULT for IADC_SCAN                  */
 #define _IADC_SCAN_PORTNEG_GND                          0x00000000UL                       /**< Mode GND for IADC_SCAN                      */
-#define _IADC_SCAN_PORTNEG_RSV0                         0x00000001UL                       /**< Mode RSV0 for IADC_SCAN                     */
 #define _IADC_SCAN_PORTNEG_DAC1                         0x00000002UL                       /**< Mode DAC1 for IADC_SCAN                     */
 #define _IADC_SCAN_PORTNEG_PADANA1                      0x00000004UL                       /**< Mode PADANA1 for IADC_SCAN                  */
 #define _IADC_SCAN_PORTNEG_PADANA3                      0x00000005UL                       /**< Mode PADANA3 for IADC_SCAN                  */
@@ -1010,7 +995,6 @@ typedef struct {
 #define _IADC_SCAN_PORTNEG_PORTD                        0x0000000BUL                       /**< Mode PORTD for IADC_SCAN                    */
 #define IADC_SCAN_PORTNEG_DEFAULT                       (_IADC_SCAN_PORTNEG_DEFAULT << 4)  /**< Shifted mode DEFAULT for IADC_SCAN          */
 #define IADC_SCAN_PORTNEG_GND                           (_IADC_SCAN_PORTNEG_GND << 4)      /**< Shifted mode GND for IADC_SCAN              */
-#define IADC_SCAN_PORTNEG_RSV0                          (_IADC_SCAN_PORTNEG_RSV0 << 4)     /**< Shifted mode RSV0 for IADC_SCAN             */
 #define IADC_SCAN_PORTNEG_DAC1                          (_IADC_SCAN_PORTNEG_DAC1 << 4)     /**< Shifted mode DAC1 for IADC_SCAN             */
 #define IADC_SCAN_PORTNEG_PADANA1                       (_IADC_SCAN_PORTNEG_PADANA1 << 4)  /**< Shifted mode PADANA1 for IADC_SCAN          */
 #define IADC_SCAN_PORTNEG_PADANA3                       (_IADC_SCAN_PORTNEG_PADANA3 << 4)  /**< Shifted mode PADANA3 for IADC_SCAN          */

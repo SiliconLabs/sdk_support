@@ -58,8 +58,8 @@
 
 // <q CPU_CFG_TS_32_EN> Timestamp on 32 bits
 // <i> Enable 32-bits CPU timestamp feature.
-// <i> Default: 1
-#define  CPU_CFG_TS_32_EN                                   1
+// <i> Default: 0
+#define  CPU_CFG_TS_32_EN                                   0
 
 // <q CPU_CFG_TS_64_EN> Timestamp on 64 bits
 // <i> Enable 64-bits CPU timestamp feature.

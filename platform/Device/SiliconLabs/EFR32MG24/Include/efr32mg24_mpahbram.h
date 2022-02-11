@@ -60,8 +60,8 @@ typedef struct {
   __IOM uint32_t CFGIU1MAP;                     /**< Interleaving Unit 1 Map                            */
   __IOM uint32_t CFGIU2MAP;                     /**< Interleaving Unit 2 Map                            */
   __IOM uint32_t CFGIU3MAP;                     /**< Interleaving Unit 3 Map                            */
-  __IOM uint32_t RPURATD0;                      /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED0[1006U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED0[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED1[1006U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_SET;                 /**< IP version ID                                      */
   __IOM uint32_t CMD_SET;                       /**< Command register                                   */
   __IOM uint32_t CTRL_SET;                      /**< Control register                                   */
@@ -79,8 +79,8 @@ typedef struct {
   __IOM uint32_t CFGIU1MAP_SET;                 /**< Interleaving Unit 1 Map                            */
   __IOM uint32_t CFGIU2MAP_SET;                 /**< Interleaving Unit 2 Map                            */
   __IOM uint32_t CFGIU3MAP_SET;                 /**< Interleaving Unit 3 Map                            */
-  __IOM uint32_t RPURATD0_SET;                  /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED1[1006U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED2[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED3[1006U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_CLR;                 /**< IP version ID                                      */
   __IOM uint32_t CMD_CLR;                       /**< Command register                                   */
   __IOM uint32_t CTRL_CLR;                      /**< Control register                                   */
@@ -98,8 +98,8 @@ typedef struct {
   __IOM uint32_t CFGIU1MAP_CLR;                 /**< Interleaving Unit 1 Map                            */
   __IOM uint32_t CFGIU2MAP_CLR;                 /**< Interleaving Unit 2 Map                            */
   __IOM uint32_t CFGIU3MAP_CLR;                 /**< Interleaving Unit 3 Map                            */
-  __IOM uint32_t RPURATD0_CLR;                  /**< Root Access Type Descriptor Register               */
-  uint32_t       RESERVED2[1006U];              /**< Reserved for future use                            */
+  uint32_t       RESERVED4[1U];                 /**< Reserved for future use                            */
+  uint32_t       RESERVED5[1006U];              /**< Reserved for future use                            */
   __IM uint32_t  IPVERSION_TGL;                 /**< IP version ID                                      */
   __IOM uint32_t CMD_TGL;                       /**< Command register                                   */
   __IOM uint32_t CTRL_TGL;                      /**< Control register                                   */
@@ -117,7 +117,7 @@ typedef struct {
   __IOM uint32_t CFGIU1MAP_TGL;                 /**< Interleaving Unit 1 Map                            */
   __IOM uint32_t CFGIU2MAP_TGL;                 /**< Interleaving Unit 2 Map                            */
   __IOM uint32_t CFGIU3MAP_TGL;                 /**< Interleaving Unit 3 Map                            */
-  __IOM uint32_t RPURATD0_TGL;                  /**< Root Access Type Descriptor Register               */
+  uint32_t       RESERVED6[1U];                 /**< Reserved for future use                            */
 } MPAHBRAM_TypeDef;
 /** @} End of group EFR32MG24_MPAHBRAM */
 
@@ -435,65 +435,6 @@ typedef struct {
 #define _MPAHBRAM_CFGIU3MAP_MAP_MASK                      0xFFFFUL                               /**< Bit mask for MPAHBRAM_MAP                   */
 #define _MPAHBRAM_CFGIU3MAP_MAP_DEFAULT                   0x00000000UL                           /**< Mode DEFAULT for MPAHBRAM_CFGIU3MAP         */
 #define MPAHBRAM_CFGIU3MAP_MAP_DEFAULT                    (_MPAHBRAM_CFGIU3MAP_MAP_DEFAULT << 0) /**< Shifted mode DEFAULT for MPAHBRAM_CFGIU3MAP */
-
-/* Bit fields for MPAHBRAM RPURATD0 */
-#define _MPAHBRAM_RPURATD0_RESETVALUE                     0x00000000UL                                         /**< Default value for MPAHBRAM_RPURATD0         */
-#define _MPAHBRAM_RPURATD0_MASK                           0x0001FF06UL                                         /**< Mask for MPAHBRAM_RPURATD0                  */
-#define MPAHBRAM_RPURATD0_RATDCMD                         (0x1UL << 1)                                         /**< CMD Protection Bit                          */
-#define _MPAHBRAM_RPURATD0_RATDCMD_SHIFT                  1                                                    /**< Shift value for MPAHBRAM_RATDCMD            */
-#define _MPAHBRAM_RPURATD0_RATDCMD_MASK                   0x2UL                                                /**< Bit mask for MPAHBRAM_RATDCMD               */
-#define _MPAHBRAM_RPURATD0_RATDCMD_DEFAULT                0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCMD_DEFAULT                 (_MPAHBRAM_RPURATD0_RATDCMD_DEFAULT << 1)            /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCTRL                        (0x1UL << 2)                                         /**< CTRL Protection Bit                         */
-#define _MPAHBRAM_RPURATD0_RATDCTRL_SHIFT                 2                                                    /**< Shift value for MPAHBRAM_RATDCTRL           */
-#define _MPAHBRAM_RPURATD0_RATDCTRL_MASK                  0x4UL                                                /**< Bit mask for MPAHBRAM_RATDCTRL              */
-#define _MPAHBRAM_RPURATD0_RATDCTRL_DEFAULT               0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCTRL_DEFAULT                (_MPAHBRAM_RPURATD0_RATDCTRL_DEFAULT << 2)           /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDIF                          (0x1UL << 8)                                         /**< IF Protection Bit                           */
-#define _MPAHBRAM_RPURATD0_RATDIF_SHIFT                   8                                                    /**< Shift value for MPAHBRAM_RATDIF             */
-#define _MPAHBRAM_RPURATD0_RATDIF_MASK                    0x100UL                                              /**< Bit mask for MPAHBRAM_RATDIF                */
-#define _MPAHBRAM_RPURATD0_RATDIF_DEFAULT                 0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDIF_DEFAULT                  (_MPAHBRAM_RPURATD0_RATDIF_DEFAULT << 8)             /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDIEN                         (0x1UL << 9)                                         /**< IEN Protection Bit                          */
-#define _MPAHBRAM_RPURATD0_RATDIEN_SHIFT                  9                                                    /**< Shift value for MPAHBRAM_RATDIEN            */
-#define _MPAHBRAM_RPURATD0_RATDIEN_MASK                   0x200UL                                              /**< Bit mask for MPAHBRAM_RATDIEN               */
-#define _MPAHBRAM_RPURATD0_RATDIEN_DEFAULT                0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDIEN_DEFAULT                 (_MPAHBRAM_RPURATD0_RATDIEN_DEFAULT << 9)            /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDRAMBANKSVALID               (0x1UL << 10)                                        /**< RAMBANKSVALID Protection Bit                */
-#define _MPAHBRAM_RPURATD0_RATDRAMBANKSVALID_SHIFT        10                                                   /**< Shift value for MPAHBRAM_RATDRAMBANKSVALID  */
-#define _MPAHBRAM_RPURATD0_RATDRAMBANKSVALID_MASK         0x400UL                                              /**< Bit mask for MPAHBRAM_RATDRAMBANKSVALID     */
-#define _MPAHBRAM_RPURATD0_RATDRAMBANKSVALID_DEFAULT      0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDRAMBANKSVALID_DEFAULT       (_MPAHBRAM_RPURATD0_RATDRAMBANKSVALID_DEFAULT << 10) /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGSRTOP                    (0x1UL << 11)                                        /**< CFGSRTOP Protection Bit                     */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRTOP_SHIFT             11                                                   /**< Shift value for MPAHBRAM_RATDCFGSRTOP       */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRTOP_MASK              0x800UL                                              /**< Bit mask for MPAHBRAM_RATDCFGSRTOP          */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRTOP_DEFAULT           0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGSRTOP_DEFAULT            (_MPAHBRAM_RPURATD0_RATDCFGSRTOP_DEFAULT << 11)      /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGSRMAP                    (0x1UL << 12)                                        /**< CFGSRMAP Protection Bit                     */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRMAP_SHIFT             12                                                   /**< Shift value for MPAHBRAM_RATDCFGSRMAP       */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRMAP_MASK              0x1000UL                                             /**< Bit mask for MPAHBRAM_RATDCFGSRMAP          */
-#define _MPAHBRAM_RPURATD0_RATDCFGSRMAP_DEFAULT           0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGSRMAP_DEFAULT            (_MPAHBRAM_RPURATD0_RATDCFGSRMAP_DEFAULT << 12)      /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGIU0MAP                   (0x1UL << 13)                                        /**< CFGIU0MAP Protection Bit                    */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU0MAP_SHIFT            13                                                   /**< Shift value for MPAHBRAM_RATDCFGIU0MAP      */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU0MAP_MASK             0x2000UL                                             /**< Bit mask for MPAHBRAM_RATDCFGIU0MAP         */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU0MAP_DEFAULT          0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGIU0MAP_DEFAULT           (_MPAHBRAM_RPURATD0_RATDCFGIU0MAP_DEFAULT << 13)     /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGIU1MAP                   (0x1UL << 14)                                        /**< CFGIU1MAP Protection Bit                    */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU1MAP_SHIFT            14                                                   /**< Shift value for MPAHBRAM_RATDCFGIU1MAP      */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU1MAP_MASK             0x4000UL                                             /**< Bit mask for MPAHBRAM_RATDCFGIU1MAP         */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU1MAP_DEFAULT          0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGIU1MAP_DEFAULT           (_MPAHBRAM_RPURATD0_RATDCFGIU1MAP_DEFAULT << 14)     /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGIU2MAP                   (0x1UL << 15)                                        /**< CFGIU2MAP Protection Bit                    */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU2MAP_SHIFT            15                                                   /**< Shift value for MPAHBRAM_RATDCFGIU2MAP      */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU2MAP_MASK             0x8000UL                                             /**< Bit mask for MPAHBRAM_RATDCFGIU2MAP         */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU2MAP_DEFAULT          0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGIU2MAP_DEFAULT           (_MPAHBRAM_RPURATD0_RATDCFGIU2MAP_DEFAULT << 15)     /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
-#define MPAHBRAM_RPURATD0_RATDCFGIU3MAP                   (0x1UL << 16)                                        /**< CFGIU3MAP Protection Bit                    */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU3MAP_SHIFT            16                                                   /**< Shift value for MPAHBRAM_RATDCFGIU3MAP      */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU3MAP_MASK             0x10000UL                                            /**< Bit mask for MPAHBRAM_RATDCFGIU3MAP         */
-#define _MPAHBRAM_RPURATD0_RATDCFGIU3MAP_DEFAULT          0x00000000UL                                         /**< Mode DEFAULT for MPAHBRAM_RPURATD0          */
-#define MPAHBRAM_RPURATD0_RATDCFGIU3MAP_DEFAULT           (_MPAHBRAM_RPURATD0_RATDCFGIU3MAP_DEFAULT << 16)     /**< Shifted mode DEFAULT for MPAHBRAM_RPURATD0  */
 
 /** @} End of group EFR32MG24_MPAHBRAM_BitFields */
 /** @} End of group EFR32MG24_MPAHBRAM */

@@ -37,7 +37,7 @@ config_file:
     file_id: spidrv_usart_config
     condition: [device_series_2]
 validation_helper:
-  - path: script/spidrv_usart_validation.py
+  - path: script/spidrv_usart_validation.lua
 provides:  
   - name: "spidrv_instance"
     allow_multiple: true

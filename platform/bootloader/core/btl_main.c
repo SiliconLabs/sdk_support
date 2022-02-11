@@ -3,7 +3,7 @@
  * @brief Main file for Main Bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -24,23 +24,23 @@
 #include "core/btl_bootload.h"
 #include "core/btl_upgrade.h"
 
-#include "plugin/debug/btl_debug.h"
+#include "debug/btl_debug.h"
 
-#ifdef BTL_PLUGIN_GPIO_ACTIVATION
-#include "plugin/gpio/gpio-activation/btl_gpio_activation.h"
+#ifdef BTL_GPIO_ACTIVATION
+#include "gpio/gpio-activation/btl_gpio_activation.h"
 #endif
 
-#ifdef BTL_PLUGIN_EZSP_GPIO_ACTIVATION
-#include "plugin/gpio/ezsp-gpio-activation/btl_ezsp_gpio_activation.h"
+#ifdef BTL_EZSP_GPIO_ACTIVATION
+#include "gpio/ezsp-gpio-activation/btl_ezsp_gpio_activation.h"
 #endif
 
 #ifdef BOOTLOADER_SUPPORT_STORAGE
-#include "plugin/storage/btl_storage.h"
-#include "plugin/storage/bootloadinfo/btl_storage_bootloadinfo.h"
+#include "storage/btl_storage.h"
+#include "storage/bootloadinfo/btl_storage_bootloadinfo.h"
 #endif
 
 #ifdef BOOTLOADER_SUPPORT_COMMUNICATION
-#include "plugin/communication/btl_communication.h"
+#include "communication/btl_communication.h"
 #endif
 
 #include "em_device.h"
@@ -61,7 +61,7 @@ const size_t __rom_end__ @ "ROM_SIZE";
 __STATIC_INLINE bool enterBootloader(void);
 SL_NORETURN static void bootToApp(uint32_t);
 
-#if defined(BOOTLOADER_WRITE_DISABLE)
+#if defined(BOOTLOADER_WRITE_DISABLE) && (BOOTLOADER_WRITE_DISABLE == 1)
 __STATIC_INLINE void lockBootloaderArea(void)
 {
   // Disable write access to bootloader.
@@ -97,23 +97,17 @@ void HardFault_Handler(void)
 int main(void)
 {
   int32_t ret = BOOTLOADER_ERROR_STORAGE_BOOTLOAD;
-
   CHIP_Init();
-
-  // Enabling HFXO will add a hefty code size penalty (~1k)
-  // CMU_HFXOInit_TypeDef hfxoInit = CMU_HFXOINIT_DEFAULT;
-  // CMU_HFXOInit(&hfxoInit);
-  // CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);
-  // CMU_OscillatorEnable(cmuOsc_HFRCO, false, false);
-
   BTL_DEBUG_PRINTLN("BTL entry");
 
 #if defined(EMU_CMD_EM01VSCALE2) && defined(EMU_STATUS_VSCALEBUSY)
   // Device supports voltage scaling, and the bootloader may have been entered
   // with a downscaled voltage. Scale voltage up to allow flash programming.
-  EMU->CMD = EMU_CMD_EM01VSCALE2;
-  while (EMU->STATUS & EMU_STATUS_VSCALEBUSY) {
-    // Do nothing
+  if ((EMU->STATUS & EMU_STATUS_VSCALE_VSCALE2) != EMU_STATUS_VSCALE_VSCALE2) {
+    EMU->CMD = EMU_CMD_EM01VSCALE2;
+    while (EMU->STATUS & EMU_STATUS_VSCALEBUSY) {
+      // Do nothing
+    }
   }
 #endif
 
@@ -152,7 +146,7 @@ int main(void)
       // If the system is not able to recover from a fault like BADAPP or
       // BADIMAGE, wait in a busy loop to ease reflashing and debugging.
       BTL_DEBUG_PRINTLN("Reset loop detected. Stopping...");
-      reset_disableResetCounter();
+      reset_invalidateResetReason();
       while (1) {
         // Wait...
       }
@@ -224,31 +218,31 @@ const MainBootloaderTable_t mainStageTable = {
   .startOfAppSpace = (BareBootTable_t *)(BTL_APPLICATION_BASE),
   .endOfAppSpace = (void *)(BTL_APPLICATION_BASE + BTL_APP_SPACE_SIZE),
   .capabilities = (0
-#ifdef BOOTLOADER_ENFORCE_SIGNED_UPGRADE
+#if defined(BOOTLOADER_ENFORCE_SIGNED_UPGRADE) && (BOOTLOADER_ENFORCE_SIGNED_UPGRADE == 1)
                    | BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_SIGNATURE
 #endif
-#ifdef BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE
+#if defined(BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE) && (BOOTLOADER_ENFORCE_ENCRYPTED_UPGRADE == 1)
                    | BOOTLOADER_CAPABILITY_ENFORCE_UPGRADE_ENCRYPTION
 #endif
-#ifdef BOOTLOADER_ENFORCE_SECURE_BOOT
+#if defined(BOOTLOADER_ENFORCE_SECURE_BOOT) && (BOOTLOADER_ENFORCE_SECURE_BOOT == 1)
                    | BOOTLOADER_CAPABILITY_ENFORCE_SECURE_BOOT
 #endif
-#ifdef BOOTLOADER_SUPPORT_CERTIFICATES
+#if defined(BOOTLOADER_SUPPORT_CERTIFICATES) && (BOOTLOADER_SUPPORT_CERTIFICATES == 1)
                    | BOOTLOADER_CAPABILITY_ENFORCE_CERTIFICATE_SECURE_BOOT
 #endif
-#ifdef BOOTLOADER_ROLLBACK_PROTECTION
+#if defined(BOOTLOADER_ROLLBACK_PROTECTION) && (BOOTLOADER_ROLLBACK_PROTECTION == 1)
                    | BOOTLOADER_CAPABILITY_ROLLBACK_PROTECTION
 #endif
                    | BOOTLOADER_CAPABILITY_BOOTLOADER_UPGRADE
-                   | BOOTLOADER_CAPABILITY_EBL
-                   | BOOTLOADER_CAPABILITY_EBL_SIGNATURE
+                   | BOOTLOADER_CAPABILITY_GBL
+                   | BOOTLOADER_CAPABILITY_GBL_SIGNATURE
 #if !defined(BTL_PARSER_NO_SUPPORT_ENCRYPTION)
-                   | BOOTLOADER_CAPABILITY_EBL_ENCRYPTION
+                   | BOOTLOADER_CAPABILITY_GBL_ENCRYPTION
 #endif
-#ifdef BOOTLOADER_SUPPORT_STORAGE
+#if defined(BOOTLOADER_SUPPORT_STORAGE) && (BOOTLOADER_SUPPORT_STORAGE == 1)
                    | BOOTLOADER_CAPABILITY_STORAGE
 #endif
-#ifdef BOOTLOADER_SUPPORT_COMMUNICATION
+#if defined(BOOTLOADER_SUPPORT_COMMUNICATION) && (BOOTLOADER_SUPPORT_COMMUNICATION == 1)
                    | BOOTLOADER_CAPABILITY_COMMUNICATION
 #endif
                    ),
@@ -257,21 +251,21 @@ const MainBootloaderTable_t mainStageTable = {
   .verifyApplication = &bootload_verifyApplication,
   .initParser = &core_initParser,
   .parseBuffer = &core_parseBuffer,
-#ifdef BOOTLOADER_SUPPORT_STORAGE
+#if defined(BOOTLOADER_SUPPORT_STORAGE) && (BOOTLOADER_SUPPORT_STORAGE == 1)
   .storage = &storageFunctions,
 #else
   .storage = NULL,
 #endif
   .parseImageInfo = core_parseImageInfo,
   .parserContextSize = core_parserContextSize,
-#ifdef BOOTLOADER_ROLLBACK_PROTECTION
+#if defined(BOOTLOADER_ROLLBACK_PROTECTION) && (BOOTLOADER_ROLLBACK_PROTECTION == 1)
   .remainingApplicationUpgrades = &bootload_remainingApplicationUpgrades
 #else
   .remainingApplicationUpgrades = NULL
 #endif
 };
 
-#if defined(BOOTLOADER_SUPPORT_CERTIFICATES)
+#if defined(BOOTLOADER_SUPPORT_CERTIFICATES) && (BOOTLOADER_SUPPORT_CERTIFICATES == 1)
 const ApplicationCertificate_t sl_app_certificate = {
   .structVersion = APPLICATION_CERTIFICATE_VERSION,
   .flags = { 0U },
@@ -292,7 +286,7 @@ const ApplicationProperties_t sl_app_properties = {
     .capabilities = 0UL,
     .productId = { 0U },
   },
-#if defined(BOOTLOADER_SUPPORT_CERTIFICATES)
+#if defined(BOOTLOADER_SUPPORT_CERTIFICATES) && (BOOTLOADER_SUPPORT_CERTIFICATES == 1)
   // If certificate based boot chain is enabled, the bootloader binary will be provided with
   // a certificate that does not contain any key.
   // A valid certificate needs to be injected to the bootloader images using Simplicity Commander.
@@ -321,7 +315,8 @@ void SystemInit2(void)
   // Check if we came from EM4. If any other bit than the EM4 bit it set, we
   // can't know whether this was really an EM4 reset, and we need to do further
   // checking.
-#if defined(RMU_RSTCAUSE_EM4RST) && defined(APPLICATION_VERIFICATION_SKIP_EM4_RST)
+#if defined(RMU_RSTCAUSE_EM4RST) && defined(APPLICATION_VERIFICATION_SKIP_EM4_RST) \
+  && (APPLICATION_VERIFICATION_SKIP_EM4_RST == 1)
   if (RMU->RSTCAUSE == RMU_RSTCAUSE_EM4RST) {
     // We came from EM4, app doesn't need to be verified
     verifyApp = false;
@@ -353,11 +348,12 @@ void SystemInit2(void)
     // If app verification fails, enter bootloader instead
     enterApp = bootload_verifyApplication(startOfAppSpace);
     if (!enterApp) {
+      BTL_DEBUG_PRINTLN("App verify fail");
       reset_setResetReason(BOOTLOADER_RESET_REASON_BADAPP);
     }
   }
 
-#if defined(BOOTLOADER_ROLLBACK_PROTECTION)
+#if defined(BOOTLOADER_ROLLBACK_PROTECTION) && (BOOTLOADER_ROLLBACK_PROTECTION == 1)
   // Clean the stored application versions if requested with a magic.
   // The magic is only written when a bootloader upgrade is triggered.
   bootload_removeStoredApplicationVersions();
@@ -378,11 +374,12 @@ void SystemInit2(void)
     }
 #endif
 
-#if defined(BOOTLOADER_WRITE_DISABLE)
+#if defined(BOOTLOADER_WRITE_DISABLE) && (BOOTLOADER_WRITE_DISABLE == 1)
     lockBootloaderArea();
 #endif
 
-#if defined(BOOTLOADER_ENFORCE_SECURE_BOOT) && defined(APPLICATION_WRITE_DISABLE)
+#if defined(BOOTLOADER_ENFORCE_SECURE_BOOT) && (BOOTLOADER_ENFORCE_SECURE_BOOT == 1) \
+    && defined(APPLICATION_WRITE_DISABLE) && (APPLICATION_WRITE_DISABLE == 1)
     // The neccessary check of valid signature pointer for application at startOfAppSpace
     // is already done in bootload_verifyApplication.
     bootload_lockApplicationArea(startOfAppSpace, 0);
@@ -444,14 +441,14 @@ __STATIC_INLINE bool enterBootloader(void)
   }
 // *INDENT-ON*
 
-#ifdef BTL_PLUGIN_GPIO_ACTIVATION
+#ifdef BTL_GPIO_ACTIVATION
   if (gpio_enterBootloader()) {
     // GPIO pin state signals bootloader entry
     return true;
   }
 #endif
 
-#ifdef BTL_PLUGIN_EZSP_GPIO_ACTIVATION
+#ifdef BTL_EZSP_GPIO_ACTIVATION
   if (ezsp_gpio_enterBootloader()) {
     // GPIO pin state signals bootloader entry
     return true;
@@ -459,13 +456,4 @@ __STATIC_INLINE bool enterBootloader(void)
 #endif
 
   return false;
-}
-
-bool bootloader_enforceSecureBoot(void)
-{
-#ifdef BOOTLOADER_ENFORCE_SECURE_BOOT
-  return true;
-#else
-  return false;
-#endif
 }

@@ -11,7 +11,9 @@ include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:
       - path: mbedtls/bignum.h
-      - path: mbedtls/bn_mul.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: bn_mul.h
 provides:
   - name: mbedtls_mpi
 requires:

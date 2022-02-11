@@ -30,6 +30,9 @@
 #define BSP_BCC_RXPORT        gpioPortA
 #define BSP_BCC_RXPIN         9
 
+#define BSP_BCC_ENABLE_PORT   gpioPortB
+#define BSP_BCC_ENABLE_PIN    0
+
 #define BSP_DISP_ENABLE_PORT  gpioPortC
 #define BSP_DISP_ENABLE_PIN   9
 

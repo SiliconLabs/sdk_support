@@ -45,6 +45,7 @@
 #if defined (MBEDTLS_CMAC_C) && defined(MBEDTLS_CMAC_ALT)
 
 #include "mbedtls/cmac.h"
+#include "mbedtls/error.h"
 
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
@@ -113,9 +114,9 @@ static int psa_status_to_mbedtls(psa_status_t status)
     case PSA_SUCCESS:
       return 0;
     case PSA_ERROR_HARDWARE_FAILURE:
-      return MBEDTLS_ERR_CIPHER_HW_ACCEL_FAILED;
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
     case PSA_ERROR_NOT_SUPPORTED:
-      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
     default:
       return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
@@ -125,7 +126,7 @@ static inline void sl_psa_set_key_type(psa_key_attributes_t *attributes,
                                        psa_key_type_t type)
 {
   /* Common case: quick path */
-  attributes->core.type = type;
+  attributes->MBEDTLS_PRIVATE(core).MBEDTLS_PRIVATE(type) = type;
 }
 
 int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
@@ -136,11 +137,11 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
   sl_psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
 
-  if ( ctx == NULL || ctx->cipher_info == NULL || key == NULL ) {
+  if ( ctx == NULL || ctx->MBEDTLS_PRIVATE(cipher_info) == NULL || key == NULL ) {
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
 
-  type = ctx->cipher_info->type;
+  type = ctx->MBEDTLS_PRIVATE(cipher_info)->MBEDTLS_PRIVATE(type);
 
   switch ( type ) {
     case MBEDTLS_CIPHER_AES_128_ECB:
@@ -157,23 +158,23 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
       psa_set_key_bits(&attr, 256);
       break;
     default:
-      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
-  if ( ctx->cmac_ctx == NULL ) {
+  if ( ctx->MBEDTLS_PRIVATE(cmac_ctx) == NULL ) {
     /* Allocate CMAC context memory if it hasn't already been allocated */
     cmac_ctx = mbedtls_calloc(1, sizeof(struct mbedtls_cmac_context_t) );
     if ( cmac_ctx == NULL ) {
       return(MBEDTLS_ERR_CIPHER_ALLOC_FAILED);
     }
 
-    ctx->cmac_ctx = cmac_ctx;
+    ctx->MBEDTLS_PRIVATE(cmac_ctx) = cmac_ctx;
   } else {
-    mbedtls_platform_zeroize(ctx->cmac_ctx, sizeof(*ctx->cmac_ctx) );
+    mbedtls_platform_zeroize(ctx->MBEDTLS_PRIVATE(cmac_ctx), sizeof(*ctx->MBEDTLS_PRIVATE(cmac_ctx)) );
   }
 
   return psa_status_to_mbedtls(
-    MAC_SETUP_EN_FCT(&ctx->cmac_ctx->ctx,
+    MAC_SETUP_EN_FCT(&ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx,
                      &attr,
                      key,
                      keybits / 8U,
@@ -183,13 +184,13 @@ int mbedtls_cipher_cmac_starts(mbedtls_cipher_context_t *ctx,
 int mbedtls_cipher_cmac_update(mbedtls_cipher_context_t *ctx,
                                const unsigned char *input, size_t ilen)
 {
-  if ( ctx == NULL || ctx->cipher_info == NULL || input == NULL
-       || ctx->cmac_ctx == NULL ) {
+  if ( ctx == NULL || ctx->MBEDTLS_PRIVATE(cipher_info) == NULL || input == NULL
+       || ctx->MBEDTLS_PRIVATE(cmac_ctx) == NULL ) {
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
 
   return psa_status_to_mbedtls(
-    MAC_UPDATE_FCT(&ctx->cmac_ctx->ctx,
+    MAC_UPDATE_FCT(&ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx,
                    input,
                    ilen) );
 }
@@ -197,7 +198,7 @@ int mbedtls_cipher_cmac_update(mbedtls_cipher_context_t *ctx,
 int mbedtls_cipher_cmac_finish(mbedtls_cipher_context_t *ctx,
                                unsigned char *output)
 {
-  if ( ctx == NULL || ctx->cipher_info == NULL || ctx->cmac_ctx == NULL
+  if ( ctx == NULL || ctx->MBEDTLS_PRIVATE(cipher_info) == NULL || ctx->MBEDTLS_PRIVATE(cmac_ctx) == NULL
        || output == NULL ) {
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
@@ -205,7 +206,7 @@ int mbedtls_cipher_cmac_finish(mbedtls_cipher_context_t *ctx,
   size_t olen = 0;
 
   return psa_status_to_mbedtls(
-    MAC_FINISH_EN_FCT(&ctx->cmac_ctx->ctx,
+    MAC_FINISH_EN_FCT(&ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx,
                       output,
                       MBEDTLS_AES_BLOCK_SIZE,
                       &olen) );
@@ -213,7 +214,7 @@ int mbedtls_cipher_cmac_finish(mbedtls_cipher_context_t *ctx,
 
 int mbedtls_cipher_cmac_reset(mbedtls_cipher_context_t *ctx)
 {
-  if ( ctx == NULL || ctx->cipher_info == NULL || ctx->cmac_ctx == NULL ) {
+  if ( ctx == NULL || ctx->MBEDTLS_PRIVATE(cipher_info) == NULL || ctx->MBEDTLS_PRIVATE(cmac_ctx) == NULL ) {
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
 
@@ -222,19 +223,21 @@ int mbedtls_cipher_cmac_reset(mbedtls_cipher_context_t *ctx)
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
   sl_psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
 
-  if ( ctx->cmac_ctx->ctx.cipher_mac.key_len > sizeof(key) ) {
+  if ( ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx.cipher_mac.key_len > sizeof(key) ) {
     return(MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA);
   }
 
   /* Save the key to be able to restart the operation */
-  memcpy(key, ctx->cmac_ctx->ctx.cipher_mac.key, ctx->cmac_ctx->ctx.cipher_mac.key_len);
-  key_len = ctx->cmac_ctx->ctx.cipher_mac.key_len;
+  memcpy(key,
+         ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx.cipher_mac.key,
+         ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx.cipher_mac.key_len);
+  key_len = ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx.cipher_mac.key_len;
   psa_set_key_bits(&attr, key_len * 8);
 
   /* Abort and restart with the same key */
-  MAC_ABORT_FCT(&ctx->cmac_ctx->ctx);
+  MAC_ABORT_FCT(&ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx);
   return psa_status_to_mbedtls(
-    MAC_SETUP_EN_FCT(&ctx->cmac_ctx->ctx,
+    MAC_SETUP_EN_FCT(&ctx->MBEDTLS_PRIVATE(cmac_ctx)->ctx,
                      &attr,
                      key,
                      key_len,
@@ -250,7 +253,7 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
     return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
   }
 
-  switch ( cipher_info->type ) {
+  switch ( cipher_info->MBEDTLS_PRIVATE(type) ) {
     case MBEDTLS_CIPHER_AES_128_ECB:
       if ( keylen != 128UL ) {
         return MBEDTLS_ERR_CIPHER_BAD_INPUT_DATA;
@@ -271,7 +274,7 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
       }
       break;
     default:
-      return MBEDTLS_ERR_CIPHER_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
 
 #if defined(RADIOAES_PRESENT) && defined(SEMAILBOX_PRESENT)
@@ -279,11 +282,16 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
    * CMAC operations, we can dispatch these to the RADIOAES instance if there is
    * one available. */
   if ( (keylen == 128UL || keylen == 256UL) && (ilen <= 2 * MBEDTLS_AES_BLOCK_SIZE) ) {
-    return sli_aes_cmac_radio(key,
-                              keylen,
-                              input,
-                              ilen,
-                              output);
+    sl_status_t status = sli_aes_cmac_radio(key,
+                                            keylen,
+                                            input,
+                                            ilen,
+                                            output);
+    if (status == SL_STATUS_OK) {
+      return 0;
+    } else {
+      return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
+    }
   }
 #endif
 
@@ -291,7 +299,7 @@ int mbedtls_cipher_cmac(const mbedtls_cipher_info_t *cipher_info,
   psa_key_attributes_t attr = PSA_KEY_ATTRIBUTES_INIT;
   sl_psa_set_key_type(&attr, PSA_KEY_TYPE_AES);
 
-  switch ( cipher_info->type ) {
+  switch ( cipher_info->MBEDTLS_PRIVATE(type) ) {
     case MBEDTLS_CIPHER_AES_128_ECB:
       psa_set_key_bits(&attr, 128);
       break;

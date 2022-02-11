@@ -119,7 +119,7 @@ typedef struct fs_fat_tbl_entry {
 
 /********************************************************************************************************
  ********************************************************************************************************
- *                                               VARIABLES
+ *                                       LOCAL GLOBAL VARIABLES
  *
  * Note(s) : (1) These tables represent the default cluster size for FAT12, FAT16 and FAT32
  *           https://support.microsoft.com/en-us/help/140365/default-cluster-size-for-ntfs,-fat,-and-exfat

@@ -34,6 +34,10 @@
 #include "sl_rail_util_ant_div_config.h"
 #endif // SL_CATALOG_RAIL_UTIL_ANT_DIV_PRESENT
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** @brief Antenna modes
  */
 typedef int8_t sl_rail_util_antenna_mode_t;
@@ -186,6 +190,11 @@ void sl_rail_util_ant_div_get_antenna_config(RAIL_AntennaConfig_t *antennaConfig
  * or SL_STATUS_NOT_SUPPORTED if antenna is unsupported.
  */
 sl_status_t sl_rail_util_ant_div_update_antenna_config(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif //__SL_RAIL_UTIL_ANT_DIV_H__
 
 /**@} END micro group

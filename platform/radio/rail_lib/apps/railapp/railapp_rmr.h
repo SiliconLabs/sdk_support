@@ -36,6 +36,10 @@
 
 #include "rail_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @enum RAIL_RMR_StructureIndex_t
  * @brief Identifier for each structure used during reconfiguration
@@ -101,5 +105,9 @@ RAIL_ENUM(RAIL_RMR_CommandArguments_t) {
 #define RMR_ARGUMENT_BUFFER_SIZE 10
 #define RMR_DCDC_RETIMING_LEN 5
 #define RMR_HFXO_RETIMING_LEN 86
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__CI_RMR_H__

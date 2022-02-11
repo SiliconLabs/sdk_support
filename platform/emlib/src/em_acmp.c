@@ -373,7 +373,7 @@ void ACMP_Reset(ACMP_TypeDef *acmp)
   ACMP_Enable(acmp);
   acmp->INPUTCTRL   = _ACMP_INPUTCTRL_RESETVALUE;
   ACMP_Disable(acmp);
-  acmp->CFG         = _ACMP_CFG_RESETVALUE;
+  acmp->CFG         = PM5507_ACMP_CFG_RESETVALUE;
   acmp->CTRL        = _ACMP_CTRL_RESETVALUE;
   acmp->IF_CLR      = _ACMP_IF_MASK;
 #endif
@@ -570,6 +570,18 @@ void ACMP_Init(ACMP_TypeDef *acmp, const ACMP_Init_TypeDef *init)
 #if defined(_SILICON_LABS_32B_SERIES_2)
   EFM_ASSERT(init->biasProg
              <= (_ACMP_CFG_BIAS_MASK >> _ACMP_CFG_BIAS_SHIFT));
+
+// PM-5507: enforce that biasProg is a functional value
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
+  EFM_ASSERT(init->biasProg >= 4);
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3)
+  // Allow customer to use BIASPROG in [2; 3]
+  EFM_ASSERT(init->biasProg >= 2);
+#else
+  // Allow customer to use BIASPROG in [0; 3]
+  // but the implementation of the wait operation would be their responsibility
+#endif
+
   /* Make sure the ACMP is disabled since ACMP power source might be changed.*/
   ACMP_Disable(acmp);
 

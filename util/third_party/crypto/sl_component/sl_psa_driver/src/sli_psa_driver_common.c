@@ -43,6 +43,8 @@ size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type)
       return sizeof(psa_aead_operation_t);
     case SLI_PSA_CONTEXT_ENUM_NAME(psa_key_derivation_operation_t):
       return sizeof(psa_key_derivation_operation_t);
+    case SLI_PSA_CONTEXT_ENUM_NAME(psa_key_attributes_t):
+      return sizeof(psa_key_attributes_t);
     default:
       return 0;
   }

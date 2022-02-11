@@ -17,6 +17,11 @@
   - name: hardware_board_from_efm32wg-dk3850
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD3800A"'
+  - name: SL_BOARD_REV
+    value: '"A00"'
 - tag:
   - board:pn:BRD3800
   - board:variant:A

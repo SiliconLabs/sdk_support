@@ -25,8 +25,9 @@
 
 // <gpio> SL_CCS811_WAKE
 // $[GPIO_SL_CCS811_WAKE]
-#define SL_CCS811_WAKE_PORT            gpioPortF
-#define SL_CCS811_WAKE_PIN             15
+#define SL_CCS811_WAKE_PORT                      gpioPortF
+#define SL_CCS811_WAKE_PIN                       15
+
 // [GPIO_SL_CCS811_WAKE]$
 
 // <<< sl:end pin_tool >>>

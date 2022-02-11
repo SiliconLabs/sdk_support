@@ -77,7 +77,7 @@ void enableAppMode(AppMode_t next, bool enable, char *command)
 
 const char *streamModeNames(RAIL_StreamMode_t streamMode)
 {
-  char *streamModes[] = { "Tone", "PN9", "10Stream", "TonePhaseNoise" };
+  char *streamModes[] = { "Tone", "PN9", "10Stream", "TonePhaseNoise", "RampStream", "ToneShifted" };
   return streamModes[streamMode];
 }
 
@@ -99,7 +99,7 @@ static void transitionAppMode(AppMode_t nextAppMode)
   } else if (currAppMode == TX_STREAM) {
     RAIL_StopTxStream(railHandle);
   } else if (currAppMode == DIRECT) {
-    RAIL_EnableDirectMode(railHandle, false);
+    RAIL_EnableDirectModeAlt(railHandle, false, false);
   } else if (currAppMode == TX_CONTINUOUS   || currAppMode == TX_N_PACKETS
              || currAppMode == TX_SCHEDULED || currAppMode == TX_UNDERFLOW
              || currAppMode == TX_CANCEL) {
@@ -118,7 +118,7 @@ static void transitionAppMode(AppMode_t nextAppMode)
   if (nextAppMode == TX_STREAM) {
     RAIL_StartTxStreamAlt(railHandle, channel, streamMode, antOptions);
   } else if (nextAppMode == DIRECT) {
-    RAIL_EnableDirectMode(railHandle, true);
+    RAIL_EnableDirectModeAlt(railHandle, true, true);
   } else if (nextAppMode == TX_CONTINUOUS || nextAppMode == TX_N_PACKETS) {
     pendPacketTx();
   } else if (nextAppMode == TX_SCHEDULED || nextAppMode == TX_CANCEL) {

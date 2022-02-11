@@ -34,7 +34,7 @@
     <property object="LED" propertyId="LED.HAL_LED_COUNT.INT" value="2"/>
     <property object="LED" propertyId="LED.HAL_LED_ENABLE.ARRAY" value="0, 1"/>
 
-    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_2P4_MP"/>
+    <property object="PA" propertyId="PA.HAL_PA_SELECTION.ENUM" value="HAL_PA_SELECTION_HP"/>
     <property object="PA" propertyId="PA.BSP_PA_VOLTAGE.INT" value="1800"/>
 
     <property object="PTI" propertyId="PTI.BSP_PTI_DFRAME.PIN" value="PC05"/>

@@ -144,6 +144,17 @@ uint32_t halInternalGetHeapBottom(void);
 /** @}  Vector Table Index Definitions */
 
 /**
+ * @brief EM2xx-compatible reset code returned by halGetEm2xxResetInfo()
+ */
+#define EM2XX_RESET_UNKNOWN               0
+#define EM2XX_RESET_EXTERNAL              1   // EM2XX reports POWERON instead
+#define EM2XX_RESET_POWERON               2
+#define EM2XX_RESET_WATCHDOG              3
+#define EM2XX_RESET_ASSERT                6
+#define EM2XX_RESET_BOOTLOADER            9
+#define EM2XX_RESET_SOFTWARE              11
+
+/**
  * @brief Records the specified reset cause then forces a reboot.
  */
 void halInternalSysReset(uint16_t extendedCause);
@@ -154,6 +165,17 @@ void halInternalSysReset(uint16_t extendedCause);
  * @return A 16-bit code identifying the base and extended cause of the reset
  */
 uint16_t halGetExtendedResetInfo(void);
+
+/** @brief Calls ::halGetExtendedResetInfo() and translates the EM35x
+ *  reset code to the corresponding value used by the EM2XX HAL. Any reset codes
+ * not present in the EM2XX are returned after being OR'ed with 0x80.
+ *
+ * @appusage Used by the EZSP host as a platform-independent NCP reset code.
+ *
+ * @return The EM2XX-compatible reset code. If not supported by the EM2XX,
+ *         return the platform-specific code with B7 set.
+ */
+uint8_t halGetEm2xxResetInfo(void);
 
 /** @brief Calls ::halGetExtendedResetInfo() and supplies a string describing
  *  the extended cause of the reset.  halGetResetString() should also be called

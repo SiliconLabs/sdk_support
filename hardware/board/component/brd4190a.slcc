@@ -16,6 +16,7 @@
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4190a
   - name: hardware_board_has_spiflash
+  - name: hardware_board_has_si446x_radio
   - name: hardware_board_has_hfxo
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
@@ -29,6 +30,10 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
@@ -40,13 +45,21 @@
     - btn0
     - btn1
   - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: si446x_radio_usart
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4190A"'
+  - name: SL_BOARD_REV
+    value: '"A02"'
 - tag:
   - board:pn:BRD4190
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A02
   - board:device:efr32mg12p232f1024gm48
   - hardware:has:vcom
   - hardware:has:pti
@@ -55,3 +68,4 @@
   - hardware:has:led:2
   - hardware:has:button:2
   - hardware:has:memory:spi:mx25r8035f
+  - hardware:has:radio:spi:si4468

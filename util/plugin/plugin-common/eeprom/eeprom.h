@@ -8,6 +8,10 @@
 #ifndef EEPROM_H
 #define EEPROM_H
 
+#ifdef UC_BUILD
+#include "bootloader-eeprom.h"
+#endif
+
 /**
  * Initialize the underlying EEPROM part.
  *

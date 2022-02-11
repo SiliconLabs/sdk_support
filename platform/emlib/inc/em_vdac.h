@@ -281,7 +281,7 @@ typedef enum {
   vdacTrigModeNone          = _VDAC_CH0CFG_TRIGMODE_NONE,           /**< No conversion trigger source selected. */
   vdacTrigModeSw            = _VDAC_CH0CFG_TRIGMODE_SW,             /**< Channel is triggered by CHnDATA or COMBDATA write. */
   vdacTrigModeSyncPrs       = _VDAC_CH0CFG_TRIGMODE_SYNCPRS,        /**< Channel is triggered by Sync PRS input. */
-#if defined(LESENSE_PRESENT)
+#if defined(LESENSE_PRESENT) && defined(_VDAC_CH0CFG_TRIGMODE_LESENSE)
   vdacTrigModeLesense       = _VDAC_CH0CFG_TRIGMODE_LESENSE,        /**< Channel is triggered by LESENSE. */
 #endif
   vdacTrigModeInternalTimer = _VDAC_CH0CFG_TRIGMODE_INTERNALTIMER,  /**< Channel is triggered by Internal Timer. */
@@ -424,7 +424,7 @@ typedef struct {
     false,                  /* Leave channel disabled when initialization is done. */ \
     false,                  /* Turn off between sample off conversions.*/             \
     true,                   /* Enable High cap mode. */                               \
-    0,                      /* Fifo data low watermark at 0. */                       \
+    0,                      /* FIFO data low watermark at 0. */                       \
     vdacRefreshSrcNone,     /* Channel refresh source. */                             \
     vdacTrigModeSw,         /* Conversion trigged by CH0DATA or COMBDATA write. */    \
     vdacPowerModeHighPower, /* High power mode enabled. */                            \
@@ -454,10 +454,10 @@ void VDAC_InitChannel(VDAC_TypeDef *vdac,
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
- *  Sinemode start/stop
+ *  Start/stop Sinemode.
  *
  * @details
- *   This function send the sine mode start/stop signal to the DAC.
+ *   This function sends the sine mode start/stop signal to the DAC.
  *
  * @param[in] vdac
  *   Pointer to VDAC peripheral register block.
@@ -667,7 +667,7 @@ __STATIC_INLINE void VDAC_IntSet(VDAC_TypeDef *vdac, uint32_t flags)
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
- *    Get Vdac Status register.
+ *    Get the VDAC Status register.
  *
  * @param[in] vdac
  *   Pointer to VDAC peripheral register block.

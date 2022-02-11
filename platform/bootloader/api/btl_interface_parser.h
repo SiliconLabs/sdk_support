@@ -3,7 +3,7 @@
  * @brief Application interface to the bootloader parser.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -116,7 +116,7 @@ int32_t bootloader_parseImageInfo(BootloaderParserContext_t *context,
                                   uint32_t                  *bootloaderVersion);
 
 /***************************************************************************//**
- * Find size of context struct BootloaderParserContext used by bootloader
+ * Find the size of the context struct BootloaderParserContext used by the bootloader
  * image parser to store parser state.
  *
  * @return size of BootloaderParserContext, returns 0 if something went wrong.

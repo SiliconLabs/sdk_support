@@ -1,9 +1,9 @@
 id: micriumos_usbh_class_aoap
-label: USB Host Class - Android Accessory
+label: Micrium-USB Host Class - Android Accessory
 package: micrium-usbh
 description: Micrium OS USB Host Android Accessory Class
-category: Services|USB|Host
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 source:
   - path: platform/micrium_os/usb/source/host/class/usbh_aoap.c
 include:

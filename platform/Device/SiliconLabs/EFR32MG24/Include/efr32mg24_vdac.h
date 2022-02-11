@@ -265,11 +265,11 @@ typedef struct {
 #define _VDAC_CFG_DMAWU_MASK                        0x2000000UL                                   /**< Bit mask for VDAC_DMAWU                     */
 #define _VDAC_CFG_DMAWU_DEFAULT                     0x00000000UL                                  /**< Mode DEFAULT for VDAC_CFG                   */
 #define VDAC_CFG_DMAWU_DEFAULT                      (_VDAC_CFG_DMAWU_DEFAULT << 25)               /**< Shifted mode DEFAULT for VDAC_CFG           */
-#define VDAC_CFG_ONDEMANDCLKDIS                     (0x1UL << 26)                                 /**< Always allow clk_dac                        */
-#define _VDAC_CFG_ONDEMANDCLKDIS_SHIFT              26                                            /**< Shift value for VDAC_ONDEMANDCLKDIS         */
-#define _VDAC_CFG_ONDEMANDCLKDIS_MASK               0x4000000UL                                   /**< Bit mask for VDAC_ONDEMANDCLKDIS            */
-#define _VDAC_CFG_ONDEMANDCLKDIS_DEFAULT            0x00000000UL                                  /**< Mode DEFAULT for VDAC_CFG                   */
-#define VDAC_CFG_ONDEMANDCLKDIS_DEFAULT             (_VDAC_CFG_ONDEMANDCLKDIS_DEFAULT << 26)      /**< Shifted mode DEFAULT for VDAC_CFG           */
+#define VDAC_CFG_ONDEMANDCLK                        (0x1UL << 26)                                 /**< Always allow clk_dac                        */
+#define _VDAC_CFG_ONDEMANDCLK_SHIFT                 26                                            /**< Shift value for VDAC_ONDEMANDCLK            */
+#define _VDAC_CFG_ONDEMANDCLK_MASK                  0x4000000UL                                   /**< Bit mask for VDAC_ONDEMANDCLK               */
+#define _VDAC_CFG_ONDEMANDCLK_DEFAULT               0x00000000UL                                  /**< Mode DEFAULT for VDAC_CFG                   */
+#define VDAC_CFG_ONDEMANDCLK_DEFAULT                (_VDAC_CFG_ONDEMANDCLK_DEFAULT << 26)         /**< Shifted mode DEFAULT for VDAC_CFG           */
 #define VDAC_CFG_DBGHALT                            (0x1UL << 27)                                 /**< Debug Halt                                  */
 #define _VDAC_CFG_DBGHALT_SHIFT                     27                                            /**< Shift value for VDAC_DBGHALT                */
 #define _VDAC_CFG_DBGHALT_MASK                      0x8000000UL                                   /**< Bit mask for VDAC_DBGHALT                   */

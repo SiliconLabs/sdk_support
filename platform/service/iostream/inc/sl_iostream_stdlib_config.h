@@ -41,8 +41,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_stdlib_cfg IO Stream STDLIB Configuration
- * @brief IO Stream STDLIB Configuration
+ * @addtogroup iostream_stdlib_cfg I/O Stream STDLIB Configuration
+ * @brief I/O Stream STDLIB Configuration
  * @details
  * ## Overview
  *

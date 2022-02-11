@@ -33,6 +33,10 @@
 
 #include "rail_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum {
   RAILAPP_ANTENNA_0 = RAIL_RX_OPTION_ANTENNA0,
   RAILAPP_ANTENNA_1 = RAIL_RX_OPTION_ANTENNA1,
@@ -40,5 +44,9 @@ typedef enum {
 }RAILAPP_AntennaSel_t;
 
 void RAILAPP_SetRfPath(RAIL_AntennaSel_t rfPath);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

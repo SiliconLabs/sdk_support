@@ -131,7 +131,7 @@ static int psa_status_to_mbedtls(psa_status_t status, psa_algorithm_t alg)
   }
 }
 
-#if defined(MBEDTLS_SHA512_ALT) && defined(MBEDTLS_SHA512_C)
+#if defined(MBEDTLS_SHA512_ALT) && (defined(MBEDTLS_SHA384_C) || defined(MBEDTLS_SHA512_C))
 
 void mbedtls_sha512_init(mbedtls_sha512_context *ctx)
 {
@@ -154,13 +154,13 @@ void mbedtls_sha512_clone(mbedtls_sha512_context *dst,
   *dst = *src;
 }
 
-int mbedtls_sha512_starts_ret(mbedtls_sha512_context *ctx, int is384)
+int mbedtls_sha512_starts(mbedtls_sha512_context *ctx, int is384)
 {
   return psa_status_to_mbedtls(HASH_SETUP_FCT(ctx, is384 ? PSA_ALG_SHA_384 : PSA_ALG_SHA_512), PSA_ALG_SHA_512);
 }
 
-int mbedtls_sha512_update_ret(mbedtls_sha512_context *ctx, const unsigned char *input,
-                              size_t ilen)
+int mbedtls_sha512_update(mbedtls_sha512_context *ctx, const unsigned char *input,
+                          size_t ilen)
 {
   return psa_status_to_mbedtls(HASH_UPDATE_FCT(ctx, input, ilen), PSA_ALG_SHA_512);
 }
@@ -170,40 +170,14 @@ int mbedtls_internal_sha512_process(mbedtls_sha512_context *ctx, const unsigned 
   return psa_status_to_mbedtls(HASH_UPDATE_FCT(ctx, data, 128), PSA_ALG_SHA_512);
 }
 
-int mbedtls_sha512_finish_ret(mbedtls_sha512_context *ctx, unsigned char output[64])
+int mbedtls_sha512_finish(mbedtls_sha512_context *ctx, unsigned char output[64])
 {
   size_t out_length = 0;
   return psa_status_to_mbedtls(HASH_FINISH_FCT(ctx, output, 64, &out_length), PSA_ALG_SHA_512);
 }
-
-#if !defined(MBEDTLS_DEPRECATED_REMOVED)
-void mbedtls_sha512_starts(mbedtls_sha512_context *ctx,
-                           int is384)
-{
-  (void) mbedtls_sha512_starts_ret(ctx, is384);
-}
-
-void mbedtls_sha512_process(mbedtls_sha512_context *ctx, const unsigned char data[128])
-{
-  (void) mbedtls_sha512_update_ret(ctx, data, 128);
-}
-
-void mbedtls_sha512_update(mbedtls_sha512_context *ctx,
-                           const unsigned char *input,
-                           size_t ilen)
-{
-  (void) mbedtls_sha512_update_ret(ctx, input, ilen);
-}
-
-void mbedtls_sha512_finish(mbedtls_sha512_context *ctx,
-                           unsigned char output[64])
-{
-  (void) mbedtls_sha512_finish_ret(ctx, output);
-}
-#endif /* !DEPRECATED_REMOVED */
 #endif /* SHA512 acceleration active */
 
-#if defined(MBEDTLS_SHA256_ALT) && defined(MBEDTLS_SHA256_C)
+#if defined(MBEDTLS_SHA256_ALT) && (defined(MBEDTLS_SHA256_C) || defined(MBEDTLS_SHA224_C))
 void mbedtls_sha256_init(mbedtls_sha256_context *ctx)
 {
   SHA256_VALIDATE(ctx != NULL);
@@ -225,7 +199,7 @@ void mbedtls_sha256_clone(mbedtls_sha256_context *dst,
   *dst = *src;
 }
 
-int mbedtls_sha256_starts_ret(mbedtls_sha256_context *ctx, int is224)
+int mbedtls_sha256_starts(mbedtls_sha256_context *ctx, int is224)
 {
   SHA256_VALIDATE_RET(ctx != NULL);
   SHA256_VALIDATE_RET(is224 == 0 || is224 == 1);
@@ -233,8 +207,8 @@ int mbedtls_sha256_starts_ret(mbedtls_sha256_context *ctx, int is224)
   return psa_status_to_mbedtls(HASH_SETUP_FCT((void *)ctx, is224 ? PSA_ALG_SHA_224 : PSA_ALG_SHA_256), PSA_ALG_SHA_256);
 }
 
-int mbedtls_sha256_update_ret(mbedtls_sha256_context *ctx, const unsigned char *input,
-                              size_t ilen)
+int mbedtls_sha256_update(mbedtls_sha256_context *ctx, const unsigned char *input,
+                          size_t ilen)
 {
   SHA256_VALIDATE_RET(ctx != NULL);
   SHA256_VALIDATE_RET(ilen == 0 || input != NULL);
@@ -250,7 +224,7 @@ int mbedtls_internal_sha256_process(mbedtls_sha256_context *ctx, const unsigned 
   return psa_status_to_mbedtls(HASH_UPDATE_FCT((void *)ctx, data, 64), PSA_ALG_SHA_256);
 }
 
-int mbedtls_sha256_finish_ret(mbedtls_sha256_context *ctx, unsigned char output[32])
+int mbedtls_sha256_finish(mbedtls_sha256_context *ctx, unsigned char output[32])
 {
   SHA256_VALIDATE_RET(ctx != NULL);
   SHA256_VALIDATE_RET((unsigned char *)output != NULL);
@@ -258,32 +232,6 @@ int mbedtls_sha256_finish_ret(mbedtls_sha256_context *ctx, unsigned char output[
   size_t out_length = 0;
   return psa_status_to_mbedtls(HASH_FINISH_FCT((void *)ctx, output, 32, &out_length), PSA_ALG_SHA_256);
 }
-
-#if !defined(MBEDTLS_DEPRECATED_REMOVED)
-void mbedtls_sha256_starts(mbedtls_sha256_context *ctx,
-                           int is224)
-{
-  (void) mbedtls_sha256_starts_ret(ctx, is224);
-}
-
-void mbedtls_sha256_process(mbedtls_sha256_context *ctx, const unsigned char data[64])
-{
-  (void) mbedtls_sha256_update_ret(ctx, data, 64);
-}
-
-void mbedtls_sha256_update(mbedtls_sha256_context *ctx,
-                           const unsigned char *input,
-                           size_t ilen)
-{
-  (void) mbedtls_sha256_update_ret(ctx, input, ilen);
-}
-
-void mbedtls_sha256_finish(mbedtls_sha256_context *ctx,
-                           unsigned char output[32])
-{
-  (void) mbedtls_sha256_finish_ret(ctx, output);
-}
-#endif /* !DEPRECATED_REMOVED */
 #endif /* SHA256 acceleration active */
 
 #if defined(MBEDTLS_SHA1_ALT) && defined(MBEDTLS_SHA1_C)
@@ -309,14 +257,14 @@ void mbedtls_sha1_clone(mbedtls_sha1_context *dst,
   *dst = *src;
 }
 
-int mbedtls_sha1_starts_ret(mbedtls_sha1_context *ctx)
+int mbedtls_sha1_starts(mbedtls_sha1_context *ctx)
 {
   SHA1_VALIDATE_RET(ctx != NULL);
 
   return psa_status_to_mbedtls(HASH_SETUP_FCT((void *)ctx, PSA_ALG_SHA_1), PSA_ALG_SHA_1);
 }
 
-int mbedtls_sha1_update_ret(mbedtls_sha1_context *ctx, const unsigned char *input, size_t ilen)
+int mbedtls_sha1_update(mbedtls_sha1_context *ctx, const unsigned char *input, size_t ilen)
 {
   SHA1_VALIDATE_RET(ctx != NULL);
   SHA1_VALIDATE_RET(ilen == 0 || input != NULL);
@@ -332,7 +280,7 @@ int mbedtls_internal_sha1_process(mbedtls_sha1_context *ctx, const unsigned char
   return psa_status_to_mbedtls(HASH_UPDATE_FCT((void *)ctx, data, 64), PSA_ALG_SHA_1);
 }
 
-int mbedtls_sha1_finish_ret(mbedtls_sha1_context *ctx, unsigned char output[20])
+int mbedtls_sha1_finish(mbedtls_sha1_context *ctx, unsigned char output[20])
 {
   SHA1_VALIDATE_RET(ctx != NULL);
   SHA1_VALIDATE_RET((unsigned char *)output != NULL);
@@ -340,31 +288,6 @@ int mbedtls_sha1_finish_ret(mbedtls_sha1_context *ctx, unsigned char output[20])
   size_t out_length = 0;
   return psa_status_to_mbedtls(HASH_FINISH_FCT((void *)ctx, output, 20, &out_length), PSA_ALG_SHA_1);
 }
-
-#if !defined(MBEDTLS_DEPRECATED_REMOVED)
-void mbedtls_sha1_starts(mbedtls_sha1_context *ctx)
-{
-  (void) mbedtls_sha1_starts_ret(ctx);
-}
-
-void mbedtls_sha1_process(mbedtls_sha1_context *ctx, const unsigned char data[64])
-{
-  (void) mbedtls_sha1_update_ret(ctx, data, 64);
-}
-
-void mbedtls_sha1_update(mbedtls_sha1_context *ctx,
-                         const unsigned char *input,
-                         size_t ilen)
-{
-  (void) mbedtls_sha1_update_ret(ctx, input, ilen);
-}
-
-void mbedtls_sha1_finish(mbedtls_sha1_context *ctx,
-                         unsigned char output[20])
-{
-  (void) mbedtls_sha1_finish_ret(ctx, output);
-}
-#endif /* !DEPRECATED_REMOVED */
 #endif /* SHA1 acceleration active */
 
 #endif /* HASH_IMPLEMENTATION_PRESENT */

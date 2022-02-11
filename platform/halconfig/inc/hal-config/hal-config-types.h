@@ -116,10 +116,11 @@ typedef uint8_t HalRadioConfig_t;
 #define HAL_USART_FLOW_CONTROL_HW       2
 #define HAL_USART_FLOW_CONTROL_HWUART   3
 
-#define HAL_PA_SELECTION_2P4_HP         0
-#define HAL_PA_SELECTION_2P4_MP         1
-#define HAL_PA_SELECTION_2P4_LP         2
-#define HAL_PA_SELECTION_HIGHEST        3
+#define HAL_PA_SELECTION_HP             0
+#define HAL_PA_SELECTION_MP             1
+#define HAL_PA_SELECTION_LP             2
+#define HAL_PA_SELECTION_LLP            3
+#define HAL_PA_SELECTION_HIGHEST        4
 
 #define HAL_TIMER_TIMER0             0x20
 #define HAL_TIMER_TIMER1             0x21

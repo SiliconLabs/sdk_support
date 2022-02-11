@@ -42,7 +42,7 @@
 #define PHY_COUNT ((sizeof(phyNames) / sizeof(phyNames[0])) - 1)
 static const char * const phyNames[] = {
   "IEEE802154_2P4_MODE_DEFAULT",
-#if HAL_CONFIG
+#if HAL_CONFIG || defined(EZSP_HOST)
   "IEEE802154_2P4_MODE_ANT_DIV",
   "IEEE802154_2P4_MODE_COEX",
   "IEEE802154_2P4_MODE_ANT_DIV_COEX",
@@ -50,7 +50,7 @@ static const char * const phyNames[] = {
   "IEEE802154_2P4_MODE_ANT_DIV_FEM",
   "IEEE802154_2P4_MODE_COEX_FEM",
   "IEEE802154_2P4_MODE_ANT_DIV_COEX_FEM",
-#endif //HAL_CONFIG
+#endif //HAL_CONFIG || defined(EZSP_HOST)
   "INVALID_PHY_SELECTION"
 };
 

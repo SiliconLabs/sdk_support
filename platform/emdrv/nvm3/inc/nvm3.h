@@ -272,7 +272,7 @@ Ecode_t nvm3_close(nvm3_Handle_t *h);
 /***************************************************************************//**
  * @brief
  *  Write the object value identified with the key to NVM.
- *  If the data object exist with the same lenght, its old content is compared
+ *  If the data object exists with the same length, its old content is compared
  *  with the new and only if the new content is different from the old it will
  *  be written.
  *
@@ -748,7 +748,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
       @ref nvm3_repack() will not perform repacking unless free memory is below
       this threshold.
 
-   An NVM3 function that deletes or modifies a data or counter object will trigger
+   An NVM3 function that deletes or modifies data or counter object will trigger
    an automatic repack operation when free memory is below the forced threshold.
    The check is done before the object is modified, not after.
 
@@ -756,7 +756,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    member of the @ref nvm3_Init_t structure used by the @ref nvm3_open() function.
    The repackHeadroom value defines the difference between the user and forced
    threshold. The forced threshold is the minimum low memory threshold defined
-   by the page size and maximum object size and cannot be changed by the user.
+   by the page size and maximum object size and can't be changed by the user.
    The default value for the repack headroom is 0, meaning that the forced and
    user thresholds are equal.
 
@@ -765,7 +765,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    that "high" values of the repack headroom may cause
    increased NVM wear from increased number of repacks.
 
-   Please refer to @ref nvm3_timing section for more details on repack timing.
+   See @ref nvm3_timing section for more details on repack timing.
 
    # Caching {#nvm3_cache}
    NVM3 includes an object location lookup cache to speed up object access, as
@@ -809,25 +809,25 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    # Stack Usage {#nvm3_stack}
    NVM3 library function calls are nested several levels deep. The stack
    usage has been measured on some EFM32 and EFR32 targets with library builds
-   for IAR and armgcc. The maximum stack usage measured was 420 bytes for
+   for IAR and ARM GCC. The maximum stack usage measured was 420 bytes for
    IAR and 472 bytes for ARM GCC builds. The unit test used to validate the
    stack usage has a 10% margin and is using a stack limit at 462 bytes for IAR
    and 520 for ARM GCC.
-   Please note that the actual stack usage is a little different on the Cortex
-   M0 Plus, M3, M4 and M33 versions of the library.
+   Note that the actual stack usage is a little different on the Cortex
+   M0 Plus, M3, M4, and M33 versions of the library.
 
    # The API {#nvm3_api}
-   The NVM3 API is defined in the nvm3.h file, and the application code
+   The NVM3 API is defined in the nvm3.h file. The application code
    must include the nvm3.h header file to get access to all definitions,
    datatypes, and function prototypes defined by NVM3.
 
    This section contains brief descriptions of NVM3 functions. For
-   more information about parameters and return values see the Function
-   Documentation section. Most functions return an @ref Ecode_t that has the
+   more information about parameters and return values, see the Function
+   documentation section. Most functions return an @ref Ecode_t that has the
    value @ref ECODE_NVM3_OK on success or see nvm3.h for other values.
 
    @ref nvm3_open() and @ref nvm3_close().
-   @n Functions to open and close an NVM3 instance. @ref nvm3_open() takes a handle
+   @n These functions open and close an NVM3 instance. @ref nvm3_open() takes a handle
    of type nvm3_Handle_t and initialization data of type @ref nvm3_Init_t.
    The helper macro pair @ref NVM3_DEFINE_SECTION_STATIC_DATA() and
    @ref NVM3_DEFINE_SECTION_INIT_DATA() are provided to simplify initialization
@@ -865,7 +865,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    all functions are protected with protection functions that disable interrupts.
 
    @note The default NVM3 protection functions can be substituted by the
-   application if other syncronization functions are available and disabling
+   application if other synchronization functions are available and disabling
    interrupts for extended periods is not desired.
 
    If the application does all the nvm3-calls from the same thread and guarantees
@@ -873,13 +873,13 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
 
    # Memory Placement {#nvm3_memory_placement}
    The application is responsible for placing the NVM area correctly. Minimum
-   requirements for memory placement are:
+   requirements for memory placement are, as follows:
    -# NVM area start address must be aligned with a page of the underlying
     memory system.
    -# NVM area size must be a multiple of the page size.
 
    The minimum required NVM size is dependent on both the NVM page size and the
-   NVM3_MAX_OBJECT_SIZE value. For a device with 2 kB page size and some typical
+   NVM3_MAX_OBJECT_SIZE value. For a device with 2 kB page size and typical
    values for NVM3_MAX_OBJECT_SIZE, the following is the minimum required
    number of pages:
      - For NVM3_MAX_OBJECT_SIZE=208:  3 pages
@@ -894,11 +894,11 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    must place the section according to the requirements above. An error is returned
    by @ref nvm3_open() on alignment or size violation.
 
-   @note When the start address and size of the data area has been defined and
-   used by an application, it is important that the same values are used at
-   every program startup and also re-used by new versions of the software after
+   @note When the start address and size of the data area are defined and
+   used by an application, make sure you use the same values at
+   every program startup and also re-use by new versions of the software after
    an upgrade. If an application tries to open an instance with a start address
-   or size that does not mach previous use, it can result in permanent data loss
+   or size that does not match the previous use, it can result in permanent data loss
    and failure.
 
    # Configuration Options {#nvm3_configuration}
@@ -944,7 +944,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    @note Because the @ref nvm3_open may need to do recovery operations,
    the execution time will occasionally vary.
 
-   # Storing objects in internal Flash {#nvm3_support_internal_flash}
+   # Storing Objects in Internal Flash {#nvm3_support_internal_flash}
    NVM3 has support for writing and reading objects in internal i.e., memory
    mapped Flash memory through the nvm3_hal_flash.c "driver". nvm3_hal_flash.c
    is using EMLIB functions to write and erase data, while using regular
@@ -954,7 +954,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    the nvm3_open initialization structure to point to nvm3_halFlashHandle.
 
    # NVM3 Libraries {#nvm3_libraries}
-   The NVM3 comes with pre-compiled libraries for Cortex M0, M3, M4 and M33
+   The NVM3 comes with pre-compiled libraries for Cortex M0, M3, M4, and M33
    compiled with either Arm GCC or IAR toolchains.
 
    # Storage Capacity {#nvm3_capacity}
@@ -965,7 +965,7 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    basic storage for a varying number of 2 kB or 8 kB flash pages ,and the minimum
    (208 bytes), default (254 bytes), high (1900 bytes) and maximum (4096 bytes)
    max object size. Note that this is a theoretical limit and if the basic storage
-   is at this limit, no space is left for wear-levelling and page erases will be
+   is at this limit, no space is left for wear-leveling and page erases will be
    forced for every object write. The NVM3 instance should therefore be configured
    with enough flash pages to put the maximum allowed basic storage significantly
    higher than the actual basic storage.
@@ -1010,21 +1010,21 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
 
    # NVM3 in Simplicity Commander {#nvm3_commander}
    Simplicity Commander is a single, all-purpose tool to be used in a production environment.
-   It is invoked using a simple CLI (Command Line Interface) that is also scriptable.
+   It is invoked using a simple Command Line Interface (CLI), that can also be scripted.
    Simplicity Commander supports reading out the NVM3 data area from a device and parsing
    the NVM3 data to extract stored values. This can be useful in a debugging scenario
    where you may need to find out the stored state of an application that has been running
    for some time.
 
-   More information on how to use the Simplicity Commander with NVM3 can be found in
+   For more information about using the Simplicity Commander with NVM3, see
    UG162: Simplicity Commander Reference Guide.
 
    # Execution Timing {#nvm3_timing}
    There are several factors that affect the execution time for NVM3 calls that
-   can update the NVM.
+   can update the NVM, described below.
 
    The primary factor when doing updates is that data must be written to flash.
-   Writing to flash is relatively slow, and timing information for the particular
+   Writing to flash is relatively slow and timing information for the particular
    device is available in the data sheet and can be used to calculate the
    approximately minimum execution time. Note that NVM3 will in addition to the
    user data write object headers and the software will of course add some
@@ -1032,11 +1032,11 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    objects.
 
    When doing updates to the flash store, repacking must be done from time to
-   time. Please refer to the @ref nvm3_repack section for more details on why
-   repack is needed and how it works.
+   time. See the @ref nvm3_repack section for more details about why
+   repacking is needed and how it works.
 
    To minimize the time when repacks are executed, there are a few configurations
-   that affect how NVM3 works. The most important are:
+   that affect how NVM3 works. The most important configurations are listed below:
    -# The repackHeadroom parameter in the @ref nvm3_Init_t structure can be used
    to set the number of bytes that can be written before a forced repack is
    triggered. To make this work, the @ref nvm3_repack() function must be called
@@ -1046,15 +1046,15 @@ __STATIC_INLINE size_t nvm3_countDeletedObjects(nvm3_Handle_t *h)
    the maximum object size will limit the time spent in both write and repack
    functions.
 
-   When triggered, the repack function will do either copy data or erase a page.
-   To limit the time spent when doing copy, the repack function will return when
+   When triggered, the repack function will either copy data or erase a page.
+   To limit the time spent when copying, the repack function will return when
    the NVM3_MAX_OBJECT_SIZE number of bytes have been copied. The copy operation
    will resume on the next call to repack and the application may have to call
    the repack function several times to complete a full repack operation.
 
    # Examples {#nvm3_example}
 
-   Example 1 shows initialization, usage of data objects and repacking.
+   Example 1 shows initialization, usage of data objects, and repacking.
 
    @include nvm3_example_1.c
 

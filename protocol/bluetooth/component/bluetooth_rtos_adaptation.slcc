@@ -1,5 +1,5 @@
 id: "bluetooth_rtos_adaptation"
-label: "Bluetooth Core"
+label: "Bluetooth RTOS Adaptation"
 package: "Bluetooth"
 description: >
   Bluetooth RTOS adaptation for running Bluetooth stack in a kernel.

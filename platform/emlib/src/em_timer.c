@@ -52,7 +52,18 @@
 #if defined(_PRS_CONSUMER_TIMER0_CC0_MASK)
 
 /** Map TIMER reference to index of device. */
-#if defined(TIMER4)
+#if defined(TIMER7)
+#define TIMER_DEVICE_ID(timer) ( \
+    (timer) == TIMER0     ? 0    \
+    : (timer) == TIMER1   ? 1    \
+    : (timer) == TIMER2   ? 2    \
+    : (timer) == TIMER3   ? 3    \
+    : (timer) == TIMER4   ? 4    \
+    : (timer) == TIMER5   ? 5    \
+    : (timer) == TIMER6   ? 6    \
+    : (timer) == TIMER7   ? 7    \
+    : -1)
+#elif defined(TIMER4)
 #define TIMER_DEVICE_ID(timer) ( \
     (timer) == TIMER0   ? 0      \
     : (timer) == TIMER1 ? 1      \
@@ -232,7 +243,7 @@ void TIMER_InitCC(TIMER_TypeDef *timer,
                   const TIMER_InitCC_TypeDef *init)
 {
   EFM_ASSERT(TIMER_REF_VALID(timer));
-  EFM_ASSERT(TIMER_CH_VALID(ch));
+  EFM_ASSERT(TIMER_REF_CH_VALIDATE(timer, ch));
 
 #if defined (_TIMER_CC_CFG_MASK)
   TIMER_SyncWait(timer);
@@ -420,7 +431,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
   /* Do not reset the route register, setting should be done independently. */
   /* Note: The ROUTE register may be locked by the DTLOCK register. */
 
-  for (i = 0; TIMER_CH_VALID(i); i++) {
+  for (i = 0; TIMER_REF_CH_VALIDATE(timer, i); i++) {
     timer->CC[i].CTRL = _TIMER_CC_CTRL_RESETVALUE;
 #if defined (_TIMER_CC_CCV_RESETVALUE) && defined (_TIMER_CC_CCVB_RESETVALUE)
     timer->CC[i].CCV  = _TIMER_CC_CCV_RESETVALUE;
@@ -458,7 +469,7 @@ void TIMER_Reset(TIMER_TypeDef *timer)
   }
 #endif
   timer->CFG = _TIMER_CFG_RESETVALUE;
-  for (i = 0; TIMER_CH_VALID(i); i++) {
+  for (i = 0; TIMER_REF_CH_VALIDATE(timer, i); i++) {
     timer->CC[i].CFG = _TIMER_CC_CFG_RESETVALUE;
   }
   timer->DTCFG = _TIMER_DTCFG_RESETVALUE;

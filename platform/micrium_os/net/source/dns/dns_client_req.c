@@ -53,6 +53,7 @@
 #include  <net/include/net_ascii.h>
 #include  <net/include/net_util.h>
 #include  <net/include/net_app.h>
+#include  <net/source/tcpip/net_util_priv.h>
 
 #include  "../tcpip/net_def_priv.h"
 #include  "../tcpip/net_if_priv.h"
@@ -595,11 +596,7 @@ CPU_INT16U DNScReq_TxReq(CPU_CHAR      *p_host_name,
   CPU_INT16U data_len;
 
   if (query_id == DNSc_QUERY_ID_NONE) {
-    CORE_DECLARE_IRQ_STATE;
-
-    CORE_ENTER_ATOMIC();
-    query_id = DNSc_DataPtr->QueryID++;
-    CORE_EXIT_ATOMIC();
+    query_id = (CPU_INT16U)NetUtil_RandomRangeGet(0, DEF_INT_16U_MAX_VAL);
   }
 
   data_len = DNScReq_TxPrepareMsg(buf, DNSc_PKT_MAX_SIZE, p_host_name, req_type, query_id, p_err);
@@ -803,9 +800,10 @@ static void DNScReq_RxRespMsg(DNSc_HOST_OBJ *p_host,
   CPU_INT08U *p_data;
   CPU_INT16U answer_type;
   CPU_INT16U data_16;
+  CPU_INT16U msg_len_remaining;
   CPU_INT08U ix;
 
-  PP_UNUSED_PARAM(resp_msg_len);
+  msg_len_remaining = resp_msg_len;
 
   Mem_Copy(&data_16, &p_dns_msg->Param, sizeof(p_dns_msg->Param));
   data_16 = NET_UTIL_NET_TO_HOST_16(data_16) & DNSc_PARAM_MASK_QR;
@@ -850,7 +848,7 @@ static void DNScReq_RxRespMsg(DNSc_HOST_OBJ *p_host,
   Mem_Copy(&question_nbr, &p_dns_msg->QuestionNbr, sizeof(p_dns_msg->QuestionNbr));
   question_nbr = NET_UTIL_NET_TO_HOST_16(question_nbr);
   if (question_nbr != DNSc_QUESTION_NBR) {                      // If nbr of question do not match the query,       ...
-    RTOS_ERR_SET(*p_err, RTOS_ERR_RX);                              // ... rtn err.
+    RTOS_ERR_SET(*p_err, RTOS_ERR_RX);                          // ... rtn err.
     goto exit;
   }
 
@@ -860,14 +858,35 @@ static void DNScReq_RxRespMsg(DNSc_HOST_OBJ *p_host,
     goto exit;                                                  // No answer for this type of request.
   }
 
+  // Remove header length from message length.
+  msg_len_remaining -= 12;
+
   //                                                               Skip over the questions section.
   p_data = &p_dns_msg->QueryMsg;
 
   for (ix = 0u; ix < question_nbr; ix++) {
-    while (*p_data != ASCII_CHAR_NULL) {                        // Step through the host name until reaching the ZERO.
+    while (*p_data != ASCII_CHAR_NULL
+           && msg_len_remaining > 0) {                        // Step through the host name until reaching the ZERO.
+      if (msg_len_remaining < *p_data) {
+        RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+        goto exit;
+      }
+      msg_len_remaining -= *p_data;
       p_data += *p_data;
+      if (msg_len_remaining < 1) {
+        RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+        goto exit;
+      }
+      msg_len_remaining--;
       p_data++;
     }
+
+    if (msg_len_remaining < (DNSc_ZERO_CHAR_SIZE + DNSc_PKT_TYPE_SIZE + DNSc_PKT_CLASS_SIZE)) {
+      RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+      goto exit;
+    }
+    msg_len_remaining -= (DNSc_ZERO_CHAR_SIZE + DNSc_PKT_TYPE_SIZE + DNSc_PKT_CLASS_SIZE);
+
 
     p_data += (DNSc_ZERO_CHAR_SIZE                              // Skip over the ZERO.
                + DNSc_PKT_TYPE_SIZE                             // Skip over the TYPE.
@@ -877,28 +896,68 @@ static void DNScReq_RxRespMsg(DNSc_HOST_OBJ *p_host,
   //                                                               Extract the rtn'd IP addr (see Note #5).
   for (ix = 0; ix < answer_nbr; ix++) {
     //                                                             Skip over the answer host name.
-    if ((*p_data & DNSc_COMP_ANSWER) == DNSc_COMP_ANSWER) {                          // If the host name is compressed,                  ...
-      p_data += DNSc_HOST_NAME_PTR_SIZE;                         // ... skip over the host name pointer.
+    if ((*p_data & DNSc_COMP_ANSWER) == DNSc_COMP_ANSWER) {     // If the host name is compressed,                  ...
+      if (msg_len_remaining < DNSc_HOST_NAME_PTR_SIZE) {
+        RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+        goto exit;
+      }
+      msg_len_remaining -= DNSc_HOST_NAME_PTR_SIZE;
+      p_data += DNSc_HOST_NAME_PTR_SIZE;                        // ... skip over the host name pointer.
     } else {
-      while (*p_data != ASCII_CHAR_NULL) {                      // Step through the host name until reaching the ZERO.
+      while (*p_data != ASCII_CHAR_NULL
+             && msg_len_remaining > 0) {                        // Step through the host name until reaching the ZERO.
+        if (msg_len_remaining < *p_data) {
+          RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+          goto exit;
+        }
+        msg_len_remaining -= *p_data;
         p_data += *p_data;
+        if (msg_len_remaining < 1) {
+          RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+          goto exit;
+        }
+        msg_len_remaining--;
         p_data++;
       }
 
+      if (msg_len_remaining < DNSc_ZERO_CHAR_SIZE) {
+        RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+        goto exit;
+      }
+      msg_len_remaining -= DNSc_ZERO_CHAR_SIZE;
       p_data += DNSc_ZERO_CHAR_SIZE;                            // Skip over the ZERO.
     }
 
+    if (msg_len_remaining < sizeof(CPU_INT16U)) {
+      RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+      goto exit;
+    }
     Mem_Copy(&answer_type, p_data, sizeof(CPU_INT16U));
     answer_type = NET_UTIL_NET_TO_HOST_16(answer_type);         // Get answer TYPE.
 
+    if (msg_len_remaining < (DNSc_PKT_TYPE_SIZE + DNSc_PKT_CLASS_SIZE + DNSc_PKT_TTL_SIZE)) {
+      RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+      goto exit;
+    }
+    msg_len_remaining -= (DNSc_PKT_TYPE_SIZE + DNSc_PKT_CLASS_SIZE + DNSc_PKT_TTL_SIZE);
     p_data += (DNSc_PKT_TYPE_SIZE                               // Skip over the CLASS & the TTL.
                + DNSc_PKT_CLASS_SIZE
                + DNSc_PKT_TTL_SIZE);
 
+    if (msg_len_remaining < sizeof(CPU_INT16U)) {
+      RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+      goto exit;
+    }
+    msg_len_remaining -= sizeof(CPU_INT16U);
     Mem_Copy(&data_16, p_data, sizeof(CPU_INT16U));
     data_16 = NET_UTIL_NET_TO_HOST_16(data_16);                 // Addr len.
     p_data += sizeof(CPU_INT16U);
 
+    if (msg_len_remaining < data_16) {
+      RTOS_ERR_SET(*p_err, RTOS_ERR_RX);
+      goto exit;
+    }
+    msg_len_remaining -= data_16;
     DNScReq_RxRespAddAddr(p_host, answer_type, p_data, p_err);
 
     p_data += data_16;

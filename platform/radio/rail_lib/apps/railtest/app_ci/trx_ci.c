@@ -41,15 +41,20 @@
 #include "app_common.h"
 #include "app_trx.h"
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
-#include "sl_iostream_usart_vcom_config.h"
-#endif
-
 #if defined(SL_COMPONENT_CATALOG_PRESENT)
   #include "sl_component_catalog.h"
 #endif
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) && defined(SL_CATALOG_CLI_PRESENT)
+#if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+#include "sl_iostream_eusart_vcom_config.h"
+#include "em_eusart.h"
+#endif
+
+#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#include "sl_iostream_usart_vcom_config.h"
+#endif
+
+#if (defined(SL_CATALOG_IOSTREAM_USART_PRESENT) || defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)) && defined(SL_CATALOG_CLI_PRESENT)
   #if defined(SL_CLI_USE_STDIO)
     #include "sl_iostream.h"
     #define consumeChar()                               \
@@ -62,7 +67,8 @@
   #endif // #if defined(SL_CLI_USE_STDIO)
 #else
   #define consumeChar()
-#endif // #if defined(SL_CATALOG_IOSTREAM_USART_PRESENT) && defined(SL_CATALOG_CLI_PRESENT)
+#endif // #if (defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+// || defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)) && defined(SL_CATALOG_CLI_PRESENT)
 
 static RAIL_Status_t identityTimestampTx(RAIL_Handle_t railHandle,
                                          RAIL_TxPacketDetails_t *pPacketDetails)
@@ -450,14 +456,64 @@ void setTxStream(sl_cli_command_arg_t *args)
       return;
     }
   }
+  //in ofdm case the PHR is read in the BUFC to provide MCS and packet length information
+  //thus write it here again. It is not a problem to write it even for other modulations
+  //as the TX fifo is reset
+  if (railDataConfig.txMethod == PACKET_MODE) {
+    RAIL_WriteTxFifo(railHandle, txData, 4, true);
+  }
   streamMode = stream;
   enableAppMode(TX_STREAM, enable, sl_cli_get_command_string(args, 0));
 }
 
+void configDirectMode(sl_cli_command_arg_t *args)
+{
+#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
+  RAIL_Status_t status = RAIL_STATUS_NO_ERROR;
+  RAIL_DirectModeConfig_t directModeConfig = { 0 };
+
+  #ifdef _SILICON_LABS_32B_SERIES_1
+  if (sl_cli_get_argument_count(args) != 11) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 1, "Must provide location for all ports/pins");
+    return;
+  }
+
+  directModeConfig.doutLoc = sl_cli_get_argument_uint8(args, 8);
+  directModeConfig.dclkLoc = sl_cli_get_argument_uint8(args, 9);
+  directModeConfig.dinLoc = sl_cli_get_argument_uint8(args, 10);
+  #endif
+
+  directModeConfig.syncRx = sl_cli_get_argument_uint8(args, 0);
+  directModeConfig.syncTx = sl_cli_get_argument_uint8(args, 1);
+  directModeConfig.doutPort = sl_cli_get_argument_uint8(args, 2);
+  directModeConfig.doutPin = sl_cli_get_argument_uint8(args, 3);
+  directModeConfig.dclkPort = sl_cli_get_argument_uint8(args, 4);
+  directModeConfig.dclkPin = sl_cli_get_argument_uint8(args, 5);
+  directModeConfig.dinPort = sl_cli_get_argument_uint8(args, 6);
+  directModeConfig.dinPin = sl_cli_get_argument_uint8(args, 7);
+
+  status = RAIL_ConfigDirectMode(railHandle, &directModeConfig);
+
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s",
+                ((status == RAIL_STATUS_NO_ERROR) ? "Success"
+                 : (status == RAIL_STATUS_INVALID_CALL) ? "Invalid Call"
+                 : "Failure"
+                ));
+#else
+  (void)args;
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s", "Invalid Call");
+#endif
+}
+
 void setDirectMode(sl_cli_command_arg_t *args)
 {
+#if ((_SILICON_LABS_32B_SERIES == 1) || (_SILICON_LABS_32B_SERIES_2_CONFIG >= 3))
   uint8_t enable = sl_cli_get_argument_uint8(args, 0);
   enableAppMode(DIRECT, enable, sl_cli_get_command_string(args, 0));
+#else
+  (void)args;
+  responsePrint(sl_cli_get_command_string(args, 0), "Result:%s", "Invalid Call");
+#endif
 }
 
 void setDirectTx(sl_cli_command_arg_t *args)
@@ -600,8 +656,8 @@ void sleep(sl_cli_command_arg_t *args)
     // *only* wakeup possible out of EM4 is RFsense (or reset).
     responsePrint(sl_cli_get_command_string(args, 0), "EM:%u%s,SerialWakeup:%s,RfSense:%s,RfSensitivity:%s,ButtonWakeup:%s",
                   emMode, em4State,
-#if defined(_SILICON_LABS_32B_SERIES_2)
-                  (SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortC || SL_IOSTREAM_USART_VCOM_TX_PORT == gpioPortD)
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined (VCOM_TX_PORT)
+                  (VCOM_TX_PORT == gpioPortC || VCOM_TX_PORT == gpioPortD)
                   ? ((emMode < 2) ? "On" : "Off") :
 #endif
                   (emMode < 4) ? "On" : "Off",
@@ -620,11 +676,11 @@ void sleep(sl_cli_command_arg_t *args)
     CORE_DECLARE_IRQ_STATE;
     CORE_ENTER_CRITICAL();
 
-#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(VCOM_TX_PORT)
     // Sleep the USART Tx pin on series 2 devices to save energy
     if (emMode >= 2) {
-      GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,
-                      SL_IOSTREAM_USART_VCOM_TX_PIN,
+      GPIO_PinModeSet(VCOM_TX_PORT,
+                      VCOM_TX_PIN,
                       gpioModeDisabled, 1);
     }
 #endif
@@ -655,13 +711,11 @@ void sleep(sl_cli_command_arg_t *args)
         break;
     }
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
     // Configure the USART Rx pin as a GPIO interrupt for sleep-wake purposes,
     // falling-edge only
-    GPIO_IntConfig(SL_IOSTREAM_USART_VCOM_RX_PORT,
-                   SL_IOSTREAM_USART_VCOM_RX_PIN,
+    GPIO_IntConfig(VCOM_RX_PORT,
+                   VCOM_RX_PIN,
                    false, true, true);
-#endif
 
     serEvent = false;
     rxPacketEvent = false;
@@ -708,12 +762,20 @@ void sleep(sl_cli_command_arg_t *args)
     } while (!rfSensed && !serEvent && !rxPacketEvent && !buttonWakeEvent);
 #endif // not FPGA
 
-#if defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
-    // Disable serial interrupt so it's not bothersome
-    GPIO_IntDisable(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
-    GPIO_IntClear(1U << SL_IOSTREAM_USART_VCOM_RX_PIN);
+#if defined(SL_CATALOG_IOSTREAM_EUSART_PRESENT)
+    // Enable EUSART after waking up from sleep on platforms that use EUSART
+    EUSART_Enable(SL_IOSTREAM_EUSART_VCOM_PERIPHERAL, eusartEnable);
 #endif
 
+#if defined(VCOM_TX_PORT)
+    // Disable serial interrupt so it's not bothersome
+    GPIO_IntDisable(1U << VCOM_RX_PIN);
+    GPIO_IntClear(1U << VCOM_RX_PIN);
+#endif
+
+    // Disable serial interrupt so it's not bothersome
+    GPIO_IntDisable(1U << VCOM_RX_PIN);
+    GPIO_IntClear(1U << VCOM_RX_PIN);
     CORE_EXIT_CRITICAL(); // Back on permanently
 
     // Here we've awoken for at least one of the desired events.
@@ -722,11 +784,11 @@ void sleep(sl_cli_command_arg_t *args)
       enableAppMode(RF_SENSE, false, NULL);
     }
 
-#if defined(_SILICON_LABS_32B_SERIES_2) && defined(SL_CATALOG_IOSTREAM_USART_PRESENT)
+#if defined(_SILICON_LABS_32B_SERIES_2) && defined(VCOM_TX_PORT)
     // Wake the USART Tx pin back up
     if (emMode >= 2) {
-      GPIO_PinModeSet(SL_IOSTREAM_USART_VCOM_TX_PORT,
-                      SL_IOSTREAM_USART_VCOM_TX_PIN,
+      GPIO_PinModeSet(VCOM_TX_PORT,
+                      VCOM_TX_PIN,
                       gpioModePushPull, 1);
     }
 #endif

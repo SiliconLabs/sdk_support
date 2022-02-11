@@ -29,7 +29,10 @@
  ******************************************************************************/
 #include "sl_device_init_lfrco.h"
 #include "em_cmu.h"
-#if defined(_SILICON_LABS_32B_SERIES_2) && defined(PLFRCO_PRESENT)
+
+#if defined(_SILICON_LABS_32B_SERIES_1)
+#include "sl_device_init_lfrco_config.h"
+#elif defined(_SILICON_LABS_32B_SERIES_2) && defined(PLFRCO_PRESENT)
 #include "sl_device_init_lfrco_config.h"
 #endif
 
@@ -38,5 +41,26 @@ sl_status_t sl_device_init_lfrco(void)
 #if defined(_SILICON_LABS_32B_SERIES_2) && defined(PLFRCO_PRESENT)
   CMU_LFRCOSetPrecision(SL_DEVICE_INIT_LFRCO_PRECISION);
 #endif
+
+#if defined(_SILICON_LABS_32B_SERIES_1)
+#if SL_DEVICE_INIT_LFRCO_ENVREF == 0
+  CMU->LFRCOCTRL &= ~(CMU_LFRCOCTRL_ENVREF);
+#else
+  CMU->LFRCOCTRL |= CMU_LFRCOCTRL_ENVREF;
+#endif
+
+#if SL_DEVICE_INIT_LFRCO_ENCHOP == 0
+  CMU->LFRCOCTRL &= ~(CMU_LFRCOCTRL_ENCHOP);
+#else
+  CMU->LFRCOCTRL |= CMU_LFRCOCTRL_ENCHOP;
+#endif
+
+#if SL_DEVICE_INIT_LFRCO_ENDEM == 0
+  CMU->LFRCOCTRL &= ~(CMU_LFRCOCTRL_ENDEM);
+#else
+  CMU->LFRCOCTRL |= CMU_LFRCOCTRL_ENDEM;
+#endif
+#endif // defined(_SILICON_LABS_32B_SERIES_1)
+
   return SL_STATUS_OK;
 }

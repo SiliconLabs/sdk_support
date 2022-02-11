@@ -3,7 +3,7 @@
  * @brief Bootloading functionality for the Silicon Labs bootloader
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -38,7 +38,7 @@
  * @param appProperties   Pointer to ::ApplicationProperties_t
  *
  * @return True if the application properties magic is valid.
-******************************************************************************/
+ ******************************************************************************/
 bool bootload_checkApplicationPropertiesMagic(void *appProperties);
 
 /***************************************************************************//**
@@ -48,7 +48,7 @@ bool bootload_checkApplicationPropertiesMagic(void *appProperties);
  *
  * @return True if the application properties struct version is compatible
  *         with the bootloader.
-******************************************************************************/
+ ******************************************************************************/
 bool bootload_checkApplicationPropertiesVersion(void *appProperties);
 
 /***************************************************************************//**
@@ -108,13 +108,6 @@ void bootload_applicationCallback(uint32_t address,
                                   void     *context);
 
 /***************************************************************************//**
- * Indicates whether the bootloader should enforce a secure boot.
- *
- * @return  True if secure boot is to be enforced.
- ******************************************************************************/
-bool bootloader_enforceSecureBoot(void);
-
-/***************************************************************************//**
  * Perform a bootloader upgrade using the upgrade image present at
  * upgradeAddress with length size.
  *
@@ -143,7 +136,7 @@ bool bootload_commitBootloaderUpgrade(uint32_t upgradeAddress, uint32_t size);
  *          \p checkRemainingAppUpgrades is true.
  ******************************************************************************/
 bool bootload_verifyApplicationVersion(uint32_t appVersion,
-	                                   bool checkRemainingAppUpgrades);
+                                       bool checkRemainingAppUpgrades);
 
 /***************************************************************************//**
  * Store the application version.
@@ -169,7 +162,7 @@ uint32_t bootload_remainingApplicationUpgrades(void);
  *
  * @note Store application version reset magic to ensure that application
  *       versions are cleaned after a bootloader upgrade.
-******************************************************************************/
+ ******************************************************************************/
 void bootload_storeApplicationVersionResetMagic(void);
 
 /***************************************************************************//**
@@ -177,46 +170,46 @@ void bootload_storeApplicationVersionResetMagic(void);
  *
  * @note The application versions are cleaned only if this is requested with a
  *       magic and the application version storage is not already empty.
-******************************************************************************/
+ ******************************************************************************/
 void bootload_removeStoredApplicationVersions(void);
 
 /***************************************************************************//**
- * Get application version storage capacity.
+ * Get the application version storage capacity.
  *
  * @return Application version storage capacity.
  ******************************************************************************/
 uint32_t bootload_getApplicationVersionStorageCapacity(void);
 
 /***************************************************************************//**
- * Get address of the application version storage buffer.
+ * Get the address of the application version storage buffer.
  *
  * @param index     Index of the application version storage buffer.
  *
  * @return Address of the application version storage buffer
  *         with the given index.
-******************************************************************************/
+ ******************************************************************************/
 uint32_t* bootload_getApplicationVersionStoragePtr(uint32_t index);
 
 /***************************************************************************//**
- * Check if application contains a certificate.
+ * Check whether the application contains a certificate.
  *
  * @param appProp     Pointer to ::ApplicationProperties_t of application.
  *
  * @return True if application contains a certificate.
-******************************************************************************/
+ ******************************************************************************/
 bool bootload_gotCertificate(void *appProp);
 
 /***************************************************************************//**
- * Verify a certificate with bootloader certificate.
+ * Verify a certificate with a bootloader certificate.
  *
  * @param cert     Pointer to ::ApplicationCertificate_t.
  *
  * @return True if certificate is verified.
-******************************************************************************/
+ ******************************************************************************/
 bool bootload_verifyCertificate(void *cert);
 
 /***************************************************************************//**
- * Verify application certificate.
+ * Verify the application certificate.
  *
  * @note
  *   This function will always return true if certificate support is
@@ -227,7 +220,7 @@ bool bootload_verifyCertificate(void *cert);
  * @param gotCert     Boolean to store application certificate presence.
  *
  * @return True if application certificate is verified.
-******************************************************************************/
+ ******************************************************************************/
 bool bootload_verifyApplicationCertificate(void *appProp, void *gotCert);
 
 #if defined(_MSC_PAGELOCK0_MASK)

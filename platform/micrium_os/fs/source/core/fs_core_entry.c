@@ -1138,7 +1138,7 @@ FS_ENTRY_NODE_HANDLE FSEntry_NodeOpen(FS_WRK_DIR_HANDLE wrk_dir_handle,
                                                                  entry_type == FS_ENTRY_TYPE_DIR,
                                                                  p_err));
 #else
-            RTOS_CRITICAL_FAIL_EXEC(FSEntry_NullHandle, RTOS_ERR_ASSERT_CRITICAL_FAIL);
+            RTOS_CRITICAL_FAIL_EXEC(RTOS_ERR_ASSERT_CRITICAL_FAIL, FSEntry_NullHandle);
 #endif
           } else {
             //                                                     ------------------ EXISTING ENTRY ------------------
@@ -1184,7 +1184,7 @@ FS_ENTRY_NODE_HANDLE FSEntry_NodeOpen(FS_WRK_DIR_HANDLE wrk_dir_handle,
               RTOS_ERR err_tmp = RTOS_ERR_INIT_CODE(RTOS_ERR_NONE);
               p_sys_api->EntryDel(p_vol, entry_pos_data, &err_tmp);
 #else
-              RTOS_CRITICAL_FAIL_EXEC(FSEntry_NullHandle, RTOS_ERR_ASSERT_CRITICAL_FAIL);
+              RTOS_CRITICAL_FAIL_EXEC(RTOS_ERR_ASSERT_CRITICAL_FAIL, FSEntry_NullHandle);
 #endif
             }
             break;

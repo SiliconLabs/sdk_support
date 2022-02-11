@@ -293,10 +293,15 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
   uint32_t tmp;
   uint32_t pcPresc = 0UL;  /* Period counter prescaler. */
   uint32_t clkDiv  = 1UL;  /* Clock divisor value (2^pcPresc). */
-  uint32_t pcTop   = 63UL; /* Period counter top value (max. 63). */
   uint32_t calcScanFreq;   /* Variable for testing the calculation algorithm. */
 #if defined(_SILICON_LABS_32B_SERIES_2)
   bool enabled = false;
+#endif
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+  uint32_t pcTop   = 255UL; /* Period counter top value (max. 255). */
+#else
+  uint32_t pcTop   = 63UL; /* Period counter top value (max. 63). */
 #endif
 
 #if defined(_SILICON_LABS_32B_SERIES_2)
@@ -317,10 +322,11 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
   /* If refFreq is set to 0, the currently-configured reference clock is
    * assumed. */
   if (!refFreq) {
-#if defined(_SILICON_LABS_32B_SERIES_1) || defined(_SILICON_LABS_32B_SERIES_0)
+#if defined(_SILICON_LABS_32B_SERIES_1) \
+    || defined(_SILICON_LABS_32B_SERIES_0)
     refFreq = CMU_ClockFreqGet(cmuClock_LESENSE);
 #elif defined(_SILICON_LABS_32B_SERIES_2)
-    refFreq = CMU_ClockFreqGet(cmuClock_LESENSEHF);
+    refFreq = CMU_ClockFreqGet(cmuClock_LESENSECLK);
 #endif
   }
 
@@ -343,6 +349,7 @@ uint32_t LESENSE_ScanFreqSet(uint32_t refFreq, uint32_t scanFreq)
 
   /* Calculate the pcTop value. */
   pcTop = ((uint32_t)refFreq / ((uint32_t)scanFreq * clkDiv)) - 1UL;
+  EFM_ASSERT(pcTop <= (_LESENSE_TIMCTRL_PCTOP_MASK >> _LESENSE_TIMCTRL_PCTOP_SHIFT));
 
   /* Clear current PCPRESC and PCTOP settings. Be aware of the effect of
    * non-atomic Read-Modify-Write on LESENSE->TIMCRTL. */
@@ -674,6 +681,9 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
   EFM_ASSERT(chIdx < LESENSE_NUM_CHANNELS);
   EFM_ASSERT(confCh->exTime      <= (_LESENSE_CH_TIMING_EXTIME_MASK >> _LESENSE_CH_TIMING_EXTIME_SHIFT));
   EFM_ASSERT(confCh->measDelay   <= (_LESENSE_CH_TIMING_MEASUREDLY_MASK >> _LESENSE_CH_TIMING_MEASUREDLY_SHIFT));
+#if defined(_LESENSE_CH_INTERACT_OFFSET_MASK)
+  EFM_ASSERT(confCh->offset      <= (_LESENSE_CH_INTERACT_OFFSET_MASK >> _LESENSE_CH_INTERACT_OFFSET_SHIFT));
+#endif
 #if defined(_SILICON_LABS_32B_SERIES_0)
   // Sample delay on other devices are 8 bits which fits perfectly in uint8_t.
   EFM_ASSERT(confCh->sampleDelay <= (_LESENSE_CH_TIMING_SAMPLEDLY_MASK >> _LESENSE_CH_TIMING_SAMPLEDLY_SHIFT));
@@ -723,7 +733,11 @@ void LESENSE_ChannelConfig(const LESENSE_ChDesc_TypeDef * confCh,
     | (uint32_t)confCh->sampleMode
     | (uint32_t)confCh->intMode
     | (uint32_t)confCh->chPinExMode
-    | ((uint32_t)confCh->useAltEx  << _LESENSE_CH_INTERACT_ALTEX_SHIFT);
+    | ((uint32_t)confCh->useAltEx  << _LESENSE_CH_INTERACT_ALTEX_SHIFT)
+#if defined(_LESENSE_CH_INTERACT_OFFSET_MASK)
+    | ((uint32_t)confCh->offset    << _LESENSE_CH_INTERACT_OFFSET_SHIFT)
+#endif
+  ;
 
   /* Configure the channel-specific counter comparison mode, optional result
    * forwarding to decoder, optional counter value storing, and optional result
@@ -1100,7 +1114,7 @@ void LESENSE_ChannelThresSet(uint8_t chIdx,
 #endif
 }
 
-#if defined(_LESENSE_CH_EVAL_MODE_MASK) || defined(_SILICON_LABS_32B_SERIES_2)
+#if defined(_LESENSE_CH_EVAL_MODE_MASK) || defined(_LESENSE_CH_EVALCFG_MODE_MASK)
 /***************************************************************************//**
  * @brief
  *   Configure a Sliding Window evaluation mode for a specific channel.

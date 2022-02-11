@@ -1,5 +1,5 @@
 id: "bluetooth_feature_test"
-label: "Test"
+label: "Direct Test Mode"
 package: "Bluetooth"
 description: >
   Bluetooth DTM test feature

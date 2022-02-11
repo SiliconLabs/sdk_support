@@ -49,10 +49,6 @@ void sl_board_init(void)
   // Errata fixes and default pin states
   sl_board_default_init();
 
-#if defined(SL_BOARD_ENABLE_VCOM) && SL_BOARD_ENABLE_VCOM
-  sl_board_enable_vcom();
-#endif
-
 #if defined(SL_BOARD_ENABLE_SENSOR_RHT) && SL_BOARD_ENABLE_SENSOR_RHT
   sl_board_enable_sensor(SL_BOARD_SENSOR_RHT);
 #endif

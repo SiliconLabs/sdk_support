@@ -19,9 +19,11 @@ requires:
   - name: "device"
   - name: "emlib_cmu"
   - name: "emlib_core"
+  - name: "emlib_common"
   - name: "emlib_gpio"
-  - name: "device_has_usart"
   - name: "emlib_usart"
+    condition:
+    - "device_has_usart"
   - name: "emlib_eusart"
     condition: 
     - "device_has_eusart"

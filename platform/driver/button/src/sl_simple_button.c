@@ -34,9 +34,6 @@ static const uint16_t check_press = (uint16_t)(0xffff << SL_SIMPLE_BUTTON_DEBOUN
 static const uint16_t check_release = (uint16_t)(~(0x1 << SL_SIMPLE_BUTTON_DEBOUNCE_BITS));
 static const uint16_t debounce_window = (uint16_t)(0xffff << (SL_SIMPLE_BUTTON_DEBOUNCE_BITS + 1));
 
-extern const sl_button_t *sl_simple_button_array[];
-extern const uint8_t simple_button_count;
-
 /***************************************************************************//**
  * An internal callback called in interrupt context whenever a button changes
  * its state. (mode - SL_SIMPLE_BUTTON_MODE_INTERRUPT)
@@ -45,39 +42,44 @@ extern const uint8_t simple_button_count;
  * should not update it again.
  *
  * @param[in] interrupt_no      Interrupt number (pin number)
+ * @param[in] ctx               Pointer to button handle
  ******************************************************************************/
-static void sli_simple_button_on_change(uint8_t interrupt_no)
+static void sli_simple_button_on_change(uint8_t interrupt_no, void *ctx)
 {
-  for (uint8_t i = 0; i < simple_button_count; i++) {
-    sl_simple_button_context_t *ctxt = ((sl_simple_button_context_t *)sl_simple_button_array[i]->context);
-    if ( (ctxt->pin == interrupt_no) && (ctxt->state != SL_SIMPLE_BUTTON_DISABLED) ) {
-      ctxt->state = ((bool)GPIO_PinInGet(ctxt->port, ctxt->pin) == SL_SIMPLE_BUTTON_POLARITY);
-      sl_button_on_change(sl_simple_button_array[i]);
-      break;
-    }
+  (void)interrupt_no;
+  sl_button_t *button = (sl_button_t *)ctx;
+  sl_simple_button_context_t *simple_button = button->context;
+
+  if (simple_button->state != SL_SIMPLE_BUTTON_DISABLED) {
+    simple_button->state = ((bool)GPIO_PinInGet(simple_button->port, simple_button->pin) == SL_SIMPLE_BUTTON_POLARITY);
+    sl_button_on_change(button);
   }
 }
 
-sl_status_t sl_simple_button_init(void *context)
+sl_status_t sl_simple_button_init(const sl_button_t *handle)
 {
-  sl_simple_button_context_t *button = context;
+  unsigned int interrupt;
+  sl_button_t *button = (sl_button_t *)handle;
+  sl_simple_button_context_t *simple_button = button->context;
 
   CMU_ClockEnable(cmuClock_GPIO, true);
 
-  GPIO_PinModeSet(button->port,
-                  button->pin,
+  GPIO_PinModeSet(simple_button->port,
+                  simple_button->pin,
                   SL_SIMPLE_BUTTON_GPIO_MODE,
                   SL_SIMPLE_BUTTON_GPIO_DOUT);
 
-  button->state = ((bool)GPIO_PinInGet(button->port, button->pin) == SL_SIMPLE_BUTTON_POLARITY);
+  simple_button->state = ((bool)GPIO_PinInGet(simple_button->port, simple_button->pin) == SL_SIMPLE_BUTTON_POLARITY);
 
-  if (button->mode == SL_SIMPLE_BUTTON_MODE_INTERRUPT) {
+  if (simple_button->mode == SL_SIMPLE_BUTTON_MODE_INTERRUPT) {
     GPIOINT_Init();
-    GPIOINT_CallbackRegister(button->pin,
-                             (GPIOINT_IrqCallbackPtr_t)sli_simple_button_on_change);
-    GPIO_ExtIntConfig(button->port,
-                      button->pin,
-                      button->pin,
+    interrupt = GPIOINT_CallbackRegisterExt(simple_button->pin,
+                                            (GPIOINT_IrqCallbackPtrExt_t)sli_simple_button_on_change,
+                                            button);
+    EFM_ASSERT(interrupt != INTERRUPT_UNAVAILABLE);
+    GPIO_ExtIntConfig(simple_button->port,
+                      simple_button->pin,
+                      interrupt,
                       true,
                       true,
                       true);
@@ -86,71 +88,77 @@ sl_status_t sl_simple_button_init(void *context)
   return SL_STATUS_OK;
 }
 
-sl_button_state_t sl_simple_button_get_state(void *context)
+sl_button_state_t sl_simple_button_get_state(const sl_button_t *handle)
 {
-  sl_simple_button_context_t *button = context;
-  return button->state;
+  sl_button_t *button = (sl_button_t *)handle;
+  sl_simple_button_context_t *simple_button = button->context;
+
+  return simple_button->state;
 }
 
-void sl_simple_button_poll_step(void *context)
+void sl_simple_button_poll_step(const sl_button_t *handle)
 {
-  sl_simple_button_context_t *button = context;
+  sl_button_t *button = (sl_button_t *)handle;
+  sl_simple_button_context_t *simple_button = button->context;
 
-  if (button->state == SL_SIMPLE_BUTTON_DISABLED) {
+  if (simple_button->state == SL_SIMPLE_BUTTON_DISABLED) {
     return;
   }
 
-  bool button_press = (bool)GPIO_PinInGet(button->port, button->pin);
+  bool button_press = (bool)GPIO_PinInGet(simple_button->port, simple_button->pin);
 
-  if (button->mode == SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE) {
-    uint16_t history = button->history;
+  if (simple_button->mode == SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE) {
+    uint16_t history = simple_button->history;
     history = (history << 1) | (button_press ^ SL_SIMPLE_BUTTON_POLARITY) | (debounce_window);
 
     if (history == check_press) {
-      button->state = SL_SIMPLE_BUTTON_PRESSED;
+      simple_button->state = SL_SIMPLE_BUTTON_PRESSED;
     }
     if (history == check_release) {
-      button->state = SL_SIMPLE_BUTTON_RELEASED;
+      simple_button->state = SL_SIMPLE_BUTTON_RELEASED;
     }
 
-    button->history = history;
-  } else if (button->mode == SL_SIMPLE_BUTTON_MODE_POLL) {
-    button->state = (button_press == SL_SIMPLE_BUTTON_POLARITY);
+    simple_button->history = history;
+  } else if (simple_button->mode == SL_SIMPLE_BUTTON_MODE_POLL) {
+    simple_button->state = (button_press == SL_SIMPLE_BUTTON_POLARITY);
   }
 }
 
-void sl_simple_button_enable(void *context)
+void sl_simple_button_enable(const sl_button_t *handle)
 {
-  sl_simple_button_context_t *button = context;
+  sl_button_t *button = (sl_button_t *)handle;
+  sl_simple_button_context_t *simple_button = button->context;
 
   // Return if the button is not disabled
-  if (button->state != SL_SIMPLE_BUTTON_DISABLED) {
+  if (simple_button->state != SL_SIMPLE_BUTTON_DISABLED) {
     return;
   }
 
   // Clear history
-  button->history = 0;
+  simple_button->history = 0;
   // Reinit button
-  sl_simple_button_init(button);
+  sl_simple_button_init(handle);
 }
 
-void sl_simple_button_disable(void *context)
+void sl_simple_button_disable(const sl_button_t *handle)
 {
-  sl_simple_button_context_t *button = context;
+  sl_button_t *button = (sl_button_t *)handle;
+  sl_simple_button_context_t *simple_button = button->context;
+
   // Return if the button is disabled
-  if (button->state == SL_SIMPLE_BUTTON_DISABLED) {
+  if (simple_button->state == SL_SIMPLE_BUTTON_DISABLED) {
     return;
   }
-  if (button->mode == SL_SIMPLE_BUTTON_MODE_INTERRUPT) {
-    GPIOINT_CallbackUnRegister(button->pin);
+  if (simple_button->mode == SL_SIMPLE_BUTTON_MODE_INTERRUPT) {
+    GPIOINT_CallbackUnRegister(simple_button->pin);
     // Disable interrupts
-    GPIO_ExtIntConfig(button->port,
-                      button->pin,
-                      button->pin,
+    GPIO_ExtIntConfig(simple_button->port,
+                      simple_button->pin,
+                      simple_button->pin,
                       false,
                       false,
                       false);
   }
   // Disable the button
-  button->state = SL_SIMPLE_BUTTON_DISABLED;
+  simple_button->state = SL_SIMPLE_BUTTON_DISABLED;
 }

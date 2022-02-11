@@ -82,14 +82,14 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_UARTDRV_EUSART_EXP
 // $[EUSART_SL_UARTDRV_EUSART_EXP]
-#define SL_UARTDRV_EUSART_EXP_PERIPHERAL         EUSART1
-#define SL_UARTDRV_EUSART_EXP_PERIPHERAL_NO      1
+#define SL_UARTDRV_EUSART_EXP_PERIPHERAL         EUSART0
+#define SL_UARTDRV_EUSART_EXP_PERIPHERAL_NO      0
 
-// EUSART1 TX on PA08
+// EUSART0 TX on PA08
 #define SL_UARTDRV_EUSART_EXP_TX_PORT            gpioPortA
 #define SL_UARTDRV_EUSART_EXP_TX_PIN             8
 
-// EUSART1 RX on PA09
+// EUSART0 RX on PA09
 #define SL_UARTDRV_EUSART_EXP_RX_PORT            gpioPortA
 #define SL_UARTDRV_EUSART_EXP_RX_PIN             9
 

@@ -10,6 +10,7 @@ provides:
 requires:
   - name: nvm3_lib
   - name: nvm3_default
+  - name: token_manager
 define:
   - name: USE_NVM3
 template_contribution:

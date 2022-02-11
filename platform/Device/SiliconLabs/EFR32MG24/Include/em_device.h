@@ -41,17 +41,47 @@
 
 #ifndef EM_DEVICE_H
 #define EM_DEVICE_H
-#if defined(EFR32MG24A010F1536GM40)
+#if defined(EFR32MG24A010F1024IM40)
+#include "efr32mg24a010f1024im40.h"
+
+#elif defined(EFR32MG24A010F1024IM48)
+#include "efr32mg24a010f1024im48.h"
+
+#elif defined(EFR32MG24A010F1536GM40)
 #include "efr32mg24a010f1536gm40.h"
 
 #elif defined(EFR32MG24A010F1536GM48)
 #include "efr32mg24a010f1536gm48.h"
+
+#elif defined(EFR32MG24A010F1536IM40)
+#include "efr32mg24a010f1536im40.h"
+
+#elif defined(EFR32MG24A010F1536IM48)
+#include "efr32mg24a010f1536im48.h"
+
+#elif defined(EFR32MG24A020F1024IM40)
+#include "efr32mg24a020f1024im40.h"
+
+#elif defined(EFR32MG24A020F1024IM48)
+#include "efr32mg24a020f1024im48.h"
 
 #elif defined(EFR32MG24A020F1536GM40)
 #include "efr32mg24a020f1536gm40.h"
 
 #elif defined(EFR32MG24A020F1536GM48)
 #include "efr32mg24a020f1536gm48.h"
+
+#elif defined(EFR32MG24A020F1536IM40)
+#include "efr32mg24a020f1536im40.h"
+
+#elif defined(EFR32MG24A020F1536IM48)
+#include "efr32mg24a020f1536im48.h"
+
+#elif defined(EFR32MG24A021F1024IM40)
+#include "efr32mg24a021f1024im40.h"
+
+#elif defined(EFR32MG24A110F1024IM48)
+#include "efr32mg24a110f1024im48.h"
 
 #elif defined(EFR32MG24A110F1536GM48)
 #include "efr32mg24a110f1536gm48.h"
@@ -65,11 +95,23 @@
 #elif defined(EFR32MG24A121F1536GM48)
 #include "efr32mg24a121f1536gm48.h"
 
+#elif defined(EFR32MG24A610F1536IM40)
+#include "efr32mg24a610f1536im40.h"
+
+#elif defined(EFR32MG24A620F1536IM40)
+#include "efr32mg24a620f1536im40.h"
+
+#elif defined(EFR32MG24B010F1024IM48)
+#include "efr32mg24b010f1024im48.h"
+
 #elif defined(EFR32MG24B010F1536IM40)
 #include "efr32mg24b010f1536im40.h"
 
 #elif defined(EFR32MG24B010F1536IM48)
 #include "efr32mg24b010f1536im48.h"
+
+#elif defined(EFR32MG24B020F1024IM48)
+#include "efr32mg24b020f1024im48.h"
 
 #elif defined(EFR32MG24B020F1536IM40)
 #include "efr32mg24b020f1536im40.h"
@@ -79,6 +121,24 @@
 
 #elif defined(EFR32MG24B110F1536GM48)
 #include "efr32mg24b110f1536gm48.h"
+
+#elif defined(EFR32MG24B110F1536IM48)
+#include "efr32mg24b110f1536im48.h"
+
+#elif defined(EFR32MG24B120F1536IM48)
+#include "efr32mg24b120f1536im48.h"
+
+#elif defined(EFR32MG24B210F1536IM48)
+#include "efr32mg24b210f1536im48.h"
+
+#elif defined(EFR32MG24B220F1536IM48)
+#include "efr32mg24b220f1536im48.h"
+
+#elif defined(EFR32MG24B310F1536IM48)
+#include "efr32mg24b310f1536im48.h"
+
+#elif defined(EFR32MG24B610F1536IM40)
+#include "efr32mg24b610f1536im40.h"
 
 #else
 #error "em_device.h: PART NUMBER undefined"

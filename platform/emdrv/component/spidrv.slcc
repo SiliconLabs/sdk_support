@@ -7,10 +7,10 @@ description: >
   APIs are provided for transmit and receive operations.
 
 
-  This component is instantiable, meaning that several named instances can be 
-  created. For each instance a configuration is generated along with an 
+  This component is instantiable, meaning that several named instances can be
+  created. For each instance a configuration is generated along with an
   initialization struct set according to this configuration. These instance
-  defines and variables are available in a generated header file, 
+  defines and variables are available in a generated header file,
   sl_spidrv_instances.h.
 
 
@@ -19,7 +19,7 @@ description: >
   instance configurations, during the sl_system_init() call in main.c.
 
 
-  Selecting this component will also include the SPIDRV Core component, which is 
+  Selecting this component will also include the SPIDRV Core component, which is
   the implementation of the SPI driver itself.
 category: "Platform|Driver|SPI"
 quality: production
@@ -37,7 +37,7 @@ config_file:
     file_id: spidrv_config
     condition: [device_series_2]
 validation_helper:
-  - path: script/spidrv_validation.py
+  - path: script/spidrv_validation.lua
 provides:
   - name: "spidrv_instance"
     allow_multiple: true
@@ -45,6 +45,7 @@ provides:
     allow_multiple: true
 requires:
   - name: "spidrv_core"
+  - name: "slist"
 template_contribution:
   - name: "spidrv_instances"
     value: "{{instance}}"

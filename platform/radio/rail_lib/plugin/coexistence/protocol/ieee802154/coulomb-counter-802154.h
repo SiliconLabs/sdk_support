@@ -22,6 +22,10 @@
 #ifndef COULOMB_COUNTER_802154_H
 #define COULOMB_COUNTER_802154_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Set state for Coulomb Counter, Idle/Awake/Tx/Rx.
  *
@@ -38,6 +42,10 @@ void halCoulombCounterEvent(halPtaStackEvent_t ptaStackEvent);
  * @param ccState The current radio state
  */
 void coexCoulombCounterEventCallback(uint16_t ccState);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //COULOMB_COUNTER_802154_H
 

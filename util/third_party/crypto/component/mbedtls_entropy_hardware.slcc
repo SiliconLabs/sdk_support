@@ -8,7 +8,7 @@ category: Platform|Security
 quality: production
 component_root_path: util/third_party/crypto
 source:
-  - path: sl_component/sl_alt/source/sl_entropy.c
+  - path: sl_component/sl_mbedtls_support/src/sl_entropy_hardware.c
 provides:
   - name: mbedtls_entropy_source
     allow_multiple: true

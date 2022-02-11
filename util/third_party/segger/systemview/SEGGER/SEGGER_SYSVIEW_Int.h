@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*            (c) 1995 - 2019 SEGGER Microcontroller GmbH             *
+*            (c) 1995 - 2021 SEGGER Microcontroller GmbH             *
 *                                                                    *
 *       www.segger.com     Support: support@segger.com               *
 *                                                                    *
@@ -42,13 +42,13 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       SystemView version: 3.10                                    *
+*       SystemView version: 3.30                                    *
 *                                                                    *
 **********************************************************************
 -------------------------- END-OF-HEADER -----------------------------
 File    : SEGGER_SYSVIEW_Int.h
 Purpose : SEGGER SystemView internal header.
-Revision: $Rev: 9599 $
+Revision: $Rev: 21281 $
 */
 
 #ifndef SEGGER_SYSVIEW_INT_H
@@ -62,8 +62,6 @@ Revision: $Rev: 9599 $
 */
 
 #include "SEGGER_SYSVIEW.h"
-#include "SEGGER_SYSVIEW_Conf.h"
-#include "SEGGER_SYSVIEW_ConfDefaults.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,6 +85,7 @@ typedef enum {
   SEGGER_SYSVIEW_COMMAND_ID_GET_SYSDESC,
   SEGGER_SYSVIEW_COMMAND_ID_GET_NUMMODULES,
   SEGGER_SYSVIEW_COMMAND_ID_GET_MODULEDESC,
+  SEGGER_SYSVIEW_COMMAND_ID_HEARTBEAT = 127,
   // Extended commands: Commands >= 128 have a second parameter
   SEGGER_SYSVIEW_COMMAND_ID_GET_MODULE = 128
 } SEGGER_SYSVIEW_COMMAND_ID;

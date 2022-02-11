@@ -86,8 +86,8 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
   /* Enable pins and set location */
 #if defined (_I2C_ROUTEPEN_MASK)
   init->port->ROUTEPEN  = I2C_ROUTEPEN_SDAPEN | I2C_ROUTEPEN_SCLPEN;
-  init->port->ROUTELOC0 = (init->portLocationSda << _I2C_ROUTELOC0_SDALOC_SHIFT)
-                          | (init->portLocationScl << _I2C_ROUTELOC0_SCLLOC_SHIFT);
+  init->port->ROUTELOC0 = (uint32_t)((init->portLocationSda << _I2C_ROUTELOC0_SDALOC_SHIFT)
+                                     | (init->portLocationScl << _I2C_ROUTELOC0_SCLLOC_SHIFT));
 #elif defined (_I2C_ROUTE_MASK)
   init->port->ROUTE = I2C_ROUTE_SDAPEN
                       | I2C_ROUTE_SCLPEN
@@ -96,28 +96,28 @@ void I2CSPM_Init(I2CSPM_Init_TypeDef *init)
 #if defined(I2C0)
   if (init->port == I2C0) {
     GPIO->I2CROUTE[0].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
-    GPIO->I2CROUTE[0].SCLROUTE = (init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT);
-    GPIO->I2CROUTE[0].SDAROUTE = (init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT);
+    GPIO->I2CROUTE[0].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
+                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+    GPIO->I2CROUTE[0].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
+                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #if defined(I2C1)
   if (init->port == I2C1) {
     GPIO->I2CROUTE[1].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
-    GPIO->I2CROUTE[1].SCLROUTE = (init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT);
-    GPIO->I2CROUTE[1].SDAROUTE = (init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT);
+    GPIO->I2CROUTE[1].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
+                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+    GPIO->I2CROUTE[1].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
+                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #if defined(I2C2)
   if (init->port == I2C2) {
     GPIO->I2CROUTE[2].ROUTEEN = GPIO_I2C_ROUTEEN_SDAPEN | GPIO_I2C_ROUTEEN_SCLPEN;
-    GPIO->I2CROUTE[2].SCLROUTE = (init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
-                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT);
-    GPIO->I2CROUTE[2].SDAROUTE = (init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
-                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT);
+    GPIO->I2CROUTE[2].SCLROUTE = (uint32_t)((init->sclPin << _GPIO_I2C_SCLROUTE_PIN_SHIFT)
+                                 | (init->sclPort << _GPIO_I2C_SCLROUTE_PORT_SHIFT));
+    GPIO->I2CROUTE[2].SDAROUTE = (uint32_t)((init->sdaPin << _GPIO_I2C_SDAROUTE_PIN_SHIFT)
+                                 | (init->sdaPort << _GPIO_I2C_SDAROUTE_PORT_SHIFT));
   }
 #endif
 #endif

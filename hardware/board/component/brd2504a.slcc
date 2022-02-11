@@ -20,6 +20,10 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: simple_led
     instance:
     - led0
@@ -28,11 +32,17 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2504A"'
+  - name: SL_BOARD_REV
+    value: '"A03"'
 - tag:
   - board:pn:BRD2504
   - board:variant:A
-  - board:revision:A02
+  - board:revision:A03
   - board:device:efm32pg23b310f512im48
   - hardware:has:vcom
   - hardware:has:sensor:si7021

@@ -29,19 +29,14 @@
 #define SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE      0x08
 #define SL_MAC_CHILD_EXPECTING_JIT_MESSAGE                  0x10 // Set by stack
 #define SL_MAC_CHILD_HAS_SECURE_DATA_REQUESTS               0x20 // Set by stack
-
+#define SL_MAC_CHILD_INVALID_INDEX                          0xFF
 // Pick out the flags that indicate that a MAC indirect message is pending.
 #define SL_MAC_CHILD_HAS_PENDING_MESSAGE           \
   (SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE \
    | SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE)
 
-#ifdef HAL_HAS_INT64
 typedef uint64_t sl_mac_child_status_flags_t;
 #define SL_MAC_MAX_CHILD_TABLE_SIZE 64
-#else
-typedef uint32_t sl_mac_child_status_flags_t;
-#define SL_MAC_MAX_CHILD_TABLE_SIZE 32
-#endif
 
 typedef struct {
   uint8_t mac_index;

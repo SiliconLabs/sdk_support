@@ -32,7 +32,6 @@
 #define SL_STRING_H
 
 #include "sl_status.h"
-#include "em_core.h"
 #include <stddef.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -43,7 +42,7 @@ extern "C" {
 
 /*******************************************************************************
  * @addtogroup string String
- * @brief String functions
+ * @brief String module provides APIs to handle string-related operations.
  * @{
  ******************************************************************************/
 
@@ -117,10 +116,7 @@ size_t sl_strnlen(char *str, size_t max_len);
  *
  * @return              true if string is empty or null, else return false.
  ******************************************************************************/
-__INLINE bool sl_str_is_empty(const char *str)
-{
-  return (str == NULL || *str == '\0');
-}
+bool sl_str_is_empty(const char *str);
 
 /*******************************************************************************
  * @brief

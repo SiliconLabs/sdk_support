@@ -49,6 +49,8 @@ static bool is_argument_optional(sl_cli_argument_type_t arg_type)
     case SL_CLI_ARG_STRINGOPT:
     case SL_CLI_ARG_HEXOPT:
       return true;
+    default:
+      break;
   }
   return false;
 }
@@ -65,6 +67,8 @@ static sl_cli_argument_type_t optional_to_mandatory(sl_cli_argument_type_t arg_t
     case SL_CLI_ARG_STRINGOPT:
     case SL_CLI_ARG_HEXOPT:
       return arg_type - 0x10;
+    default:
+      break;
   }
   return arg_type;
 }
@@ -81,7 +85,8 @@ bool sli_cli_arguments_validate_uint(int size,
   if (argument[0] == '0' && (argument[1] == 'x' || argument[1] == 'X')) {
     i = 2;
     while (argument[i] != '\0') {
-      if (!isxdigit((int)argument[i])) {
+      int value = (int)((unsigned char)argument[i]);
+      if ((value < 0) || (value > 255) || !isxdigit(value)) {
         return false;
       }
       i++;
@@ -98,7 +103,8 @@ bool sli_cli_arguments_validate_uint(int size,
   // Argument is decimal
   i = 0;
   while (argument[i] != '\0') {
-    if (!isdigit((int)argument[i])) {
+    int value = (int)((unsigned char)argument[i]);
+    if ((value < 0) || (value > 255) || !isdigit(value)) {
       return false;
     }
     i++;
@@ -133,7 +139,11 @@ bool sli_cli_arguments_validate_hex_string(const char *argument)
   int i = 1;
   int digit_count = 0;
   while (argument[i] != '}') {
-    if (isxdigit((int)argument[i])) {
+    int value = (int)((unsigned char)argument[i]);
+    if ((value < 0) || (value > 255)) {
+      return false;
+    }
+    if (isxdigit(value)) {
       digit_count++;
     } else if (argument[i] == ' ') {
       i++;

@@ -61,8 +61,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_usart IO Stream USART
- * @brief IO Stream USART
+ * @addtogroup iostream_usart I/O Stream USART
+ * @brief I/O Stream USART
  * @details
  * ## Overview
  *
@@ -81,7 +81,7 @@ extern "C" {
  *
  * ## Power manager integration
  *
- *   On transmission side, IO Stream-USART adds a requirement on EM1 until the transmit is
+ *   On transmission side, I/O Stream-USART adds a requirement on EM1 until the transmit is
  *   really completed. Once the transmit is completed the requirement is removed and the
  *   system can go to a lower energy mode if allowed.
  *
@@ -100,7 +100,7 @@ extern "C" {
 // -----------------------------------------------------------------------------
 // Data Types
 
-/// @brief IO Stream USART config
+/// @brief I/O Stream USART config
 typedef struct {
   USART_TypeDef *usart;       ///< Pointer to USART peripheral
   CMU_Clock_TypeDef clock;    ///< Peripheral Clock
@@ -124,7 +124,7 @@ typedef struct {
 #endif
 } sl_iostream_usart_config_t;
 
-/// @brief IO Stream USART context
+/// @brief I/O Stream USART context
 typedef struct {
   sl_iostream_uart_context_t context; ///< usart_location
   USART_TypeDef *usart;       ///< usart
@@ -148,9 +148,9 @@ typedef struct {
 /***************************************************************************//**
  * USART Stream init.
  *
- * @param[in] iostream_uart  IO Stream UART handle.
+ * @param[in] iostream_uart  I/O Stream UART handle.
  *
- * @param[in] uart_config  IO Stream UART config.
+ * @param[in] uart_config  I/O Stream UART config.
  *
  * @param[in] init  USART initialization modes.
  *

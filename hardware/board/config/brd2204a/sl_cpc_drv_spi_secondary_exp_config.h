@@ -50,11 +50,11 @@
 
 // <o SL_CPC_DRV_SPI_EXP_CS_FALLING_EDGE_INT_NO> Chip Select Interrupt Number on Falling Edge
 // <i> Default: 10
-#define SL_CPC_DRV_SPI_EXP_CS_FALLING_EDGE_INT_NO  10
+#define SL_CPC_DRV_SPI_EXP_CS_FALLING_EDGE_INT_NO  12
 
 // <o SL_CPC_DRV_SPI_EXP_CS_RISING_EDGE_INT_NO> Chip Select Interrupt Number on Rising Edge
 // <i> Default: 11
-#define SL_CPC_DRV_SPI_EXP_CS_RISING_EDGE_INT_NO   11
+#define SL_CPC_DRV_SPI_EXP_CS_RISING_EDGE_INT_NO   13
 // </h>
 
 // <<< end of configuration section >>>

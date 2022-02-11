@@ -29,6 +29,8 @@
  ******************************************************************************/
 #include "sl_udelay.h"
 #include "em_device.h"
+#include "em_assert.h"
+#include <stdbool.h>
 
 /* The Cortex-M33 has a faster execution of the hw loop
  * with the same arm instructions. */
@@ -42,10 +44,25 @@ void sli_delay_loop(unsigned n);
 
 void sl_udelay_wait(unsigned us)
 {
-  uint32_t freq_khz = SystemCoreClockGet() / 1000U;
-  uint32_t ns_period = 1000000U / freq_khz;
-  uint32_t cycles = us * 1000U / ns_period;
-  uint32_t loops = cycles / HW_LOOP_CYCLE;
+  uint32_t freq_khz;
+  uint32_t ns_period;
+  uint32_t cycles;
+  uint32_t loops;
+
+  freq_khz = SystemCoreClockGet() / 1000U;
+  if (freq_khz == 0) {
+    EFM_ASSERT(false);
+    return;
+  }
+
+  ns_period = 1000000U / freq_khz;
+  if (ns_period == 0) {
+    EFM_ASSERT(false);
+    return;
+  }
+
+  cycles = us * 1000U / ns_period;
+  loops = cycles / HW_LOOP_CYCLE;
   if (loops > 0U) {
     sli_delay_loop(loops);
   }

@@ -15,6 +15,7 @@
   - name: hardware_board_rb
   - name: hardware_board_from_stk
   - name: hardware_board_from_slwrb4308c
+  - name: hardware_board_from_slwstk6102a
   - name: hardware_board_has_lfxo
   - name: hardware_board_supports_rf_band_2400
   - name: hardware_board_supports_1_rf_band
@@ -25,6 +26,7 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
   - id: ls013b7dh03
   - id: memlcd_usart
   - id: simple_led
@@ -35,9 +37,15 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4308C"'
+  - name: SL_BOARD_REV
+    value: '"A01"'
 - tag:
   - board:pn:BRD4308
   - board:variant:C

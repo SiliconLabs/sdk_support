@@ -141,8 +141,6 @@ typedef  struct  dnsc_data {
   CPU_INT08U      CfgReqRetryNbrMax;
   CPU_INT16U      CfgReqRetryTimeout_ms;
 
-  CPU_INT16U      QueryID;
-
   DNSc_SERVER     ServerAddrStatic;
   DNSc_SERVER     ServerAddrAuto;
 

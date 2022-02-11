@@ -3,7 +3,7 @@
  * @brief Gecko bootloader driver utility functions.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -70,7 +70,7 @@ uint32_t util_getClockFreq(void)
 #endif
   return clockFreq;
 }
-
+#if defined(BTL_UART_ENABLE) || defined(BTL_SPI_USART_ENABLE)
 void util_deinitUsart(USART_TypeDef *btlUsart, uint8_t usartNum, CMU_Clock_TypeDef btlUsartClock)
 {
   // Void casting to prevent warning.
@@ -97,3 +97,4 @@ void util_deinitUsart(USART_TypeDef *btlUsart, uint8_t usartNum, CMU_Clock_TypeD
   CMU->CLKEN0_CLR = CMU_CLKEN0_USART1;
 #endif
 }
+#endif

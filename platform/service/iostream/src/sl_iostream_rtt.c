@@ -32,6 +32,14 @@
 #include "SEGGER_RTT.h"
 #include "sl_status.h"
 
+#if !defined(IOSTREAM_RTT_UP_MODE)
+#define IOSTREAM_RTT_UP_MODE   SEGGER_RTT_MODE_NO_BLOCK_TRIM
+#endif
+
+#if !defined(IOSTREAM_RTT_DOWN_MODE)
+#define IOSTREAM_RTT_DOWN_MODE   SEGGER_RTT_MODE_NO_BLOCK_TRIM
+#endif
+
 /*******************************************************************************
  *********************   LOCAL FUNCTION PROTOTYPES   ***************************
  ******************************************************************************/
@@ -75,7 +83,8 @@ sl_iostream_instance_info_t sl_iostream_instance_rtt_info = {
 sl_status_t sl_iostream_rtt_init(void)
 {
   SEGGER_RTT_Init();
-  SEGGER_RTT_ConfigUpBuffer(0, NULL, NULL, 0, SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL);
+  SEGGER_RTT_ConfigUpBuffer(0, NULL, NULL, 0, IOSTREAM_RTT_UP_MODE);
+  SEGGER_RTT_ConfigDownBuffer(0, NULL, NULL, 0, IOSTREAM_RTT_DOWN_MODE);
   sl_iostream_set_system_default(&sl_iostream_rtt);
 
   return SL_STATUS_OK;
@@ -95,14 +104,20 @@ static sl_status_t rtt_write(void *context,
   uint32_t ret = 0;
   sl_status_t status;
   (void)context;
+  (void)ret;
 
   ret = SEGGER_RTT_Write(0, buffer, buffer_length);
 
+#if ((IOSTREAM_RTT_UP_MODE == SEGGER_RTT_MODE_NO_BLOCK_TRIM) \
+  || (IOSTREAM_RTT_UP_MODE == SEGGER_RTT_MODE_NO_BLOCK_SKIP))
+  status = SL_STATUS_OK; // Ignore error
+#else
   if (ret > 0) {
     status = SL_STATUS_OK;
   } else {
     status = SL_STATUS_IO;
   }
+#endif
 
   return status;
 }

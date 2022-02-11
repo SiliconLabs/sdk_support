@@ -43,7 +43,7 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_vuart IO Stream VUART
+ * @addtogroup iostream_vuart I/O Stream VUART
  * @brief IO Stream VUART
  * @details
  * ## Overview

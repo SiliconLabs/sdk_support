@@ -784,6 +784,9 @@ void USART_InitAsync(USART_TypeDef *usart, const USART_InitAsync_TypeDef *init)
   if (init->autoCsEnable) {
     usart->CTRL |= USART_CTRL_AUTOCS;
   }
+  if (init->csInv) {
+    usart->CTRL |= USART_CTRL_CSINV;
+  }
 #if defined(_USART_TIMING_CSHOLD_MASK)
   usart->TIMING = (((uint32_t)init->autoCsHold << _USART_TIMING_CSHOLD_SHIFT)
                    & _USART_TIMING_CSHOLD_MASK)
@@ -892,6 +895,9 @@ void USART_InitSync(USART_TypeDef *usart, const USART_InitSync_TypeDef *init)
 
   if (init->autoCsEnable) {
     usart->CTRL |= USART_CTRL_AUTOCS;
+  }
+  if (init->csInv) {
+    usart->CTRL |= USART_CTRL_CSINV;
   }
 #if defined(_USART_TIMING_CSHOLD_MASK)
   usart->TIMING = (((uint32_t)init->autoCsHold << _USART_TIMING_CSHOLD_SHIFT)

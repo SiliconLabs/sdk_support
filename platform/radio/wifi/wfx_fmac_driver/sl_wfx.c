@@ -1043,14 +1043,15 @@ sl_status_t sl_wfx_set_roam_parameters(uint8_t rcpi_threshold,
  * @param rate_set_bitmask is the list of rates that will be used in STA mode.
  * @returns SL_STATUS_OK if the setting is applied correctly, SL_STATUS_FAIL otherwise
  *
- * @note Parameters set by sl_wfx_set_roam_parameters() take effect at the next
+ * @note Parameters set by sl_wfx_set_tx_rate_parameters() take effect at the next
  * connection. Calling it while connected has no immediate effect.
  *****************************************************************************/
-sl_status_t sl_wfx_set_tx_rate_parameters(sl_wfx_rate_set_bitmask_t rate_set_bitmask)
+sl_status_t sl_wfx_set_tx_rate_parameters(sl_wfx_rate_set_bitmask_t rate_set_bitmask, uint8_t use_minstrel)
 {
   sl_wfx_set_tx_rate_parameters_req_body_t payload;
 
   payload.reserved = 0;
+  payload.use_minstrel = use_minstrel;
   memcpy(&payload.rate_set_bitmask, &rate_set_bitmask, sizeof(sl_wfx_rate_set_bitmask_t));
 
   return sl_wfx_send_command(SL_WFX_SET_TX_RATE_PARAMETERS_REQ_ID, &payload, sizeof(payload), SL_WFX_STA_INTERFACE, NULL);

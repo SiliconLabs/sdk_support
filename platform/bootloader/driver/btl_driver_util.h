@@ -3,7 +3,7 @@
  * @brief Gecko bootloader driver utility functions.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -18,7 +18,9 @@
 #define BTL_DRIVER_UTIL_H
 
 #include <stdint.h>
+#if defined(BTL_UART_ENABLE) || defined(BTL_SPI_USART_ENABLE)
 #include "em_usart.h"
+#endif
 #include "em_cmu.h"
 
 /**
@@ -28,6 +30,7 @@
  */
 uint32_t util_getClockFreq(void);
 
+#if defined(BTL_UART_ENABLE) || defined(BTL_SPI_USART_ENABLE)
 /**
  * Disable USART TX, RX, and USART Clock.
  *
@@ -36,5 +39,5 @@ uint32_t util_getClockFreq(void);
  * @param[in] btlUsartClock The clock signal for the USART to deinitialize
  */
 void util_deinitUsart(USART_TypeDef *btlUsart, uint8_t usartNum, CMU_Clock_TypeDef btlUsartClock);
-
+#endif
 #endif

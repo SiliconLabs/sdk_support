@@ -32,6 +32,15 @@
 
 #include "em_gpio.h"
 
+sl_status_t sl_board_configure_vcom(void)
+{
+#if defined(SL_BOARD_ENABLE_VCOM) && SL_BOARD_ENABLE_VCOM
+  return sl_board_enable_vcom();
+#else
+  return SL_STATUS_NOT_SUPPORTED;
+#endif
+}
+
 sl_status_t sl_board_enable_vcom(void)
 {
 #if defined(SL_BOARD_ENABLE_VCOM_PORT)
@@ -83,49 +92,71 @@ sl_status_t sl_board_enable_sensor(sl_board_sensor_t sensor)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (sensor) {
-  #if defined(SL_BOARD_ENABLE_SENSOR_RHT_PORT)
     case SL_BOARD_SENSOR_RHT:
+    #if defined(SL_BOARD_ENABLE_SENSOR_RHT_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_RHT_PORT, SL_BOARD_ENABLE_SENSOR_RHT_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT)
+
     case SL_BOARD_SENSOR_LIGHT:
+    #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT, SL_BOARD_ENABLE_SENSOR_LIGHT_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT)
+
     case SL_BOARD_SENSOR_PRESSURE:
+    #if defined(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT, SL_BOARD_ENABLE_SENSOR_PRESSURE_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_HALL_PORT)
+
     case SL_BOARD_SENSOR_HALL:
+    #if defined(SL_BOARD_ENABLE_SENSOR_HALL_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_HALL_PORT, SL_BOARD_ENABLE_SENSOR_HALL_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_GAS_PORT)
+
     case SL_BOARD_SENSOR_GAS:
+    #if defined(SL_BOARD_ENABLE_SENSOR_GAS_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_GAS_PORT, SL_BOARD_ENABLE_SENSOR_GAS_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_IMU_PORT)
+
     case SL_BOARD_SENSOR_IMU:
+    #if defined(SL_BOARD_ENABLE_SENSOR_IMU_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_IMU_PORT, SL_BOARD_ENABLE_SENSOR_IMU_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT)
+
     case SL_BOARD_SENSOR_MICROPHONE:
+    #if defined(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT, SL_BOARD_ENABLE_SENSOR_MICROPHONE_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false);  // Should not happen
       break;
   }
 
@@ -137,49 +168,71 @@ sl_status_t sl_board_disable_sensor(sl_board_sensor_t sensor)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (sensor) {
-  #if defined(SL_BOARD_ENABLE_SENSOR_RHT_PORT)
     case SL_BOARD_SENSOR_RHT:
+    #if defined(SL_BOARD_ENABLE_SENSOR_RHT_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_RHT_PORT, SL_BOARD_ENABLE_SENSOR_RHT_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT)
+
     case SL_BOARD_SENSOR_LIGHT:
+    #if defined(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_LIGHT_PORT, SL_BOARD_ENABLE_SENSOR_LIGHT_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT)
+
     case SL_BOARD_SENSOR_PRESSURE:
+    #if defined(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_PRESSURE_PORT, SL_BOARD_ENABLE_SENSOR_PRESSURE_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_HALL_PORT)
+
     case SL_BOARD_SENSOR_HALL:
+    #if defined(SL_BOARD_ENABLE_SENSOR_HALL_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_HALL_PORT, SL_BOARD_ENABLE_SENSOR_HALL_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_GAS_PORT)
+
     case SL_BOARD_SENSOR_GAS:
+    #if defined(SL_BOARD_ENABLE_SENSOR_GAS_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_GAS_PORT, SL_BOARD_ENABLE_SENSOR_GAS_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_IMU_PORT)
+
     case SL_BOARD_SENSOR_IMU:
+    #if defined(SL_BOARD_ENABLE_SENSOR_IMU_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_IMU_PORT, SL_BOARD_ENABLE_SENSOR_IMU_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT)
+
     case SL_BOARD_SENSOR_MICROPHONE:
+    #if defined(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_SENSOR_MICROPHONE_PORT, SL_BOARD_ENABLE_SENSOR_MICROPHONE_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false);  // Should not happen
       break;
   }
 
@@ -191,19 +244,26 @@ sl_status_t sl_board_enable_memory(sl_board_memory_t memory)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (memory) {
-  #if defined(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT)
     case SL_BOARD_MEMORY_SDCARD:
+    #if defined(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT, SL_BOARD_ENABLE_MEMORY_SDCARD_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_MEMORY_QSPI_PORT)
+
     case SL_BOARD_MEMORY_QSPI:
+    #if defined(SL_BOARD_ENABLE_MEMORY_QSPI_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_MEMORY_QSPI_PORT, SL_BOARD_ENABLE_MEMORY_QSPI_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false); // Should not happen
       break;
   }
 
@@ -215,19 +275,26 @@ sl_status_t sl_board_disable_memory(sl_board_memory_t memory)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (memory) {
-  #if defined(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT)
     case SL_BOARD_MEMORY_SDCARD:
+    #if defined(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_MEMORY_SDCARD_PORT, SL_BOARD_ENABLE_MEMORY_SDCARD_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
-  #if defined(SL_BOARD_ENABLE_MEMORY_QSPI_PORT)
+
     case SL_BOARD_MEMORY_QSPI:
+    #if defined(SL_BOARD_ENABLE_MEMORY_QSPI_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_MEMORY_QSPI_PORT, SL_BOARD_ENABLE_MEMORY_QSPI_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false);  // Should not happen
       break;
   }
 
@@ -239,13 +306,17 @@ sl_status_t sl_board_enable_oscillator(sl_board_oscillator_t oscillator)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (oscillator) {
-  #if defined(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT)
     case SL_BOARD_OSCILLATOR_TCXO:
+    #if defined(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT, SL_BOARD_ENABLE_OSCILLATOR_TCXO_PIN, gpioModePushPull, 1);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false);  // Should not happen
       break;
   }
 
@@ -257,13 +328,17 @@ sl_status_t sl_board_disable_oscillator(sl_board_oscillator_t oscillator)
   sl_status_t status = SL_STATUS_NOT_AVAILABLE;
 
   switch (oscillator) {
-  #if defined(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT)
     case SL_BOARD_OSCILLATOR_TCXO:
+    #if defined(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT)
       GPIO_PinModeSet(SL_BOARD_ENABLE_OSCILLATOR_TCXO_PORT, SL_BOARD_ENABLE_OSCILLATOR_TCXO_PIN, gpioModePushPull, 0);
       status = SL_STATUS_OK;
+    #else
+      EFM_ASSERT(false);
+    #endif
       break;
-  #endif
+
     default:
+      EFM_ASSERT(false); // Should not happen
       break;
   }
 

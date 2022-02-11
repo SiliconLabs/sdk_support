@@ -60,7 +60,7 @@ extern "C" {
  * See this link for other polynomials:
  * https://en.wikipedia.org/wiki/Cyclic_redundancy_check
  *
- * Before a CRC calculation can begin it is important to call the
+ * Before a CRC calculation can begin, call the
  * @ref GPCRC_Start function. This function will reset CRC calculation
  * by copying the configured initialization value over to the CRC data register.
  *
@@ -95,16 +95,16 @@ extern "C" {
 typedef struct {
   /**
    * CRC polynomial value. GPCRC supports either a fixed 32-bit polynomial
-   * or a user configurable 16 bit polynomial. The fixed 32-bit polynomial
+   * or a user-configurable 16 bit polynomial. The fixed 32-bit polynomial
    * is the one used in IEEE 802.3, which has the value 0x04C11DB7. To use the
-   * 32-bit fixed polynomial, just assign 0x04C11DB7 to the crcPoly field.
+   * 32-bit fixed polynomial, assign 0x04C11DB7 to the crcPoly field.
    * To use a 16-bit polynomial, assign a value to crcPoly where the upper 16
    * bits are zero.
    *
    * The polynomial should be written in normal bit order. For instance,
    * to use the CRC-16 polynomial X^16 + X^15 + X^2 + 1, first convert
    * it to hex representation and remove the highest order term
-   * of the polynomial. This would give us 0x8005 as the value to write into
+   * of the polynomial. This will give 0x8005 as the value to write into
    * crcPoly.
    */
   uint32_t                   crcPoly;
@@ -190,10 +190,10 @@ __STATIC_INLINE void GPCRC_Enable(GPCRC_TypeDef * gpcrc, bool enable)
 
 /***************************************************************************//**
  * @brief
- *   Issues a command to initialize CRC calculation.
+ *   Issue a command to initialize the CRC calculation.
  *
  * @details
- *   Issues the command INIT in GPCRC_CMD that initializes
+ *   Issues the command INIT in GPCRC_CMD that initializes the
  *   CRC calculation by writing the initial values to the DATA register.
  *
  * @param[in] gpcrc
@@ -222,7 +222,7 @@ __STATIC_INLINE void GPCRC_InitValueSet(GPCRC_TypeDef * gpcrc, uint32_t initValu
 
 /***************************************************************************//**
  * @brief
- *   Writes a 32-bit value to the input data register of the CRC.
+ *   Write a 32-bit value to the input data register of the CRC.
  *
  * @details
  *   Use this function to write a 32-bit input data to the CRC. CRC
@@ -242,7 +242,7 @@ __STATIC_INLINE void GPCRC_InputU32(GPCRC_TypeDef * gpcrc, uint32_t data)
 
 /***************************************************************************//**
  * @brief
- *   Writes a 16-bit value to the input data register of the CRC.
+ *   Write a 16-bit value to the input data register of the CRC.
  *
  * @details
  *   Use this function to write a 16 bit input data to the CRC. CRC
@@ -262,7 +262,7 @@ __STATIC_INLINE void GPCRC_InputU16(GPCRC_TypeDef * gpcrc, uint16_t data)
 
 /***************************************************************************//**
  * @brief
- *   Writes an 8-bit value to the input data register of the CRC.
+ *   Write an 8-bit value to the CRC input data register.
  *
  * @details
  *   Use this function to write an 8-bit input data to the CRC. CRC
@@ -282,7 +282,7 @@ __STATIC_INLINE void GPCRC_InputU8(GPCRC_TypeDef * gpcrc, uint8_t data)
 
 /***************************************************************************//**
  * @brief
- *   Reads the data register of the CRC.
+ *   Read the CRC data register.
  *
  * @details
  *   Use this function to read the calculated CRC value.
@@ -300,7 +300,7 @@ __STATIC_INLINE uint32_t GPCRC_DataRead(GPCRC_TypeDef * gpcrc)
 
 /***************************************************************************//**
  * @brief
- *   Reads the data register of the CRC bit reversed.
+ *   Read the data register of the CRC bit reversed.
  *
  * @details
  *   Use this function to read the calculated CRC value bit reversed. When
@@ -320,7 +320,7 @@ __STATIC_INLINE uint32_t GPCRC_DataReadBitReversed(GPCRC_TypeDef * gpcrc)
 
 /***************************************************************************//**
  * @brief
- *   Reads the data register of the CRC byte reversed.
+ *   Read the data register of the CRC byte reversed.
  *
  * @details
  *   Use this function to read the calculated CRC value byte reversed.

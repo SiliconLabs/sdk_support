@@ -17,6 +17,7 @@
 #include "rail.h"
 #include "sl_status.h"
 #include "coexistence/protocol/ieee802154_uc/coexistence-802154.h"
+#include "rail_ieee802154.h"
 
 #ifdef RTOS
   #include "rtos/rtos.h"
@@ -42,11 +43,11 @@
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_ACK_HOLDOFF SL_RAIL_UTIL_COEX_OPT_DISABLED
 #endif //SL_RAIL_UTIL_COEX_ACKHOLDOFF || defined(RHO_GPIO)
 
-#if SL_RAIL_UTIL_COEX_TX_ABORT
+#if SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_ABORT_TX SL_RAIL_UTIL_COEX_OPT_ABORT_TX
-#else //!SL_RAIL_UTIL_COEX_TX_ABORT
+#else //!SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_ABORT_TX SL_RAIL_UTIL_COEX_OPT_DISABLED
-#endif //SL_RAIL_UTIL_COEX_TX_ABORT
+#endif //SL_RAIL_UTIL_COEX_IEEE802154_TX_ABORT
 
 #if SL_RAIL_UTIL_COEX_TX_HIPRI
   #define DEFAULT_SL_RAIL_UTIL_COEX_OPT_TX_HIPRI SL_RAIL_UTIL_COEX_OPT_TX_HIPRI
@@ -236,11 +237,9 @@ static uint8_t phySelectTimeoutMs = SL_RAIL_UTIL_COEX_PHY_SELECT_TIMEOUT_MAX;
 static uint8_t phySelectTimeoutMs = 0U;
 #endif //SL_RAIL_UTIL_COEX_PHY_ENABLED
 
-#if COEX_STACK_EVENT_SUPPORT
-static bool coexInitialized = false;
-#endif //COEX_STACK_EVENT_SUPPORT
-
 #include "rail_types.h"
+
+COEX_Events_t sli_rail_util_ieee802154_coex_event_filter = ~COEX_EVENT_REQUEST_EVENTS;
 
 #if SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 #if SL_RAIL_UTIL_COEX_PHY_ENABLED
@@ -271,7 +270,18 @@ static void coexEventsCb(COEX_Events_t events);
 static void phySelectIsr(void);
 #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
 
-static void eventsCb(COEX_Events_t events)
+#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+static void wifiTxIsr(void)
+{
+  if (COEX_HAL_GetWifiTx()) {
+    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+  } else {
+    RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, true);
+  }
+}
+#endif
+
+void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
 {
   if ((events & COEX_EVENT_HOLDOFF_CHANGED) != 0U) {
     emRadioHoldOffIsr((COEX_GetOptions() & COEX_OPTION_HOLDOFF_ACTIVE) != 0U);
@@ -281,73 +291,12 @@ static void eventsCb(COEX_Events_t events)
     phySelectIsr();
   }
  #endif//SL_RAIL_UTIL_COEX_RUNTIME_PHY_SELECT
+ #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+  if ((events & COEX_EVENT_WIFI_TX_CHANGED) != 0U) {
+    wifiTxIsr();
+  }
+ #endif
   coexEventsCb(events);
-}
-
-#if SL_RAIL_UTIL_COEX_REQ_BACKOFF
-static uint16_t randomSeed[2];
-static bool pseudoRandomSeeded = false;
-
-/***************************************************************************//**
- * This function performs a linear feedback shift.
- * @param val Pointer to random seed to update
- * @param taps The feedback polynomial mask
- *
- * @return Returns a 16 bit random value.
- *
- ******************************************************************************/
-static uint16_t linearFeedbackShift(uint16_t *val, uint16_t taps)
-{
-  uint16_t newVal = *val;
-
-  if ((newVal & 0x8000U) != 0U) {
-    newVal ^= taps;
-  }
-  *val = newVal << 1;
-  return newVal;
-}
-
-/*******************************************************************************
- * This function seeds the pseudo random number.
- *
- ******************************************************************************/
-static void seedPseudoRandom(void)
-{
-  randomSeed[0] = (uint16_t)DEVINFO->EUI48L;
-}
-
-/***************************************************************************//**
- * This function generates a pseudo random number using LFSR.
- *
- * @return Returns a 16 bit random value.
- *
- ******************************************************************************/
-static uint16_t getPseudoRandom(void)
-{
-  if (!pseudoRandomSeeded) {
-    seedPseudoRandom();
-  }
-  return (linearFeedbackShift(&randomSeed[0], 0x0062) ^ linearFeedbackShift(&randomSeed[1], 0x100B));
-}
-
-static void randomDelayCallback(uint16_t randomDelayMaskUs)
-{
-  RAIL_DelayUs(getPseudoRandom() & randomDelayMaskUs);
-}
-#endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
-
-static void COEX_802154_Init(void)
-{
-  if (coexInitialized) {
-    return;
-  }
-  RAIL_ConfigMultiTimer(true);
-#if SL_RAIL_UTIL_COEX_REQ_BACKOFF
-  COEX_SetRandomDelayCallback(&randomDelayCallback);
-#endif //SL_RAIL_UTIL_COEX_REQ_BACKOFF
-  COEX_SetRadioCallback(&eventsCb);
-  COEX_HAL_Init();
-  coexInitialized = true;
 }
 
 #define MAP_COEX_OPTION(coexOpt, sl_rail_util_coex_opt) \
@@ -380,7 +329,7 @@ sl_rail_util_coex_options_t sl_rail_util_coex_get_options(void)
 sl_status_t sl_rail_util_coex_set_options(sl_rail_util_coex_options_t options)
 {
   sl_status_t status = SL_STATUS_NOT_SUPPORTED;
-  COEX_802154_Init();
+  COEX_HAL_Init();
   COEX_Options_t coexOptions = COEX_GetOptions();
 
 #ifndef DEBUG_PTA
@@ -660,6 +609,11 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
           (void) sl_rail_util_coex_set_rx_request(sl_rail_util_coex_frame_detect_req(), NULL);
           cancelTimer(&ptaRxRetryTimer);
           setTimer(&ptaRxTimer, SL_RAIL_UTIL_COEX_RX_TIMEOUT_US, &ptaRxTimerCb);
+        #if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+          // Disable signal identifier if RX started before signal detected event happened
+          RAIL_IEEE802154_EnableSignalIdentifier(emPhyRailHandle, false);
+          COEX_EnableWifiTxIsr(false);
+        #endif
         }
       }
       break;
@@ -679,6 +633,7 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_CORRUPTED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_BLOCKED:
     case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_RX_ACK_ABORTED:
+    case SL_RAIL_UTIL_IEEE802154_STACK_EVENT_SIGNAL_DETECTED:
       if (sl_rail_util_coex_is_enabled()) {
         if ((sl_rail_util_coex_get_options() & SL_RAIL_UTIL_COEX_OPT_RX_RETRY_REQ) != 0U) {
           cancelTimer(&ptaRxTimer);
@@ -702,6 +657,9 @@ sl_rail_util_ieee802154_stack_status_t sl_rail_util_coex_on_event(
         cancelTimer(&ptaRxRetryTimer);
         if (!isReceivingFrame) {
           (void) sl_rail_util_coex_set_rx_request(SL_RAIL_UTIL_COEX_REQ_OFF, NULL);
+        #if RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+          COEX_EnableWifiTxIsr(true);
+        #endif
         }
       }
       break;
@@ -815,6 +773,11 @@ static sl_status_t internalPtaSetRequest(COEX_ReqState_t * coexReqState,
                                          COEX_Req_t coexReq,
                                          COEX_ReqCb_t coexCb)
 {
+  if (txReq.coexReq == COEX_REQ_OFF && rxReq.coexReq == COEX_REQ_OFF) {
+    sli_rail_util_ieee802154_coex_event_filter &= ~COEX_EVENT_REQUEST_EVENTS;
+  } else {
+    sli_rail_util_ieee802154_coex_event_filter |= COEX_EVENT_REQUEST_EVENTS;
+  }
   // if force holdoff is enabled, don't set request
   return (((sl_rail_util_coex_options & SL_RAIL_UTIL_COEX_OPT_FORCE_HOLDOFF) == 0U)
           && COEX_SetRequest(coexReqState, coexReq, coexCb))
@@ -970,6 +933,11 @@ const sl_rail_util_coex_pwm_args_t *sl_rail_util_coex_get_request_pwm_args(void)
   return NULL;
 }
 
+void sli_rail_util_ieee802154_coex_on_event(COEX_Events_t events)
+{
+  (void)events;
+}
+
 #endif//COEX_SUPPORT
 
 #ifdef COEX_HAL_SMALL_RHO
@@ -1085,7 +1053,12 @@ sl_status_t sl_rail_util_coex_set_gpio_input_override(sl_rail_util_coex_gpio_ind
 
 void sl_rail_util_coex_init(void)
 {
+  sl_rail_util_coex_set_options(DEFAULT_SL_RAIL_UTIL_COEX_OPTIONS);
 #if defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
   sl_rail_util_coex_set_enable(true);
 #endif //defined(SL_RAIL_UTIL_COEX_REQ_PORT) || defined(SL_RAIL_UTIL_COEX_GNT_PORT)
+#if SL_RAIL_UTIL_COEX_SIGNAL_IDENTIFIER_ENABLED
+  COEX_EnableWifiTxIsr(true);
+  RAIL_IEEE802154_ConfigSignalIdentifier(emPhyRailHandle);
+#endif
 }

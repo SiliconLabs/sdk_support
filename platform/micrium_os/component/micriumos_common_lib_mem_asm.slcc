@@ -2,7 +2,7 @@ id: micriumos_common_lib_mem_asm
 label: Micrium OS Common Libraries Optimized Mem Copy
 package: micrium-krnx
 description: Use an optimized Mem_Copy in assembly
-category: RTOS|Micrium OS|Common
+category: Services|Micrium|Common
 quality: production
 component_root_path: platform/micrium_os/ports
 provides:

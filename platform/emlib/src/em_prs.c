@@ -43,11 +43,29 @@
  * @{
  ******************************************************************************/
 
+/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
+
+/*******************************************************************************
+ *******************************   DEFINES   ***********************************
+ ******************************************************************************/
+
+/* Generic defines for async and sync signals applying to all TIMER instances.
+ * Those defines map to TIMER2 but it could be any TIMER instance number. */
+#define   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERUF   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2UF
+#define   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMEROF   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2OF
+#define   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC0  _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC0
+#define   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC1  _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC1
+#define   _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC2  _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC2
+
+#define   _PRS_SYNC_CH_CTRL_SIGSEL_TIMERUF   _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2UF
+#define   _PRS_SYNC_CH_CTRL_SIGSEL_TIMEROF   _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2OF
+#define   _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC0  _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC0
+#define   _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC1  _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC1
+#define   _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC2  _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC2
+
 /*******************************************************************************
  **************************   LOCAL FUNCTIONS   ********************************
  ******************************************************************************/
-
-/** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
 /***************************************************************************//**
  * @brief
@@ -85,6 +103,10 @@ static PRS_Signal_t getSignal(unsigned int ch, PRS_ChType_t type)
 
 /** @endcond */
 
+/*******************************************************************************
+ **************************   GLOBAL FUNCTIONS   *******************************
+ ******************************************************************************/
+
 #if defined(_SILICON_LABS_32B_SERIES_2)
 /***************************************************************************//**
  * @brief
@@ -109,9 +131,11 @@ uint32_t PRS_ConvertToSyncSource(uint32_t asyncSource)
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_NONE:
       syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_NONE;
       break;
+#if defined(IADC_PRESENT)
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_IADC0:
       syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_IADC0;
       break;
+#endif
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER0:
       syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER0;
       break;
@@ -127,6 +151,21 @@ uint32_t PRS_ConvertToSyncSource(uint32_t asyncSource)
 #if defined(TIMER4)
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER4:
       syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER4;
+      break;
+#endif
+#if defined(TIMER5)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER5:
+      syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER5;
+      break;
+#endif
+#if defined(TIMER6)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER6:
+      syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER6;
+      break;
+#endif
+#if defined(TIMER7)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER7:
+      syncSource = _PRS_SYNC_CH_CTRL_SOURCESEL_TIMER7;
       break;
 #endif
 #if defined(VDAC0)
@@ -151,7 +190,7 @@ uint32_t PRS_ConvertToSyncSource(uint32_t asyncSource)
  *   Convert an async PRS signal to a sync signal.
  *
  * @details
- *   PRS values for TIMER2 and TIMER3 signals differ between asynchronous and
+ *   PRS values for some peripherals signals differ between asynchronous and
  *   synchronous PRS channels. This function must be used to handle the
  *   conversion.
  *
@@ -171,47 +210,37 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
   switch (asyncSource) {
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER0:
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER1:
-      switch (asyncSignal) {
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER1UF:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER1UF;
-          break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER1OF:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER1OF;
-          break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER1CC0:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER1CC0;
-          break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC1:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER1CC1;
-          break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC2:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER1CC2;
-          break;
-        default:
-          EFM_ASSERT(false);
-          break;
-      }
-      break;
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER2:
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER3:
 #if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER4)
     case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER4:
 #endif
+#if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER5)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER5:
+#endif
+#if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER6)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER6:
+#endif
+#if defined(_PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER7)
+    case _PRS_ASYNC_CH_CTRL_SOURCESEL_TIMER7:
+#endif
+      /* Async and sync signal values are consistent across all timers instances.
+       * Generic defines are used. */
       switch (asyncSignal) {
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2UF:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2UF;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERUF:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMERUF;
           break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2OF:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2OF;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMEROF:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMEROF;
           break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC0:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC0;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC0:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC0;
           break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC1:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC1;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC1:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC1;
           break;
-        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMER2CC2:
-          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMER2CC2;
+        case _PRS_ASYNC_CH_CTRL_SIGSEL_TIMERCC2:
+          syncSignal = _PRS_SYNC_CH_CTRL_SIGSEL_TIMERCC2;
           break;
         default:
           EFM_ASSERT(false);
@@ -272,12 +301,7 @@ uint32_t PRS_ConvertToSyncSignal(uint32_t asyncSource, uint32_t asyncSignal)
   }
   return syncSignal;
 }
-
 #endif
-
-/*******************************************************************************
- **************************   GLOBAL FUNCTIONS   *******************************
- ******************************************************************************/
 
 /***************************************************************************//**
  * @brief
@@ -380,7 +404,7 @@ void PRS_GpioOutputLocation(unsigned int ch,
   uint32_t shift = (ch % 4) * 8;
   uint32_t mask = location << shift;
   uint32_t locationGroup = ch / 4;
-  /* Since all ROUTELOCx registers are in consecutive memory locations, we can treat them
+  /* Since all ROUTELOCx registers are in consecutive memory locations, treat them
    * as an array starting at ROUTELOC0 and use locationGroup to index into this array */
   volatile uint32_t * routeloc = &PRS->ROUTELOC0;
   routeloc[locationGroup] |= mask;
@@ -629,8 +653,11 @@ void PRS_Combine(unsigned int chA, unsigned int chB, PRS_Logic_t logic)
                                  | _PRS_ASYNC_CH_CTRL_AUXSEL_MASK))
                             | ((uint32_t)logic << _PRS_ASYNC_CH_CTRL_FNSEL_SHIFT)
                             | ((uint32_t)chB << _PRS_ASYNC_CH_CTRL_AUXSEL_SHIFT);
-  PRS->ASYNC_CH[chB].CTRL = (PRS->ASYNC_CH[chB].CTRL & ~_PRS_ASYNC_CH_CTRL_FNSEL_MASK)
-                            | PRS_ASYNC_CH_CTRL_FNSEL_DEFAULT;
+  // Preventing 'FNSEL resets to default' when both channels are configured as same.
+  if (chA != chB) {
+    PRS->ASYNC_CH[chB].CTRL = (PRS->ASYNC_CH[chB].CTRL & ~_PRS_ASYNC_CH_CTRL_FNSEL_MASK)
+                              | PRS_ASYNC_CH_CTRL_FNSEL_DEFAULT;
+  }
 #endif
 }
 #endif

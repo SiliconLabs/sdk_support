@@ -29,12 +29,13 @@
 #endif // CONFIGURATION_HEADER
 
 //Bluetooth event flag definitions
-#define SL_BT_RTOS_EVENT_FLAG_STACK        0x00000001U    //Bluetooth task needs an update
-#define SL_BT_RTOS_EVENT_FLAG_LL           0x00000002U    //Linklayer task needs an update
-#define SL_BT_RTOS_EVENT_FLAG_CMD_WAITING  0x00000004U    //Bluetooth command is waiting to be processed
-#define SL_BT_RTOS_EVENT_FLAG_RSP_WAITING  0x00000008U    //Bluetooth response is waiting to be processed
-#define SL_BT_RTOS_EVENT_FLAG_EVT_WAITING  0x00000010U    //Bluetooth event is waiting to be processed
-#define SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED  0x00000020U    //Bluetooth event is handled
+#define SL_BT_RTOS_EVENT_FLAG_STACK            0x00000001U    //Bluetooth task needs an update
+#define SL_BT_RTOS_EVENT_FLAG_LL               0x00000002U    //Linklayer task needs an update
+#define SL_BT_RTOS_EVENT_FLAG_CMD_WAITING      0x00000004U    //Bluetooth command is waiting to be processed
+#define SL_BT_RTOS_EVENT_FLAG_RSP_WAITING      0x00000008U    //Bluetooth response is waiting to be processed
+#define SL_BT_RTOS_EVENT_FLAG_EVT_WAITING      0x00000010U    //Bluetooth event is waiting to be processed
+#define SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED      0x00000020U    //Bluetooth event is handled
+#define SL_BT_RTOS_EVENT_FLAG_START_REQUESTED  0x00000040U    //Bluetooth start has been requested
 
 void sli_bgapi_cmd_handler_delegate(uint32_t header, sl_bgapi_handler, const void*);
 
@@ -227,6 +228,13 @@ void sli_bt_rtos_stack_callback()
  */
 extern uint32_t sli_bt_can_sleep_ticks();
 
+/**
+ * Internal stack function to start the Bluetooth stack.
+ *
+ * @return SL_STATUS_OK if the stack was successfully started
+ */
+extern sl_status_t sli_bt_system_start_bluetooth();
+
 //Bluetooth task, it waits for events from bluetooth and handles them
 void bluetooth_thread(void *p_arg)
 {
@@ -237,6 +245,22 @@ void bluetooth_thread(void *p_arg)
   sl_bt_init();
 
   while (1) {
+    //Start the stack if that has been requested
+    if ((flags & SL_BT_RTOS_EVENT_FLAG_START_REQUESTED) && (flags & SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED)) {
+      flags &= ~SL_BT_RTOS_EVENT_FLAG_START_REQUESTED;
+      sl_status_t status = sli_bt_system_start_bluetooth();
+      if (status != SL_STATUS_OK) {
+        //Starting the stack has failed. Generate a system error event to let the application know.
+        uint32_t evt_len = sizeof(bluetooth_evt_instance.data.evt_system_error);
+        bluetooth_evt_instance.header = sl_bt_evt_system_error_id | (evt_len << 8);
+        bluetooth_evt_instance.data.evt_system_error.reason = (uint16_t) status;
+        bluetooth_evt_instance.data.evt_system_error.data.len = 0;
+        osEventFlagsSet(bluetooth_event_flags,
+                        SL_BT_RTOS_EVENT_FLAG_EVT_WAITING);
+        flags &= ~SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED;
+      }
+    }
+
     //Command needs to be sent to Bluetooth stack
     if (flags & SL_BT_RTOS_EVENT_FLAG_CMD_WAITING) {
       uint32_t header = command_header;
@@ -266,7 +290,10 @@ void bluetooth_thread(void *p_arg)
       continue;
     }
     flags |= osEventFlagsWait(bluetooth_event_flags,
-                              SL_BT_RTOS_EVENT_FLAG_STACK + SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED + SL_BT_RTOS_EVENT_FLAG_CMD_WAITING,
+                              SL_BT_RTOS_EVENT_FLAG_STACK
+                              + SL_BT_RTOS_EVENT_FLAG_EVT_HANDLED
+                              + SL_BT_RTOS_EVENT_FLAG_CMD_WAITING
+                              + SL_BT_RTOS_EVENT_FLAG_START_REQUESTED,
                               osFlagsWaitAny,
                               osWaitForever);
     if ((flags & 0x80000000u) == 0x80000000u) {
@@ -427,6 +454,19 @@ sl_status_t sli_bgapi_lock()
 void sli_bgapi_unlock()
 {
   (void) osMutexRelease(bgapi_mutex_id);
+}
+
+// Request the starting of Bluetooth
+sl_status_t sli_request_rtos_bluetooth_start()
+{
+  uint32_t flags = osEventFlagsSet(bluetooth_event_flags,
+                                   SL_BT_RTOS_EVENT_FLAG_START_REQUESTED);
+  if ((flags & 0x80000000u) == 0x80000000u) {
+    return osFlags2sl_status(flags); // Error was returned
+  }
+
+  // Return the special status to indicate that stack will now start automatically
+  return SL_STATUS_IN_PROGRESS;
 }
 
 sl_status_t sl_bt_bluetooth_pend()

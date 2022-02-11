@@ -1,9 +1,9 @@
 id: micriumos_usbh_class_usb2ser_prolific
-label: USB Host Class - USB-to-Serial for Prolific adapters
+label: Micrium-USB Host Class - USB-to-Serial for Prolific adapters
 package: micrium-usbh
 description: Micrium OS USB Host USB-to-Serial Class - Driver for Prolific adapters
-category: Services|USB|Host
-quality: production
+category: Services|Micrium|USB
+quality: deprecated
 source:
   - path: platform/micrium_os/usb/source/host/class/usbh_usb2ser_prolific.c
 include:

@@ -6,8 +6,6 @@ category: Services
 quality: production
 ui_hints:
   visibility: never
-config_file:
-  - path: platform/service/power_manager/config/sl_power_manager_config.h
 source:
   - path: platform/service/power_manager/src/sl_power_manager.c
   - path: platform/service/power_manager/src/sl_power_manager_debug.c

@@ -10,6 +10,11 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_stk
+- define:
+  - name: SL_KIT_NAME
+    value: '"EFM32-G8XX-STK"'
+  - name: SL_KIT_REV
+    value: '"C01"'
 - tag:
   - kit:opn:EFM32-G8xx-STK
   - kit:pn:G8xx-STK

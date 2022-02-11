@@ -25,4 +25,4 @@ template_contribution:
   - name: component_catalog
     value: btmesh_feature_proxy
 validation_helper:
-  - path: proxy_validation.py
+  - path: proxy_validation.lua

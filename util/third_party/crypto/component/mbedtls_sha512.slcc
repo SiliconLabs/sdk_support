@@ -21,6 +21,8 @@ requires:
   - name: mbedtls_core
 template_contribution:
   - name: mbedtls_config
+    value: MBEDTLS_SHA384_C
+  - name: mbedtls_config
     value: MBEDTLS_SHA512_C
 documentation:
   docset: mbed-tls

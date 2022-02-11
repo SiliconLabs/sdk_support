@@ -51,8 +51,6 @@ bool sl_mac_check_additional_pending_data(PacketHeader header);
 // should be troubled with a transmit complete callback).
 void sl_mac_indirect_transmit_complete(uint8_t mac_index, sl_status_t status, PacketHeader packet, uint8_t tag);
 
-// A timer is required to timeout messages in the queue.
-extern EmberEventControl sl_mac_indirect_event;
 void sl_mac_indirect_event_handler(void);
 
 // Called every emberTick() to check if anyone has polled.
@@ -60,5 +58,6 @@ void sl_mac_indirect_check_poll_flags(void);
 
 // Drop all messages currently waiting to be transmitted for the network indicated.
 void sl_mac_indirect_purge(uint8_t nwk_index);
+void sli_mac_transient_table_init(void* p_fn);
 
 #endif // INDIRECT_QUEUE_H

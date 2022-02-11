@@ -12,11 +12,11 @@ source:
 include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:
-      - path: mbedtls/arc4.h
-      - path: mbedtls/blowfish.h
       - path: mbedtls/camellia.h
       - path: mbedtls/cipher.h
-      - path: mbedtls/cipher_internal.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: cipher_wrap.h
 provides:
   - name: mbedtls_cipher
 requires:

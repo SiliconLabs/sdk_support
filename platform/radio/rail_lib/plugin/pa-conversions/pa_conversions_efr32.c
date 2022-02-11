@@ -33,9 +33,10 @@
 
 #include "em_device.h"
 #include "em_cmu.h"
-#include "em_common.h"
 #include "pa_conversions_efr32.h"
 #include "rail.h"
+
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
 
 static RAIL_TxPowerCurvesConfigAlt_t powerCurvesState;
 
@@ -44,12 +45,14 @@ static RAIL_TxPowerCurvesConfigAlt_t powerCurvesState;
 #else
   #define PA_CONVERSION_MINIMUM_PWRLVL 0
 #endif
+/* For details on how to use this plugin, see
+   https://www.silabs.com/documents/public/application-notes/an1127-power-amplifier-power-conversion-functions.pdf
 
-// This macro is defined when Silicon Labs builds this into the library as WEAK
-// to ensure it can be overriden by customer versions of these functions. It
-// should *not* be defined in a customer build.
+   This macro is defined when Silicon Labs builds this into the library as WEAK
+   to ensure it can be overriden by customer versions of these functions. The macro
+   should *not* be defined in a customer build. */
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 const RAIL_TxPowerCurves_t *RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode)
 {
@@ -84,7 +87,7 @@ const RAIL_TxPowerCurves_t *RAIL_GetTxPowerCurve(RAIL_TxPowerMode_t mode)
 
 // This function will not be supported for any parts after efr32xg1x
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config)
 {
@@ -148,7 +151,7 @@ RAIL_Status_t RAIL_InitTxPowerCurves(const RAIL_TxPowerCurvesConfig_t *config)
 }
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *config)
 {
@@ -160,14 +163,14 @@ RAIL_Status_t RAIL_InitTxPowerCurvesAlt(const RAIL_TxPowerCurvesConfigAlt_t *con
 }
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
                                          RAIL_TxPowerMode_t mode,
                                          RAIL_TxPower_t power)
 {
   uint32_t powerLevel;
-  int16_t powerIndex = 0;
+  uint32_t powerIndex = 0U;
   uint32_t minPowerLevel;
 
   (void)railHandle;
@@ -193,22 +196,29 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   }
 
   RAIL_PaDescriptor_t const *modeInfo = &powerCurvesState.curves[mode];
-  minPowerLevel = SL_MAX(modeInfo->min, PA_CONVERSION_MINIMUM_PWRLVL);
+  minPowerLevel = MAX(modeInfo->min, PA_CONVERSION_MINIMUM_PWRLVL);
 
   // If we're in low power mode, just use the simple lookup table
   if (modeInfo->algorithm == RAIL_PA_ALGORITHM_MAPPING_TABLE) {
-    // Loop through the lookup table to find the closest power level
+    // Binary search through the lookup table to find the closest power level
     // without going over.
-    for (powerIndex = (int16_t)(modeInfo->max - minPowerLevel);
-         (powerIndex != 0) && (power < modeInfo->conversion.mappingTable[powerIndex]);
-         powerIndex--) {
-      // Searching...
+    uint32_t lower = 0U;
+    // Track the high side of the estimate
+    powerIndex = modeInfo->max - minPowerLevel;
+
+    while (lower < powerIndex) {
+      // Calculate the midpoint of the current range
+      uint32_t index = powerIndex - (powerIndex - lower) / 2U;
+      if (power < modeInfo->conversion.mappingTable[index]) {
+        powerIndex = index - 1U;
+      } else {
+        lower = index;
+      }
     }
     return powerIndex + minPowerLevel;
   }
 
   // Here we know we're using the piecewise linear conversion
-  RAIL_TxPowerCurveSegment_t const *powerParams;
   RAIL_TxPowerCurveAlt_t const *paParams = modeInfo->conversion.powerCurve;
 
   // Check for valid paParams before using them
@@ -242,19 +252,20 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
   //using values different than the default - RAIL_TX_POWER_CURVE_DEFAULT_MAX
   // and RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT.
   if ((paParams->powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
-    powerIndex += 1;
+    powerIndex += 1U;
     txPowerMax = paParams->powerParams[0].slope;
     txPowerIncrement = paParams->powerParams[0].intercept;
   }
 
   powerIndex += ((txPowerMax - power) / txPowerIncrement);
-  if (powerIndex > (int16_t)(modeInfo->segments - 1U)) {
-    powerIndex = (int16_t)(modeInfo->segments - 1U);
+  if (powerIndex > (modeInfo->segments - 1U)) {
+    powerIndex = (modeInfo->segments - 1U);
   }
 
   do {
     // Select the correct piecewise segment to use for conversion.
-    powerParams = &paParams->powerParams[powerIndex];
+    RAIL_TxPowerCurveSegment_t const *powerParams =
+      &paParams->powerParams[powerIndex];
 
     // powerLevel can only go down to 0.
     if (powerParams->intercept + powerParams->slope * power < 0) {
@@ -269,12 +280,12 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
     // In case it turns out the resultant power level was too low and we have
     // to recalculate with the next curve...
     powerIndex++;
-  } while ((powerIndex < (int16_t)modeInfo->segments)
+  } while ((powerIndex < modeInfo->segments)
            && (powerLevel <= paParams->powerParams[powerIndex].maxPowerLevel));
 
   // We already know that powerIndex is at most modeInfo->segments
-  if (powerLevel > paParams->powerParams[powerIndex - 1].maxPowerLevel) {
-    powerLevel = paParams->powerParams[powerIndex - 1].maxPowerLevel;
+  if (powerLevel > paParams->powerParams[powerIndex - 1U].maxPowerLevel) {
+    powerLevel = paParams->powerParams[powerIndex - 1U].maxPowerLevel;
   }
 
   // If we go below the minimum we want included in the curve fit, force it.
@@ -286,7 +297,7 @@ RAIL_TxPowerLevel_t RAIL_ConvertDbmToRaw(RAIL_Handle_t railHandle,
 }
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
                                     RAIL_TxPowerMode_t mode,
@@ -308,7 +319,7 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     }
 
     // We 1-index low power PA power levels, but of course arrays are 0 indexed
-    powerLevel -= SL_MAX(modeInfo->min, PA_CONVERSION_MINIMUM_PWRLVL);
+    powerLevel -= MAX(modeInfo->min, PA_CONVERSION_MINIMUM_PWRLVL);
 
     //If the index calculation above underflowed, then provide the lowest array index.
     if (powerLevel > (modeInfo->max - modeInfo->min)) {
@@ -326,8 +337,6 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
       return -500;
     }
 #endif
-
-    int32_t power;
 
     RAIL_TxPowerCurveAlt_t const *powerCurve = modeInfo->conversion.powerCurve;
     // Check for a valid powerCurve pointer before using it
@@ -352,7 +361,7 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     }
 
     // Figure out which parameter to use based on the power level
-    uint8_t x;
+    uint8_t x = 0;
     uint8_t upperBound = modeInfo->segments - 1U;
 
     // If the first curve segment starts with RAIL_TX_POWER_LEVEL_INVALID,
@@ -362,15 +371,15 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
     // values other than default - RAIL_TX_POWER_CURVE_DEFAULT_MAX and
     // RAIL_TX_POWER_CURVE_DEFAULT_INCREMENT.
     if ((powerParams[0].maxPowerLevel) == RAIL_TX_POWER_LEVEL_INVALID) {
-      upperBound -= 1U;
+      x = 1U; // skip over the first entry
     }
 
-    for (x = 0; x < upperBound; x++) {
+    for (; x < upperBound; x++) {
       if (powerParams[x + 1U].maxPowerLevel < powerLevel) {
         break;
       }
     }
-
+    int32_t power;
     power = ((1000 * (int32_t)(powerLevel)) - powerParams[x].intercept);
     power = ((power + (powerParams[x].slope / 2)) / powerParams[x].slope);
 
@@ -385,7 +394,7 @@ RAIL_TxPower_t RAIL_ConvertRawToDbm(RAIL_Handle_t railHandle,
 }
 
 #ifdef RAIL_PA_CONVERSIONS_WEAK
-SL_WEAK
+__WEAK
 #endif
 RAIL_Status_t RAIL_GetTxPowerCurveLimits(RAIL_Handle_t railHandle,
                                          RAIL_TxPowerMode_t mode,
@@ -431,23 +440,35 @@ void sl_rail_util_pa_init(void)
 #endif
 }
 
+#if RAIL_SUPPORTS_2P4GHZ_BAND
 static RAIL_TxPowerConfig_t txPowerConfig2p4Ghz = {
   .mode = SL_RAIL_UTIL_PA_SELECTION_2P4GHZ,
   .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
   .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };
+#endif
+RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void)
+{
+#if RAIL_SUPPORTS_2P4GHZ_BAND
+  return &txPowerConfig2p4Ghz;
+#else
+  return NULL;
+#endif
+}
+#if RAIL_SUPPORTS_SUBGHZ_BAND
 static RAIL_TxPowerConfig_t txPowerConfigSubGhz = {
   .mode = SL_RAIL_UTIL_PA_SELECTION_SUBGHZ,
   .voltage = SL_RAIL_UTIL_PA_VOLTAGE_MV,
   .rampTime = SL_RAIL_UTIL_PA_RAMP_TIME_US,
 };
-RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_2p4ghz(void)
-{
-  return &txPowerConfig2p4Ghz;
-}
+#endif
 RAIL_TxPowerConfig_t *sl_rail_util_pa_get_tx_power_config_subghz(void)
 {
+#if RAIL_SUPPORTS_SUBGHZ_BAND
   return &txPowerConfigSubGhz;
+#else
+  return NULL;
+#endif
 }
 
 void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
@@ -466,13 +487,21 @@ void sl_rail_util_pa_on_channel_config_change(RAIL_Handle_t rail_handle,
       } // Error: Can't get TX Power Config
     }
 
+#if RAIL_SUPPORTS_DUAL_BAND
     // Determine new TX Power Config.
     if (entry->baseFrequency < 1000000000UL) {
       newTxPowerConfigPtr = &txPowerConfigSubGhz;
     } else {
       newTxPowerConfigPtr = &txPowerConfig2p4Ghz;
     }
-
+#else
+    (void) entry;
+#if RAIL_SUPPORTS_2P4GHZ_BAND
+    newTxPowerConfigPtr = &txPowerConfig2p4Ghz;
+#else
+    newTxPowerConfigPtr = &txPowerConfigSubGhz;
+#endif
+#endif
     // Call RAIL_ConfigTxPower only if TX Power Config mode has changed.
     if (currentTxPowerConfig.mode != newTxPowerConfigPtr->mode) {
       // Save current TX power before RAIL_ConfigTxPower (because not preserved).

@@ -67,12 +67,12 @@ typedef struct {
 
 typedef struct {
   psa_algorithm_t alg;
-  sl_se_command_context_t cmd_ctx;
   sl_se_key_descriptor_t key_desc;
   size_t ad_len;
   size_t pt_len;
   union {
-    sl_se_gcm_streaming_context_t gcm;
+    sl_se_gcm_multipart_context_t gcm;
+    sl_se_ccm_multipart_context_t ccm;
     sli_se_driver_aead_preinit_t preinit;
   } ctx;
 } sli_se_driver_aead_operation_t;
@@ -164,13 +164,9 @@ psa_status_t sli_se_driver_aead_set_nonce(sli_se_driver_aead_operation_t *operat
                                           const uint8_t *nonce,
                                           size_t nonce_size);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *operation,
                                             size_t ad_length,
                                             size_t plaintext_length);
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operation,
                                           uint8_t *key_buffer,
@@ -194,8 +190,6 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                        size_t tag_size,
                                        size_t *tag_length);
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation,
                                        uint8_t *key_buffer,
                                        uint8_t *plaintext,
@@ -203,8 +197,6 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                        size_t *plaintext_length,
                                        const uint8_t *tag,
                                        size_t tag_length);
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // SEMAILBOX_PRESENT
 

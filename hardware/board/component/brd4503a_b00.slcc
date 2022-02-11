@@ -17,6 +17,11 @@
 - recommends:
   - id: brd4001a
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4503A"'
+  - name: SL_BOARD_REV
+    value: '"B00"'
 - tag:
   - board:pn:BRD4503
   - board:variant:A

@@ -63,9 +63,9 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
   (void)additional_data_length;
 #endif // PSA_WANT_ALG_GCM
 
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       // verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
         return PSA_ERROR_NOT_SUPPORTED;
@@ -87,7 +87,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
       break;
 #endif // PSA_WANT_ALG_CCM
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       // AD are limited to 2^64 bits, so 2^61 bytes.
       // We need not check if SIZE_MAX (max of size_t) is less than 2^61 (0x2000000000000000)
 #if SIZE_MAX > 0x2000000000000000ull
@@ -125,7 +125,7 @@ static psa_status_t check_aead_parameters(const psa_key_attributes_t *attributes
 #endif // PSA_WANT_ALG_GCM
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 #if defined(PSA_WANT_ALG_CHACHA20_POLY1305)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CHACHA20_POLY1305, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 0):
       // verify key type
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_CHACHA20
           || psa_get_key_bits(attributes) != 256) {
@@ -531,9 +531,9 @@ psa_status_t sli_se_driver_aead_encrypt_tag(const psa_key_attributes_t *attribut
   }
 
   psa_status = PSA_ERROR_BAD_STATE;
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
 
       status = sl_se_ccm_encrypt_and_tag(&cmd_ctx,
                                          &key_desc,
@@ -555,7 +555,7 @@ psa_status_t sli_se_driver_aead_encrypt_tag(const psa_key_attributes_t *attribut
 #endif // PSA_WANT_ALG_CCM
 
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (nonce_length == 12) {
         status = sl_se_gcm_crypt_and_tag(&cmd_ctx,
                                          &key_desc,
@@ -598,7 +598,7 @@ psa_status_t sli_se_driver_aead_encrypt_tag(const psa_key_attributes_t *attribut
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 #if defined(PSA_WANT_ALG_CHACHA20_POLY1305)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CHACHA20_POLY1305, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 0):
     {
       #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
       // EFR32xG21 doesn't support the special case where both the message
@@ -738,9 +738,9 @@ psa_status_t sli_se_driver_aead_decrypt_tag(const psa_key_attributes_t *attribut
   }
 
   psa_status = PSA_ERROR_BAD_STATE;
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
 #if defined(PSA_WANT_ALG_CCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
 
       status = sl_se_ccm_auth_decrypt(&cmd_ctx,
                                       &key_desc,
@@ -765,7 +765,7 @@ psa_status_t sli_se_driver_aead_decrypt_tag(const psa_key_attributes_t *attribut
 #endif // PSA_WANT_ALG_CCM
 
 #if defined(PSA_WANT_ALG_GCM)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
       if (nonce_length == 12) {
         status = sl_se_gcm_auth_decrypt(&cmd_ctx,
                                         &key_desc,
@@ -813,7 +813,7 @@ psa_status_t sli_se_driver_aead_decrypt_tag(const psa_key_attributes_t *attribut
 
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 #if defined(PSA_WANT_ALG_CHACHA20_POLY1305)
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_CHACHA20_POLY1305, 0):
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CHACHA20_POLY1305, 0):
 
       #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_1)
       // EFR32xG21 doesn't support the special case where both the message
@@ -907,8 +907,11 @@ psa_status_t sli_se_driver_aead_encrypt_decrypt_setup(sli_se_driver_aead_operati
   memset(operation, 0, sizeof(*operation));
 
   // Validate operation
-  switch (PSA_ALG_AEAD_WITH_TAG_LENGTH(alg, 0)) {
-    case PSA_ALG_AEAD_WITH_TAG_LENGTH(PSA_ALG_GCM, 0):
+  switch (PSA_ALG_AEAD_WITH_SHORTENED_TAG(alg, 0)) {
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_GCM, 0):
+      operation->alg = alg;
+      break;
+    case PSA_ALG_AEAD_WITH_SHORTENED_TAG(PSA_ALG_CCM, 0):
       operation->alg = alg;
       break;
     default:
@@ -1073,18 +1076,15 @@ psa_status_t sli_se_driver_aead_set_nonce(sli_se_driver_aead_operation_t *operat
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM || PSA_WANT_ALG_CHACHA20_POLY1305
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *operation,
                                             size_t ad_length,
                                             size_t plaintext_length)
 {
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
 
-  // TODO: when implementing AES-CCM, this will need to be fleshed out
   if (operation == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
@@ -1097,8 +1097,6 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
   if (operation->ad_len != 0 || operation->pt_len != 0) {
     return PSA_ERROR_BAD_STATE;
   }
-
-  // TODO: when full suite is implemented, add checks for already-begun operation
 
   operation->ctx.preinit.ad_length = ad_length;
   operation->ctx.preinit.pt_length = plaintext_length;
@@ -1115,67 +1113,77 @@ psa_status_t sli_se_driver_aead_set_lengths(sli_se_driver_aead_operation_t *oper
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM || PSA_WANT_ALG_CHACHA20_POLY1305
 }
 
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
-
-static void update_context_pointers(sli_se_driver_aead_operation_t *operation,
-                                    uint8_t *key_buffer)
-{
-  if (operation == NULL) {
-    return;
-  }
-
-  // Update key buffer pointer in stored key_desc
-  if (key_buffer != NULL) {
-    operation->key_desc.storage.location.buffer.pointer = key_buffer;
-  }
-
-  // If we have started an operation, we need to update the GCM context pointers
-  if (operation->ad_len != 0 || operation->pt_len != 0) {
-    operation->ctx.gcm.cmd_ctx = &(operation->cmd_ctx);
-    operation->ctx.gcm.key = &(operation->key_desc);
-  }
-}
 
 static psa_status_t aead_start(sli_se_driver_aead_operation_t *operation,
                                const uint8_t *input,
                                size_t input_length)
 {
   // Ephemeral contexts
+#if defined(PSA_WANT_ALG_GCM) \
+  || (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2))
   sli_se_driver_aead_preinit_t preinit = operation->ctx.preinit;
+#endif
 
-  sl_status_t status = sl_se_init_command_context(&operation->cmd_ctx);
+  sl_se_command_context_t cmd_ctx = { 0 };
+
+  sl_status_t status = sl_se_init_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
 
-  switch (operation->alg) {
+#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+  uint8_t tag_length = PSA_ALG_AEAD_GET_TAG_LENGTH(operation->alg);
+#endif//PSA_WANT_ALG_CCM
+
+  psa_algorithm_t alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(operation->alg);
+
+  switch (alg) {
+#if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_GCM:
-      status = sl_se_gcm_starts(&operation->ctx.gcm,
-                                &operation->cmd_ctx,
-                                &operation->key_desc,
-                                preinit.direction,
-                                preinit.nonce,
-                                preinit.nonce_length,
-                                input,
-                                input_length);
+      status = sl_se_gcm_multipart_starts(&operation->ctx.gcm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          preinit.direction,
+                                          preinit.nonce,
+                                          preinit.nonce_length,
+                                          input,
+                                          input_length);
       if (status != SL_STATUS_OK) {
         return PSA_ERROR_HARDWARE_FAILURE;
       }
 
       operation->ad_len += input_length;
-      break;
+      return PSA_SUCCESS;
+#endif//PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+    case PSA_ALG_CCM:
+      status = sl_se_ccm_multipart_starts(&operation->ctx.ccm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          preinit.direction,
+                                          preinit.pt_length,
+                                          preinit.nonce,
+                                          preinit.nonce_length,
+                                          input,
+                                          input_length,
+                                          tag_length);
+
+      if (status != SL_STATUS_OK) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+      operation->ad_len += input_length;
+      return PSA_SUCCESS;
+#endif //PSA_WANT_ALG_CCM
     default:
+      (void) input;
+      (void) input_length;
       return PSA_ERROR_NOT_SUPPORTED;
   }
-
-  return PSA_SUCCESS;
 }
-
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM || PSA_WANT_ALG_CHACHA20_POLY1305
 
 psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operation,
@@ -1183,9 +1191,9 @@ psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operat
                                           const uint8_t *input,
                                           size_t input_length)
 {
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
 
   if (operation == NULL
@@ -1206,9 +1214,6 @@ psa_status_t sli_se_driver_aead_update_ad(sli_se_driver_aead_operation_t *operat
   if (input_length == 0) {
     return PSA_SUCCESS;
   }
-
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
 
   return aead_start(operation, input, input_length);
 
@@ -1232,10 +1237,20 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
                                        size_t output_size,
                                        size_t *output_length)
 {
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
+
+  (void)key_buffer;
+  sl_status_t status;
+
+  sl_se_command_context_t cmd_ctx = { 0 };
+
+  status = sl_se_init_command_context(&cmd_ctx);
+  if (status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
 
   if (operation == NULL
       || ((input == NULL || output == NULL) && input_length > 0)
@@ -1253,8 +1268,7 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
     return PSA_SUCCESS;
   }
 
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
+  psa_algorithm_t alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(operation->alg);
 
   psa_status_t psa_status;
 
@@ -1267,25 +1281,43 @@ psa_status_t sli_se_driver_aead_update(sli_se_driver_aead_operation_t *operation
     }
   }
 
-  switch (operation->alg) {
+  switch (alg) {
 #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_GCM:
     {
-      sl_status_t status = sl_se_gcm_update(&operation->ctx.gcm,
-                                            input_length,
-                                            input,
-                                            output);
+      status = sl_se_gcm_multipart_update(&operation->ctx.gcm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          input_length,
+                                          input,
+                                          output,
+                                          output_length);
       if (status != SL_STATUS_OK) {
         return PSA_ERROR_HARDWARE_FAILURE;
-      } else {
-        psa_status = PSA_SUCCESS;
       }
-
+      psa_status = PSA_SUCCESS;
       operation->pt_len += input_length;
-      *output_length = input_length;
       break;
     }
 #endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+    case PSA_ALG_CCM:
+    {
+      status = sl_se_ccm_multipart_update(&operation->ctx.ccm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          input_length,
+                                          input,
+                                          output,
+                                          output_length);
+      if (status != SL_STATUS_OK) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+      psa_status = PSA_SUCCESS;
+      operation->pt_len += input_length;
+      break;
+    }
+#endif //PSA_WANT_ALG_CCM
     default:
       psa_status = PSA_ERROR_NOT_SUPPORTED;
       break;
@@ -1317,19 +1349,32 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
                                        size_t tag_size,
                                        size_t *tag_length)
 {
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
 
   (void)ciphertext;
   (void)ciphertext_size;
+  (void)key_buffer;
 
   sl_status_t status;
   psa_status_t psa_status;
 
-  if (operation == NULL
-      || ciphertext_length == NULL
+  sl_se_command_context_t cmd_ctx = { 0 };
+
+  status = sl_se_init_command_context(&cmd_ctx);
+  if (status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  psa_algorithm_t alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(operation->alg);
+
+  if (ciphertext_length == NULL
       || tag == NULL
       || tag_length == NULL) {
     psa_status = PSA_ERROR_INVALID_ARGUMENT;
@@ -1341,9 +1386,6 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
     goto exit;
   }
 
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
-
   // Operation isn't initialised unless we have either AD or PT, so  if we are
   // still at 0, we need to run the start step.
   if (operation->ad_len == 0 && operation->pt_len == 0) {
@@ -1353,21 +1395,50 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
     }
   }
 
-  switch (operation->alg) {
+  switch (alg) {
 #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_GCM:
-      status = sl_se_gcm_finish(&operation->ctx.gcm,
-                                tag,
-                                (tag_size > 16 ? 16 : tag_size));
+      if (operation->ctx.gcm.mode != SL_SE_ENCRYPT) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      status = sl_se_gcm_multipart_finish(&operation->ctx.gcm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          tag,
+                                          tag_size,
+                                          ciphertext,
+                                          ciphertext_size,
+                                          (uint8_t *)ciphertext_length);
       if (status != SL_STATUS_OK) {
         psa_status = PSA_ERROR_HARDWARE_FAILURE;
         break;
       }
-
-      *tag_length = (tag_size > 16 ? 16 : tag_size);
+      *tag_length = tag_size;
       psa_status = PSA_SUCCESS;
       break;
 #endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+    case PSA_ALG_CCM:
+      if (operation->ctx.ccm.mode != SL_SE_ENCRYPT) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      status = sl_se_ccm_multipart_finish(&operation->ctx.ccm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          tag,
+                                          tag_size,
+                                          ciphertext,
+                                          ciphertext_size,
+                                          (uint8_t *)ciphertext_length);
+
+      if (status != SL_STATUS_OK) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+      *tag_length = operation->ctx.ccm.tag_len;
+      psa_status = PSA_SUCCESS;
+      break;
+
+#endif // PSA_WANT_ALG_CCM
     default:
       (void)tag_size;
       psa_status = PSA_ERROR_NOT_SUPPORTED;
@@ -1375,10 +1446,8 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
   }
 
   exit:
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
 
-  status = sl_se_deinit_command_context(&operation->cmd_ctx);
+  status = sl_se_deinit_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -1401,8 +1470,6 @@ psa_status_t sli_se_driver_aead_finish(sli_se_driver_aead_operation_t *operation
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM || PSA_WANT_ALG_CHACHA20_POLY1305
 }
 
-#if defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
-
 psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation,
                                        uint8_t *key_buffer,
                                        uint8_t *plaintext,
@@ -1411,19 +1478,32 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
                                        const uint8_t *tag,
                                        size_t tag_length)
 {
-#if defined(PSA_WANT_ALG_CCM)                 \
-  || defined(PSA_WANT_ALG_GCM)                \
-  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305) \
+#if (defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)) \
+  || defined(PSA_WANT_ALG_GCM)                                             \
+  || (defined(PSA_WANT_ALG_CHACHA20_POLY1305)                              \
   && (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT))
 
   (void)plaintext;
   (void)plaintext_size;
+  (void)key_buffer;
 
   sl_status_t status;
   psa_status_t psa_status;
 
-  if (operation == NULL
-      || plaintext_length == NULL
+  sl_se_command_context_t cmd_ctx = { 0 };
+
+  status = sl_se_init_command_context(&cmd_ctx);
+  if (status != SL_STATUS_OK) {
+    return PSA_ERROR_HARDWARE_FAILURE;
+  }
+
+  if (operation == NULL) {
+    return PSA_ERROR_INVALID_ARGUMENT;
+  }
+
+  psa_algorithm_t alg = PSA_ALG_AEAD_WITH_DEFAULT_LENGTH_TAG(operation->alg);
+
+  if (plaintext_length == NULL
       || tag == NULL
       || tag_length == 0) {
     psa_status = PSA_ERROR_INVALID_ARGUMENT;
@@ -1435,9 +1515,6 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
     goto exit;
   }
 
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
-
   // Operation isn't initialised unless we have either AD or PT, so  if we are
   // still at 0, we need to run the start step.
   if (operation->ad_len == 0 && operation->pt_len == 0) {
@@ -1447,12 +1524,20 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
     }
   }
 
-  switch (operation->alg) {
+  switch (alg) {
 #if defined(PSA_WANT_ALG_GCM)
     case PSA_ALG_GCM:
-      status = sl_se_gcm_finish(&operation->ctx.gcm,
-                                (uint8_t *)tag,
-                                (tag_length > 16 ? 16 : tag_length));
+      if (operation->ctx.gcm.mode != SL_SE_DECRYPT) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      status = sl_se_gcm_multipart_finish(&operation->ctx.gcm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          (uint8_t *)tag,
+                                          tag_length,
+                                          plaintext,
+                                          plaintext_size,
+                                          (uint8_t *)plaintext_length);
       if (status == SL_STATUS_INVALID_SIGNATURE) {
         psa_status = PSA_ERROR_INVALID_SIGNATURE;
         goto exit;
@@ -1460,20 +1545,39 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
         psa_status = PSA_ERROR_HARDWARE_FAILURE;
         goto exit;
       }
+      psa_status = PSA_SUCCESS;
       break;
 #endif // PSA_WANT_ALG_GCM
+#if defined(PSA_WANT_ALG_CCM) && (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+    case PSA_ALG_CCM:
+      if (operation->ctx.ccm.mode != SL_SE_DECRYPT) {
+        return PSA_ERROR_INVALID_ARGUMENT;
+      }
+      status = sl_se_ccm_multipart_finish(&operation->ctx.ccm,
+                                          &cmd_ctx,
+                                          &operation->key_desc,
+                                          (uint8_t *)tag,
+                                          tag_length,
+                                          plaintext,
+                                          plaintext_size,
+                                          (uint8_t *)plaintext_length);
+
+      if (status == SL_STATUS_INVALID_SIGNATURE) {
+        return PSA_ERROR_INVALID_SIGNATURE;
+      } else if (status != SL_STATUS_OK) {
+        return PSA_ERROR_HARDWARE_FAILURE;
+      }
+      psa_status = PSA_SUCCESS;
+      break;
+#endif //PSA_WANT_ALG_CCM
     default:
       psa_status = PSA_ERROR_NOT_SUPPORTED;
       goto exit;
   }
 
-  psa_status = PSA_SUCCESS;
-
   exit:
-  // Refresh internal pointers in operation context before use
-  update_context_pointers(operation, key_buffer);
 
-  status = sl_se_deinit_command_context(&operation->cmd_ctx);
+  status = sl_se_deinit_command_context(&cmd_ctx);
   if (status != SL_STATUS_OK) {
     return PSA_ERROR_HARDWARE_FAILURE;
   }
@@ -1494,7 +1598,5 @@ psa_status_t sli_se_driver_aead_verify(sli_se_driver_aead_operation_t *operation
 
 #endif // PSA_WANT_ALG_CCM || PSA_WANT_ALG_GCM || PSA_WANT_ALG_CHACHA20_POLY1305
 }
-
-#endif // defined(PSA_CRYPTO_AEAD_MULTIPART_SUPPORTED)
 
 #endif // defined(SEMAILBOX_PRESENT)

@@ -149,7 +149,7 @@ sl_status_t sl_wfx_set_roam_parameters(uint8_t rcpi_threshold,
                                        const uint8_t *channel_list,
                                        uint8_t channel_list_count);
 
-sl_status_t sl_wfx_set_tx_rate_parameters(sl_wfx_rate_set_bitmask_t rate_set_bitmask);
+sl_status_t sl_wfx_set_tx_rate_parameters(sl_wfx_rate_set_bitmask_t rate_set_bitmask, uint8_t use_minstrel);
 
 sl_status_t sl_wfx_set_max_tx_power(int32_t max_tx_power, sl_wfx_interface_t interface);
 

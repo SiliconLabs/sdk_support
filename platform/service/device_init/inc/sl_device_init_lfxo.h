@@ -45,6 +45,10 @@
  * option `SL_DEVICE_INIT_LFXO_PRECISION`. This is used by certain wireless
  * stacks to optimize wakeup time for scheduled events (such as Bluetooth
  * advertising).
+ *
+ * If using Simplicity Studio, this configuration header is also configurable
+ * through the Project Configurator by selecting the "Device Init: LFXO"
+ * configuration component.
  * @{
  */
 

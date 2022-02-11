@@ -10,6 +10,11 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_dk
+- define:
+  - name: SL_KIT_NAME
+    value: '"EFM32WG-DK3850"'
+  - name: SL_KIT_REV
+    value: '"A02"'
 - tag:
   - kit:opn:EFM32WG-DK3850
   - kit:pn:DK3850

@@ -8,6 +8,7 @@ description: "802.15.4 MAC Layer"
 provides:
   - name: "unified_mac"
 requires:
+  - name: "legacy_hal"
   - name: "silabs_core_buffer_manager"
 
 include:
@@ -23,7 +24,7 @@ source:
   - path: "platform/radio/mac/mac-flat-header.c"
   - path: "platform/radio/mac/mac-header.c"
   - path: "platform/radio/mac/mac-packet-header.c"
-  - path: "platform/radio/mac/multi-network.c"
+  - path: "platform/radio/mac/mac-multi-network.c"
   - path: "platform/radio/mac/scan.c"
   - path: "platform/radio/mac/upper-mac.c"
 

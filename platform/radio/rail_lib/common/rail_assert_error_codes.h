@@ -35,6 +35,10 @@
 
 #include "rail_types.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @addtogroup Assertions
  * @{
@@ -78,7 +82,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING = 30,
   RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG = 31,
   RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH = 32,
-  RAIL_ASSERT_FAILED_RFINIT = 33,
+  RAIL_ASSERT_FAILED_RESERVED33 = 33,
   RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX = 34,
   RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX = 35,
   RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX = 36,
@@ -111,6 +115,11 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
   RAIL_ASSERT_INVALID_PA_OPERATION = 63,
   RAIL_ASSERT_SEQ_INVALID_PA_SELECTED = 64,
   RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG = 65,
+  RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH = 66,
+  RAIL_ASSERT_FAILED_EM1P_ENTRY = 67,
+  RAIL_ASSERT_FAILED_EM1P_EXIT = 68,
+  RAIL_ASSERT_FAILED_RTCC_SYNC_STOP = 69,
+  RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT = 70,
 };
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -148,7 +157,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_SCHED_TIMER_NOT_RUNNING)
 #define RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_CONFIG)
 #define RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SWITCH)
-#define RAIL_ASSERT_FAILED_RFINIT                              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RFINIT)
+#define RAIL_ASSERT_FAILED_RESERVED33                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RESERVED33)
 #define RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX            ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_NO_ACTIVE_HANDLE_SCHEDRX)
 #define RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_HANDLE_SCHEDTX)
 #define RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX             ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INACTIVE_HANDLE_SCHEDTX)
@@ -181,6 +190,11 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
 #define RAIL_ASSERT_INVALID_PA_OPERATION                       ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_PA_OPERATION)
 #define RAIL_ASSERT_SEQ_INVALID_PA_SELECTED                    ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_SEQ_INVALID_PA_SELECTED)
 #define RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG              ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_INVALID_CHANNEL_CONFIG)
+#define RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH               ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_INVALID_DYNAMIC_FRAME_LENGTH)
+#define RAIL_ASSERT_FAILED_EM1P_ENTRY                          ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_ENTRY)
+#define RAIL_ASSERT_FAILED_EM1P_EXIT                           ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_EM1P_EXIT)
+#define RAIL_ASSERT_FAILED_RTCC_SYNC_STOP                      ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_RTCC_SYNC_STOP)
+#define RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT                  ((RAIL_AssertErrorCodes_t) RAIL_ASSERT_FAILED_MULTITIMER_CORRUPT)
 #endif//DOXYGEN_SHOULD_SKIP_THIS
 
 /// Use this define to create an array of error messages that map to the codes
@@ -241,7 +255,7 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*30*/ "Scheduled timer not running",                                              \
     /*31*/ "API improperly called while protocol inactive",                            \
     /*32*/ "No active handle after switch",                                            \
-    /*33*/ "RfInit failed to configure active state",                                  \
+    /*33*/ "Reserved for future use",                                                  \
     /*34*/ "No active handle for scheduled rx",                                        \
     /*35*/ "Invalid handle for scheduled tx",                                          \
     /*36*/ "Inactive handle for scheduled tx",                                         \
@@ -274,10 +288,19 @@ RAIL_ENUM_GENERIC(RAIL_AssertErrorCodes_t, uint32_t)
     /*63*/ "The current PA config does not allow for this operation",                  \
     /*64*/ "The sequencer selected an invalid PA",                                     \
     /*65*/ "Invalid/unsupported channel config",                                       \
+    /*66*/ "The dynamic frame length configuration is invalid",                        \
+    /*67*/ "Failed to enable EM1P energy mode",                                        \
+    /*68*/ "Failed to disable EM1P energy mode",                                       \
+    /*69*/ "Failed to disable RTCC synchronization",                                   \
+    /*70*/ "Multitimer linked list corrupted",                                         \
 }
 
 /**
  * @}
  */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // __RAIL_ASSERT_ERROR_CODES_H__

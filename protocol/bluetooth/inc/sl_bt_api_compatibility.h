@@ -63,19 +63,18 @@ typedef enum
 
 
 /*
- * Deprecated and replaced by sl_bt_advertiser_connectable_mode_t.
+ * Deprecated and replaced by sl_bt_advertiser_connection_mode_t.
  */
 typedef enum
 {
   advertiser_non_connectable           = 0x0,
-  advertiser_directed_connectable      = 0x1,
   advertiser_connectable_scannable     = 0x2,
   advertiser_scannable_non_connectable = 0x3,
   advertiser_connectable_non_scannable = 0x4
-} advertiser_connectable_mode_t;
+} advertiser_connection_mode_t;
 
 /*
- * Deprecated and replaced by sl_bt_advertiser_discoverable_mode_t.
+ * Deprecated and replaced by sl_bt_advertiser_discovery_mode_t.
  */
 typedef enum
 {
@@ -84,7 +83,7 @@ typedef enum
   advertiser_general_discoverable = 0x2,
   advertiser_broadcast            = 0x3,
   advertiser_user_data            = 0x4
-} advertiser_discoverable_mode_t;
+} advertiser_discovery_mode_t;
 
 /*
  * Deprecated and replaced by sl_bt_advertiser_adv_address_type_t.
@@ -96,6 +95,65 @@ typedef enum
 } advertiser_adv_address_type_t;
 
 /*
+ * Deprecated and replaced by sl_bt_advertiser_packet_type_t.
+ */
+typedef enum
+{
+  advertiser_advertising_data_packet = 0x0,
+  advertiser_scan_response_packet    = 0x1
+} advertiser_packet_type_t;
+
+/*
+ * Deprecated ADVERTISER_* defines replaced by SL_BT_ADVERTISER_*.
+ */
+#define ADVERTISER_USE_NONRESOLVABLE_ADDRESS      0x4       
+#define ADVERTISER_USE_DEVICE_IDENTITY_IN_PRIVACY 0x10      
+
+
+/*
+ * Deprecated and replaced by sl_bt_legacy_advertiser_connection_mode_t.
+ */
+typedef enum
+{
+  legacy_advertiser_non_connectable = 0x0,
+  legacy_advertiser_connectable     = 0x2,
+  legacy_advertiser_scannable       = 0x3
+} legacy_advertiser_connection_mode_t;
+
+/*
+ * Deprecated and replaced by sl_bt_legacy_advertiser_directed_connection_mode_t.
+ */
+typedef enum
+{
+  legacy_advertiser_high_duty_directed_connectable = 0x1,
+  legacy_advertiser_low_duty_directed_connectable  = 0x5
+} legacy_advertiser_directed_connection_mode_t;
+
+/*
+ * Deprecated and replaced by sl_bt_extended_advertiser_connection_mode_t.
+ */
+typedef enum
+{
+  extended_advertiser_non_connectable = 0x0,
+  extended_advertiser_scannable       = 0x3,
+  extended_advertiser_connectable     = 0x4
+} extended_advertiser_connection_mode_t;
+
+/*
+ * Deprecated EXTENDED_ADVERTISER_* defines replaced by SL_BT_EXTENDED_ADVERTISER_*.
+ */
+#define EXTENDED_ADVERTISER_ANONYMOUS_ADVERTISING 0x1       
+#define EXTENDED_ADVERTISER_INCLUDE_TX_POWER      0x2       
+
+
+/*
+ * Deprecated PERIODIC_ADVERTISER_* defines replaced by SL_BT_PERIODIC_ADVERTISER_*.
+ */
+#define PERIODIC_ADVERTISER_INCLUDE_TX_POWER                0x1       
+#define PERIODIC_ADVERTISER_AUTO_START_EXTENDED_ADVERTISING 0x2       
+
+
+/*
  * Deprecated and replaced by sl_bt_scanner_discover_mode_t.
  */
 typedef enum
@@ -104,6 +162,15 @@ typedef enum
   scanner_discover_generic     = 0x1,
   scanner_discover_observation = 0x2
 } scanner_discover_mode_t;
+
+/*
+ * Deprecated and replaced by sl_bt_sync_reporting_mode_t.
+ */
+typedef enum
+{
+  sync_report_none = 0x0,
+  sync_report_all  = 0x1
+} sync_reporting_mode_t;
 
 /*
  * Deprecated and replaced by sl_bt_sync_advertiser_clock_accuracy_t.
@@ -145,6 +212,7 @@ typedef enum
  */
 typedef enum
 {
+  connection_tx_power_flag_none  = 0x0,
   connection_tx_power_at_minimum = 0x1,
   connection_tx_power_at_maximum = 0x2
 } connection_tx_power_flag_t;
@@ -313,6 +381,23 @@ typedef enum
 } sm_bonding_key_t;
 
 /*
+ * Deprecated and replaced by sl_bt_sm_bonding_data_t.
+ */
+typedef enum
+{
+  sm_bonding_data_remote_address       = 0x0,
+  sm_bonding_data_remote_ltk           = 0x1,
+  sm_bonding_data_local_ltk            = 0x2,
+  sm_bonding_data_remote_master_inf    = 0x3,
+  sm_bonding_data_local_master_inf     = 0x4,
+  sm_bonding_data_irk                  = 0x5,
+  sm_bonding_data_meta                 = 0x6,
+  sm_bonding_data_gatt_client_config   = 0x7,
+  sm_bonding_data_gatt_client_features = 0x8,
+  sm_bonding_data_gatt_db_hash         = 0x9
+} sm_bonding_data_t;
+
+/*
  * Deprecated and replaced by sl_bt_sm_io_capability_t.
  */
 typedef enum
@@ -370,16 +455,6 @@ typedef enum
   l2cap_connection_request    = 0x14,
   l2cap_flow_control_credit   = 0x16
 } l2cap_command_code_t;
-
-/*
- * Deprecated MEMORY_PROFILER_* defines replaced by SL_BT_MEMORY_PROFILER_*.
- */
-#define MEMORY_PROFILER_ERROR_TOO_MANY_TRACKERS         0x1       
-#define MEMORY_PROFILER_ERROR_TOO_MANY_LIVE_ALLOCATIONS 0x2       
-
-#define MEMORY_PROFILER_RESET_ERROR_FLAGS               0x1       
-#define MEMORY_PROFILER_RESET_ALLOC_FAILURES            0x2       
-
 /*
  * Deprecated and replaced by sl_bt_gap_phy_type_t.
  */

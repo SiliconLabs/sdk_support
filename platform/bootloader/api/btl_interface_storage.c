@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Application interface to the storage plugin of the bootloader.
+ * @brief Application interface to the storage component of the bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this

@@ -130,11 +130,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
   // Argument check
   if (key_buffer == NULL
       || key_buffer_size == 0
-      || input == NULL
-      || input_length == 0
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (input == NULL && input_length > 0)
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -149,7 +147,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
     case PSA_ALG_CBC_PKCS7:
 #endif /* MBEDTLS_PSA_CRYPTO_C */
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_NOT_SUPPORTED;
       }
       if (key_buffer_size < (psa_get_key_bits(attributes) / 8)
           || !(psa_get_key_bits(attributes) == 128
@@ -160,6 +158,12 @@ psa_status_t sli_cryptoacc_transparent_cipher_encrypt(const psa_key_attributes_t
       break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // 0-length encrypt/decrypt is allowed according to the unit tests in PSA
+  if (input_length == 0) {
+    *output_length = 0;
+    return PSA_SUCCESS;
   }
 
   // Our drivers only support full or no overlap between input and output
@@ -614,11 +618,9 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
   // Argument check
   if (key_buffer == NULL
       || key_buffer_size == 0
-      || input == NULL
-      || input_length == 0
-      || output == NULL
-      || output_length == NULL
-      || output_size == 0) {
+      || (input == NULL && input_length > 0)
+      || (output == NULL && output_size > 0)
+      || output_length == NULL) {
     return PSA_ERROR_INVALID_ARGUMENT;
   }
 
@@ -631,7 +633,7 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
     case PSA_ALG_CBC_NO_PADDING:
     case PSA_ALG_CBC_PKCS7:
       if (psa_get_key_type(attributes) != PSA_KEY_TYPE_AES) {
-        return PSA_ERROR_INVALID_ARGUMENT;
+        return PSA_ERROR_NOT_SUPPORTED;
       }
       if (key_buffer_size < (psa_get_key_bits(attributes) / 8)
           || !(psa_get_key_bits(attributes) == 128
@@ -642,6 +644,12 @@ psa_status_t sli_cryptoacc_transparent_cipher_decrypt(const psa_key_attributes_t
       break;
     default:
       return PSA_ERROR_NOT_SUPPORTED;
+  }
+
+  // 0-length encrypt/decrypt is allowed according to the unit tests in PSA
+  if (input_length == 0) {
+    *output_length = 0;
+    return PSA_SUCCESS;
   }
 
   // Our drivers only support full or no overlap between input and output
@@ -1314,12 +1322,14 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
 
     // We know we'll be computing at least the completed streaming block
     size_t output_blocks = 1;
-    // plus however many full blocks are left over after filling the stream buffer
-    output_blocks += (input_length - bytes_to_boundary) / 16;
-    // If we're caching and the sum of already-input and to-be-input data
-    // ends up at a block boundary, we won't be outputting the last block
-    if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
-      output_blocks -= 1;
+    if (input_length > bytes_to_boundary) {
+      // plus however many full blocks are left over after filling the stream buffer
+      output_blocks += (input_length - bytes_to_boundary) / 16;
+      // If we're caching and the sum of already-input and to-be-input data
+      // ends up at a block boundary, we won't be outputting the last block
+      if (cache_full_block && ((input_length - bytes_to_boundary) % 16 == 0)) {
+        output_blocks -= 1;
+      }
     }
 
     if (output_size < (output_blocks * 16)) {
@@ -1529,6 +1539,35 @@ psa_status_t sli_cryptoacc_transparent_cipher_update(sli_cryptoacc_transparent_c
       }
     }
   }
+#if defined(PSA_WANT_ALG_CBC_PKCS7)
+  else if (cache_full_block && operation->processed_length > 0) {
+    // We know there's processing to be done, and that we haven't processed
+    // the full block in the streaming buffer yet. Process it now.
+    data_in = block_t_convert(operation->streaming_block, 16);
+    data_out = block_t_convert(operation->streaming_block, 16);
+
+    status = cryptoacc_management_acquire();
+    if (status != PSA_SUCCESS) {
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
+
+    sx_ret = sx_aes_cbc_decrypt_update((const block_t*)&key,
+                                       (const block_t*)&data_in,
+                                       &data_out,
+                                       (const block_t*)&iv_block,
+                                       &iv_block);
+
+    status = cryptoacc_management_release();
+    if (sx_ret != CRYPTOLIB_SUCCESS
+        || status != PSA_SUCCESS) {
+      return PSA_ERROR_HARDWARE_FAILURE;
+    }
+
+    memcpy(output, operation->streaming_block, 16);
+    output += 16;
+    actual_output_length += 16;
+  }
+#endif
 
   // Do multi-block operation if applicable.
   if (input_length >= 16) {

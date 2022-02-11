@@ -26,6 +26,7 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
   - id: simple_led
     instance:
     - led0
@@ -33,13 +34,20 @@
     instance:
     - btn0
   - id: mx25_flash_shutdown_usart
+  - id: bootloader_spi_controller_usart_driver
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4183C"'
+  - name: SL_BOARD_REV
+    value: '"A01"'
 - tag:
   - board:pn:BRD4183
   - board:variant:C
-  - board:revision:A00
+  - board:revision:A01
   - board:device:efr32mg22c224f512im32
   - hardware:has:vcom
   - hardware:has:pti

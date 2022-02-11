@@ -83,5 +83,20 @@ requires:
   - name: "psa_its"
     condition:
       - "device_series_2"
+  - name: "psa_crypto_hmac"
+    condition:
+      - "device_series_2"
+  - name: "psa_crypto_sha256"
+    condition:
+      - "device_series_2"
+  - name: "psa_crypto_sha1"
+    condition:
+      - "device_series_2"
+  - name: "mbedtls_hash"
+    condition:
+      - "device_series_1"
+  - name: "mbedtls_sha1"
+    condition:
+      - "device_series_1"
 provides:
   - name: "btmesh_crypto"

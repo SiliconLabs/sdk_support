@@ -346,8 +346,6 @@ typedef enum IRQn{
 #define GPIO_EM4WU9_PIN                                   2U            /**< Pin of EM4WU9.*/
 #define GPIO_THMSW_EN_PORT                                GPIO_PC_INDEX /**< Port of THMSW_EN.*/
 #define GPIO_THMSW_EN_PIN                                 0U            /**< Pin of THMSW_EN.*/
-#define IADC0_VREFN_PORT                                  GPIO_PB_INDEX /**< Port of VREFN.*/
-#define IADC0_VREFN_PIN                                   0U            /**< Pin of VREFN.*/
 #define IADC0_VREFP_PORT                                  GPIO_PA_INDEX /**< Port of VREFP.*/
 #define IADC0_VREFP_PIN                                   0U            /**< Pin of VREFP.*/
 #define LFXO_LFXTAL_I_PORT                                GPIO_PD_INDEX /**< Port of LFXTAL_I.*/
@@ -1037,6 +1035,7 @@ typedef enum IRQn{
 #define RDMEM_FRC_RAM_BWE_WIDTH                 0x27UL    /**> FRCRAM BWE width */
 #define RDMEM_FRC_RAM_DATA_WIDTH                0x27UL    /**> FRC_RAM_DATA_WIDTH */
 #define RDMEM_FRC_RAM_ECC_EN                    0x1UL     /**> FRC RAM ECCEN */
+#define RDMEM_FRC_RAM_TOTAL_SIZE                0x1000UL  /**> FRC_RAM_TOTAL_SIZE */
 #define RDMEM_SEQ_BANK0_SIZE                    0x2000UL  /**> SEQ_RAM_BANK0_SIZE */
 #define RDMEM_SEQ_BANK1_SIZE                    0x2000UL  /**> SEQ_RAM_BANK1_SIZE */
 #define RDMEM_SEQ_BANK2_SIZE                    0x0UL     /**> SEQ_RAM_BANK2_SIZE */
@@ -1052,6 +1051,7 @@ typedef enum IRQn{
 #define RDMEM_SEQ_RAM_BWE_WIDTH                 0x27UL    /**> SEQRAM BWE width */
 #define RDMEM_SEQ_RAM_DATA_WIDTH                0x27UL    /**> SEQ_RAM_DATA_WIDTH */
 #define RDMEM_SEQ_RAM_ECC_EN                    0x1UL     /**> SEQ RAM ECCEN */
+#define RDMEM_SEQ_RAM_TOTAL_SIZE                0x4000UL  /**> SEQ_RAM_TOTAL_SIZE */
 #define PRORTC_CC_NUM                           0x2UL     /**> None */
 #define FRC_DEMOD_FILT_WIDTH                    0x13UL    /**> New Param */
 #define FRC_FCD_NUM                             0x4UL     /**> None */
@@ -1061,7 +1061,7 @@ typedef enum IRQn{
 #define AGC_POWER_WIDTH                         0xCUL     /**> New Param */
 #define MODEM_ADDR_WIDTH                        0xBUL     /**> New Param */
 #define MODEM_AMPLITUDE_WIDTH                   0x14UL    /**> New Param */
-#define MODEM_ANT_NUM                           0x1UL     /**> Antenna Number */
+#define MODEM_ANT_NUM                           0x2UL     /**> Antenna Number */
 #define MODEM_DEC0_SIZE                         0xFUL     /**> New Param */
 #define MODEM_DEMOD_RAM_WIDTH                   0xAUL     /**> New Param */
 #define MODEM_DEMOD_WIDTH                       0x8UL     /**> New Param */

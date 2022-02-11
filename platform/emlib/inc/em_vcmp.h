@@ -118,7 +118,7 @@ typedef struct {
     false,             /** Rising edge sense not enabled. */                 \
     vcmpWarmTime4Cycles, /** 4 clock cycles warm-up time. */                 \
     vcmpHystNone,      /** No hysteresis. */                                 \
-    0,                 /** 0 in digital ouput when inactive. */              \
+    0,                 /** 0 in digital output when inactive. */             \
     true,              /** Do not use low power reference. */                \
     39,                /** Trigger level just below 3V. */                   \
     true,              /** Enable after initialization. */                   \
@@ -170,7 +170,7 @@ __STATIC_INLINE uint32_t VCMP_VoltageToLevel(float v)
 
 /***************************************************************************//**
  * @brief
- *   Check if VDD is lower than trigger level.
+ *   Check whether VDD is lower than the trigger level.
  *
  * @return
  *   True if Voltage Comparator indicated VDD < trigger level, else
@@ -187,7 +187,7 @@ __STATIC_INLINE bool VCMP_VDDLower(void)
 
 /***************************************************************************//**
  * @brief
- *   Check if VDD is higher than trigger level.
+ *   Check whether VDD is higher than the trigger level.
  *
  * @return
  *   True if Voltage Comparator indicated VDD > trigger level, else
@@ -204,7 +204,7 @@ __STATIC_INLINE bool VCMP_VDDHigher(void)
 
 /***************************************************************************//**
  * @brief
- *    Check if VCMP output is ready.
+ *    Check whether the VCMP output is ready.
  *
  * @return
  *   True if VCMP output is ready.

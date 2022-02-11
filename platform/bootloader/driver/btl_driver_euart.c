@@ -4,7 +4,7 @@
  *        driver for the Silicon Labs Bootloader.
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -17,68 +17,59 @@
  ******************************************************************************/
 #include "config/btl_config.h"
 
-#if (BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUART0)  \
-  || (BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART0) \
-  || (BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART1) \
-  || (BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART2)
-
-#include "btl_driver_uart.h"
+#include "btl_serial_driver.h"
 #include "btl_driver_delay.h"
 #include "api/btl_interface.h"
 #include "btl_driver_util.h"
 
+#include "em_device.h"
 #include "em_cmu.h"
 #include "em_eusart.h"
 #include "em_gpio.h"
 #include "em_ldma.h"
 
-#include "plugin/debug/btl_debug.h"
+#include "debug/btl_debug.h"
+#ifdef BTL_CONFIG_FILE
+#include BTL_CONFIG_FILE
+#else
+#include "btl_euart_driver_cfg.h"
+#endif
 
-#if (BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUART0 || BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART0)// TODO: update the define name
-#if defined(EUART0)
-#define GPIO_EUSART                            GPIO->EUARTROUTE
-#define BTL_DRIVER_EUSART                      EUART0
-#define BTL_DRIVER_EUSART_CLOCK                cmuClock_EUART0
-#define BTL_DRIVER_EUSART_LDMA_TXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUART0TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUART0)
-#define BTL_DRIVER_EUSART_LDMA_RXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUART0)
-#elif defined(EUSART0)
-#define GPIO_EUSART                            GPIO->EUSARTROUTE[0]
-#define BTL_DRIVER_EUSART                      EUSART0
-#define BTL_DRIVER_EUSART_CLOCK                cmuClock_EUSART0
-#define BTL_DRIVER_EUSART_LDMA_TXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0)
-#define BTL_DRIVER_EUSART_LDMA_RXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0)
-#endif // LDMAXBAR_CH_REQSEL_SIGSEL_EUART0TXFL
-#elif BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART1
-#define GPIO_EUSART                            GPIO->EUSARTROUTE[1]
-#define BTL_DRIVER_EUSART                      EUSART1
-#define BTL_DRIVER_EUSART_CLOCK                cmuClock_EUSART1
-#define BTL_DRIVER_EUSART_LDMA_TXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1)
-#define BTL_DRIVER_EUSART_LDMA_RXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1)
-#elif BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUSART2
-#define GPIO_EUSART                            GPIO->EUSARTROUTE[2]
-#define BTL_DRIVER_EUSART                      EUSART2
-#define BTL_DRIVER_EUSART_CLOCK                cmuClock_EUSART2
-#define BTL_DRIVER_EUSART_LDMA_TXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2)
-#define BTL_DRIVER_EUSART_LDMA_RXFL_SIGNAL     (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2)
-#endif // BSP_SERIAL_APP_PORT == HAL_SERIAL_PORT_EUART0
-
-#define BTL_DRIVER_EUSART_LDMA_RX_CHANNEL     0
-#define BTL_DRIVER_EUSART_LDMA_TX_CHANNEL     1
+#define SL_DRIVER_EUSART_LDMA_RX_CHANNEL     0
+#define SL_DRIVER_EUSART_LDMA_TX_CHANNEL     1
 
 // ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
 // Configuration validation
-#if HAL_SERIAL_APP_BAUD_RATE < 100
-#warning "UART baud rate is very low, consider increasing speed"
+#if SL_SERIAL_EUART_BAUD_RATE < 100
+#warning "EUART baud rate is very low, consider increasing speed"
 #endif
-#if BTL_DRIVER_UART_RX_BUFFER_SIZE < 8
-#error "UART RX buffer too small"
+#if SL_DRIVER_EUART_RX_BUFFER_SIZE < 8
+#error "EUART RX buffer too small"
 #endif
-#if BTL_DRIVER_UART_TX_BUFFER_SIZE < 8
-#error "UART TX buffer too small"
+#if SL_DRIVER_EUART_TX_BUFFER_SIZE < 8
+#error "EUART TX buffer too small"
 #endif
-#if (BTL_DRIVER_UART_RX_BUFFER_SIZE % 2) != 0
-#error "UART RX buffer size is not even"
+#if (SL_DRIVER_EUART_RX_BUFFER_SIZE % 2) != 0
+#error "EUART RX buffer size is not even"
 #endif
+
+// A btl_euart_drv driver instance initialization structure contains peripheral name
+// of the euart, euart instance number and cmu_clock_type.
+typedef struct {
+  EUSART_TypeDef            *port;             // The peripheral used for EUART
+  uint8_t                    uartNum;          // EUART instance number.
+  CMU_Clock_TypeDef          euartClock;       // Clock source for the euart peripheral
+} btl_euart_drv;
+
+btl_euart_drv sl_uart_init_inst = {
+  .port       = SL_SERIAL_EUART_PERIPHERAL,
+  .uartNum    = SL_SERIAL_EUART_PERIPHERAL_NO,
+#if defined(EUART0)
+  .euartClock = cmuClock_EUART0,
+#else
+  .euartClock = cmuClock_EUSART0,
+#endif
+};
 
 // ‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐‐
 // Static variables
@@ -87,9 +78,9 @@
 static bool    initialized = false;
 /// Receive buffer (forced to even size).
 /// LDMA will pingpong between two halves of this buffer.
-static uint8_t rxBuffer[BTL_DRIVER_UART_RX_BUFFER_SIZE];
+static uint8_t rxBuffer[SL_DRIVER_EUART_RX_BUFFER_SIZE];
 /// Transmit buffer for LDMA use.
-static uint8_t txBuffer[BTL_DRIVER_UART_TX_BUFFER_SIZE];
+static uint8_t txBuffer[SL_DRIVER_EUART_TX_BUFFER_SIZE];
 /// Amount of bytes in the current transmit operation
 static size_t  txLength;
 
@@ -97,27 +88,24 @@ static size_t  txLength;
 static size_t  rxHead;
 
 /// LDMA channel configuration triggering on free space in UART transmit FIFO
-static const LDMA_TransferCfg_t ldmaTxTransfer = LDMA_TRANSFER_CFG_PERIPHERAL(
-  BTL_DRIVER_EUSART_LDMA_TXFL_SIGNAL
-  );
+static LDMA_TransferCfg_t ldmaTxTransfer = LDMA_TRANSFER_CFG_PERIPHERAL(0);
+
 /// LDMA channel configuration triggering on available byte in UART receive FIFO
-static const LDMA_TransferCfg_t ldmaRxTransfer = LDMA_TRANSFER_CFG_PERIPHERAL(
-  BTL_DRIVER_EUSART_LDMA_RXFL_SIGNAL
-  );
+static LDMA_TransferCfg_t ldmaRxTransfer = LDMA_TRANSFER_CFG_PERIPHERAL(0);
 
 /// LDMA transfer for copying transmit buffer to UART TX FIFO
 static LDMA_Descriptor_t ldmaTxDesc = LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(
   txBuffer,
-  &(BTL_DRIVER_EUSART->TXDATA),
+  NULL,
   0
   );
 
-static const LDMA_Descriptor_t ldmaRxDesc[4] = {
+static LDMA_Descriptor_t ldmaRxDesc[4] = {
   /// First half of receive pingpong configuration
   LDMA_DESCRIPTOR_LINKREL_P2M_BYTE(
-    &(BTL_DRIVER_EUSART->RXDATA),
+    NULL,
     &(rxBuffer[0]),
-    BTL_DRIVER_UART_RX_BUFFER_SIZE / 2,
+    SL_DRIVER_EUART_RX_BUFFER_SIZE / 2,
     1
     ),
   // Sync structure waiting for SYNC[1], clearing SYNC[0]
@@ -130,9 +118,9 @@ static const LDMA_Descriptor_t ldmaRxDesc[4] = {
     ),
   /// Second half of receive pingpong configuration
   LDMA_DESCRIPTOR_LINKREL_P2M_BYTE(
-    &(BTL_DRIVER_EUSART->RXDATA),
-    &(rxBuffer[BTL_DRIVER_UART_RX_BUFFER_SIZE / 2]),
-    BTL_DRIVER_UART_RX_BUFFER_SIZE / 2,
+    NULL,
+    &(rxBuffer[SL_DRIVER_EUART_RX_BUFFER_SIZE / 2]),
+    SL_DRIVER_EUART_RX_BUFFER_SIZE / 2,
     1
     ),
   /// Sync structure waiting for SYNC[0], clearing SYNC[1]
@@ -153,15 +141,39 @@ static const LDMA_Descriptor_t ldmaRxDesc[4] = {
  */
 void uart_init(void)
 {
-  CMU_ClockEnable(BTL_DRIVER_EUSART_CLOCK, true);
+#if defined(EUART0) && (SL_SERIAL_EUART_PERIPHERAL_NO == 0)
+  sl_uart_init_inst.euartClock = cmuClock_EUART0;
+  ldmaTxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUART0TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUART0);
+  ldmaRxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUART0);
+#elif defined(EUSART0)  && (SL_SERIAL_EUART_PERIPHERAL_NO == 0)
+  sl_uart_init_inst.euartClock = cmuClock_EUSART0;
+  ldmaTxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0);
+  ldmaRxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART0RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART0);
+#elif defined(EUSART1) && (SL_SERIAL_EUART_PERIPHERAL_NO == 1)
+  sl_uart_init_inst.euartClock = cmuClock_EUSART1;
+  ldmaTxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1);
+  ldmaRxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART1RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART1);
+#elif defined(EUSART2) && (SL_SERIAL_EUART_PERIPHERAL_NO == 2)
+  sl_uart_init_inst.euartClock = cmuClock_EUSART2;
+  ldmaTxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2TXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2);
+  ldmaRxTransfer.ldmaReqSel = (LDMAXBAR_CH_REQSEL_SIGSEL_EUSART2RXFL | LDMAXBAR_CH_REQSEL_SOURCESEL_EUSART2);
+#endif
+
+  ldmaTxDesc.xfer.dstAddr = (uint32_t)&(sl_uart_init_inst.port->TXDATA);
+
+  ldmaRxDesc[0].xfer.srcAddr = (uint32_t)&(sl_uart_init_inst.port->RXDATA);
+
+  ldmaRxDesc[2].xfer.srcAddr = (uint32_t)&(sl_uart_init_inst.port->RXDATA);
+
+  CMU_ClockEnable(sl_uart_init_inst.euartClock, true);
   CMU_ClockEnable(cmuClock_GPIO, true);
 
   // Select HF clock as clock input source
 #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_2)
-  CMU_ClockSelectSet(BTL_DRIVER_EUSART_CLOCK, cmuSelect_EM01GRPACLK);
+  CMU_ClockSelectSet(sl_uart_init_inst.euartClock, cmuSelect_EM01GRPACLK);
 #elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_3) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
   CMU_ClockSelectSet(cmuClock_EM01GRPCCLK, cmuSelect_HFRCODPLL);
-  if (BTL_DRIVER_EUSART_CLOCK == cmuClock_EUSART0) {
+  if (sl_uart_init_inst.euartClock == cmuClock_EUSART0) {
     CMU_ClockSelectSet(cmuClock_EUSART0CLK, cmuSelect_EM01GRPCCLK);
   }
 #endif
@@ -170,78 +182,78 @@ void uart_init(void)
   init.enable = eusartDisable;
 
   // Configure CTS/RTS in case of flow control
-#if (HAL_SERIAL_APP_FLOW_CONTROL == HAL_USART_FLOW_CONTROL_HW)      \
-  || (HAL_SERIAL_APP_FLOW_CONTROL == HAL_USART_FLOW_CONTROL_HWUART) \
-  || (HAL_SERIAL_APP_FLOW_CONTROL == HAL_UART_FLOW_CONTROL_HW)      \
-  || (HAL_SERIAL_APP_FLOW_CONTROL == HAL_UART_FLOW_CONTROL_HWUART)
-  GPIO_PinModeSet(BSP_SERIAL_APP_RTS_PORT,
-                  BSP_SERIAL_APP_RTS_PIN,
+#if (SL_SERIAL_EUART_FLOW_CONTROL == 1)
+
+  GPIO_PinModeSet(SL_SERIAL_EUART_RTS_PORT,
+                  SL_SERIAL_EUART_RTS_PIN,
                   gpioModePushPull,
                   1);
-  GPIO_PinModeSet(BSP_SERIAL_APP_CTS_PORT,
-                  BSP_SERIAL_APP_CTS_PIN,
+  GPIO_PinModeSet(SL_SERIAL_EUART_CTS_PORT,
+                  SL_SERIAL_EUART_CTS_PIN,
                   gpioModeInput,
                   1);
 
   // Advansed init to configure CTS and RTS
   EUSART_AdvancedInit_TypeDef advancedInit = EUSART_ADVANCED_INIT_DEFAULT;
-  advancedInit.hwFlowControl = eusartHwFlowControlCtsAndRts;
+  advancedInit.hwFlowControl = 1;
   init.advancedSettings = &advancedInit;
 
-#if defined(_GPIO_EUART_CTSROUTE_PORT_SHIFT)
-  GPIO_EUSART->CTSROUTE =
-    (BSP_SERIAL_APP_CTS_PORT << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
-    | (BSP_SERIAL_APP_CTS_PIN << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
-  GPIO_EUSART->RTSROUTE =
-    (BSP_SERIAL_APP_RTS_PORT << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
-    | (BSP_SERIAL_APP_RTS_PIN << _GPIO_EUART_RTSROUTE_PIN_SHIFT);
-#else
-  GPIO_EUSART->CTSROUTE =
-    (BSP_SERIAL_APP_CTS_PORT << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
-    | (BSP_SERIAL_APP_CTS_PIN << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
-  GPIO_EUSART->RTSROUTE =
-    (BSP_SERIAL_APP_RTS_PORT << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
-    | (BSP_SERIAL_APP_RTS_PIN << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
+#if defined(EUART_PRESENT)
+  GPIO->EUARTROUTE_SET->ROUTEEN = GPIO_EUART_ROUTEEN_RTSPEN;
+  GPIO->EUARTROUTE_SET[0].RTSROUTE =
+    (SL_SERIAL_EUART_RTS_PORT << _GPIO_EUART_RTSROUTE_PORT_SHIFT)
+    | (SL_SERIAL_EUART_RTS_PIN << _GPIO_EUART_RTSROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE_SET[0].CTSROUTE =
+    (SL_SERIAL_EUART_CTS_PORT << _GPIO_EUART_CTSROUTE_PORT_SHIFT)
+    | (SL_SERIAL_EUART_CTS_PIN << _GPIO_EUART_CTSROUTE_PIN_SHIFT);
+#elif defined(EUSART_PRESENT)
+  GPIO->EUSARTROUTE_SET[sl_uart_init_inst.uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_RTSPEN;
+  GPIO->EUSARTROUTE_SET[sl_uart_init_inst.uartNum].RTSROUTE =
+    (SL_SERIAL_EUART_RTS_PORT << _GPIO_EUSART_RTSROUTE_PORT_SHIFT)
+    | (SL_SERIAL_EUART_RTS_PIN << _GPIO_EUSART_RTSROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE_SET[sl_uart_init_inst.uartNum].CTSROUTE =
+    (SL_SERIAL_EUART_CTS_PORT << _GPIO_EUSART_CTSROUTE_PORT_SHIFT)
+    | (SL_SERIAL_EUART_CTS_PIN << _GPIO_EUSART_CTSROUTE_PIN_SHIFT);
 #endif
 #endif
   init.refFreq = util_getClockFreq() / (1U + ((CMU->SYSCLKCTRL & _CMU_SYSCLKCTRL_PCLKPRESC_MASK)
                                               >> _CMU_SYSCLKCTRL_PCLKPRESC_SHIFT));
-  init.baudrate = HAL_SERIAL_APP_BAUD_RATE;
-  EUSART_UartInitHf(BTL_DRIVER_EUSART, &init);
+  init.baudrate = SL_SERIAL_EUART_BAUD_RATE;
+  EUSART_UartInitHf(sl_uart_init_inst.port, &init);
 
-  GPIO_PinModeSet(BSP_SERIAL_APP_TX_PORT,
-                  BSP_SERIAL_APP_TX_PIN,
+  GPIO_PinModeSet(SL_SERIAL_EUART_TX_PORT,
+                  SL_SERIAL_EUART_TX_PIN,
                   gpioModePushPull,
                   1);
-  GPIO_PinModeSet(BSP_SERIAL_APP_RX_PORT,
-                  BSP_SERIAL_APP_RX_PIN,
+  GPIO_PinModeSet(SL_SERIAL_EUART_RX_PORT,
+                  SL_SERIAL_EUART_RX_PIN,
                   gpioModeInput,
                   1);
-#if defined(GPIO_EUART_ROUTEEN_TXPEN)
-  GPIO_EUSART->ROUTEEN = GPIO_EUART_ROUTEEN_TXPEN;
-  GPIO_EUSART->TXROUTE = 0
-                         | (BSP_SERIAL_APP_TX_PORT << _GPIO_EUART_TXROUTE_PORT_SHIFT)
-                         | (BSP_SERIAL_APP_TX_PIN << _GPIO_EUART_TXROUTE_PIN_SHIFT);
-  GPIO_EUSART->RXROUTE = 0
-                         | (BSP_SERIAL_APP_RX_PORT << _GPIO_EUART_RXROUTE_PORT_SHIFT)
-                         | (BSP_SERIAL_APP_RX_PIN << _GPIO_EUART_RXROUTE_PIN_SHIFT);
-#else
-  GPIO_EUSART.ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN;
-  GPIO_EUSART.TXROUTE = 0
-                        | (BSP_SERIAL_APP_TX_PORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
-                        | (BSP_SERIAL_APP_TX_PIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
-  GPIO_EUSART.RXROUTE = 0
-                        | (BSP_SERIAL_APP_RX_PORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
-                        | (BSP_SERIAL_APP_RX_PIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+#if defined(EUART_COUNT) && (EUART_COUNT > 0)
+  GPIO->EUARTROUTE->ROUTEEN = GPIO_EUART_ROUTEEN_TXPEN;
+  GPIO->EUARTROUTE->TXROUTE = (SL_SERIAL_EUART_TX_PORT
+                               << _GPIO_EUART_TXROUTE_PORT_SHIFT)
+                              | (SL_SERIAL_EUART_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  GPIO->EUARTROUTE->RXROUTE = (SL_SERIAL_EUART_RX_PORT
+                               << _GPIO_EUART_RXROUTE_PORT_SHIFT)
+                              | (SL_SERIAL_EUART_RX_PIN << _GPIO_EUART_RXROUTE_PIN_SHIFT);
+#elif defined(EUSART_COUNT) && (EUSART_COUNT > 0)
+  GPIO->EUSARTROUTE[sl_uart_init_inst.uartNum].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN;
+  GPIO->EUSARTROUTE[sl_uart_init_inst.uartNum].TXROUTE = (SL_SERIAL_EUART_TX_PORT
+                                                          << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                                         | (SL_SERIAL_EUART_TX_PIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[sl_uart_init_inst.uartNum].RXROUTE = (SL_SERIAL_EUART_RX_PORT
+                                                          << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                                         | (SL_SERIAL_EUART_RX_PIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
 #endif
 
-#if (HAL_VCOM_ENABLE == 1) && defined(BSP_VCOM_ENABLE_PORT)
-  GPIO_PinModeSet(BSP_VCOM_ENABLE_PORT,
-                  BSP_VCOM_ENABLE_PIN,
+#if (SL_VCOM_ENABLE == 1) && defined(SL_VCOM_ENABLE_PORT)
+  GPIO_PinModeSet(SL_VCOM_ENABLE_PORT,
+                  SL_VCOM_ENABLE_PIN,
                   gpioModePushPull,
                   1);
 #endif
-  EUSART_Enable(BTL_DRIVER_EUSART, eusartEnable);
+  EUSART_Enable(sl_uart_init_inst.port, eusartEnable);
 
   // Configure LDMA
   CMU->CLKEN0_SET = (CMU_CLKEN0_LDMA | CMU_CLKEN0_LDMAXBAR);
@@ -254,33 +266,33 @@ void uart_init(void)
   LDMA->IEN = _LDMA_IEN_RESETVALUE;
 
   // Set up channel 0 as RX transfer
-  LDMAXBAR->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].REQSEL = ldmaRxTransfer.ldmaReqSel;
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].LOOP
+  LDMAXBAR->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].REQSEL = ldmaRxTransfer.ldmaReqSel;
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].LOOP
     = (ldmaRxTransfer.ldmaLoopCnt << _LDMA_CH_LOOP_LOOPCNT_SHIFT);
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].CFG
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].CFG
     = (ldmaRxTransfer.ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
       | (ldmaRxTransfer.ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
       | (ldmaRxTransfer.ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT);
 
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].LINK
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].LINK
     = (uint32_t)(&ldmaRxDesc[0]) & _LDMA_CH_LINK_LINKADDR_MASK;
 
   // Set up channel 1 as TX transfer
-  LDMAXBAR->CH[BTL_DRIVER_EUSART_LDMA_TX_CHANNEL].REQSEL = ldmaTxTransfer.ldmaReqSel;
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_TX_CHANNEL].LOOP
+  LDMAXBAR->CH[SL_DRIVER_EUSART_LDMA_TX_CHANNEL].REQSEL = ldmaTxTransfer.ldmaReqSel;
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_TX_CHANNEL].LOOP
     = (ldmaTxTransfer.ldmaLoopCnt << _LDMA_CH_LOOP_LOOPCNT_SHIFT);
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_TX_CHANNEL].CFG
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_TX_CHANNEL].CFG
     = (ldmaTxTransfer.ldmaCfgArbSlots << _LDMA_CH_CFG_ARBSLOTS_SHIFT)
       | (ldmaTxTransfer.ldmaCfgSrcIncSign << _LDMA_CH_CFG_SRCINCSIGN_SHIFT)
       | (ldmaTxTransfer.ldmaCfgDstIncSign << _LDMA_CH_CFG_DSTINCSIGN_SHIFT);
 
   // Clear DONE flag on both RX and TX channels
   BUS_RegMaskedClear(&LDMA->CHDONE,
-                     ((1 << BTL_DRIVER_EUSART_LDMA_RX_CHANNEL)
-                      | (1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL)));
+                     ((1 << SL_DRIVER_EUSART_LDMA_RX_CHANNEL)
+                      | (1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL)));
 
   // Kick off background RX
-  LDMA->LINKLOAD = (1 << BTL_DRIVER_EUSART_LDMA_RX_CHANNEL);
+  LDMA->LINKLOAD = (1 << SL_DRIVER_EUSART_LDMA_RX_CHANNEL);
 
   // Mark second half of RX buffer as ready
   LDMA->SYNCSWSET_SET = (1UL << 1);
@@ -318,8 +330,8 @@ int32_t uart_sendBuffer(uint8_t* buffer, size_t length, bool blocking)
   BTL_ASSERT(initialized == true);
   BTL_ASSERT(length > 0);
 
-  if (length >= BTL_DRIVER_UART_TX_BUFFER_SIZE) {
-    return BOOTLOADER_ERROR_SPISLAVE_ARGUMENT;
+  if (length >= SL_DRIVER_EUART_TX_BUFFER_SIZE) {
+    return BOOTLOADER_ERROR_SPI_PERIPHERAL_ARGUMENT;
   }
 
   if (!uart_isTxIdle()) {
@@ -337,16 +349,16 @@ int32_t uart_sendBuffer(uint8_t* buffer, size_t length, bool blocking)
   ldmaTxDesc.xfer.xferCnt = txLength - 1;
 
   // Kick off transfer
-  LDMA->CH[BTL_DRIVER_EUSART_LDMA_TX_CHANNEL].LINK
+  LDMA->CH[SL_DRIVER_EUSART_LDMA_TX_CHANNEL].LINK
     = (uint32_t)(&ldmaTxDesc) & _LDMA_CH_LINK_LINKADDR_MASK;
-  LDMA->LINKLOAD = (1UL << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL);
+  LDMA->LINKLOAD = (1UL << SL_DRIVER_EUSART_LDMA_TX_CHANNEL);
 
   // Optional wait for completion
   if (blocking) {
     while (uart_isTxIdle() == false) {
       // Do nothing
     }
-    while (!(BTL_DRIVER_EUSART->STATUS & EUSART_STATUS_TXC)) {
+    while (!(sl_uart_init_inst.port->STATUS & EUSART_STATUS_TXC)) {
       // Do nothing
     }
   }
@@ -371,15 +383,15 @@ int32_t uart_sendByte(uint8_t byte)
   }
 
   // Wait until there is room for one more byte
-  while (!(BTL_DRIVER_EUSART->STATUS & EUSART_STATUS_TXFL)) {
+  while (!(sl_uart_init_inst.port->STATUS & EUSART_STATUS_TXFL)) {
     // Do nothing
   }
 
   // Send byte
-  BTL_DRIVER_EUSART->TXDATA = byte;
+  sl_uart_init_inst.port->TXDATA = byte;
 
   // Wait until byte has been fully sent out
-  while (!(BTL_DRIVER_EUSART->STATUS & EUSART_STATUS_TXC)) {
+  while (!(sl_uart_init_inst.port->STATUS & EUSART_STATUS_TXC)) {
     // Do nothing
   }
   return BOOTLOADER_OK;
@@ -393,13 +405,13 @@ int32_t uart_sendByte(uint8_t byte)
 bool uart_isTxIdle(void)
 {
   BTL_ASSERT(initialized == true);
-  if (LDMA->CHDONE & (1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL)) {
-    LDMA->CHDIS = (1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL);
-    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL);
+  if (LDMA->CHDONE & (1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL)) {
+    LDMA->CHDIS = (1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL);
+    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL);
     txLength = 0;
     return true;
-  } else if ((LDMA->CHSTATUS & (1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL)) == 0) {
-    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL);
+  } else if ((LDMA->CHSTATUS & (1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL)) == 0) {
+    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL);
     txLength = 0;
     return true;
   }
@@ -421,14 +433,14 @@ size_t  uart_getRxAvailableBytes(void)
   BTL_ASSERT(initialized == true);
 
   // Get destination address for next transfer
-  dst = LDMA->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].DST;
+  dst = LDMA->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].DST;
 
   if (dst == 0x0101) {
     // SYNC descriptor with bit 0 of MATCHEN and MATCHVAL set
     ldmaHead = 0;
   } else if (dst == 0x0202) {
     // SYNC descriptor with bit 1 of MATCHEN and MATCHVAL set
-    ldmaHead = BTL_DRIVER_UART_RX_BUFFER_SIZE / 2;
+    ldmaHead = SL_DRIVER_EUART_RX_BUFFER_SIZE / 2;
   } else {
     // XFER descriptor with absolute address in buffer
     ldmaHead = dst - (uint32_t)(rxBuffer);
@@ -440,7 +452,7 @@ size_t  uart_getRxAvailableBytes(void)
   } else if (rxHead < ldmaHead) {
     return ldmaHead - rxHead;
   } else {
-    return BTL_DRIVER_UART_RX_BUFFER_SIZE - (rxHead - ldmaHead);
+    return SL_DRIVER_EUART_RX_BUFFER_SIZE - (rxHead - ldmaHead);
   }
 }
 
@@ -467,7 +479,7 @@ int32_t uart_receiveBuffer(uint8_t  * buffer,
   size_t copiedBytes = 0;
 
   BTL_ASSERT(initialized == true);
-  BTL_ASSERT(requestedLength < BTL_DRIVER_UART_RX_BUFFER_SIZE);
+  BTL_ASSERT(requestedLength < SL_DRIVER_EUART_RX_BUFFER_SIZE);
 
   // Check whether we have enough data
   // Optional spin for timeout cycles
@@ -495,18 +507,16 @@ int32_t uart_receiveBuffer(uint8_t  * buffer,
     copiedBytes++;
     rxHead++;
 
-    if (rxHead == BTL_DRIVER_UART_RX_BUFFER_SIZE) {
+    if (rxHead == SL_DRIVER_EUART_RX_BUFFER_SIZE) {
       rxHead = 0;
       // Completed processing of second half of the buffer, mark it as available
       // for LDMA again by setting SYNC[1]
       LDMA->SYNCSWSET_SET = 1 << 1;
-    } else if (rxHead == BTL_DRIVER_UART_RX_BUFFER_SIZE / 2) {
+    } else if (rxHead == SL_DRIVER_EUART_RX_BUFFER_SIZE / 2) {
       // Completed processing of first half of the buffer, mark it as available
       // for LDMA again by setting SYNC[0]
       LDMA->SYNCSWSET_SET = 1 << 0;
     }
-
-    // TODO: Check overflow by checking both SYNC[0] and SYNC[1]
   }
 
   if ((uint32_t)receivedLength != 0UL) {
@@ -558,17 +568,17 @@ int32_t uart_flush(bool flushTx, bool flushRx)
   BTL_ASSERT(initialized == true);
 
   if (flushTx) {
-    LDMA->CHDIS = (1 << BTL_DRIVER_EUSART_LDMA_TX_CHANNEL);
+    LDMA->CHDIS = (1 << SL_DRIVER_EUSART_LDMA_TX_CHANNEL);
     txLength = 0;
   }
 
   if (flushRx) {
-    LDMA->CHDIS = (1 << BTL_DRIVER_EUSART_LDMA_RX_CHANNEL);
-    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << BTL_DRIVER_EUSART_LDMA_RX_CHANNEL);
-    LDMA->CH[BTL_DRIVER_EUSART_LDMA_RX_CHANNEL].LINK
+    LDMA->CHDIS = (1 << SL_DRIVER_EUSART_LDMA_RX_CHANNEL);
+    BUS_RegMaskedClear(&LDMA->CHDONE, 1 << SL_DRIVER_EUSART_LDMA_RX_CHANNEL);
+    LDMA->CH[SL_DRIVER_EUSART_LDMA_RX_CHANNEL].LINK
       = (uint32_t)(&ldmaRxDesc[0]) & _LDMA_CH_LINK_LINKADDR_MASK;
     rxHead = 0;
-    LDMA->LINKLOAD = (1 << BTL_DRIVER_EUSART_LDMA_RX_CHANNEL);
+    LDMA->LINKLOAD = (1 << SL_DRIVER_EUSART_LDMA_RX_CHANNEL);
 
     // Mark second half of RX buffer as ready
     BUS_RegMaskedSet(&LDMA->SYNCSWSET, 1 << 1);
@@ -576,5 +586,3 @@ int32_t uart_flush(bool flushTx, bool flushRx)
 
   return BOOTLOADER_OK;
 }
-
-#endif

@@ -61,8 +61,8 @@
 
 // <q OS_CFG_DBG_EN> Add debug helper code and variable
 // <i> Enable debug helper code and variables.
-// <i> Default: 1
-#define  OS_CFG_DBG_EN                                      1
+// <i> Default: 0
+#define  OS_CFG_DBG_EN                                      0
 
 // <q OS_CFG_TICK_EN> Enable ticks support
 // <i> Enable or disable support for ticks (Delay functions, pend with timeouts, etc).
@@ -70,8 +70,8 @@
 #define  OS_CFG_TICK_EN                                     1
 
 // <q OS_CFG_TS_EN> Add timestamping capabilities
-// <i> Default: 1
-#define  OS_CFG_TS_EN                                       1
+// <i> Default: 0
+#define  OS_CFG_TS_EN                                       0
 
 // <o OS_CFG_PRIO_MAX> Maximum number of task priorities
 // <i> Default: 64
@@ -82,13 +82,16 @@
 #define  OS_CFG_SCHED_LOCK_TIME_MEAS_EN                     0
 
 // <q OS_CFG_SCHED_ROUND_ROBIN_EN> Enable Round-Robin scheduling
-// <i> Default: 1
-#define  OS_CFG_SCHED_ROUND_ROBIN_EN                        1
+// <i> Default: 0
+#define  OS_CFG_SCHED_ROUND_ROBIN_EN                        0
 
 // <o OS_CFG_STK_SIZE_MIN> Minimum allowable task stack size (in CPU_STK elements)
 // <i> Default: 64
 #define  OS_CFG_STK_SIZE_MIN                                64u
 
+// <o OS_CFG_ERRNO_EN> Add threadsafe errno support
+// <i> Default: 0
+#define OS_CFG_ERRNO_EN                                     0
 // </h>
 
 /********************************************************************************************************
@@ -196,28 +199,28 @@
 // <h>Task Management Configuration
 
 // <q OS_CFG_STAT_TASK_EN> Enable statistics gathering task
-// <i> Default: 1
-#define  OS_CFG_STAT_TASK_EN                                1
+// <i> Default: 0
+#define  OS_CFG_STAT_TASK_EN                                0
 
 // <q OS_CFG_STAT_TASK_STK_CHK_EN> Enable stack overflow detection of the statistics task
 // <i> Default: 1
 #define  OS_CFG_STAT_TASK_STK_CHK_EN                        1
 
 // <q OS_CFG_TASK_PROFILE_EN> Enable task profiling instrumentation
-// <i> Default: 1
-#define  OS_CFG_TASK_PROFILE_EN                             1
+// <i> Default: 0
+#define  OS_CFG_TASK_PROFILE_EN                             0
 
 // <q OS_CFG_TASK_Q_EN> Enable task message queues
-// <i> Default: 1
-#define  OS_CFG_TASK_Q_EN                                   1
+// <i> Default: 0
+#define  OS_CFG_TASK_Q_EN                                   0
 
 // <o OS_CFG_TASK_REG_TBL_SIZE> Number of task registers
 // <i> Default: 3
 #define  OS_CFG_TASK_REG_TBL_SIZE                           3
 
 // <q OS_CFG_TASK_STK_REDZONE_EN> Enable redzone stack protection
-// <i> Default: 1
-#define  OS_CFG_TASK_STK_REDZONE_EN                         1
+// <i> Default: 0
+#define  OS_CFG_TASK_STK_REDZONE_EN                         0
 
 // <o OS_CFG_TASK_STK_REDZONE_DEPTH> Depth of the redzone stack protection
 // <i> Default: 8

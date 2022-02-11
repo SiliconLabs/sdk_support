@@ -33,10 +33,19 @@
 
 #include "rail.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Initialize the AoX(angle of arrival/departure) Utility.
  *
  * @note: This function should be called during application initialization.
  */
 void sl_rail_util_aox_init(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif // SL_RAIL_UTIL_AOX_H

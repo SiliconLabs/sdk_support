@@ -64,7 +64,7 @@ static psa_status_t sli_crypto_trng_soft_reset(void)
 
     // Wait for TRNG to complete startup tests and start filling the FIFO.
     size_t loop_cycles = CMU_ClockFreqGet(cmuClock_CORE) >> 10;
-    for (size_t j = 0; (TRNG0->FIFOLEVEL == 0) && (j < loop_cycles); j++) {
+    for (size_t i = 0; (TRNG0->FIFOLEVEL == 0) && (i < loop_cycles); i++) {
       ;
     }
 

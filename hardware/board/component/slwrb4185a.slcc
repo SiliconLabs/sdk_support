@@ -10,6 +10,11 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_rb
+- define:
+  - name: SL_KIT_NAME
+    value: '"SLWRB4185A"'
+  - name: SL_KIT_REV
+    value: '"A01"'
 - tag:
   - kit:opn:SLWRB4185A
   - kit:pn:WRB4185

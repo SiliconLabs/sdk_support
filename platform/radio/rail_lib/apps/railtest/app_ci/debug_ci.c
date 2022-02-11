@@ -49,6 +49,8 @@
 #include "rail_features.h"
 #include "sl_rail_util_init.h"
 
+#include "em_prs.h"
+
 #if SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
   #include "rail_config.h"
 #endif // SL_RAIL_UTIL_INIT_RADIO_CONFIG_SUPPORT_INST0_ENABLE
@@ -345,6 +347,55 @@ void getRandom(sl_cli_command_arg_t *args)
   }
 }
 
+// configs 1, 2, 3, and 5 behave the same, but 4 has some extra channels
+#if defined(_SILICON_LABS_32B_SERIES_2)
+
+#define FIRST_PAB_CHANNEL 0
+#define FIRST_PCD_CHANNEL 6
+#define LAST_PCD_CHANNEL 11
+
+#if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  #define LAST_PAB_CHANNEL 15
+#else
+  #define LAST_PAB_CHANNEL 5
+#endif
+
+char pinForPRSChannel[PRS_ASYNC_CHAN_COUNT][5];
+
+static void printDebugSignalHelp(char *cmdName,
+                                 const debugSignal_t *signals,
+                                 uint32_t numSignals)
+{
+  uint32_t i;
+  bool isFirstInstance = true;
+
+  RAILTEST_PRINTF("%s [pin] [signal] [options]\n", cmdName);
+  #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+  RAILTEST_PRINTF("\nPins: Any pin from PA, PB, PC, and PD available for debug, but only 6 total from PA and PB, and 6 total from PC and PD\n");
+  #else
+  RAILTEST_PRINTF("\nPins: Any pin from PA, PB, PC, and PD available for debug, but only 10 total from PA and PB, and 6 total from PC and PD\n");
+  #endif
+  RAILTEST_PRINTF("\nPins in Use: \n");
+  for (i = 0; i < PRS_ASYNC_CHAN_COUNT; i++) {
+    if (pinForPRSChannel[i][0] != '\0') {
+      if (!isFirstInstance) {
+        RAILTEST_PRINTF(", ");
+      }
+
+      isFirstInstance = false;
+
+      RAILTEST_PRINTF("%s", pinForPRSChannel[i]);
+    }
+  }
+
+  // Print information about the supported debug signals
+  RAILTEST_PRINTF("\n\nSignals: \n");
+  RAILTEST_PRINTF("  OFF\n  CUSTOM_PRS <source> <signal>\n  CUSTOM_LIB <event>\n");
+  for (i = 0; i < numSignals; i++) {
+    RAILTEST_PRINTF("  %s\n", signals[i].name);
+  }
+}
+#else
 static void printDebugSignalHelp(char *cmdName,
                                  const debugPin_t *pins,
                                  const debugSignal_t *signals,
@@ -369,18 +420,60 @@ static void printDebugSignalHelp(char *cmdName,
     RAILTEST_PRINTF("  %s\n", signals[i].name);
   }
 }
+#endif
 
 void setDebugSignal(sl_cli_command_arg_t *args)
 {
-  const debugPin_t *pin = NULL, *pinList;
   const debugSignal_t *signal = NULL, *signalList;
   debugSignal_t customSignal;
   uint32_t i;
-  uint32_t numSignals, numPins;
+  uint32_t numSignals;
   bool disablePin = false;
 
-  // Get the debug signals and pins for this chip
+  // Get the debug signals
   signalList = halGetDebugSignals(&numSignals);
+
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  // Series 2 can use any pin for a PRS channel output, so parse input to determine port and pin
+  // instead of referring to a table
+  char *pinArg = sl_cli_get_argument_string(args, 0);
+  char *pinName = pinArg;
+
+  uint32_t pinNumber;
+  uint8_t debugPort;
+  uint8_t debugPin;
+  uint8_t prsChannel = 0;
+
+  // Provide information about the pins and signals supported by this chip if
+  // the help command is given. @TODO: It would be nice if this ignored the next
+  // parameter somehow...
+  if (strcasecmp(sl_cli_get_argument_string(args, 0), "help") == 0) {
+    printDebugSignalHelp(sl_cli_get_command_string(args, 0), signalList, numSignals);
+    return;
+  }
+
+  // Determine port from pinArg
+  debugPort = (pinArg[1] - ((pinArg[1] >= 'a') ? 'a' : 'A'));
+  // Skip the first two chars from the string and convert the remainder into an integer
+  pinNumber = strtoul(&pinArg[2], NULL, 10);
+
+  if (((pinArg[0] != 'P') && (pinArg[0] != 'p'))
+      || (strlen(pinArg) >= 5)
+      || (!GPIO_PORT_VALID(debugPort))
+      || (!GPIO_PORT_PIN_VALID(debugPort, pinNumber))) {
+    responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "%s is not a valid pin name", sl_cli_get_argument_string(args, 0));
+    return;
+  }
+
+  debugPin = (uint8_t)pinNumber;
+#else
+  // Series 1 uses a lookup table to determine valid debug pins
+
+  uint32_t numPins;
+
+  const debugPin_t *pin = NULL, *pinList;
+
+  // Get the debug pins for this chip
   pinList = halGetDebugPins(&numPins);
 
   // Provide information about the pins and signals supported by this chip if
@@ -401,6 +494,7 @@ void setDebugSignal(sl_cli_command_arg_t *args)
     responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "%s is not a valid pin name", sl_cli_get_argument_string(args, 0));
     return;
   }
+#endif
 
   // Make sure the signal they're trying to use is valid for this chip
   if (strcasecmp("CUSTOM_LIB", sl_cli_get_argument_string(args, 1)) == 0) {
@@ -449,15 +543,40 @@ void setDebugSignal(sl_cli_command_arg_t *args)
   CMU_ClockEnable(cmuClock_GPIO, true);
 
   // Disable the GPIO while configuring it
+#if defined(_SILICON_LABS_32B_SERIES_2)
+  GPIO_PinModeSet(debugPort, debugPin, gpioModeDisabled, 0);
+#else
   GPIO_PinModeSet(pin->gpioPort, pin->gpioPin, gpioModeDisabled, 0);
+#endif
 
   // If this is a disable command then just turn everything off for this debug
   // pin to stop it from outputting.
   if (disablePin) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    // Search for what PRS channel the pin uses it and remove the reference
+    for (i = 0; i < PRS_ASYNC_CHAN_COUNT; i++) {
+      if (strcasecmp(pinForPRSChannel[i], pinName) == 0) {
+        prsChannel = i;
+        pinForPRSChannel[i][0] = '\0';
+        break;
+      }
+    }
+
+    if (i == PRS_ASYNC_CHAN_COUNT) {
+      responsePrint(sl_cli_get_command_string(args, 0), "\nPin %s not in use", pinName);
+      return;
+    }
+
+    // Turn off the PRS output on this pin's channel
+    halDisablePrs(prsChannel);
+    // @TODO: Turn off the RAIL debug event for this pin
+    responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:OFF", pinName);
+#else
     // Turn off the PRS output on this pin's channel
     halDisablePrs(pin->prsChannel);
     // @TODO: Turn off the RAIL debug event for this pin
     responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:OFF", pin->name);
+#endif
     return;
   }
 
@@ -466,6 +585,55 @@ void setDebugSignal(sl_cli_command_arg_t *args)
   }
   // Configure the PRS or library signal as needed
   if (signal->isPrs) {
+#if defined(_SILICON_LABS_32B_SERIES_2)
+    // On series 2 there are many PRS channels that can go to each GPIO, so choose the first valid available one
+    // XG24 parts have 4 extra channels available for ports A and B, so do some extra logic to include them in the search
+    if (debugPort < 2U) { // gpioPortA or gpioPortB
+      for (i = FIRST_PAB_CHANNEL; i <= LAST_PAB_CHANNEL; i++) {
+        #if defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+        if (((i < FIRST_PCD_CHANNEL) || (i > LAST_PCD_CHANNEL)) && (pinForPRSChannel[i][0] == '\0'))
+        #else
+        if (pinForPRSChannel[i][0] == '\0')
+        #endif
+        {
+          prsChannel = i;
+          strcpy(pinForPRSChannel[i], pinName);
+          break;
+        }
+      }
+      if (i > LAST_PAB_CHANNEL) {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "No more PRS channels available for PA/PB");
+        return;
+      }
+    }
+    // ports C and D
+    else {
+      for (i = FIRST_PCD_CHANNEL; i <= LAST_PCD_CHANNEL; i++) {
+        if (pinForPRSChannel[i][0] == '\0') {
+          prsChannel = i;
+          strcpy(pinForPRSChannel[i], pinName);
+          break;
+        }
+      }
+      if (i > LAST_PCD_CHANNEL) {
+        responsePrintError(sl_cli_get_command_string(args, 0), 0x50, "No more PRS channels available for PC/PD");
+        return;
+      }
+    }
+
+    // Enable this PRS signal
+    halEnablePrs(prsChannel,
+                 0,
+                 debugPort,
+                 debugPin,
+                 signal->loc.prs.source,
+                 signal->loc.prs.signal);
+  } else {
+    // Turn on the RAIL debug event for this signal
+  }
+
+  responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:%s,Channel:%d", pinForPRSChannel[prsChannel], signal->name, prsChannel);
+#else
     // Enable this PRS signal
     halEnablePrs(pin->prsChannel,
                  pin->prsLocation,
@@ -478,6 +646,7 @@ void setDebugSignal(sl_cli_command_arg_t *args)
   }
 
   responsePrint(sl_cli_get_command_string(args, 0), "Pin:%s,Signal:%s", pin->name, signal->name);
+#endif
 }
 
 void forceAssert(sl_cli_command_arg_t *args)

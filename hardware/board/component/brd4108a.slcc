@@ -24,6 +24,7 @@
   - id: iostream_eusart
     instance:
     - vcom
+  - id: bootloader_uart_driver
   - id: simple_led
     instance:
     - led0
@@ -33,10 +34,15 @@
 - template_contribution:
   - name: board_default_init
     value: sl_board_disable_vcom()
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD4108A"'
+  - name: SL_BOARD_REV
+    value: '"A03"'
 - tag:
   - board:pn:BRD4108
   - board:variant:A
-  - board:revision:A01
+  - board:revision:A03
   - board:device:efr32bg22c224f512im40
   - hardware:has:vcom
   - hardware:has:pti

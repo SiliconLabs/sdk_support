@@ -2,18 +2,18 @@ id: nvm3_default
 label: NVM3 Default Instance
 package: platform
 description: >
-  This component provides functions to initialize/deinitialize the default NVM3 
-  instance. The instance can be accessed with the NVM3 API by using the 
+  This component provides functions to initialize/deinitialize the default NVM3
+  instance. The instance can be accessed with the NVM3 API by using the
   nvm3_defaultHandle provided in nvm3_default.h as the nvm3_Handle_t pointer.
 
 
-  If the Services->Runtime->System Setup component is included in a 
-  project, the default instance will be initialized automatically, using 
-  the default instance configuration, during the sl_system_init() call in main.c. 
+  If the Services->Runtime->System Setup component is included in a
+  project, the default instance will be initialized automatically, using
+  the default instance configuration, during the sl_system_init() call in main.c.
 
 
-  Selecting this component will also include the NVM3 Core component, which is 
-  the implementation of the PWM driver itself.
+  Selecting this component will also include the NVM3 Core component, which is
+  the implementation of the NVM3 driver itself.
 category: Services|NVM3
 quality: production
 config_file:

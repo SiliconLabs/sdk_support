@@ -55,6 +55,10 @@
 #endif
 #endif
 
+#if defined(SL_CATALOG_SYSTEMVIEW_TRACE_PRESENT)
+#include "SEGGER_SYSVIEW_FreeRTOS.h"
+#endif
+
 //-------- <<< Use Configuration Wizard in Context Menu >>> --------------------
 
 //  <o>Minimal stack size [words] <0-65535>
@@ -170,6 +174,11 @@
 //  <i> Default: 0
 #define configNUM_USER_THREAD_LOCAL_STORAGE_POINTERS 0
 // </h>
+
+//  <q> Use Threadsafe Errno
+//  <i> Enable Threadsafe Errno support.
+//  <i> Default: 0
+#define configUSE_POSIX_ERRNO                 0
 
 //------------- <<< end of configuration section >>> ---------------------------
 

@@ -3,7 +3,7 @@
  * @brief Hardware driver layer for simple delay on EXX32.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -65,8 +65,6 @@ void delay_init(void)
 
 void delay_milliseconds(uint32_t msecs, bool blocking)
 {
-  // TODO: Assert msecs within a single TIMER0 overflow (approx. 3300 ms)
-
   uint16_t count = TIMER0->CNT;
   delayTarget = count + (msecs * ticksPerMillisecond);
   expectOverflow = (delayTarget < count);

@@ -12,6 +12,11 @@
   - name: hardware_board_mainboard
 - recommends: []
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD8016A"'
+  - name: SL_BOARD_REV
+    value: '"A01"'
 - tag:
   - board:pn:BRD8016
   - board:variant:A

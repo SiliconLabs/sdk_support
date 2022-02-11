@@ -57,27 +57,16 @@
 
 // Instance: {{ inst | lower }}
 static RAIL_Handle_t sl_rail_handle_{{ inst | lower }} = RAIL_EFR32_HANDLE;
-#if SL_RAIL_UTIL_INIT_BLE_SUPPORT_{{ inst | upper }}_ENABLE
-static RAIL_BLE_State_t sl_rail_ble_state_{{ inst | lower }}; // needed for BLE (ignored by others)
-#endif // SL_RAIL_UTIL_INIT_BLE_SUPPORT_{{ inst | upper }}_ENABLE
-#if SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_{{ inst | upper }}_ENABLE
-static RAILSched_Config_t sl_rail_sched_config_{{ inst | lower }};
-#endif // SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_{{ inst | upper }}_ENABLE
-static RAIL_Config_t sl_rail_config_{{ inst | lower }} = {
-  .eventsCallback = &sli_rail_util_on_event,
-#if SL_RAIL_UTIL_INIT_BLE_SUPPORT_{{ inst | upper }}_ENABLE
-  .protocol = &sl_rail_ble_state_{{ inst | lower }},
-#endif // SL_RAIL_UTIL_INIT_BLE_SUPPORT_{{ inst | upper }}_ENABLE
-#if SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_{{ inst | upper }}_ENABLE
-  .scheduler = &sl_rail_sched_config_{{ inst | lower }},
-#endif // SL_RAIL_UTIL_INIT_SCHEDULER_SUPPORT_{{ inst | upper }}_ENABLE
-};
 
 static void sl_rail_util_init_{{ inst | lower }}(void)
 {
 #if SL_RAIL_UTIL_INIT_{{ inst | upper }}_ENABLE
   RAIL_Status_t status;
-  sl_rail_handle_{{ inst | lower }} = RAIL_Init(&sl_rail_config_{{ inst | lower }},
+  RAIL_Config_t sl_rail_config = {
+    .eventsCallback = &sli_rail_util_on_event,
+    // Other fields are ignored nowadays
+  };
+  sl_rail_handle_{{ inst | lower }} = RAIL_Init(&sl_rail_config,
 #if SL_RAIL_UTIL_INIT_INIT_COMPLETE_CALLBACK_{{ inst | upper }}_ENABLE
                              &sli_rail_util_on_rf_ready
 #else
@@ -165,7 +154,6 @@ static void sl_rail_util_init_{{ inst | lower }}(void)
 #else // !SL_RAIL_UTIL_INIT_{{ inst | upper }}_ENABLE
   // Eliminate compiler warnings.
   (void) sl_rail_handle_{{ inst | lower }};
-  (void) sl_rail_config_{{ inst | lower }};
 #endif // SL_RAIL_UTIL_INIT_{{ inst | upper }}_ENABLE
 }
 {%- endfor %}
@@ -180,13 +168,43 @@ RAIL_Handle_t sl_rail_util_get_handle(sl_rail_util_handle_type_t handle)
   return *sl_rail_handle_array[handle];
 }
 
+#define INIT_INSTANCES (0{%- for inst in rail_util_init_instance %} + 1{%- endfor %})
+
+#if (INIT_INSTANCES > 1) && !SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT
+  #error "sl_rail_util_init.c: If you are going to use more than one rail_util_init instance, you must use the Multiprotocol RAIL library."
+#elif (INIT_INSTANCES > 4)
+  static uint64_t extraStateBuffers[INIT_INSTANCES - 4][RAIL_STATE_BUFFER_BYTES / sizeof(uint64_t)];
+  static RAIL_StateBufferEntry_t extraProtos[INIT_INSTANCES - 4];
+#else
+  // RAIL provides enough built-in state buffers for all the instances
+#endif
+
 void sl_rail_util_init(void)
 {
+#if   (INIT_INSTANCES > 2)
+  RAIL_Status_t status;
+  status = RAIL_AddStateBuffer3(RAIL_EFR32_HANDLE);
+  APP_ASSERT((RAIL_STATUS_NO_ERROR == status),
+             "RAIL_AddStateBuffer3 failed, return value: %d",
+             status);
+#if   (INIT_INSTANCES > 3)
+  status = RAIL_AddStateBuffer4(RAIL_EFR32_HANDLE);
+  APP_ASSERT((RAIL_STATUS_NO_ERROR == status),
+             "RAIL_AddStateBuffer4 failed, return value: %d",
+             status);
+#endif
+#if   (INIT_INSTANCES > 4)
+  for (int i = 0; i < (INIT_INSTANCES - 4); i++) {
+    extraProtos[i].bufferBytes = sizeof(extraStateBuffers[0]);
+    extraProtos[i].buffer = extraStateBuffers[i];
+    status = RAIL_AddStateBuffer(RAIL_EFR32_HANDLE, &extraProtos[i]);
+    APP_ASSERT((RAIL_STATUS_NO_ERROR == status),
+               "RAIL_AddStateBuffer(%d) failed, return value: %d",
+               (INIT_INSTANCES + i), status);
+  }
+#endif
+#endif
 {%- for inst in rail_util_init_instance %}
   sl_rail_util_init_{{ inst | lower }}();
 {%- endfor %}
 }
-
-#if !SL_RAIL_LIB_MULTIPROTOCOL_SUPPORT && ((0{%- for inst in rail_util_init_instance %} + 1{%- endfor %}) > 1)
-  #error "sl_rail_util_init.c: If you are going to use more than one rail_util_init instance, you must use the Multiprotocol RAIL library."
-#endif

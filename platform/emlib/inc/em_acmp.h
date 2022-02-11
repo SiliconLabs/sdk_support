@@ -52,7 +52,7 @@ extern "C" {
  ********************************   ENUMS   ************************************
  ******************************************************************************/
 
-/** Resistor values used for the internal capacative sense resistor. See
+/** Resistor values used for the internal capacitive sense resistor. See
  *  data sheet for your device for details on each resistor value. */
 typedef enum {
 #if defined(_ACMP_INPUTCTRL_CSRESSEL_MASK)
@@ -636,7 +636,7 @@ typedef struct {
   ACMP_HysteresisLevel_TypeDef  hysteresisLevel_1;
 #endif
 
-  /** A resistor used in the capacative sensing circuit. For values see
+  /** A resistor used in the capacitive sensing circuit. For values see
    *  the device data sheet. */
   ACMP_CapsenseResistor_TypeDef resistor;
 
@@ -680,13 +680,21 @@ typedef struct {
 
 /** A default configuration for capacitive sense mode initialization. */
 #if defined(_ACMP_CFG_MASK)
-#define ACMP_CAPSENSE_INIT_DEFAULT                                          \
-  {                                                                         \
-    _ACMP_CFG_BIAS_DEFAULT, /* Using biasProg default value. */             \
-    acmpHysteresisDisabled, /* Disable hysteresis. */                       \
-    acmpResistor5,          /* Use internal resistor value 5. */            \
-    0x3F,                   /* Set VREFDIV to maximum to disable divide. */ \
-    true                    /* Enable after init. */                        \
+
+// PM5507: provide default configuration that is functional
+/** Analog comparator CFG with initial bias value */
+#define PM5507_ACMP_CFG_BIAS_DEFAULT  0x00000004UL
+/** Analog comparator reset value */
+#define PM5507_ACMP_CFG_RESETVALUE    0x00000004UL
+
+/** Capacitive sense mode configuration default values. */
+#define ACMP_CAPSENSE_INIT_DEFAULT                                                \
+  {                                                                               \
+    PM5507_ACMP_CFG_BIAS_DEFAULT, /* Using biasProg default value. */             \
+    acmpHysteresisDisabled,       /* Disable hysteresis. */                       \
+    acmpResistor5,                /* Use internal resistor value 5. */            \
+    0x3F,                         /* Set VREFDIV to maximum to disable divide. */ \
+    true                          /* Enable after init. */                        \
   }
 #elif defined(_ACMP_HYSTERESIS0_HYST_MASK)
 #define ACMP_CAPSENSE_INIT_DEFAULT                                            \
@@ -823,15 +831,15 @@ typedef struct {
 
 /** Default configuration for ACMP regular initialization. */
 #if defined(_ACMP_CFG_MASK)
-#define ACMP_INIT_DEFAULT                                                     \
-  {                                                                           \
-    _ACMP_CFG_BIAS_DEFAULT,   /* Using biasProg default value. */             \
-    acmpInputRangeFull,       /* Input range from 0 to Vdd. */                \
-    acmpAccuracyLow,          /* Low accuracy, less current usage. */         \
-    acmpHysteresisDisabled,   /* Disable hysteresis. */                       \
-    false,                    /* Output 0 when ACMP is inactive. */           \
-    0x3F,                     /* Set VREFDIV to maximum to disable divide. */ \
-    true                      /* Enable after init. */                        \
+#define ACMP_INIT_DEFAULT                                                         \
+  {                                                                               \
+    PM5507_ACMP_CFG_BIAS_DEFAULT, /* Using biasProg default value. */             \
+    acmpInputRangeFull,           /* Input range from 0 to Vdd. */                \
+    acmpAccuracyLow,              /* Low accuracy, less current usage. */         \
+    acmpHysteresisDisabled,       /* Disable hysteresis. */                       \
+    false,                        /* Output 0 when ACMP is inactive. */           \
+    0x3F,                         /* Set VREFDIV to maximum to disable divide. */ \
+    true                          /* Enable after init. */                        \
   }
 #elif defined(_ACMP_HYSTERESIS0_HYST_MASK)
 #define ACMP_INIT_DEFAULT                                                   \

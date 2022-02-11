@@ -2,7 +2,7 @@ id: micriumos_canopen
 label: CANopen
 package: micrium-cano
 description: Micrium OS CANopen
-category: Services|CANopen
+category: Services|Micrium|CANopen
 quality: production
 component_root_path: platform/micrium_os/canopen
 config_file:

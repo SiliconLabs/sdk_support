@@ -28,15 +28,15 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+#include "em_device.h"
+#include "rail_types.h"
+
 #ifndef __RAIL_FEATURES_H__
 #define __RAIL_FEATURES_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "em_device.h"
-#include "rail_types.h"
 
 /**
  * @addtogroup RAIL_API RAIL API
@@ -126,6 +126,24 @@ bool RAIL_Supports2p4GHzBand(RAIL_Handle_t railHandle);
  * Runtime refinement of compile-time \ref RAIL_SUPPORTS_SUBGHZ_BAND.
  */
 bool RAIL_SupportsSubGHzBand(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports OFDM PA.
+/// See also runtime refinement \ref RAIL_SupportsOFDMPA().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#define RAIL_SUPPORTS_OFDM_PA 1
+#else
+#define RAIL_SUPPORTS_OFDM_PA 0
+#endif
+
+/**
+ * Indicate whether RAIL supports OFDM band operation on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if OFDM operation is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_OFDM_PA.
+ */
+bool RAIL_SupportsOFDMPA(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
 /// bit masked address filtering.
@@ -641,12 +659,15 @@ bool RAIL_BLE_SupportsQuuppa(RAIL_Handle_t railHandle);
  */
 bool RAIL_BLE_SupportsIQSampling(RAIL_Handle_t railHandle);
 
-/// Backwards-compatible synonym of \ref RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING,
-/// or \ref RAIL_BLE_SUPPORTS_IQ_SAMPLING, or \ref RAIL_BLE_SUPPORTS_CTE.
-#define RAIL_FEAT_BLE_AOX_SUPPORTED    \
+/// Boolean to indicate whether the selected chip supports some BLE AOX
+/// features.
+#define RAIL_BLE_SUPPORTS_AOX          \
   (RAIL_BLE_SUPPORTS_ANTENNA_SWITCHING \
    || RAIL_BLE_SUPPORTS_IQ_SAMPLING    \
    || RAIL_BLE_SUPPORTS_CTE)
+
+/// Backwards-compatible synonym of \ref RAIL_BLE_SUPPORTS_AOX
+#define RAIL_FEAT_BLE_AOX_SUPPORTED RAIL_BLE_SUPPORTS_AOX
 
 /// Boolean to indicate whether the selected chip supports BLE PHY switch to RX
 /// functionality, which is used to switch BLE PHYs at a specific time
@@ -835,10 +856,52 @@ bool RAIL_IEEE802154_SupportsEMultipurposeFrames(RAIL_Handle_t railHandle);
 bool RAIL_IEEE802154_SupportsGSubsetGB868(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports
+/// dynamic FEC
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 1)
+#define RAIL_IEEE802154_SUPPORTS_G_DYNFEC \
+  RAIL_FEAT_IEEE802154_G_GB868_SUPPORTED  // limit to SUBGHZ for now
+#else
+#define RAIL_IEEE802154_SUPPORTS_G_DYNFEC 0
+#endif
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4G dynamic FEC
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if dynamic FEC is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_DYNFEC.
+ */
+bool RAIL_IEEE802154_SupportsGDynFec(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
+/// Wi-SUN mode switching
+/// See also runtime refinement \ref
+/// RAIL_IEEE802154_SupportsGModeSwitch().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#define RAIL_IEEE802154_SUPPORTS_G_MODESWITCH \
+  RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868  // limit to SUBGHZ for now
+#else
+#define RAIL_IEEE802154_SUPPORTS_G_MODESWITCH 0
+#endif
+
+/**
+ * Indicate whether this chip supports Wi-SUN mode switching
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if Wi-SUN mode switching is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_IEEE802154_SUPPORTS_G_MODESWITCH.
+ */
+bool RAIL_IEEE802154_SupportsGModeSwitch(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports
 /// IEEE 802.15.4G-2012 reception and transmission of frames
 /// with 4-byte CRC.
 /// See also runtime refinement \ref RAIL_IEEE802154_SupportsG4ByteCrc().
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
 #define RAIL_IEEE802154_SUPPORTS_G_4BYTE_CRC RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868
 #else
 #define RAIL_IEEE802154_SUPPORTS_G_4BYTE_CRC 0
@@ -863,7 +926,7 @@ bool RAIL_IEEE802154_SupportsG4ByteCrc(RAIL_Handle_t railHandle);
 /// IEEE 802.15.4G-2012 reception of unwhitened frames.
 /// See also runtime refinement \ref
 /// RAIL_IEEE802154_SupportsGUnwhitenedRx().
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
 #define RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_RX RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868
 #else
 #define RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_RX 0
@@ -890,7 +953,7 @@ bool RAIL_IEEE802154_SupportsGUnwhitenedRx(RAIL_Handle_t railHandle);
 /// IEEE 802.15.4G-2012 transmission of unwhitened frames.
 /// See also runtime refinement \ref
 /// RAIL_IEEE802154_SupportsGUnwhitenedTx().
-#if (_SILICON_LABS_32B_SERIES_1_CONFIG > 1)
+#if (_SILICON_LABS_32B_SERIES_1_CONFIG != 1)
 #define RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_TX RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868
 #else
 #define RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_TX 0
@@ -974,6 +1037,43 @@ bool RAIL_IEEE802154_SupportsCancelFramePendingLookup(RAIL_Handle_t railHandle);
  */
 bool RAIL_IEEE802154_SupportsEarlyFramePendingLookup(RAIL_Handle_t railHandle);
 
+/// Boolean to indicate whether the selected chip supports dual PA configs for mode switch
+/// or concurrent mode.
+/// See also runtime refinement \ref RAIL_IEEE802154_SupportsDualPaConfig().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
+#define RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 1
+#else
+#define RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG 0
+#endif
+
+/**
+ * Indicate whether RAIL supports dual PA mode on this chip.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the dual PA mode is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG.
+ */
+bool RAIL_IEEE802154_SupportsDualPaConfig(RAIL_Handle_t railHandle);
+
+/// Boolean to indicate whether the selected chip supports IEEE 802.15.4 PHY
+/// with custom settings
+#if ((_SILICON_LABS_32B_SERIES_1_CONFIG == 2) || (_SILICON_LABS_32B_SERIES_1_CONFIG == 3))
+#define RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY (RAIL_SUPPORTS_PROTOCOL_IEEE802154 && RAIL_SUPPORTS_2P4GHZ_BAND)
+#else
+#define RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY 0
+#endif
+
+/**
+ * Indicate whether this chip supports the IEEE 802.15.4 PHY with custom settings.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if the 802.15.4 PHY with custom settings is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY.
+ */
+bool RAIL_IEEE802154_SupportsCustom1Phy(RAIL_Handle_t railHandle);
+
 // Z-Wave features
 // Some features may not be available on all platforms
 // due to radio hardware limitations.
@@ -1036,7 +1136,9 @@ bool RAIL_ZWAVE_SupportsConcPhy(RAIL_Handle_t railHandle);
 
 /// Boolean to indicate whether the selected chip supports SQ-based PHY.
 /// See also runtime refinement \ref RAIL_SupportsSQPhy().
-#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)  \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 4) \
+  || (_SILICON_LABS_32B_SERIES_2_CONFIG == 5)
 #define RAIL_SUPPORTS_SQ_PHY 1
 #else
 #define RAIL_SUPPORTS_SQ_PHY 0
@@ -1094,14 +1196,33 @@ bool RAIL_ZWAVE_SupportsRegionPti(RAIL_Handle_t railHandle);
  */
 bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+/// Boolean to indicate whether the selected chip supports
+/// RX direct mode data to FIFO.
+/// See also runtime refinement \ref RAIL_SupportsRxDirectModeDataToFifo().
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
+#define RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO 1
+#else
+#define RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO 0
+#endif
+
+/**
+ * Indicate whether this chip supports RX direct mode data to FIFO.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if direct mode data to FIFO is supported; false otherwise.
+ *
+ * Runtime refinement of compile-time \ref
+ * RAIL_SUPPORTS_RX_DIRECT_MODE_DATA_TO_FIFO.
+ */
+bool RAIL_SupportsRxDirectModeDataToFifo(RAIL_Handle_t railHandle);
+
 /// Boolean to indicate whether the selected chip supports
 /// MFM protocol.
-/// See also runtime refinement \ref RAIL_SupportsProtocolMfm().
+/// See also runtime refinement \ref RAIL_SupportsMfm().
 #if (_SILICON_LABS_32B_SERIES_2_CONFIG == 3)
-#define RAIL_SUPPORTS_PROTOCOL_MFM 1
+#define RAIL_SUPPORTS_MFM 1
 #else
-#define RAIL_SUPPORTS_PROTOCOL_MFM 0
+#define RAIL_SUPPORTS_MFM 0
 #endif
 
 /**
@@ -1110,10 +1231,41 @@ bool RAIL_SupportsDirectMode(RAIL_Handle_t railHandle);
  * @param[in] railHandle A RAIL instance handle.
  * @return true if MFM protocol is supported; false otherwise.
  *
- * Runtime refinement of compile-time \ref RAIL_SUPPORTS_PROTOCOL_MFM.
+ * Runtime refinement of compile-time \ref RAIL_SUPPORTS_MFM.
  */
-bool RAIL_SupportsProtocolMfm(RAIL_Handle_t railHandle);
-#endif //DOXYGEN_SHOULD_SKIP_THIS
+bool RAIL_SupportsMfm(RAIL_Handle_t railHandle);
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG == 4)
+/// Boolean to indicate whether the selected chip supports
+/// 802.15.4 signal detection
+  #define RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER  (RAIL_SUPPORTS_PROTOCOL_IEEE802154)
+/// Boolean to indicate whether the selected chip supports
+/// BLE signal detection
+  #define RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER         (RAIL_SUPPORTS_PROTOCOL_BLE)
+#else
+/// Boolean to indicate whether the selected chip supports
+/// 802.15.4 signal detection
+  #define RAIL_IEEE802154_SUPPORTS_SIGNAL_IDENTIFIER  0
+/// Boolean to indicate whether the selected chip supports
+/// BLE signal detection
+  #define RAIL_BLE_SUPPORTS_SIGNAL_IDENTIFIER         0
+#endif
+
+/**
+ * Indicate whether this chip supports IEEE 802.15.4 signal identifier.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if signal identifier is supported; false otherwise.
+ */
+bool RAIL_IEEE802154_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
+
+/**
+ * Indicate whether this chip supports BLE signal identifier.
+ *
+ * @param[in] railHandle A RAIL instance handle.
+ * @return true if signal identifier is supported; false otherwise.
+ */
+bool RAIL_BLE_SupportsSignalIdentifier(RAIL_Handle_t railHandle);
 
 /** @} */ // end of group Features
 

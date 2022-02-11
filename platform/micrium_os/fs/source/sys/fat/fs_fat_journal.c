@@ -173,6 +173,16 @@ enum FS_FAT_JOURNAL_ENTRY_DEL_LOG_STRUCTURE {
 
 /********************************************************************************************************
  ********************************************************************************************************
+ *                                         GLOBAL VARIABLES
+ ********************************************************************************************************
+ *******************************************************************************************************/
+
+#if (FS_TEST_FAT_JNL_EN == DEF_ENABLED)
+extern CPU_INT08U FS_Test_FAT_JournalTestNumber;
+#endif
+
+/********************************************************************************************************
+ ********************************************************************************************************
  *                                       LOCAL FUNCTION PROTOTYPES
  ********************************************************************************************************
  *******************************************************************************************************/
@@ -1237,9 +1247,16 @@ static void FS_FAT_JournalRdWr(FS_FAT_VOL  *p_fat_vol,
 
                                                                 // ----------------- CHK IF VALID POS -----------------
     file_pos_end = p_jnl_data->File.CurPos + len;
+#if (FS_TEST_FAT_JNL_EN == DEF_ENABLED)
+      if (FS_Test_FAT_JournalTestNumber == FSVOL_OPEN) {
+        RTOS_ERR_SET(*p_err, RTOS_ERR_ASSERT_CRITICAL_FAIL);    // Simulate journal file over FS_FAT_JOURNAL_FILE_LEN.
+        return;
+      }
+#endif
     if (file_pos_end > FS_FAT_JOURNAL_FILE_LEN) {
       LOG_ERR(("Attempt to rd beyond journal file end."));
-      RTOS_CRITICAL_FAIL_EXEC(RTOS_ERR_INVALID_ARG, ;);
+      RTOS_ERR_SET(*p_err, RTOS_ERR_ASSERT_CRITICAL_FAIL);
+      RTOS_CRITICAL_FAIL_EXEC(RTOS_ERR_ASSERT_CRITICAL_FAIL, ;);
     }
 
     BREAK_ON_ERR(lb_size = FSBlkDev_LbSizeGet(p_fat_vol->Vol.BlkDevHandle, p_err));

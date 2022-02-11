@@ -2,7 +2,7 @@ id: micriumos_net_app_http_client
 label: Network Suite - HTTP Client
 package: micrium-tcpx
 description: Micrium OS Network HTTP Client
-category: Services|Network Suite|Applications
+category: Services|Micrium|Network Suite
 quality: production
 component_root_path: platform/micrium_os/net
 config_file:

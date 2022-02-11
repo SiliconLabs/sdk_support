@@ -72,14 +72,6 @@ PACKSTRUCT( struct sl_bt_cmd_system_linklayer_configure_s
 typedef struct sl_bt_cmd_system_linklayer_configure_s sl_bt_cmd_system_linklayer_configure_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_system_set_max_tx_power_s
-{
-    int16_t             power;
-});
-
-typedef struct sl_bt_cmd_system_set_max_tx_power_s sl_bt_cmd_system_set_max_tx_power_t;
-
-
 PACKSTRUCT( struct sl_bt_cmd_system_set_tx_power_s
 {
     int16_t             min_power;
@@ -170,9 +162,18 @@ typedef struct sl_bt_cmd_gap_enable_whitelisting_s sl_bt_cmd_gap_enable_whitelis
 
 
 
+PACKSTRUCT( struct sl_bt_cmd_advertiser_configure_s
+{
+    uint8_t             advertising_set;
+    uint32_t            flags;
+});
+
+typedef struct sl_bt_cmd_advertiser_configure_s sl_bt_cmd_advertiser_configure_t;
+
+
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_timing_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint32_t            interval_min;
     uint32_t            interval_max;
     uint16_t            duration;
@@ -182,19 +183,9 @@ PACKSTRUCT( struct sl_bt_cmd_advertiser_set_timing_s
 typedef struct sl_bt_cmd_advertiser_set_timing_s sl_bt_cmd_advertiser_set_timing_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_advertiser_set_phy_s
-{
-    uint8_t             handle;
-    uint8_t             primary_phy;
-    uint8_t             secondary_phy;
-});
-
-typedef struct sl_bt_cmd_advertiser_set_phy_s sl_bt_cmd_advertiser_set_phy_t;
-
-
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_channel_map_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             channel_map;
 });
 
@@ -203,7 +194,7 @@ typedef struct sl_bt_cmd_advertiser_set_channel_map_s sl_bt_cmd_advertiser_set_c
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_tx_power_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     int16_t             power;
 });
 
@@ -212,7 +203,7 @@ typedef struct sl_bt_cmd_advertiser_set_tx_power_s sl_bt_cmd_advertiser_set_tx_p
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_report_scan_request_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             report_scan_req;
 });
 
@@ -221,7 +212,7 @@ typedef struct sl_bt_cmd_advertiser_set_report_scan_request_s sl_bt_cmd_advertis
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_random_address_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             addr_type;
     bd_addr             address;
 });
@@ -231,15 +222,41 @@ typedef struct sl_bt_cmd_advertiser_set_random_address_s sl_bt_cmd_advertiser_se
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_clear_random_address_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
 });
 
 typedef struct sl_bt_cmd_advertiser_clear_random_address_s sl_bt_cmd_advertiser_clear_random_address_t;
 
 
+PACKSTRUCT( struct sl_bt_cmd_advertiser_stop_s
+{
+    uint8_t             advertising_set;
+});
+
+typedef struct sl_bt_cmd_advertiser_stop_s sl_bt_cmd_advertiser_stop_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_advertiser_delete_set_s
+{
+    uint8_t             advertising_set;
+});
+
+typedef struct sl_bt_cmd_advertiser_delete_set_s sl_bt_cmd_advertiser_delete_set_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_advertiser_set_phy_s
+{
+    uint8_t             advertising_set;
+    uint8_t             primary_phy;
+    uint8_t             secondary_phy;
+});
+
+typedef struct sl_bt_cmd_advertiser_set_phy_s sl_bt_cmd_advertiser_set_phy_t;
+
+
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_configuration_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint32_t            configurations;
 });
 
@@ -248,7 +265,7 @@ typedef struct sl_bt_cmd_advertiser_set_configuration_s sl_bt_cmd_advertiser_set
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_clear_configuration_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint32_t            configurations;
 });
 
@@ -257,7 +274,7 @@ typedef struct sl_bt_cmd_advertiser_clear_configuration_s sl_bt_cmd_advertiser_c
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_data_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             packet_type;
     uint8array          adv_data;
 });
@@ -267,7 +284,7 @@ typedef struct sl_bt_cmd_advertiser_set_data_s sl_bt_cmd_advertiser_set_data_t;
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_set_long_data_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             packet_type;
 });
 
@@ -276,7 +293,7 @@ typedef struct sl_bt_cmd_advertiser_set_long_data_s sl_bt_cmd_advertiser_set_lon
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_start_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint8_t             discover;
     uint8_t             connect;
 });
@@ -284,17 +301,9 @@ PACKSTRUCT( struct sl_bt_cmd_advertiser_start_s
 typedef struct sl_bt_cmd_advertiser_start_s sl_bt_cmd_advertiser_start_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_advertiser_stop_s
-{
-    uint8_t             handle;
-});
-
-typedef struct sl_bt_cmd_advertiser_stop_s sl_bt_cmd_advertiser_stop_t;
-
-
 PACKSTRUCT( struct sl_bt_cmd_advertiser_start_periodic_advertising_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
     uint16_t            interval_min;
     uint16_t            interval_max;
     uint32_t            flags;
@@ -305,18 +314,134 @@ typedef struct sl_bt_cmd_advertiser_start_periodic_advertising_s sl_bt_cmd_adver
 
 PACKSTRUCT( struct sl_bt_cmd_advertiser_stop_periodic_advertising_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
 });
 
 typedef struct sl_bt_cmd_advertiser_stop_periodic_advertising_s sl_bt_cmd_advertiser_stop_periodic_advertising_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_advertiser_delete_set_s
+
+PACKSTRUCT( struct sl_bt_cmd_legacy_advertiser_set_data_s
 {
-    uint8_t             handle;
+    uint8_t             advertising_set;
+    uint8_t             type;
+    uint8array          data;
 });
 
-typedef struct sl_bt_cmd_advertiser_delete_set_s sl_bt_cmd_advertiser_delete_set_t;
+typedef struct sl_bt_cmd_legacy_advertiser_set_data_s sl_bt_cmd_legacy_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_legacy_advertiser_generate_data_s
+{
+    uint8_t             advertising_set;
+    uint8_t             discover;
+});
+
+typedef struct sl_bt_cmd_legacy_advertiser_generate_data_s sl_bt_cmd_legacy_advertiser_generate_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_legacy_advertiser_start_s
+{
+    uint8_t             advertising_set;
+    uint8_t             connect;
+});
+
+typedef struct sl_bt_cmd_legacy_advertiser_start_s sl_bt_cmd_legacy_advertiser_start_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_legacy_advertiser_start_directed_s
+{
+    uint8_t             advertising_set;
+    uint8_t             connect;
+    bd_addr             peer_addr;
+    uint8_t             peer_addr_type;
+});
+
+typedef struct sl_bt_cmd_legacy_advertiser_start_directed_s sl_bt_cmd_legacy_advertiser_start_directed_t;
+
+
+
+PACKSTRUCT( struct sl_bt_cmd_extended_advertiser_set_phy_s
+{
+    uint8_t             advertising_set;
+    uint8_t             primary_phy;
+    uint8_t             secondary_phy;
+});
+
+typedef struct sl_bt_cmd_extended_advertiser_set_phy_s sl_bt_cmd_extended_advertiser_set_phy_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_extended_advertiser_set_data_s
+{
+    uint8_t             advertising_set;
+    uint8array          data;
+});
+
+typedef struct sl_bt_cmd_extended_advertiser_set_data_s sl_bt_cmd_extended_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_extended_advertiser_set_long_data_s
+{
+    uint8_t             advertising_set;
+});
+
+typedef struct sl_bt_cmd_extended_advertiser_set_long_data_s sl_bt_cmd_extended_advertiser_set_long_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_extended_advertiser_generate_data_s
+{
+    uint8_t             advertising_set;
+    uint8_t             discover;
+});
+
+typedef struct sl_bt_cmd_extended_advertiser_generate_data_s sl_bt_cmd_extended_advertiser_generate_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_extended_advertiser_start_s
+{
+    uint8_t             advertising_set;
+    uint8_t             connect;
+    uint32_t            flags;
+});
+
+typedef struct sl_bt_cmd_extended_advertiser_start_s sl_bt_cmd_extended_advertiser_start_t;
+
+
+
+PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_set_data_s
+{
+    uint8_t             advertising_set;
+    uint8array          data;
+});
+
+typedef struct sl_bt_cmd_periodic_advertiser_set_data_s sl_bt_cmd_periodic_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_set_long_data_s
+{
+    uint8_t             advertising_set;
+});
+
+typedef struct sl_bt_cmd_periodic_advertiser_set_long_data_s sl_bt_cmd_periodic_advertiser_set_long_data_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_start_s
+{
+    uint8_t             advertising_set;
+    uint16_t            interval_min;
+    uint16_t            interval_max;
+    uint32_t            flags;
+});
+
+typedef struct sl_bt_cmd_periodic_advertiser_start_s sl_bt_cmd_periodic_advertiser_start_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_periodic_advertiser_stop_s
+{
+    uint8_t             advertising_set;
+});
+
+typedef struct sl_bt_cmd_periodic_advertiser_stop_s sl_bt_cmd_periodic_advertiser_stop_t;
 
 
 
@@ -367,6 +492,15 @@ PACKSTRUCT( struct sl_bt_cmd_sync_open_s
 });
 
 typedef struct sl_bt_cmd_sync_open_s sl_bt_cmd_sync_open_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sync_set_reporting_mode_s
+{
+    uint16_t            sync;
+    uint8_t             reporting_mode;
+});
+
+typedef struct sl_bt_cmd_sync_set_reporting_mode_s sl_bt_cmd_sync_set_reporting_mode_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_sync_close_s
@@ -947,16 +1081,6 @@ PACKSTRUCT( struct sl_bt_cmd_gatt_server_send_user_write_response_s
 typedef struct sl_bt_cmd_gatt_server_send_user_write_response_s sl_bt_cmd_gatt_server_send_user_write_response_t;
 
 
-PACKSTRUCT( struct sl_bt_cmd_gatt_server_send_characteristic_notification_s
-{
-    uint8_t             connection;
-    uint16_t            characteristic;
-    uint8array          value;
-});
-
-typedef struct sl_bt_cmd_gatt_server_send_characteristic_notification_s sl_bt_cmd_gatt_server_send_characteristic_notification_t;
-
-
 PACKSTRUCT( struct sl_bt_cmd_gatt_server_send_notification_s
 {
     uint8_t             connection;
@@ -1067,17 +1191,6 @@ typedef struct sl_bt_cmd_nvm_erase_s sl_bt_cmd_nvm_erase_t;
 
 
 
-PACKSTRUCT( struct sl_bt_cmd_test_dtm_tx_s
-{
-    uint8_t             packet_type;
-    uint8_t             length;
-    uint8_t             channel;
-    uint8_t             phy;
-});
-
-typedef struct sl_bt_cmd_test_dtm_tx_s sl_bt_cmd_test_dtm_tx_t;
-
-
 PACKSTRUCT( struct sl_bt_cmd_test_dtm_tx_v4_s
 {
     uint8_t             packet_type;
@@ -1088,6 +1201,17 @@ PACKSTRUCT( struct sl_bt_cmd_test_dtm_tx_v4_s
 });
 
 typedef struct sl_bt_cmd_test_dtm_tx_v4_s sl_bt_cmd_test_dtm_tx_v4_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_test_dtm_tx_cw_s
+{
+    uint8_t             packet_type;
+    uint8_t             channel;
+    uint8_t             phy;
+    int16_t             power_level;
+});
+
+typedef struct sl_bt_cmd_test_dtm_tx_cw_s sl_bt_cmd_test_dtm_tx_cw_t;
 
 
 PACKSTRUCT( struct sl_bt_cmd_test_dtm_rx_s
@@ -1277,6 +1401,16 @@ PACKSTRUCT( struct sl_bt_cmd_sm_set_remote_oob_s
 });
 
 typedef struct sl_bt_cmd_sm_set_remote_oob_s sl_bt_cmd_sm_set_remote_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_cmd_sm_set_bonding_data_s
+{
+    uint8_t             connection;
+    uint8_t             type;
+    uint8array          data;
+});
+
+typedef struct sl_bt_cmd_sm_set_bonding_data_s sl_bt_cmd_sm_set_bonding_data_t;
 
 
 
@@ -1554,15 +1688,6 @@ typedef struct sl_bt_cmd_cte_receiver_enable_silabs_cte_s sl_bt_cmd_cte_receiver
 
 
 
-PACKSTRUCT( struct sl_bt_cmd_memory_profiler_reset_s
-{
-    uint32_t            flags;
-});
-
-typedef struct sl_bt_cmd_memory_profiler_reset_s sl_bt_cmd_memory_profiler_reset_t;
-
-
-
 PACKSTRUCT( struct sl_bt_cmd_user_message_to_target_s
 {
     uint8array          data;
@@ -1657,15 +1782,6 @@ PACKSTRUCT( struct sl_bt_rsp_system_linklayer_configure_s
 });
 
 typedef struct sl_bt_rsp_system_linklayer_configure_s sl_bt_rsp_system_linklayer_configure_t;
-
-
-PACKSTRUCT( struct sl_bt_rsp_system_set_max_tx_power_s
-{
-    uint16_t            result;
-    int16_t             set_power;
-});
-
-typedef struct sl_bt_rsp_system_set_max_tx_power_s sl_bt_rsp_system_set_max_tx_power_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_system_set_tx_power_s
@@ -1795,20 +1911,20 @@ PACKSTRUCT( struct sl_bt_rsp_advertiser_create_set_s
 typedef struct sl_bt_rsp_advertiser_create_set_s sl_bt_rsp_advertiser_create_set_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_advertiser_configure_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_advertiser_configure_s sl_bt_rsp_advertiser_configure_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_advertiser_set_timing_s
 {
     uint16_t            result;
 });
 
 typedef struct sl_bt_rsp_advertiser_set_timing_s sl_bt_rsp_advertiser_set_timing_t;
-
-
-PACKSTRUCT( struct sl_bt_rsp_advertiser_set_phy_s
-{
-    uint16_t            result;
-});
-
-typedef struct sl_bt_rsp_advertiser_set_phy_s sl_bt_rsp_advertiser_set_phy_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_advertiser_set_channel_map_s
@@ -1853,6 +1969,30 @@ PACKSTRUCT( struct sl_bt_rsp_advertiser_clear_random_address_s
 typedef struct sl_bt_rsp_advertiser_clear_random_address_s sl_bt_rsp_advertiser_clear_random_address_t;
 
 
+PACKSTRUCT( struct sl_bt_rsp_advertiser_stop_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_advertiser_stop_s sl_bt_rsp_advertiser_stop_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_advertiser_delete_set_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_advertiser_delete_set_s sl_bt_rsp_advertiser_delete_set_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_advertiser_set_phy_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_advertiser_set_phy_s sl_bt_rsp_advertiser_set_phy_t;
+
+
 PACKSTRUCT( struct sl_bt_rsp_advertiser_set_configuration_s
 {
     uint16_t            result;
@@ -1893,14 +2033,6 @@ PACKSTRUCT( struct sl_bt_rsp_advertiser_start_s
 typedef struct sl_bt_rsp_advertiser_start_s sl_bt_rsp_advertiser_start_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_advertiser_stop_s
-{
-    uint16_t            result;
-});
-
-typedef struct sl_bt_rsp_advertiser_stop_s sl_bt_rsp_advertiser_stop_t;
-
-
 PACKSTRUCT( struct sl_bt_rsp_advertiser_start_periodic_advertising_s
 {
     uint16_t            result;
@@ -1917,12 +2049,108 @@ PACKSTRUCT( struct sl_bt_rsp_advertiser_stop_periodic_advertising_s
 typedef struct sl_bt_rsp_advertiser_stop_periodic_advertising_s sl_bt_rsp_advertiser_stop_periodic_advertising_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_advertiser_delete_set_s
+PACKSTRUCT( struct sl_bt_rsp_legacy_advertiser_set_data_s
 {
     uint16_t            result;
 });
 
-typedef struct sl_bt_rsp_advertiser_delete_set_s sl_bt_rsp_advertiser_delete_set_t;
+typedef struct sl_bt_rsp_legacy_advertiser_set_data_s sl_bt_rsp_legacy_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_legacy_advertiser_generate_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_legacy_advertiser_generate_data_s sl_bt_rsp_legacy_advertiser_generate_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_legacy_advertiser_start_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_legacy_advertiser_start_s sl_bt_rsp_legacy_advertiser_start_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_legacy_advertiser_start_directed_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_legacy_advertiser_start_directed_s sl_bt_rsp_legacy_advertiser_start_directed_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_extended_advertiser_set_phy_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_extended_advertiser_set_phy_s sl_bt_rsp_extended_advertiser_set_phy_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_extended_advertiser_set_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_extended_advertiser_set_data_s sl_bt_rsp_extended_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_extended_advertiser_set_long_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_extended_advertiser_set_long_data_s sl_bt_rsp_extended_advertiser_set_long_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_extended_advertiser_generate_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_extended_advertiser_generate_data_s sl_bt_rsp_extended_advertiser_generate_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_extended_advertiser_start_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_extended_advertiser_start_s sl_bt_rsp_extended_advertiser_start_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_set_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_periodic_advertiser_set_data_s sl_bt_rsp_periodic_advertiser_set_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_set_long_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_periodic_advertiser_set_long_data_s sl_bt_rsp_periodic_advertiser_set_long_data_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_start_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_periodic_advertiser_start_s sl_bt_rsp_periodic_advertiser_start_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_periodic_advertiser_stop_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_periodic_advertiser_stop_s sl_bt_rsp_periodic_advertiser_stop_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_scanner_set_timing_s
@@ -1972,6 +2200,14 @@ PACKSTRUCT( struct sl_bt_rsp_sync_open_s
 });
 
 typedef struct sl_bt_rsp_sync_open_s sl_bt_rsp_sync_open_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sync_set_reporting_mode_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sync_set_reporting_mode_s sl_bt_rsp_sync_set_reporting_mode_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_sync_close_s
@@ -2475,15 +2711,6 @@ PACKSTRUCT( struct sl_bt_rsp_gatt_server_send_user_write_response_s
 typedef struct sl_bt_rsp_gatt_server_send_user_write_response_s sl_bt_rsp_gatt_server_send_user_write_response_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_gatt_server_send_characteristic_notification_s
-{
-    uint16_t            result;
-    uint16_t            sent_len;
-});
-
-typedef struct sl_bt_rsp_gatt_server_send_characteristic_notification_s sl_bt_rsp_gatt_server_send_characteristic_notification_t;
-
-
 PACKSTRUCT( struct sl_bt_rsp_gatt_server_send_notification_s
 {
     uint16_t            result;
@@ -2600,20 +2827,20 @@ PACKSTRUCT( struct sl_bt_rsp_nvm_erase_all_s
 typedef struct sl_bt_rsp_nvm_erase_all_s sl_bt_rsp_nvm_erase_all_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_test_dtm_tx_s
-{
-    uint16_t            result;
-});
-
-typedef struct sl_bt_rsp_test_dtm_tx_s sl_bt_rsp_test_dtm_tx_t;
-
-
 PACKSTRUCT( struct sl_bt_rsp_test_dtm_tx_v4_s
 {
     uint16_t            result;
 });
 
 typedef struct sl_bt_rsp_test_dtm_tx_v4_s sl_bt_rsp_test_dtm_tx_v4_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_test_dtm_tx_cw_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_test_dtm_tx_cw_s sl_bt_rsp_test_dtm_tx_cw_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_test_dtm_rx_s
@@ -2834,6 +3061,14 @@ PACKSTRUCT( struct sl_bt_rsp_sm_set_remote_oob_s
 });
 
 typedef struct sl_bt_rsp_sm_set_remote_oob_s sl_bt_rsp_sm_set_remote_oob_t;
+
+
+PACKSTRUCT( struct sl_bt_rsp_sm_set_bonding_data_s
+{
+    uint16_t            result;
+});
+
+typedef struct sl_bt_rsp_sm_set_bonding_data_s sl_bt_rsp_sm_set_bonding_data_t;
 
 
 PACKSTRUCT( struct sl_bt_rsp_ota_set_device_name_s
@@ -3085,37 +3320,6 @@ PACKSTRUCT( struct sl_bt_rsp_cte_receiver_disable_silabs_cte_s
 typedef struct sl_bt_rsp_cte_receiver_disable_silabs_cte_s sl_bt_rsp_cte_receiver_disable_silabs_cte_t;
 
 
-PACKSTRUCT( struct sl_bt_rsp_memory_profiler_get_status_s
-{
-    uint16_t            result;
-    uint32_t            num_memory_trackers;
-    uint32_t            num_live_allocations;
-    uint32_t            peak_live_allocations;
-    uint32_t            num_heap_bytes_used;
-    uint32_t            peak_heap_bytes_used;
-    uint32_t            peak_stack_bytes_used;
-    uint32_t            errors;
-});
-
-typedef struct sl_bt_rsp_memory_profiler_get_status_s sl_bt_rsp_memory_profiler_get_status_t;
-
-
-PACKSTRUCT( struct sl_bt_rsp_memory_profiler_reset_s
-{
-    uint16_t            result;
-});
-
-typedef struct sl_bt_rsp_memory_profiler_reset_s sl_bt_rsp_memory_profiler_reset_t;
-
-
-PACKSTRUCT( struct sl_bt_rsp_memory_profiler_list_ram_usage_s
-{
-    uint16_t            result;
-});
-
-typedef struct sl_bt_rsp_memory_profiler_list_ram_usage_s sl_bt_rsp_memory_profiler_list_ram_usage_t;
-
-
 PACKSTRUCT( struct sl_bt_rsp_user_message_to_target_s
 {
     uint16_t            result;
@@ -3144,7 +3348,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_system_reset_t                                     cmd_system_reset;
     sl_bt_cmd_system_halt_t                                      cmd_system_halt;
     sl_bt_cmd_system_linklayer_configure_t                       cmd_system_linklayer_configure;
-    sl_bt_cmd_system_set_max_tx_power_t                          cmd_system_set_max_tx_power;
     sl_bt_cmd_system_set_tx_power_t                              cmd_system_set_tx_power;
     sl_bt_cmd_system_set_identity_address_t                      cmd_system_set_identity_address;
     sl_bt_cmd_system_get_random_data_t                           cmd_system_get_random_data;
@@ -3155,27 +3358,42 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_gap_set_privacy_mode_t                             cmd_gap_set_privacy_mode;
     sl_bt_cmd_gap_set_data_channel_classification_t              cmd_gap_set_data_channel_classification;
     sl_bt_cmd_gap_enable_whitelisting_t                          cmd_gap_enable_whitelisting;
+    sl_bt_cmd_advertiser_configure_t                             cmd_advertiser_configure;
     sl_bt_cmd_advertiser_set_timing_t                            cmd_advertiser_set_timing;
-    sl_bt_cmd_advertiser_set_phy_t                               cmd_advertiser_set_phy;
     sl_bt_cmd_advertiser_set_channel_map_t                       cmd_advertiser_set_channel_map;
     sl_bt_cmd_advertiser_set_tx_power_t                          cmd_advertiser_set_tx_power;
     sl_bt_cmd_advertiser_set_report_scan_request_t               cmd_advertiser_set_report_scan_request;
     sl_bt_cmd_advertiser_set_random_address_t                    cmd_advertiser_set_random_address;
     sl_bt_cmd_advertiser_clear_random_address_t                  cmd_advertiser_clear_random_address;
+    sl_bt_cmd_advertiser_stop_t                                  cmd_advertiser_stop;
+    sl_bt_cmd_advertiser_delete_set_t                            cmd_advertiser_delete_set;
+    sl_bt_cmd_advertiser_set_phy_t                               cmd_advertiser_set_phy;
     sl_bt_cmd_advertiser_set_configuration_t                     cmd_advertiser_set_configuration;
     sl_bt_cmd_advertiser_clear_configuration_t                   cmd_advertiser_clear_configuration;
     sl_bt_cmd_advertiser_set_data_t                              cmd_advertiser_set_data;
     sl_bt_cmd_advertiser_set_long_data_t                         cmd_advertiser_set_long_data;
     sl_bt_cmd_advertiser_start_t                                 cmd_advertiser_start;
-    sl_bt_cmd_advertiser_stop_t                                  cmd_advertiser_stop;
     sl_bt_cmd_advertiser_start_periodic_advertising_t            cmd_advertiser_start_periodic_advertising;
     sl_bt_cmd_advertiser_stop_periodic_advertising_t             cmd_advertiser_stop_periodic_advertising;
-    sl_bt_cmd_advertiser_delete_set_t                            cmd_advertiser_delete_set;
+    sl_bt_cmd_legacy_advertiser_set_data_t                       cmd_legacy_advertiser_set_data;
+    sl_bt_cmd_legacy_advertiser_generate_data_t                  cmd_legacy_advertiser_generate_data;
+    sl_bt_cmd_legacy_advertiser_start_t                          cmd_legacy_advertiser_start;
+    sl_bt_cmd_legacy_advertiser_start_directed_t                 cmd_legacy_advertiser_start_directed;
+    sl_bt_cmd_extended_advertiser_set_phy_t                      cmd_extended_advertiser_set_phy;
+    sl_bt_cmd_extended_advertiser_set_data_t                     cmd_extended_advertiser_set_data;
+    sl_bt_cmd_extended_advertiser_set_long_data_t                cmd_extended_advertiser_set_long_data;
+    sl_bt_cmd_extended_advertiser_generate_data_t                cmd_extended_advertiser_generate_data;
+    sl_bt_cmd_extended_advertiser_start_t                        cmd_extended_advertiser_start;
+    sl_bt_cmd_periodic_advertiser_set_data_t                     cmd_periodic_advertiser_set_data;
+    sl_bt_cmd_periodic_advertiser_set_long_data_t                cmd_periodic_advertiser_set_long_data;
+    sl_bt_cmd_periodic_advertiser_start_t                        cmd_periodic_advertiser_start;
+    sl_bt_cmd_periodic_advertiser_stop_t                         cmd_periodic_advertiser_stop;
     sl_bt_cmd_scanner_set_timing_t                               cmd_scanner_set_timing;
     sl_bt_cmd_scanner_set_mode_t                                 cmd_scanner_set_mode;
     sl_bt_cmd_scanner_start_t                                    cmd_scanner_start;
     sl_bt_cmd_sync_set_parameters_t                              cmd_sync_set_parameters;
     sl_bt_cmd_sync_open_t                                        cmd_sync_open;
+    sl_bt_cmd_sync_set_reporting_mode_t                          cmd_sync_set_reporting_mode;
     sl_bt_cmd_sync_close_t                                       cmd_sync_close;
     sl_bt_cmd_connection_set_default_parameters_t                cmd_connection_set_default_parameters;
     sl_bt_cmd_connection_set_default_preferred_phy_t             cmd_connection_set_default_preferred_phy;
@@ -3235,7 +3453,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_gatt_server_write_attribute_value_t                cmd_gatt_server_write_attribute_value;
     sl_bt_cmd_gatt_server_send_user_read_response_t              cmd_gatt_server_send_user_read_response;
     sl_bt_cmd_gatt_server_send_user_write_response_t             cmd_gatt_server_send_user_write_response;
-    sl_bt_cmd_gatt_server_send_characteristic_notification_t     cmd_gatt_server_send_characteristic_notification;
     sl_bt_cmd_gatt_server_send_notification_t                    cmd_gatt_server_send_notification;
     sl_bt_cmd_gatt_server_send_indication_t                      cmd_gatt_server_send_indication;
     sl_bt_cmd_gatt_server_notify_all_t                           cmd_gatt_server_notify_all;
@@ -3248,8 +3465,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_nvm_save_t                                         cmd_nvm_save;
     sl_bt_cmd_nvm_load_t                                         cmd_nvm_load;
     sl_bt_cmd_nvm_erase_t                                        cmd_nvm_erase;
-    sl_bt_cmd_test_dtm_tx_t                                      cmd_test_dtm_tx;
     sl_bt_cmd_test_dtm_tx_v4_t                                   cmd_test_dtm_tx_v4;
+    sl_bt_cmd_test_dtm_tx_cw_t                                   cmd_test_dtm_tx_cw;
     sl_bt_cmd_test_dtm_rx_t                                      cmd_test_dtm_rx;
     sl_bt_cmd_sm_configure_t                                     cmd_sm_configure;
     sl_bt_cmd_sm_set_minimum_key_size_t                          cmd_sm_set_minimum_key_size;
@@ -3272,6 +3489,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_sm_set_legacy_oob_t                                cmd_sm_set_legacy_oob;
     sl_bt_cmd_sm_set_oob_t                                       cmd_sm_set_oob;
     sl_bt_cmd_sm_set_remote_oob_t                                cmd_sm_set_remote_oob;
+    sl_bt_cmd_sm_set_bonding_data_t                              cmd_sm_set_bonding_data;
     sl_bt_cmd_ota_set_device_name_t                              cmd_ota_set_device_name;
     sl_bt_cmd_ota_set_advertising_data_t                         cmd_ota_set_advertising_data;
     sl_bt_cmd_ota_set_configuration_t                            cmd_ota_set_configuration;
@@ -3300,7 +3518,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_cmd_cte_receiver_enable_connectionless_cte_t           cmd_cte_receiver_enable_connectionless_cte;
     sl_bt_cmd_cte_receiver_disable_connectionless_cte_t          cmd_cte_receiver_disable_connectionless_cte;
     sl_bt_cmd_cte_receiver_enable_silabs_cte_t                   cmd_cte_receiver_enable_silabs_cte;
-    sl_bt_cmd_memory_profiler_reset_t                            cmd_memory_profiler_reset;
     sl_bt_cmd_user_message_to_target_t                           cmd_user_message_to_target;
     sl_bt_cmd_user_manage_event_filter_t                         cmd_user_manage_event_filter;
     sl_bt_rsp_dfu_flash_set_address_t                            rsp_dfu_flash_set_address;
@@ -3312,7 +3529,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_system_get_version_t                               rsp_system_get_version;
     sl_bt_rsp_system_halt_t                                      rsp_system_halt;
     sl_bt_rsp_system_linklayer_configure_t                       rsp_system_linklayer_configure;
-    sl_bt_rsp_system_set_max_tx_power_t                          rsp_system_set_max_tx_power;
     sl_bt_rsp_system_set_tx_power_t                              rsp_system_set_tx_power;
     sl_bt_rsp_system_get_tx_power_setting_t                      rsp_system_get_tx_power_setting;
     sl_bt_rsp_system_set_identity_address_t                      rsp_system_set_identity_address;
@@ -3327,28 +3543,43 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_gap_set_data_channel_classification_t              rsp_gap_set_data_channel_classification;
     sl_bt_rsp_gap_enable_whitelisting_t                          rsp_gap_enable_whitelisting;
     sl_bt_rsp_advertiser_create_set_t                            rsp_advertiser_create_set;
+    sl_bt_rsp_advertiser_configure_t                             rsp_advertiser_configure;
     sl_bt_rsp_advertiser_set_timing_t                            rsp_advertiser_set_timing;
-    sl_bt_rsp_advertiser_set_phy_t                               rsp_advertiser_set_phy;
     sl_bt_rsp_advertiser_set_channel_map_t                       rsp_advertiser_set_channel_map;
     sl_bt_rsp_advertiser_set_tx_power_t                          rsp_advertiser_set_tx_power;
     sl_bt_rsp_advertiser_set_report_scan_request_t               rsp_advertiser_set_report_scan_request;
     sl_bt_rsp_advertiser_set_random_address_t                    rsp_advertiser_set_random_address;
     sl_bt_rsp_advertiser_clear_random_address_t                  rsp_advertiser_clear_random_address;
+    sl_bt_rsp_advertiser_stop_t                                  rsp_advertiser_stop;
+    sl_bt_rsp_advertiser_delete_set_t                            rsp_advertiser_delete_set;
+    sl_bt_rsp_advertiser_set_phy_t                               rsp_advertiser_set_phy;
     sl_bt_rsp_advertiser_set_configuration_t                     rsp_advertiser_set_configuration;
     sl_bt_rsp_advertiser_clear_configuration_t                   rsp_advertiser_clear_configuration;
     sl_bt_rsp_advertiser_set_data_t                              rsp_advertiser_set_data;
     sl_bt_rsp_advertiser_set_long_data_t                         rsp_advertiser_set_long_data;
     sl_bt_rsp_advertiser_start_t                                 rsp_advertiser_start;
-    sl_bt_rsp_advertiser_stop_t                                  rsp_advertiser_stop;
     sl_bt_rsp_advertiser_start_periodic_advertising_t            rsp_advertiser_start_periodic_advertising;
     sl_bt_rsp_advertiser_stop_periodic_advertising_t             rsp_advertiser_stop_periodic_advertising;
-    sl_bt_rsp_advertiser_delete_set_t                            rsp_advertiser_delete_set;
+    sl_bt_rsp_legacy_advertiser_set_data_t                       rsp_legacy_advertiser_set_data;
+    sl_bt_rsp_legacy_advertiser_generate_data_t                  rsp_legacy_advertiser_generate_data;
+    sl_bt_rsp_legacy_advertiser_start_t                          rsp_legacy_advertiser_start;
+    sl_bt_rsp_legacy_advertiser_start_directed_t                 rsp_legacy_advertiser_start_directed;
+    sl_bt_rsp_extended_advertiser_set_phy_t                      rsp_extended_advertiser_set_phy;
+    sl_bt_rsp_extended_advertiser_set_data_t                     rsp_extended_advertiser_set_data;
+    sl_bt_rsp_extended_advertiser_set_long_data_t                rsp_extended_advertiser_set_long_data;
+    sl_bt_rsp_extended_advertiser_generate_data_t                rsp_extended_advertiser_generate_data;
+    sl_bt_rsp_extended_advertiser_start_t                        rsp_extended_advertiser_start;
+    sl_bt_rsp_periodic_advertiser_set_data_t                     rsp_periodic_advertiser_set_data;
+    sl_bt_rsp_periodic_advertiser_set_long_data_t                rsp_periodic_advertiser_set_long_data;
+    sl_bt_rsp_periodic_advertiser_start_t                        rsp_periodic_advertiser_start;
+    sl_bt_rsp_periodic_advertiser_stop_t                         rsp_periodic_advertiser_stop;
     sl_bt_rsp_scanner_set_timing_t                               rsp_scanner_set_timing;
     sl_bt_rsp_scanner_set_mode_t                                 rsp_scanner_set_mode;
     sl_bt_rsp_scanner_start_t                                    rsp_scanner_start;
     sl_bt_rsp_scanner_stop_t                                     rsp_scanner_stop;
     sl_bt_rsp_sync_set_parameters_t                              rsp_sync_set_parameters;
     sl_bt_rsp_sync_open_t                                        rsp_sync_open;
+    sl_bt_rsp_sync_set_reporting_mode_t                          rsp_sync_set_reporting_mode;
     sl_bt_rsp_sync_close_t                                       rsp_sync_close;
     sl_bt_rsp_connection_set_default_parameters_t                rsp_connection_set_default_parameters;
     sl_bt_rsp_connection_set_default_preferred_phy_t             rsp_connection_set_default_preferred_phy;
@@ -3409,7 +3640,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_gatt_server_write_attribute_value_t                rsp_gatt_server_write_attribute_value;
     sl_bt_rsp_gatt_server_send_user_read_response_t              rsp_gatt_server_send_user_read_response;
     sl_bt_rsp_gatt_server_send_user_write_response_t             rsp_gatt_server_send_user_write_response;
-    sl_bt_rsp_gatt_server_send_characteristic_notification_t     rsp_gatt_server_send_characteristic_notification;
     sl_bt_rsp_gatt_server_send_notification_t                    rsp_gatt_server_send_notification;
     sl_bt_rsp_gatt_server_send_indication_t                      rsp_gatt_server_send_indication;
     sl_bt_rsp_gatt_server_notify_all_t                           rsp_gatt_server_notify_all;
@@ -3424,8 +3654,8 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_nvm_load_t                                         rsp_nvm_load;
     sl_bt_rsp_nvm_erase_t                                        rsp_nvm_erase;
     sl_bt_rsp_nvm_erase_all_t                                    rsp_nvm_erase_all;
-    sl_bt_rsp_test_dtm_tx_t                                      rsp_test_dtm_tx;
     sl_bt_rsp_test_dtm_tx_v4_t                                   rsp_test_dtm_tx_v4;
+    sl_bt_rsp_test_dtm_tx_cw_t                                   rsp_test_dtm_tx_cw;
     sl_bt_rsp_test_dtm_rx_t                                      rsp_test_dtm_rx;
     sl_bt_rsp_test_dtm_end_t                                     rsp_test_dtm_end;
     sl_bt_rsp_sm_configure_t                                     rsp_sm_configure;
@@ -3452,6 +3682,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_sm_set_legacy_oob_t                                rsp_sm_set_legacy_oob;
     sl_bt_rsp_sm_set_oob_t                                       rsp_sm_set_oob;
     sl_bt_rsp_sm_set_remote_oob_t                                rsp_sm_set_remote_oob;
+    sl_bt_rsp_sm_set_bonding_data_t                              rsp_sm_set_bonding_data;
     sl_bt_rsp_ota_set_device_name_t                              rsp_ota_set_device_name;
     sl_bt_rsp_ota_set_advertising_data_t                         rsp_ota_set_advertising_data;
     sl_bt_rsp_ota_set_configuration_t                            rsp_ota_set_configuration;
@@ -3483,9 +3714,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_rsp_cte_receiver_disable_connectionless_cte_t          rsp_cte_receiver_disable_connectionless_cte;
     sl_bt_rsp_cte_receiver_enable_silabs_cte_t                   rsp_cte_receiver_enable_silabs_cte;
     sl_bt_rsp_cte_receiver_disable_silabs_cte_t                  rsp_cte_receiver_disable_silabs_cte;
-    sl_bt_rsp_memory_profiler_get_status_t                       rsp_memory_profiler_get_status;
-    sl_bt_rsp_memory_profiler_reset_t                            rsp_memory_profiler_reset;
-    sl_bt_rsp_memory_profiler_list_ram_usage_t                   rsp_memory_profiler_list_ram_usage;
     sl_bt_rsp_user_message_to_target_t                           rsp_user_message_to_target;
     sl_bt_rsp_user_manage_event_filter_t                         rsp_user_manage_event_filter;
     sl_bt_evt_dfu_boot_t                                         evt_dfu_boot;
@@ -3497,7 +3725,7 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_system_soft_timer_t                                evt_system_soft_timer;
     sl_bt_evt_advertiser_timeout_t                               evt_advertiser_timeout;
     sl_bt_evt_advertiser_scan_request_t                          evt_advertiser_scan_request;
-    sl_bt_evt_advertiser_periodic_advertising_status_t           evt_advertiser_periodic_advertising_status;
+    sl_bt_evt_periodic_advertiser_status_t                       evt_periodic_advertiser_status;
     sl_bt_evt_scanner_scan_report_t                              evt_scanner_scan_report;
     sl_bt_evt_sync_opened_t                                      evt_sync_opened;
     sl_bt_evt_sync_data_t                                        evt_sync_data;
@@ -3542,7 +3770,6 @@ PACKSTRUCT( struct sl_bt_packet {
     sl_bt_evt_cte_receiver_connection_iq_report_t                evt_cte_receiver_connection_iq_report;
     sl_bt_evt_cte_receiver_connectionless_iq_report_t            evt_cte_receiver_connectionless_iq_report;
     sl_bt_evt_cte_receiver_silabs_iq_report_t                    evt_cte_receiver_silabs_iq_report;
-    sl_bt_evt_memory_profiler_ram_usage_entry_t                  evt_memory_profiler_ram_usage_entry;
     sl_bt_evt_user_message_to_host_t                             evt_user_message_to_host;
     uint8_t payload[SL_BGAPI_MAX_PAYLOAD_SIZE];
   } data;

@@ -8,9 +8,6 @@ requires:
   - name: device
   - name: status
   - name: rail_lib
-  - name: rail_util_ant_div_cli
-    condition:
-      - cli
   - name: rail_util_ieee802154_phy_select
   - name: rail_util_rf_path
     condition:
@@ -39,7 +36,7 @@ template_contribution:
       event: stack_init
       include: sl_rail_util_ant_div.h
       handler: sl_rail_util_ant_div_init
-    priority: -9005
+    priority: -7005
   - name: rail_util_ieee802154_phy_select_callbacks
     value:
       include: sl_rail_util_ant_div.h

@@ -36,6 +36,10 @@
 #ifndef  _USBH_CORE_H_
 #define  _USBH_CORE_H_
 
+#if !defined(SL_SUPRESS_MICRIUMOS_USB_HOST_DEPRECATION_WARNINGS)
+#warning  Warning: MicriumOS-USB-Host is deprecated and will be removed in an upcoming release.
+#endif
+
 /********************************************************************************************************
  ********************************************************************************************************
  *                                               INCLUDE FILES

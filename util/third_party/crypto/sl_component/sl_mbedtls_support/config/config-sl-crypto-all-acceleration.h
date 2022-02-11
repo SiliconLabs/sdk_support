@@ -249,7 +249,6 @@
 #define MBEDTLS_ECP_DP_SECP256R1_ENABLED
 
 /* Save RAM by adjusting to our exact needs */
-#define MBEDTLS_ECP_MAX_BITS   256
 #ifndef MBEDTLS_MPI_MAX_SIZE
 #define MBEDTLS_MPI_MAX_SIZE    32 // 384 bits is 48 bytes
 #endif
@@ -268,10 +267,11 @@
 #define MBEDTLS_ECP_NIST_OPTIM
 
 /* Include the default mbed TLS config file */
-#include "mbedtls/config.h"
+#include "mbedtls/mbedtls_config.h"
 
 #undef MBEDTLS_TIMING_C
 #undef MBEDTLS_FS_IO
+#undef MBEDTLS_PSA_ITS_FILE_C
 #undef MBEDTLS_NET_C
 #undef MBEDTLS_HAVE_TIME
 #undef MBEDTLS_HAVE_TIME_DATE

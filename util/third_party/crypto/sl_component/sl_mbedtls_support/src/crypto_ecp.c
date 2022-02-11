@@ -55,16 +55,24 @@
  *     <http://eprint.iacr.org/2004/342.pdf>
  */
 
-#include "mbedtls/ecp.h"
-#include "mbedtls/ecp_internal.h"
+/** Allow access to mbedtls structs' private members.
+ *
+ * Although the library tries to enforce not reaching into library structures
+ * directly, the nature of this code (alternate implementation) is as such that
+ * we need to reach down to get to the data we need.
+ */
+#define MBEDTLS_ALLOW_PRIVATE_ACCESS
 
 #include "em_device.h"
+#include "mbedtls/ecp.h"
+#include "ecp_internal_alt.h"
 
 #if defined(CRYPTO_PRESENT)
 #if defined(MBEDTLS_ECP_C)
 #if defined(MBEDTLS_ECP_INTERNAL_ALT)
 
 #include "mbedtls/platform.h"
+#include "mbedtls/error.h"
 #include "em_crypto.h"
 #include "em_core.h"
 #include "crypto_management.h"
@@ -496,7 +504,7 @@ static int ecp_crypto_device_init(CRYPTO_TypeDef *device, const mbedtls_ecp_grou
 #endif /* MBEDTLS_ECP_DP_SECP256R1_ENABLED */
 
     default:
-      ret = MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+      ret = MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
       break;
   }
 
@@ -687,7 +695,7 @@ int mbedtls_internal_ecp_randomize_jac(const mbedtls_ecp_group *grp,
       bigint_set_bytes(l, 0, 192 / 8, sizeof(ecc_bigint_t) - (192 / 8));
       break;
     default:
-      return MBEDTLS_ERR_ECP_FEATURE_UNAVAILABLE;
+      return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
   }
   if ( ret != 0 ) {
     return(ret);

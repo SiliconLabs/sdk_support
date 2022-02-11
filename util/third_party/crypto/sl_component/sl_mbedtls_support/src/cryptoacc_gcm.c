@@ -60,6 +60,7 @@
 #include "mbedtls/aes.h"
 #include "mbedtls/platform.h"
 #include "mbedtls/platform_util.h"
+#include "mbedtls/error.h"
 #include "sx_aes.h"
 #include "sx_math.h"
 #include "sx_errors.h"
@@ -141,11 +142,29 @@ int mbedtls_gcm_setkey(mbedtls_gcm_context *ctx,
 int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
                        int mode,
                        const unsigned char *iv,
-                       size_t iv_len,
-                       const unsigned char *add,
-                       size_t add_len)
+                       size_t iv_len)
 {
-  int status;
+  GCM_VALIDATE_RET(ctx != NULL);
+  GCM_VALIDATE_RET(iv != NULL);
+
+  int status = sli_validate_gcm_params(16, iv_len, 0);
+  if (status) {
+    return status;
+  }
+
+  /* Store input in context data structure. */
+  ctx->dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
+  ctx->add_len    = 0;
+  ctx->len        = 0;
+
+  memcpy(ctx->sx_ctx, iv, AES_IV_GCM_SIZE);
+  return 0;
+}
+
+int mbedtls_gcm_update_ad(mbedtls_gcm_context *ctx,
+                          const unsigned char *add,
+                          size_t add_len)
+{
   uint32_t sx_ret;
   block_t  key;
   block_t  aad;
@@ -154,55 +173,53 @@ int mbedtls_gcm_starts(mbedtls_gcm_context *ctx,
   block_t  dummy = NULL_blk;
 
   GCM_VALIDATE_RET(ctx != NULL);
-  GCM_VALIDATE_RET(iv != NULL);
   GCM_VALIDATE_RET(add_len == 0 || add != NULL);
-
-  status = sli_validate_gcm_params(16, iv_len, add_len);
+  int status = sli_validate_gcm_params(16, 12, add_len);
   if (status) {
     return status;
   }
 
-  /* Store input in context data structure. */
-  ctx->dir = mode == MBEDTLS_AES_ENCRYPT ? ENC : DEC;
-  ctx->add_len    = add_len;
-  /* Reset data length to zero. */
-  ctx->len        = 0;
-
   if (add_len == 0) {
-    memcpy(ctx->sx_ctx, iv, AES_IV_GCM_SIZE);
-  } else {
-    key = block_t_convert(ctx->key, ctx->keybits / 8);
-    nonce = block_t_convert(iv, AES_IV_GCM_SIZE);
-    aad = block_t_convert(add, add_len);
-    hw_ctx = block_t_convert(ctx->sx_ctx, AES_CTX_xCM_SIZE);
-
-    status = cryptoacc_management_acquire();
-    if (status != 0) {
-      return status;
-    }
-    /* Execute GCM operation */
-    if (ctx->dir == ENC) {
-      sx_ret = sx_aes_gcm_encrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
-                                       (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
-    } else {
-      sx_ret = sx_aes_gcm_decrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
-                                       (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
-    }
-    status = cryptoacc_management_release();
-
-    if (sx_ret == CRYPTOLIB_SUCCESS) {
-      return status;
-    } else {
-      return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
-    }
+    return 0;
   }
-  return 0;
+
+  if (ctx->add_len > 0) {
+    // This accelerator does not support adding AD in chunks
+    return MBEDTLS_ERR_PLATFORM_FEATURE_UNSUPPORTED;
+  }
+
+  ctx->add_len = add_len;
+
+  key = block_t_convert(ctx->key, ctx->keybits / 8);
+  nonce = block_t_convert(ctx->sx_ctx, AES_IV_GCM_SIZE);
+  aad = block_t_convert(add, add_len);
+  hw_ctx = block_t_convert(ctx->sx_ctx, AES_CTX_xCM_SIZE);
+
+  status = cryptoacc_management_acquire();
+  if (status != 0) {
+    return status;
+  }
+  /* Execute GCM operation */
+  if (ctx->dir == ENC) {
+    sx_ret = sx_aes_gcm_encrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
+                                     (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
+  } else {
+    sx_ret = sx_aes_gcm_decrypt_init((const block_t *)&key, (const block_t *)&dummy, &dummy,
+                                     (const block_t *)&nonce, &hw_ctx, (const block_t *)&aad);
+  }
+  status = cryptoacc_management_release();
+
+  if (sx_ret == CRYPTOLIB_SUCCESS) {
+    return status;
+  } else {
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
+  }
 }
 
 int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
-                       size_t length,
-                       const unsigned char *input,
-                       unsigned char *output)
+                       const unsigned char *input, size_t input_length,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length)
 {
   int status;
   uint32_t sx_ret;
@@ -214,23 +231,29 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
   block_t  dummy = NULL_blk;
 
   GCM_VALIDATE_RET(ctx != NULL);
-  GCM_VALIDATE_RET(length == 0 || input != NULL);
-  GCM_VALIDATE_RET(length == 0 || output != NULL);
+  GCM_VALIDATE_RET(input_length == 0 || input != NULL);
+  GCM_VALIDATE_RET(input_length == 0 || output != NULL);
 
-  if (length == 0) {
+  *output_length = 0;
+
+  if (input_length > output_size) {
+    return MBEDTLS_ERR_GCM_BAD_INPUT;
+  }
+
+  if (input_length == 0) {
     return 0;
   }
 
   /* Total length is restricted to 2^39 - 256 bits, ie 2^36 - 2^5 bytes
    * Also check for possible overflow */
-  if ( ctx->len + length < ctx->len
-       || (uint64_t) ctx->len + length > 0xFFFFFFFE0ull ) {
+  if ( ctx->len + input_length < ctx->len
+       || (uint64_t) ctx->len + input_length > 0xFFFFFFFE0ull ) {
     return(MBEDTLS_ERR_GCM_BAD_INPUT);
   }
 
   key = block_t_convert(ctx->key, ctx->keybits / 8);
-  data_in = block_t_convert(input, length);
-  data_out = block_t_convert(output, length);
+  data_in = block_t_convert(input, input_length);
+  data_out = block_t_convert(output, input_length);
   hw_ctx = block_t_convert(ctx->sx_ctx, AES_CTX_xCM_SIZE);
 
   if (ctx->add_len == 0 && ctx->len == 0) {
@@ -268,19 +291,30 @@ int mbedtls_gcm_update(mbedtls_gcm_context *ctx,
     status = cryptoacc_management_release();
   }
 
-  ctx->len += length;
+  ctx->len += input_length;
 
   if (sx_ret == CRYPTOLIB_SUCCESS) {
+    *output_length = input_length;
     return status;
   } else {
-    return MBEDTLS_ERR_AES_HW_ACCEL_FAILED;
+    memset(output, 0, output_size);
+    return MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED;
   }
 }
 
 int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
+                       unsigned char *output, size_t output_size,
+                       size_t *output_length,
                        unsigned char *tag,
                        size_t tag_len)
 {
+  // Voiding these because our implementation does not support
+  // partial-block input (i.e. passing a partial block to
+  // update() will have caused the operation to finish already)
+  (void) output;
+  (void) output_size;
+  *output_length = 0;
+
   int status;
   uint32_t sx_ret;
   block_t key;
@@ -331,7 +365,7 @@ int mbedtls_gcm_finish(mbedtls_gcm_context *ctx,
     status = cryptoacc_management_release();
 
     if (sx_ret != CRYPTOLIB_SUCCESS) {
-      return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+      return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
     }
 
     memcpy(tag, tagbuf, tag_len);
@@ -397,7 +431,7 @@ int mbedtls_gcm_crypt_and_tag(mbedtls_gcm_context *ctx,
 
   if (sx_ret != CRYPTOLIB_SUCCESS) {
     mbedtls_zeroize(output, length);
-    return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+    return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 
   memcpy(tag, tagbuf, tag_len);
@@ -463,7 +497,7 @@ int mbedtls_gcm_auth_decrypt(mbedtls_gcm_context *ctx,
     }
   } else {
     mbedtls_zeroize(output, length);
-    return(MBEDTLS_ERR_AES_HW_ACCEL_FAILED);
+    return(MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED);
   }
 }
 

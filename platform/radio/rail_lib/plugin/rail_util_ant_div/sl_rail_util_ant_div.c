@@ -39,6 +39,13 @@
   #define ANTENNA_UNSPECIFIED_LOC -1 // Dummy location to select legacy GPIO scheme
 #endif//_SILICON_LABS_32B_SERIES_2
 
+#ifndef SL_RAIL_UTIL_ANT_DIV_ANT0_LOC
+  #define SL_RAIL_UTIL_ANT_DIV_ANT0_LOC ANTENNA_UNSPECIFIED_LOC
+#endif
+#ifndef SL_RAIL_UTIL_ANT_DIV_ANT1_LOC
+  #define SL_RAIL_UTIL_ANT_DIV_ANT1_LOC ANTENNA_UNSPECIFIED_LOC
+#endif
+
 // Determine scheme to use based on platform, PHY, debug, and GPIO location(s):
 #if (!defined(_SILICON_LABS_32B_SERIES_1_CONFIG_1)                                          \
   && (((defined(SL_RAIL_UTIL_ANT_DIV_ANT0_PORT) || defined(SL_RAIL_UTIL_ANT_DIV_ANT1_PORT)) \
@@ -86,6 +93,10 @@ sl_status_t sl_rail_util_ant_div_init(void)
   if (RAIL_ConfigAntenna(RAIL_EFR32_HANDLE, &antennaConfig)
       != RAIL_STATUS_NO_ERROR) {
     return SL_STATUS_NOT_SUPPORTED;
+  }
+  sl_status_t status = sl_rail_util_ant_div_set_rx_antenna_mode(SL_RAIL_UTIL_ANTENNA_RX_DEFAULT_MODE);
+  if (status != SL_STATUS_OK) {
+    return status;
   }
   return sl_rail_util_ant_div_set_tx_antenna_mode(SL_RAIL_UTIL_ANTENNA_TX_DEFAULT_MODE);
  #else//!ANTENNA_USE_RAIL_SCHEME

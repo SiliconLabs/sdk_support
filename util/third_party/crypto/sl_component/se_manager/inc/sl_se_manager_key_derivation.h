@@ -391,8 +391,11 @@ sl_status_t sl_se_derive_key_hkdf(sl_se_command_context_t *cmd_ctx,
  * @param[in] in_key
  *   Pointer to the input key material.
  *
- * @param[in] hash
- *   Which hashing algorithm to use.
+ * @param[in] prf
+ *   The underlying psuedorandom function (PRF) to use in the algorithm. The
+ *   most common choice of HMAC-SHA-{1, 224, 256, 384, 512} is supported on all
+ *   Series-2 devices (with Vault High Security). Newer chips, EFR32xG23 and
+ *   later, also support usage of AES-CMAC-PRF-128.
  *
  * @param[in] salt
  *   An optional salt value (a non-secret random value).
@@ -413,7 +416,7 @@ sl_status_t sl_se_derive_key_hkdf(sl_se_command_context_t *cmd_ctx,
  ******************************************************************************/
 sl_status_t sl_se_derive_key_pbkdf2(sl_se_command_context_t *cmd_ctx,
                                     const sl_se_key_descriptor_t *in_key,
-                                    sl_se_hash_type_t hash,
+                                    sl_se_pbkdf2_prf_type_t prf,
                                     const unsigned char *salt,
                                     size_t salt_len,
                                     uint32_t iterations,

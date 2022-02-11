@@ -146,7 +146,7 @@ void SystemInit(void)
   SCB->CCR |= SCB_CCR_UNALIGN_TRP_Msk;
 #endif
 
-#if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+#if (__FPU_PRESENT == 1)
   SCB->CPACR |= ((3U << 10U * 2U)           /* set CP10 Full Access */
                  | (3U << 11U * 2U));       /* set CP11 Full Access */
 #endif

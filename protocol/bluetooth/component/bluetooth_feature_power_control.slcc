@@ -1,5 +1,5 @@
 id: "bluetooth_feature_power_control"
-label:  "PowerControl"
+label:  "LE Power Control"
 package: "Bluetooth"
 description: >
   Bluetooth LE Power Control feature
@@ -17,11 +17,11 @@ provides:
 template_contribution:
   - name: component_catalog
     value: bluetooth_feature_power_control
-  - name: bluetooth_stack_pre_init
+  - name: bluetooth_host_init_controller
     value:
       include: "sl_bt_power_control_config.h"
-      function: "sl_bt_init_power_control"
-    priority: 4
+      function: "sl_bt_init_power_control()"
+    priority: 10
   - name: bluetooth_controller_feature_init
     value:
       include: sl_bt_power_control_config.h

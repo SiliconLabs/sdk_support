@@ -106,11 +106,13 @@ void getStatus(sl_cli_command_arg_t *args)
                         counters.syncDetect,
                         counters.noRxBuffer
                         );
-  responsePrintContinue("RfSensed:%u,"
+  responsePrintContinue("TxRemainErrs:%u,"
+                        "RfSensed:%u,"
                         "ackTimeout:%u,"
                         "ackTxFpSet:%u,"
                         "ackTxFpFail:%u,"
                         "ackTxFpAddrFail:%u",
+                        counters.userTxRemainingErrors,
                         counters.rfSensedEvent,
                         counters.ackTimeout,
                         counters.ackTxFpSet,
@@ -199,16 +201,38 @@ void fifoStatus(sl_cli_command_arg_t *args)
                 );
 }
 
-void getVersion(sl_cli_command_arg_t *args)
+static void printRailVersion(sl_cli_command_arg_t *args, bool verbose)
 {
   RAIL_Version_t rail_ver;
-  RAIL_GetVersion(&rail_ver, false);
-  responsePrint(sl_cli_get_command_string(args, 0), "App:%d.%d.%d,RAIL:%d.%d.%d,Multiprotocol:%s,"
-                                                    "Built:%s",
-                rail_ver.major, rail_ver.minor, rail_ver.rev,
-                rail_ver.major, rail_ver.minor, rail_ver.rev,
-                rail_ver.multiprotocol ? "True" : "False",
-                buildDateTime);
+  RAIL_GetVersion(&rail_ver, verbose);
+  responsePrintStart(sl_cli_get_command_string(args, 0));
+  responsePrintContinue("App:%d.%d.%d",
+                        rail_ver.major, rail_ver.minor, rail_ver.rev);
+  if (verbose) {
+    responsePrintContinue("RAIL:%d.%d.%d.%d,"
+                          "hash:0x%.8X,"
+                          "flags:0x%.2X",
+                          rail_ver.major, rail_ver.minor, rail_ver.rev, rail_ver.build,
+                          rail_ver.hash,
+                          rail_ver.flags);
+  } else {
+    responsePrintContinue("RAIL:%d.%d.%d",
+                          rail_ver.major, rail_ver.minor, rail_ver.rev);
+  }
+  responsePrintEnd("Multiprotocol:%s,"
+                   "Built:%s",
+                   rail_ver.multiprotocol ? "True" : "False",
+                   buildDateTime);
+}
+
+void getVersion(sl_cli_command_arg_t *args)
+{
+  printRailVersion(args, false);
+}
+
+void getVersionVerbose(sl_cli_command_arg_t *args)
+{
+  printRailVersion(args, true);
 }
 
 static const char *ptiModes[] = {
@@ -218,6 +242,7 @@ static const char *ptiModes[] = {
 void getPti(sl_cli_command_arg_t *args)
 {
   RAIL_PtiConfig_t ptiConfig;
+  CHECK_RAIL_HANDLE((args == NULL) ? "pti" : sl_cli_get_command_string(args, 0));
   // Get the current config and change the baud rate as requested
   RAIL_GetPtiConfig(railHandle, &ptiConfig);
   if (ptiConfig.mode >= (sizeof(ptiModes) / sizeof(*ptiModes))) {
@@ -240,17 +265,6 @@ void setPtiProtocol(sl_cli_command_arg_t *args)
   (void) RAIL_SetPtiProtocol(railHandle, (RAIL_PtiProtocol_t) sl_cli_get_argument_uint8(args, 0));
   // success (or not) will be reflected in getPti() output
   getPti(args);
-}
-
-void getVersionVerbose(sl_cli_command_arg_t *args)
-{
-  RAIL_Version_t rail_ver;
-  RAIL_GetVersion(&rail_ver, true);
-  responsePrint(sl_cli_get_command_string(args, 0), "App:%d.%d.%d,RAIL:%d.%d.%d.%d",
-                rail_ver.major, rail_ver.minor, rail_ver.rev,
-                rail_ver.major, rail_ver.minor, rail_ver.rev, rail_ver.build);
-  responsePrint(sl_cli_get_command_string(args, 0), "hash:0x%.8X,flags:0x%.2X",
-                rail_ver.hash, rail_ver.flags);
 }
 
 void offsetLqi(sl_cli_command_arg_t *args)
@@ -427,6 +441,10 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      RAIL_SUPPORTS_SUBGHZ_BAND ? "Yes" : "No",
                      RAIL_SupportsSubGHzBand(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_SUPPORTS_OFDM_PA",
+                     RAIL_SUPPORTS_OFDM_PA ? "Yes" : "No",
+                     RAIL_SupportsOFDMPA(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_ALTERNATE_TX_POWER",
                      RAIL_SUPPORTS_ALTERNATE_TX_POWER ? "Yes" : "No",
                      RAIL_SupportsAlternateTxPower(railHandle) ? "Yes" : "No");
@@ -542,22 +560,86 @@ void printChipFeatures(sl_cli_command_arg_t *args)
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_TX_POWER_MODE_2P4GIG_LP", "N/A", "N/A");
  #endif//RAIL_TX_POWER_MODE_2P4GIG_LP
- #ifdef  RAIL_TX_POWER_MODE_SUBGIG
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_HP
   if (RAIL_SupportsTxPowerMode(railHandle,
-                               RAIL_TX_POWER_MODE_SUBGIG,
+                               RAIL_TX_POWER_MODE_SUBGIG_HP,
                                &maxPowerLevel)
       && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
     responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
-                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes",
+                       "RAIL_TX_POWER_MODE_SUBGIG_HP", "Yes",
                        maxPowerLevel);
   } else {
     responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                       "RAIL_TX_POWER_MODE_SUBGIG", "Yes", "No");
+                       "RAIL_TX_POWER_MODE_SUBGIG_HP", "Yes", "No");
   }
  #else
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_TX_POWER_MODE_SUBGIG", "N/A", "N/A");
- #endif//RAIL_TX_POWER_MODE_SUBGIG
+                     "RAIL_TX_POWER_MODE_SUBGIG_HP", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_HP
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_MP
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_MP,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_MP", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_MP", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_MP", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_MP
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_LP
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_LP,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_LP", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_LP", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_LP", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_LP
+ #ifdef RAIL_TX_POWER_MODE_SUBGIG_LLP
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_SUBGIG_LLP,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_SUBGIG_LLP", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_SUBGIG_LLP", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_SUBGIG_LLP", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_SUBGIG_LLP
+ #ifdef RAIL_TX_POWER_MODE_OFDM_PA
+  if (RAIL_SupportsTxPowerMode(railHandle,
+                               RAIL_TX_POWER_MODE_OFDM_PA,
+                               &maxPowerLevel)
+      && (maxPowerLevel != RAIL_TX_POWER_LEVEL_INVALID)) {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%u",
+                       "RAIL_TX_POWER_MODE_OFDM_PA", "Yes",
+                       maxPowerLevel);
+  } else {
+    responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                       "RAIL_TX_POWER_MODE_OFDM_PA", "Yes", "No");
+  }
+ #else
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_TX_POWER_MODE_OFDM_PA", "N/A", "N/A");
+ #endif//RAIL_TX_POWER_MODE_OFDM_PA
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_BLE",
                      RAIL_SUPPORTS_PROTOCOL_BLE ? "Yes" : "No",
@@ -631,6 +713,14 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      RAIL_IEEE802154_SUPPORTS_G_SUBSET_GB868 ? "Yes" : "No",
                      RAIL_IEEE802154_SupportsGSubsetGB868(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_IEEE802154_SUPPORTS_G_DYNFEC",
+                     RAIL_IEEE802154_SUPPORTS_G_DYNFEC ? "Yes" : "No",
+                     RAIL_IEEE802154_SupportsGDynFec(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_IEEE802154_SUPPORTS_G_MODESWITCH",
+                     RAIL_IEEE802154_SUPPORTS_G_MODESWITCH ? "Yes" : "No",
+                     RAIL_IEEE802154_SupportsGModeSwitch(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_RX",
                      RAIL_IEEE802154_SUPPORTS_G_UNWHITENED_RX ? "Yes" : "No",
                      RAIL_IEEE802154_SupportsGUnwhitenedRx(railHandle) ? "Yes" : "No");
@@ -654,6 +744,14 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      "RAIL_IEEE802154_SUPPORTS_E_MULTIPURPOSE_FRAMES",
                      RAIL_IEEE802154_SUPPORTS_E_MULTIPURPOSE_FRAMES ? "Yes" : "No",
                      RAIL_IEEE802154_SupportsEMultipurposeFrames(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG",
+                     RAIL_IEEE802154_SUPPORTS_DUAL_PA_CONFIG ? "Yes" : "No",
+                     RAIL_IEEE802154_SupportsDualPaConfig(railHandle) ? "Yes" : "No");
+  responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
+                     "RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY",
+                     RAIL_IEEE802154_SUPPORTS_CUSTOM1_PHY ? "Yes" : "No",
+                     RAIL_IEEE802154_SupportsCustom1Phy(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
                      "RAIL_SUPPORTS_PROTOCOL_ZWAVE",
                      RAIL_SUPPORTS_PROTOCOL_ZWAVE ? "Yes" : "No",
@@ -683,9 +781,9 @@ void printChipFeatures(sl_cli_command_arg_t *args)
                      RAIL_SUPPORTS_ADDR_FILTER_ADDRESS_BIT_MASK ? "Yes" : "No",
                      RAIL_SupportsAddrFilterAddressBitMask(railHandle) ? "Yes" : "No");
   responsePrintMulti("Feature:%s,CompileTime:%s,RunTime:%s",
-                     "RAIL_SUPPORTS_PROTOCOL_MFM",
-                     RAIL_SUPPORTS_PROTOCOL_MFM ? "Yes" : "No",
-                     RAIL_SupportsProtocolMfm(railHandle) ? "Yes" : "No");
+                     "RAIL_SUPPORTS_MFM",
+                     RAIL_SUPPORTS_MFM ? "Yes" : "No",
+                     RAIL_SupportsMfm(railHandle) ? "Yes" : "No");
 }
 
 void cliSeparatorHack(sl_cli_command_arg_t *args)

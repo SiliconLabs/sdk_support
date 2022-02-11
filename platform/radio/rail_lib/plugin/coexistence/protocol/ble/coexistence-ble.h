@@ -20,6 +20,10 @@
 
 #include "sl_rail_util_coex_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Coexistence interface
  */
@@ -29,6 +33,11 @@ typedef struct {
   uint16_t requestWindow;
   uint16_t requestWindowCalibration;
 } sl_bt_coex_init_t;
+
+//Compatibility defines for TX abort
+#ifndef SL_RAIL_UTIL_COEX_BLE_TX_ABORT
+#define SL_RAIL_UTIL_COEX_BLE_TX_ABORT SL_RAIL_UTIL_COEX_TX_ABORT
+#endif
 
 //Compatibility defines if Tx and Rx defined separately
 #ifndef SL_BT_COEX_PRIORITY_DEFAULT
@@ -94,7 +103,7 @@ static inline void sl_bt_init_coex_hal()
   };
 
   // COEX options
-  coexInit.options |= SL_RAIL_UTIL_COEX_TX_ABORT ? SL_BT_COEX_OPTION_TX_ABORT : 0;
+  coexInit.options |= SL_RAIL_UTIL_COEX_BLE_TX_ABORT ? SL_BT_COEX_OPTION_TX_ABORT : 0;
   coexInit.options |= SL_RAIL_UTIL_COEX_PRIORITY_DEFAULT ? SL_BT_COEX_OPTION_PRIORITY_ENABLE : 0;
 #if SL_RAIL_UTIL_COEX_PWM_REQ_ENABLED
   coexInit.options |= SL_RAIL_UTIL_COEX_PWM_PRIORITY ? SL_BT_COEX_OPTION_PWM_PRIORITY : 0;
@@ -158,4 +167,9 @@ bool sl_bt_get_coex_counters(const void **ptr, uint8_t *size);
 void sli_bt_coex_counter_request(bool request, bool priority);
 void sli_bt_coex_counter_grant_update(bool state);
 void sli_bt_coex_counter_increment_denied(void);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

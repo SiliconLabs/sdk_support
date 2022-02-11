@@ -46,10 +46,10 @@ extern "C" {
  * @brief Ultra Low Energy Timer/Counter (CRYOTIMER) Peripheral API
  *
  * @details
- *   The CRYOTIMER is a 32 bit counter which operates on a low-frequency
+ *   The CRYOTIMER is a 32 bit counter, which operates on a low-frequency
  *   oscillator and is capable of running in all Energy Modes. It can provide
- *   periodic wakeup events and PRS signals which can be used to wake up
- *   peripherals from any energy mode. The CRYOTIMER provides a very wide range
+ *   periodic wakeup events and PRS signals, which can be used to wake up
+ *   peripherals from any energy mode. The CRYOTIMER provides a wide range
  *   of periods for the interrupts facilitating flexible ultra-low energy
  *   operation. Because of its simplicity, the CRYOTIMER is a lower energy
  *   solution for periodically waking up the MCU compared to the RTCC.
@@ -83,8 +83,8 @@ extern "C" {
  *   @ref CRYOTIMER_EM4WakeupEnable.
  *
  *   Note that when using the CRYOTIMER to wake up from EM4, the application has
- *   the responsibility to clear the wakeup event. This is done by calling
- *   @ref CRYOTIMER_IntClear. If the user does not clear the wakeup event,
+ *   the responsibility to clear the wakeup event by calling
+ *   @ref CRYOTIMER_IntClear. If the you do not clear the wakeup event,
  *   the wakeup event will stay pending and will cause an immediate wakeup the
  *   next time the application attempts to enter EM4.
  *
@@ -96,9 +96,9 @@ extern "C" {
  * @details
  *   All the low frequency oscillators can be used in EM4, however, the
  *   oscillator that is used must be be configured to be retained when going
- *   into EM4. This can be configured by using functions in the @ref emu module.
+ *   into EM4 by using functions in the @ref emu module.
  *   See @ref EMU_EM4Init and @ref EMU_EM4Init_TypeDef. If an oscillator is
- *   retained in EM4, the user is also responsible for unlatching the retained
+ *   retained in EM4, users are also responsible for unlatching the retained
  *   configuration on a wakeup from EM4.
  *
  * @{

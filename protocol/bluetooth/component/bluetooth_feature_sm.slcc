@@ -11,6 +11,8 @@ requires:
 provides:
   - name: "bluetooth_feature_sm"
 template_contribution:
+  - name: component_catalog
+    value: bluetooth_feature_sm
   - name: bluetooth_bgapi_class
     value:
       class: "sm"

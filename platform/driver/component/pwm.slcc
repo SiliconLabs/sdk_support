@@ -44,6 +44,10 @@ requires:
 template_contribution:
   - name: pwm_instances
     value: "{{instance}}"
+  - name: component_catalog
+    value: pwm
+  - name: component_catalog
+    value: "pwm_{{instance}}"
 documentation:
     docset: gecko-platform
     document: driver/api/group-pwm

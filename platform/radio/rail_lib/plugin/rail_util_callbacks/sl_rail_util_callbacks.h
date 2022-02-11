@@ -33,6 +33,10 @@
 
 #include "rail.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * A callback available to the application, called on RAIL asserts.
  *
@@ -70,5 +74,9 @@ void sl_rail_util_on_channel_config_change(RAIL_Handle_t rail_handle,
  */
 void sl_rail_util_on_event(RAIL_Handle_t rail_handle,
                            RAIL_Events_t events);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // SL_RAIL_UTIL_CALLBACKS_H

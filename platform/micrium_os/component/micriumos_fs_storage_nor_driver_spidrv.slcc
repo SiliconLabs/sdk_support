@@ -1,7 +1,7 @@
 id: micriumos_fs_storage_nor_driver_spidrv
 package: micrium-fsxx
 description: Micrium OS File System NOR SPIDRV Driver for Silicon Labs
-category: Services|File System|Storage
+category: Services|Micrium|File System
 quality: production
 component_root_path: platform/micrium_os/drivers/fs
 source:

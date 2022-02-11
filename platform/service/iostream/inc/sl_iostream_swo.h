@@ -43,8 +43,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_swo IO Stream SWO
- * @brief IO Stream SWO
+ * @addtogroup iostream_swo I/O Stream SWO
+ * @brief I/O Stream SWO
  * @details
  * ## Overview
  *

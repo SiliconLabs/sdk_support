@@ -36,7 +36,6 @@ requires:
   - name: spidrv_core
   - name: cpc_core
   - name: cpc_secondary
-  - name: cpc_security_secondary
 template_file:
   - path: template/s0_s1/sl_cpc_drv_spi_secondary_config.h.jinja
     condition: [device_series_0]

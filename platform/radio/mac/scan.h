@@ -145,6 +145,10 @@ void sli_scan_stop(void);
 
 sl_status_t sli_mac_alt_mac_scan(sl_mac_scan_complete_callback_t scan_complete_callback);
 
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+void sli_set_energy_scan_results(int8_t rssiValue);
+#endif
+
 #ifdef __cplusplus
 }
 #endif

@@ -15,9 +15,11 @@ include:
   - path: util/third_party/crypto/mbedtls/include
     file_list:
       - path: mbedtls/entropy.h
-      - path: mbedtls/entropy_poll.h
       - path: mbedtls/ctr_drbg.h
       - path: mbedtls/hmac_drbg.h
+  - path: util/third_party/crypto/mbedtls/library
+    file_list:
+      - path: entropy_poll.h
 provides:
   - name: mbedtls_random
 requires:

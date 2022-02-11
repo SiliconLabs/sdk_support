@@ -9,7 +9,7 @@ root_path: hardware/driver/si70xx
 provides:
   - name: si70xx_driver
 requires:
-  - name: i2cspm_core
+  - name: i2cspm
   - name: sleeptimer
   - name: status
 include:

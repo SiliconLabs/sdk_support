@@ -49,10 +49,14 @@ extern "C" {
 /*******************************************************************************
  *******************************   DEFINES   ***********************************
  ******************************************************************************/
-#if defined(_EMU_STATUS_VSCALE_MASK) \
+#if (defined(_EMU_STATUS_VSCALE_MASK) || defined(_EMU_CTRL_EM23VSCALE_MASK)) \
   && !defined(_SILICON_LABS_GECKO_INTERNAL_SDID_200)
 /** Voltage scaling present */
 #define EMU_VSCALE_PRESENT
+#if !defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
+/** Voltage scaling for EM01 present */
+#define EMU_VSCALE_EM01_PRESENT
+#endif
 #endif
 
 /*******************************************************************************
@@ -436,7 +440,7 @@ typedef enum {
 } EMU_BiasMode_TypeDef;
 #endif
 
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 /** Supported EM0/1 Voltage Scaling Levels. */
 typedef enum {
   /** High-performance voltage level. HF clock can be set to any frequency. */
@@ -462,7 +466,7 @@ typedef enum {
   emuVScaleEM23_FastWakeup      = _EMU_CTRL_EM23VSCALE_VSCALE2,
   /** Low-power optimized voltage level. Using this voltage level in EM2 and 3
       adds approximately 30 us to wakeup time if EM0 and 1 voltage must be scaled
-      up to @ref emuVScaleEM01_HighPerformance on EM2 or 3 exit. */
+      up to emuVScaleEM01_HighPerformance on EM2 or 3 exit. */
   emuVScaleEM23_LowPower        = _EMU_CTRL_EM23VSCALE_VSCALE0,
 } EMU_VScaleEM23_TypeDef;
 #endif
@@ -612,16 +616,14 @@ typedef enum {
  *******************************   STRUCTS   ***********************************
  ******************************************************************************/
 
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 /** EM0 and 1 initialization structure. Voltage scaling is applied when
     the core clock frequency is changed from @ref cmu. EM0 and 1 emuVScaleEM01_HighPerformance
     is always enabled. */
 typedef struct {
   bool  vScaleEM01LowPowerVoltageEnable; /**< EM0/1 low power voltage status. */
 } EMU_EM01Init_TypeDef;
-#endif
 
-#if defined(EMU_VSCALE_PRESENT)
 /** Default initialization of EM0 and 1 configuration. */
 #define EMU_EM01INIT_DEFAULT                                                              \
   {                                                                                       \
@@ -773,7 +775,7 @@ typedef struct {
 /** Default Backup Power Domain configuration. */
 #define EMU_BUINIT_DEFAULT                                                               \
   {                                                                                      \
-    false,                   /* MAIN-BU Comparator is not disabloed */                   \
+    false,                   /* MAIN-BU Comparator is not disabled */                    \
     emuBuBuInactPwrCon_None, /* No power connection wen not in backup mode */            \
     emuBuBuActPwrCon_None,   /* No power connection when in backup mode */               \
     emuBuPwrRes_Res0,        /* RES0 series resistance between main and backup power. */ \
@@ -823,7 +825,7 @@ typedef struct {
     emuDcdcPeakCurrent_Load36mA,   /**< Default peak current in EM0/1. */    \
     emuDcdcPeakCurrent_Load36mA    /**< Default peak current in EM2/3. */    \
   }
-#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4)
+#elif defined(_SILICON_LABS_32B_SERIES_2_CONFIG_4) || defined(_SILICON_LABS_32B_SERIES_2_CONFIG_5)
 #define EMU_DCDCINIT_DEFAULT                                                 \
   {                                                                          \
     emuDcdcMode_Regulation,        /**< DCDC regulator on. */                \
@@ -993,20 +995,23 @@ typedef struct {
  *****************************   PROTOTYPES   **********************************
  ******************************************************************************/
 
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 void EMU_EM01Init(const EMU_EM01Init_TypeDef *em01Init);
 #endif
 void EMU_EM23Init(const EMU_EM23Init_TypeDef *em23Init);
 void EMU_EM23PresleepHook(void);
 void EMU_EM23PostsleepHook(void);
-#if defined(_EMU_EM4CONF_MASK) || defined(_EMU_EM4CTRL_MASK)
-void EMU_EM4Init(const EMU_EM4Init_TypeDef *em4Init);
-#endif
+void EMU_EFPEM23PresleepHook(void);
+void EMU_EFPEM23PostsleepHook(void);
 void EMU_EnterEM2(bool restore);
 void EMU_EnterEM3(bool restore);
 void EMU_Save(void);
 void EMU_Restore(void);
+#if defined(_EMU_EM4CONF_MASK) || defined(_EMU_EM4CTRL_MASK)
+void EMU_EM4Init(const EMU_EM4Init_TypeDef *em4Init);
+#endif
 void EMU_EM4PresleepHook(void);
+void EMU_EFPEM4PresleepHook(void);
 void EMU_EnterEM4(void);
 #if defined(_EMU_EM4CTRL_MASK)
 void EMU_EnterEM4H(void);
@@ -1019,7 +1024,7 @@ void EMU_RamPowerUp(void);
 void EMU_PeripheralRetention(EMU_PeripheralRetention_TypeDef periMask, bool enable);
 #endif
 void EMU_UpdateOscConfig(void);
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 #if defined(_SILICON_LABS_32B_SERIES_2)
 void EMU_EFPEM01VScale(EMU_VScaleEM01_TypeDef voltage);
 #endif
@@ -1058,9 +1063,6 @@ void EMU_BUStatEnSet(bool enable);
 #if defined(_EMU_BUCTRL_EN_MASK)
 void EMU_BUEnableSet(bool enable);
 #endif
-void EMU_EFPEM23PresleepHook(void);
-void EMU_EFPEM23PostsleepHook(void);
-void EMU_EFPEM4PresleepHook(void);
 #if defined(_EMU_DCDCCTRL_MASK) || defined(_DCDC_CTRL_MASK)
 bool EMU_DCDCInit(const EMU_DCDCInit_TypeDef *dcdcInit);
 void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
@@ -1068,14 +1070,14 @@ void EMU_DCDCModeSet(EMU_DcdcMode_TypeDef dcdcMode);
 void EMU_DCDCModeEM23Set(EMU_DcdcModeEM23_TypeDef dcdcModeEM23);
 #endif
 bool EMU_DCDCPowerOff(void);
+#if defined(_DCDC_EM01CTRL0_IPKVAL_MASK)
+void EMU_EM01PeakCurrentSet(const EMU_DcdcPeakCurrent_TypeDef peakCurrentEM01);
+#endif
 #if defined(_DCDC_PFMXCTRL_IPKVAL_MASK)
 void EMU_DCDCSetPFMXModePeakCurrent(uint32_t value);
 #endif
 #if defined(_DCDC_PFMXCTRL_IPKTMAXCTRL_MASK)
 void EMU_DCDCSetPFMXTimeoutMaxCtrl(EMU_DcdcTonMaxTimeout_TypeDef value);
-#endif
-#if defined(_DCDC_EM01CTRL0_IPKVAL_MASK)
-void EMU_EM01PeakCurrentSet(const EMU_DcdcPeakCurrent_TypeDef peakCurrentEM01);
 #endif
 
 #if !defined(_DCDC_CTRL_MASK)
@@ -1090,6 +1092,9 @@ void EMU_VmonInit(const EMU_VmonInit_TypeDef *vmonInit);
 void EMU_VmonHystInit(const EMU_VmonHystInit_TypeDef *vmonInit);
 void EMU_VmonEnable(EMU_VmonChannel_TypeDef channel, bool enable);
 bool EMU_VmonChannelStatusGet(EMU_VmonChannel_TypeDef channel);
+#endif
+#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
+void EMU_SetBiasMode(EMU_BiasMode_TypeDef mode);
 #endif
 #if defined(_EMU_TEMP_TEMP_MASK)
 float EMU_TemperatureGet(void);
@@ -1173,7 +1178,7 @@ __STATIC_INLINE void EMU_EnterEM1(void)
   __WFI();
 }
 
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 /***************************************************************************//**
  * @brief
  *   Wait for voltage scaling to complete.
@@ -1192,7 +1197,7 @@ __STATIC_INLINE void EMU_VScaleWait(void)
 }
 #endif
 
-#if defined(EMU_VSCALE_PRESENT)
+#if defined(EMU_VSCALE_EM01_PRESENT)
 /***************************************************************************//**
  * @brief
  *   Get current voltage scaling level.
@@ -1231,7 +1236,7 @@ __STATIC_INLINE bool EMU_VmonStatusGet(void)
  *
  * @param[in] flags
  *   Pending EMU interrupt sources to clear. Use one or more valid
- *   interrupt flags for the EMU module (EMU_IFC_nnn).
+ *   interrupt flags for the EMU module (EMU_IFC_nnn or EMU_IF_nnn).
  ******************************************************************************/
 __STATIC_INLINE void EMU_IntClear(uint32_t flags)
 {
@@ -1530,7 +1535,7 @@ __STATIC_INLINE bool EMU_TemperatureReady(void)
 #if defined(_EMU_TEMP_TEMPAVG_MASK)
 /***************************************************************************//**
  * @brief
- *   Get averaged temperature in degrees Celcius
+ *   Get averaged temperature in degrees Celsius.
  *
  * @note
  *   An averaged temperature measurement must first be requested by calling
@@ -1549,14 +1554,14 @@ __STATIC_INLINE float EMU_TemperatureAvgGet(void)
 
 /***************************************************************************//**
  * @brief
- *   Request averaged temperature
+ *   Request averaged temperature.
  *
  * @note
- *   EMU must be unlocked, by calling @ref EMU_Unlock(), before this function
+ *   EMU must be unlocked by calling @ref EMU_Unlock() before this function
  *   can be called.
  *
  * @param[in] numSamples
- *   Number of temeprature samples to average
+ *   Number of temperature samples to average
  ******************************************************************************/
 __STATIC_INLINE void EMU_TemperatureAvgRequest(EMU_TempAvgNum_TypeDef numSamples)
 {
@@ -1566,10 +1571,6 @@ __STATIC_INLINE void EMU_TemperatureAvgRequest(EMU_TempAvgNum_TypeDef numSamples
 
 #endif //defined(_EMU_TEMP_TEMPAVG_MASK)
 #endif //defined(_EMU_TEMP_TEMP_MASK)
-
-#if defined(_SILICON_LABS_GECKO_INTERNAL_SDID_80)
-void EMU_SetBiasMode(EMU_BiasMode_TypeDef mode);
-#endif
 
 /** @} (end addtogroup emu) */
 

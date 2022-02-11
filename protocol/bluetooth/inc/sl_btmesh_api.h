@@ -109,6 +109,7 @@ extern "C" {
 
 /* Command and Response IDs */
 #define sl_btmesh_cmd_node_init_id                                       0x00140028
+#define sl_btmesh_cmd_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_cmd_node_start_unprov_beaconing_id                     0x01140028
 #define sl_btmesh_cmd_node_stop_unprov_beaconing_id                      0x16140028
 #define sl_btmesh_cmd_node_get_rssi_id                                   0x17140028
@@ -144,6 +145,7 @@ extern "C" {
 #define sl_btmesh_cmd_node_set_adv_phy_id                                0x22140028
 #define sl_btmesh_cmd_node_get_adv_phy_id                                0x23140028
 #define sl_btmesh_rsp_node_init_id                                       0x00140028
+#define sl_btmesh_rsp_node_set_exportable_keys_id                        0x24140028
 #define sl_btmesh_rsp_node_start_unprov_beaconing_id                     0x01140028
 #define sl_btmesh_rsp_node_stop_unprov_beaconing_id                      0x16140028
 #define sl_btmesh_rsp_node_get_rssi_id                                   0x17140028
@@ -180,9 +182,8 @@ extern "C" {
 #define sl_btmesh_rsp_node_get_adv_phy_id                                0x23140028
 
 /**
- * @brief Flags for supported OOB authentication methods during
-          provisioning, which use a bitmap so that multiple methods can
-          be supported.
+ * @brief Flags for supported OOB authentication methods during provisioning,
+ * which use a bitmap so that multiple methods can be supported.
  */
 typedef enum
 {
@@ -197,7 +198,8 @@ typedef enum
 } sl_btmesh_node_auth_method_flag_t;
 
 /**
- * @brief Flags for supported input OOB actions during provisioning, which use a bitmap so that multiple actions can be supported.
+ * @brief Flags for supported input OOB actions during provisioning, which use a
+ * bitmap so that multiple actions can be supported.
  */
 typedef enum
 {
@@ -213,8 +215,8 @@ typedef enum
 } sl_btmesh_node_oob_input_action_flag_t;
 
 /**
- * @brief Indicate the input OOB action selected by
-          the Provisioner during provisioning of the device.
+ * @brief Indicate the input OOB action selected by the Provisioner during
+ * provisioning of the device.
  */
 typedef enum
 {
@@ -230,7 +232,8 @@ typedef enum
 } sl_btmesh_node_oob_input_action_t;
 
 /**
- * @brief Flags for supported output OOB actions during provisioning, which use a bitmap so that multiple actions can be supported.
+ * @brief Flags for supported output OOB actions during provisioning, which use
+ * a bitmap so that multiple actions can be supported.
  */
 typedef enum
 {
@@ -250,8 +253,8 @@ typedef enum
 } sl_btmesh_node_oob_output_action_flag_t;
 
 /**
- * @brief Indicate the output OOB action selected by
-          the Provisioner during provisioning of the device.
+ * @brief Indicate the output OOB action selected by the Provisioner during
+ * provisioning of the device.
  */
 typedef enum
 {
@@ -275,7 +278,8 @@ typedef enum
 } sl_btmesh_node_key_type_t;
 
 /**
- * @brief Specify the state to which a Configuration Client/Server command/event applies.
+ * @brief Specify the state to which a Configuration Client/Server command/event
+ * applies.
  */
 typedef enum
 {
@@ -840,6 +844,34 @@ typedef struct sl_btmesh_evt_node_local_dcd_data_end_s sl_btmesh_evt_node_local_
 
 /** @} */ // end addtogroup sl_btmesh_evt_node_local_dcd_data_end
 
+/**
+ * @addtogroup sl_btmesh_evt_node_start_received sl_btmesh_evt_node_start_received
+ * @{
+ * @brief Provisioning Start PDU received
+ *
+ * This diagnostic event shows the algorithm, public key, and authentication
+ * choices Provisioner made and communicated to the unprovisioned device.
+ */
+
+/** @brief Identifier of the start_received event */
+#define sl_btmesh_evt_node_start_received_id                             0x161400a8
+
+/***************************************************************************//**
+ * @brief Data structure of the start_received event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_node_start_received_s
+{
+  uint8_t algorithm;             /**< Selected provisioning algorithm */
+  uint8_t public_key;            /**< Selected OOB public key */
+  uint8_t authentication_method; /**< Selected authentication method */
+  uint8_t authentication_action; /**< Selected authentication action */
+  uint8_t authentication_size;   /**< Selected authentication size */
+});
+
+typedef struct sl_btmesh_evt_node_start_received_s sl_btmesh_evt_node_start_received_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_node_start_received
+
 /***************************************************************************//**
  *
  * Initialize the Bluetooth mesh stack in Node role. When initialization is
@@ -859,6 +891,23 @@ typedef struct sl_btmesh_evt_node_local_dcd_data_end_s sl_btmesh_evt_node_local_
  *
  ******************************************************************************/
 sl_status_t sl_btmesh_node_init();
+
+/***************************************************************************//**
+ *
+ * Set the node in mode that allows exporting encryption keys. By default on
+ * devices with PSA/ITS support the keys on normal node cannot be exported. This
+ * command must called before either @ref sl_btmesh_node_init or @ref
+ * sl_btmesh_node_init_oob. <b>On everey boot device boots to node role unless
+ * this command is issued before node initialization</b>
+ *
+ * This command is to be used if device is originally in a node role and at
+ * later stage switches to a provisioner role.
+ *
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_node_set_exportable_keys();
 
 /***************************************************************************//**
  *
@@ -1733,7 +1782,8 @@ PACKSTRUCT( struct sl_btmesh_evt_prov_provisioning_suspended_s
 {
   uuid_128 uuid;   /**< UUID of the device */
   uint8_t  reason; /**< Reason for suspension. Values are as follows:
-                          - <b>0:</b> Capabilities Event received */
+                          - <b>0:</b> Capabilities Event received
+                          - <b>1:</b> Provisioning link opened */
 });
 
 typedef struct sl_btmesh_evt_prov_provisioning_suspended_s sl_btmesh_evt_prov_provisioning_suspended_t;
@@ -2143,6 +2193,35 @@ typedef struct sl_btmesh_evt_prov_initialization_failed_s sl_btmesh_evt_prov_ini
 
 /** @} */ // end addtogroup sl_btmesh_evt_prov_initialization_failed
 
+/**
+ * @addtogroup sl_btmesh_evt_prov_start_sent sl_btmesh_evt_prov_start_sent
+ * @{
+ * @brief Provisioning Start PDU sent
+ *
+ * This diagnostic event shows the algorithm, public key, and authentication
+ * choices Provisioner made and communicated to the unprovisioned device.
+ */
+
+/** @brief Identifier of the start_sent event */
+#define sl_btmesh_evt_prov_start_sent_id                                 0x1e1500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the start_sent event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_prov_start_sent_s
+{
+  uuid_128 uuid;                  /**< UUID of the device */
+  uint8_t  algorithm;             /**< Selected provisioning algorithm */
+  uint8_t  public_key;            /**< Selected OOB public key */
+  uint8_t  authentication_method; /**< Selected authentication method */
+  uint8_t  authentication_action; /**< Selected authentication action */
+  uint8_t  authentication_size;   /**< Selected authentication size */
+});
+
+typedef struct sl_btmesh_evt_prov_start_sent_s sl_btmesh_evt_prov_start_sent_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_prov_start_sent
+
 /***************************************************************************//**
  *
  * Initialize the Bluetooth mesh stack in the Provisioner role. Note that the
@@ -2216,13 +2295,20 @@ sl_status_t sl_btmesh_prov_create_provisioning_session(uint16_t netkey_index,
  *
  * Set whether the provisioning can be suspended at a specified point while it
  * is occurring. Currently, this can happen after reception on provisioning
- * capabilities message.
+ * capabilities message or when the provisioning link is opened.
  *
  * @param[in] status @parblock
- *   State of @ref sl_btmesh_evt_prov_provisioning_suspended event
+ *   Controls when provisioning is suspended and @ref
+ *   sl_btmesh_evt_prov_provisioning_suspended event is created. The value is a
+ *   bitmap so multiple possibilities can be set.
  *
- *     - <b>0</b> No suspension during provisioning
- *     - <b>1</b> Provisioning can be suspended while it is occurring
+ *     - <b>Bit 0 set</b> provisioning will be suspended when Capabilities PDU
+ *       is received from the unprovisioned device
+ *     - <b>Bit 1 set</b> provisioning will be suspended when the provisioning
+ *       session is opened
+ *
+ *   If no bits are set (value is zero) provisioning will not be suspended. This
+ *   is the default.
  *   @endparblock
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
@@ -2374,26 +2460,30 @@ sl_status_t sl_btmesh_prov_create_appkey(uint16_t netkey_index,
  *
  * Respond to the prov_oob_pkey_request.
  *
+ * @param[in] uuid UUID of the Device
  * @param[in] pkey_len Length of data in @p pkey
  * @param[in] pkey Public Key read out-of-band
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_prov_send_oob_pkey_response(size_t pkey_len,
+sl_status_t sl_btmesh_prov_send_oob_pkey_response(uuid_128 uuid,
+                                                  size_t pkey_len,
                                                   const uint8_t* pkey);
 
 /***************************************************************************//**
  *
  * Respond to the prov_oob_auth_request.
  *
+ * @param[in] uuid UUID of the Device
  * @param[in] data_len Length of data in @p data
  * @param[in] data Output or static OOB data
  *
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_prov_send_oob_auth_response(size_t data_len,
+sl_status_t sl_btmesh_prov_send_oob_auth_response(uuid_128 uuid,
+                                                  size_t data_len,
                                                   const uint8_t* data);
 
 /***************************************************************************//**
@@ -3011,12 +3101,16 @@ sl_status_t sl_btmesh_proxy_optimisation_toggle(uint8_t enable);
 #define sl_btmesh_cmd_vendor_model_publish_id                            0x03190028
 #define sl_btmesh_cmd_vendor_model_init_id                               0x04190028
 #define sl_btmesh_cmd_vendor_model_deinit_id                             0x05190028
+#define sl_btmesh_cmd_vendor_model_send_tracked_id                       0x06190028
+#define sl_btmesh_cmd_vendor_model_set_publication_tracked_id            0x07190028
 #define sl_btmesh_rsp_vendor_model_send_id                               0x00190028
 #define sl_btmesh_rsp_vendor_model_set_publication_id                    0x01190028
 #define sl_btmesh_rsp_vendor_model_clear_publication_id                  0x02190028
 #define sl_btmesh_rsp_vendor_model_publish_id                            0x03190028
 #define sl_btmesh_rsp_vendor_model_init_id                               0x04190028
 #define sl_btmesh_rsp_vendor_model_deinit_id                             0x05190028
+#define sl_btmesh_rsp_vendor_model_send_tracked_id                       0x06190028
+#define sl_btmesh_rsp_vendor_model_set_publication_tracked_id            0x07190028
 
 /**
  * @addtogroup sl_btmesh_evt_vendor_model_receive sl_btmesh_evt_vendor_model_receive
@@ -3069,6 +3163,41 @@ PACKSTRUCT( struct sl_btmesh_evt_vendor_model_receive_s
 typedef struct sl_btmesh_evt_vendor_model_receive_s sl_btmesh_evt_vendor_model_receive_t;
 
 /** @} */ // end addtogroup sl_btmesh_evt_vendor_model_receive
+
+/**
+ * @addtogroup sl_btmesh_evt_vendor_model_send_complete sl_btmesh_evt_vendor_model_send_complete
+ * @{
+ * @brief Vendor model message send complete event
+ *
+ * Stack generates this event when a vendor message has been sent or published,
+ * either successfully or unsuccessfully.
+ *
+ * The time this event is generated depends on the message being sent or
+ * published. For an unsegmented message the event is generated immediately
+ * after the network PDU is sent out, while for a segmented message the event is
+ * generated once the segmented message transmission state machine completes.
+ */
+
+/** @brief Identifier of the send_complete event */
+#define sl_btmesh_evt_vendor_model_send_complete_id                      0x011900a8
+
+/***************************************************************************//**
+ * @brief Data structure of the send_complete event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_vendor_model_send_complete_s
+{
+  uint16_t result; /**< Result code
+                          - <b>0:</b> success
+                          - <b>Non-zero:</b> an error has occurred */
+  uint16_t handle; /**< Tracking handle for the message sending attempt as
+                        reported by @ref sl_btmesh_vendor_model_send_tracked or
+                        @ref sl_btmesh_vendor_model_set_publication_tracked
+                        command responses. */
+});
+
+typedef struct sl_btmesh_evt_vendor_model_send_complete_s sl_btmesh_evt_vendor_model_send_complete_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_vendor_model_send_complete
 
 /***************************************************************************//**
  *
@@ -3238,6 +3367,106 @@ sl_status_t sl_btmesh_vendor_model_init(uint16_t elem_index,
 sl_status_t sl_btmesh_vendor_model_deinit(uint16_t elem_index,
                                           uint16_t vendor_id,
                                           uint16_t model_id);
+
+/***************************************************************************//**
+ *
+ * Send vendor-specific data with a delivery report.
+ *
+ * This command works otherwise as @ref sl_btmesh_vendor_model_send but also
+ * provides a tracking handle if there is no immediate local error. Once the
+ * message sending completes a @ref sl_btmesh_evt_vendor_model_send_complete
+ * event is generated, and the handle received here can be used to correlate the
+ * event to the sent message.
+ *
+ * @param[in] destination_address Destination address of the message. It can be
+ *   a unicast address, a group address, or a virtual address.
+ * @param[in] va_index Index of the destination Label UUID (used only is the
+ *   destination address is a virtual address)
+ * @param[in] appkey_index The application key index used
+ * @param[in] elem_index Sending model element index
+ * @param[in] vendor_id Vendor ID of the sending model
+ * @param[in] model_id Model ID of the sending model
+ * @param[in] nonrelayed If the message is a response to a received message, set
+ *   this parameter according to what was received in the receive event.
+ *   Otherwise, set to non-zero if the message affects only devices in the
+ *   immediate radio neighborhood.
+ * @param[in] segment If nonzero, instruct the stack to use transport layer
+ *   segmentation, even if the data would be short enough to send as an
+ *   unsegmented message. If zero, stack selects automatically based on data
+ *   length whether to use segmentation or not.
+ * @param[in] opcode Message opcode
+ * @param[in] final Indicates whether this payload chunk is the final one of the
+ *   message or whether more will follow.
+ * @param[in] payload_len Length of data in @p payload
+ * @param[in] payload Payload data (either complete or partial; see final
+ *   parameter).
+ * @param[out] handle Tracking handle for the message sending. Note that a valid
+ *   handle is returned only when the final payload fragment is received by the
+ *   stack (as indicated by the final parameter of this message) and the message
+ *   is accepted for delivery (as indicated by the result code). Otherwise the
+ *   value of this parameter should be ignored. attempt
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_vendor_model_send_tracked(uint16_t destination_address,
+                                                int8_t va_index,
+                                                uint16_t appkey_index,
+                                                uint16_t elem_index,
+                                                uint16_t vendor_id,
+                                                uint16_t model_id,
+                                                uint8_t nonrelayed,
+                                                uint8_t segment,
+                                                uint8_t opcode,
+                                                uint8_t final,
+                                                size_t payload_len,
+                                                const uint8_t* payload,
+                                                uint16_t *handle);
+
+/***************************************************************************//**
+ *
+ * Set the vendor model publication message with a delivery report.
+ *
+ * This command works otherwise as @ref sl_btmesh_vendor_model_set_publication
+ * but also sets up a tracking handle for monitoring message delivery. When the
+ * message message publishing completes a @ref
+ * sl_btmesh_evt_vendor_model_send_complete event is generated, and the handle
+ * received here can be used to correlate the event to the sent message.
+ *
+ * Note that the same tracking handle will be reported multiple times in case of
+ * periodic publication or publication retransmissions.
+ *
+ * @param[in] elem_index Publishing model element index
+ * @param[in] vendor_id Vendor ID of the model
+ * @param[in] model_id Model ID of the model
+ * @param[in] segment If nonzero, instruct the stack to use transport layer
+ *   segmentation, even if the data would be short enough to publish as an
+ *   unsegmented message. If zero, stack selects automatically based on data
+ *   length whether to use segmentation or not.
+ * @param[in] opcode Message opcode
+ * @param[in] final Indicates whether this payload chunk is the final one of the
+ *   message or whether more will follow.
+ * @param[in] payload_len Length of data in @p payload
+ * @param[in] payload Payload data (either complete or partial; see final
+ *   parameter).
+ * @param[out] handle Tracking handle for the message publishing. Note that a
+ *   valid handle is returned only when the final payload fragment is received
+ *   by the stack (as indicated by the final parameter of this message) and the
+ *   message is accepted for publication (as indicated by the result code).
+ *   Otherwise the value of this parameter should be ignored. attempt
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_vendor_model_set_publication_tracked(uint16_t elem_index,
+                                                           uint16_t vendor_id,
+                                                           uint16_t model_id,
+                                                           uint8_t segment,
+                                                           uint8_t opcode,
+                                                           uint8_t final,
+                                                           size_t payload_len,
+                                                           const uint8_t* payload,
+                                                           uint16_t *handle);
 
 /** @} */ // end addtogroup sl_btmesh_vendor_model
 
@@ -4879,6 +5108,17 @@ sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
 #define sl_btmesh_cmd_test_get_replay_protection_list_entry_id           0x2a220028
 #define sl_btmesh_cmd_test_clear_replay_protection_list_entry_id         0x2b220028
 #define sl_btmesh_cmd_test_set_replay_protection_list_diagnostics_id     0x2c220028
+#define sl_btmesh_cmd_test_get_model_option_id                           0x2d220028
+#define sl_btmesh_cmd_test_get_default_ttl_id                            0x2e220028
+#define sl_btmesh_cmd_test_set_default_ttl_id                            0x2f220028
+#define sl_btmesh_cmd_test_get_gatt_proxy_id                             0x30220028
+#define sl_btmesh_cmd_test_set_gatt_proxy_id                             0x31220028
+#define sl_btmesh_cmd_test_get_identity_id                               0x32220028
+#define sl_btmesh_cmd_test_set_identity_id                               0x33220028
+#define sl_btmesh_cmd_test_get_friend_id                                 0x34220028
+#define sl_btmesh_cmd_test_set_friend_id                                 0x35220028
+#define sl_btmesh_cmd_test_get_beacon_id                                 0x36220028
+#define sl_btmesh_cmd_test_set_beacon_id                                 0x37220028
 #define sl_btmesh_rsp_test_get_nettx_id                                  0x00220028
 #define sl_btmesh_rsp_test_set_nettx_id                                  0x01220028
 #define sl_btmesh_rsp_test_get_relay_id                                  0x02220028
@@ -4920,6 +5160,17 @@ sl_status_t sl_btmesh_generic_server_get_cached_state(uint16_t elem_index,
 #define sl_btmesh_rsp_test_get_replay_protection_list_entry_id           0x2a220028
 #define sl_btmesh_rsp_test_clear_replay_protection_list_entry_id         0x2b220028
 #define sl_btmesh_rsp_test_set_replay_protection_list_diagnostics_id     0x2c220028
+#define sl_btmesh_rsp_test_get_model_option_id                           0x2d220028
+#define sl_btmesh_rsp_test_get_default_ttl_id                            0x2e220028
+#define sl_btmesh_rsp_test_set_default_ttl_id                            0x2f220028
+#define sl_btmesh_rsp_test_get_gatt_proxy_id                             0x30220028
+#define sl_btmesh_rsp_test_set_gatt_proxy_id                             0x31220028
+#define sl_btmesh_rsp_test_get_identity_id                               0x32220028
+#define sl_btmesh_rsp_test_set_identity_id                               0x33220028
+#define sl_btmesh_rsp_test_get_friend_id                                 0x34220028
+#define sl_btmesh_rsp_test_set_friend_id                                 0x35220028
+#define sl_btmesh_rsp_test_get_beacon_id                                 0x36220028
+#define sl_btmesh_rsp_test_set_beacon_id                                 0x37220028
 
 /**
  * @brief Specify the type of a key in key manipulation commands.
@@ -5114,7 +5365,7 @@ sl_status_t sl_btmesh_test_set_relay(uint8_t enabled,
  * sl_btmesh_prov_init for the settings to take effect.
  *
  * @param[in] adv_interval_min Minimum advertisement interval. Value is in units
- *   of 0.625 ms. Default value is 1 (0.625 ms).
+ *   of 0.625 ms. Default value is 32 (20 ms).
  * @param[in] adv_interval_max Maximum advertisement interval. Value is in units
  *   of 0.625 ms. Must be equal to or greater than the minimum interval. Default
  *   value is 32 (20 ms).
@@ -5590,6 +5841,16 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
 
 /***************************************************************************//**
  *
+ * <b>Deprecated</b> . Use the following commands instead:
+ *   - @ref sl_btmesh_test_set_beacon for setting secure network beacon state
+ *   - @ref sl_btmesh_test_set_default_ttl for setting default TTL state
+ *   - @ref sl_btmesh_test_set_friend for setting friend state
+ *   - @ref sl_btmesh_test_set_gatt_proxy for setting GATT proxy state
+ *   - @ref sl_btmesh_test_set_identity for setting node identity state
+ *   - @ref sl_btmesh_test_set_nettx for setting network transmit state
+ *   - @ref sl_btmesh_test_set_relay for setting relay and relay retransmit
+ *     state
+ *
  * Set a state to a value in the local Configuration Server model. Use for
  * testing and debugging purposes only.
  *
@@ -5601,12 +5862,22 @@ sl_status_t sl_btmesh_test_set_local_heartbeat_publication(uint16_t publication_
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
                                             uint16_t netkey_index,
                                             size_t value_len,
                                             const uint8_t* value);
 
 /***************************************************************************//**
+ *
+ * <b>Deprecated</b> . Use the following commands instead:
+ *   - @ref sl_btmesh_test_get_beacon for setting secure network beacon state
+ *   - @ref sl_btmesh_test_get_default_ttl for setting default TTL state
+ *   - @ref sl_btmesh_test_get_friend for setting friend state
+ *   - @ref sl_btmesh_test_get_gatt_proxy for setting GATT proxy state
+ *   - @ref sl_btmesh_test_get_identity for setting node identity state
+ *   - @ref sl_btmesh_test_get_nettx for setting network transmit state
+ *   - @ref sl_btmesh_test_get_relay for setting relay and relay retransmit
+ *     state
  *
  * Get the value of a state in the Configuration Server model. Use this for
  * testing and debugging purposes only.
@@ -5621,7 +5892,7 @@ sl_status_t sl_btmesh_test_set_local_config(uint16_t id,
  * @return SL_STATUS_OK if successful. Error code otherwise.
  *
  ******************************************************************************/
-sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
+SL_BGAPI_DEPRECATED sl_status_t sl_btmesh_test_get_local_config(uint16_t id,
                                             uint16_t netkey_index,
                                             size_t max_data_size,
                                             size_t *data_len,
@@ -5888,6 +6159,185 @@ sl_status_t sl_btmesh_test_clear_replay_protection_list_entry(uint16_t address);
  ******************************************************************************/
 sl_status_t sl_btmesh_test_set_replay_protection_list_diagnostics(uint8_t enable);
 
+/***************************************************************************//**
+ * @cond RESTRICTED
+ *
+ * Restricted/experimental API. Contact Silicon Labs sales for more information.
+ *
+ * Get a model-specific option.
+ *
+ * @param[in] elem_index The index of the target element, 0 is the primary
+ *   element
+ * @param[in] vendor_id Vendor ID for vendor-specific models. Use 0xffff for
+ *   Bluetooth SIG models.
+ * @param[in] model_id Model ID
+ * @param[in] option Option to get.
+ * @param[out] value Value for the option.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @endcond
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_model_option(uint16_t elem_index,
+                                            uint16_t vendor_id,
+                                            uint16_t model_id,
+                                            uint8_t option,
+                                            uint32_t *value);
+
+/***************************************************************************//**
+ *
+ * Get node default TTL state.
+ *
+ * @param[out] value Default TTL value. Valid value range is from 2 to 127 for
+ *   relayed PDUs, and 0 to indicate non-relayed PDUs
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_default_ttl(uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Set node default TTL state.
+ *
+ * @param[in] set_value Default TTL value. See @ref
+ *   sl_btmesh_test_get_default_ttl for details.
+ * @param[out] value Default TTL value. See @ref sl_btmesh_test_get_default_ttl
+ *   for details.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_default_ttl(uint8_t set_value, uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Get node GATT proxy state.
+ *
+ * @param[out] value GATT proxy value of the node. Valid values are:
+ *     - 0: GATT proxy feature is disabled
+ *     - 1: GATT proxy feature is enabled
+ *     - 2: GATT proxy feature is not supported
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_gatt_proxy(uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Set node GATT proxy state.
+ *
+ * @param[in] set_value GATT proxy value to set. Valid values are:
+ *     - 0: Proxy feature is disabled
+ *     - 1: Proxy feature is enabled
+ * @param[out] value GATT proxy state value. See @ref
+ *   sl_btmesh_test_get_gatt_proxy for details.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ * @b Events
+ *   - @ref sl_btmesh_evt_config_client_gatt_proxy_status
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_gatt_proxy(uint8_t set_value, uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Get node identity state.
+ *
+ * @param[in] get_netkey_index Network key index for which the state is queried
+ * @param[out] netkey_index Network key index for which the state is queried
+ * @param[out] value Identity state of the node for the used network index.
+ *   Valid values are as follows:
+ *     - 0: Node identity advertising is disabled
+ *     - 1: Node identity advertising is enabled
+ *     - 2: Node identity advertising is not supported
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_identity(uint16_t get_netkey_index,
+                                        uint16_t *netkey_index,
+                                        uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Set node identity state.
+ *
+ * @param[in] set_netkey_index Network key index for which the state is
+ *   configured
+ * @param[in] set_value Identity value to set. Valid values are:
+ *     - 0: Node identity advertising is disabled
+ *     - 1: Node identity advertising is enabled
+ * @param[out] netkey_index Network key index for which the state is set
+ * @param[out] value Identity state of the node for the used network index. See
+ *   @ref sl_btmesh_test_get_identity for details
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_identity(uint16_t set_netkey_index,
+                                        uint8_t set_value,
+                                        uint16_t *netkey_index,
+                                        uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Get node friend state.
+ *
+ * @param[out] value Friend state value. Valid values are:
+ *     - 0: Friend feature is not enabled
+ *     - 1: Friend feature is enabled
+ *     - 2: Friend feature is not supported
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_friend(uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Set node friend state.
+ *
+ * @param[in] set_value Friend value to set. Valid values are:
+ *     - 0: Friend feature is not enabled
+ *     - 1: Friend feature is enabled
+ * @param[out] value Friend state value. See @ref sl_btmesh_test_get_friend for
+ *   detais.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_friend(uint8_t set_value, uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Get node secure network beacon state.
+ *
+ * @param[out] value Secure network beacon value. Valid values are:
+ *     - 0: Node is not broadcasting secure network beacons
+ *     - 1: Node is broadcasting secure network beacons
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_get_beacon(uint8_t *value);
+
+/***************************************************************************//**
+ *
+ * Set node secure network beacon state.
+ *
+ * @param[in] set_value Secure network beacon value to set. Valid values are:
+ *     - 0: Node is not broadcasting secure network beacons
+ *     - 1: Node is broadcasting secure network beacons
+ * @param[out] value Secure network beacon value of the node.
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_test_set_beacon(uint8_t set_value, uint8_t *value);
+
 /** @} */ // end addtogroup sl_btmesh_test
 
 /**
@@ -5952,9 +6402,18 @@ typedef enum
                                             friend poll message if the friend
                                             update was not received by the LPN.
                                             Range is from 0 to 10, default is 3 */
-  sl_btmesh_lpn_retry_interval  = 0x4  /**< (0x4) Time interval between retry
+  sl_btmesh_lpn_retry_interval  = 0x4, /**< (0x4) Time interval between retry
                                             attempts in milliseconds. Range is 0
                                             to 100 ms. */
+  sl_btmesh_lpn_clock_accuracy  = 0x5  /**< (0x5) Clock accuracy in ppm, which
+                                            will be taken into account when
+                                            opening and closing the receive
+                                            window, and determining the poll
+                                            timeout. Should be used with care,
+                                            because inaccurate clock can
+                                            increase the receive window lenght
+                                            to up to 2,5 times in some cases.
+                                            Default value is 0. */
 } sl_btmesh_lpn_settings_t;
 
 /**
@@ -10209,7 +10668,8 @@ typedef enum
 } sl_btmesh_lc_server_lc_state_t;
 
 /**
- * @brief These values identify optional diagnostic events that provide more information to the application about LC behavior.
+ * @brief These values identify optional diagnostic events that provide more
+ * information to the application about LC behavior.
  */
 typedef enum
 {
@@ -11651,6 +12111,29 @@ typedef struct sl_btmesh_evt_scheduler_server_action_changed_s sl_btmesh_evt_sch
 
 /** @} */ // end addtogroup sl_btmesh_evt_scheduler_server_action_changed
 
+/**
+ * @addtogroup sl_btmesh_evt_scheduler_server_scene_changed sl_btmesh_evt_scheduler_server_scene_changed
+ * @{
+ * @brief Notification that scheduled scene change took place
+ */
+
+/** @brief Identifier of the scene_changed event */
+#define sl_btmesh_evt_scheduler_server_scene_changed_id                  0x025500a8
+
+/***************************************************************************//**
+ * @brief Data structure of the scene_changed event
+ ******************************************************************************/
+PACKSTRUCT( struct sl_btmesh_evt_scheduler_server_scene_changed_s
+{
+  uint16_t elem_index;         /**< Scheduler server model element index */
+  uint32_t transition_time_ms; /**< Transition time for this action */
+  uint16_t scene_number;       /**< Scene number being activated */
+});
+
+typedef struct sl_btmesh_evt_scheduler_server_scene_changed_s sl_btmesh_evt_scheduler_server_scene_changed_t;
+
+/** @} */ // end addtogroup sl_btmesh_evt_scheduler_server_scene_changed
+
 /***************************************************************************//**
  *
  * Initialize the Scheduler Server model
@@ -11784,6 +12267,8 @@ sl_status_t sl_btmesh_scheduler_server_set_action(uint16_t elem_index,
 #define sl_btmesh_cmd_time_server_get_time_role_id                       0x08520028
 #define sl_btmesh_cmd_time_server_set_time_role_id                       0x09520028
 #define sl_btmesh_cmd_time_server_get_datetime_id                        0x0a520028
+#define sl_btmesh_cmd_time_server_publish_id                             0x0b520028
+#define sl_btmesh_cmd_time_server_status_id                              0x0c520028
 #define sl_btmesh_rsp_time_server_init_id                                0x00520028
 #define sl_btmesh_rsp_time_server_deinit_id                              0x01520028
 #define sl_btmesh_rsp_time_server_get_time_id                            0x02520028
@@ -11795,6 +12280,8 @@ sl_status_t sl_btmesh_scheduler_server_set_action(uint16_t elem_index,
 #define sl_btmesh_rsp_time_server_get_time_role_id                       0x08520028
 #define sl_btmesh_rsp_time_server_set_time_role_id                       0x09520028
 #define sl_btmesh_rsp_time_server_get_datetime_id                        0x0a520028
+#define sl_btmesh_rsp_time_server_publish_id                             0x0b520028
+#define sl_btmesh_rsp_time_server_status_id                              0x0c520028
 
 /**
  * @addtogroup sl_btmesh_evt_time_server_time_updated sl_btmesh_evt_time_server_time_updated
@@ -12107,8 +12594,36 @@ sl_status_t sl_btmesh_time_server_get_datetime(uint16_t elem_index,
                                                uint8_t *min,
                                                uint8_t *sec,
                                                uint16_t *ms,
-                                               uint16_t *timezone,
+                                               int16_t *timezone,
                                                uint8_t *day_of_week);
+
+/***************************************************************************//**
+ *
+ * Publish Time Status containing the current time. Permitted only for Time
+ * Server having the role of Time Authority.
+ *
+ * @param[in] elem_index Element index of the Time Server
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_time_server_publish(uint16_t elem_index);
+
+/***************************************************************************//**
+ *
+ * Send a Time Status message containing the current time as an unsolicited
+ * message. Permitted only for Time Server having the role of Time Authority.
+ *
+ * @param[in] destination_address Destination address
+ * @param[in] elem_index Element index of the Time Server
+ * @param[in] appkey_index The application key index to use
+ *
+ * @return SL_STATUS_OK if successful. Error code otherwise.
+ *
+ ******************************************************************************/
+sl_status_t sl_btmesh_time_server_status(uint16_t destination_address,
+                                         uint16_t elem_index,
+                                         uint16_t appkey_index);
 
 /** @} */ // end addtogroup sl_btmesh_time_server
 
@@ -12545,6 +13060,7 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_node_beacon_received_t                         evt_node_beacon_received; /**< Data field for node beacon_received event*/
     sl_btmesh_evt_node_local_dcd_data_t                          evt_node_local_dcd_data; /**< Data field for node local_dcd_data event*/
     sl_btmesh_evt_node_local_dcd_data_end_t                      evt_node_local_dcd_data_end; /**< Data field for node local_dcd_data_end event*/
+    sl_btmesh_evt_node_start_received_t                          evt_node_start_received; /**< Data field for node start_received event*/
     sl_btmesh_evt_prov_initialized_t                             evt_prov_initialized; /**< Data field for prov initialized event*/
     sl_btmesh_evt_prov_provisioning_suspended_t                  evt_prov_provisioning_suspended; /**< Data field for prov provisioning_suspended event*/
     sl_btmesh_evt_prov_capabilities_t                            evt_prov_capabilities; /**< Data field for prov capabilities event*/
@@ -12562,10 +13078,12 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_prov_add_ddb_entry_complete_t                  evt_prov_add_ddb_entry_complete; /**< Data field for prov add_ddb_entry_complete event*/
     sl_btmesh_evt_prov_delete_ddb_entry_complete_t               evt_prov_delete_ddb_entry_complete; /**< Data field for prov delete_ddb_entry_complete event*/
     sl_btmesh_evt_prov_initialization_failed_t                   evt_prov_initialization_failed; /**< Data field for prov initialization_failed event*/
+    sl_btmesh_evt_prov_start_sent_t                              evt_prov_start_sent; /**< Data field for prov start_sent event*/
     sl_btmesh_evt_proxy_connected_t                              evt_proxy_connected; /**< Data field for proxy connected event*/
     sl_btmesh_evt_proxy_disconnected_t                           evt_proxy_disconnected; /**< Data field for proxy disconnected event*/
     sl_btmesh_evt_proxy_filter_status_t                          evt_proxy_filter_status; /**< Data field for proxy filter_status event*/
     sl_btmesh_evt_vendor_model_receive_t                         evt_vendor_model_receive; /**< Data field for vendor_model receive event*/
+    sl_btmesh_evt_vendor_model_send_complete_t                   evt_vendor_model_send_complete; /**< Data field for vendor_model send_complete event*/
     sl_btmesh_evt_health_client_server_status_t                  evt_health_client_server_status; /**< Data field for health_client server_status event*/
     sl_btmesh_evt_health_client_server_status_period_t           evt_health_client_server_status_period; /**< Data field for health_client server_status_period event*/
     sl_btmesh_evt_health_client_server_status_attention_t        evt_health_client_server_status_attention; /**< Data field for health_client server_status_attention event*/
@@ -12656,6 +13174,7 @@ PACKSTRUCT( struct sl_btmesh_msg {
     sl_btmesh_evt_scheduler_client_status_t                      evt_scheduler_client_status; /**< Data field for scheduler_client status event*/
     sl_btmesh_evt_scheduler_client_action_status_t               evt_scheduler_client_action_status; /**< Data field for scheduler_client action_status event*/
     sl_btmesh_evt_scheduler_server_action_changed_t              evt_scheduler_server_action_changed; /**< Data field for scheduler_server action_changed event*/
+    sl_btmesh_evt_scheduler_server_scene_changed_t               evt_scheduler_server_scene_changed; /**< Data field for scheduler_server scene_changed event*/
     sl_btmesh_evt_time_server_time_updated_t                     evt_time_server_time_updated; /**< Data field for time_server time_updated event*/
     sl_btmesh_evt_time_server_time_zone_offset_updated_t         evt_time_server_time_zone_offset_updated; /**< Data field for time_server time_zone_offset_updated event*/
     sl_btmesh_evt_time_server_tai_utc_delta_updated_t            evt_time_server_tai_utc_delta_updated; /**< Data field for time_server tai_utc_delta_updated event*/

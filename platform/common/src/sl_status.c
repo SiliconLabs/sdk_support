@@ -17,7 +17,6 @@
 
 #include <stddef.h>
 #include <stdio.h>
-#include "em_core.h"
 #include "sl_string.h"
 #include "sl_status_string_config.h"
 
@@ -252,7 +251,7 @@ static const char *sli_status_group_bluetooth_ctrl[] =
   "MEMORY_CAPACITY_EXCEEDED",
   "CONNECTION_TIMEOUT",
   "CONNECTION_LIMIT_EXCEEDED",
-  "SYNCHRONOUS_CONNECTIONTION_LIMIT_EXCEEDED",
+  "SYNCHRONOUS_CONNECTION_LIMIT_EXCEEDED",
   "ACL_CONNECTION_ALREADY_EXISTS",
   "COMMAND_DISALLOWED",
   "CONNECTION_REJECTED_DUE_TO_LIMITED_RESOURCES",
@@ -596,7 +595,8 @@ static const char *sli_status_group_bluetooth_smp[] =
   "DHKEY_CHECK_FAILED",
   "NUMERIC_COMPARISON_FAILED",
   "BREDR_PAIRING_IN_PROGRESS",
-  "CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED"
+  "CROSS_TRANSPORT_KEY_DERIVATION_GENERATION_NOT_ALLOWED",
+  "KEY_REJECTED"
 };
 #endif
 

@@ -160,11 +160,18 @@
  *   static GLIB_Context_t context;
  *   static const char * msg = "Hello GLIB!";
  *
- *   void setupGlib(void)
+ *   void glibExample(void)
  *   {
+ *     // Setup the dot matrix and initialize the GLIB context - these should be called once
  *     DMD_init(0);
  *     GLIB_contextInit(&context);
+ *
+ *     // Write our message into the GLIB instance.
  *     GLIB_drawString(&context, msg, strlen(msg), 10, 10, true);
+ *
+ *     // Needs to be called each time there is a change to GLIB to mirror
+ *     // GLIB context data model changes to the physical LCD.
+ *     DMD_updateDisplay();
  *   }
  *   @endcode
  *

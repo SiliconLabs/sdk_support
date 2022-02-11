@@ -20,6 +20,10 @@
   - id: iostream_usart
     instance:
     - vcom
+  - id: bootloader_uart_driver
+  - id: i2cspm
+    instance:
+    - sensor
   - id: ls013b7dh06
   - id: memlcd_usart
   - id: mic_i2s_driver
@@ -35,7 +39,13 @@
     instance:
     - btn0
     - btn1
+  - id: bootloader_spi_peripheral_usart_driver
 - template_contribution: []
+- define:
+  - name: SL_BOARD_NAME
+    value: '"BRD2204A"'
+  - name: SL_BOARD_REV
+    value: '"B07"'
 - tag:
   - board:pn:BRD2204
   - board:variant:A

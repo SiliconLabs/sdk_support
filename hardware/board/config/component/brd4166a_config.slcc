@@ -26,17 +26,21 @@
       file_id: btl_gpio_activation_cfg
     path: brd4166a/btl_gpio_activation_cfg.h
   - override:
-      component: bootloader_spi_master_driver
-      file_id: btl_spi_master_driver_cfg
-    path: brd4166a/btl_spi_master_driver_cfg.h
+      component: bootloader_spi_controller_usart_driver
+      file_id: btl_spi_controller_usart_driver_cfg
+    path: brd4166a/btl_spi_controller_usart_driver_cfg.h
   - override:
-      component: bootloader_spi_slave_driver
-      file_id: btl_spi_slave_driver_cfg
-    path: brd4166a/btl_spi_slave_driver_cfg.h
+      component: bootloader_spi_peripheral_usart_driver
+      file_id: btl_spi_peripheral_usart_driver_cfg
+    path: brd4166a/btl_spi_peripheral_usart_driver_cfg.h
   - override:
       component: bootloader_uart_driver
       file_id: btl_uart_driver_cfg
     path: brd4166a/btl_uart_driver_cfg.h
+  - override:
+      component: ccs811_driver
+      file_id: ccs811_config
+    path: brd4166a/sl_ccs811_config.h
   - override:
       component: cpc_primary_driver_spi
       file_id: cpc_drv_spi_primary_config
@@ -120,86 +124,6 @@
       instance: exp
     path: brd4166a/sl_iostream_usart_exp_config.h
   - override:
-      component: mic_i2s_driver
-      file_id: mic_i2s_config
-    path: brd4166a/sl_mic_i2s_config.h
-  - override:
-      component: mx25_flash_shutdown_usart
-      file_id: mx25_flash_shutdown_usart_config
-    path: brd4166a/sl_mx25_flash_shutdown_usart_config.h
-  - override:
-      component: pwm
-      file_id: pwm_config
-      instance: led0
-    path: brd4166a/sl_pwm_init_led0_config.h
-  - override:
-      component: pwm
-      file_id: pwm_config
-      instance: led1
-    path: brd4166a/sl_pwm_init_led1_config.h
-  - override:
-      component: rail_util_pa
-      file_id: rail_util_pa_config
-    path: brd4166a/sl_rail_util_pa_config.h
-  - override:
-      component: rail_util_pti
-      file_id: rail_util_pti_config
-    path: brd4166a/sl_rail_util_pti_config.h
-  - override:
-      component: simple_button
-      file_id: simple_button_config
-      instance: btn0
-    path: brd4166a/sl_simple_button_btn0_config.h
-  - override:
-      component: simple_button
-      file_id: simple_button_config
-      instance: btn1
-    path: brd4166a/sl_simple_button_btn1_config.h
-  - override:
-      component: simple_led
-      file_id: simple_led_config
-      instance: led0
-    path: brd4166a/sl_simple_led_led0_config.h
-  - override:
-      component: simple_led
-      file_id: simple_led_config
-      instance: led1
-    path: brd4166a/sl_simple_led_led1_config.h
-  - override:
-      component: spidrv
-      file_id: spidrv_config
-      instance: exp
-    path: brd4166a/sl_spidrv_exp_config.h
-  - override:
-      component: spidrv_usart
-      file_id: spidrv_usart_config
-      instance: exp
-    path: brd4166a/sl_spidrv_usart_exp_config.h
-  - override:
-      component: uartdrv_leuart
-      file_id: uartdrv_leuart_config
-      instance: vcom
-    path: brd4166a/sl_uartdrv_leuart_vcom_config.h
-  - override:
-      component: uartdrv_leuart
-      file_id: uartdrv_leuart_config
-      instance: exp
-    path: brd4166a/sl_uartdrv_leuart_exp_config.h
-  - override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: vcom
-    path: brd4166a/sl_uartdrv_usart_vcom_config.h
-  - override:
-      component: uartdrv_usart
-      file_id: uartdrv_usart_config
-      instance: exp
-    path: brd4166a/sl_uartdrv_usart_exp_config.h
-  - override:
-      component: ccs811_driver
-      file_id: ccs811_config
-    path: brd4166a/sl_ccs811_config.h
-  - override:
       component: iot_flash
       file_id: iot_flash_cfg
       instance: msc
@@ -279,3 +203,83 @@
       file_id: iot_uart_cfg
       instance: loopback
     path: brd4166a/iot_uart_cfg_loopback.h
+  - override:
+      component: legacy_ncp_spi
+      file_id: legacy_ncp_spi_config
+    path: brd4166a/legacy_ncp_spi_config.h
+  - override:
+      component: mic_i2s_driver
+      file_id: mic_i2s_config
+    path: brd4166a/sl_mic_i2s_config.h
+  - override:
+      component: mx25_flash_shutdown_usart
+      file_id: mx25_flash_shutdown_usart_config
+    path: brd4166a/sl_mx25_flash_shutdown_usart_config.h
+  - override:
+      component: pwm
+      file_id: pwm_config
+      instance: led0
+    path: brd4166a/sl_pwm_init_led0_config.h
+  - override:
+      component: pwm
+      file_id: pwm_config
+      instance: led1
+    path: brd4166a/sl_pwm_init_led1_config.h
+  - override:
+      component: rail_util_pa
+      file_id: rail_util_pa_config
+    path: brd4166a/sl_rail_util_pa_config.h
+  - override:
+      component: rail_util_pti
+      file_id: rail_util_pti_config
+    path: brd4166a/sl_rail_util_pti_config.h
+  - override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn0
+    path: brd4166a/sl_simple_button_btn0_config.h
+  - override:
+      component: simple_button
+      file_id: simple_button_config
+      instance: btn1
+    path: brd4166a/sl_simple_button_btn1_config.h
+  - override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led0
+    path: brd4166a/sl_simple_led_led0_config.h
+  - override:
+      component: simple_led
+      file_id: simple_led_config
+      instance: led1
+    path: brd4166a/sl_simple_led_led1_config.h
+  - override:
+      component: spidrv
+      file_id: spidrv_config
+      instance: exp
+    path: brd4166a/sl_spidrv_exp_config.h
+  - override:
+      component: spidrv_usart
+      file_id: spidrv_usart_config
+      instance: exp
+    path: brd4166a/sl_spidrv_usart_exp_config.h
+  - override:
+      component: uartdrv_leuart
+      file_id: uartdrv_leuart_config
+      instance: vcom
+    path: brd4166a/sl_uartdrv_leuart_vcom_config.h
+  - override:
+      component: uartdrv_leuart
+      file_id: uartdrv_leuart_config
+      instance: exp
+    path: brd4166a/sl_uartdrv_leuart_exp_config.h
+  - override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: vcom
+    path: brd4166a/sl_uartdrv_usart_vcom_config.h
+  - override:
+      component: uartdrv_usart
+      file_id: uartdrv_usart_config
+      instance: exp
+    path: brd4166a/sl_uartdrv_usart_exp_config.h

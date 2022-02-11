@@ -40,7 +40,7 @@ extern "C" {
 
 /*******************************************************************************
  * @addtogroup stdio Standard I/O
- * @brief Standard I/O
+ * @brief Standard I/O allows to get and put characters on stdio stream that is the default in I/O Streams.
  * @{
  ******************************************************************************/
 
@@ -53,7 +53,7 @@ int sl_getchar_std_wrapper(void);
 #endif
 
 /*******************************************************************************
- * Put a character on default the stream.
+ * Put a character on the default stream.
  *
  * @param[in] c   Character to print
  *
@@ -62,7 +62,7 @@ int sl_getchar_std_wrapper(void);
 sl_status_t sl_putchar(char c);
 
 /*******************************************************************************
- * Put a character on default the stream (match standard API).
+ * Put a character on the default stream (match standard API).
  *
  * @param[in] c   Integer character to print
  *
@@ -72,7 +72,7 @@ sl_status_t sl_putchar(char c);
 #define putchar  sl_putchar_std_wrapper
 
 /*******************************************************************************
- * Get a character on default the stream.
+ * Get a character on the default stream.
  *
  * @param[out] c Pointer to variable that will receive the character.
  *
@@ -81,7 +81,7 @@ sl_status_t sl_putchar(char c);
 sl_status_t sl_getchar(char *c);
 
 /*******************************************************************************
- * Get a character on default the stream.
+ * Get a character on the default stream.
  *
  * @return  On success, the character read is returned
  *          If a reading error occurs, -1 is returned (EOF).

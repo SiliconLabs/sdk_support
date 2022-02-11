@@ -40,6 +40,11 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup memlcd MEMLCD - Memory LCD
  * @brief Memory LCD interface.
+ *
+ * @note When using the EUSART as the communication engine, care must be taken
+ *       to ensure the EUSART is re-enabled when coming back from EM2/3.
+ *       This is automatically handle by the Power Manager when added to a project.
+ *       See EMLIB Eusart - EM2 guideline for non EM2-Capable instance
  * @{
  ******************************************************************************/
 
@@ -47,14 +52,14 @@ extern "C" {
  * General memory LCD data structure.
  */
 typedef struct sl_memlcd_t {
-  unsigned short width;       ///< Display pixel width 
-  unsigned short height;      ///< Display pixel height 
-  uint8_t bpp;                ///< Bits per pixel 
-  uint8_t color_mode;         ///< Color mode 
+  unsigned short width;       ///< Display pixel width
+  unsigned short height;      ///< Display pixel height
+  uint8_t bpp;                ///< Bits per pixel
+  uint8_t color_mode;         ///< Color mode
   int spi_freq;               ///< SPI clock frequency
-  uint8_t extcomin_freq;      ///< Extcomin pin toggle frequency 
-  uint8_t setup_us;           ///< SPI CS setup time 
-  uint8_t hold_us;            ///< SPI CS hold time 
+  uint8_t extcomin_freq;      ///< Extcomin pin toggle frequency
+  uint8_t setup_us;           ///< SPI CS setup time
+  uint8_t hold_us;            ///< SPI CS hold time
 } sl_memlcd_t;
 
 /**************************************************************************//**

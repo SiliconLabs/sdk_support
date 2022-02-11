@@ -299,6 +299,70 @@ library:
     condition:
       - toolchain_iar
       - mgm220sc22hna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sa27hgn_iar.a
+    condition:
+      - toolchain_iar
+      - zgm230sa27hgn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sb27hgn_iar.a
+    condition:
+      - toolchain_iar
+      - zgm230sb27hgn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sa27hnn_iar.a
+    condition:
+      - toolchain_iar
+      - zgm230sa27hnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa22vna_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pa22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb22vna_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pb22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa32vna_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pa32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb32vna_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pb32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa32vnn_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pa32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb32vnn_iar.a
+    condition:
+      - toolchain_iar
+      - bgm240pb32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240l022vnf_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240l022vnf
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa22vna_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pa22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb22vna_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pb22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa32vna_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pa32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb32vna_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pb32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa32vnn_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pa32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb32vnn_iar.a
+    condition:
+      - toolchain_iar
+      - mgm240pb32vnn
 
   - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm111a256v2_gcc.a
     condition:
@@ -588,3 +652,67 @@ library:
     condition:
       - toolchain_gcc
       - mgm220sc22hna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sa27hgn_gcc.a
+    condition:
+      - toolchain_gcc
+      - zgm230sa27hgn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sb27hgn_gcc.a
+    condition:
+      - toolchain_gcc
+      - zgm230sb27hgn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_zgm230sa27hnn_gcc.a
+    condition:
+      - toolchain_gcc
+      - zgm230sa27hnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa22vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pa22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb22vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pb22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa32vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pa32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb32vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pb32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240l022vnf_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240l022vnf
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa22vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pa22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb22vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pb22vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa32vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pa32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb32vna_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pb32vna
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pa32vnn_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pa32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_bgm240pb32vnn_gcc.a
+    condition:
+      - toolchain_gcc
+      - bgm240pb32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pa32vnn_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pa32vnn
+  - path: platform/radio/rail_lib/autogen/librail_release/librail_config_mgm240pb32vnn_gcc.a
+    condition:
+      - toolchain_gcc
+      - mgm240pb32vnn

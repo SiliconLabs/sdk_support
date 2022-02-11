@@ -52,13 +52,30 @@ extern "C" {
 /***************************************************************************//**
  * @addtogroup power_manager Power Manager
  *
- * @brief Power Manager
+ * @details Power manager is a platform level software module that manages
+ * the system's energy modes. Its main purpose is to transition the system to a
+ * low energy mode when the processor has nothing to execute. The energy mode the
+ * system will transition to is determined each time the system goes to sleep
+ * using requirements. These requirements are set by the different software modules
+ * (drivers, stacks, application code, etc...). Power manager also ensures a
+ * strict control of some power hungry resources such as the high frequency
+ * external oscillator (normally called HFXO). Power manager also
+ * offers a notification mechanism through which any piece of software module can be
+ * notified of energy mode transitions through callbacks.
+ *
+ * @note Sleep Driver is deprecated. Use Power Manager for all sleep-related
+ *       operations. See <a href="https://www.silabs.com/documents/
+ *       public/application-notes/
+ *       an1358-migrating-from-sleep-driver-to-power-manager.pdf">AN1358:
+ *       Migrating from Sleep Driver to Power Manager</a> for information on how
+ *       to migrate from Sleep Driver to Power Manager.
+ *
  * @details
  * ## Initialization
  *
- *   The power manager must be initialized prior to any call to power manager API.
+ *   Power manager must be initialized prior to any call to power manager API.
  *   If sl_system is used, only sl_system_init() must be called, otherwise
- *   sl_power_manager_init() must be called manually. Note that the power manager
+ *   sl_power_manager_init() must be called manually. Note that power manager
  *   must be initialized after the clock(s), when initialized manually, as the
  *   power manager check which oscillators are used during the initialization phase.
  *
@@ -108,13 +125,13 @@ extern "C" {
  * ### Sleep on ISR exit
  *
  *   When the system enters sleep, the only way to wake it up is via an interrupt or
- *   exception. By default, the power manager will assume that when an interrupt
+ *   exception. By default, power manager will assume that when an interrupt
  *   occurs and the corresponding ISR has been executed, the system must not go back
  *   to sleep. However, in the case where all the processing related to this interrupt
  *   is performed in the ISR, it is possible to go back to sleep by using this hook.
  *
  *   In case of an application that runs on an RTOS, the RTOS will take care of determining
- *   if the system can go back to sleep on ISR exit. The power manager will ensure the system resumes
+ *   if the system can go back to sleep on ISR exit. Power manager will ensure the system resumes
  *   its operations as soon as a task is resumed, posted or that its delay expires.
  *   In case of a baremetal application, the function `sl_power_manager_sleep_on_isr_exit()` will be generated
  *   automatically by Simplicity Studio's wizard. The function will look at multiple software modules from the SDK
@@ -163,7 +180,7 @@ extern "C" {
  *
  * void main(void)
  * {
- *   // Initialize the power manager; not needed if sl_system_init() is used.
+ *   // Initialize power manager; not needed if sl_system_init() is used.
  *   sl_power_manager_init();
  *
  *   // Limit sleep level to EM1
@@ -259,7 +276,7 @@ SL_ENUM(sl_power_manager_on_isr_exit_t) {
 };
 
 // -----------------------------------------------------------------------------
-// Internal Prototypes only to be used by the Power Manager module
+// Internal Prototypes only to be used by Power Manager module
 void sli_power_manager_update_em_requirement(sl_power_manager_em_t em,
                                              bool  add);
 

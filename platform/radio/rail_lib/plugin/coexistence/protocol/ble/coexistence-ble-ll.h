@@ -21,6 +21,10 @@
 #include <stdbool.h>
 #include <rail_types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Set request window
  * @param request window in us
@@ -64,5 +68,9 @@ void sl_bt_ll_coex_set_context(RAIL_Handle_t railHandle, sl_bt_coex_abort_tx_cal
 uint16_t sl_bt_ll_coex_fast_random(void);
 
 bool sl_bt_coex_tx_allowed(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

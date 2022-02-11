@@ -21,6 +21,8 @@ include:
       - path: sl_udelay.h
 provides:
   - name: udelay
+requires:
+  - name: emlib_common
 documentation:
     docset: gecko-platform
     document: service/api/group-udelay

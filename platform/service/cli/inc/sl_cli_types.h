@@ -68,6 +68,10 @@ extern "C" {
 #define SL_CLI_ACTIVE_FLAG_EN   1
 #endif
 
+#define SL_CLI_NVM3_KEY_COUNT    (0x100)
+#define SL_CLI_NVM3_KEY_BEGIN    (0x3000)
+#define SL_CLI_NVM3_KEY_END      (SL_CLI_NVM3_KEY_BEGIN + SL_CLI_NVM3_KEY_COUNT)
+
 // Defines for return types
 #define SL_CLI_INPUT_ORDINARY   (0U)   // Ordinary text or non-special characters
 #define SL_CLI_INPUT_RETURN     (1U)   // RETURN ('\r')
@@ -146,6 +150,7 @@ typedef struct sl_cli {
   sl_slist_node_t *command_group;              ///< Base for the command group list.
   sl_cli_command_function_t command_function;  ///< Function pointer to an alternate command function.
   void *aux_argument;                          ///< User defined command argument.
+  void *session_data;                          ///< Instance session data; own by submodule
 #if SL_CLI_NUM_HISTORY_BYTES
   char history_buf[SL_CLI_NUM_HISTORY_BYTES];  ///< The history buffer.
   size_t history_pos;                          ///< Position in history, if enabled.
@@ -159,6 +164,7 @@ typedef struct sl_cli {
   uint32_t loop_delay_tick;                    ///< A delay in the CLI task loop in ticks.
 #else
   int input_char;                              ///< A buffer that may contain the last input character.
+  bool block_sleep;
 #if defined(SL_CATALOG_CLI_DELAY_PRESENT)
   cli_delay_t cli_delay;                       ///< Instance data for the CLI delay function.
 #endif
@@ -169,19 +175,19 @@ typedef sl_cli_t *sl_cli_handle_t;
 
 /// @brief The structure defining the parameters for creating a CLI instance.
 typedef struct {
-  char *task_name;                               ///< The name.
-  sl_iostream_t  *iostream_handle;               ///< The iostream.
-  sl_cli_command_group_t *default_command_group; ///< The command_group.
+  const char *task_name;                         ///< Task name.
+  sl_iostream_t  *iostream_handle;               ///< IOstream handle.
+  sl_cli_command_group_t *default_command_group; ///< Command_group.
 #if defined(SL_CATALOG_KERNEL_PRESENT)
   osThreadId_t thread_id;                        ///< Thread ID.
   void *thread_cb;                               ///< Thread control block.
                                                  ///  Can be set to NULL for dynamic allocation.
   void *stack;                                   ///< Pointer to the stack.
                                                  ///  Can be set to NULL for dynamic allocation.
-  uint32_t stack_size;                           ///< The stack size.
-  osPriority_t prio;                             ///< The task priority.
-  uint32_t start_delay_ms;                       ///< The task start delay.
-  uint32_t loop_delay_ms;                        ///< The task loop delay.
+  uint32_t stack_size;                           ///< Stack size.
+  osPriority_t prio;                             ///< Task priority.
+  uint32_t start_delay_ms;                       ///< Task start delay.
+  uint32_t loop_delay_ms;                        ///< Task loop delay.
 #endif
 } sl_cli_instance_parameters_t;
 

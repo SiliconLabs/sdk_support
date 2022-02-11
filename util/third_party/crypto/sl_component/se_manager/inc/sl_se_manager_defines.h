@@ -139,6 +139,10 @@ extern "C" {
 
 /// ECC Weierstrass Prime key type
 #define SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM     (0x8U << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
+/// ECC Montgomery key type
+#define SL_SE_KEY_TYPE_ECC_MONTGOMERY                   (0xbU << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
+/// EDDSA key type
+#define SL_SE_KEY_TYPE_ECC_EDDSA                        (0xcU << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
 
 /// ECC NIST P-192
 #define SL_SE_KEY_TYPE_ECC_P192     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x18))
@@ -147,27 +151,24 @@ extern "C" {
 /// ECC NIST P-256
 #define SL_SE_KEY_TYPE_ECC_P256     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x20))
 
+/// ECC Ed25519 key for EdDSA
+#define SL_SE_KEY_TYPE_ECC_ED25519  (SL_SE_KEY_TYPE_ECC_EDDSA | (0x20))
+
+/// ECC X25519 key for ECDH
+#define SL_SE_KEY_TYPE_ECC_X25519   (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x20))
+
 #if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
 /// Symmetric key type for ChaCha20
   #define SL_SE_KEY_TYPE_CHACHA20     0x00000020
-
-/// ECC Montgomery key type
-  #define SL_SE_KEY_TYPE_ECC_MONTGOMERY (0xbU << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
-/// EDDSA key type
-  #define SL_SE_KEY_TYPE_ECC_EDDSA      (0xcU << SL_SE_KEY_TYPE_ALGORITHM_OFFSET)
 
 /// ECC NIST P-384
   #define SL_SE_KEY_TYPE_ECC_P384     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x30))
 /// ECC NIST P-521
   #define SL_SE_KEY_TYPE_ECC_P521     (SL_SE_KEY_TYPE_ECC_WEIERSTRASS_PRIME_CUSTOM | (0x42))
 
-/// ECC X25519 key for ECDH
-  #define SL_SE_KEY_TYPE_ECC_X25519   (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x20))
 /// ECC X448 key for ECDH
   #define SL_SE_KEY_TYPE_ECC_X448     (SL_SE_KEY_TYPE_ECC_MONTGOMERY | (0x38))
 
-/// ECC Ed25519 key for EdDSA
-  #define SL_SE_KEY_TYPE_ECC_ED25519  (SL_SE_KEY_TYPE_ECC_EDDSA | (0x20))
 /// ECC Ed448 key for EdDSA
   #define SL_SE_KEY_TYPE_ECC_ED448    (SL_SE_KEY_TYPE_ECC_EDDSA | (0x38))
 
@@ -224,6 +225,19 @@ extern "C" {
 #define SLI_SE_WRAPPED_KEY_OVERHEAD  (12 + 16)
 /// @} (end addtogroup sl_se_manager_key_handling)
 
+/// @addtogroup sl_se_manager_key_derivation
+/// @{
+
+/// Defines mapping the PBKDF2 PRFs to corresponding sl_se_hash_type_t values.
+#define SL_SE_PRF_AES_CMAC_128 SL_SE_HASH_NONE    ///< CMAC-AES-128
+#define SL_SE_PRF_HMAC_SHA1 SL_SE_HASH_SHA1       ///< HMAC-SHA-1
+#define SL_SE_PRF_HMAC_SHA224 SL_SE_HASH_SHA224   ///< HMAC-SHA-224
+#define SL_SE_PRF_HMAC_SHA256 SL_SE_HASH_SHA256   ///< HMAC-SHA-256
+#define SL_SE_PRF_HMAC_SHA384 SL_SE_HASH_SHA384   ///< HMAC-SHA-384
+#define SL_SE_PRF_HMAC_SHA512 SL_SE_HASH_SHA512   ///< HMAC-SHA-512
+
+/// @} (end addtogroup sl_se_manager_key_derivation)
+
 /// @addtogroup sl_se_manager_util
 /// @{
 
@@ -236,14 +250,12 @@ extern "C" {
 /// Certificate signature size
 #define SL_SE_CERT_SIGN_SIZE                      64
 
-#if (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT) || defined(DOXYGEN)
 /// Batch ID certificate
-  #define SL_SE_CERT_BATCH                          0x01
+#define SL_SE_CERT_BATCH                          0x01
 /// SE ID certificate
-  #define SL_SE_CERT_DEVICE_SE                      0x02
+#define SL_SE_CERT_DEVICE_SE                      0x02
 /// Host ID certificate
-  #define SL_SE_CERT_DEVICE_HOST                    0x03
-#endif
+#define SL_SE_CERT_DEVICE_HOST                    0x03
 
 /// @addtogroup sl_se_manager_util_tamper Tamper options
 /// @brief

@@ -7,6 +7,9 @@ category: Services|Device Initialization
 quality: production
 root_path: platform/service/device_init/
 config_file:
+  - path: config/s1/sl_device_init_lfrco_config.h
+    file_id: device_init_lfrco_config
+    condition: [device_series_1]
   - path: config/s2/sl_device_init_lfrco_config.h
     file_id: device_init_lfrco_config
     condition: [device_sdid_205]

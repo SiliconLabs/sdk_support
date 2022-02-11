@@ -40,6 +40,18 @@
 /// @addtogroup sl_se_manager
 /// @{
 
+uint32_t memcmp_time_cst(uint8_t *in1, uint8_t *in2, uint32_t size)
+{
+  //Don't try to optimise this function for performance, it's time constant for security reasons
+  uint32_t diff = 0;
+  uint32_t i = 0;
+  for (i = 0; i < size; i++) {
+    diff |= (*(in1 + i) ^ (*(in2 + i)));
+  }
+
+  return (diff > 0);
+}
+
 // -----------------------------------------------------------------------------
 // Global Functions
 
@@ -284,6 +296,7 @@ sl_status_t sl_se_aes_crypt_cfb8(sl_se_command_context_t *cmd_ctx,
 
   return ret;
 }
+
 /***************************************************************************//**
  * AES-CTR buffer encryption/decryption.
  ******************************************************************************/
@@ -497,7 +510,7 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
     return SL_STATUS_INVALID_PARAMETER;
   }
 
-  if (tag_len == 2 || tag_len > 16 || tag_len % 2 != 0) {
+  if (tag_len == 2 || tag_len == 0 || tag_len > 16 || tag_len % 2 != 0) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -544,6 +557,326 @@ sl_status_t sl_se_ccm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
     return command_status;
   }
 }
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+/***************************************************************************//**
+ *   Prepare a CCM streaming command context object to be used in subsequent
+ *   CCM streaming function calls.
+ ******************************************************************************/
+sl_status_t sl_se_ccm_multipart_starts(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       sl_se_cipher_operation_t mode,
+                                       uint32_t total_message_length,
+                                       const uint8_t *iv,
+                                       size_t iv_len,
+                                       const uint8_t *add,
+                                       size_t add_len,
+                                       size_t tag_len)
+
+{
+  sl_status_t status = SL_STATUS_OK;
+  unsigned char q;
+
+  //Check input parameters
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || iv == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (add_len > 0 && add == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (tag_len == 2 || tag_len > 16 || tag_len % 2 != 0) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (iv_len < 7 || iv_len > 13) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  q = 16 - 1 - (unsigned char) iv_len;
+  if ((q < sizeof(ccm_ctx->total_message_length)) && (ccm_ctx->total_message_length >= (1UL << (q * 8)))) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  memset(ccm_ctx, 0, sizeof(sl_se_ccm_multipart_context_t));
+
+  ccm_ctx->mode = mode;
+  ccm_ctx->message_length = 0;
+  ccm_ctx->total_message_length = total_message_length;
+  ccm_ctx->tag_len = tag_len;
+  ccm_ctx->last_update_operation = false;
+  memcpy(ccm_ctx->iv, iv, iv_len);
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  if (total_message_length == 0) {
+    // The first encryption precomputes the tag in the event there is no more data.
+    // For decryption, the pre-computed is compared to the input tag in
+    // sl_se_ccm_multipart_finish.
+    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
+    SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.tagbuf,
+                                                        tag_len);
+
+    sli_se_command_init(cmd_ctx,
+                        SLI_SE_COMMAND_AES_CCM_ENCRYPT
+                        | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+    SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+    SE_addParameter(se_cmd, add_len);
+    SE_addParameter(se_cmd, 0);
+
+    // Add key metadata block to command
+    sli_add_key_metadata(cmd_ctx, key, status);
+    // Add key input block to command
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_in);
+    SE_addDataInput(se_cmd, &add_in);
+
+    SE_addDataOutput(se_cmd, &tag_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+    if (status != SL_STATUS_OK) {
+      memset(ccm_ctx->mode_specific_buffer.tagbuf, 0, sizeof(ccm_ctx->mode_specific_buffer.tagbuf));
+    }
+    return status;
+  }
+  SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+  SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
+  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+  SE_DataTransfer_t message_length_in = SE_DATATRANSFER_DEFAULT(&total_message_length, sizeof(uint32_t));
+
+  sli_se_command_init(cmd_ctx,
+                      ((ccm_ctx->mode == SL_SE_DECRYPT)
+                       ? SLI_SE_COMMAND_AES_CCM_DECRYPT : SLI_SE_COMMAND_AES_CCM_ENCRYPT)
+                      | SLI_SE_COMMAND_OPTION_CONTEXT_START);
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+
+  SE_addParameter(se_cmd, ((iv_len & 0xFFFF) << 16) | (tag_len & 0xFFFF));
+  SE_addParameter(se_cmd, add_len);
+  SE_addParameter(se_cmd, 0);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &message_length_in);
+
+  SE_addDataInput(se_cmd, &iv_in);
+  SE_addDataInput(se_cmd, &add_in);
+  SE_addDataOutput(se_cmd, &ctx_out);
+
+  status = sli_se_execute_and_wait(cmd_ctx);
+  if (status != SL_STATUS_OK) {
+    memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+    return status;
+  }
+
+  return status;
+}
+#endif
+
+/***************************************************************************//**
+ *   This function feeds an input buffer into an ongoing CCM computation.
+ *   It is called between sl_se_ccm_multipart_starts() and sl_se_ccm_multipart_finish().
+ *   Can be called repeatedly.
+ ******************************************************************************/
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+sl_status_t sl_se_ccm_multipart_update(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       size_t length,
+                                       const uint8_t *input,
+                                       uint8_t *output,
+                                       size_t *output_length)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  // Check input parameters.
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (length == 0) {
+    ccm_ctx->last_update_operation = true;
+    return SL_STATUS_OK;
+  }
+
+  if ((ccm_ctx->message_length) + length > ccm_ctx->total_message_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (length > 0 && (input == NULL || output == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if ((uint32_t)output + length > RAM_MEM_END) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (ccm_ctx->last_update_operation == true) {
+    // We've already closed the input stream, no way back.
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  // Approach:
+  // Encrypt or decrypt regularly with context store. The crypto DMA must have input data in the 'END' operation, thus,
+  // some data must be saved in the context.
+  ccm_ctx->message_length += length;
+
+  if ((length % 16 != 0) && (ccm_ctx->message_length != ccm_ctx->total_message_length)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if ((ccm_ctx->message_length == ccm_ctx->total_message_length)) {
+    // Indicate that this is our last operation
+    ccm_ctx->last_update_operation = true;
+    //The update operation must have a multiple of 16 as input, so what is left up to or equal 16 bytes will be stored.
+    if (length <= 16) {
+      //go directly to finish
+      memcpy(ccm_ctx->mode_specific_buffer.final_data, input, length);
+      ccm_ctx->final_data_length = length;
+      return SL_STATUS_OK;
+    } else if (length % 16 > 0) {
+      memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - length % 16), length % 16);
+      ccm_ctx->final_data_length = length % 16;
+    } else {
+      memcpy(ccm_ctx->mode_specific_buffer.final_data, input + (length - 16), 16);
+      ccm_ctx->final_data_length = 16;
+    }
+    length -= ccm_ctx->final_data_length;
+  }
+
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+  SE_DataTransfer_t data_in =
+    SE_DATATRANSFER_DEFAULT(input, length);
+  SE_DataTransfer_t data_out =
+    SE_DATATRANSFER_DEFAULT(output, length);
+
+  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+  sli_se_command_init(cmd_ctx,
+                      ((ccm_ctx->mode == SL_SE_DECRYPT)
+                       ? SLI_SE_COMMAND_AES_CCM_DECRYPT : SLI_SE_COMMAND_AES_CCM_ENCRYPT)
+                      | SLI_SE_COMMAND_OPTION_CONTEXT_ADD);
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+
+  SE_addParameter(se_cmd, length);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &iv_ctx_in);
+  SE_addDataInput(se_cmd, &data_in);
+
+  SE_addDataOutput(se_cmd, &data_out);
+  SE_addDataOutput(se_cmd, &ctx_out);
+
+  status = sli_se_execute_and_wait(cmd_ctx);
+  if (status != SL_STATUS_OK) {
+    memset(output, 0, length);
+    memset(ccm_ctx->se_ctx, 0, sizeof(ccm_ctx->se_ctx));
+    return status;
+  }
+
+  *output_length = length;
+
+  return status;
+}
+#endif
+
+/***************************************************************************//**
+ *   Finish a CCM streaming operation and return the resulting CCM tag.
+ *   It is called after sl_se_ccm_multipart_update().
+ ******************************************************************************/
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
+sl_status_t sl_se_ccm_multipart_finish(sl_se_ccm_multipart_context_t *ccm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       uint8_t *tag,
+                                       uint8_t tag_size,
+                                       uint8_t *output,
+                                       uint8_t output_size,
+                                       uint8_t *output_length)
+{
+  //Check input parameters
+  if (ccm_ctx == NULL || cmd_ctx == NULL || key == NULL || tag == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (tag_size < ccm_ctx->tag_len || output_size < ccm_ctx->final_data_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  sl_status_t status = SL_STATUS_OK;
+
+  if (ccm_ctx->total_message_length == 0) {
+    if (ccm_ctx->mode == SL_SE_DECRYPT) {
+      if (memcmp_time_cst(tag, ccm_ctx->mode_specific_buffer.tagbuf, ccm_ctx->tag_len) != 0) {
+        memset(tag, 0, ccm_ctx->tag_len);
+        return SL_STATUS_INVALID_SIGNATURE;
+      }
+    } else {
+      memcpy(tag, ccm_ctx->mode_specific_buffer.tagbuf, ccm_ctx->tag_len);
+    }
+    return SL_STATUS_OK;
+  }
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(ccm_ctx->se_ctx, sizeof(ccm_ctx->se_ctx));
+
+  SE_DataTransfer_t data_in =
+    SE_DATATRANSFER_DEFAULT(ccm_ctx->mode_specific_buffer.final_data, ccm_ctx->final_data_length);
+
+  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, ccm_ctx->final_data_length);
+  SE_DataTransfer_t tag_buf = SE_DATATRANSFER_DEFAULT(tag,
+                                                      ccm_ctx->tag_len);
+
+  sli_se_command_init(cmd_ctx,
+                      ((ccm_ctx->mode == SL_SE_DECRYPT)
+                       ? SLI_SE_COMMAND_AES_CCM_DECRYPT : SLI_SE_COMMAND_AES_CCM_ENCRYPT)
+                      | SLI_SE_COMMAND_OPTION_CONTEXT_END);
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+
+  SE_addParameter(se_cmd, (ccm_ctx->tag_len & 0xFFFF));
+
+  SE_addParameter(se_cmd, ccm_ctx->final_data_length);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &iv_ctx_in);
+  SE_addDataInput(se_cmd, &data_in);
+
+  SE_addDataOutput(se_cmd, &data_out);
+  if (ccm_ctx->mode == SL_SE_DECRYPT) {
+    SE_addDataInput(se_cmd, &tag_buf);
+  } else {
+    SE_addDataOutput(se_cmd, &tag_buf);
+  }
+  status = sli_se_execute_and_wait(cmd_ctx);
+
+  if (status != SL_STATUS_OK) {
+    memset(tag, 0, ccm_ctx->tag_len);
+    *output_length = 0;
+    return status;
+  }
+
+  *output_length = ccm_ctx->final_data_length;
+
+  return SL_STATUS_OK;
+}
+#endif
 
 /***************************************************************************//**
  * This function calculates the full generic CMAC on the input buffer with
@@ -599,19 +932,21 @@ sl_status_t sl_se_cmac(sl_se_command_context_t *cmd_ctx,
  *   Finish a CMAC streaming operation and return the resulting CMAC tag.
  *   It is called after sl_se_cmac_update().
  ******************************************************************************/
-sl_status_t sl_se_cmac_finish(sl_se_cmac_streaming_context_t *cmac_ctx,
-                              uint8_t *output)
+sl_status_t sl_se_cmac_multipart_finish(sl_se_cmac_multipart_context_t *cmac_ctx,
+                                        sl_se_command_context_t *cmd_ctx,
+                                        const sl_se_key_descriptor_t *key,
+                                        uint8_t *output)
 {
   sl_status_t status = SL_STATUS_OK;
 
-  if (cmac_ctx == NULL || output == NULL) {
+  if (cmac_ctx == NULL || cmd_ctx == NULL || key == NULL || output == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
   if (cmac_ctx->length >= 16U) {
     // Compute previous input block by decryption of current data.
-    status = sl_se_aes_crypt_ecb(cmac_ctx->cmd_ctx,
-                                 cmac_ctx->key,
+    status = sl_se_aes_crypt_ecb(cmd_ctx,
+                                 key,
                                  SL_SE_DECRYPT,
                                  16U,
                                  cmac_ctx->data_out,
@@ -621,11 +956,11 @@ sl_status_t sl_se_cmac_finish(sl_se_cmac_streaming_context_t *cmac_ctx,
   if (status == SL_STATUS_OK) {
     // Feed previous block and unprocessed data (if any) to CMAC,
     // or on data < 16 just use accumulated data in context.
-    SE_Command_t *se_cmd = &cmac_ctx->cmd_ctx->command;
-    sli_se_command_init(cmac_ctx->cmd_ctx, SLI_SE_COMMAND_AES_CMAC);
+    SE_Command_t *se_cmd = &cmd_ctx->command;
+    sli_se_command_init(cmd_ctx, SLI_SE_COMMAND_AES_CMAC);
 
     // Add key parameter to command.
-    sli_add_key_parameters(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
+    sli_add_key_parameters(cmd_ctx, key, status);
 
     // Message size parameter.
     if (cmac_ctx->length >= 16U) {
@@ -635,8 +970,8 @@ sl_status_t sl_se_cmac_finish(sl_se_cmac_streaming_context_t *cmac_ctx,
     }
 
     // Key metadata.
-    sli_add_key_metadata(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
-    sli_add_key_input(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
 
     SE_DataTransfer_t in_data1 = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
     SE_DataTransfer_t in_data2 = SE_DATATRANSFER_DEFAULT(cmac_ctx->data_in,
@@ -657,18 +992,31 @@ sl_status_t sl_se_cmac_finish(sl_se_cmac_streaming_context_t *cmac_ctx,
     SE_DataTransfer_t out_tag = SE_DATATRANSFER_DEFAULT(output, 16U);
     SE_addDataOutput(se_cmd, &out_tag);
 
-    status = sli_se_execute_and_wait(cmac_ctx->cmd_ctx);
+    status = sli_se_execute_and_wait(cmd_ctx);
   }
   return status;
+}
+
+/***************************************************************************//**
+ *   Finish a CMAC streaming operation and return the resulting CMAC tag.
+ *   It is called after sl_se_cmac_update(). Deprecated.
+ ******************************************************************************/
+sl_status_t sl_se_cmac_finish(sl_se_cmac_streaming_context_t *cmac_ctx,
+                              uint8_t *output)
+{
+  if (cmac_ctx == NULL || output == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  return sl_se_cmac_multipart_finish(&cmac_ctx->cmac_ctx, cmac_ctx->cmd_ctx, cmac_ctx->key, output);
 }
 
 /***************************************************************************//**
  *   Prepare a CMAC streaming command context object to be used in subsequent
  *   CMAC streaming function calls.
  ******************************************************************************/
-sl_status_t sl_se_cmac_starts(sl_se_cmac_streaming_context_t *cmac_ctx,
-                              sl_se_command_context_t *cmd_ctx,
-                              const sl_se_key_descriptor_t *key)
+sl_status_t sl_se_cmac_multipart_starts(sl_se_cmac_multipart_context_t *cmac_ctx,
+                                        sl_se_command_context_t *cmd_ctx,
+                                        const sl_se_key_descriptor_t *key)
 {
   if (cmac_ctx == NULL || cmd_ctx == NULL || key == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
@@ -684,10 +1032,25 @@ sl_status_t sl_se_cmac_starts(sl_se_cmac_streaming_context_t *cmac_ctx,
       return SL_STATUS_INVALID_PARAMETER;
   }
 
-  memset(cmac_ctx, 0, sizeof(sl_se_cmac_streaming_context_t));
+  memset(cmac_ctx, 0, sizeof(sl_se_cmac_multipart_context_t));
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ *   Prepare a CMAC streaming command context object to be used in subsequent
+ *   CMAC streaming function calls. Deprecated.
+ ******************************************************************************/
+sl_status_t sl_se_cmac_starts(sl_se_cmac_streaming_context_t *cmac_ctx,
+                              sl_se_command_context_t *cmd_ctx,
+                              const sl_se_key_descriptor_t *key)
+{
+  if (cmac_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
   cmac_ctx->cmd_ctx = cmd_ctx;
   cmac_ctx->key = key;
-  return SL_STATUS_OK;
+
+  return sl_se_cmac_multipart_starts(&cmac_ctx->cmac_ctx, cmac_ctx->cmd_ctx, cmac_ctx->key);
 }
 
 /***************************************************************************//**
@@ -695,13 +1058,15 @@ sl_status_t sl_se_cmac_starts(sl_se_cmac_streaming_context_t *cmac_ctx,
  *   It is called between sl_se_cmac_starts() and sl_se_cmac_finish().
  *   Can be called repeatedly.
  ******************************************************************************/
-sl_status_t sl_se_cmac_update(sl_se_cmac_streaming_context_t *cmac_ctx,
-                              const uint8_t *input,
-                              size_t input_len)
+sl_status_t sl_se_cmac_multipart_update(sl_se_cmac_multipart_context_t *cmac_ctx,
+                                        sl_se_command_context_t *cmd_ctx,
+                                        const sl_se_key_descriptor_t *key,
+                                        const uint8_t *input,
+                                        size_t input_len)
 {
   sl_status_t status = SL_STATUS_OK;
 
-  if (cmac_ctx == NULL || input == NULL) {
+  if (cmac_ctx == NULL || cmd_ctx == NULL || key == NULL || input == NULL) {
     return SL_STATUS_INVALID_PARAMETER;
   }
 
@@ -711,21 +1076,21 @@ sl_status_t sl_se_cmac_update(sl_se_cmac_streaming_context_t *cmac_ctx,
     // Process one or more 16 byte blocks.
     size_t bytes_to_process = (pending + input_len) & 0xFFFFFFF0U;
 
-    SE_Command_t *se_cmd = &cmac_ctx->cmd_ctx->command;
-    sli_se_command_init(cmac_ctx->cmd_ctx,
+    SE_Command_t *se_cmd = &cmd_ctx->command;
+    sli_se_command_init(cmd_ctx,
                         SLI_SE_COMMAND_AES_ENCRYPT
                         | SLI_SE_COMMAND_OPTION_MODE_CBC
                         | SLI_SE_COMMAND_OPTION_CONTEXT_ADD);
 
     // Add key parameters to command.
-    sli_add_key_parameters(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
+    sli_add_key_parameters(cmd_ctx, key, status);
     // Message size (number of bytes)
     SE_addParameter(se_cmd, bytes_to_process);
 
     // Add key metadata block to command.
-    sli_add_key_metadata(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
+    sli_add_key_metadata(cmd_ctx, key, status);
     // Add key input block to command.
-    sli_add_key_input(cmac_ctx->cmd_ctx, cmac_ctx->key, status);
+    sli_add_key_input(cmd_ctx, key, status);
 
     SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
     SE_addDataInput(se_cmd, &iv_in);
@@ -748,7 +1113,7 @@ sl_status_t sl_se_cmac_update(sl_se_cmac_streaming_context_t *cmac_ctx,
     SE_DataTransfer_t iv_out = SE_DATATRANSFER_DEFAULT(cmac_ctx->state, 16U);
     SE_addDataOutput(se_cmd, &iv_out);
 
-    status = sli_se_execute_and_wait(cmac_ctx->cmd_ctx);
+    status = sli_se_execute_and_wait(cmd_ctx);
 
     // Store leftover data.
     size_t leftover = pending + input_len - bytes_to_process;
@@ -759,6 +1124,22 @@ sl_status_t sl_se_cmac_update(sl_se_cmac_streaming_context_t *cmac_ctx,
   }
   cmac_ctx->length += input_len;
   return status;
+}
+
+/***************************************************************************//**
+ *   This function feeds an input buffer into an ongoing CMAC computation.
+ *   It is called between sl_se_cmac_starts() and sl_se_cmac_finish().
+ *   Can be called repeatedly. Deprecatad.
+ ******************************************************************************/
+sl_status_t sl_se_cmac_update(sl_se_cmac_streaming_context_t *cmac_ctx,
+                              const uint8_t *input,
+                              size_t input_len)
+{
+  if (cmac_ctx == NULL ) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  return sl_se_cmac_multipart_update(&cmac_ctx->cmac_ctx, cmac_ctx->cmd_ctx, cmac_ctx->key, input, input_len);
 }
 
 /***************************************************************************//**
@@ -1056,7 +1437,7 @@ sl_status_t sl_se_gcm_auth_decrypt(sl_se_command_context_t *cmd_ctx,
 }
 
 /***************************************************************************//**
- * GCM streaming encryption/decryption, initial stage.
+ * GCM streaming encryption/decryption, initial stage. Deprecated.
  ******************************************************************************/
 sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
                              sl_se_command_context_t *cmd_ctx,
@@ -1189,8 +1570,201 @@ sl_status_t sl_se_gcm_starts(sl_se_gcm_streaming_context_t *gcm_ctx,
   return status;
 }
 
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 /***************************************************************************//**
- * GCM streaming encryption/decryption, update stage.
+ * GCM  multipart encryption/decryption, initial stage.
+ ******************************************************************************/
+sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       sl_se_cipher_operation_t mode,
+                                       const uint8_t *iv,
+                                       size_t iv_len,
+                                       const uint8_t *add,
+                                       size_t add_len)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  // Check input parameters.
+  if (gcm_ctx == NULL || cmd_ctx == NULL || key == NULL || iv == NULL
+      || (add_len > 0 && add == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if ((iv_len != 12)
+      // AD are limited to 2^64 bits, so 2^61 bytes.
+      // However, on 32 bit platforms, that amount of continous data cannot be
+      // available.
+      // || (((uint64_t)add_len) >> 61 != 0)
+      ) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  memset(gcm_ctx, 0, sizeof(sl_se_gcm_multipart_context_t));
+
+  gcm_ctx->mode = mode;
+  gcm_ctx->len = 0;
+  gcm_ctx->add_len = add_len;
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  // The start context requires some data, either additional data or input data.
+  // Case add_len > 0: Run start command with additonal data to create ctx_out.
+  // Case add_len = 0: Store iv in gcm_ctx and run start function with input data
+  // in sl_se_gcm_multipart_update. In the case of zero input data or
+  // input data < 16 run sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in
+  // sl_se_gcm_multipart_finish.
+  if ( add_len > 0 ) {
+    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
+    SE_DataTransfer_t ctx_out =
+      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+
+    sli_se_command_init(cmd_ctx,
+                        (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                         : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                        | SLI_SE_COMMAND_OPTION_CONTEXT_START);
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+    SE_addParameter(se_cmd, add_len);
+    SE_addParameter(se_cmd, 0);
+
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_in);
+    SE_addDataInput(se_cmd, &add_in);
+    SE_addDataOutput(se_cmd, &ctx_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+    if (status != SL_STATUS_OK) {
+      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      return status;
+    }
+    gcm_ctx->first_operation = false;
+  } else {
+    memcpy(gcm_ctx->se_ctx, iv, iv_len);
+    gcm_ctx->first_operation = true;
+  }
+  return SL_STATUS_OK;
+}
+
+#else
+/***************************************************************************//**
+ * GCM  multipart encryption/decryption, initial stage.
+ ******************************************************************************/
+sl_status_t sl_se_gcm_multipart_starts(sl_se_gcm_multipart_context_t *gcm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       sl_se_cipher_operation_t mode,
+                                       const uint8_t *iv,
+                                       size_t iv_len,
+                                       const uint8_t *add,
+                                       size_t add_len)
+{
+  sl_status_t status = SL_STATUS_OK;
+
+  // Check input parameters.
+  if (gcm_ctx == NULL || cmd_ctx == NULL || key == NULL || iv == NULL
+      || (add_len > 0 && add == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if ((iv_len != 12)
+      // AD are limited to 2^64 bits, so 2^61 bytes.
+      // However, on 32 bit platforms, that amount of continous data cannot be
+      // available.
+      // || (((uint64_t)add_len) >> 61 != 0)
+      ) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  memset(gcm_ctx, 0, sizeof(sl_se_gcm_multipart_context_t));
+
+  gcm_ctx->mode = mode;
+  gcm_ctx->len = 0;
+  gcm_ctx->add_len = add_len;
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  // The start context requires some data, either additional data or input data.
+  // Case add_len > 0: Run start command with additonal data to create ctx_out.
+  // Case add_len = 0: Store iv in gcm_ctx and run start function with input data
+  // in sl_se_gcm_multipart_update. In the case of zero input data or
+  // input data < 16 run sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in
+  // sl_se_gcm_multipart_finish.
+  if ( add_len > 0 ) {
+    {
+      // Encrypt: Compute tag and store it in context and output tag in finish.
+      // Decrypt: Compute tag and store it in context and compare it to the
+      // input tag in finish to verify it.
+
+      // Explanation:The end-context in finish is currently not supporting 0 input data
+      // for this config. For add_len = 0 and input_length = 0 we can run
+      // sl_se_gcm_auth_decrypt()/sl_se_gcm_crypt_and_tag() in finish, so this is only
+      // an issue for 0 input data and add_len != 0.
+      SE_Command_t *se_cmd = &cmd_ctx->command;
+      SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+      SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
+      SE_DataTransfer_t tag_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->tagbuf,
+                                                          sizeof(gcm_ctx->tagbuf));
+
+      sli_se_command_init(cmd_ctx,
+                          SLI_SE_COMMAND_AES_GCM_ENCRYPT
+                          | SLI_SE_COMMAND_OPTION_CONTEXT_WHOLE);
+
+      sli_add_key_parameters(cmd_ctx, key, status);
+      SE_addParameter(se_cmd, add_len);
+      SE_addParameter(se_cmd, 0);
+
+      sli_add_key_metadata(cmd_ctx, key, status);
+      sli_add_key_input(cmd_ctx, key, status);
+
+      SE_addDataInput(se_cmd, &iv_in);
+      SE_addDataInput(se_cmd, &add_in);
+      SE_addDataOutput(se_cmd, &tag_out);
+
+      status = sli_se_execute_and_wait(cmd_ctx);
+      if (status != SL_STATUS_OK) {
+        memset(gcm_ctx->tagbuf, 0, sizeof(gcm_ctx->tagbuf));
+        return status;
+      }
+    }
+    SE_DataTransfer_t iv_in = SE_DATATRANSFER_DEFAULT(iv, iv_len);
+    SE_DataTransfer_t add_in = SE_DATATRANSFER_DEFAULT(add, add_len);
+    SE_DataTransfer_t ctx_out =
+      SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+
+    sli_se_command_init(cmd_ctx,
+                        (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                         : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                        | SLI_SE_COMMAND_OPTION_CONTEXT_START);
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+    SE_addParameter(se_cmd, add_len);
+    SE_addParameter(se_cmd, 0);
+
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_in);
+    SE_addDataInput(se_cmd, &add_in);
+    SE_addDataOutput(se_cmd, &ctx_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+    if (status != SL_STATUS_OK) {
+      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      return status;
+    }
+    gcm_ctx->first_operation = false;
+  } else {
+    memcpy(gcm_ctx->se_ctx, iv, iv_len);
+    gcm_ctx->first_operation = true;
+  }
+  return SL_STATUS_OK;
+}
+#endif
+
+/***************************************************************************//**
+ * GCM streaming encryption/decryption, update stage. Deprecated.
  ******************************************************************************/
 sl_status_t sl_se_gcm_update(sl_se_gcm_streaming_context_t *gcm_ctx,
                              size_t length,
@@ -1420,8 +1994,422 @@ sl_status_t sl_se_gcm_update(sl_se_gcm_streaming_context_t *gcm_ctx,
   }
 }
 
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG > 2)
 /***************************************************************************//**
- * GCM streaming encryption/decryption, finish stage.
+ * GCM multipart encryption/decryption, update stage.
+ ******************************************************************************/
+sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       size_t length,
+                                       const uint8_t *input,
+                                       uint8_t *output,
+                                       size_t *output_length)
+{
+  sl_status_t status = SL_STATUS_OK;
+  uint8_t stored_res_length = 0;
+  uint8_t output_index = 0;
+
+  // Check input parameters.
+  if (cmd_ctx == NULL || key == NULL || gcm_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (length == 0) {
+    return SL_STATUS_OK;
+  }
+  if (length > 0 && (input == NULL || output == NULL || output_length == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  *output_length = 0;
+
+  // Total length is restricted to 2^39 - 256 bits, ie 2^36 - 2^5 bytes.
+  // Also check for possible overflow.
+  if (gcm_ctx->len + length < gcm_ctx->len
+      || (uint64_t)gcm_ctx->len + length > 0xFFFFFFFE0ULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  // The update context only support an input length as a multiple of 16. Hence, there
+  // there is a few cases that can happen.
+
+  // Always:
+  //  Case length = 0: Return SL_STATUS_OK
+
+  // If there is no data in gcm_ctx->final_data:
+  //  Case length < 16: Store data in gcm_ctx->final_data and return SL_STATUS_OK
+  //  Case length == 16: Run update as normal
+  //  Case length > 16 and length is a multiple of 16: Run update as normal
+  //  Case lenght > 16 and length is not a multiple of 16: Run update as normal on the largest multiple
+  //  and save the residue bytes in gcm_ctx->final_data.
+
+  // If there is data in gcm_ctx->final_data:
+  //  Case final_data_length + length < 16: Store input data in gcm_ctx and return SL_STATUS_OKAY
+  //  Case final_data_length + length > 16: Add data to fill up the gcm_ctx->final_data-buffer, run update
+  //  on the gcm_ctx->final_data-buffer and finally run update as explained above on the rest of the data.
+
+  if (gcm_ctx->final_data_length) {
+    if ((gcm_ctx->final_data_length + length) < 16) {
+      memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, length);
+      gcm_ctx->final_data_length += length;
+      *output_length = 0;
+      return SL_STATUS_OK;
+    }
+    stored_res_length = 16 - gcm_ctx->final_data_length;
+    memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
+
+    //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
+    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                          gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+
+    SE_DataTransfer_t data_in =
+      SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
+
+    SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, 16);
+    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                        sizeof(gcm_ctx->se_ctx));
+
+    sli_se_command_init(cmd_ctx,
+                        (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                         : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                        | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+    SE_addParameter(se_cmd, 0);
+    SE_addParameter(se_cmd, 16);
+
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_ctx_in);
+    SE_addDataInput(se_cmd, &data_in);
+
+    SE_addDataOutput(se_cmd, &data_out);
+
+    SE_addDataOutput(se_cmd, &ctx_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+
+    if (status != SL_STATUS_OK) {
+      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      return status;
+    }
+    gcm_ctx->first_operation = false;
+    gcm_ctx->len += 16;
+    output_index += 16;
+
+    if ((length - stored_res_length) < 16) {
+      memcpy(gcm_ctx->final_data, input + stored_res_length, length - stored_res_length);
+      gcm_ctx->final_data_length = length - stored_res_length;
+      *output_length = 16;
+      return SL_STATUS_OK;
+    }
+
+    length -= stored_res_length;
+    gcm_ctx->final_data_length = 0;
+    *output_length += 16;
+  }
+  if (length % 16 != 0) {
+    if (length > 16) {
+      // Input length is larger than, and a non multiple of, 16
+      memcpy(gcm_ctx->final_data, input + stored_res_length + (length - (length % 16)), length % 16);
+      gcm_ctx->final_data_length = length % 16;
+      length -= length % 16;
+    } else {
+      // Input length is not a multiple of 16
+      memcpy(gcm_ctx->final_data, input + stored_res_length, length);
+      gcm_ctx->final_data_length = length;
+      *output_length = 0;
+      return SL_STATUS_OK;
+    }
+  }
+  gcm_ctx->len += length;
+
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                        gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+
+  SE_DataTransfer_t data_in =
+    SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
+
+  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output + output_index, length);
+  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                      sizeof(gcm_ctx->se_ctx));
+
+  sli_se_command_init(cmd_ctx,
+                      (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                       : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                      | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+  SE_addParameter(se_cmd, 0);
+  SE_addParameter(se_cmd, length);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &iv_ctx_in);
+  SE_addDataInput(se_cmd, &data_in);
+
+  SE_addDataOutput(se_cmd, &data_out);
+
+  SE_addDataOutput(se_cmd, &ctx_out);
+
+  status = sli_se_execute_and_wait(cmd_ctx);
+
+  if (status != SL_STATUS_OK) {
+    memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+    return status;
+  }
+  *output_length += length;
+  gcm_ctx->first_operation = false;
+  return SL_STATUS_OK;
+}
+
+#else
+/***************************************************************************//**
+ * GCM multipart encryption/decryption, update stage.
+ ******************************************************************************/
+sl_status_t sl_se_gcm_multipart_update(sl_se_gcm_multipart_context_t *gcm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       size_t length,
+                                       const uint8_t *input,
+                                       uint8_t *output,
+                                       size_t *output_length)
+{
+  sl_status_t status = SL_STATUS_OK;
+  uint8_t stored_res_length = 0;
+  uint8_t output_index = 0;
+
+  // Check input parameters.
+  if (cmd_ctx == NULL || key == NULL || gcm_ctx == NULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  if (length == 0) {
+    return SL_STATUS_OK;
+  }
+  if (length > 0 && (input == NULL || output == NULL || output_length == NULL)) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  *output_length = 0;
+
+  // Total length is restricted to 2^39 - 256 bits, ie 2^36 - 2^5 bytes.
+  // Also check for possible overflow.
+  if (gcm_ctx->len + length < gcm_ctx->len
+      || (uint64_t)gcm_ctx->len + length > 0xFFFFFFFE0ULL) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+
+  // The finish command will return the wrong tag or INVALID SIGNATURE if there is no
+  // input data. There is no way to know when sl_se_gcm_multipart_update is called for the last time, so there must
+  // always be data stored.
+  // The update context only support an input length as a multiple of 16. Hence, there
+  // there is a few cases that can happen.
+
+  // Always:
+  //  Case length = 0: Return SL_STATUS_OK
+
+  // If there is no data in gcm_ctx->final_data
+  //  Case length < 16: Store data in gcm_ctx->final_data and return SL_STATUS_OK
+  //  Case lenght > 16 and length is not a multiple of 16: Run update as normal on the largest multiple
+  //  and save the residue bytes in gcm_ctx->final_data.
+  //  Case length == 16: store the current se_ctx in gcm_ctx->previous_se_ctx and store input data in final_data,
+  //  then run update as normal on the input data.
+  //  Case length > 16 and length is a multible of 16: run update twice, one with all input data and one with
+  //  all input data except the last 16 bytes. The out_ctx from each run are stored in gcm_ctx->se_ctx and
+  //  gcm_ctx->previous_se_ctx respectively. The last 16 bytes are then stored in final_data.
+  //  NOTE:output_length will include all encrypted/decrypted data.
+
+  // If there is data in gcm_ctx->final_data
+  //  Case final_data_length + length < 16: Store input data in gcm_ctx and return SL_STATUS_OKAY
+  //  Case final_data_length + length > 16: Add data to fill up the gcm_ctx->final_data-buffer, run update
+  //  on the gcm_ctx->final_data-buffer and finally run update as explained above on the rest of the data.
+
+  // Check for data in final_data_length.
+  if (gcm_ctx->final_data_length && gcm_ctx->final_data_length != 16) {
+    if ((gcm_ctx->final_data_length + length) < 16) {
+      memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, length);
+      gcm_ctx->final_data_length += length;
+      *output_length = 0;
+      return SL_STATUS_OK;
+    }
+
+    if ((gcm_ctx->final_data_length + length) == 16) {
+      memcpy(gcm_ctx->previous_se_ctx, gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+    }
+    stored_res_length = 16 - gcm_ctx->final_data_length;
+    memcpy(gcm_ctx->final_data + gcm_ctx->final_data_length, input, stored_res_length);
+
+    SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                          gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+
+    SE_DataTransfer_t data_in =
+      SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, 16);
+
+    SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, 16);
+    SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                        sizeof(gcm_ctx->se_ctx));
+
+    sli_se_command_init(cmd_ctx,
+                        (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                         : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                        | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
+
+    sli_add_key_parameters(cmd_ctx, key, status);
+    SE_addParameter(se_cmd, 0);
+    SE_addParameter(se_cmd, 16);
+
+    sli_add_key_metadata(cmd_ctx, key, status);
+    sli_add_key_input(cmd_ctx, key, status);
+
+    SE_addDataInput(se_cmd, &iv_ctx_in);
+    SE_addDataInput(se_cmd, &data_in);
+
+    SE_addDataOutput(se_cmd, &data_out);
+
+    SE_addDataOutput(se_cmd, &ctx_out);
+
+    status = sli_se_execute_and_wait(cmd_ctx);
+
+    if (status != SL_STATUS_OK) {
+      memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+      return status;
+    }
+    gcm_ctx->first_operation = false;
+    gcm_ctx->len += 16;
+    output_index += 16;
+
+    if ((gcm_ctx->final_data_length + length) == 16) {
+      gcm_ctx->final_data_length = 16;
+      *output_length = 16;
+      return SL_STATUS_OK;
+    }
+
+    if ((length - stored_res_length) < 16) {
+      memcpy(gcm_ctx->final_data, input + stored_res_length, length - stored_res_length);
+      gcm_ctx->final_data_length = length - stored_res_length;
+      *output_length = 16;
+      return SL_STATUS_OK;
+    }
+
+    length -= stored_res_length;
+    gcm_ctx->final_data_length = 0;
+    *output_length += 16;
+  }
+  if (length % 16 != 0) {
+    if (length > 16) {
+      //Input length is larger than, and a non multiple of, 16
+      memcpy(gcm_ctx->final_data, input + stored_res_length + (length - (length % 16)), length % 16);
+      gcm_ctx->final_data_length = length % 16;
+      length -= length % 16;
+    } else {
+      //Input length is not a multiple of 16
+      memcpy(gcm_ctx->final_data, input + stored_res_length, length);
+      gcm_ctx->final_data_length = length;
+      *output_length = 0;
+      return SL_STATUS_OK;
+    }
+  } else {
+    if (length > 16) {
+      //If length is larger than, and a multiple of, 16, we must compute a context without the last 16 bytes
+      //and store it as the previous context in case there is no more data.
+      memcpy(gcm_ctx->final_data, input + stored_res_length + (length - 16), 16);
+      gcm_ctx->final_data_length = 16;
+
+      uint8_t temp_context[32];
+      //The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
+      SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                            gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+
+      SE_DataTransfer_t data_in =
+        SE_DATATRANSFER_DEFAULT(input + stored_res_length, length - 16);
+
+      SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output + output_index, length - 16);
+      SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(temp_context,
+                                                          sizeof(temp_context));
+
+      sli_se_command_init(cmd_ctx,
+                          (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                           : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                          | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
+
+      sli_add_key_parameters(cmd_ctx, key, status);
+      SE_addParameter(se_cmd, 0);
+      SE_addParameter(se_cmd, length - 16);
+
+      sli_add_key_metadata(cmd_ctx, key, status);
+      sli_add_key_input(cmd_ctx, key, status);
+
+      SE_addDataInput(se_cmd, &iv_ctx_in);
+      SE_addDataInput(se_cmd, &data_in);
+
+      SE_addDataOutput(se_cmd, &data_out);
+
+      SE_addDataOutput(se_cmd, &ctx_out);
+
+      status = sli_se_execute_and_wait(cmd_ctx);
+
+      if (status != SL_STATUS_OK) {
+        memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+        return status;
+      }
+
+      memcpy(gcm_ctx->previous_se_ctx, temp_context, sizeof(gcm_ctx->se_ctx));
+    } else {
+      memcpy(gcm_ctx->previous_se_ctx, gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+      memcpy(gcm_ctx->final_data, input + stored_res_length, length);
+      gcm_ctx->final_data_length = length;
+    }
+  }
+  gcm_ctx->len += length;
+
+  // The gcm_ctx->se_ctx buffer contain iv data with length 12 if gcm_ctx->first_operation = true
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                        gcm_ctx->first_operation ? 12 : sizeof(gcm_ctx->se_ctx));
+
+  SE_DataTransfer_t data_in =
+    SE_DATATRANSFER_DEFAULT(input + stored_res_length, length);
+
+  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output + output_index, length);
+  SE_DataTransfer_t ctx_out = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx,
+                                                      sizeof(gcm_ctx->se_ctx));
+
+  sli_se_command_init(cmd_ctx,
+                      (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                       : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                      | (gcm_ctx->first_operation ? SLI_SE_COMMAND_OPTION_CONTEXT_START : SLI_SE_COMMAND_OPTION_CONTEXT_ADD));
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+  SE_addParameter(se_cmd, 0);
+  SE_addParameter(se_cmd, length);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &iv_ctx_in);
+  SE_addDataInput(se_cmd, &data_in);
+
+  SE_addDataOutput(se_cmd, &data_out);
+
+  SE_addDataOutput(se_cmd, &ctx_out);
+
+  status = sli_se_execute_and_wait(cmd_ctx);
+
+  if (status != SL_STATUS_OK) {
+    memset(gcm_ctx->se_ctx, 0, sizeof(gcm_ctx->se_ctx));
+    return status;
+  }
+  *output_length += length;
+  gcm_ctx->first_operation = false;
+  return SL_STATUS_OK;
+}
+#endif
+
+/***************************************************************************//**
+ * GCM streaming encryption/decryption, finish stage. Deprecated.
  ******************************************************************************/
 sl_status_t sl_se_gcm_finish(sl_se_gcm_streaming_context_t *gcm_ctx,
                              uint8_t *tag,
@@ -1444,6 +2432,147 @@ sl_status_t sl_se_gcm_finish(sl_se_gcm_streaming_context_t *gcm_ctx,
   }
 
   memcpy(tag, gcm_ctx->tagbuf, tag_len);
+  return SL_STATUS_OK;
+}
+
+/***************************************************************************//**
+ * GCM multipart encryption/decryption, finish stage.
+ ******************************************************************************/
+sl_status_t sl_se_gcm_multipart_finish(sl_se_gcm_multipart_context_t *gcm_ctx,
+                                       sl_se_command_context_t *cmd_ctx,
+                                       const sl_se_key_descriptor_t *key,
+                                       uint8_t *tag,
+                                       uint8_t tag_length,
+                                       uint8_t *output,
+                                       uint8_t output_size,
+                                       uint8_t *output_length)
+{
+  sl_status_t status = SL_STATUS_OK;
+  uint32_t lena_lenc[4];
+  uint8_t length;
+  if (cmd_ctx == NULL || key == NULL || gcm_ctx == NULL || tag == NULL || tag_length < 4 || tag_length > 16) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  if (output_size < gcm_ctx->final_data_length) {
+    return SL_STATUS_INVALID_PARAMETER;
+  }
+
+  SE_Command_t *se_cmd = &cmd_ctx->command;
+  length = gcm_ctx->final_data_length;
+  gcm_ctx->len += ((length % 16 != 0) ? length : 0);
+
+  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  if ((gcm_ctx->add_len > 0) && (gcm_ctx->len == 0)) {
+    if (gcm_ctx->mode == SL_SE_DECRYPT) {
+      if (memcmp_time_cst(tag, gcm_ctx->tagbuf, tag_length)) {
+        memset(tag, 0, tag_length);
+        return SL_STATUS_INVALID_SIGNATURE;
+      }
+    } else {
+      memcpy(tag, gcm_ctx->tagbuf, tag_length);
+    }
+    return SL_STATUS_OK;
+  }
+  #endif
+
+  lena_lenc[0] = __REV(gcm_ctx->add_len >> 29);
+  lena_lenc[1] = __REV((gcm_ctx->add_len << 3) & 0xFFFFFFFFUL);
+  lena_lenc[2] = __REV(gcm_ctx->len >> 29);
+  lena_lenc[3] = __REV((gcm_ctx->len << 3) & 0xFFFFFFFFUL);
+
+#if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  // No add data and a total length of 16 means there has been only one update operation
+  // (i.e no se_ctx stored in the previous context) and first_operation = false. Hence
+  // one shot is run.
+  if (gcm_ctx->first_operation || (gcm_ctx->add_len == 0 && gcm_ctx->len == 16)) {
+#else
+  if (gcm_ctx->first_operation) {
+#endif
+    if (gcm_ctx->mode == SL_SE_ENCRYPT) {
+      status = sl_se_gcm_crypt_and_tag(cmd_ctx,
+                                       key,
+                                       gcm_ctx->mode,
+                                       length,
+                                       gcm_ctx->se_ctx, //iv
+                                       12,  //iv_len
+                                       NULL,
+                                       0,
+                                       gcm_ctx->final_data,
+                                       output,
+                                       tag_length,
+                                       tag);
+    } else {
+      status = sl_se_gcm_auth_decrypt(cmd_ctx,
+                                      key,
+                                      length,
+                                      gcm_ctx->se_ctx, //iv
+                                      12,   //iv_len
+                                      NULL,
+                                      0,
+                                      gcm_ctx->final_data,
+                                      output,
+                                      tag_length,
+                                      tag);
+    }
+    if (status != SL_STATUS_OK) {
+      memset(tag, 0, tag_length);
+      return status;
+    }
+    return SL_STATUS_OK;
+  }
+
+  SE_DataTransfer_t data_in =
+    SE_DATATRANSFER_DEFAULT(gcm_ctx->final_data, length);
+
+  #if (_SILICON_LABS_32B_SERIES_2_CONFIG < 3)
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT((length % 16 != 0 || length == 0) ? gcm_ctx->se_ctx : gcm_ctx->previous_se_ctx, sizeof(gcm_ctx->previous_se_ctx));
+  #else
+  SE_DataTransfer_t iv_ctx_in = SE_DATATRANSFER_DEFAULT(gcm_ctx->se_ctx, sizeof(gcm_ctx->se_ctx));
+  #endif
+
+  SE_DataTransfer_t lenalenc_in = SE_DATATRANSFER_DEFAULT(&lena_lenc[0],
+                                                          sizeof(lena_lenc));
+
+  SE_DataTransfer_t data_out = SE_DATATRANSFER_DEFAULT(output, length);
+  SE_DataTransfer_t gcm_tag = SE_DATATRANSFER_DEFAULT(tag, tag_length);
+
+  sli_se_command_init(cmd_ctx,
+                      (gcm_ctx->mode == SL_SE_DECRYPT ? SLI_SE_COMMAND_AES_GCM_DECRYPT
+                       : SLI_SE_COMMAND_AES_GCM_ENCRYPT)
+                      | tag_length << 8 | SLI_SE_COMMAND_OPTION_CONTEXT_END);
+
+  sli_add_key_parameters(cmd_ctx, key, status);
+  SE_addParameter(se_cmd, 0);
+  SE_addParameter(se_cmd, length);
+
+  sli_add_key_metadata(cmd_ctx, key, status);
+  sli_add_key_input(cmd_ctx, key, status);
+
+  SE_addDataInput(se_cmd, &iv_ctx_in);
+  SE_addDataInput(se_cmd, &data_in);
+  SE_addDataInput(se_cmd, &lenalenc_in);
+
+  if (gcm_ctx->mode == SL_SE_DECRYPT) {
+    SE_addDataInput(se_cmd, &gcm_tag);
+  }
+
+  SE_addDataOutput(se_cmd, &data_out);
+
+  if (gcm_ctx->mode == SL_SE_ENCRYPT) {
+    SE_addDataOutput(se_cmd, &gcm_tag);
+  }
+
+  status = sli_se_execute_and_wait(cmd_ctx);
+
+  if (status != SL_STATUS_OK) {
+    if (gcm_ctx->mode == SL_SE_ENCRYPT) {
+      memset(tag, 0, tag_length);
+    }
+    return status;
+  }
+
+  *output_length = length;
   return SL_STATUS_OK;
 }
 

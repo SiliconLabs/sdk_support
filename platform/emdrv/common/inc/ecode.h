@@ -34,7 +34,11 @@
 
 /***************************************************************************//**
  * @addtogroup ecode ECODE - Error Codes
- * @brief Error and Status Codes
+ * @details ECODE is set of error and status codes related to DMA, RTC, SPI,
+ *        NVM, USTIMER, UARTDRV, EZRADIO, TEMP, and NVM3 drivers. These error and
+ *        status codes are used by the above listed drivers to update the layer
+ *        (using the driver) about an error or status.
+ *
  * @{
  ******************************************************************************/
 

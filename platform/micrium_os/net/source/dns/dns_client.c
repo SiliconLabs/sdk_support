@@ -757,8 +757,6 @@ void DNSc_Init(const DNSc_CFG *p_cfg,
   p_dnsc_data->ServerAddrAuto = server_addr;
   CORE_EXIT_ATOMIC();
 
-  p_dnsc_data->QueryID = 1u;
-
   //                                                               ------------- INITIALIZE CACHE MODULE --------------
   DNScCache_Init(p_cfg, p_dnsc_data, p_mem_seg, p_err);
   if (RTOS_ERR_CODE_GET(*p_err) != RTOS_ERR_NONE) {

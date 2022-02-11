@@ -29,10 +29,15 @@
  ******************************************************************************/
 
 #include "em_device.h"
+#include <stddef.h>
 #include "em_cmu.h"
 #include "em_ebi.h"
 #include "em_gpio.h"
+#if defined(USART_PRESENT)
 #include "em_usart.h"
+#elif defined(EUSART_PRESENT)
+#include "em_eusart.h"
+#endif
 #include "bsp_dk_bcreg_3201.h"
 #include "bsp.h"
 
@@ -225,13 +230,13 @@ int BSP_BusControlModeSet(BSP_BusControl_TypeDef mode)
       break;
 
     case BSP_BusControl_SPI:
-      #if !defined(BSP_MCUBOARD_BRD1004A)
+      #if !defined(BSP_MCUBOARD_BRD1004A) && !defined(BSP_MCUBOARD_BRD1011A)
       /* Configure board for SPI mode on PB15 MCU_EBI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 15, gpioModePushPull, 1);
       /* Configure board for SPI mode on PD13 MCU_SPI_CONNECT */
       GPIO_PinModeSet(gpioPortD, 13, gpioModePushPull, 0);
       #else
-      // Configure board for SPI mode on PD13 MCU_SPI_CONNECT
+      /* Configure board for SPI mode on PB0 MCU_SPI_CONNECT */
       GPIO_PinModeSet(gpioPortB, 0, gpioModePushPull, 0);
       #endif
       break;
@@ -1125,12 +1130,13 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
   /* Enable CS */
   GPIO_PinOutClear(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
 
+#if defined(USART_PRESENT)
   /* Write SPI address MSB */
   USART_Tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
   /* Just ignore data read back */
   USART_Rx(BSP_SPI_USART_USED);
 
-  /* Write SPI address  LSB */
+  /* Write SPI data  LSB */
   USART_Tx(BSP_SPI_USART_USED, data & 0xFF);
 
   tmp = (uint16_t) USART_Rx(BSP_SPI_USART_USED);
@@ -1139,17 +1145,35 @@ static uint16_t SpiBcAccess(uint8_t addr, uint8_t rw, uint16_t data)
   USART_Tx(BSP_SPI_USART_USED, data >> 8);
   tmp |= (uint16_t) USART_Rx(BSP_SPI_USART_USED) << 8;
 
+#elif defined(EUSART_PRESENT)
+  /* 1-byte Header */
+  EUSART_Tx(BSP_SPI_USART_USED, (addr & 0x3) | rw << 3);
+  /* Just ignore data read back */
+  (void)EUSART_Rx(BSP_SPI_USART_USED);
+
+  /* SPI data LSB */
+  EUSART_Tx(BSP_SPI_USART_USED, data & 0xFF);
+  tmp = (uint16_t) EUSART_Rx(BSP_SPI_USART_USED);
+
+  /* SPI data MSB */
+  EUSART_Tx(BSP_SPI_USART_USED, data >> 8);
+  tmp |= (uint16_t) EUSART_Rx(BSP_SPI_USART_USED) << 8;
+#endif
+
   /* Disable CS */
   GPIO_PinOutSet(BSP_PORT_SPI_CS, BSP_PIN_SPI_CS);
 
-  return tmp;
+  return (tmp);
 }
 
 static void SpiBcDisable(void)
 {
   /* Restore and disable USART */
+#if defined(USART_PRESENT)
   USART_Reset(BSP_SPI_USART_USED);
-
+#elif defined(EUSART_PRESENT)
+  EUSART_Reset(BSP_SPI_USART_USED);
+#endif
   GPIO_PinModeSet(BSP_PORT_SPI_TX, BSP_PIN_SPI_TX, gpioModeDisabled, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_RX, BSP_PIN_SPI_RX, gpioModeDisabled, 0);
   GPIO_PinModeSet(BSP_PORT_SPI_CLK, BSP_PIN_SPI_CLK, gpioModeDisabled, 0);
@@ -1164,7 +1188,11 @@ static void SpiBcDisable(void)
 
 static void SpiBcInit(void)
 {
+#if defined(USART_PRESENT)
   USART_InitSync_TypeDef bcinit = USART_INITSYNC_DEFAULT;
+#elif defined(EUSART_PRESENT)
+  EUSART_SpiInit_TypeDef bcinit = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
+#endif
 
   /* Enable module clocks */
   CMU_ClockEnable(BSP_SPI_USART_CLK, true);
@@ -1183,39 +1211,54 @@ static void SpiBcInit(void)
 
   #if defined(_EFM32_GECKO_FAMILY)
   bcinit.refFreq  = 32000000;
-  #elif defined(BSP_MCUBOARD_BRD1004A)
-  bcinit.refFreq  = 38400000;
+  #elif defined(BSP_MCUBOARD_BRD1004A) || defined(BSP_MCUBOARD_BRD1011A)
+  bcinit.refFreq  = 0; /* Use default USART or EUSART clock of FPGA. */
   #else
   bcinit.refFreq  = 48000000;
   #endif
+
+#if defined(USART_PRESENT)
   bcinit.baudrate = 7000000;
 
   /* Initialize USART */
   USART_InitSync(BSP_SPI_USART_USED, &bcinit);
+#elif defined(EUSART_PRESENT)
+  bcinit.bitRate = 2000000;
+
+  /* Initialize EUSART */
+  EUSART_SpiInit(BSP_SPI_USART_USED, &bcinit);
+#endif
 
   /* Enable pins at default location */
-  #if defined(GPIO_USART_ROUTEEN_TXPEN)
+#if defined(GPIO_USART_ROUTEEN_TXPEN)
   GPIO->USARTROUTE[BSP_SPI_USART_NO].ROUTEEN = GPIO_USART_ROUTEEN_TXPEN
                                                | GPIO_USART_ROUTEEN_RXPEN
                                                | GPIO_USART_ROUTEEN_CLKPEN;
 
-  GPIO->USARTROUTE[BSP_SPI_USART_NO].TXROUTE = (BSP_PORT_SPI_TX
-                                                << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                               | (BSP_PIN_SPI_TX
-                                                  << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[BSP_SPI_USART_NO].TXROUTE = (BSP_PORT_SPI_TX << _GPIO_USART_TXROUTE_PORT_SHIFT)
+                                               | (BSP_PIN_SPI_TX << _GPIO_USART_TXROUTE_PIN_SHIFT);
 
-  GPIO->USARTROUTE[BSP_SPI_USART_NO].RXROUTE = (BSP_PORT_SPI_RX
-                                                << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                               | (BSP_PIN_SPI_RX
-                                                  << _GPIO_USART_RXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[BSP_SPI_USART_NO].RXROUTE = (BSP_PORT_SPI_RX << _GPIO_USART_RXROUTE_PORT_SHIFT)
+                                               | (BSP_PIN_SPI_RX << _GPIO_USART_RXROUTE_PIN_SHIFT);
 
-  GPIO->USARTROUTE[BSP_SPI_USART_NO].CLKROUTE = (BSP_PORT_SPI_CLK
-                                                 << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-                                                | (BSP_PIN_SPI_CLK
-                                                   << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-  #else
+  GPIO->USARTROUTE[BSP_SPI_USART_NO].CLKROUTE = (BSP_PORT_SPI_CLK << _GPIO_USART_CLKROUTE_PORT_SHIFT)
+                                                | (BSP_PIN_SPI_CLK << _GPIO_USART_CLKROUTE_PIN_SHIFT);
+#elif defined(USART_PRESENT)
   BSP_SPI_USART_USED->ROUTE = USART_ROUTE_TXPEN | USART_ROUTE_RXPEN | USART_ROUTE_CLKPEN;
-  #endif
+#elif defined(EUSART_PRESENT)
+  GPIO->EUSARTROUTE_SET[BSP_SPI_USART_NO].ROUTEEN = GPIO_EUSART_ROUTEEN_TXPEN
+                                                    | GPIO_EUSART_ROUTEEN_RXPEN
+                                                    | GPIO_EUSART_ROUTEEN_SCLKPEN;
+
+  GPIO->EUSARTROUTE[BSP_SPI_USART_NO].TXROUTE = (BSP_PORT_SPI_TX << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+                                                | (BSP_PIN_SPI_TX << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+
+  GPIO->EUSARTROUTE[BSP_SPI_USART_NO].RXROUTE = (BSP_PORT_SPI_RX << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+                                                | (BSP_PIN_SPI_RX << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+
+  GPIO->EUSARTROUTE[BSP_SPI_USART_NO].SCLKROUTE = (BSP_PORT_SPI_CLK << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
+                                                  | (BSP_PIN_SPI_CLK << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT);
+#endif
 }
 
 static void SpiControl(BSP_SpiControl_TypeDef device)
@@ -1234,7 +1277,11 @@ static void SpiControl(BSP_SpiControl_TypeDef device)
       break;
 
     case BSP_SPI_OFF:
+#if defined(USART_PRESENT)
       USART_Reset(BSP_SPI_USART_USED);
+#elif defined(EUSART_PRESENT)
+      EUSART_Reset(BSP_SPI_USART_USED);
+#endif
       CMU_ClockEnable(BSP_SPI_USART_CLK, false);
       break;
   }

@@ -187,7 +187,43 @@ typedef enum {
   pcntPRSCh10 = 10,   /**< PRS channel 10. */
 #endif
 #if defined(PCNT_INPUT_S0PRSSEL_PRSCH11)
-  pcntPRSCh11 = 11    /**< PRS channel 11. */
+  pcntPRSCh11 = 11,   /**< PRS channel 11. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH12)
+  pcntPRSCh12 = 12,   /**< PRS channel 12. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH13)
+  pcntPRSCh13 = 13,   /**< PRS channel 13. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH14)
+  pcntPRSCh14 = 14,   /**< PRS channel 14. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH15)
+  pcntPRSCh15 = 15,   /**< PRS channel 15. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH16)
+  pcntPRSCh16 = 16,   /**< PRS channel 16. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH17)
+  pcntPRSCh17 = 17,   /**< PRS channel 17. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH18)
+  pcntPRSCh18 = 18,   /**< PRS channel 18. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH19)
+  pcntPRSCh19 = 19,   /**< PRS channel 19. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH20)
+  pcntPRSCh20 = 20,   /**< PRS channel 20. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH21)
+  pcntPRSCh21 = 21,   /**< PRS channel 21. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH22)
+  pcntPRSCh22 = 22,   /**< PRS channel 22. */
+#endif
+#if defined(PCNT_INPUT_S0PRSSEL_PRSCH23)
+  pcntPRSCh23 = 23,   /**< PRS channel 23. */
 #endif
 } PCNT_PRSSel_TypeDef;
 #elif defined(_SILICON_LABS_32B_SERIES_2)
@@ -449,10 +485,10 @@ typedef struct {
 
 /***************************************************************************//**
  * @brief
- *   Get pulse counter value.
+ *   Get the pulse counter value.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @return
  *   Current pulse counter value.
@@ -465,10 +501,10 @@ __STATIC_INLINE uint32_t PCNT_CounterGet(PCNT_TypeDef *pcnt)
 #if defined(_PCNT_AUXCNT_MASK)
 /***************************************************************************//**
  * @brief
- *   Get auxiliary counter value.
+ *   Get the auxiliary counter value.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @return
  *   Current auxiliary counter value.
@@ -484,10 +520,10 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top);
 
 /***************************************************************************//**
  * @brief
- *   Set counter value.
+ *   Set a counter value.
  *
  * @details
- *   Pulse counter is disabled while changing counter value, and re-enabled
+ *   Pulse counter is disabled while changing counter value and re-enabled
  *   (if originally enabled) when counter value has been set.
  *
  * @note
@@ -498,7 +534,7 @@ void PCNT_CounterTopSet(PCNT_TypeDef *pcnt, uint32_t count, uint32_t top);
  *   operating in (or about to enable) #pcntModeOvsSingle mode.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @param[in] count
  *   Value to set in counter register.
@@ -534,7 +570,7 @@ void PCNT_TCCConfiguration(PCNT_TypeDef *pcnt, const PCNT_TCC_TypeDef *config);
  *   Clear one or more pending PCNT interrupts.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @param[in] flags
  *   Pending PCNT interrupt source to clear. Use a bitwise logic OR combination
@@ -554,7 +590,7 @@ __STATIC_INLINE void PCNT_IntClear(PCNT_TypeDef *pcnt, uint32_t flags)
  *   Disable one or more PCNT interrupts.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @param[in] flags
  *   PCNT interrupt sources to disable. Use a bitwise logic OR combination of
@@ -579,7 +615,7 @@ __STATIC_INLINE void PCNT_IntDisable(PCNT_TypeDef *pcnt, uint32_t flags)
  *   PCNT_IntClear() prior to enabling the interrupt.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @param[in] flags
  *   PCNT interrupt sources to enable. Use a bitwise logic OR combination of
@@ -602,7 +638,7 @@ __STATIC_INLINE void PCNT_IntEnable(PCNT_TypeDef *pcnt, uint32_t flags)
  *   The event bits are not cleared by the use of this function.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @return
  *   PCNT interrupt sources pending. A bitwise logic OR combination of valid
@@ -624,7 +660,7 @@ __STATIC_INLINE uint32_t PCNT_IntGet(PCNT_TypeDef *pcnt)
  *   The event bits are not cleared by the use of this function.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to thePCNT peripheral register block.
  *
  * @return
  *   Pending and enabled PCNT interrupt sources.
@@ -651,7 +687,7 @@ __STATIC_INLINE uint32_t PCNT_IntGetEnabled(PCNT_TypeDef *pcnt)
  *   Set one or more pending PCNT interrupts from SW.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @param[in] flags
  *   PCNT interrupt sources to set to pending. Use a bitwise logic OR combination
@@ -669,10 +705,10 @@ __STATIC_INLINE void PCNT_IntSet(PCNT_TypeDef *pcnt, uint32_t flags)
 #if defined(_PCNT_LOCK_MASK)
 /***************************************************************************//**
  * @brief
- *   Locks PCNT registers.
+ *   Lock PCNT registers.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @note When PCNT registers are locked PCNT_CFG, PCNT_EN, PCNT_SWRST, PCNT_CMD,
  *       PCNT_CTRL, PCNT_OVSCTRL, PCNT_CNT, PCNT_TOP, and PCNT_TOPB registers
@@ -687,10 +723,10 @@ __STATIC_INLINE void PCNT_Lock(PCNT_TypeDef *pcnt)
 #if defined(_PCNT_LOCK_MASK)
 /***************************************************************************//**
  * @brief
- *   Unlocks PCNT registers.
+ *   Unlock PCNT registers.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to thePCNT peripheral register block.
  ******************************************************************************/
 __STATIC_INLINE void PCNT_Unlock(PCNT_TypeDef *pcnt)
 {
@@ -702,10 +738,10 @@ void PCNT_Reset(PCNT_TypeDef *pcnt);
 
 /***************************************************************************//**
  * @brief
- *   Get pulse counter top buffer value.
+ *   Get the pulse counter top buffer value.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @return
  *   Current pulse counter top buffer value.
@@ -723,10 +759,10 @@ void PCNT_TopBufferSet(PCNT_TypeDef *pcnt, uint32_t val);
 
 /***************************************************************************//**
  * @brief
- *   Get pulse counter top value.
+ *   Get the pulse counter top value.
  *
  * @param[in] pcnt
- *   Pointer to PCNT peripheral register block.
+ *   Pointer to the PCNT peripheral register block.
  *
  * @return
  *   Current pulse counter top value.

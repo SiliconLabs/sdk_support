@@ -697,6 +697,8 @@ sl_status_t sl_se_disable_tamper(sl_se_command_context_t *cmd_ctx,
                                  uint32_t len,
                                  sl_se_tamper_signals_t tamper_signals);
 
+#endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
+
 /***************************************************************************//**
  * @brief
  *   Read size of stored certificates in SE.
@@ -736,7 +738,6 @@ sl_status_t sl_se_read_cert(sl_se_command_context_t *cmd_ctx,
                             sl_se_cert_type_t cert_type,
                             void *cert,
                             uint32_t num_bytes);
-#endif // (_SILICON_LABS_SECURITY_FEATURE == _SILICON_LABS_SECURITY_FEATURE_VAULT)
 
 #endif // defined(SEMAILBOX_PRESENT)
 

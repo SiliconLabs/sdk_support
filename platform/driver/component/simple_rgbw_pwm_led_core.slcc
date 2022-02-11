@@ -15,20 +15,18 @@ quality: production
 root_path: platform/driver/leddrv/
 ui_hints:
   visibility: never
-source:
-  - path: src/sl_simple_rgbw_pwm_led.c
 include:
   - path: inc
     file_list:
       - path: sl_simple_rgbw_pwm_led.h
+source:
+  - path: src/sl_simple_rgbw_pwm_led.c
 provides:
   - name: simple_rgbw_pwm_led_core
 requires:
-  - name: status
-  - name: emlib_timer
-  - name: emlib_gpio
-  - name: emlib_cmu
-  - name: emlib_common
+  - name: simple_pwm_led_core
+  - name: simple_rgbw_pwm_led_s2
+    condition: [device_series_2]
   - name: led
 template_file:
   - path: inst/sl_simple_rgbw_pwm_led_instances.c.jinja

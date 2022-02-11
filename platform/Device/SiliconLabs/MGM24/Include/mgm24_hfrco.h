@@ -98,7 +98,7 @@ typedef struct {
 
 /* Bit fields for HFRCO CTRL */
 #define _HFRCO_CTRL_RESETVALUE                0x00000000UL                              /**< Default value for HFRCO_CTRL                */
-#define _HFRCO_CTRL_MASK                      0x00000003UL                              /**< Mask for HFRCO_CTRL                         */
+#define _HFRCO_CTRL_MASK                      0x00000007UL                              /**< Mask for HFRCO_CTRL                         */
 #define HFRCO_CTRL_FORCEEN                    (0x1UL << 0)                              /**< Force Enable                                */
 #define _HFRCO_CTRL_FORCEEN_SHIFT             0                                         /**< Shift value for HFRCO_FORCEEN               */
 #define _HFRCO_CTRL_FORCEEN_MASK              0x1UL                                     /**< Bit mask for HFRCO_FORCEEN                  */
@@ -109,6 +109,11 @@ typedef struct {
 #define _HFRCO_CTRL_DISONDEMAND_MASK          0x2UL                                     /**< Bit mask for HFRCO_DISONDEMAND              */
 #define _HFRCO_CTRL_DISONDEMAND_DEFAULT       0x00000000UL                              /**< Mode DEFAULT for HFRCO_CTRL                 */
 #define HFRCO_CTRL_DISONDEMAND_DEFAULT        (_HFRCO_CTRL_DISONDEMAND_DEFAULT << 1)    /**< Shifted mode DEFAULT for HFRCO_CTRL         */
+#define HFRCO_CTRL_EM23ONDEMAND               (0x1UL << 2)                              /**< EM23 On-demand                              */
+#define _HFRCO_CTRL_EM23ONDEMAND_SHIFT        2                                         /**< Shift value for HFRCO_EM23ONDEMAND          */
+#define _HFRCO_CTRL_EM23ONDEMAND_MASK         0x4UL                                     /**< Bit mask for HFRCO_EM23ONDEMAND             */
+#define _HFRCO_CTRL_EM23ONDEMAND_DEFAULT      0x00000000UL                              /**< Mode DEFAULT for HFRCO_CTRL                 */
+#define HFRCO_CTRL_EM23ONDEMAND_DEFAULT       (_HFRCO_CTRL_EM23ONDEMAND_DEFAULT << 2)   /**< Shifted mode DEFAULT for HFRCO_CTRL         */
 
 /* Bit fields for HFRCO CAL */
 #define _HFRCO_CAL_RESETVALUE                 0xA8689F7FUL                              /**< Default value for HFRCO_CAL                 */

@@ -3,7 +3,7 @@
  * @brief Hardware driver layer for simple delay.
  *******************************************************************************
  * # License
- * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * The licensor of this software is Silicon Laboratories Inc.  Your use of this
@@ -27,7 +27,7 @@
  * @{
  * @addtogroup Delay
  * @brief Basic delay functionality
- * @details Simple delay routines for use with plugins that require small
+ * @details Simple delay routines for use with components that require small
  *          delays.
  * @{
  */
@@ -35,7 +35,9 @@
 /**
  * Delay for a number of microseconds.
  *
- * @note This function can be used without calling delay_init() first.
+ * @note This function can be used without calling delay_init() first. This is not an accurate microsecond
+ *       delay and can have a delay greater than expected, of about +50%. This error becomes significant
+ *       for lower values delay.
  *
  * @param usecs Number of microseconds to delay
  */
@@ -49,7 +51,8 @@ void delay_init(void);
 /**
  * Delay for a number of milliseconds.
  *
- * @param msecs    Number of milliseconds to delay
+ * @param msecs    Number of milliseconds to delay. The number should stay within
+ *                 a single TIMER0 overflow (approx. 3300 ms).
  * @param blocking Whether to block until the delay has expired. If false, the
  *                 @ref delay_expired() function can be called to check whether
  *                 the delay has expired.

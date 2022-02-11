@@ -10,6 +10,11 @@
 - provides:
   - name: hardware_kit
   - name: hardware_kit_stk
+- define:
+  - name: SL_KIT_NAME
+    value: '"EFM32LG-STK3600"'
+  - name: SL_KIT_REV
+    value: '"C01"'
 - tag:
   - kit:opn:EFM32LG-STK3600
   - kit:pn:STK3600

@@ -54,7 +54,8 @@ typedef enum {
   SLI_PSA_CONTEXT_ENUM_NAME(psa_cipher_operation_t),
   SLI_PSA_CONTEXT_ENUM_NAME(psa_mac_operation_t),
   SLI_PSA_CONTEXT_ENUM_NAME(psa_aead_operation_t),
-  SLI_PSA_CONTEXT_ENUM_NAME(psa_key_derivation_operation_t)
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_key_derivation_operation_t),
+  SLI_PSA_CONTEXT_ENUM_NAME(psa_key_attributes_t)
 } sli_psa_context_name_t;
 
 /***************************************************************************//**

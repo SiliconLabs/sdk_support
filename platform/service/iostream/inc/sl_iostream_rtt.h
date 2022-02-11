@@ -44,8 +44,8 @@ extern "C" {
  ******************************************************************************/
 
 /***************************************************************************//**
- * @addtogroup iostream_rtt IO Stream RTT
- * @brief IO Stream RTT
+ * @addtogroup iostream_rtt I/O Stream RTT
+ * @brief I/O Stream RTT
  * @details
  * ## Overview
  *

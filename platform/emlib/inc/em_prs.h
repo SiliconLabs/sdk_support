@@ -75,7 +75,7 @@ extern "C" {
 #endif
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-/* Some devices have renamed signals so we map some of these signals to
+/* Some devices have renamed signals so some of these signals are mapped to
    common names. */
 #if defined(PRS_USART0_RXDATAV)
 #define PRS_USART0_RXDATA        PRS_USART0_RXDATAV
@@ -234,6 +234,13 @@ typedef enum {
   prsSignalTIMER6_CC0 = PRS_TIMER6_CC0, /**< TIMER6 capture/compare channel 0 Signal. */
   prsSignalTIMER6_CC1 = PRS_TIMER6_CC1, /**< TIMER6 capture/compare channel 1 Signal. */
   prsSignalTIMER6_CC2 = PRS_TIMER6_CC2, /**< TIMER6 capture/compare channel 2 Signal. */
+#endif
+#if defined(TIMER7)
+  prsSignalTIMER7_UF  = PRS_TIMER7_UF,  /**< TIMER7 underflow Signal. */
+  prsSignalTIMER7_OF  = PRS_TIMER7_OF,  /**< TIMER7 overflow Signal. */
+  prsSignalTIMER7_CC0 = PRS_TIMER7_CC0, /**< TIMER7 capture/compare channel 0 Signal. */
+  prsSignalTIMER7_CC1 = PRS_TIMER7_CC1, /**< TIMER7 capture/compare channel 1 Signal. */
+  prsSignalTIMER7_CC2 = PRS_TIMER7_CC2, /**< TIMER7 capture/compare channel 2 Signal. */
 #endif
 #if defined(PRS_LETIMER0_CH0)
   prsSignalLETIMER0_CH0  = PRS_LETIMER0_CH0, /**< LETIMER0 channel 0 Signal. */
@@ -410,100 +417,100 @@ typedef enum {
 
   /* USART Signals */
 #if defined(USART0)
-  prsSignalUSART0_TXC     = PRS_USART0_TXC,    /**< USART0 tx complete Signal. */
+  prsSignalUSART0_TXC     = PRS_USART0_TXC,    /**< USART0 TX complete Signal. */
 #if defined(PRS_USART0_RXDATA)
-  prsSignalUSART0_RXDATA  = PRS_USART0_RXDATA, /**< USART0 rx data available Signal. */
+  prsSignalUSART0_RXDATA  = PRS_USART0_RXDATA, /**< USART0 RX data available Signal. */
 #endif
 #if defined(PRS_USART0_RXDATAV)
-  prsSignalUSART0_RXDATAV = PRS_USART0_RXDATAV, /**< USART0 rx data available Signal. */
+  prsSignalUSART0_RXDATAV = PRS_USART0_RXDATAV, /**< USART0 RX data available Signal. */
 #endif
 #if defined(PRS_USART0_IRTX)
-  prsSignalUSART0_IRTX    = PRS_USART0_IRTX,    /**< USART0 IR tx Signal. */
+  prsSignalUSART0_IRTX    = PRS_USART0_IRTX,    /**< USART0 IR TX Signal. */
 #endif
 #if defined(PRS_USART0_RTS)
   prsSignalUSART0_RTS     = PRS_USART0_RTS,    /**< USART0 RTS Signal. */
-  prsSignalUSART0_TX      = PRS_USART0_TX,     /**< USART0 tx Signal. */
+  prsSignalUSART0_TX      = PRS_USART0_TX,     /**< USART0 TX Signal. */
   prsSignalUSART0_CS      = PRS_USART0_CS,     /**< USART0 chip select Signal. */
 #endif
 #endif
 #if defined(USART1)
-  prsSignalUSART1_TXC     = PRS_USART1_TXC,    /**< USART1 tx complete Signal. */
+  prsSignalUSART1_TXC     = PRS_USART1_TXC,    /**< USART1 TX complete Signal. */
 #if defined(PRS_USART1_RXDATA)
-  prsSignalUSART1_RXDATA  = PRS_USART1_RXDATA, /**< USART1 rx data available Signal. */
+  prsSignalUSART1_RXDATA  = PRS_USART1_RXDATA, /**< USART1 RX data available Signal. */
 #endif
 #if defined(PRS_USART1_RXDATAV)
-  prsSignalUSART1_RXDATAV = PRS_USART1_RXDATAV, /**< USART1 rx data available Signal. */
+  prsSignalUSART1_RXDATAV = PRS_USART1_RXDATAV, /**< USART1 RX data available Signal. */
 #endif
 #if defined(PRS_USART1_IRTX)
-  prsSignalUSART1_IRTX    = PRS_USART1_IRTX,   /**< USART1 IR tx Signal. */
+  prsSignalUSART1_IRTX    = PRS_USART1_IRTX,   /**< USART1 IR TX Signal. */
 #endif
 #if defined(PRS_USART1_RTS)
   prsSignalUSART1_RTS     = PRS_USART1_RTS,    /**< USART1 RTS Signal. */
-  prsSignalUSART1_TX      = PRS_USART1_TX,     /**< USART1 tx Signal. */
+  prsSignalUSART1_TX      = PRS_USART1_TX,     /**< USART1 TX Signal. */
   prsSignalUSART1_CS      = PRS_USART1_CS,     /**< USART1 chip select Signal. */
 #endif
 #endif
 #if defined(USART2)
-  prsSignalUSART2_TXC     = PRS_USART2_TXC,    /**< USART2 tx complete Signal. */
+  prsSignalUSART2_TXC     = PRS_USART2_TXC,    /**< USART2 TX complete Signal. */
 #if defined(PRS_USART2_RXDATA)
-  prsSignalUSART2_RXDATA  = PRS_USART2_RXDATA, /**< USART2 rx data available Signal. */
+  prsSignalUSART2_RXDATA  = PRS_USART2_RXDATA, /**< USART2 RX data available Signal. */
 #endif
 #if defined(PRS_USART2_RXDATAV)
-  prsSignalUSART2_RXDATAV = PRS_USART2_RXDATAV, /**< USART2 rx data available Signal. */
+  prsSignalUSART2_RXDATAV = PRS_USART2_RXDATAV, /**< USART2 RX data available Signal. */
 #endif
 #if defined(PRS_USART2_IRTX)
-  prsSignalUSART2_IRTX    = PRS_USART2_IRTX,   /**< USART2 IR tx Signal. */
+  prsSignalUSART2_IRTX    = PRS_USART2_IRTX,   /**< USART2 IR TX Signal. */
 #endif
 #if defined(PRS_USART2_RTS)
   prsSignalUSART2_RTS     = PRS_USART2_RTS,    /**< USART2 RTS Signal. */
-  prsSignalUSART2_TX      = PRS_USART2_TX,     /**< USART2 tx Signal. */
+  prsSignalUSART2_TX      = PRS_USART2_TX,     /**< USART2 TX Signal. */
   prsSignalUSART2_CS      = PRS_USART2_CS,     /**< USART2 chip select Signal. */
 #endif
 #endif
 #if defined(PRS_USART3_TXC)
-  prsSignalUSART3_TXC     = PRS_USART3_TXC,       /**< USART3 tx complete Signal. */
-  prsSignalUSART3_RXDATAV = PRS_USART3_RXDATAV,   /**< USART3 rx data available Signal. */
+  prsSignalUSART3_TXC     = PRS_USART3_TXC,       /**< USART3 TX complete Signal. */
+  prsSignalUSART3_RXDATAV = PRS_USART3_RXDATAV,   /**< USART3 RX data available Signal. */
   prsSignalUSART3_RTS     = PRS_USART3_RTS,       /**< USART3 RTS Signal. */
-  prsSignalUSART3_TX      = PRS_USART3_TX,        /**< USART3 tx Signal. */
+  prsSignalUSART3_TX      = PRS_USART3_TX,        /**< USART3 TX Signal. */
   prsSignalUSART3_CS      = PRS_USART3_CS,        /**< USART3 chip select Signal. */
 #endif
 #if defined(PRS_USART4_TXC)
-  prsSignalUSART4_TXC     = PRS_USART4_TXC,       /**< USART4 tx complete Signal. */
-  prsSignalUSART4_RXDATAV = PRS_USART4_RXDATAV,   /**< USART4 rx data available Signal. */
+  prsSignalUSART4_TXC     = PRS_USART4_TXC,       /**< USART4 TX complete Signal. */
+  prsSignalUSART4_RXDATAV = PRS_USART4_RXDATAV,   /**< USART4 RX data available Signal. */
   prsSignalUSART4_RTS     = PRS_USART4_RTS,       /**< USART4 RTS Signal. */
-  prsSignalUSART4_TX      = PRS_USART4_TX,        /**< USART4 tx Signal. */
+  prsSignalUSART4_TX      = PRS_USART4_TX,        /**< USART4 TX Signal. */
   prsSignalUSART4_CS      = PRS_USART4_CS,        /**< USART4 chip select Signal. */
 #endif
 #if defined(PRS_USART5_TXC)
-  prsSignalUSART5_TXC     = PRS_USART5_TXC,       /**< USART5 tx complete Signal. */
-  prsSignalUSART5_RXDATAV = PRS_USART5_RXDATAV,   /**< USART5 rx data available Signal. */
+  prsSignalUSART5_TXC     = PRS_USART5_TXC,       /**< USART5 TX complete Signal. */
+  prsSignalUSART5_RXDATAV = PRS_USART5_RXDATAV,   /**< USART5 RX data available Signal. */
   prsSignalUSART5_RTS     = PRS_USART5_RTS,       /**< USART5 RTS Signal. */
-  prsSignalUSART5_TX      = PRS_USART5_TX,        /**< USART5 tx Signal. */
+  prsSignalUSART5_TX      = PRS_USART5_TX,        /**< USART5 TX Signal. */
   prsSignalUSART5_CS      = PRS_USART5_CS,        /**< USART5 chip select Signal. */
 #endif
 
 #if defined(UART0)
-  prsSignalUART0_TXC     = PRS_UART0_TXC,       /**< UART0 tx complete Signal. */
-  prsSignalUART0_RXDATAV = PRS_UART0_RXDATAV,   /**< UART0 rx data available Signal. */
+  prsSignalUART0_TXC     = PRS_UART0_TXC,       /**< UART0 TX complete Signal. */
+  prsSignalUART0_RXDATAV = PRS_UART0_RXDATAV,   /**< UART0 RX data available Signal. */
 #if defined(PRS_UART1_IRTX)
-  prsSignalUART0_IRTX    = PRS_UART0_IRTX,      /**< UART0 IR tx Signal. */
+  prsSignalUART0_IRTX    = PRS_UART0_IRTX,      /**< UART0 IR TX Signal. */
 #endif
 #if defined(PRS_UART0_RTS)
   prsSignalUART0_RTS     = PRS_UART0_RTS,       /**< UART0 RTS Signal. */
-  prsSignalUART0_TX      = PRS_UART0_TX,        /**< UART0 tx Signal. */
+  prsSignalUART0_TX      = PRS_UART0_TX,        /**< UART0 TX Signal. */
   prsSignalUART0_CS      = PRS_UART0_CS,        /**< UART0 chip select Signal. */
 #endif
 #endif
 
 #if defined(UART1)
-  prsSignalUART1_TXC     = PRS_UART1_TXC,       /**< UART1 tx complete Signal. */
-  prsSignalUART1_RXDATAV = PRS_UART1_RXDATAV,   /**< UART1 rx data available Signal. */
+  prsSignalUART1_TXC     = PRS_UART1_TXC,       /**< UART1 TX complete Signal. */
+  prsSignalUART1_RXDATAV = PRS_UART1_RXDATAV,   /**< UART1 RX data available Signal. */
 #if defined(PRS_UART1_IRTX)
-  prsSignalUART1_IRTX    = PRS_UART1_IRTX,      /**< UART1 IR tx Signal. */
+  prsSignalUART1_IRTX    = PRS_UART1_IRTX,      /**< UART1 IR RX Signal. */
 #endif
 #if defined(PRS_UART1_RTS)
   prsSignalUART1_RTS     = PRS_UART1_RTS,       /**< UART1 RTS Signal. */
-  prsSignalUART1_TX      = PRS_UART1_TX,        /**< UART1 tx Signal. */
+  prsSignalUART1_TX      = PRS_UART1_TX,        /**< UART1 RX Signal. */
   prsSignalUART1_CS      = PRS_UART1_CS,        /**< UART1 chip select Signal. */
 #endif
 #endif
@@ -554,36 +561,55 @@ typedef enum {
 /* EUSART Signals */
 #if defined(EUSART0)
   prsSignalEUSART0_CS         = PRS_EUSART0L_CS,         /**< EUSART0 chip select Signal. */
-  prsSignalEUSART0_IRTX       = PRS_EUSART0L_IRDATX,     /**< EUSART0 IR tx Signal. */
+  prsSignalEUSART0_IRTX       = PRS_EUSART0L_IRDATX,     /**< EUSART0 IR RX Signal. */
   prsSignalEUSART0_RTS        = PRS_EUSART0L_RTS,        /**< EUSART0 RTS Signal. */
-  prsSignalEUSART0_RXDATA     = PRS_EUSART0L_RXDATAV,    /**< EUSART0 rx data available Signal. */
-  prsSignalEUSART0_TX         = PRS_EUSART0L_TX,         /**< EUSART0 tx Signal. */
-  prsSignalEUSART0_TXC        = PRS_EUSART0L_TXC,        /**< EUSART0 tx complete Signal. */
+  prsSignalEUSART0_RXDATA     = PRS_EUSART0L_RXDATAV,    /**< EUSART0 RX data available Signal. */
+  prsSignalEUSART0_TX         = PRS_EUSART0L_TX,         /**< EUSART0 TX Signal. */
+  prsSignalEUSART0_TXC        = PRS_EUSART0L_TXC,        /**< EUSART0 TX complete Signal. */
   prsSignalEUSART0_RXFL       = PRS_EUSART0L_RXFL,       /**< EUSART0 rxfl Signal. */
   prsSignalEUSART0_TXFL       = PRS_EUSART0L_TXFL,       /**< EUSART0 txfl Signal. */
 #endif
 #if defined(EUSART1)
   prsSignalEUSART1_CS         = PRS_EUSART1L_CS,         /**< EUSART1 chip select Signal. */
-  prsSignalEUSART1_IRTX       = PRS_EUSART1L_IRDATX,     /**< EUSART1 IR tx Signal. */
+  prsSignalEUSART1_IRTX       = PRS_EUSART1L_IRDATX,     /**< EUSART1 IR TX Signal. */
   prsSignalEUSART1_RTS        = PRS_EUSART1L_RTS,        /**< EUSART1 RTS Signal. */
-  prsSignalEUSART1_RXDATA     = PRS_EUSART1L_RXDATAV,    /**< EUSART1 rx data available Signal. */
-  prsSignalEUSART1_TX         = PRS_EUSART1L_TX,         /**< EUSART1 tx Signal. */
-  prsSignalEUSART1_TXC        = PRS_EUSART1L_TXC,        /**< EUSART1 tx complete Signal. */
+  prsSignalEUSART1_RXDATA     = PRS_EUSART1L_RXDATAV,    /**< EUSART1 RX data available Signal. */
+  prsSignalEUSART1_TX         = PRS_EUSART1L_TX,         /**< EUSART1 TX Signal. */
+  prsSignalEUSART1_TXC        = PRS_EUSART1L_TXC,        /**< EUSART1 TX complete Signal. */
   prsSignalEUSART1_RXFL       = PRS_EUSART1L_RXFL,       /**< EUSART1 rxfl Signal. */
   prsSignalEUSART1_TXFL       = PRS_EUSART1L_TXFL,       /**< EUSART1 txfl Signal. */
 #endif
 #if defined(EUSART2)
   prsSignalEUSART2_CS         = PRS_EUSART2L_CS,         /**< EUSART2 chip select Signal. */
-  prsSignalEUSART2_IRTX       = PRS_EUSART2L_IRDATX,     /**< EUSART2 IR tx Signal. */
+  prsSignalEUSART2_IRTX       = PRS_EUSART2L_IRDATX,     /**< EUSART2 IR TX Signal. */
   prsSignalEUSART2_RTS        = PRS_EUSART2L_RTS,        /**< EUSART2 RTS Signal. */
-  prsSignalEUSART2_RXDATA     = PRS_EUSART2L_RXDATAV,    /**< EUSART2 rx data available Signal. */
-  prsSignalEUSART2_TX         = PRS_EUSART2L_TX,         /**< EUSART2 tx Signal. */
-  prsSignalEUSART2_TXC        = PRS_EUSART2L_TXC,        /**< EUSART2 tx complete Signal. */
+  prsSignalEUSART2_RXDATA     = PRS_EUSART2L_RXDATAV,    /**< EUSART2 RX data available Signal. */
+  prsSignalEUSART2_TX         = PRS_EUSART2L_TX,         /**< EUSART2 TX Signal. */
+  prsSignalEUSART2_TXC        = PRS_EUSART2L_TXC,        /**< EUSART2 TX complete Signal. */
   prsSignalEUSART2_RXFL       = PRS_EUSART2L_RXFL,       /**< EUSART2 rxfl Signal. */
   prsSignalEUSART2_TXFL       = PRS_EUSART2L_TXFL,       /**< EUSART2 txfl Signal. */
 #endif
-
-/* ADC Signals */
+#if defined(EUSART3)
+  prsSignalEUSART3_CS         = PRS_EUSART3L_CS,         /**< EUSART3 chip select Signal. */
+  prsSignalEUSART3_IRTX       = PRS_EUSART3L_IRDATX,     /**< EUSART3 IR TX Signal. */
+  prsSignalEUSART3_RTS        = PRS_EUSART3L_RTS,        /**< EUSART3 RTS Signal. */
+  prsSignalEUSART3_RXDATA     = PRS_EUSART3L_RXDATAV,    /**< EUSART3 RX data available Signal. */
+  prsSignalEUSART3_TX         = PRS_EUSART3L_TX,         /**< EUSART3 TX Signal. */
+  prsSignalEUSART3_TXC        = PRS_EUSART3L_TXC,        /**< EUSART3 TX complete Signal. */
+  prsSignalEUSART3_RXFL       = PRS_EUSART3L_RXFL,       /**< EUSART3 rxfl Signal. */
+  prsSignalEUSART3_TXFL       = PRS_EUSART3L_TXFL,       /**< EUSART3 txfl Signal. */
+#endif
+#if defined(EUSART4)
+  prsSignalEUSART4_CS         = PRS_EUSART4L_CS,         /**< EUSART4 chip select Signal. */
+  prsSignalEUSART4_IRTX       = PRS_EUSART4L_IRDATX,     /**< EUSART4 IR TX Signal. */
+  prsSignalEUSART4_RTS        = PRS_EUSART4L_RTS,        /**< EUSART4 RTS Signal. */
+  prsSignalEUSART4_RXDATA     = PRS_EUSART4L_RXDATAV,    /**< EUSART4 RX data available Signal. */
+  prsSignalEUSART4_TX         = PRS_EUSART4L_TX,         /**< EUSART4 TX Signal. */
+  prsSignalEUSART4_TXC        = PRS_EUSART4L_TXC,        /**< EUSART4 TX complete Signal. */
+  prsSignalEUSART4_RXFL       = PRS_EUSART4L_RXFL,       /**< EUSART4 rxfl Signal. */
+  prsSignalEUSART4_TXFL       = PRS_EUSART4L_TXFL,       /**< EUSART4 txfl Signal. */
+#endif
+  /* ADC Signals */
 #if defined(IADC0)
   prsSignalIADC0_SCANENTRY  = PRS_IADC0_SCANENTRYDONE, /**< IADC0 scan entry Signal. */
   prsSignalIADC0_SCANTABLE  = PRS_IADC0_SCANTABLEDONE, /**< IADC0 scan table Signal. */
@@ -753,8 +779,52 @@ typedef enum {
   prsSignalSE_STATE1GATED            = PRS_SE_STATE1GATED,  /**< SE_STATE1GATED Signal. */
   prsSignalSE_STATE2GATED            = PRS_SE_STATE2GATED,  /**< SE_STATE2GATED Signal. */
 #endif
+#if defined(RFFPLL0)
+  prsSignalRFFPLL0L_CLKDIGDIV4      = PRS_RFFPLL0L_CLKDIGDIV4,      /**< RFFPLL0L CLKDIGDIV4 Signal. */
+  prsSignalRFFPLL0L_CLKMODEMDIV4    = PRS_RFFPLL0L_CLKMODEMDIV4,    /**< RFFPLL0L CLKMODEMDIV4 Signal. */
+#if defined(PRS_RFFPLL0L_RFBIASFSMSTATE0)
+  prsSignalRFFPLL0L_RFBIASFSMSTATE0 = PRS_RFFPLL0L_RFBIASFSMSTATE0, /**< RFFPLL0L RFBIASFSMSTATE0 Signal. */
+  prsSignalRFFPLL0L_RFBIASFSMSTATE1 = PRS_RFFPLL0L_RFBIASFSMSTATE1, /**< RFFPLL0L RFBIASFSMSTATE1 Signal. */
+  prsSignalRFFPLL0L_RFFPLLFSMSTATE0 = PRS_RFFPLL0L_RFFPLLFSMSTATE0, /**< RFFPLL0L RFFPLLFSMSTATE0 Signal. */
+  prsSignalRFFPLL0L_RFFPLLFSMSTATE1 = PRS_RFFPLL0L_RFFPLLFSMSTATE1, /**< RFFPLL0L RFFPLLFSMSTATE1 Signal. */
+  prsSignalRFFPLL0L_RFFPLLFSMSTATE2 = PRS_RFFPLL0L_RFFPLLFSMSTATE2, /**< RFFPLL0L RFFPLLFSMSTATE2 Signal. */
+  prsSignalRFFPLL0L_RFBIASFSMSTATE2 = PRS_RFFPLL0L_RFBIASFSMSTATE2, /**< RFFPLL0L RFBIASFSMSTATE2 Signal. */
+  prsSignalRFFPLL0_RFFPLLFSMSTATE3  = PRS_RFFPLL0_RFFPLLFSMSTATE3,  /**< RFFPLL0 RFFPLLFSMSTATE3 Signal. */
+#endif
+#endif
+#if defined(FEFILT0)
+  prsSignalFEFILT0_REMPTY = PRS_FEFILT0_REMPTY, /**< FEFILT0 REMPTY Signal. */
+  prsSignalFEFILT0_WFULL  = PRS_FEFILT0_WFULL,  /**< FEFILT0 WFULL Signal. */
+#endif
+#if defined(FEFILT0)
+  prsSignalFEFILT1_REMPTY = PRS_FEFILT1_REMPTY, /**< FEFILT1 REMPTY Signal. */
+  prsSignalFEFILT1_WFULL  = PRS_FEFILT1_WFULL,  /**< FEFILT1 WFULL Signal. */
+#endif
+#if defined(ETAMPDET)
+  prsSignalETAMPDET_TAMPERSRCETAMPDET = PRS_ETAMPDET_TAMPERSRCETAMPDET, /**< ETAMPDET TAMPERSRCETAMPDET Signal. */
+#endif
+#if defined(SMCTRL)
+  prsSignalSMCTRLL_SOFTM0 = PRS_SMCTRLL_SOFTM0, /**< SMCTRLL SOFTM0 Signal. */
+  prsSignalSMCTRLL_SOFTM1 = PRS_SMCTRLL_SOFTM1, /**< SMCTRLL SOFTM1 Signal. */
+  prsSignalSMCTRLL_SOFTM2 = PRS_SMCTRLL_SOFTM2, /**< SMCTRLL SOFTM2 Signal. */
+  prsSignalSMCTRLL_SOFTM3 = PRS_SMCTRLL_SOFTM3, /**< SMCTRLL SOFTM3 Signal. */
+  prsSignalSMCTRLL_SOFTM4 = PRS_SMCTRLL_SOFTM4, /**< SMCTRLL SOFTM4 Signal. */
+  prsSignalSMCTRLL_SOFTM5 = PRS_SMCTRLL_SOFTM5, /**< SMCTRLL SOFTM5 Signal. */
+  prsSignalSMCTRLL_SOFTM6 = PRS_SMCTRLL_SOFTM6, /**< SMCTRLL SOFTM6 Signal. */
+  prsSignalSMCTRLL_SOFTM7 = PRS_SMCTRLL_SOFTM7, /**< SMCTRLL SOFTM7 Signal. */
+  prsSignalSMCTRL_SOFTM8  = PRS_SMCTRL_SOFTM8,  /**< SMCTRL SOFTM8 Signal. */
+  prsSignalSMCTRL_SOFTM9  = PRS_SMCTRL_SOFTM9,  /**< SMCTRL SOFTM9 Signal. */
+  prsSignalSMCTRL_SOFTM10 = PRS_SMCTRL_SOFTM10, /**< SMCTRL SOFTM10 Signal. */
+  prsSignalSMCTRL_SOFTM11 = PRS_SMCTRL_SOFTM11, /**< SMCTRL SOFTM11 Signal. */
+#endif
+#if defined(PRS_SEHFRCO_COREEN)
+  prsSignalSEHFRCO_COREEN = PRS_SEHFRCO_COREEN, /**< SEHFRCO COREEN Signal. */
+  prsSignalSEHFRCO_STATE0 = PRS_SEHFRCO_STATE0, /**< SEHFRCO STATE0 Signal. */
+  prsSignalSEHFRCO_STATE1 = PRS_SEHFRCO_STATE1, /**< SEHFRCO STATE1 Signal. */
+  prsSignalSEHFRCO_STATE2 = PRS_SEHFRCO_STATE2, /**< SEHFRCO STATE2 Signal. */
+#endif
 #if defined(PRS_SEATAMPDET_SEATAMPDETSUPTPDELAY)
-  prsSignalSEATAMPDET_SEATAMPDETSUPTPDELAY = PRS_SEATAMPDET_SEATAMPDETSUPTPDELAY, /**< SEATAMPDET_SEATAMPDETSUPTPDELAY Signal. */
+  prsSignalSEATAMPDET_SEATAMPDETSUPTPDELAY = PRS_SEATAMPDET_SEATAMPDETSUPTPDELAY, /**< SEATAMPDET SEATAMPDETSUPTPDELAY Signal. */
 #endif
 } PRS_Signal_t;
 
@@ -764,8 +834,10 @@ typedef enum {
   prsConsumerNone                = 0x000,                                               /**< No PRS consumer */
   prsConsumerCMU_CALDN           = offsetof(PRS_TypeDef, CONSUMER_CMU_CALDN),           /**< CMU calibration down consumer. */
   prsConsumerCMU_CALUP           = offsetof(PRS_TypeDef, CONSUMER_CMU_CALUP),           /**< CMU calibration up consumer. */
+#if defined(IADC_PRESENT)
   prsConsumerIADC0_SCANTRIGGER   = offsetof(PRS_TypeDef, CONSUMER_IADC0_SCANTRIGGER),   /**< IADC0 scan trigger consumer. */
   prsConsumerIADC0_SINGLETRIGGER = offsetof(PRS_TypeDef, CONSUMER_IADC0_SINGLETRIGGER), /**< IADC0 single trigger consumer. */
+#endif
   prsConsumerLDMA_REQUEST0       = offsetof(PRS_TypeDef, CONSUMER_LDMAXBAR_DMAREQ0),    /**< LDMA Request 0 consumer. */
   prsConsumerLDMA_REQUEST1       = offsetof(PRS_TypeDef, CONSUMER_LDMAXBAR_DMAREQ1),    /**< LDMA Request 1 consumer. */
 #if defined(LETIMER0)
@@ -790,40 +862,62 @@ typedef enum {
   prsConsumerTIMER4_CC1          = offsetof(PRS_TypeDef, CONSUMER_TIMER4_CC1),          /**< TIMER4 capture/compare channel 1 consumer. */
   prsConsumerTIMER4_CC2          = offsetof(PRS_TypeDef, CONSUMER_TIMER4_CC2),          /**< TIMER4 capture/compare channel 2 consumer. */
 #endif
+#if defined(TIMER5)
+  prsConsumerTIMER5_CC0          = offsetof(PRS_TypeDef, CONSUMER_TIMER5_CC0),          /**< TIMER5 capture/compare channel 0 consumer. */
+  prsConsumerTIMER5_CC1          = offsetof(PRS_TypeDef, CONSUMER_TIMER5_CC1),          /**< TIMER5 capture/compare channel 1 consumer. */
+  prsConsumerTIMER5_CC2          = offsetof(PRS_TypeDef, CONSUMER_TIMER5_CC2),          /**< TIMER5 capture/compare channel 2 consumer. */
+#endif
+#if defined(TIMER6)
+  prsConsumerTIMER6_CC0          = offsetof(PRS_TypeDef, CONSUMER_TIMER6_CC0),          /**< TIMER6 capture/compare channel 0 consumer. */
+  prsConsumerTIMER6_CC1          = offsetof(PRS_TypeDef, CONSUMER_TIMER6_CC1),          /**< TIMER6 capture/compare channel 1 consumer. */
+  prsConsumerTIMER6_CC2          = offsetof(PRS_TypeDef, CONSUMER_TIMER6_CC2),          /**< TIMER6 capture/compare channel 2 consumer. */
+#endif
+#if defined(TIMER7)
+  prsConsumerTIMER7_CC0          = offsetof(PRS_TypeDef, CONSUMER_TIMER7_CC0),          /**< TIMER7 capture/compare channel 0 consumer. */
+  prsConsumerTIMER7_CC1          = offsetof(PRS_TypeDef, CONSUMER_TIMER7_CC1),          /**< TIMER7 capture/compare channel 1 consumer. */
+  prsConsumerTIMER7_CC2          = offsetof(PRS_TypeDef, CONSUMER_TIMER7_CC2),          /**< TIMER7 capture/compare channel 2 consumer. */
+#endif
 #if defined(USART0)
   prsConsumerUSART0_CLK          = offsetof(PRS_TypeDef, CONSUMER_USART0_CLK),          /**< USART0 clock consumer. */
   prsConsumerUSART0_IR           = offsetof(PRS_TypeDef, CONSUMER_USART0_IR),           /**< USART0 IR consumer. */
-  prsConsumerUSART0_RX           = offsetof(PRS_TypeDef, CONSUMER_USART0_RX),           /**< USART0 rx consumer. */
+  prsConsumerUSART0_RX           = offsetof(PRS_TypeDef, CONSUMER_USART0_RX),           /**< USART0 RX consumer. */
   prsConsumerUSART0_TRIGGER      = offsetof(PRS_TypeDef, CONSUMER_USART0_TRIGGER),      /**< USART0 trigger consumer. */
 #endif
 #if defined(USART1)
   prsConsumerUSART1_CLK          = offsetof(PRS_TypeDef, CONSUMER_USART1_CLK),          /**< USART1 clock consumer. */
   prsConsumerUSART1_IR           = offsetof(PRS_TypeDef, CONSUMER_USART1_IR),           /**< USART1 IR consumer. */
-  prsConsumerUSART1_RX           = offsetof(PRS_TypeDef, CONSUMER_USART1_RX),           /**< USART1 rx consumer. */
+  prsConsumerUSART1_RX           = offsetof(PRS_TypeDef, CONSUMER_USART1_RX),           /**< USART1 TX consumer. */
   prsConsumerUSART1_TRIGGER      = offsetof(PRS_TypeDef, CONSUMER_USART1_TRIGGER),      /**< USART1 trigger consumer. */
 #endif
 #if defined(USART2)
   prsConsumerUSART2_CLK          = offsetof(PRS_TypeDef, CONSUMER_USART2_CLK),          /**< USART2 clock consumer. */
   prsConsumerUSART2_IR           = offsetof(PRS_TypeDef, CONSUMER_USART2_IR),           /**< USART2 IR consumer. */
-  prsConsumerUSART2_RX           = offsetof(PRS_TypeDef, CONSUMER_USART2_RX),           /**< USART2 rx consumer. */
+  prsConsumerUSART2_RX           = offsetof(PRS_TypeDef, CONSUMER_USART2_RX),           /**< USART2 RX consumer. */
   prsConsumerUSART2_TRIGGER      = offsetof(PRS_TypeDef, CONSUMER_USART2_TRIGGER),      /**< USART2 trigger consumer. */
 #endif
 #if defined(EUSART0)
   prsConsumerEUSART0_CLK         = offsetof(PRS_TypeDef, CONSUMER_EUSART0_CLK),         /**< EUSART0 clk consumer. */
-  prsConsumerEUSART0_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART0_RX),          /**< EUSART0 rx consumer. */
+  prsConsumerEUSART0_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART0_RX),          /**< EUSART0 RX consumer. */
   prsConsumerEUSART0_TRIGGER     = offsetof(PRS_TypeDef, CONSUMER_EUSART0_TRIGGER),     /**< EUSART0 trigger consumer. */
 #endif
 #if defined(EUSART1)
   prsConsumerEUSART1_CLK         = offsetof(PRS_TypeDef, CONSUMER_EUSART1_CLK),         /**< EUSART1 clk consumer. */
-  prsConsumerEUSART1_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART1_RX),          /**< EUSART1 rx consumer. */
+  prsConsumerEUSART1_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART1_RX),          /**< EUSART1 RX consumer. */
   prsConsumerEUSART1_TRIGGER     = offsetof(PRS_TypeDef, CONSUMER_EUSART1_TRIGGER),     /**< EUSART1 trigger consumer. */
 #endif
 #if defined(EUSART2)
   prsConsumerEUSART2_CLK         = offsetof(PRS_TypeDef, CONSUMER_EUSART2_CLK),         /**< EUSART1 clk consumer. */
-  prsConsumerEUSART2_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART2_RX),          /**< EUSART2 rx consumer. */
+  prsConsumerEUSART2_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART2_RX),          /**< EUSART2 RX consumer. */
   prsConsumerEUSART2_TRIGGER     = offsetof(PRS_TypeDef, CONSUMER_EUSART2_TRIGGER),     /**< EUSART2 trigger consumer. */
 #endif
-
+#if defined(EUSART3)
+  prsConsumerEUSART3_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART3_RX),             /**< EUSART3 RX consumer. */
+  prsConsumerEUSART3_TRIGGER     = offsetof(PRS_TypeDef, CONSUMER_EUSART3_TRIGGER),        /**< EUSART3 trigger consumer. */
+#endif
+#if defined(EUSART4)
+  prsConsumerEUSART4_RX          = offsetof(PRS_TypeDef, CONSUMER_EUSART4_RX),             /**< EUSART4 RX consumer. */
+  prsConsumerEUSART4_TRIGGER     = offsetof(PRS_TypeDef, CONSUMER_EUSART4_TRIGGER),        /**< EUSART4 trigger consumer. */
+#endif
 #if defined(EUART0)
   prsConsumerEUART0_RX           = offsetof(PRS_TypeDef, CONSUMER_EUART0_RX),           /**< EUART0 RX consumer. */
   prsConsumerEUART0_TRIGGER      = offsetof(PRS_TypeDef, CONSUMER_EUART0_TRIGGER),      /**< EUART0 TRIGGER Consumer. */
@@ -855,16 +949,16 @@ typedef enum {
   prsConsumerLESENSE_START       = offsetof(PRS_TypeDef, CONSUMER_LESENSE_START),       /**< LESENSE_START consumer. */
 #endif
 #if defined(VDAC0)
-  prsConsumerVDAC0_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH0),
-  prsConsumerVDAC0_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH1),
-  prsConsumerVDAC0_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH0),
-  prsConsumerVDAC0_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH1),
+  prsConsumerVDAC0_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH0),  /**< VDAC0 ASYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC0_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC0_ASYNCTRIGCH1),  /**< VDAC0 ASYNC TRIGER CH1 consumer. */
+  prsConsumerVDAC0_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH0),   /**< VDAC0 SYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC0_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC0_SYNCTRIGCH1),   /**< VDAC0 SYNC TRIGER CH1 consumer. */
 #endif
 #if defined(VDAC1)
-  prsConsumerVDAC1_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC1_ASYNCTRIGCH0),
-  prsConsumerVDAC1_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC1_ASYNCTRIGCH1),
-  prsConsumerVDAC1_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC1_SYNCTRIGCH0),
-  prsConsumerVDAC1_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC1_SYNCTRIGCH1),
+  prsConsumerVDAC1_ASYNCTRIGCH0  = offsetof(PRS_TypeDef, CONSUMER_VDAC1_ASYNCTRIGCH0),  /**< VDAC1 ASYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC1_ASYNCTRIGCH1  = offsetof(PRS_TypeDef, CONSUMER_VDAC1_ASYNCTRIGCH1),  /**< VDAC1 ASYNC TRIGER CH1 consumer. */
+  prsConsumerVDAC1_SYNCTRIGCH0   = offsetof(PRS_TypeDef, CONSUMER_VDAC1_SYNCTRIGCH0),   /**< VDAC1 SYNC TRIGER CH0 consumer. */
+  prsConsumerVDAC1_SYNCTRIGCH1   = offsetof(PRS_TypeDef, CONSUMER_VDAC1_SYNCTRIGCH1),   /**< VDAC1 SYNC TRIGER CH1 consumer. */
 #endif
 } PRS_Consumer_t;
 #endif

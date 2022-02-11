@@ -22,6 +22,9 @@
  ******************************************************************************/
 
 #include PLATFORM_HEADER
+#ifdef UNIFIED_MAC_SCRIPTED_TEST
+#define EVENT_CONTROL_SYSTEM
+#endif
 #include "hal/hal.h"
 #include "event_control/event.h"
 #include "core/ember-stack.h"
@@ -35,6 +38,14 @@
 #include "mac-child.h"
 #include "indirect-queue.h"
 
+#ifdef SL_COMPONENT_CATALOG_PRESENT
+#include "sl_component_catalog.h"
+#endif // SL_COMPONENT_CATALOG_PRESENT
+
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+#include "lower-mac-spinel.h"
+#endif
+
 #ifdef EMBER_TEST
   #define EMBER_TEST_ASSERT(n) assert(n)
 #else
@@ -46,8 +57,25 @@
 #define INDIRECT_TRANSMIT_TRIES 3
 
 //----------------------------------------------------------------
-EmberEventControl sl_mac_indirect_event;
+#ifndef EVENT_CONTROL_SYSTEM
+static void mac_indirect_event_handler(EmberEvent *event);
 
+EmberEvent sl_mac_indirect_event = {
+  {
+    &emStackEventQueue,
+    mac_indirect_event_handler,
+    NULL,
+    #ifndef EMBER_TEST
+    ""
+    #else
+    "mac indirect"
+    #endif
+  },
+  NULL
+};
+#else
+EmberEventControl sl_mac_indirect_event;
+#endif
 static uint16_t lastEventTimeMS;
 
 static Buffer longIndirectPool = NULL_BUFFER;
@@ -67,12 +95,17 @@ static void removeHeaderFromPool(PacketHeader header);
 static uint16_t timeoutPools(uint16_t elapsedTicks, uint8_t nwk_index);
 static void recalculateMacDataPendingBitField(void);
 
+typedef bool (*sli_transient_function_type) (EmberNodeId);
+static sli_transient_function_type sli_transient_entry_present = NULL;
 //-------------------------------------------------------
 // Initialize.
-
+void sli_mac_transient_table_init(void* p_fn)
+{
+  sli_transient_entry_present = (sli_transient_function_type) p_fn;
+}
 void sl_mac_indirect_queue_init(uint16_t timeoutMs)
 {
-  emberEventControlSetInactive(sl_mac_indirect_event);
+  sli_mac_inactivate_event(sl_mac_indirect_event);
   longIndirectPool = NULL_BUFFER;
   shortIndirectPool = NULL_BUFFER;
   indirectTimeoutMs = timeoutMs;
@@ -91,7 +124,6 @@ void sl_mac_set_indirect_transmission_timeout(uint16_t newTimeoutMs)
 
 //-------------------------------------------------------
 // Interface upwards.
-
 // Since this function is called by a higher layer, the child tables should
 // already be pointed to the correct ones based on the current network index.
 sl_status_t sl_mac_indirect_submit(PacketHeader header)
@@ -101,7 +133,20 @@ sl_status_t sl_mac_indirect_submit(PacketHeader header)
   uint8_t childIndex = sl_mac_header_outgoing_child_index(header);
 
   if (sl_mac_destination_mode(header) == MAC_FRAME_DESTINATION_MODE_SHORT) {
-    if (childIndex != 0xFF) {
+    // only want to do this if there isn't an entry in the child table
+    bool isInTransientTable = false;
+    if (childIndex == 0xFF) {
+      isInTransientTable = (sli_transient_entry_present)
+                           ? sli_transient_entry_present(sl_mac_destination(header))
+                           : false;
+    }
+    if ((childIndex != 0xFF) || isInTransientTable) {
+      #ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+      if (!sl_mac_check_additional_pending_data(header)) {
+        uint16_t dest = sl_mac_destination(header);
+        sl_mac_spinel_add_src_match_short_entry(dest);
+      }
+      #endif
       sl_mac_set_child_flag(childIndex, SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE, true);
       // Short addressed indirect messages are only sent to children
       ATOMIC(emBufferQueueAdd(&shortIndirectPool, header); )
@@ -111,6 +156,12 @@ sl_status_t sl_mac_indirect_submit(PacketHeader header)
   } else {
     if (emBufferQueueLength(&longIndirectPool) < LONG_INDIRECT_POOL_SIZE) {
       if (childIndex != 0xFF) {
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+        if (!sl_mac_check_additional_pending_data(header)) {
+          uint8_t *destpointer = sl_mac_destination_pointer(header);
+          sl_mac_spinel_add_src_match_ext_entry(destpointer);
+        }
+#endif
         sl_mac_set_child_flag(childIndex, SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE, true);
       }
       // Zigbee sends long indirect messages to nodes not in the child table
@@ -119,11 +170,11 @@ sl_status_t sl_mac_indirect_submit(PacketHeader header)
       return SL_STATUS_FULL;
     }
   }
-  if (emberEventControlGetActive(sl_mac_indirect_event)) {
+  if (sli_mac_event_is_active(sl_mac_indirect_event)) {
     timeout += elapsedTimeInt16u(lastEventTimeMS, nowMS);
   } else {
     lastEventTimeMS = nowMS;
-    emberEventControlSetDelayMS(sl_mac_indirect_event, timeout);
+    sli_mac_set_event_delay_ms(sl_mac_indirect_event, timeout);
   }
 
   sl_mac_in_memory_overhead_t *in_memory_packet
@@ -213,16 +264,26 @@ bool sl_mac_indirect_process_poll(uint8_t mac_index, PacketHeader header)
   } else {
     EmberNodeId address = emberFetchLowHighInt16u(source);
     uint8_t childIndex = sl_mac_child_index(address);
-    if (childIndex == 0xFF) {
+    bool isInTransientTable = false;
+    if (childIndex == SL_MAC_CHILD_INVALID_INDEX) {
+      isInTransientTable = (sli_transient_entry_present)
+                           ? sli_transient_entry_present(address)
+                           : false;
+    }
+    if ((childIndex == SL_MAC_CHILD_INVALID_INDEX)  && !isInTransientTable) {
       return false;     // Unknown device; let the network layer deal with it.
     } else {
-      sl_mac_child_status_flags_t mask = ((sl_mac_child_status_flags_t) 1) << childIndex;
-      childPolledBitField[nwk_index] |= mask;
+      sl_mac_child_status_flags_t mask;
+      if (childIndex != SL_MAC_CHILD_INVALID_INDEX) {
+        mask = ((sl_mac_child_status_flags_t) 1) << childIndex;
+        childPolledBitField[nwk_index] |= mask;
+      }
+
       if (expectingData
-          && sl_mac_child_has_pending_message(childIndex)) {
-        if (sl_mac_get_child_info_flags(childIndex)
-            & (SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE
-               | SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE)) {
+          &&  (isInTransientTable ||  sl_mac_child_has_pending_message(childIndex))) {
+        if ( isInTransientTable || (sl_mac_get_child_info_flags(childIndex)
+                                    & (SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE
+                                       | SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE))) {
           uint8_t temp[2];
           PacketHeader match;
           temp[0] = LOW_BYTE(address);
@@ -236,6 +297,10 @@ bool sl_mac_indirect_process_poll(uint8_t mac_index, PacketHeader header)
                                   (SL_MAC_CHILD_HAS_PENDING_SHORT_INDIRECT_MESSAGE
                                    | SL_MAC_CHILD_HAS_PENDING_LONG_INDIRECT_MESSAGE),
                                   false);
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+            uint16_t dest = sl_mac_destination(match);
+            sl_mac_spinel_clear_src_match_short_entry(dest);
+#endif
           } else if (sl_mac_submit(MAC_INDEX,
                                    in_memory_packet->info.nwk_index,
                                    match,
@@ -325,6 +390,17 @@ void sl_mac_indirect_transmit_complete(uint8_t mac_index, sl_status_t status, Pa
       } else {
         recalculateMacDataPendingBitField();
       }
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+      if (!sl_mac_check_additional_pending_data(finger)) {
+        if (indirect_queue == &shortIndirectPool) {
+          uint16_t dest = sl_mac_destination(finger);
+          sl_mac_spinel_clear_src_match_short_entry(dest);
+        } else {
+          uint8_t *destpointer = sl_mac_destination_pointer(finger);
+          sl_mac_spinel_clear_src_match_ext_entry(destpointer);
+        }
+      }
+#endif
     }
     finger = emBufferQueueNext(indirect_queue, finger);
   }
@@ -332,8 +408,11 @@ void sl_mac_indirect_transmit_complete(uint8_t mac_index, sl_status_t status, Pa
 
 //-------------------------------------------------------
 // Removes any headers whose timelimit has been reached.
-
+#ifndef EVENT_CONTROL_SYSTEM
+static void mac_indirect_event_handler(EmberEvent *event)
+#else
 void sl_mac_indirect_event_handler(void)
+#endif
 {
   uint16_t nowMS = (halCommonGetInt16uMillisecondTick());
   uint16_t elapsedTicks = elapsedTimeInt16u(lastEventTimeMS, nowMS);
@@ -344,10 +423,10 @@ void sl_mac_indirect_event_handler(void)
   minTimeoutTicks = timeoutPools(elapsedTicks, 0xFF);
 
   if (minTimeoutTicks == MAX_INT16U_VALUE) {
-    emberEventControlSetInactive(sl_mac_indirect_event);
+    sli_mac_inactivate_event(sl_mac_indirect_event);
   } else {
-    emberEventControlSetDelayMS(sl_mac_indirect_event,
-                                minTimeoutTicks);
+    sli_mac_set_event_delay_ms(sl_mac_indirect_event,
+                               minTimeoutTicks);
   }
 }
 
@@ -625,6 +704,17 @@ static uint16_t timeoutPools(uint16_t elapsedTicks, uint8_t nwk_index)
             // TODO: Zigbee sends long indirect messages to nodes not in the child table
           }
           sli_mac_pop_child_table_pointer();
+#ifdef SL_CATALOG_LOWER_MAC_SPINEL_PRESENT
+          if (!sl_mac_check_additional_pending_data(header)) {
+            if (indirect_queue == &shortIndirectPool) {
+              uint16_t dest = sl_mac_destination(header);
+              sl_mac_spinel_clear_src_match_short_entry(dest);
+            } else {
+              uint8_t *destpointer = sl_mac_destination_pointer(header);
+              sl_mac_spinel_clear_src_match_ext_entry(destpointer);
+            }
+          }
+#endif
         }
       }
     }

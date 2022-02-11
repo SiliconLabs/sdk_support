@@ -61,7 +61,9 @@
 #define IOT_I2C_CFG_SENSOR_HALL_DEFAULT_FREQ       400000
 
 // <q  IOT_I2C_CFG_SENSOR_HALL_ACCEPT_NACK> Accept NACK
-// <i> If the driver receives NACK during a transfer, the transfer is halted immediately but it is not considered as an error. Instead, the driver returns success status (useful for test purposes).
+// <i> If the driver receives NACK during a transfer, the transfer is halted
+//     immediately but it is not considered as an error. Instead, the driver
+//     returns success status (useful for test purposes).
 // Default: 0
 #define IOT_I2C_CFG_SENSOR_HALL_ACCEPT_NACK        0
 

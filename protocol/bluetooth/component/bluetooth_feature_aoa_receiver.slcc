@@ -2,7 +2,7 @@ id: "bluetooth_feature_aoa_receiver"
 label: "AoA Receiver"
 package: "Bluetooth"
 description: >
-  Bluetooth AoA CTE receiving feature
+  The Bluetooth Angle of Arrival (AoA) Constant Tone Extension (CTE) receiving feature
 category: "Bluetooth|Stack|Direction Finding"
 quality: "production"
 root_path: "protocol/bluetooth"
