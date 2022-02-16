@@ -91,18 +91,20 @@ uint8_t softap_channel                 = SOFTAP_CHANNEL_DEFAULT;
 
 /* station network interface structures */
 struct netif sta_netif;
-extern uint8_t scan_count_web;
-
 wfx_wifi_provision_t wifi_provision;
 
 
 #ifdef SL_WFX_CONFIG_SCAN
-#define SL_WFX_MAX_STATIONS 8
-#define SL_WFX_MAX_SCAN_RESULTS 50
-scan_result_list_t scan_list[SL_WFX_MAX_SCAN_RESULTS];
-uint8_t scan_count   = 0;
-uint8_t scan_count_t = 0;
-#endif
+static struct scan_result_holder {
+    struct scan_result_holder *next;
+    wfx_wifi_scan_result scan;
+} *scan_save;
+static uint8_t scan_count   = 0;
+static void (*scan_cb) (wfx_wifi_scan_result_t *); /* user-callback - when scan is done */
+static char *scan_ssid; /* Which one are we scanning for */
+static void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t * scan_result);
+static void sl_wfx_scan_complete_callback(uint32_t status);
+#endif /* SL_WFX_CONFIG_SCAN */
 
 static void wfx_events_task(void * p_arg);
 
@@ -110,10 +112,7 @@ static void wfx_events_task(void * p_arg);
 static void sl_wfx_connect_callback(uint8_t * mac, uint32_t status);
 static void sl_wfx_disconnect_callback(uint8_t * mac, uint16_t reason);
 static void sl_wfx_generic_status_callback(sl_wfx_generic_ind_t * frame);
-#ifdef SL_WFX_CONFIG_SCAN
-static void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t * scan_result);
-static void sl_wfx_scan_complete_callback(uint32_t status);
-#endif
+
 #ifdef SL_WFX_CONFIG_SOFTAP
 static void sl_wfx_start_ap_callback(uint32_t status);
 static void sl_wfx_stop_ap_callback(void);
@@ -269,33 +268,58 @@ sl_status_t sl_wfx_host_process_event(sl_wfx_generic_message_t * event_payload)
 /****************************************************************************
  * Callback for individual scan result
  *****************************************************************************/
-static void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t * scan_result)
+static void
+sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t *scan_result)
 {
-    scan_count++;
+    struct scan_result_holder *ap;
+
     EFR32_LOG("# %2d %2d  %03d %02X:%02X:%02X:%02X:%02X:%02X  %s", scan_count, scan_result->channel,
               ((int16_t)(scan_result->rcpi - 220) / 2), scan_result->mac[0], scan_result->mac[1], scan_result->mac[2],
               scan_result->mac[3], scan_result->mac[4], scan_result->mac[5], scan_result->ssid_def.ssid);
     /*Report one AP information*/
     EFR32_LOG("\r\n");
-    if (scan_count <= SL_WFX_MAX_SCAN_RESULTS)
-    {
-        scan_list[scan_count - 1].ssid_def      = scan_result->ssid_def;
-        scan_list[scan_count - 1].channel       = scan_result->channel;
-        scan_list[scan_count - 1].security_mode = scan_result->security_mode;
-        scan_list[scan_count - 1].rcpi          = scan_result->rcpi;
-        memcpy(scan_list[scan_count - 1].mac, scan_result->mac, 6);
+    /* don't save if filter only wants specific ssid */
+    if (scan_ssid != (char *)0) {
+        if (strcmp (scan_ssid, (char *)&scan_result->ssid_def.ssid [0]) != 0)
+            return;
+    }
+    if ((ap = (struct scan_result_holder *)pvPortMalloc (sizeof (*ap))) == (struct scan_result_holder *)0) {
+        EFR32_LOG ("*ERR*Scan: No Mem");
+    } else {
+        ap->next = scan_save;
+        scan_save = ap;
+        /* Not checking if scan_result->ssid_length is < 33 */
+        memcpy (ap->scan.ssid, scan_result->ssid_def.ssid, scan_result->ssid_def.ssid_length);
+        ap->scan.ssid [scan_result->ssid_def.ssid_length] = 0; /* make sure about null terminate */
+        /* We do it in this order WPA3 first */
+        /* No EAP supported - Is this required */
+        if (scan_result->security_mode.wpa3) {
+            ap->scan.security = WFX_SEC_WPA3;
+        } else if (scan_result->security_mode.wpa2) {
+            ap->scan.security = WFX_SEC_WPA2;
+        } else if (scan_result->security_mode.wpa) {
+            ap->scan.security = WFX_SEC_WPA;
+        } else if (scan_result->security_mode.wep) {
+            ap->scan.security = WFX_SEC_WEP;
+        } else {
+            ap->scan.security = WFX_SEC_NONE;
+        }
+        ap->scan.chan = scan_result->channel;
+        ap->scan.rssi = scan_result->rcpi;
+        memcpy (&ap->scan.bssid [0], &scan_result->mac [0], 6);
+        scan_count++;
     }
 }
 
 /****************************************************************************
  * Callback for scan complete
  *****************************************************************************/
-static void sl_wfx_scan_complete_callback(uint32_t status)
+/* ARGSUSED */
+static void
+sl_wfx_scan_complete_callback(uint32_t status)
 {
     (void) (status);
     /* Use scan_count value and reset it */
-    scan_count_web = scan_count;
-    scan_count     = 0;
     xEventGroupSetBits(sl_wfx_event_group, SL_WFX_SCAN_COMPLETE);
 }
 #endif /* SL_WFX_CONFIG_SCAN */
@@ -459,6 +483,7 @@ wfx_events_task(void * p_arg)
                                      | SL_WFX_START_AP | SL_WFX_STOP_AP
 #endif /* SL_WFX_CONFIG_SOFTAP */
 #ifdef SL_WFX_CONFIG_SCAN
+                                     | SL_WFX_SCAN_START
                                      | SL_WFX_SCAN_COMPLETE
 #endif /* SL_WFX_CONFIG_SCAN */
                                      | 0,
@@ -481,7 +506,7 @@ wfx_events_task(void * p_arg)
             if (!(wfx_get_wifi_state() & SL_WFX_AP_INTERFACE_UP))
             {
                 // Enable the power save
-                sl_wfx_set_power_mode(WFM_PM_MODE_PS, 1);
+                sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_UAPSD, 1);
                 sl_wfx_enable_device_power_save();
             }
 #endif
@@ -492,11 +517,52 @@ wfx_events_task(void * p_arg)
         }
 
 #ifdef SL_WFX_CONFIG_SCAN
-        if (flags & SL_WFX_SCAN_COMPLETE)
-        {
-            // we don't process this here (see scan cgi handler)
+        if (flags & SL_WFX_SCAN_START) {
+            /*
+             * Start the Scan
+             */
+            sl_wfx_ssid_def_t ssid, *sp;
+            uint16_t num_ssid, slen;
+            if (scan_ssid) {
+                memset (&ssid, 0, sizeof (ssid));
+                slen = strlen (scan_ssid);
+                memcpy (&ssid.ssid [0],scan_ssid, slen);
+                ssid.ssid_length = slen;
+                num_ssid = 1;
+                sp = &ssid;
+            } else {
+                num_ssid = 0;
+                sp = (sl_wfx_ssid_def_t *)0;
+            }
+            (void)sl_wfx_send_scan_command (WFM_SCAN_MODE_ACTIVE,
+                                      (const uint8_t *)0, /* Channel list */
+                                      0, /* Scan all chans */
+                                      sp,
+                                      num_ssid,
+                                      (const uint8_t *)0, /* IE we're looking for */
+                                      0,
+                                      (const uint8_t *)0);
         }
-#endif
+        if (flags & SL_WFX_SCAN_COMPLETE) {
+            struct scan_result_holder *hp, *next;
+
+            EFR32_LOG ("WIFI: Return %d scan results", scan_count);
+            for (hp = scan_save; hp; hp = next) {
+                next = hp->next;
+                (*scan_cb) (&hp->scan);
+                vPortFree (hp);
+            }
+            (*scan_cb) ((wfx_wifi_scan_result *)0);
+            scan_save = (struct scan_result_holder *)0;
+            scan_count = 0;
+            if (scan_ssid) {
+                vPortFree (scan_ssid);
+                scan_ssid = (char *)0;
+            }
+            /* Terminate scan */
+            scan_cb = 0;
+        }
+#endif /* SL_WFX_CONFIG_SCAN */
     }
 }
 
@@ -751,3 +817,46 @@ wfx_dhcp_got_ipv4 (uint32_t ip)
         wfx_ip_changed_notify (1);
 }
 
+#ifdef SL_WFX_CONFIG_SCAN
+bool
+wfx_start_scan (char *ssid, void (*callback) (wfx_wifi_scan_result_t *))
+{
+    int sz;
+
+    if (scan_cb)
+        return false; /* Already in progress */
+    if (ssid) {
+        sz = strlen (ssid);
+        if ((scan_ssid = (char *)pvPortMalloc (sz + 1)) == (char *)0) {
+            return false;
+        }
+        strcpy (scan_ssid, ssid);
+    }
+    scan_cb = callback;
+    xEventGroupSetBits(sl_wfx_event_group, SL_WFX_SCAN_START);
+
+    return true;
+
+}
+void
+wfx_cancel_scan (void)
+{
+    struct scan_result_holder *hp, *next;
+    /* Not possible */
+    if (!scan_cb) {
+        return;
+    }
+    sl_wfx_send_stop_scan_command ();
+    for (hp = scan_save; hp; hp = next) {
+        next = hp->next;
+        vPortFree (hp);
+    }
+    scan_save = (struct scan_result_holder *)0;
+    scan_count = 0;
+    if (scan_ssid) {
+        vPortFree (scan_ssid);
+        scan_ssid = (char *)0;
+    }
+    scan_cb = 0;
+}
+#endif /* SL_WFX_CONFIG_SCAN */

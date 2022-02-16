@@ -18,7 +18,7 @@
 #define WFX_EVT_STA_DISCONN		0x02
 #define WFX_EVT_AP_START		0x04
 #define WFX_EVT_AP_STOP			0x08
-#define WFX_EVT_SCAN_COMPLETE		0x10
+#define WFX_EVT_SCAN			0x10	/* This is used as scan result and start */
 #define WFX_EVT_STA_START_JOIN		0x20
 #define WFX_EVT_STA_DO_DHCP		0x40
 #define WFX_EVT_STA_DHCP_DONE		0x80
@@ -35,6 +35,7 @@
 #define WFX_RSI_ST_AP_MODE		0x100	/* Enable AP Mode			*/
 #define WFX_RSI_ST_STA_READY (WFX_RSI_ST_STA_CONNECTED|WFX_RSI_ST_STA_DHCP_DONE)
 #define WFX_RSI_ST_STARTED		0x200	/* RSI task started			*/
+#define WFX_RSI_ST_SCANSTARTED		0x400	/* Scan Started				*/
 
 struct wfx_rsi {
 	EventGroupHandle_t events;
@@ -43,6 +44,10 @@ struct wfx_rsi {
 	uint16_t dev_state;
 	uint16_t ap_chan;		/* The chan our STA is using	*/
 	wfx_wifi_provision_t sec;
+#ifdef SL_WFX_CONFIG_SCAN
+        void (*scan_cb) (wfx_wifi_scan_result_t *);
+        char *scan_ssid; /* Which one are we scanning for */
+#endif
 #ifdef SL_WFX_CONFIG_SOFTAP
 	sl_wfx_mac_address_t softap_mac;
 #endif
@@ -52,6 +57,8 @@ struct wfx_rsi {
 	uint16_t join_retries;
 	uint8_t ip4_addr [4]; /* Not sure if this is enough */
 };
+#define RSI_SCAN_RESP_SZ 54
+
 extern struct wfx_rsi wfx_rsi;
 #ifdef __cplusplus
 extern "C" {

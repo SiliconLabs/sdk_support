@@ -68,7 +68,8 @@
 #define SL_WFX_DISCONNECT (1 << 2)
 #define SL_WFX_START_AP (1 << 3)
 #define SL_WFX_STOP_AP (1 << 4)
-#define SL_WFX_SCAN_COMPLETE (1 << 5)
+#define SL_WFX_SCAN_START (1 << 5)
+#define SL_WFX_SCAN_COMPLETE (1 << 6)
 
 #endif /* RS911X_SOCKETS */
 
@@ -105,7 +106,7 @@ typedef enum {
 } wfx_sec_t;
 typedef struct
 {
-    char ssid [64 + 1];
+    char ssid [32 + 1];
     char passkey [64+1];
     uint8_t security;
 } wfx_wifi_provision_t;
@@ -118,6 +119,15 @@ typedef enum
     WIFI_MODE_APSTA,
     WIFI_MODE_MAX,
 } wifi_mode_t;
+
+typedef struct wfx_wifi_scan_result {
+    char ssid [32 + 1];
+    uint8_t security;
+    uint8_t bssid [6];
+    uint8_t chan;
+    int16_t rssi; /* I suspect this is in dBm - so signed */
+} wfx_wifi_scan_result_t;
+
 #ifdef RS911X_WIFI
 /*
  * This Sh%t is here to support WFXUtils - and the Matter stuff that uses it
@@ -148,6 +158,7 @@ void wfx_enable_sta_mode (void);
 sl_wfx_state_t wfx_get_wifi_state(void);
 void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *addr);
 void wfx_set_wifi_provision(wfx_wifi_provision_t *wifiConfig);
+bool wfx_get_wifi_provision(wfx_wifi_provision_t * wifiConfig);
 bool wfx_is_sta_provisioned (void);
 bool wfx_is_sta_mode_enabled (void);
 
@@ -158,6 +169,8 @@ bool wfx_is_sta_connected (void);
 sl_status_t wfx_sta_discon (void);
 bool wfx_have_ipv4_addr (sl_wfx_interface_t);
 wifi_mode_t wfx_get_wifi_mode (void);
+bool wfx_start_scan (char *ssid, void (*scan_cb) (wfx_wifi_scan_result_t *)); /* true returned if successfuly started */
+void wfx_cancel_scan (void);
 
   /*
    * Call backs into the Matter Platform code

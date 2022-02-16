@@ -245,7 +245,35 @@ wfx_rsi_do_join (void)
                 }
         }
 }
+#ifdef SL_WFX_CONFIG_SCAN
+static void
+wfx_scan_cb (uint16_t status, const uint8_t *buffer, const uint16_t length)
+{
+        int x;
+        wfx_wifi_scan_result_t ap;
+        rsi_scan_info_t *scan;
+        rsi_rsp_scan_t *rsp;
 
+        WFX_RSI_LOG ("WLAN:Scan got status=%d, len=%d", (int) status, (int)length);
+
+        if (status) {
+                /*
+                 * Scan is done - failed
+                 */
+        } else  for (x = 0; x < rsp->scan_count [0] ; x++) {
+                scan = &rsp->scan_info [x];
+                strcpy (&ap.ssid [0], (char *)&scan->ssid [0]);
+                ap.security = scan->security_mode;
+                ap.rssi = (int)scan->rssi_val;
+                memcpy (&ap.bssid [0], &scan->bssid [0], 6);
+                (*wfx_rsi.scan_cb) (&ap);
+        }
+        wfx_rsi.dev_state &= ~WFX_RSI_ST_SCANSTARTED;
+        /* Terminate with end of scan which is no ap sent back */
+        (*wfx_rsi.scan_cb) ((wfx_wifi_scan_result_t *)0);
+        wfx_rsi.scan_cb = (void (*) (wfx_wifi_scan_result_t *))0;
+}
+#endif /* SL_WFX_CONFIG_SCAN */
 /*
  * The main WLAN task - started by wfx_wifi_start () that interfaces with RSI.
  * The rest of RSI stuff come in call-backs.
@@ -293,7 +321,7 @@ wfx_rsi_task (void *arg)
 					    | WFX_EVT_AP_START | WFX_EVT_AP_STOP
 #endif /* SL_WFX_CONFIG_SOFTAP */
 #ifdef SL_WFX_CONFIG_SCAN
-					    | WFX_EVT_SCAN_COMPLETE
+					    | WFX_EVT_SCAN
 #endif /* SL_WFX_CONFIG_SCAN */
 					    | 0,
 					    pdTRUE, /* Clear the bits */
@@ -347,7 +375,16 @@ wfx_rsi_task (void *arg)
 
 		}
 #ifdef SL_WFX_CONFIG_SCAN
-		if (flags & WFX_EVT_SCAN_COMPLETE) {
+		if (flags & WFX_EVT_SCAN) {
+                        if (!(wfx_rsi.dev_state & WFX_RSI_ST_SCANSTARTED)) {
+                                WFX_RSI_LOG ("WLAN: Start Scan");
+                                rsi_wlan_scan_async ((int8_t *)wfx_rsi.scan_ssid, 0, wfx_scan_cb);
+                                if (wfx_rsi.scan_ssid) {
+                                        vPortFree (wfx_rsi.scan_ssid);
+                                        wfx_rsi.scan_ssid = (char *)0;
+                                }
+                                wfx_rsi.dev_state |= WFX_RSI_ST_SCANSTARTED;
+                        }
 		}
 #endif /* SL_WFX_CONFIG_SCAN */
 #ifdef SL_WFX_CONFIG_SOFTAP
