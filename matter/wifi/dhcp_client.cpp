@@ -95,59 +95,56 @@ dhcpclient_poll (void *arg)
     ip_addr_t gw;
     struct dhcp *dhcp;
 
-    for (;;)
+    switch (dhcp_state)
     {
-        switch (dhcp_state)
-        {
-        case DHCP_START:
-            EFR32_LOG ("DHCP: Wait addr");
-            ip_addr_set_zero_ip4(&netif->ip_addr);
-            ip_addr_set_zero_ip4(&netif->netmask);
-            ip_addr_set_zero_ip4(&netif->gw);
-            dhcp_start (netif);
-            dhcp_state = DHCP_WAIT_ADDRESS;
-            break;
+    case DHCP_START:
+        EFR32_LOG ("DHCP: Wait addr");
+        ip_addr_set_zero_ip4(&netif->ip_addr);
+        ip_addr_set_zero_ip4(&netif->netmask);
+        ip_addr_set_zero_ip4(&netif->gw);
+        dhcp_start (netif);
+        dhcp_state = DHCP_WAIT_ADDRESS;
+        break;
 
-        case DHCP_WAIT_ADDRESS:
-            if (dhcp_supplied_address (netif)) {
-                dhcp_state = DHCP_ADDRESS_ASSIGNED;
+    case DHCP_WAIT_ADDRESS:
+        if (dhcp_supplied_address (netif)) {
+            dhcp_state = DHCP_ADDRESS_ASSIGNED;
 
-                EFR32_LOG("DHCP IP: %d.%d.%d.%d", (netif->ip_addr.u_addr.ip4.addr & 0xff),
-                          ((netif->ip_addr.u_addr.ip4.addr >> 8) & 0xff),
-                          ((netif->ip_addr.u_addr.ip4.addr >> 16) & 0xff),
-                          ((netif->ip_addr.u_addr.ip4.addr >> 24) & 0xff));
+            EFR32_LOG("DHCP IP: %d.%d.%d.%d", (netif->ip_addr.u_addr.ip4.addr & 0xff),
+                        ((netif->ip_addr.u_addr.ip4.addr >> 8) & 0xff),
+                        ((netif->ip_addr.u_addr.ip4.addr >> 16) & 0xff),
+                        ((netif->ip_addr.u_addr.ip4.addr >> 24) & 0xff));
 
-                wfx_dhcp_got_ipv4 ((uint32_t)netif->ip_addr.u_addr.ip4.addr);
-            } else {
-                dhcp = (struct dhcp *) netif_get_client_data (netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
+            wfx_dhcp_got_ipv4 ((uint32_t)netif->ip_addr.u_addr.ip4.addr);
+        } else {
+            dhcp = (struct dhcp *) netif_get_client_data (netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
 
-                /* DHCP timeout */
-                if (dhcp->tries > MAX_DHCP_TRIES) {
-                    dhcp_state = DHCP_TIMEOUT;
+            /* DHCP timeout */
+            if (dhcp->tries > MAX_DHCP_TRIES) {
+                dhcp_state = DHCP_TIMEOUT;
 
-                    EFR32_LOG ("*ERR*DHCP: Failed");
-                    /* Stop DHCP */
-                    dhcp_stop (netif);
+                EFR32_LOG ("*ERR*DHCP: Failed");
+                /* Stop DHCP */
+                dhcp_stop (netif);
 
-                    /* TODO - I am not sure that this is best */
-                    /* Static address used */
-                    IP_ADDR4(&ipaddr, sta_ip_addr0, sta_ip_addr1, sta_ip_addr2, sta_ip_addr3);
-                    IP_ADDR4(&netmask, sta_netmask_addr0, sta_netmask_addr1, sta_netmask_addr2, sta_netmask_addr3);
-                    IP_ADDR4(&gw, sta_gw_addr0, sta_gw_addr1, sta_gw_addr2, sta_gw_addr3);
-                    netif_set_addr (netif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask), ip_2_ip4(&gw));
-                }
+                /* TODO - I am not sure that this is best */
+                /* Static address used */
+                IP_ADDR4(&ipaddr, sta_ip_addr0, sta_ip_addr1, sta_ip_addr2, sta_ip_addr3);
+                IP_ADDR4(&netmask, sta_netmask_addr0, sta_netmask_addr1, sta_netmask_addr2, sta_netmask_addr3);
+                IP_ADDR4(&gw, sta_gw_addr0, sta_gw_addr1, sta_gw_addr2, sta_gw_addr3);
+                netif_set_addr (netif, ip_2_ip4(&ipaddr), ip_2_ip4(&netmask), ip_2_ip4(&gw));
             }
-            break;
-
-        case DHCP_LINK_DOWN:
-            /* Stop DHCP */
-            EFR32_LOG ("*ERR*DHCP Link down");
-            dhcp_stop (netif);
-            dhcp_state = DHCP_OFF;
-            wfx_ip_changed_notify (0);
-            break;
-        default:
-            break;
         }
+        break;
+
+    case DHCP_LINK_DOWN:
+        /* Stop DHCP */
+        EFR32_LOG ("*ERR*DHCP Link down");
+        dhcp_stop (netif);
+        dhcp_state = DHCP_OFF;
+        wfx_ip_changed_notify (0);
+        break;
+    default:
+        break;
     }
 }
