@@ -16,6 +16,9 @@ include:
   - path: inc
     file_list:
       - path: keyscan_driver.h
+  - path: src
+    file_list:
+      - path: keyscan_driver_hal.h
 source:
   - path: src/keyscan_driver.c
   - path: src/keyscan_driver_hal.c

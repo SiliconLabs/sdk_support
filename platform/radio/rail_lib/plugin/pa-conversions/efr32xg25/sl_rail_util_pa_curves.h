@@ -98,19 +98,19 @@ extern "C" {
     { 9, 82, 30654 },                                                                                      \
     { 4, 78, 29348 } }
 
-#define RAIL_PA_CURVES_MAX_POWER_OFDM      230
-#define RAIL_PA_CURVES_MIN_POWER_OFDM       60
+#define RAIL_PA_CURVES_MAX_POWER_OFDM      180
+#define RAIL_PA_CURVES_MIN_POWER_OFDM      -42
 #define RAIL_PA_CURVES_CURVES_OFDM                                                                         \
 /* NOT a real power level, when set to 255 the first acts as an override for default max and step size. */ \
-  { { 255, 230, 10 },                                                                                      \
-    { 204, 4960, -940996 },                                                                                \
-    { 128, 2302, -367422 },                                                                                \
-    { 105, 1583, -219560 },                                                                                \
-    { 89, 1237, -151893 },                                                                                 \
-    { 77, 994, -106796 },                                                                                  \
-    { 66, 863, -83980 },                                                                                   \
-    { 58, 723, -60820 },                                                                                   \
-    { 45, 417, -16092 } }
+  { { 255, 180, 30 },                                                                                      \
+    { 204, 2239, -205088 },                                                                                \
+    { 124, 1315, -68859 },                                                                                 \
+    { 84, 856, -15199 },                                                                                   \
+    { 58, 577, 8776 },                                                                                     \
+    { 41, 405, 18477 },                                                                                    \
+    { 29, 285, 21666 },                                                                                    \
+    { 21, 200, 21343 },                                                                                    \
+    { 15, 152, 19784 } }
 
 // *INDENT-OFF*
 // Macro to declare the variables needed to initialize RAIL_TxPowerCurvesConfig_t for use in
