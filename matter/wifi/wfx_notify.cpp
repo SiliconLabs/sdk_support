@@ -110,8 +110,9 @@ wfx_ip_changed_notify (int got_ip)
     if (got_ip) {
         /* Should remember this */
         vTaskDelay (1);
-        //chip::app::MdnsServer::Instance().StartServer();
+        chip::DeviceLayer::PlatformMgr().LockChipStack();
         chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
+        chip::DeviceLayer::PlatformMgr().UnlockChipStack();
     }
 }
 
