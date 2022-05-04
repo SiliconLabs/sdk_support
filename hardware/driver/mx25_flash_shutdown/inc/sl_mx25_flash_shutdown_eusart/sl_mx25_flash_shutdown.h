@@ -25,7 +25,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 #include "em_device.h"
-#include "sl_mx25_flash_shutdown_eusart_config.h"
+#include "sl_mx25_flash_shutdown_usart_config.h"
 
 /***************************************************************************//**
  * @addtogroup mx25_flash_shutdown MX25 SPI Flash Shutdown

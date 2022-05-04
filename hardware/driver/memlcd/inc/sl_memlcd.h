@@ -25,7 +25,7 @@
 
 #include "sl_memlcd_spi.h"
 #if defined(SL_MEMLCD_USE_EUSART)
-#include "sl_memlcd_eusart_config.h"
+#include "sl_memlcd_usart_config.h"
 #elif defined(SL_MEMLCD_USE_USART)
 #include "sl_memlcd_usart_config.h"
 #endif
