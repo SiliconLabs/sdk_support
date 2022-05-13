@@ -1,7 +1,8 @@
 #ifndef _RSI_BOARD_CONFIGURATION_H_
 #define _RSI_BOARD_CONFIGURATION_H_
 
-typedef struct {
+typedef struct
+{
     unsigned char port;
     unsigned char pin;
 } rsi_pin_t;
@@ -11,15 +12,17 @@ typedef struct {
 //#define CONCAT_EXPAND(a, b)      CONCAT(a,b)
 //#define CONCAT3_EXPAND(a, b, c)  CONCAT3(a,b,c)
 
-#define PIN(port_id, pin_id)  (rsi_pin_t){.port=gpioPort##port_id, .pin=pin_id}
+#define PIN(port_id, pin_id)                                                                                                       \
+    (rsi_pin_t) { .port = gpioPort##port_id, .pin = pin_id }
 
-#if defined(EFR32MG21_BRD4180A) || defined (BRD4180A)
+#if defined(EFR32MG21_BRD4180A) || defined(BRD4180A)
 #include "brd4180a.h"
-#elif defined(EFR32MG12_BRD4161A) || defined (BRD4161A)
+#elif defined(EFR32MG12_BRD4161A) || defined(BRD4161A)
 #include "brd4161a.h"
+#elif defined(EFR32MG24_BRD4187A) || defined(BRD4187A)
+#include "brd4187c.h"
 #else
 #error "Need SPI Pins"
-#endif /* EFR32MG21_BRD4180A */
-
+#endif /* EFR32MG24_BRD4187A */
 
 #endif /* _RSI_BOARD_CONFIGURATION_H_ */

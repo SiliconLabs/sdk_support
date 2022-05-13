@@ -1,13 +1,13 @@
 #ifndef _BRD4161A_H_
 #define _BRD4161A_H_
 #ifndef LOGGING_STATS
-#define WAKE_INDICATOR_PIN  PIN(D, 3)
+#define WAKE_INDICATOR_PIN PIN(D, 3)
 #endif
 
 #ifdef LOGGING_STATS
-#define LOGGING_WAKE_INDICATOR_PIN  PIN(D, 3)
-#define LOGGING_STATS_PORT    gpioPortD
-#define LOGGING_STATS_PIN     03
+#define LOGGING_WAKE_INDICATOR_PIN PIN(D, 3)
+#define LOGGING_STATS_PORT gpioPortD
+#define LOGGING_STATS_PIN 03
 #endif
 
 #define MY_USART USART2
@@ -15,12 +15,10 @@
 #define MY_USART_TX_SIGNAL dmadrvPeripheralSignal_USART2_TXBL
 #define MY_USART_RX_SIGNAL dmadrvPeripheralSignal_USART2_RXDATAV
 
-
 #define SPI_CLOCK_PIN PIN(A, 8)
-#define SPI_MOSI_PIN  PIN(A, 6)
-#define SPI_MISO_PIN  PIN(A, 7)
-#define SPI_CS_PIN    PIN(A, 9)
-
+#define SPI_MOSI_PIN PIN(A, 6)
+#define SPI_MISO_PIN PIN(A, 7)
+#define SPI_CS_PIN PIN(A, 9)
 
 #if (BRD4161A || BRD4163A || BRD4164A)
 
@@ -53,16 +51,16 @@
 //#define SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN 9          /* SPI IRQ pin */
 //#define SL_WFX_HOST_PINOUT_RESET_PORT gpioPortD
 //#define SL_WFX_HOST_PINOUT_RESET_PIN 12
-#define WFX_RESET_PIN           PIN(D, 12)
-#define WFX_INTERRUPT_PIN       PIN(C, 9)
+#define WFX_RESET_PIN PIN(D, 12)
+#define WFX_INTERRUPT_PIN PIN(C, 9)
 //#define WFX_INTERRUPT_PIN       PIN(D, 3)
-#define WFX_SLEEP_CONFIRM_PIN   PIN(D, 2)
+#define WFX_SLEEP_CONFIRM_PIN PIN(D, 13)
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 9
 #else /* WF200 */
 #define SL_WFX_HOST_PINOUT_RESET_PORT gpioPortD
 #define SL_WFX_HOST_PINOUT_RESET_PIN 10
 #define SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT gpioPortB /* SPI IRQ port*/
-#define SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN 6          /* SPI IRQ pin */
+#define SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN 6 /* SPI IRQ pin */
 #define SL_WFX_HOST_PINOUT_WUP_PORT gpioPortD
 #define SL_WFX_HOST_PINOUT_WUP_PIN 8
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 5

@@ -9,24 +9,24 @@
 #include "em_usart.h"
 #include "gpiointerrupt.h"
 
-#include "sl_wfx_host.h"
-#include "wfx_host_events.h"
-#include "sl_wfx_board.h"
-#include "sl_wfx_task.h"
 #include "AppConfig.h"
+#include "sl_wfx_board.h"
+#include "sl_wfx_host.h"
+#include "sl_wfx_task.h"
+#include "wfx_host_events.h"
 
+extern uint8_t wirq_irq_nb;
 /*
  * IRQ for SPI callback
  * Clear the Interrupt and wake up the task that
  * handles the actions of the interrupt (typically - wfx_bus_task ())
  */
-static void
-sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
+static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
 {
     BaseType_t bus_task_woken;
     uint32_t interrupt_mask;
 
-    if (irqNumber != SL_WFX_HOST_PINOUT_SPI_IRQ)
+    if (irqNumber != wirq_irq_nb)
         return;
     // Get and clear all pending GPIO interrupts
     interrupt_mask = GPIO_IntGet();
@@ -40,10 +40,9 @@ sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
 /****************************************************************************
  * Init some actions pins to the WF-200 expansion board
  *****************************************************************************/
-void
-sl_wfx_host_gpio_init(void)
+void sl_wfx_host_gpio_init(void)
 {
-    EFR32_LOG ("WIFI: GPIO Init");
+    EFR32_LOG("WIFI: GPIO Init:IRQ=%d", wirq_irq_nb);
     // Enable GPIO clock.
     CMU_ClockEnable(cmuClock_GPIO, true);
 
@@ -58,12 +57,13 @@ sl_wfx_host_gpio_init(void)
 
     // Set up interrupt based callback function - trigger on both edges.
     GPIOINT_Init();
-    GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, SL_WFX_HOST_PINOUT_SPI_IRQ, true, false,
-                      true);
-    GPIOINT_CallbackRegister(SL_WFX_HOST_PINOUT_SPI_IRQ, sl_wfx_spi_wakeup_irq_callback);
+    GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false,
+                      false); /* Don't enable it */
+
+    GPIOINT_CallbackRegister(wirq_irq_nb, sl_wfx_spi_wakeup_irq_callback);
 
     // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
+    NVIC_ClearPendingIRQ(1 << wirq_irq_nb);
     NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
     NVIC_SetPriority(GPIO_ODD_IRQn, 5);
 }
-

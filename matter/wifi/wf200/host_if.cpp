@@ -80,6 +80,7 @@ sl_wfx_context_t wifiContext;
 static uint8_t wifi_extra;
 #define WE_ST_STARTED 1
 #define WE_ST_STA_CONN 2
+#define WE_ST_HW_STARTED 4
 
 #ifdef SL_WFX_CONFIG_SOFTAP
 // Connection parameters
@@ -469,10 +470,10 @@ wfx_events_task(void * p_arg)
 {
         TickType_t last_dhcp_poll, now;
         EventBits_t flags;
-        void *sta_netif;
+        void *ifp;
         (void) p_arg;
 
-        sta_netif = wfx_get_netif (SL_WFX_STA_INTERFACE);
+        ifp = wfx_get_netif (SL_WFX_STA_INTERFACE);
         last_dhcp_poll = xTaskGetTickCount ();
     while (1)
     {
@@ -493,7 +494,7 @@ wfx_events_task(void * p_arg)
 
         if (wifi_extra & WE_ST_STA_CONN) {
             if ((now = xTaskGetTickCount ()) > (last_dhcp_poll + pdMS_TO_TICKS (250))) {
-                dhcpclient_poll (sta_netif);
+                dhcpclient_poll (ifp);
                 last_dhcp_poll = now;
             }
         }
@@ -622,18 +623,15 @@ wfx_init(void)
  * @return
  *    sl_status_t Shows init succes or error.
  ******************************************************************************/
-sl_status_t
-wfx_wifi_start(void)
+static void
+wfx_wifi_hw_start (void)
 {
     sl_status_t status;
 
-    if (wifi_extra & WE_ST_STARTED) {
-        EFR32_LOG ("WIFI: Already started");
-        return SL_STATUS_OK;
-   }
-    wifi_extra |= WE_ST_STARTED;
-
-    EFR32_LOG("STARTING WF200");
+    if (wifi_extra & WE_ST_HW_STARTED)
+        return;
+    EFR32_LOG("STARTING WF200\n");
+    wifi_extra |= WE_ST_HW_STARTED;
 
     sl_wfx_host_gpio_init();
     if ((status = wfx_init()) == SL_STATUS_OK) {
@@ -641,10 +639,28 @@ wfx_wifi_start(void)
         EFR32_LOG ("WF200:Start LWIP");
         wfx_lwip_start ();
         wifiContext.state = SL_WFX_STARTED; /* Really this is a bit mask */
-    }
-
-    return status;
+        EFR32_LOG ("WF200:ready..");
+    } else {
+        EFR32_LOG ("*ERR*WF200:init failed");
+     }
 }
+/*
+ * I think that this is getting called before FreeRTOS threads are ready
+ */
+sl_status_t
+wfx_wifi_start(void)
+{
+    if (wifi_extra & WE_ST_STARTED) {
+        EFR32_LOG ("WIFI: Already started");
+        return SL_STATUS_OK;
+   }
+    wifi_extra |= WE_ST_STARTED;
+    wfx_soft_init ();
+    wfx_wifi_hw_start ();
+
+    return SL_STATUS_OK;
+ }
+
 
 sl_wfx_state_t
 wfx_get_wifi_state(void)
@@ -802,6 +818,10 @@ wfx_get_wifi_mode ()
 	return WIFI_MODE_NULL;
 }
 
+/*
+ * This is called from the context of AppTask
+ * For WF200 - Start WIFI here
+ */
 bool
 wfx_hw_ready (void)
 {
