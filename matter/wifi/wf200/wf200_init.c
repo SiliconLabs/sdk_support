@@ -61,8 +61,8 @@
 
 #include "AppConfig.h"
 #include "sl_wfx_host.h"
-#include "wfx_host_events.h"
 #include "sl_wfx_task.h"
+#include "wfx_host_events.h"
 
 #define SL_WFX_EVENT_MAX_SIZE 512
 #define SL_WFX_EVENT_LIST_SIZE 1
@@ -96,26 +96,20 @@ sl_status_t sl_wfx_host_disable_spi(void);
 /****************************************************************************
  * WFX FMAC driver host interface initialization
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_init(void)
+sl_status_t wfx_soft_init(void)
 {
-    host_context.wf200_firmware_download_progress = 0;
-    host_context.wf200_initialized                = 0;
-
-    wfx_event_Q = xQueueCreate(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t));
-    if (wfx_event_Q == NULL)
+    EFR32_LOG("WF200:Soft Init");
+    if ((wfx_event_Q == NULL) && ((wfx_event_Q = xQueueCreate(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t))) == NULL))
     {
         return SL_STATUS_FAIL;
     }
 
-    wfx_wakeup_sem = xSemaphoreCreateBinary();
-    if (wfx_wakeup_sem == NULL)
+    if ((wfx_wakeup_sem == NULL) && ((wfx_wakeup_sem = xSemaphoreCreateBinary()) == NULL))
     {
         return SL_STATUS_FAIL;
     }
 
-    wfx_mutex = xSemaphoreCreateMutex();
-    if (wfx_mutex == NULL)
+    if ((wfx_mutex == NULL) && ((wfx_mutex = xSemaphoreCreateMutex()) == NULL))
     {
         return SL_STATUS_FAIL;
     }
@@ -123,11 +117,18 @@ sl_wfx_host_init(void)
     return SL_STATUS_OK;
 }
 
+sl_status_t sl_wfx_host_init(void)
+{
+    EFR32_LOG("WFX: Host Init");
+    host_context.wf200_firmware_download_progress = 0;
+    host_context.wf200_initialized                = 0;
+    return SL_STATUS_OK;
+}
+
 /****************************************************************************
  * Get firmware data
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_get_firmware_data(const uint8_t ** data, uint32_t data_size)
+sl_status_t sl_wfx_host_get_firmware_data(const uint8_t ** data, uint32_t data_size)
 {
     *data = &sl_wfx_firmware[host_context.wf200_firmware_download_progress];
     host_context.wf200_firmware_download_progress += data_size;
@@ -137,8 +138,7 @@ sl_wfx_host_get_firmware_data(const uint8_t ** data, uint32_t data_size)
 /****************************************************************************
  * Get firmware size
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_get_firmware_size(uint32_t * firmware_size)
+sl_status_t sl_wfx_host_get_firmware_size(uint32_t * firmware_size)
 {
     *firmware_size = sizeof(sl_wfx_firmware);
     return SL_STATUS_OK;
@@ -147,8 +147,7 @@ sl_wfx_host_get_firmware_size(uint32_t * firmware_size)
 /****************************************************************************
  * Get PDS data
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_get_pds_data(const char ** pds_data, uint16_t index)
+sl_status_t sl_wfx_host_get_pds_data(const char ** pds_data, uint16_t index)
 {
     *pds_data = sl_wfx_pds[index];
     return SL_STATUS_OK;
@@ -157,8 +156,7 @@ sl_wfx_host_get_pds_data(const char ** pds_data, uint16_t index)
 /****************************************************************************
  * Get PDS size
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_get_pds_size(uint16_t * pds_size)
+sl_status_t sl_wfx_host_get_pds_size(uint16_t * pds_size)
 {
     *pds_size = SL_WFX_ARRAY_COUNT(sl_wfx_pds);
     return SL_STATUS_OK;
@@ -167,8 +165,7 @@ sl_wfx_host_get_pds_size(uint16_t * pds_size)
 /****************************************************************************
  * Deinit host interface
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_deinit(void)
+sl_status_t sl_wfx_host_deinit(void)
 {
     return SL_STATUS_OK;
 }
@@ -176,10 +173,9 @@ sl_wfx_host_deinit(void)
 /****************************************************************************
  * Allocate buffer (Should allocate either Ethernet - from LWIP or Control) - TODO
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_allocate_buffer(void ** buffer, sl_wfx_buffer_type_t type, uint32_t buffer_size)
+sl_status_t sl_wfx_host_allocate_buffer(void ** buffer, sl_wfx_buffer_type_t type, uint32_t buffer_size)
 {
-   if ((*buffer = pvPortMalloc (buffer_size)) == (void *) 0)
+    if ((*buffer = pvPortMalloc(buffer_size)) == (void *) 0)
     {
         return SL_STATUS_FAIL;
     }
@@ -189,18 +185,16 @@ sl_wfx_host_allocate_buffer(void ** buffer, sl_wfx_buffer_type_t type, uint32_t 
 /****************************************************************************
  * Free host buffer (CHECK LWIP buffer)
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_free_buffer(void * buffer, sl_wfx_buffer_type_t type)
+sl_status_t sl_wfx_host_free_buffer(void * buffer, sl_wfx_buffer_type_t type)
 {
-    vPortFree (buffer);
+    vPortFree(buffer);
     return SL_STATUS_OK;
 }
 
 /****************************************************************************
  * Set reset pin low
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_hold_in_reset(void)
+sl_status_t sl_wfx_host_hold_in_reset(void)
 {
     GPIO_PinOutClear(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN);
     host_context.wf200_initialized = 0;
@@ -210,8 +204,7 @@ sl_wfx_host_hold_in_reset(void)
 /****************************************************************************
  * Set wakeup pin status
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_set_wake_up_pin(uint8_t state)
+sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
 {
     CORE_DECLARE_IRQ_STATE;
 
@@ -244,8 +237,7 @@ sl_wfx_host_set_wake_up_pin(uint8_t state)
     return SL_STATUS_OK;
 }
 
-sl_status_t
-sl_wfx_host_reset_chip(void)
+sl_status_t sl_wfx_host_reset_chip(void)
 {
     // Pull it low for at least 1 ms to issue a reset sequence
     GPIO_PinOutClear(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN);
@@ -263,24 +255,21 @@ sl_wfx_host_reset_chip(void)
     return SL_STATUS_OK;
 }
 
-sl_status_t
-sl_wfx_host_wait_for_wake_up(void)
+sl_status_t sl_wfx_host_wait_for_wake_up(void)
 {
     xSemaphoreTake(wfx_wakeup_sem, 0);
     xSemaphoreTake(wfx_wakeup_sem, 3 / portTICK_PERIOD_MS);
 
     return SL_STATUS_OK;
 }
-sl_status_t
-sl_wfx_host_wait(uint32_t wait_time)
+sl_status_t sl_wfx_host_wait(uint32_t wait_time)
 {
     uint32_t ticks = pdMS_TO_TICKS(wait_time);
     vTaskDelay(ticks ? ticks : 10);
     return SL_STATUS_OK;
 }
 
-sl_status_t
-sl_wfx_host_setup_waited_event(uint8_t event_id)
+sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
 {
     host_context.waited_event_id = event_id;
     host_context.posted_event_id = 0;
@@ -288,14 +277,12 @@ sl_wfx_host_setup_waited_event(uint8_t event_id)
     return SL_STATUS_OK;
 }
 
-uint8_t
-sl_wfx_host_get_waited_event(void)
+uint8_t sl_wfx_host_get_waited_event(void)
 {
     return host_context.waited_event_id;
 }
 
-sl_status_t
-sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t timeout, void ** event_payload_out)
+sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t timeout, void ** event_payload_out)
 {
     uint8_t posted_event_id;
     for (uint32_t i = 0; i < timeout; i++)
@@ -325,13 +312,13 @@ sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t timeout, voi
  * @returns Returns SL_STATUS_OK if successful,
  *SL_STATUS_FAIL otherwise
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_lock(void)
+sl_status_t sl_wfx_host_lock(void)
 {
 
     sl_status_t status = SL_STATUS_OK;
 
-    if (xSemaphoreTake(wfx_mutex, 500) != pdTRUE)  {
+    if (xSemaphoreTake(wfx_mutex, 500) != pdTRUE)
+    {
         EFR32_LOG("*ERR*Wi-Fi driver mutex timo");
         status = SL_STATUS_TIMEOUT;
     }
@@ -345,34 +332,33 @@ sl_wfx_host_lock(void)
  * @returns Returns SL_STATUS_OK if successful,
  *SL_STATUS_FAIL otherwise
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_unlock(void)
+sl_status_t sl_wfx_host_unlock(void)
 {
-    xSemaphoreGive (wfx_mutex);
+    xSemaphoreGive(wfx_mutex);
 
     return SL_STATUS_OK;
 }
 
 /**************************************************************************/
 /**
-  * Called when the driver needs to post an event
-  *
-  * @returns Returns SL_STATUS_OK if successful,
-  *SL_STATUS_FAIL otherwise
-  *****************************************************************************/
-sl_status_t
-sl_wfx_host_post_event(sl_wfx_generic_message_t * event_payload)
+ * Called when the driver needs to post an event
+ *
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
+ *****************************************************************************/
+sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t * event_payload)
 {
     sl_status_t status;
 
     /* Forward the message to the application */
     status = sl_wfx_host_process_event(event_payload);
 
-    if (host_context.waited_event_id == event_payload->header.id)  {
-        if (event_payload->header.length < SL_WFX_EVENT_MAX_SIZE) {
+    if (host_context.waited_event_id == event_payload->header.id)
+    {
+        if (event_payload->header.length < SL_WFX_EVENT_MAX_SIZE)
+        {
             /* Post the event in the queue */
-            memcpy(sl_wfx_context->event_payload_buffer,
-                   (void *) event_payload, event_payload->header.length);
+            memcpy(sl_wfx_context->event_payload_buffer, (void *) event_payload, event_payload->header.length);
             host_context.posted_event_id = event_payload->header.id;
             xQueueOverwrite(wfx_event_Q, (void *) &event_payload->header.id);
         }
@@ -387,10 +373,9 @@ sl_wfx_host_post_event(sl_wfx_generic_message_t * event_payload)
  * @returns Returns SL_STATUS_OK if successful,
  *SL_STATUS_FAIL otherwise
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_transmit_frame(void * frame, uint32_t frame_len)
+sl_status_t sl_wfx_host_transmit_frame(void * frame, uint32_t frame_len)
 {
-    return sl_wfx_data_write (frame, frame_len);
+    return sl_wfx_data_write(frame, frame_len);
 }
 
 /****************************************************************************
@@ -399,8 +384,7 @@ sl_wfx_host_transmit_frame(void * frame, uint32_t frame_len)
  * @returns SL_WIFI_SLEEP_GRANTED to let the WFx go to
  *sleep, SL_WIFI_SLEEP_NOT_GRANTED otherwise
  *****************************************************************************/
-sl_status_t
-sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type, sl_wfx_register_address_t address, uint32_t length)
+sl_status_t sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type, sl_wfx_register_address_t address, uint32_t length)
 {
     (void) (type);
     (void) (address);
@@ -413,8 +397,7 @@ sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type, sl_wfx_register_ad
 /****************************************************************************
  * Host debug output
  *****************************************************************************/
-void
-sl_wfx_host_log(const char * str, ...)
+void sl_wfx_host_log(const char * str, ...)
 {
     va_list args;
     va_start(args, str);
@@ -433,7 +416,7 @@ void otSysEventSignalPending(void)
 {
     // BaseType_t yieldRequired = ThreadStackMgrImpl().SignalThreadActivityPendingFromISR();
     EFR32_LOG("*ERR*UART intr - NOT Handled");
-    portYIELD_FROM_ISR (pdFALSE);
+    portYIELD_FROM_ISR(pdFALSE);
 }
 #endif /* !CHIP_ENABLE_OPENTHREAD */
 #endif /* PW_RPC_ENABLED */

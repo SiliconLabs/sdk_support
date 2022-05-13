@@ -46,8 +46,8 @@
 #include "em_gpio.h"
 
 #include "sl_wfx.h"
-#include "sl_wfx_host.h"
 #include "sl_wfx_board.h"
+#include "sl_wfx_host.h"
 #include "sl_wfx_task.h"
 
 #include "FreeRTOS.h"
@@ -71,8 +71,7 @@ static bool wfx_bus_rx_in_process = false;
 /***************************************************************************
  * Check receive frame status
  ******************************************************************************/
-bool
-wfx_bus_is_receive_processing(void)
+bool wfx_bus_is_receive_processing(void)
 {
     return wfx_bus_rx_in_process;
 }
@@ -80,13 +79,13 @@ wfx_bus_is_receive_processing(void)
 /*****************************************************************************
  * Receives frames from the WFX.
  ******************************************************************************/
-static sl_status_t
-receive_frames()
+static sl_status_t receive_frames()
 {
     sl_status_t result;
     uint16_t control_register = 0;
     wfx_bus_rx_in_process     = true;
-    do {
+    do
+    {
         result = sl_wfx_receive_frame(&control_register);
         SL_WFX_ERROR_CHECK(result);
     } while ((control_register & SL_WFX_CONT_NEXT_LEN_MASK) != 0);
@@ -100,12 +99,12 @@ error_handler:
  * WFX bus communication task.
  * receives frames from the Bus interface
  */
-static void
-wfx_bus_task(void * p_arg)
+static void wfx_bus_task(void * p_arg)
 {
+    EFR32_LOG("SPI: Bus Task started");
     sl_wfx_host_start_platform_interrupt();
-    EFR32_LOG ("SPI: Bus Task started");
-    for (;;)  {
+    for (;;)
+    {
         /*Wait for an interrupt from WFX*/
         ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
@@ -124,12 +123,9 @@ wfx_bus_task(void * p_arg)
 /***************************************************************************
  * Creates WFX bus communication task.
  ******************************************************************************/
-void
-wfx_bus_start()
+void wfx_bus_start()
 {
-    wfx_bus_task_handle = xTaskCreateStatic(wfx_bus_task, "wfxbus",
-                                            BUS_TASK_STACK_SIZE, NULL, 2,
-                                            busStack, &busTaskStruct);
+    wfx_bus_task_handle = xTaskCreateStatic(wfx_bus_task, "wfxbus", BUS_TASK_STACK_SIZE, NULL, 2, busStack, &busTaskStruct);
     if (wfx_bus_task_handle == NULL)
     {
         EFR32_LOG("*ERR*WFX BusTask");

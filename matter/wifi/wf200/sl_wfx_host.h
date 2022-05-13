@@ -44,6 +44,7 @@
 extern "C" {
 #endif
 uint8_t sl_wfx_host_get_waited_event(void);
+sl_status_t wfx_soft_init(void);
 
 #ifdef SLEEP_ENABLED
 sl_status_t sl_wfx_host_switch_to_wirq(void);
