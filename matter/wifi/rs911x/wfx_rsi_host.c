@@ -176,8 +176,20 @@ wfx_sta_discon (void)
 bool
 wfx_have_ipv4_addr (sl_wfx_interface_t which_if)
 {
+    WFX_RSI_LOG (" ###### wfx_have_ipv4_addr ");
     if (which_if == SL_WFX_STA_INTERFACE) {
         return (wfx_rsi.dev_state & WFX_RSI_ST_STA_DHCP_DONE) ? true : false;
+    } else {
+        return false; /* TODO */
+    }
+}
+bool
+wfx_have_ipv6_addr (sl_wfx_interface_t which_if)
+{
+    WFX_RSI_LOG (" ###### wfx_have_ipv6_addr ");
+
+    if (which_if == SL_WFX_STA_INTERFACE) {
+        return (wfx_rsi.dev_state & WFX_RSI_ST_STA_CONNECTED) ? true : false;
     } else {
         return false; /* TODO */
     }
