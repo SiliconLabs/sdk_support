@@ -168,6 +168,7 @@ void wfx_setup_ip6_link_local (sl_wfx_interface_t);
 bool wfx_is_sta_connected (void);
 sl_status_t wfx_sta_discon (void);
 bool wfx_have_ipv4_addr (sl_wfx_interface_t);
+bool wfx_have_ipv6_addr (sl_wfx_interface_t);
 wifi_mode_t wfx_get_wifi_mode (void);
 bool wfx_start_scan (char *ssid, void (*scan_cb) (wfx_wifi_scan_result_t *)); /* true returned if successfuly started */
 void wfx_cancel_scan (void);
@@ -187,6 +188,7 @@ struct netif *wfx_get_netif (sl_wfx_interface_t interface);
 void wfx_dhcp_got_ipv4 (uint32_t);
 bool wfx_hw_ready (void);
 void wfx_ip_changed_notify (int got_ip);
+void wfx_ipv6_notify (int got_ip);
 
 #ifdef RS911X_WIFI
 /* RSI for LWIP */

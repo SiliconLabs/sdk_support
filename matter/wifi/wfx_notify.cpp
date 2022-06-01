@@ -97,6 +97,28 @@ wfx_disconnected_notify (int32_t status)
 }
 
 void
+wfx_ipv6_notify (int got_ip)
+{
+    sl_wfx_generic_message_t eventData;
+
+    EFR32_LOG("WFX: GOT IPV6 Notify ");
+
+    memset(&eventData, 0, sizeof(eventData));
+    eventData.header.id = got_ip ? IP_EVENT_GOT_IP6: IP_EVENT_STA_LOST_IP;
+    eventData.header.length = sizeof(eventData.header);
+    PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
+    /* So the other threads can run and have the connectivity OK */
+    if (got_ip) {
+        /* Should remember this */
+        vTaskDelay (1);
+        //chip::app::MdnsServer::Instance().StartServer();
+	chip::DeviceLayer::PlatformMgr().LockChipStack();
+        chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
+	chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+    }
+}
+
+void
 wfx_ip_changed_notify (int got_ip)
 {
     sl_wfx_generic_message_t eventData;

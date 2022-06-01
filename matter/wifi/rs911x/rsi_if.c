@@ -37,7 +37,7 @@
 #include "wfx_host_events.h"
 #include "wfx_rsi.h"
 #include "dhcp_client.h"
-
+#include <CHIPDevicePlatformConfig.h>
 
 //#include "rsi_wlan_config.h"
 
@@ -285,8 +285,10 @@ wfx_rsi_task (void *arg)
 {
 	EventBits_t flags;
 #ifndef RS911X_SOCKETS
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
         TickType_t last_dhcp_poll, now;
         void *sta_netif;
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 #endif
 	(void)arg;
 	if (wfx_rsi_init () != RSI_SUCCESS) {
@@ -297,8 +299,10 @@ wfx_rsi_task (void *arg)
 	}
 #ifndef RS911X_SOCKETS
         wfx_lwip_start ();
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
         last_dhcp_poll = xTaskGetTickCount ();
         sta_netif = wfx_get_netif (SL_WFX_STA_INTERFACE);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 #endif
 	wfx_started_notify ();
 
@@ -348,12 +352,14 @@ wfx_rsi_task (void *arg)
                 /*
                  * Let's handle DHCP polling here
                  */
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
                 if (wfx_rsi.dev_state & WFX_RSI_ST_STA_CONNECTED) {
                         if ((now = xTaskGetTickCount ()) > (last_dhcp_poll + pdMS_TO_TICKS (250))) {
                                 dhcpclient_poll (sta_netif);
                                 last_dhcp_poll = now;
                         }
                 }
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 #endif /* RS911X_SOCKETS */
 		if (flags & WFX_EVT_STA_START_JOIN) {
                         wfx_rsi_do_join ();
@@ -366,12 +372,21 @@ wfx_rsi_task (void *arg)
                         wfx_rsi.dev_state |= WFX_RSI_ST_STA_CONNECTED;
                         wfx_lwip_set_sta_link_up();
                         /* We need to get AP Mac - TODO */
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV6)
+			vTaskDelay(10000);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV6 */
 			wfx_connected_notify (0, &wfx_rsi.ap_mac);
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV6)
+			wfx_ipv6_notify(1);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV6 */
 		}
 		if (flags & WFX_EVT_STA_DISCONN) {
 			wfx_rsi.dev_state &= ~(WFX_RSI_ST_STA_READY|WFX_RSI_ST_STA_CONNECTING|WFX_RSI_ST_STA_CONNECTED|WFX_RSI_ST_STA_DHCP_DONE);
                         WFX_RSI_LOG ("WLAN: TODO-Discon Notify");
                         wfx_lwip_set_sta_link_down();
+#if (CHIP_DEVICE_CONFIG_ENABLE_IPV6)
+			wfx_ipv6_notify(0);
+#endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV6 */
 
 		}
 #ifdef SL_WFX_CONFIG_SCAN

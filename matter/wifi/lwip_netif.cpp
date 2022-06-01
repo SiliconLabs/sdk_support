@@ -23,6 +23,8 @@
 #include "task.h"
 
 #include <platform/CHIPDeviceLayer.h>
+#include <CHIPDevicePlatformConfig.h>
+
 using namespace ::chip;
 using namespace ::chip::DeviceLayer;
 static struct netif sta_netif;
