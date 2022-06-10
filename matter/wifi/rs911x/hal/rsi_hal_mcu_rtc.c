@@ -26,32 +26,35 @@
 #include "sl_sleeptimer_config.h"
 #include "sl_status.h"
 
-#define SLEEPTIMER_EVENT_OF (0x01)
+#define SLEEPTIMER_EVENT_OF   (0x01)
 #define SLEEPTIMER_EVENT_COMP (0x02)
-#define SLEEPTIMER_ENUM(name) typedef uint8_t name; enum name##_enum
-#define TIME_UNIX_EPOCH                         (1970u)
-#define TIME_NTP_EPOCH                          (1900u)
-#define TIME_ZIGBEE_EPOCH                       (2000u)
-#define TIME_NTP_UNIX_EPOCH_DIFF                (TIME_UNIX_EPOCH - TIME_NTP_EPOCH)
-#define TIME_ZIGBEE_UNIX_EPOCH_DIFF             (TIME_ZIGBEE_EPOCH - TIME_UNIX_EPOCH)
-#define TIME_DAY_COUNT_NTP_TO_UNIX_EPOCH        (TIME_NTP_UNIX_EPOCH_DIFF * 365u + 17u)                  ///< 70 years and 17 leap days
-#define TIME_DAY_COUNT_ZIGBEE_TO_UNIX_EPOCH     (TIME_ZIGBEE_UNIX_EPOCH_DIFF * 365u + 7u)                ///< 30 years and 7 leap days
-#define TIME_SEC_PER_DAY                        (60u * 60u * 24u)
-#define TIME_NTP_EPOCH_OFFSET_SEC               (TIME_DAY_COUNT_NTP_TO_UNIX_EPOCH * TIME_SEC_PER_DAY)
-#define TIME_ZIGBEE_EPOCH_OFFSET_SEC            (TIME_DAY_COUNT_ZIGBEE_TO_UNIX_EPOCH * TIME_SEC_PER_DAY)
-#define TIME_DAY_PER_YEAR                       (365u)
-#define TIME_SEC_PER_YEAR                       (TIME_SEC_PER_DAY * TIME_DAY_PER_YEAR)
-#define TIME_UNIX_TIMESTAMP_MAX                 (0x7FFFFFFF)
+#define SLEEPTIMER_ENUM(name) \
+  typedef uint8_t name;       \
+  enum name##_enum
+#define TIME_UNIX_EPOCH                     (1970u)
+#define TIME_NTP_EPOCH                      (1900u)
+#define TIME_ZIGBEE_EPOCH                   (2000u)
+#define TIME_NTP_UNIX_EPOCH_DIFF            (TIME_UNIX_EPOCH - TIME_NTP_EPOCH)
+#define TIME_ZIGBEE_UNIX_EPOCH_DIFF         (TIME_ZIGBEE_EPOCH - TIME_UNIX_EPOCH)
+#define TIME_DAY_COUNT_NTP_TO_UNIX_EPOCH    (TIME_NTP_UNIX_EPOCH_DIFF * 365u + 17u)   ///< 70 years and 17 leap days
+#define TIME_DAY_COUNT_ZIGBEE_TO_UNIX_EPOCH (TIME_ZIGBEE_UNIX_EPOCH_DIFF * 365u + 7u) ///< 30 years and 7 leap days
+#define TIME_SEC_PER_DAY                    (60u * 60u * 24u)
+#define TIME_NTP_EPOCH_OFFSET_SEC           (TIME_DAY_COUNT_NTP_TO_UNIX_EPOCH * TIME_SEC_PER_DAY)
+#define TIME_ZIGBEE_EPOCH_OFFSET_SEC        (TIME_DAY_COUNT_ZIGBEE_TO_UNIX_EPOCH * TIME_SEC_PER_DAY)
+#define TIME_DAY_PER_YEAR                   (365u)
+#define TIME_SEC_PER_YEAR                   (TIME_SEC_PER_DAY * TIME_DAY_PER_YEAR)
+#define TIME_UNIX_TIMESTAMP_MAX             (0x7FFFFFFF)
 
 /// Time zone offset from UTC(second).
 typedef int32_t sl_sleeptimer_time_zone_offset_t;
 /// Timestamp, wall clock time in seconds.
 typedef uint32_t sl_sleeptimer_timestamp_t;
 /// @brief Time Format.
-SLEEPTIMER_ENUM(sl_sleeptimer_time_format_t) {
-  TIME_FORMAT_UNIX = 0,           ///< Number of seconds since January 1, 1970, 00:00. Type is signed, so represented on 31 bit.
-  TIME_FORMAT_NTP = 1,            ///< Number of seconds since January 1, 1900, 00:00. Type is unsigned, so represented on 32 bit.
-  TIME_FORMAT_ZIGBEE_CLUSTER = 2, ///< Number of seconds since January 1, 2000, 00:00. Type is unsigned, so represented on 32 bit.
+SLEEPTIMER_ENUM(sl_sleeptimer_time_format_t){
+  TIME_FORMAT_UNIX = 0, ///< Number of seconds since January 1, 1970, 00:00. Type is signed, so represented on 31 bit.
+  TIME_FORMAT_NTP  = 1, ///< Number of seconds since January 1, 1900, 00:00. Type is unsigned, so represented on 32 bit.
+  TIME_FORMAT_ZIGBEE_CLUSTER =
+    2, ///< Number of seconds since January 1, 2000, 00:00. Type is unsigned, so represented on 32 bit.
 };
 
 // Initialization flag.
@@ -82,8 +85,7 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
   bool valid_time = false;
 
   // Check for overflow.
-  if ((time_zone < 0 && time > (uint32_t)abs(time_zone)) \
-      || (time_zone >= 0 && (time <= UINT32_MAX - time_zone))) {
+  if ((time_zone < 0 && time > (uint32_t)abs(time_zone)) || (time_zone >= 0 && (time <= UINT32_MAX - time_zone))) {
     valid_time = true;
   }
   if (format == TIME_FORMAT_UNIX) {
@@ -93,7 +95,8 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
   } else {
     if ((format == TIME_FORMAT_NTP) && (time >= TIME_NTP_EPOCH_OFFSET_SEC)) {
       valid_time &= true;
-    } else if ((format == TIME_FORMAT_ZIGBEE_CLUSTER) && (time <= TIME_UNIX_TIMESTAMP_MAX - TIME_ZIGBEE_EPOCH_OFFSET_SEC)) {
+    } else if ((format == TIME_FORMAT_ZIGBEE_CLUSTER)
+               && (time <= TIME_UNIX_TIMESTAMP_MAX - TIME_ZIGBEE_EPOCH_OFFSET_SEC)) {
       valid_time &= true;
     } else {
       valid_time = false;
@@ -101,7 +104,6 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
   }
   return valid_time;
 }
-
 
 /*******************************************************************************
  * Gets RTCC timer frequency.
@@ -122,7 +124,7 @@ void rsi_rtc_init_timer(void)
   CMU_ClockEnable(cmuClock_RTCC, true);
 
   rtcc_init.enable = false;
-  rtcc_init.presc = (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
+  rtcc_init.presc  = (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
 
   RTCC_Init(&rtcc_init);
 
@@ -158,7 +160,7 @@ void rsi_rtc_enable_int(uint8_t local_flag)
   RTCC_IntEnable(rtcc_ien);
 }
 
-/***************************************************************************//**
+/***************************************************************************/ /**
  * Get timer frequency.
  ******************************************************************************/
 uint32_t rsi_rtc_get_timer_frequency(void)
@@ -197,21 +199,20 @@ sl_status_t rsi_rtc_init(void)
   CORE_EXIT_ATOMIC();
 
   return SL_STATUS_OK;
-
 }
 
 #if SL_SLEEPTIMER_WALLCLOCK_CONFIG
-/***************************************************************************//**
+/***************************************************************************/ /**
  * Retrieves current time.
  ******************************************************************************/
 uint32_t rsi_rtc_get_time(void)
 {
-  uint32_t cnt = 0u;
+  uint32_t cnt  = 0u;
   uint32_t freq = 0u;
   sl_sleeptimer_timestamp_t time;
   CORE_DECLARE_IRQ_STATE;
 
-  cnt = rsi_rtc_get_counter();
+  cnt  = rsi_rtc_get_counter();
   freq = rsi_rtc_get_timer_frequency();
 
   CORE_ENTER_ATOMIC();
@@ -224,14 +225,14 @@ uint32_t rsi_rtc_get_time(void)
   return time;
 }
 
-/***************************************************************************//**
+/***************************************************************************/ /**
  * Sets current time.
  ******************************************************************************/
 sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time)
 {
-  uint32_t freq = 0u;
+  uint32_t freq        = 0u;
   uint32_t counter_sec = 0u;
-  uint32_t cnt = 0;
+  uint32_t cnt         = 0;
   CORE_DECLARE_IRQ_STATE;
 
   if (!is_valid_time(time, TIME_FORMAT_UNIX, 0u)) {
@@ -239,12 +240,12 @@ sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time)
   }
 
   freq = rsi_rtc_get_timer_frequency();
-  cnt = rsi_rtc_get_counter();
+  cnt  = rsi_rtc_get_counter();
 
   CORE_ENTER_ATOMIC();
-  second_count = time;
+  second_count       = time;
   overflow_tick_rest = 0;
-  counter_sec = cnt / freq;
+  counter_sec        = cnt / freq;
 
   if (second_count >= counter_sec) {
     second_count -= counter_sec;
@@ -258,24 +259,20 @@ sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time)
   return SL_STATUS_OK;
 }
 
-/***************************************************************************//**
+/***************************************************************************/ /**
  * Init Sleeptimer and Set current time.
  ******************************************************************************/
 int32_t rsi_rtc_set_time(uint32_t time)
 {
   sl_status_t ret_val = SL_STATUS_OK;
-  ret_val = rsi_rtc_init();
-  if(ret_val != SL_STATUS_OK)
-  {
+  ret_val             = rsi_rtc_init();
+  if (ret_val != SL_STATUS_OK) {
     return -1;
-  }
-  else
-  {
-      ret_val = rsi_rtc_settime(time);
-      if(ret_val != SL_STATUS_OK)
-      {
-          return -1;
-      }
+  } else {
+    ret_val = rsi_rtc_settime(time);
+    if (ret_val != SL_STATUS_OK) {
+      return -1;
+    }
   }
   return 0;
 }
