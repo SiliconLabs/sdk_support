@@ -5,37 +5,37 @@
 #define RSI_HAL_NO_COM_PORT /* This will be done by the project */
 
 /* Should be enums */
-#define RSI_HAL_RESET_PIN 0
-#define RSI_HAL_MODULE_INTERRUPT 1
-#define RSI_HAL_SLEEP_CONFIRM_PIN 2
+#define RSI_HAL_RESET_PIN             0
+#define RSI_HAL_MODULE_INTERRUPT      1
+#define RSI_HAL_SLEEP_CONFIRM_PIN     2
 #define RSI_HAL_WAKEUP_INDICATION_PIN 3
-#define RSI_HAL_MODULE_INTERRUPT_PIN 4
+#define RSI_HAL_MODULE_INTERRUPT_PIN  4
 
 //! Timer related macros
 //! Macro to configure timer type in single shot
 #define RSI_HAL_TIMER_TYPE_SINGLE_SHOT 0
 
 // Macro to configure timer type in periodic
-#define RSI_HAL_TIMER_TYPE_PERIODIC    1
+#define RSI_HAL_TIMER_TYPE_PERIODIC 1
 
 // Macro to configure timer in micro seconds mode
-#define RSI_HAL_TIMER_MODE_MICRO       0
+#define RSI_HAL_TIMER_MODE_MICRO 0
 
 // Macro to configure timer in milli seconds mode
-#define RSI_HAL_TIMER_MODE_MILLI       1
+#define RSI_HAL_TIMER_MODE_MILLI 1
 
 //! GPIO Pins related Macros
 //! Macro to configure GPIO in output mode
-#define RSI_HAL_GPIO_OUTPUT_MODE       1
+#define RSI_HAL_GPIO_OUTPUT_MODE 1
 
 // Macro to configure GPIO in input mode
-#define RSI_HAL_GPIO_INPUT_MODE        0
+#define RSI_HAL_GPIO_INPUT_MODE 0
 
 // Macro to drive low value on GPIO
-#define RSI_HAL_GPIO_LOW               0
+#define RSI_HAL_GPIO_LOW 0
 
 // Macro to drive high value on GPIO
-#define RSI_HAL_GPIO_HIGH              1
+#define RSI_HAL_GPIO_HIGH 1
 
 /******************************************************
  * *               Function Declarations
@@ -88,6 +88,5 @@ void rsi_os_delay_ms(uint32_t delay_ms);
 void PORTD_IRQHandler(void);
 
 #endif /* RSI_WITH_OS */
-
 
 #endif

@@ -22,7 +22,6 @@
 #include "wfx_rsi.h"
 #endif
 
-
 #include <platform/CHIPDeviceLayer.h>
 //#include <app/server/Mdns.h>
 #include <app/server/Dnssd.h>
@@ -38,104 +37,97 @@ using namespace ::chip::DeviceLayer;
 /*
  * Device started..
  */
-void
-wfx_started_notify ()
+void wfx_started_notify()
 {
-	sl_wfx_startup_ind_t evt;
-        sl_wfx_mac_address_t mac;
+  sl_wfx_startup_ind_t evt;
+  sl_wfx_mac_address_t mac;
 
-        EFR32_LOG("WFX:Start Done");
-	memset (&evt, 0, sizeof evt);
-	evt.header.id = SL_WFX_STARTUP_IND_ID;
-	evt.header.length = sizeof evt;
-	evt.body.status = 0;
-        wfx_get_wifi_mac_addr (SL_WFX_STA_INTERFACE, &mac);
-	memcpy (&evt.body.mac_addr [0], &mac.octet [0], 6);
+  EFR32_LOG("WFX:Start Done");
+  memset(&evt, 0, sizeof evt);
+  evt.header.id     = SL_WFX_STARTUP_IND_ID;
+  evt.header.length = sizeof evt;
+  evt.body.status   = 0;
+  wfx_get_wifi_mac_addr(SL_WFX_STA_INTERFACE, &mac);
+  memcpy(&evt.body.mac_addr[0], &mac.octet[0], 6);
 
-        PlatformMgrImpl().HandleWFXSystemEvent (WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
+  PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
 
 /*
  * For now we are not notifying anything other than AP Mac -
  * Other stuff such as DTIM etc. may be required for later
  */
-void
-wfx_connected_notify (int32_t status, sl_wfx_mac_address_t *ap)
+void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 {
-	sl_wfx_connect_ind_t evt;
+  sl_wfx_connect_ind_t evt;
 
-	if (status != 0) {
-		EFR32_LOG ("*ERR*WFX:Conn fail");
-		return;
-	}
-	EFR32_LOG("WFX:Connected");
-	memset (&evt, 0, sizeof evt);
-        evt.header.id = SL_WFX_CONNECT_IND_ID;
-	evt.header.length = sizeof evt;
+  if (status != 0) {
+    EFR32_LOG("*ERR*WFX:Conn fail");
+    return;
+  }
+  EFR32_LOG("WFX:Connected");
+  memset(&evt, 0, sizeof evt);
+  evt.header.id     = SL_WFX_CONNECT_IND_ID;
+  evt.header.length = sizeof evt;
 #ifdef RS911X_WIFI
-	evt.body.channel = wfx_rsi.ap_chan;
+  evt.body.channel = wfx_rsi.ap_chan;
 #endif
-	memcpy (&evt.body.mac [0], &ap->octet [0], 6);
+  memcpy(&evt.body.mac[0], &ap->octet[0], 6);
 
-        PlatformMgrImpl().HandleWFXSystemEvent (WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
+  PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
 /*
  * The network is down - RS911x will take down the link etc.
  */
-void
-wfx_disconnected_notify (int32_t status)
+void wfx_disconnected_notify(int32_t status)
 {
-	sl_wfx_disconnect_ind_t evt;
+  sl_wfx_disconnect_ind_t evt;
 
-        EFR32_LOG("WFX:Disconn");
+  EFR32_LOG("WFX:Disconn");
 
-	memset (&evt, 0, sizeof evt);
-        evt.header.id = SL_WFX_DISCONNECT_IND_ID;
-	evt.header.length = sizeof evt;
-	evt.body.reason = status;
-        PlatformMgrImpl().HandleWFXSystemEvent (WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
+  memset(&evt, 0, sizeof evt);
+  evt.header.id     = SL_WFX_DISCONNECT_IND_ID;
+  evt.header.length = sizeof evt;
+  evt.body.reason   = status;
+  PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
 
-void
-wfx_ipv6_notify (int got_ip)
+void wfx_ipv6_notify(int got_ip)
 {
-    sl_wfx_generic_message_t eventData;
+  sl_wfx_generic_message_t eventData;
 
-    EFR32_LOG("WFX: GOT IPV6 Notify ");
+  EFR32_LOG("WFX: GOT IPV6 Notify ");
 
-    memset(&eventData, 0, sizeof(eventData));
-    eventData.header.id = got_ip ? IP_EVENT_GOT_IP6: IP_EVENT_STA_LOST_IP;
-    eventData.header.length = sizeof(eventData.header);
-    PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
-    /* So the other threads can run and have the connectivity OK */
-    if (got_ip) {
-        /* Should remember this */
-        vTaskDelay (1);
-        //chip::app::MdnsServer::Instance().StartServer();
-	chip::DeviceLayer::PlatformMgr().LockChipStack();
-        chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
-	chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-    }
+  memset(&eventData, 0, sizeof(eventData));
+  eventData.header.id     = got_ip ? IP_EVENT_GOT_IP6 : IP_EVENT_STA_LOST_IP;
+  eventData.header.length = sizeof(eventData.header);
+  PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
+  /* So the other threads can run and have the connectivity OK */
+  if (got_ip) {
+    /* Should remember this */
+    vTaskDelay(1);
+    //chip::app::MdnsServer::Instance().StartServer();
+    chip::DeviceLayer::PlatformMgr().LockChipStack();
+    chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
+    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  }
 }
 
-void
-wfx_ip_changed_notify (int got_ip)
+void wfx_ip_changed_notify(int got_ip)
 {
-    sl_wfx_generic_message_t eventData;
+  sl_wfx_generic_message_t eventData;
 
-    EFR32_LOG ("WFX:IP Changed");
-    memset(&eventData, 0, sizeof(eventData));
-    eventData.header.id = got_ip ? IP_EVENT_STA_GOT_IP: IP_EVENT_STA_LOST_IP;
-    eventData.header.length = sizeof(eventData.header);
-    PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
-    /* So the other threads can run and have the connectivity OK */
-    if (got_ip) {
-        /* Should remember this */
-        vTaskDelay (1);
-        chip::DeviceLayer::PlatformMgr().LockChipStack();
-        chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
-        chip::DeviceLayer::PlatformMgr().UnlockChipStack();
-    }
+  EFR32_LOG("WFX:IP Changed");
+  memset(&eventData, 0, sizeof(eventData));
+  eventData.header.id     = got_ip ? IP_EVENT_STA_GOT_IP : IP_EVENT_STA_LOST_IP;
+  eventData.header.length = sizeof(eventData.header);
+  PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
+  /* So the other threads can run and have the connectivity OK */
+  if (got_ip) {
+    /* Should remember this */
+    vTaskDelay(1);
+    chip::DeviceLayer::PlatformMgr().LockChipStack();
+    chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
+    chip::DeviceLayer::PlatformMgr().UnlockChipStack();
+  }
 }
-
-
