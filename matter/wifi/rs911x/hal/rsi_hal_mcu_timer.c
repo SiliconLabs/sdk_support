@@ -29,10 +29,10 @@
 #if defined(SysTick)
 #undef SysTick_Handler
 /* FreeRTOS SysTick interrupt handler prototype */
-extern void SysTick_Handler     (void);
+extern void SysTick_Handler(void);
 /* FreeRTOS tick timer interrupt handler prototype */
-extern void xPortSysTickHandler (void);
-#endif  /* SysTick */
+extern void xPortSysTickHandler(void);
+#endif /* SysTick */
 #endif /* RSI_WITH_OS */
 #include "wfx_host_events.h"
 #include "rsi_driver.h"
@@ -54,16 +54,14 @@ extern void xPortSysTickHandler (void);
  * We (Matter port) need a few functions out of this file
  * They are at the top
  */
-uint32_t
-rsi_hal_gettickcount(void)
+uint32_t rsi_hal_gettickcount(void)
 {
-    return xTaskGetTickCount ();
+  return xTaskGetTickCount();
 }
-void
-rsi_delay_ms (uint32_t delay_ms)
+void rsi_delay_ms(uint32_t delay_ms)
 {
 #ifndef RSI_WITH_OS
-   uint32_t start;
+  uint32_t start;
 #endif
   if (delay_ms == 0)
     return;
@@ -77,62 +75,57 @@ rsi_delay_ms (uint32_t delay_ms)
 #endif
 }
 static struct rsi_timer {
-    void (*func) (void);
-    TimerHandle_t handle;
-    uint8_t id;
-    uint8_t name [3];
-} rsi_timer [WFX_RSI_NUM_TIMERS];
-static void
-timer_cb (TimerHandle_t thandle)
+  void (*func)(void);
+  TimerHandle_t handle;
+  uint8_t id;
+  uint8_t name[3];
+} rsi_timer[WFX_RSI_NUM_TIMERS];
+static void timer_cb(TimerHandle_t thandle)
 {
-    int x;
-    for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
-        if (rsi_timer [x].handle == thandle) {
-            (*rsi_timer [x].func) ();
-            break;
-        }
+  int x;
+  for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
+    if (rsi_timer[x].handle == thandle) {
+      (*rsi_timer[x].func)();
+      break;
     }
+  }
 }
 
 /*
  * Run a one-shot/periodic timer
  */
-int32_t
-rsi_timer_start (uint8_t timer_node, uint8_t mode,
-                 uint8_t type, uint32_t duration,
-                 void (*rsi_timer_cb)(void))
+int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t duration, void (*rsi_timer_cb)(void))
 {
-    int x;
-    struct rsi_timer *tp;
+  int x;
+  struct rsi_timer *tp;
 
-    if (mode == RSI_HAL_TIMER_MODE_MILLI)
-        return RSI_ERROR_INVALID_OPTION; /* Not supported for now - Fix this later */
-    for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
-        tp = &rsi_timer [x];
-        if (tp->handle == (TimerHandle_t)0) {
-            goto found;
-        }
+  if (mode == RSI_HAL_TIMER_MODE_MILLI)
+    return RSI_ERROR_INVALID_OPTION; /* Not supported for now - Fix this later */
+  for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
+    tp = &rsi_timer[x];
+    if (tp->handle == (TimerHandle_t)0) {
+      goto found;
     }
-    /* No space */
+  }
+  /* No space */
+  return RSI_ERROR_INSUFFICIENT_BUFFER;
+found:
+  tp->name[0] = 'r';
+  tp->name[1] = timer_node;
+  tp->name[2] = 0;
+  tp->func    = rsi_timer_cb;
+  tp->handle  = xTimerCreate((char *)&tp->name[0],
+                            pdMS_TO_TICKS(duration),
+                            ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
+                            (void *)0,
+                            timer_cb);
+  if (tp->handle == (TimerHandle_t)0)
     return RSI_ERROR_INSUFFICIENT_BUFFER;
- found:
-    tp->name [0] = 'r';
-    tp->name [1] = timer_node;
-    tp->name [2] = 0;
-    tp->func = rsi_timer_cb;
-    tp->handle = xTimerCreate ((char *)&tp->name [0],
-                               pdMS_TO_TICKS (duration),
-                               ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
-                               (void *)0,
-                               timer_cb);
-    if (tp->handle == (TimerHandle_t)0)
-        return RSI_ERROR_INSUFFICIENT_BUFFER;
-    (void)xTimerStart (tp->handle, 0);
+  (void)xTimerStart(tp->handle, 0);
 
-    return RSI_ERROR_NONE;
+  return RSI_ERROR_NONE;
 }
 #else /* _use_the_rsi_defined_functions */
-
 
 /* Counts 1ms timeTicks */
 volatile uint32_t msTicks = 0;
@@ -157,20 +150,21 @@ volatile uint32_t msTicks = 0;
  *
  */
 
-int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t duration, void (* rsi_timer_expiry_handler)(void))
+int32_t rsi_timer_start(uint8_t timer_node,
+                        uint8_t mode,
+                        uint8_t type,
+                        uint32_t duration,
+                        void (*rsi_timer_expiry_handler)(void))
 {
 
   // Initialise the timer
 
-
   // register the call back
-
 
   // Start timer
 
   return 0;
 }
-
 
 /*===================================================*/
 /**
@@ -228,9 +222,7 @@ void rsi_delay_us(uint32_t delay_us)
   // call the API for delay in micro seconds
 
   return;
-
 }
-
 
 #ifdef RSI_M4_INTERFACE
 
@@ -240,9 +232,9 @@ void SysTick_Handler(void)
 {
   _dwTickCount++;
 }
-uint32_t GetTickCount( void )
+uint32_t GetTickCount(void)
 {
-  return _dwTickCount ;						// gets the tick count from systic ISR
+  return _dwTickCount; // gets the tick count from systic ISR
 }
 #endif
 
@@ -258,7 +250,7 @@ uint32_t GetTickCount( void )
 void rsi_delay_ms(uint32_t delay_ms)
 {
 #ifndef RSI_WITH_OS
-   uint32_t start;
+  uint32_t start;
 #endif
   if (delay_ms == 0)
     return;
@@ -304,7 +296,7 @@ uint32_t rsi_hal_gettickcount(void)
   // Define your API to get the tick count delay in milli seconds from systic ISR and return the resultant value
   struct rsi_timeval tv1;
   gettimeofday(&tv1, NULL);
-  return (tv1.tv_sec * 1000 + tv1.tv_usec/1000);
+  return (tv1.tv_sec * 1000 + tv1.tv_usec / 1000);
 #endif
 }
 #else
@@ -313,4 +305,4 @@ uint32_t rsi_hal_gettickcount(void)
   return xTaskGetTickCount();
 }
 #endif /* RSI_HAL_USE_RTOS_SYSTICK */
-#endif  /* _use_the_rsi_defined_functions */
+#endif /* _use_the_rsi_defined_functions */

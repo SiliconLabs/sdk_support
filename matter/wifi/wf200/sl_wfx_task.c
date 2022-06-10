@@ -73,7 +73,7 @@ static bool wfx_bus_rx_in_process = false;
  ******************************************************************************/
 bool wfx_bus_is_receive_processing(void)
 {
-    return wfx_bus_rx_in_process;
+  return wfx_bus_rx_in_process;
 }
 
 /*****************************************************************************
@@ -81,43 +81,41 @@ bool wfx_bus_is_receive_processing(void)
  ******************************************************************************/
 static sl_status_t receive_frames()
 {
-    sl_status_t result;
-    uint16_t control_register = 0;
-    wfx_bus_rx_in_process     = true;
-    do
-    {
-        result = sl_wfx_receive_frame(&control_register);
-        SL_WFX_ERROR_CHECK(result);
-    } while ((control_register & SL_WFX_CONT_NEXT_LEN_MASK) != 0);
+  sl_status_t result;
+  uint16_t control_register = 0;
+  wfx_bus_rx_in_process     = true;
+  do {
+    result = sl_wfx_receive_frame(&control_register);
+    SL_WFX_ERROR_CHECK(result);
+  } while ((control_register & SL_WFX_CONT_NEXT_LEN_MASK) != 0);
 
 error_handler:
-    wfx_bus_rx_in_process = false;
-    return result;
+  wfx_bus_rx_in_process = false;
+  return result;
 }
 
 /*
  * WFX bus communication task.
  * receives frames from the Bus interface
  */
-static void wfx_bus_task(void * p_arg)
+static void wfx_bus_task(void *p_arg)
 {
-    EFR32_LOG("SPI: Bus Task started");
-    sl_wfx_host_start_platform_interrupt();
-    for (;;)
-    {
-        /*Wait for an interrupt from WFX*/
-        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+  EFR32_LOG("SPI: Bus Task started");
+  sl_wfx_host_start_platform_interrupt();
+  for (;;) {
+    /*Wait for an interrupt from WFX*/
+    ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
 
-        /*Disable the interrupt while treating frames received to avoid
+    /*Disable the interrupt while treating frames received to avoid
          *the case where the interrupt is set but there is no frame left to treat.*/
-        sl_wfx_host_disable_platform_interrupt();
+    sl_wfx_host_disable_platform_interrupt();
 
-        /*Receive the frame(s) pending in WFX*/
-        receive_frames();
+    /*Receive the frame(s) pending in WFX*/
+    receive_frames();
 
-        /*Re-enable the interrupt*/
-        sl_wfx_host_enable_platform_interrupt();
-    }
+    /*Re-enable the interrupt*/
+    sl_wfx_host_enable_platform_interrupt();
+  }
 }
 
 /***************************************************************************
@@ -125,9 +123,9 @@ static void wfx_bus_task(void * p_arg)
  ******************************************************************************/
 void wfx_bus_start()
 {
-    wfx_bus_task_handle = xTaskCreateStatic(wfx_bus_task, "wfxbus", BUS_TASK_STACK_SIZE, NULL, 2, busStack, &busTaskStruct);
-    if (wfx_bus_task_handle == NULL)
-    {
-        EFR32_LOG("*ERR*WFX BusTask");
-    }
+  wfx_bus_task_handle =
+    xTaskCreateStatic(wfx_bus_task, "wfxbus", BUS_TASK_STACK_SIZE, NULL, 2, busStack, &busTaskStruct);
+  if (wfx_bus_task_handle == NULL) {
+    EFR32_LOG("*ERR*WFX BusTask");
+  }
 }

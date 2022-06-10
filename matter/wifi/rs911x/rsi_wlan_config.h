@@ -39,22 +39,18 @@
 #ifdef RS911X_SOCKETS
 #define RSI_TCP_IP_BYPASS RSI_DISABLE
 
-#define RSI_TCP_IP_FEATURE_BIT_MAP                                                                     \
-  (TCP_IP_FEAT_DHCPV4_CLIENT | \
-   /*TCP_IP_FEAT_HTTP_CLIENT | */	\
-   TCP_IP_FEAT_EXTENSION_VALID |\
-   /*TCP_IP_FEAT_SSL     |*/	\
-   /*TCP_IP_FEAT_DNS_CLIENT |*/	\
-  0)
+#define RSI_TCP_IP_FEATURE_BIT_MAP                                                        \
+  (TCP_IP_FEAT_DHCPV4_CLIENT |                             /*TCP_IP_FEAT_HTTP_CLIENT | */ \
+   TCP_IP_FEAT_EXTENSION_VALID | /*TCP_IP_FEAT_SSL     |*/ /*TCP_IP_FEAT_DNS_CLIENT |*/   \
+   0)
 //! To set custom feature select bit map
 #define RSI_CUSTOM_FEATURE_BIT_MAP FEAT_CUSTOM_FEAT_EXTENTION_VALID
 
 #else /* Don't use RSI_SOCKETS */
-#define RSI_TCP_IP_BYPASS RSI_ENABLE
+#define RSI_TCP_IP_BYPASS          RSI_ENABLE
 #define RSI_TCP_IP_FEATURE_BIT_MAP (TCP_IP_FEAT_BYPASS /*| TCP_IP_FEAT_EXTENSION_VALID*/)
 //#define RSI_EXT_TCPIP_FEATURE_BITMAP CONFIG_FEAT_EXTENTION_VALID
 #endif
-
 
 //! To set Extended custom feature select bit map
 #ifdef RSI_M4_INTERFACE
@@ -337,7 +333,7 @@
 /*=======================================================================*/
 //! RSI_ENABLE or RSI_DISABLE High performance socket
 #define HIGH_PERFORMANCE_ENABLE         RSI_ENABLE //@ RSI_ENABLE or RSI_DISABLE High performance socket
-#define TOTAL_SOCKETS                   10          //@ Total number of sockets. TCP TX + TCP RX + UDP TX + UDP RX
+#define TOTAL_SOCKETS                   10         //@ Total number of sockets. TCP TX + TCP RX + UDP TX + UDP RX
 #define TOTAL_TCP_SOCKETS               4          //@ Total TCP sockets. TCP TX + TCP RX
 #define TOTAL_UDP_SOCKETS               4          //@ Total UDP sockets. UDP TX + UDP RX
 #define TCP_TX_ONLY_SOCKETS             0          //@ Total TCP TX only sockets. TCP TX

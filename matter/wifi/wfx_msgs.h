@@ -6,17 +6,17 @@
  * in the CPP files of Matter
  */
 typedef struct {
-	uint8_t octet [6]; ///< Table to store a MAC address
+  uint8_t octet[6]; ///< Table to store a MAC address
 } sl_wfx_mac_address_t;
 /**
  * @brief General Message header structure
  *
  */
 typedef struct __attribute__((__packed__)) sl_wfx_header_s {
-  uint16_t length;                                         ///< Message length in bytes including this uint16_t.
-                                                           ///< Maximum value is 8188 but maximum Request size is FW dependent and reported in the ::sl_wfx_startup_ind_body_t::size_inp_ch_buf.
-  uint8_t  id;                                             ///< Contains the message Id indexed by sl_wfx_general_commands_ids_t or sl_wfx_message_ids_t.
-  uint8_t  info;                                           ///< TODO comment missing
+  uint16_t length; ///< Message length in bytes including this uint16_t.
+    ///< Maximum value is 8188 but maximum Request size is FW dependent and reported in the ::sl_wfx_startup_ind_body_t::size_inp_ch_buf.
+  uint8_t id;   ///< Contains the message Id indexed by sl_wfx_general_commands_ids_t or sl_wfx_message_ids_t.
+  uint8_t info; ///< TODO comment missing
 } sl_wfx_header_t;
 
 /**
@@ -24,22 +24,23 @@ typedef struct __attribute__((__packed__)) sl_wfx_header_s {
  *
  */
 typedef struct __attribute__((__packed__)) sl_wfx_generic_message_s {
-  sl_wfx_header_t header;                                  ///<4 bytes header
-  uint8_t  body[];                                        ///<variable size payload of the message
+  sl_wfx_header_t header; ///<4 bytes header
+  uint8_t body[];         ///<variable size payload of the message
 } sl_wfx_generic_message_t;
-#define SL_WFX_OPN_SIZE                          14
-#define SL_WFX_UID_SIZE                          8
-#define SL_WFX_DISABLED_CHANNEL_LIST_SIZE        2
-#define SL_WFX_FIRMWARE_LABEL_SIZE               128
+#define SL_WFX_OPN_SIZE                   14
+#define SL_WFX_UID_SIZE                   8
+#define SL_WFX_DISABLED_CHANNEL_LIST_SIZE 2
+#define SL_WFX_FIRMWARE_LABEL_SIZE        128
 /**
  * @brief Startup Indication message.
  * This is the first message sent to the host to confirm boot success.
  * It gives detailed information on the HW and FW versions and capabilities
  */
 typedef struct __attribute__((__packed__)) sl_wfx_startup_ind_body_s {
-  uint32_t status;                                         ///<Initialization status. A value of zero indicates the boot is completed successfully  (see enum sl_wfx_status_t)
-  uint16_t hardware_id;                                    ///<=RO misc_read_reg7 register value
-#if 0 /* Not used in RS911x for now - use stuff here for the port */
+  uint32_t
+    status; ///<Initialization status. A value of zero indicates the boot is completed successfully  (see enum sl_wfx_status_t)
+  uint16_t hardware_id; ///<=RO misc_read_reg7 register value
+#if 0                   /* Not used in RS911x for now - use stuff here for the port */
   uint8_t  opn[SL_WFX_OPN_SIZE];                           ///<=OTP part_OPN
   uint8_t  uid[SL_WFX_UID_SIZE];                           ///<=OTP UID
   uint16_t num_inp_ch_bufs;                                ///<Number of buffers available for request messages.
@@ -60,7 +61,7 @@ typedef struct __attribute__((__packed__)) sl_wfx_startup_ind_body_s {
   uint32_t supported_rate_mask;                            ///<A bit mask that indicates which rates are supported by the Physical layer. See enum api_rate_index.
   uint8_t  firmware_label[SL_WFX_FIRMWARE_LABEL_SIZE];     ///<Null terminated text string describing the loaded FW.
 #else
-  uint8_t mac_addr [6];
+  uint8_t mac_addr[6];
 #endif
 } sl_wfx_startup_ind_body_t;
 
@@ -82,7 +83,7 @@ typedef struct __attribute__((__packed__)) sl_wfx_connect_ind_body_s {
   /**
    * @brief MAC address of the connected access point.
    */
-    uint8_t  mac[6];
+  uint8_t mac[6];
   /**
    * @brief Channel of the connected access point.
    * @details <B>1 - 13</B>: Channel number.
@@ -91,12 +92,12 @@ typedef struct __attribute__((__packed__)) sl_wfx_connect_ind_body_s {
   /**
    * @brief Beacon Interval of the connected access point.
    */
-  uint8_t  beacon_interval;
+  uint8_t beacon_interval;
   /**
    * @brief DTIM period of the connected access point.
    * @details <B>1 - 255</B>: DTIM period.
    */
-  uint8_t  dtim_period;
+  uint8_t dtim_period;
   /**
    * @brief Maximum PHY data rate supported by the connection.
    * @details See sl_wfx_rate_index_t for enumeration values.
@@ -124,7 +125,7 @@ typedef struct __attribute__((__packed__)) sl_wfx_disconnect_ind_body_s {
   /**
    * @brief MAC address of the access point.
    */
-    uint8_t  mac[6];
+  uint8_t mac[6];
   /**
    * @brief Reason for disconnection.
    * @details <B>WFM_DISCONNECTED_REASON_UNSPECIFIED</B>: The device disconnected because of an internal error.
@@ -150,6 +151,5 @@ typedef struct __attribute__((__packed__)) sl_wfx_disconnect_ind_s {
   /** Indication message body. */
   sl_wfx_disconnect_ind_body_t body;
 } sl_wfx_disconnect_ind_t;
-
 
 #endif /* _WFX_MSGS_H_ */

@@ -46,27 +46,26 @@
 #include "rsi_driver.h"
 #include "rsi_board_configuration.h"
 
-typedef void (* UserIntCallBack_t)(void);
+typedef void (*UserIntCallBack_t)(void);
 UserIntCallBack_t call_back, gpio_callback;
 #ifdef LOGGING_STATS
 uint8_t current_pin_set, prev_pin_set;
 #endif /* LOGGING_STATS */
 
 /* ARGSUSED */
-void
-rsi_gpio_irq_cb (uint8_t irqnum)
+void rsi_gpio_irq_cb(uint8_t irqnum)
 {
-    //uint32_t interrupt_mask;
+  //uint32_t interrupt_mask;
 
-    //WFX_RSI_LOG ("RSI: Got Int=%d", irqnum)
-    if (irqnum != SL_WFX_HOST_PINOUT_SPI_IRQ)
-        return;
-    //interrupt_mask = GPIO_IntGet ();
-    GPIO_IntClear (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
+  //WFX_RSI_LOG ("RSI: Got Int=%d", irqnum)
+  if (irqnum != SL_WFX_HOST_PINOUT_SPI_IRQ)
+    return;
+  //interrupt_mask = GPIO_IntGet ();
+  GPIO_IntClear(1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
 
-    //WFX_RSI_LOG ("Got SPI intr, cb=%x", (uint32_t)call_back);
-    if (call_back!=NULL)
-        (*call_back) ();
+  //WFX_RSI_LOG ("Got SPI intr, cb=%x", (uint32_t)call_back);
+  if (call_back != NULL)
+    (*call_back)();
 }
 /*===================================================*/
 /**
@@ -78,11 +77,10 @@ rsi_gpio_irq_cb (uint8_t irqnum)
  * @description  This HAL API should contain the code to initialize the register/pins
  *               related to interrupts and enable the interrupts.
  */
-void
-rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
+void rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
 {
-    call_back = rsi_interrupt_handler;
-    WFX_RSI_LOG ("RSI:Set SPI intr CB to=%x", (uint32_t)call_back);
+  call_back = rsi_interrupt_handler;
+  WFX_RSI_LOG("RSI:Set SPI intr CB to=%x", (uint32_t)call_back);
 }
 
 /*===================================================*/
@@ -96,9 +94,9 @@ rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
  *               related to mapping of gpio callback function.
  */
 #ifdef LOGGING_STATS
-void rsi_hal_log_stats_intr_config(void (* rsi_give_wakeup_indication)())
+void rsi_hal_log_stats_intr_config(void (*rsi_give_wakeup_indication)())
 {
-    gpio_callback = rsi_give_wakeup_indication;
+  gpio_callback = rsi_give_wakeup_indication;
 }
 #endif
 /*===================================================*/
@@ -110,14 +108,12 @@ void rsi_hal_log_stats_intr_config(void (* rsi_give_wakeup_indication)())
  * @return       none
  * @description  This HAL API should contain the code to mask/disable interrupts.
  */
-void
-rsi_hal_intr_mask(void)
+void rsi_hal_intr_mask(void)
 {
-    //WFX_RSI_LOG ("RSI:Disable IRQ");
-    //NVIC_DisableIRQ(GPIO_ODD_IRQn);
-    GPIO_IntDisable (1<<SL_WFX_HOST_PINOUT_SPI_IRQ);
+  //WFX_RSI_LOG ("RSI:Disable IRQ");
+  //NVIC_DisableIRQ(GPIO_ODD_IRQn);
+  GPIO_IntDisable(1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
 }
-
 
 /*===================================================*/
 /**
@@ -128,17 +124,14 @@ rsi_hal_intr_mask(void)
  * @return       none
  * @description  This HAL API should contain the code to enable interrupts.
  */
-void
-rsi_hal_intr_unmask(void)
+void rsi_hal_intr_unmask(void)
 {
-    // Unmask/Enable the interrupt
-    NVIC_EnableIRQ(GPIO_ODD_IRQn);
-    NVIC_EnableIRQ(GPIO_EVEN_IRQn);
-    GPIO_IntEnable (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
-    //WFX_RSI_LOG ("RSI:Enable IRQ (mask=%x)", GPIO_IntGetEnabled ());
+  // Unmask/Enable the interrupt
+  NVIC_EnableIRQ(GPIO_ODD_IRQn);
+  NVIC_EnableIRQ(GPIO_EVEN_IRQn);
+  GPIO_IntEnable(1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
+  //WFX_RSI_LOG ("RSI:Enable IRQ (mask=%x)", GPIO_IntGetEnabled ());
 }
-
-
 
 /*===================================================*/
 /**
@@ -149,13 +142,10 @@ rsi_hal_intr_unmask(void)
  * @return       none
  * @description  This HAL API should contain the code to clear the handled interrupts.
  */
-void
-rsi_hal_intr_clear(void)
+void rsi_hal_intr_clear(void)
 {
-    GPIO_IntClear (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
+  GPIO_IntClear(1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
 }
-
-
 
 /*===================================================*/
 /**
@@ -166,17 +156,14 @@ rsi_hal_intr_clear(void)
  * @return      none
  * @description This API is used to check interrupt pin status(pin level whether it is high/low).
  */
-uint8_t
-rsi_hal_intr_pin_status(void)
+uint8_t rsi_hal_intr_pin_status(void)
 {
-    uint32_t mask;
-    // Return interrupt pin  status(high(1) /low (0))
-    mask = GPIO_IntGet () & (1 <<SL_WFX_HOST_PINOUT_SPI_IRQ);
-    //WFX_RSI_LOG ("Interrupt: SW status: %x, PinStatus: %x",
-    //           GPIO_IntGet (),
-    //           GPIO_PinInGet (WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin));
+  uint32_t mask;
+  // Return interrupt pin  status(high(1) /low (0))
+  mask = GPIO_IntGet() & (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
+  //WFX_RSI_LOG ("Interrupt: SW status: %x, PinStatus: %x",
+  //           GPIO_IntGet (),
+  //           GPIO_PinInGet (WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin));
 
-    return !!mask;
+  return !!mask;
 }
-
-
