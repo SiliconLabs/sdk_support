@@ -5,12 +5,7 @@
 #include "pa_conversions_efr32.h"
 #include "sl_board_init.h"
 #include "sl_device_init_clocks.h"
-#if defined(EFR32MG21)
-#include "sl_device_init_hfrco.h"
-#include "sl_rail_util_rf_path.h"
-#else
 #include "sl_device_init_dcdc.h"
-#endif
 #include "cmsis_os2.h"
 #include "sl_device_init_dcdc.h"
 #include "sl_device_init_emu.h"
@@ -34,16 +29,8 @@ void sl_platform_init(void)
     CHIP_Init();
     sl_device_init_nvic();
     sl_board_preinit();
-#if defined(EFR32MG21)
-    sl_device_init_hfrco();
-#else
     sl_device_init_dcdc();
-#endif
-
-#if defined(_SILICON_LABS_32B_SERIES_2)
     sl_hfxo_manager_init_hardware();
-#endif
-
     sl_device_init_hfxo();
     sl_device_init_lfxo();
     sl_device_init_clocks();
@@ -73,18 +60,13 @@ void sl_driver_init(void)
 void sl_service_init(void)
 {
     sl_sleeptimer_init();
-#if defined(_SILICON_LABS_32B_SERIES_2)
     sl_hfxo_manager_init();
-#endif
 }
 
 void sl_stack_init(void)
 {
     sl_rail_util_pa_init();
     sl_rail_util_pti_init();
-#if defined(EFR32MG21)
-    sl_rail_util_rf_path_init();
-#endif
 }
 
 void sl_internal_app_init(void) {}
