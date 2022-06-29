@@ -48,6 +48,41 @@ bool hasNotifiedWifiConnectivity = false;
  * This file implements the interface to the RSI SAPIs
  */
 static uint8_t wfx_rsi_drv_buf[WFX_RSI_BUF_SZ];
+/*
+ * Getting the AP details
+ */
+int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
+{
+  int32_t status;
+  uint8_t rssi;
+  ap->security = wfx_rsi.sec.security;
+  ap->chan = wfx_rsi.ap_chan;
+  memcpy(&ap->bssid[0],&wfx_rsi.ap_mac.octet[0],6);
+  status = rsi_wlan_get(RSI_RSSI,&rssi,sizeof(rssi));
+  if(status == RSI_SUCCESS){
+    ap->rssi = (-1)*rssi;
+  }
+  return status;
+}
+int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
+  int32_t status;
+  uint8_t buff[28] = {0};
+  status = rsi_wlan_get(RSI_WLAN_EXT_STATS,buff,sizeof(buff));
+  if (status != RSI_SUCCESS) {
+    WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
+  }
+  else{
+    rsi_wlan_ext_stats_t *test = (rsi_wlan_ext_stats_t *)buff;
+    extra_info->beacon_lost_count = test->beacon_lost_count;
+    extra_info->beacon_rx_count = test->beacon_rx_count;
+    extra_info->mcast_rx_count = test->mcast_rx_count;
+    extra_info->mcast_tx_count = test->mcast_tx_count;
+    extra_info->ucast_rx_count = test->ucast_rx_count;
+    extra_info->ucast_tx_count = test->ucast_tx_count;
+    extra_info->overrun_count = test->overrun_count;
+  }
+  return status;
+}
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t len)
 {
   WFX_RSI_LOG("%s: status: %d", __func__, status);

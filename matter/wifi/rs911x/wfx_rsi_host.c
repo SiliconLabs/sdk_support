@@ -187,6 +187,12 @@ bool wfx_hw_ready(void)
 {
   return (wfx_rsi.dev_state & WFX_RSI_ST_DEV_READY) ? true : false;
 }
+int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap){
+  return wfx_rsi_get_ap_info(ap);
+}
+int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
+  return wfx_rsi_get_ap_ext(extra_info);
+}
 
 #ifdef SL_WFX_CONFIG_SCAN
 bool wfx_start_scan(char *ssid, void (*callback)(wfx_wifi_scan_result_t *))

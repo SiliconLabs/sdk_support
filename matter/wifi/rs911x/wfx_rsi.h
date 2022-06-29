@@ -65,6 +65,8 @@ void wfx_rsidev_init(void);
 void wfx_rsi_task(void *arg);
 void efr32Log(const char *aFormat, ...);
 void wfx_ip_changed_notify(int got_ip);
+int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap);
+int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info);
 #define WFX_RSI_LOG(...) efr32Log(__VA_ARGS__);
 
 #ifdef __cplusplus
