@@ -206,6 +206,31 @@ void wfx_show_err(char *msg)
   WFX_RSI_LOG("%s: message: %d", __func__, msg);
 }
 /*
+ * Saving the details of the AP
+ */
+static void
+wfx_rsi_save_ap_info(){
+  int32_t status;
+  rsi_rsp_scan_t rsp;
+
+  status = rsi_wlan_scan_with_bitmap_options((int8_t *)&wfx_rsi.sec.ssid[0],0,&rsp,sizeof(rsp),1);
+  if (status) {
+    /*
+     * Scan is done - failed
+     */
+  }
+  else{
+    wfx_rsi.sec.security = rsp.scan_info->security_mode;
+    wfx_rsi.ap_chan = rsp.scan_info->rf_channel;
+    memcpy (&wfx_rsi.ap_mac.octet[0],&rsp.scan_info->bssid[0],6);
+  }
+  WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d",
+            __func__,
+                &wfx_rsi.sec.ssid[0],
+                &wfx_rsi.sec.passkey[0],
+                wfx_rsi.sec.security);
+}
+/*
  * Start an async Join command
  */
 static void wfx_rsi_do_join(void)
@@ -240,35 +265,6 @@ static void wfx_rsi_do_join(void)
     }
   }
 }
-#ifdef SL_WFX_CONFIG_SCAN
-static void wfx_scan_cb(uint16_t status, const uint8_t *buffer, const uint16_t length)
-{
-  int x;
-  wfx_wifi_scan_result_t ap;
-  rsi_scan_info_t *scan;
-  rsi_rsp_scan_t *rsp;
-
-  WFX_RSI_LOG("%s: status: %d, len: %d", __func__, (int)status, (int)length);
-
-  if (status) {
-    /*
-     * Scan is done - failed
-     */
-  } else
-    for (x = 0; x < rsp->scan_count[0]; x++) {
-      scan = &rsp->scan_info[x];
-      strcpy(&ap.ssid[0], (char *)&scan->ssid[0]);
-      ap.security = scan->security_mode;
-      ap.rssi     = (int)scan->rssi_val;
-      memcpy(&ap.bssid[0], &scan->bssid[0], 6);
-      (*wfx_rsi.scan_cb)(&ap);
-    }
-  wfx_rsi.dev_state &= ~WFX_RSI_ST_SCANSTARTED;
-  /* Terminate with end of scan which is no ap sent back */
-  (*wfx_rsi.scan_cb)((wfx_wifi_scan_result_t *)0);
-  wfx_rsi.scan_cb = (void (*)(wfx_wifi_scan_result_t *))0;
-}
-#endif /* SL_WFX_CONFIG_SCAN */
 /*
  * The main WLAN task - started by wfx_wifi_start () that interfaces with RSI.
  * The rest of RSI stuff come in call-backs.
@@ -372,6 +368,9 @@ void wfx_rsi_task(void *arg)
     }
 #endif /* RS911X_SOCKETS */
     if (flags & WFX_EVT_STA_START_JOIN) {
+      // saving the AP related info
+      wfx_rsi_save_ap_info();
+      // Joining to the network
       wfx_rsi_do_join();
     }
     if (flags & WFX_EVT_STA_CONN) {
@@ -412,12 +411,37 @@ void wfx_rsi_task(void *arg)
     if (flags & WFX_EVT_SCAN) {
       if (!(wfx_rsi.dev_state & WFX_RSI_ST_SCANSTARTED)) {
         WFX_RSI_LOG("%s: start SSID scan", __func__);
-        rsi_wlan_scan_async((int8_t *)wfx_rsi.scan_ssid, 0, wfx_scan_cb);
+        int x;
+        wfx_wifi_scan_result_t ap;
+        rsi_scan_info_t *scan;
+        int32_t status;
+        uint8_t bgscan_results[500] ={0};
+        status = rsi_wlan_bgscan_profile(1, (rsi_rsp_scan_t *)bgscan_results, 500); 
+
+        WFX_RSI_LOG("%s: status: %d size = %d", __func__, (int)status,500);
+        rsi_rsp_scan_t *rsp = (rsi_rsp_scan_t *)bgscan_results;
+        if (status) {
+        /*
+         * Scan is done - failed
+         */
+        } else
+          for (x = 0; x < rsp->scan_count[0]; x++) {
+            scan = &rsp->scan_info[x];
+            strcpy(&ap.ssid[0], (char *)&scan->ssid[0]);
+            ap.security = scan->security_mode;
+            ap.rssi     = (-1)*scan->rssi_val;
+            memcpy(&ap.bssid[0], &scan->bssid[0], 6);
+            (*wfx_rsi.scan_cb)(&ap);
+          }
+        wfx_rsi.dev_state &= ~WFX_RSI_ST_SCANSTARTED;
+        /* Terminate with end of scan which is no ap sent back */
+        (*wfx_rsi.scan_cb)((wfx_wifi_scan_result_t *)0);
+        wfx_rsi.scan_cb = (void (*)(wfx_wifi_scan_result_t *))0;
+
         if (wfx_rsi.scan_ssid) {
           vPortFree(wfx_rsi.scan_ssid);
           wfx_rsi.scan_ssid = (char *)0;
         }
-        wfx_rsi.dev_state |= WFX_RSI_ST_SCANSTARTED;
       }
     }
 #endif /* SL_WFX_CONFIG_SCAN */

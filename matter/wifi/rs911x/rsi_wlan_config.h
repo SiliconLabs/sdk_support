@@ -133,7 +133,7 @@
 /*=======================================================================*/
 
 //! RSI_ENABLE or RSI_DISABLE BG Scan support
-#define RSI_BG_SCAN_SUPPORT RSI_DISABLE
+#define RSI_BG_SCAN_SUPPORT RSI_ENABLE
 
 //! RSI_ENABLE or RSI_DISABLE BG scan
 #define RSI_BG_SCAN_ENABLE RSI_ENABLE
@@ -157,7 +157,7 @@
 #define RSI_PASSIVE_SCAN_DURATION 50
 
 //! Multi probe
-#define RSI_MULTIPROBE RSI_DISABLE
+#define RSI_MULTIPROBE RSI_ENABLE
 
 /*=======================================================================*/
 
