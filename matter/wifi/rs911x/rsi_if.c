@@ -35,7 +35,6 @@
 #include "wfx_rsi.h"
 #include "dhcp_client.h"
 
-
 //#include "rsi_wlan_config.h"
 
 bool hasNotifiedIPV6 = false;
@@ -56,30 +55,30 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
   int32_t status;
   uint8_t rssi;
   ap->security = wfx_rsi.sec.security;
-  ap->chan = wfx_rsi.ap_chan;
-  memcpy(&ap->bssid[0],&wfx_rsi.ap_mac.octet[0],6);
-  status = rsi_wlan_get(RSI_RSSI,&rssi,sizeof(rssi));
-  if(status == RSI_SUCCESS){
-    ap->rssi = (-1)*rssi;
+  ap->chan     = wfx_rsi.ap_chan;
+  memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], 6);
+  status = rsi_wlan_get(RSI_RSSI, &rssi, sizeof(rssi));
+  if (status == RSI_SUCCESS) {
+    ap->rssi = (-1) * rssi;
   }
   return status;
 }
-int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
+int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
+{
   int32_t status;
-  uint8_t buff[28] = {0};
-  status = rsi_wlan_get(RSI_WLAN_EXT_STATS,buff,sizeof(buff));
+  uint8_t buff[28] = { 0 };
+  status           = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
   if (status != RSI_SUCCESS) {
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
-  }
-  else{
-    rsi_wlan_ext_stats_t *test = (rsi_wlan_ext_stats_t *)buff;
+  } else {
+    rsi_wlan_ext_stats_t *test    = (rsi_wlan_ext_stats_t *)buff;
     extra_info->beacon_lost_count = test->beacon_lost_count;
-    extra_info->beacon_rx_count = test->beacon_rx_count;
-    extra_info->mcast_rx_count = test->mcast_rx_count;
-    extra_info->mcast_tx_count = test->mcast_tx_count;
-    extra_info->ucast_rx_count = test->ucast_rx_count;
-    extra_info->ucast_tx_count = test->ucast_tx_count;
-    extra_info->overrun_count = test->overrun_count;
+    extra_info->beacon_rx_count   = test->beacon_rx_count;
+    extra_info->mcast_rx_count    = test->mcast_rx_count;
+    extra_info->mcast_tx_count    = test->mcast_tx_count;
+    extra_info->ucast_rx_count    = test->ucast_rx_count;
+    extra_info->ucast_tx_count    = test->ucast_tx_count;
+    extra_info->overrun_count     = test->overrun_count;
   }
   return status;
 }
@@ -243,27 +242,26 @@ void wfx_show_err(char *msg)
 /*
  * Saving the details of the AP
  */
-static void
-wfx_rsi_save_ap_info(){
+static void wfx_rsi_save_ap_info()
+{
   int32_t status;
   rsi_rsp_scan_t rsp;
 
-  status = rsi_wlan_scan_with_bitmap_options((int8_t *)&wfx_rsi.sec.ssid[0],0,&rsp,sizeof(rsp),1);
+  status = rsi_wlan_scan_with_bitmap_options((int8_t *)&wfx_rsi.sec.ssid[0], 0, &rsp, sizeof(rsp), 1);
   if (status) {
     /*
      * Scan is done - failed
      */
-  }
-  else{
+  } else {
     wfx_rsi.sec.security = rsp.scan_info->security_mode;
-    wfx_rsi.ap_chan = rsp.scan_info->rf_channel;
-    memcpy (&wfx_rsi.ap_mac.octet[0],&rsp.scan_info->bssid[0],6);
+    wfx_rsi.ap_chan      = rsp.scan_info->rf_channel;
+    memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], 6);
   }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d",
-            __func__,
-                &wfx_rsi.sec.ssid[0],
-                &wfx_rsi.sec.passkey[0],
-                wfx_rsi.sec.security);
+              __func__,
+              &wfx_rsi.sec.ssid[0],
+              &wfx_rsi.sec.passkey[0],
+              wfx_rsi.sec.security);
 }
 /*
  * Start an async Join command
@@ -450,13 +448,13 @@ void wfx_rsi_task(void *arg)
         wfx_wifi_scan_result_t ap;
         rsi_scan_info_t *scan;
         int32_t status;
-        uint8_t bgscan_results[500] ={0};
-        status = rsi_wlan_bgscan_profile(1, (rsi_rsp_scan_t *)bgscan_results, 500); 
+        uint8_t bgscan_results[500] = { 0 };
+        status                      = rsi_wlan_bgscan_profile(1, (rsi_rsp_scan_t *)bgscan_results, 500);
 
-        WFX_RSI_LOG("%s: status: %d size = %d", __func__, (int)status,500);
+        WFX_RSI_LOG("%s: status: %d size = %d", __func__, (int)status, 500);
         rsi_rsp_scan_t *rsp = (rsi_rsp_scan_t *)bgscan_results;
         if (status) {
-        /*
+          /*
          * Scan is done - failed
          */
         } else
@@ -464,7 +462,7 @@ void wfx_rsi_task(void *arg)
             scan = &rsp->scan_info[x];
             strcpy(&ap.ssid[0], (char *)&scan->ssid[0]);
             ap.security = scan->security_mode;
-            ap.rssi     = (-1)*scan->rssi_val;
+            ap.rssi     = (-1) * scan->rssi_val;
             memcpy(&ap.bssid[0], &scan->bssid[0], 6);
             (*wfx_rsi.scan_cb)(&ap);
           }
