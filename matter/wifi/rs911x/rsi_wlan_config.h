@@ -113,13 +113,13 @@
 /*=======================================================================*/
 
 //! RSI_ENABLE or RSI_DISABLE rejoin params
-#define RSI_REJOIN_PARAMS_SUPPORT RSI_DISABLE
+#define RSI_REJOIN_PARAMS_SUPPORT RSI_ENABLE
 
 //! Rejoin retry count. If 0 retries infinity times
-#define RSI_REJOIN_MAX_RETRY 0
+#define RSI_REJOIN_MAX_RETRY 5
 
 //! Periodicity of rejoin attempt
-#define RSI_REJOIN_SCAN_INTERVAL 4
+#define RSI_REJOIN_SCAN_INTERVAL 1
 
 //! Beacon missed count
 #define RSI_REJOIN_BEACON_MISSED_COUNT 40

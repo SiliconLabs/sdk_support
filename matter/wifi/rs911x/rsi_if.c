@@ -35,14 +35,11 @@
 #include "wfx_rsi.h"
 #include "dhcp_client.h"
 
-//#include "rsi_wlan_config.h"
-
 bool hasNotifiedIPV6 = false;
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
 bool hasNotifiedIPV4 = false;
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 bool hasNotifiedWifiConnectivity = false;
-
 /*
  * This file implements the interface to the RSI SAPIs
  */
@@ -86,6 +83,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t 
 {
   WFX_RSI_LOG("%s: status: %d", __func__, status);
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
+  WFX_RSI_LOG("%s: failed. retry: %d", __func__, wfx_rsi.join_retries);
   if (status != RSI_SUCCESS) {
     /*
      * We should enable retry.. (Need config variable for this)
@@ -111,7 +109,10 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t 
 }
 static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len)
 {
-  WFX_RSI_LOG("%s: error: failed status: %d", __func__, status);
+  WFX_RSI_LOG("%s: error: failed status: %d on try %d", __func__, status,wfx_rsi.join_retries);
+  wfx_rsi.join_retries += 1;
+  wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
+  xEventGroupSetBits(wfx_rsi.events, WFX_EVT_STA_START_JOIN);
 }
 #ifdef RS911X_SOCKETS
 /*
@@ -285,16 +286,21 @@ static void wfx_rsi_do_join(void)
      * Right now it's done by hand - we need something better
      */
     wfx_rsi.dev_state |= WFX_RSI_ST_STA_CONNECTING;
-    if ((status = rsi_wlan_connect_async((int8_t *)&wfx_rsi.sec.ssid[0],
+    while (((status = rsi_wlan_connect_async((int8_t *)&wfx_rsi.sec.ssid[0],
                                          (rsi_security_mode_t)wfx_rsi.sec.security,
                                          &wfx_rsi.sec.passkey[0],
                                          wfx_rsi_join_cb))
-        != RSI_SUCCESS) {
+        != RSI_SUCCESS) && (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN)) {
       wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
-      WFX_RSI_LOG("%s: rsi_wlan_connect_async failed with status: %d", __func__, status);
+      WFX_RSI_LOG("%s: rsi_wlan_connect_async failed with status: %d on try %d", __func__, status,wfx_rsi.join_retries);
+      vTaskDelay(4000);
       /* TODO - Start a timer.. to retry */
-    } else {
-      WFX_RSI_LOG("%s: starting JOIN to %s \n", __func__, (char *)&wfx_rsi.sec.ssid[0]);
+    }
+    if(wfx_rsi.join_retries == 5){
+      WFX_RSI_LOG("Connect failed after %d tries",wfx_rsi.join_retries);
+    }
+    else {
+      WFX_RSI_LOG("%s: starting JOIN to %s after %d tries\n", __func__, (char *)&wfx_rsi.sec.ssid[0],wfx_rsi.join_retries);
     }
   }
 }
