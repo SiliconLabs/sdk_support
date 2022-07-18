@@ -763,6 +763,11 @@ void wfx_set_wifi_provision(wfx_wifi_provision_t *wifiConfig)
       wifi_provision.security = WFM_SECURITY_MODE_WPA3_SAE;
       break;
     case WFX_SEC_WPA2:
+      wifi_provision.security = static_cast<uint8_t>(sl_wfx_security_mode_e::WFM_SECURITY_MODE_WPA2_WPA1_PSK);
+      break;
+    case WFX_SEC_WPA_WPA2_MIXED:
+      wifi_provision.security = static_cast<uint8_t>(sl_wfx_security_mode_e::WFM_SECURITY_MODE_WPA2_WPA1_PSK);
+      break;
     default:
       wifi_provision.security = WFM_SECURITY_MODE_WPA2_PSK;
       break;
