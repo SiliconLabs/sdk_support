@@ -70,6 +70,7 @@
 #define SL_WFX_STOP_AP       (1 << 4)
 #define SL_WFX_SCAN_START    (1 << 5)
 #define SL_WFX_SCAN_COMPLETE (1 << 6)
+#define SL_WFX_RETRY_CONNECT (1 << 7)
 
 #endif /* RS911X_SOCKETS */
 

@@ -97,6 +97,8 @@ wfx_wifi_provision_t wifi_provision;
 bool hasNotifiedIPV6 = false;
 bool hasNotifiedIPV4 = false;
 bool hasNotifiedWifiConnectivity = false;
+static uint8_t retryJoin = 0;
+bool retryInProgress = false;
 
 #ifdef SL_WFX_CONFIG_SCAN
 static struct scan_result_holder {
@@ -362,6 +364,15 @@ static void sl_wfx_connect_callback(uint8_t *mac, uint32_t status)
       EFR32_LOG("WF Connection attempt error\r\n");
     }
   }
+
+      if ( (status != WFM_STATUS_SUCCESS) && retryJoin < 5) {
+        retryJoin += 1;
+        retryInProgress = false;
+        EFR32_LOG("WFX Retry to connect to network count: %d",retryJoin);
+        sl_wfx_context->state = static_cast<sl_wfx_state_t>(static_cast<int>(sl_wfx_context->state)
+                                                      & ~static_cast<int>(SL_WFX_STARTED));
+        xEventGroupSetBits(sl_wfx_event_group, SL_WFX_RETRY_CONNECT);
+    }
 }
 
 /****************************************************************************
@@ -488,6 +499,13 @@ static void wfx_events_task(void *p_arg)
                                 pdTRUE,
                                 pdFALSE,
                                 pdMS_TO_TICKS(250));
+    if (flags & SL_WFX_RETRY_CONNECT) {
+        if (!retryInProgress) {
+            EFR32_LOG("WFX sending the connect command");
+            wfx_connect_to_ap();
+            retryInProgress = true;
+        }
+    }
 
     if (wifi_extra & WE_ST_STA_CONN) {
       if ((now = xTaskGetTickCount()) > (last_dhcp_poll + pdMS_TO_TICKS(250))) {
@@ -745,6 +763,11 @@ void wfx_set_wifi_provision(wfx_wifi_provision_t *wifiConfig)
       wifi_provision.security = WFM_SECURITY_MODE_WPA3_SAE;
       break;
     case WFX_SEC_WPA2:
+      wifi_provision.security = static_cast<uint8_t>(sl_wfx_security_mode_e::WFM_SECURITY_MODE_WPA2_WPA1_PSK);
+      break;
+    case WFX_SEC_WPA_WPA2_MIXED:
+      wifi_provision.security = static_cast<uint8_t>(sl_wfx_security_mode_e::WFM_SECURITY_MODE_WPA2_WPA1_PSK);
+      break;
     default:
       wifi_provision.security = WFM_SECURITY_MODE_WPA2_PSK;
       break;
