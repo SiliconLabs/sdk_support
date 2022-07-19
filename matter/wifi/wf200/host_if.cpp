@@ -703,10 +703,9 @@ int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap){
   /* TODO */
   return -1;
 }
-int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
-  /* TODO */
+/*int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
   return -1;
-}
+}*/
 /*
  * I think that this is getting called before FreeRTOS threads are ready
  */

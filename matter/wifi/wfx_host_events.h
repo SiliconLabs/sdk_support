@@ -125,7 +125,7 @@ typedef struct wfx_wifi_scan_result {
   int16_t rssi; /* I suspect this is in dBm - so signed */
 } wfx_wifi_scan_result_t;
 
-typedef struct wfx_wifi_scan_ext {
+/*typedef struct wfx_wifi_scan_ext {
   uint32_t beacon_lost_count;
   uint32_t beacon_rx_count;
   uint32_t mcast_rx_count;
@@ -133,7 +133,7 @@ typedef struct wfx_wifi_scan_ext {
   uint32_t ucast_rx_count;
   uint32_t ucast_tx_count;
   uint32_t overrun_count;
-} wfx_wifi_scan_ext_t;
+} wfx_wifi_scan_ext_t;*/
 
 #ifdef RS911X_WIFI
 /*
@@ -169,7 +169,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig);
 bool wfx_is_sta_provisioned(void);
 bool wfx_is_sta_mode_enabled(void);
 int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap);
-int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info);
+//int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info);
 
 void wfx_clear_wifi_provision(void);
 sl_status_t wfx_connect_to_ap(void);

@@ -160,10 +160,10 @@ uint8_t rsi_hal_intr_pin_status(void)
 {
   uint32_t mask;
   // Return interrupt pin  status(high(1) /low (0))
-  mask = GPIO_IntGet() & (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
+  //mask = GPIO_IntGet() & (1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
   //WFX_RSI_LOG ("Interrupt: SW status: %x, PinStatus: %x",
   //           GPIO_IntGet (),
-  //           GPIO_PinInGet (WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin));
+  mask = GPIO_PinInGet (WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin);
 
-  return !!mask;
+  return mask;
 }

@@ -60,7 +60,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
   }
   return status;
 }
-int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
+/*int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
 {
   int32_t status;
   uint8_t buff[28] = { 0 };
@@ -78,7 +78,7 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
     extra_info->overrun_count     = test->overrun_count;
   }
   return status;
-}
+}*/
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t len)
 {
   WFX_RSI_LOG("%s: status: %d", __func__, status);
