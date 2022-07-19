@@ -258,6 +258,9 @@ static void wfx_rsi_save_ap_info()
     wfx_rsi.ap_chan      = rsp.scan_info->rf_channel;
     memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], 6);
   }
+  if((wfx_rsi.sec.security==RSI_WPA) || (wfx_rsi.sec.security==RSI_WPA2)){
+    wfx_rsi.sec.security=RSI_WPA_WPA2_MIXED;
+  }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d",
               __func__,
               &wfx_rsi.sec.ssid[0],
