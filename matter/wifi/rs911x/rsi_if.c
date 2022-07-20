@@ -258,8 +258,8 @@ static void wfx_rsi_save_ap_info()
     wfx_rsi.ap_chan      = rsp.scan_info->rf_channel;
     memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], 6);
   }
-  if((wfx_rsi.sec.security==RSI_WPA) || (wfx_rsi.sec.security==RSI_WPA2)){
-    wfx_rsi.sec.security=RSI_WPA_WPA2_MIXED;
+  if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
+    wfx_rsi.sec.security = RSI_WPA_WPA2_MIXED;
   }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d",
               __func__,
@@ -392,24 +392,24 @@ void wfx_rsi_task(void *arg)
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
         uint8_t dhcp_state = dhcpclient_poll(sta_netif);
         if (dhcp_state == DHCP_ADDRESS_ASSIGNED && !hasNotifiedIPV4) {
+          wfx_dhcp_got_ipv4((uint32_t)sta_netif->ip_addr.u_addr.ip4.addr);
+          hasNotifiedIPV4 = true;
           if (!hasNotifiedWifiConnectivity) {
             wfx_connected_notify(0, &wfx_rsi.ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
-          wfx_dhcp_got_ipv4((uint32_t)sta_netif->ip_addr.u_addr.ip4.addr);
-          hasNotifiedIPV4 = true;
         } else if (dhcp_state == DHCP_OFF) {
           wfx_ip_changed_notify(0);
           hasNotifiedIPV4 = false;
         }
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
         if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) && !hasNotifiedIPV6) {
+          wfx_ipv6_notify(1);
+          hasNotifiedIPV6 = true;
           if (!hasNotifiedWifiConnectivity) {
             wfx_connected_notify(0, &wfx_rsi.ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
-          wfx_ipv6_notify(1);
-          hasNotifiedIPV6 = true;
         }
         last_dhcp_poll = now;
       }
