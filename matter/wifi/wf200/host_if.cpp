@@ -495,25 +495,25 @@ static void wfx_events_task(void *p_arg)
          uint8_t dhcp_state = dhcpclient_poll(&sta_netif);
 
          if ((dhcp_state == DHCP_ADDRESS_ASSIGNED) && !hasNotifiedIPV4) {
+            wfx_dhcp_got_ipv4 ((uint32_t)sta_netif->ip_addr.u_addr.ip4.addr);
+            hasNotifiedIPV4 = true;
             if (!hasNotifiedWifiConnectivity) {
               EFR32_LOG ("WIFI: Has Notified Wifi Connectivity");
               wfx_connected_notify(0, &ap_mac);
               hasNotifiedWifiConnectivity = true;
             }
-            wfx_dhcp_got_ipv4 ((uint32_t)sta_netif->ip_addr.u_addr.ip4.addr);
-            hasNotifiedIPV4 = true;
          } else if (dhcp_state == DHCP_OFF) {
             wfx_ip_changed_notify (0);
             hasNotifiedIPV4 = false;
          }
 #endif // CHIP_DEVICE_CONFIG_ENABLE_IPV4
         if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) && !hasNotifiedIPV6) {
+          wfx_ipv6_notify(1);
+          hasNotifiedIPV6 = true;
           if (!hasNotifiedWifiConnectivity) {
             wfx_connected_notify(0, &ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
-          wfx_ipv6_notify(1);
-          hasNotifiedIPV6 = true;
         }
         last_dhcp_poll = now;
       }
