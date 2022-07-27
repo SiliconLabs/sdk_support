@@ -44,6 +44,7 @@ bool hasNotifiedWifiConnectivity = false;
  * This file implements the interface to the RSI SAPIs
  */
 static uint8_t wfx_rsi_drv_buf[WFX_RSI_BUF_SZ];
+wfx_wifi_scan_ext_t *temp_reset;
 /*
  * Getting the AP details
  */
@@ -69,13 +70,32 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
   } else {
     rsi_wlan_ext_stats_t *test    = (rsi_wlan_ext_stats_t *)buff;
-    extra_info->beacon_lost_count = test->beacon_lost_count;
-    extra_info->beacon_rx_count   = test->beacon_rx_count;
-    extra_info->mcast_rx_count    = test->mcast_rx_count;
-    extra_info->mcast_tx_count    = test->mcast_tx_count;
-    extra_info->ucast_rx_count    = test->ucast_rx_count;
-    extra_info->ucast_tx_count    = test->ucast_tx_count;
-    extra_info->overrun_count     = test->overrun_count;
+    extra_info->beacon_lost_count = test->beacon_lost_count - temp_reset->beacon_lost_count;
+    extra_info->beacon_rx_count   = test->beacon_rx_count - temp_reset->beacon_rx_count;
+    extra_info->mcast_rx_count    = test->mcast_rx_count - temp_reset->mcast_rx_count;
+    extra_info->mcast_tx_count    = test->mcast_tx_count - temp_reset->mcast_tx_count;
+    extra_info->ucast_rx_count    = test->ucast_rx_count - temp_reset->ucast_rx_count;
+    extra_info->ucast_tx_count    = test->ucast_tx_count - temp_reset->ucast_tx_count;
+    extra_info->overrun_count     = test->overrun_count - temp_reset->overrun_count;
+  }
+  return status;
+}
+int32_t wfx_rsi_reset_count()
+{
+  int32_t status;
+  uint8_t buff[28] = { 0 };
+  status           = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
+  if (status != RSI_SUCCESS) {
+    WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
+  } else {
+    rsi_wlan_ext_stats_t *test    = (rsi_wlan_ext_stats_t *)buff;
+    temp_reset->beacon_lost_count = test->beacon_lost_count;
+    temp_reset->beacon_rx_count   = test->beacon_rx_count;
+    temp_reset->mcast_rx_count    = test->mcast_rx_count;
+    temp_reset->mcast_tx_count    = test->mcast_tx_count;
+    temp_reset->ucast_rx_count    = test->ucast_rx_count;
+    temp_reset->ucast_tx_count    = test->ucast_tx_count;
+    temp_reset->overrun_count     = test->overrun_count;
   }
   return status;
 }
@@ -83,7 +103,8 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t 
 {
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
-  WFX_RSI_LOG("%s: failed. retry: %d", __func__, wfx_rsi.join_retries);
+  temp_reset = (wfx_wifi_scan_ext_t *)malloc(sizeof(wfx_wifi_scan_ext_t));
+  memset(temp_reset,0,sizeof(wfx_wifi_scan_ext_t));
   if (status != RSI_SUCCESS) {
     /*
      * We should enable retry.. (Need config variable for this)
@@ -261,11 +282,12 @@ static void wfx_rsi_save_ap_info()
   if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
     wfx_rsi.sec.security = RSI_WPA_WPA2_MIXED;
   }
-  WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d",
+  WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d, status=%02x",
               __func__,
               &wfx_rsi.sec.ssid[0],
               &wfx_rsi.sec.passkey[0],
-              wfx_rsi.sec.security);
+              wfx_rsi.sec.security,
+              status);
 }
 /*
  * Start an async Join command
@@ -476,10 +498,24 @@ void wfx_rsi_task(void *arg)
           for (x = 0; x < rsp->scan_count[0]; x++) {
             scan = &rsp->scan_info[x];
             strcpy(&ap.ssid[0], (char *)&scan->ssid[0]);
-            ap.security = scan->security_mode;
-            ap.rssi     = (-1) * scan->rssi_val;
-            memcpy(&ap.bssid[0], &scan->bssid[0], 6);
-            (*wfx_rsi.scan_cb)(&ap);
+            if (wfx_rsi.scan_ssid) {
+              WFX_RSI_LOG("Inside scan_ssid");
+              WFX_RSI_LOG("SCAN SSID: %s , ap scan: %s",wfx_rsi.scan_ssid,ap.ssid);
+              if(strcmp(wfx_rsi.scan_ssid,ap.ssid) == 0){
+                WFX_RSI_LOG("Inside ap details");
+                ap.security = scan->security_mode;
+                ap.rssi     = (-1) * scan->rssi_val;
+                memcpy(&ap.bssid[0], &scan->bssid[0], 6);
+                (*wfx_rsi.scan_cb)(&ap);
+              }
+            }
+            else{
+              WFX_RSI_LOG("Inside else");
+              ap.security = scan->security_mode;
+              ap.rssi     = (-1) * scan->rssi_val;
+              memcpy(&ap.bssid[0], &scan->bssid[0], 6);
+              (*wfx_rsi.scan_cb)(&ap);
+            }
           }
         wfx_rsi.dev_state &= ~WFX_RSI_ST_SCANSTARTED;
         /* Terminate with end of scan which is no ap sent back */

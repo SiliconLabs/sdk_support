@@ -195,7 +195,9 @@ int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
 {
   return wfx_rsi_get_ap_ext(extra_info);
 }
-
+int32_t wfx_reset_counts(){
+  return wfx_rsi_reset_count();
+}
 #ifdef SL_WFX_CONFIG_SCAN
 bool wfx_start_scan(char *ssid, void (*callback)(wfx_wifi_scan_result_t *))
 {

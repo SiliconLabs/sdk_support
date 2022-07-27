@@ -707,6 +707,10 @@ int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
   /* TODO */
   return -1;
 }
+int32_t wfx_reset_counts(){
+  /* TODO */
+  return -1;
+}
 /*
  * I think that this is getting called before FreeRTOS threads are ready
  */
