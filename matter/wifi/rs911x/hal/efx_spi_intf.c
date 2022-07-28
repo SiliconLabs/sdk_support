@@ -24,7 +24,11 @@
 #include "em_device.h"
 #include "em_gpio.h"
 #include "em_ldma.h"
+#if defined(EFR32MG12)
 #include "em_usart.h"
+#elif defined(EFR32MG24)
+#include "em_eusart.h"
+#endif
 #include "gpiointerrupt.h"
 #include "sl_device_init_clocks.h"
 #include "sl_status.h"
@@ -38,6 +42,8 @@
 
 #include "rsi_board_configuration.h"
 #include "rsi_driver.h"
+#include "sl_device_init_dpll.h"
+#include "sl_device_init_hfxo.h"
 
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_chan, rx_dma_chan;
@@ -60,6 +66,7 @@ static void dma_init(void)
 void sl_wfx_host_init_bus(void)
 {
   // Initialize and enable the USART
+#if defined(EFR32MG12)
   USART_InitSync_TypeDef config = USART_INITSYNC_DEFAULT;
 
   dummy_data          = 0;
@@ -70,9 +77,36 @@ void sl_wfx_host_init_bus(void)
   config.msbf         = true;            // send MSB first
   config.enable       = usartDisable;    // Make sure to keep USART disabled until it's all set up
   CMU_ClockEnable(cmuClock_HFPER, true);
-  CMU_ClockEnable(cmuClock_GPIO, true);
+#elif defined(EFR32MG21) || defined(EFR32MG24)
+  CMU_ClockEnable(cmuClock_EUSART1, true);
+  // Configure MOSI (TX) pin as an output
+  GPIO_PinModeSet(EUS1MOSI_PORT, EUS1MOSI_PIN, gpioModePushPull, 0);
+
+  // Configure MISO (RX) pin as an input
+  GPIO_PinModeSet(EUS1MISO_PORT, EUS1MISO_PIN, gpioModeInput, 0);
+
+  // Configure SCLK pin as an output low (CPOL = 0)
+  GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, 0);
+
+  // Configure CS pin as an output initially high
+ // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
+  // SPI advanced configuration (part of the initializer)
+  EUSART_SpiAdvancedInit_TypeDef adv = EUSART_SPI_ADVANCED_INIT_DEFAULT;
+
+  adv.msbFirst = true;        // SPI standard MSB first
+  adv.autoInterFrameTime = 7; // 7 bit times of delay between frames
+                              // to accommodate non-DMA secondaries
+
+  // Default asynchronous initializer (main/master mode and 8-bit data)
+  EUSART_SpiInit_TypeDef init = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
+
+  init.bitRate = 12000000;         // 10 MHz shift clock
+  init.advancedSettings = &adv;   // Advanced settings structure
+#endif
+#if defined(EFR32MG12)
   CMU_ClockEnable(MY_USART_CLOCK, true);
   USART_InitSync(MY_USART, &config);
+#endif
 #if defined(EFR32MG12)
   MY_USART->CTRL |= (1u << _USART_CTRL_SMSDELAY_SHIFT);
   MY_USART->ROUTELOC0 =
@@ -84,39 +118,34 @@ void sl_wfx_host_init_bus(void)
   MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN;
   MY_USART->CMD      = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   USART_Enable(MY_USART, usartEnable);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, 1);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 1);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
+
 #elif defined(EFR32MG21) || defined(EFR32MG24)
   /*
-     * Route USART0 RX, TX, and CLK to the specified pins.  Note that CS is
-     * not controlled by USART0 so there is no write to the corresponding
-     * USARTROUTE register to do this.
-     */
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].RXROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].TXROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].CLKROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CLK_PIN << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].CSROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_CS_PORT << _GPIO_USART_CSROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CS_PIN << _GPIO_USART_CSROUTE_PIN_SHIFT);
+   * Route EUSART1 MOSI, MISO, and SCLK to the specified pins.  CS is
+   * not controlled by EUSART1 so there is no write to the corresponding
+   * EUSARTROUTE register to do this.
+   */
+  GPIO->EUSARTROUTE[1].TXROUTE = (EUS1MOSI_PORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
+      | (EUS1MOSI_PIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[1].RXROUTE = (EUS1MISO_PORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
+      | (EUS1MISO_PIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
+  GPIO->EUSARTROUTE[1].SCLKROUTE = (EUS1SCLK_PORT << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
+      | (EUS1SCLK_PIN << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT);
 
-  // Enable USART interface pins
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | // MISO
-                                                                   GPIO_USART_ROUTEEN_TXPEN | // MOSI
-                                                                   GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
-  /* Configure CS pin as output and drive strength to inactive high */
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull, 1);
+  // Enable EUSART interface pins
+  GPIO->EUSARTROUTE[1].ROUTEEN = GPIO_EUSART_ROUTEEN_RXPEN |    // MISO
+                                 GPIO_EUSART_ROUTEEN_TXPEN |    // MOSI
+                                 GPIO_EUSART_ROUTEEN_SCLKPEN;
+
+  // Configure and enable EUSART1
+  EUSART_SpiInit(EUSART1, &init);
 
 #else
 #error "EFRxx - No UART/HAL"
 #endif
-
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
 }
 /*
  * Deal with the PINS that are not associated with SPI -
@@ -124,8 +153,13 @@ void sl_wfx_host_init_bus(void)
  */
 void sl_wfx_host_gpio_init(void)
 {
-  // Enable GPIO clock.
-  CMU_ClockEnable(cmuClock_GPIO, true);
+#if defined(EFR32MG24)
+  sl_device_init_hfxo();
+  sl_device_init_dpll();
+  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+#endif
+    // Enable GPIO clock.
+    CMU_ClockEnable(cmuClock_GPIO, true);
 
   GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, 1);
   GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, 0);
@@ -170,7 +204,7 @@ void rsi_hal_board_init(void)
   sl_wfx_host_init_bus();
   dma_init();
   WFX_RSI_LOG("RSI_HAL: Reset Wifi");
-  // sl_wfx_host_reset_chip ();
+  sl_wfx_host_reset_chip ();
   WFX_RSI_LOG("RSI_HAL: Init done");
 }
 
