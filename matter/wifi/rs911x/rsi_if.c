@@ -282,6 +282,9 @@ static void wfx_rsi_save_ap_info()
   if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
     wfx_rsi.sec.security = RSI_WPA_WPA2_MIXED;
   }
+  if (wfx_rsi.sec.security == 7){
+    wfx_rsi.sec.security = RSI_WPA3;
+  }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d, status=%02x",
               __func__,
               &wfx_rsi.sec.ssid[0],
