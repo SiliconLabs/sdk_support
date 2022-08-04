@@ -100,7 +100,7 @@ void sl_wfx_host_init_bus(void)
   // Default asynchronous initializer (main/master mode and 8-bit data)
   EUSART_SpiInit_TypeDef init = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
 
-  init.bitRate = 12000000;         // 10 MHz shift clock
+  init.bitRate = 12000000;         // 12 MHz shift clock
   init.advancedSettings = &adv;   // Advanced settings structure
 #endif
 #if defined(EFR32MG12)
@@ -139,7 +139,14 @@ void sl_wfx_host_init_bus(void)
   GPIO->EUSARTROUTE[1].ROUTEEN = GPIO_EUSART_ROUTEEN_RXPEN |    // MISO
                                  GPIO_EUSART_ROUTEEN_TXPEN |    // MOSI
                                  GPIO_EUSART_ROUTEEN_SCLKPEN;
-
+     //Allow RS916
+   GPIO_PinModeSet(gpioPortC, 0, gpioModePushPull, 0);
+   //Disable flash
+   GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 1);
+   //Disable Display
+   GPIO_PinModeSet(gpioPortC, 8, gpioModePushPull, 1);
+   //Disable Display Enable
+   GPIO_PinModeSet(gpioPortC, 9, gpioModePushPull, 0);
   // Configure and enable EUSART1
   EUSART_SpiInit(EUSART1, &init);
 
