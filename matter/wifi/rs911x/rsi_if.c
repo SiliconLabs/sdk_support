@@ -99,6 +99,10 @@ int32_t wfx_rsi_reset_count()
   }
   return status;
 }
+int32_t wfx_rsi_disconnect(){
+	int32_t status = rsi_wlan_disconnect();
+	return status;
+}
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t len)
 {
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
