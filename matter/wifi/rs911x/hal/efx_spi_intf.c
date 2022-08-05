@@ -139,14 +139,19 @@ void sl_wfx_host_init_bus(void)
   GPIO->EUSARTROUTE[1].ROUTEEN = GPIO_EUSART_ROUTEEN_RXPEN |    // MISO
                                  GPIO_EUSART_ROUTEEN_TXPEN |    // MOSI
                                  GPIO_EUSART_ROUTEEN_SCLKPEN;
-     //Allow RS916
-   GPIO_PinModeSet(gpioPortC, 0, gpioModePushPull, 0);
-   //Disable flash
-   GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 1);
-   //Disable Display
-   GPIO_PinModeSet(gpioPortC, 8, gpioModePushPull, 1);
-   //Disable Display Enable
-   GPIO_PinModeSet(gpioPortC, 9, gpioModePushPull, 0);
+  /*For MG24 DISPLAY,FLASH & RS9116 communication uses same SPI line which
+   * causes RS9116 communication interruption randomly. Below changes resolve 
+   * this issue. Once proper fix is given to multiplex all the features on SPI line, 
+   * these changes can be removed
+   */
+  //Enable RS916 communication
+  GPIO_PinModeSet(gpioPortC, 0, gpioModePushPull, 0);
+  //Disable flash
+  GPIO_PinModeSet(gpioPortC, 4, gpioModePushPull, 1);
+  //Disable Display
+  GPIO_PinModeSet(gpioPortC, 8, gpioModePushPull, 1);
+  //Disable Display Enable
+  GPIO_PinModeSet(gpioPortC, 9, gpioModePushPull, 0);
   // Configure and enable EUSART1
   EUSART_SpiInit(EUSART1, &init);
 
