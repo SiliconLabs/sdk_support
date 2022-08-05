@@ -157,9 +157,11 @@ wifi_mode_t wfx_get_wifi_mode()
 sl_status_t wfx_sta_discon(void)
 {
   WFX_RSI_LOG("%s: started.", __func__);
-  /* TODO - Disconnect station mode from connected AP */
+  int32_t status;
+  status = wfx_rsi_disconnect();
+  wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTED;
   WFX_RSI_LOG("%s: completed.", __func__);
-  return SL_STATUS_OK;
+  return status;
 }
 bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
 {

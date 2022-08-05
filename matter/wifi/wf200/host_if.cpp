@@ -866,10 +866,11 @@ wfx_have_ipv6_addr (sl_wfx_interface_t which_if)
 
 sl_status_t wfx_sta_discon(void)
 {
-  EFR32_LOG("STA-Discon: TODO");
-  /* TODO - Disconnect station mode from connected AP */
-
-  return SL_STATUS_OK;
+  EFR32_LOG("STA-Disconnecting");
+  int32_t status = sl_wfx_send_disconnect_command();
+  wifi_extra &= ~WE_ST_STA_CONN;
+  xEventGroupSetBits(sl_wfx_event_group, SL_WFX_RETRY_CONNECT);
+  return status;
 }
 bool wfx_is_sta_mode_enabled(void)
 {
