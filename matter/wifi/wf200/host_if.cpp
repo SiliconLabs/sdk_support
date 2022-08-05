@@ -590,6 +590,8 @@ static void wfx_events_task(void *p_arg)
         num_ssid = 0;
         sp       = (sl_wfx_ssid_def_t *)0;
       }
+
+      (void)sl_wfx_set_scan_parameters(100,0,1);
       (void)sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
                                      (const uint8_t *)0, /* Channel list */
                                      0,                  /* Scan all chans */
@@ -804,6 +806,8 @@ sl_status_t wfx_connect_to_ap(void)
     return SL_STATUS_NOT_AVAILABLE;
   }
   EFR32_LOG("WIFI:JOIN to %s", &wifi_provision.ssid[0]);
+
+  (void)sl_wfx_set_scan_parameters(100,0,1);
   result = sl_wfx_send_join_command((uint8_t *)wifi_provision.ssid,
                                     strlen(wifi_provision.ssid),
                                     NULL,
