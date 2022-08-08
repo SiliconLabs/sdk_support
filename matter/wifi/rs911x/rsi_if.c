@@ -45,6 +45,7 @@ bool hasNotifiedWifiConnectivity = false;
  */
 static uint8_t wfx_rsi_drv_buf[WFX_RSI_BUF_SZ];
 wfx_wifi_scan_ext_t *temp_reset;
+uint8_t security;
 /*
  * Getting the AP details
  */
@@ -52,7 +53,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
 {
   int32_t status;
   uint8_t rssi;
-  ap->security = wfx_rsi.sec.security;
+  ap->security = security;
   ap->chan     = wfx_rsi.ap_chan;
   memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], 6);
   status = rsi_wlan_get(RSI_RSSI, &rssi, sizeof(rssi));
@@ -284,9 +285,12 @@ static void wfx_rsi_save_ap_info()
     memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], 6);
   }
   if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
+    // saving the security before changing into mixed mode
+    security = wfx_rsi.sec.security;
     wfx_rsi.sec.security = RSI_WPA_WPA2_MIXED;
   }
   if (wfx_rsi.sec.security == 7){
+    security = 3; //WPA3 expects security as 3
     wfx_rsi.sec.security = RSI_WPA3;
   }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d, status=%02x",
