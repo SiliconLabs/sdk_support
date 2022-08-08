@@ -47,11 +47,11 @@
 #include "wfx_msgs.h"
 
 /* Wi-Fi events*/
-#define SL_WFX_STARTUP_IND_ID    1
-#define SL_WFX_CONNECT_IND_ID    2
+#define SL_WFX_STARTUP_IND_ID 1
+#define SL_WFX_CONNECT_IND_ID 2
 #define SL_WFX_DISCONNECT_IND_ID 3
-#define SL_WFX_SCAN_COMPLETE_ID  4
-#define WFX_RSI_SSID_SIZE        64
+#define SL_WFX_SCAN_COMPLETE_ID 4
+#define WFX_RSI_SSID_SIZE 64
 
 #endif /* WF200 */
 
@@ -64,11 +64,11 @@
 #include "lwip/tcpip.h"
 
 /* Wi-Fi bitmask events - for the task */
-#define SL_WFX_CONNECT       (1 << 1)
-#define SL_WFX_DISCONNECT    (1 << 2)
-#define SL_WFX_START_AP      (1 << 3)
-#define SL_WFX_STOP_AP       (1 << 4)
-#define SL_WFX_SCAN_START    (1 << 5)
+#define SL_WFX_CONNECT (1 << 1)
+#define SL_WFX_DISCONNECT (1 << 2)
+#define SL_WFX_START_AP (1 << 3)
+#define SL_WFX_STOP_AP (1 << 4)
+#define SL_WFX_SCAN_START (1 << 5)
 #define SL_WFX_SCAN_COMPLETE (1 << 6)
 #define SL_WFX_RETRY_CONNECT (1 << 7)
 
@@ -89,20 +89,21 @@ typedef enum {
 
 /* Note that these are same as RSI_security */
 typedef enum {
-  WFX_SEC_NONE           = 0,
-  WFX_SEC_WPA            = 1,
-  WFX_SEC_WPA2           = 2,
-  WFX_SEC_WEP            = 3,
-  WFX_SEC_WPA_EAP        = 4,
-  WFX_SEC_WPA2_EAP       = 5,
+  WFX_SEC_NONE = 0,
+  WFX_SEC_WPA = 1,
+  WFX_SEC_WPA2 = 2,
+  WFX_SEC_WEP = 3,
+  WFX_SEC_WPA_EAP = 4,
+  WFX_SEC_WPA2_EAP = 5,
   WFX_SEC_WPA_WPA2_MIXED = 6,
-  WFX_SEC_WPA_PMK        = 7,
-  WFX_SEC_WPA2_PMK       = 8,
-  WFX_SEC_WPS_PIN        = 9,
-  WFX_SEC_GEN_WPS_PIN    = 10,
-  WFX_SEC_PUSH_BTN       = 11,
-  WFX_SEC_WPA3           = 11,
+  WFX_SEC_WPA_PMK = 7,
+  WFX_SEC_WPA2_PMK = 8,
+  WFX_SEC_WPS_PIN = 9,
+  WFX_SEC_GEN_WPS_PIN = 10,
+  WFX_SEC_PUSH_BTN = 11,
+  WFX_SEC_WPA3 = 11,
 } wfx_sec_t;
+#define WPA3_SECURITY 3
 typedef struct {
   char ssid[32 + 1];
   char passkey[64 + 1];
@@ -141,16 +142,16 @@ typedef struct wfx_wifi_scan_ext {
  * We took it from the SDK (for WF200)
  */
 typedef enum {
-  SL_WFX_NOT_INIT                = 0,
-  SL_WFX_STARTED                 = 1,
+  SL_WFX_NOT_INIT = 0,
+  SL_WFX_STARTED = 1,
   SL_WFX_STA_INTERFACE_CONNECTED = 2,
-  SL_WFX_AP_INTERFACE_UP         = 3,
-  SL_WFX_SLEEPING                = 4,
-  SL_WFX_POWER_SAVE_ACTIVE       = 5,
+  SL_WFX_AP_INTERFACE_UP = 3,
+  SL_WFX_SLEEPING = 4,
+  SL_WFX_POWER_SAVE_ACTIVE = 5,
 } sl_wfx_state_t;
 
 typedef enum {
-  SL_WFX_STA_INTERFACE    = 0, ///< Interface 0, linked to the station
+  SL_WFX_STA_INTERFACE = 0,    ///< Interface 0, linked to the station
   SL_WFX_SOFTAP_INTERFACE = 1, ///< Interface 1, linked to the softap
 } sl_wfx_interface_t;
 
@@ -163,7 +164,8 @@ void sl_wfx_host_gpio_init(void);
 sl_status_t wfx_wifi_start(void);
 void wfx_enable_sta_mode(void);
 sl_wfx_state_t wfx_get_wifi_state(void);
-void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *addr);
+void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface,
+                           sl_wfx_mac_address_t *addr);
 void wfx_set_wifi_provision(wfx_wifi_provision_t *wifiConfig);
 bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig);
 bool wfx_is_sta_provisioned(void);
@@ -180,7 +182,10 @@ sl_status_t wfx_sta_discon(void);
 bool wfx_have_ipv4_addr(sl_wfx_interface_t);
 bool wfx_have_ipv6_addr(sl_wfx_interface_t);
 wifi_mode_t wfx_get_wifi_mode(void);
-bool wfx_start_scan(char *ssid, void (*scan_cb)(wfx_wifi_scan_result_t *)); /* true returned if successfuly started */
+bool wfx_start_scan(
+    char *ssid,
+    void (*scan_cb)(
+        wfx_wifi_scan_result_t *)); /* true returned if successfuly started */
 void wfx_cancel_scan(void);
 
 /*
