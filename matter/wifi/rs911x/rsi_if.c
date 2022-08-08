@@ -174,7 +174,7 @@ static int32_t wfx_rsi_init(void)
   uint8_t buf[128];
   extern void rsi_hal_board_init(void);
 
-  /* 
+  /*
    * Get the GPIOs/PINs set-up
    */
   //rsi_hal_board_init ();
