@@ -297,8 +297,9 @@ static void wfx_rsi_save_ap_info() {
     security = wfx_rsi.sec.security;
     wfx_rsi.sec.security = RSI_WPA_WPA2_MIXED;
   }
-  if (wfx_rsi.sec.security == 7) {
-    security = 3; // WPA3 expects security as 3
+  if (wfx_rsi.sec.security == SME_WPA3) {
+    // returning 3 for WPA3 when DGWIFI read security-type is called
+    security = WPA3_SECURITY;
     wfx_rsi.sec.security = RSI_WPA3;
   }
   WFX_RSI_LOG("%s: WLAN: connecting to %s==%s, sec=%d, status=%02x", __func__,

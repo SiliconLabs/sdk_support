@@ -103,6 +103,7 @@ typedef enum {
   WFX_SEC_PUSH_BTN       = 11,
   WFX_SEC_WPA3           = 11,
 } wfx_sec_t;
+#define WPA3_SECURITY 3
 typedef struct {
   char ssid[32 + 1];
   char passkey[64 + 1];
