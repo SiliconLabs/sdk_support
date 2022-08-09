@@ -15,9 +15,9 @@
 
 // $[DBG]
 // DBG SWV on PF2
-#define DBG_SWV_PORT                             gpioPortF
-#define DBG_SWV_PIN                              2
-#define DBG_SWV_LOC                              0
+#define DBG_SWV_PORT gpioPortF
+#define DBG_SWV_PIN 2
+#define DBG_SWV_LOC 0
 
 // [DBG]$
 
@@ -107,25 +107,25 @@
 
 // $[USART0]
 // USART0 CLK on PC03
-#define USART0_CLK_PORT                          gpioPortC
-#define USART0_CLK_PIN                           3
+#define USART0_CLK_PORT gpioPortC
+#define USART0_CLK_PIN 3
 
 // USART0 TX on PC01
-#define USART0_TX_PORT                           gpioPortC
-#define USART0_TX_PIN                            1
+#define USART0_TX_PORT gpioPortC
+#define USART0_TX_PIN 1
 
 // [USART0]$
 
 // $[USART1]
 // USART1 CLK on PC8
-#define USART1_CLK_PORT                          gpioPortC
-#define USART1_CLK_PIN                           8
-#define USART1_CLK_LOC                           11
+#define USART1_CLK_PORT gpioPortC
+#define USART1_CLK_PIN 8
+#define USART1_CLK_LOC 11
 
 // USART1 TX on PC6
-#define USART1_TX_PORT                           gpioPortC
-#define USART1_TX_PIN                            6
-#define USART1_TX_LOC                            11
+#define USART1_TX_PORT gpioPortC
+#define USART1_TX_PIN 6
+#define USART1_TX_LOC 11
 
 // [USART1]$
 
@@ -232,7 +232,7 @@
 
 // $[EUSART0]
 // EUSART0 RTS on PA00
-#define EUSART0_RTS_PORT                         gpioPortA
-#define EUSART0_RTS_PIN                          0
+#define EUSART0_RTS_PORT gpioPortA
+#define EUSART0_RTS_PIN 0
 
 // [EUSART0]$
