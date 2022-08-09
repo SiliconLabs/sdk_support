@@ -49,10 +49,9 @@ const sl_led_t sl_led_led1 = {
     .get_state = sl_simple_led_get_state,
 };
 
-const sl_led_t* sl_simple_led_array[] = { &sl_led_led0, &sl_led_led1 };
+const sl_led_t *sl_simple_led_array[] = {&sl_led_led0, &sl_led_led1};
 
-void sl_simple_led_init_instances(void)
-{
-    sl_led_init(&sl_led_led0);
-    sl_led_init(&sl_led_led1);
+void sl_simple_led_init_instances(void) {
+  sl_led_init(&sl_led_led0);
+  sl_led_init(&sl_led_led1);
 }

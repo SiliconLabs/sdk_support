@@ -23,7 +23,7 @@
 extern const sl_button_t sl_button_btn0;
 extern const sl_button_t sl_button_btn1;
 
-extern const sl_button_t* sl_simple_button_array[];
+extern const sl_button_t *sl_simple_button_array[];
 
 #define SL_SIMPLE_BUTTON_COUNT 2
 #define SL_SIMPLE_BUTTON_INSTANCE(n) (sl_simple_button_array[n])
