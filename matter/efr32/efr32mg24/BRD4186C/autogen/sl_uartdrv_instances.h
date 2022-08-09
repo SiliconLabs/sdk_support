@@ -12,20 +12,20 @@ extern UARTDRV_Handle_t sl_uartdrv_eusart_vcom_handle;
 
 void sl_uartdrv_init_instances(void);
 
-/***************************************************************************/ /**
-                                                                               * Set the handle as the default UARTDRV handle.
-                                                                               *
-                                                                               * @param[in] handle    UARTDRV handle to set as default.
-                                                                               *
-                                                                               * @return  Status result
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * Set the handle as the default UARTDRV handle.
+ *
+ * @param[in] handle    UARTDRV handle to set as default.
+ *
+ * @return  Status result
+ ******************************************************************************/
 sl_status_t sl_uartdrv_set_default(UARTDRV_Handle_t handle);
 
-/***************************************************************************/ /**
-                                                                               * Get the default UARTDRV handle configured.
-                                                                               *
-                                                                               * @return  UARTDRV handle
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * Get the default UARTDRV handle configured.
+ *
+ * @return  UARTDRV handle
+ ******************************************************************************/
 UARTDRV_Handle_t sl_uartdrv_get_default(void);
 
 #ifdef __cplusplus
