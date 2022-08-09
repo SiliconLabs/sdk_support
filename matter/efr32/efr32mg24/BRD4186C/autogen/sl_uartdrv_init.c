@@ -28,7 +28,7 @@ DEFINE_BUF_QUEUE(SL_UARTDRV_EUSART_VCOM_TX_BUFFER_SIZE, sl_uartdrv_eusart_vcom_t
 
 
 /* Create uartdrv initialization structs */
-UARTDRV_InitEuart_t sl_uartdrv_eusart_init_vcom = {   
+UARTDRV_InitEuart_t sl_uartdrv_eusart_init_vcom = {
   .port = SL_UARTDRV_EUSART_VCOM_PERIPHERAL,
   .useLowFrequencyMode = SL_UARTDRV_EUSART_VCOM_LF_MODE,
   .baudRate = SL_UARTDRV_EUSART_VCOM_BAUDRATE,

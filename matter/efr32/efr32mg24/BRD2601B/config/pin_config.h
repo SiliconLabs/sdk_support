@@ -236,4 +236,3 @@
 #define EUSART0_RTS_PIN                          0
 
 // [EUSART0]$
-
