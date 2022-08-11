@@ -44,12 +44,12 @@ void wfx_started_notify()
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&evt, 0, sizeof evt);
+  memset(&evt, CLEAR_BUFFER, sizeof evt);
   evt.header.id     = SL_WFX_STARTUP_IND_ID;
   evt.header.length = sizeof evt;
   evt.body.status   = 0;
   wfx_get_wifi_mac_addr(SL_WFX_STA_INTERFACE, &mac);
-  memcpy(&evt.body.mac_addr[0], &mac.octet[0], 6);
+  memcpy(&evt.body.mac_addr[0], &mac.octet[0], COPY_6_CHAR);
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
@@ -64,20 +64,20 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 
   EFR32_LOG("%s: started.", __func__);
 
-  if (status != 0) {
+  if (status != SUCCESS_STATUS) {
     EFR32_LOG("%s: error: failed status: %d.", __func__, status);
     return;
   }
 
   EFR32_LOG("%s: connected.", __func__);
 
-  memset(&evt, 0, sizeof evt);
+  memset(&evt, CLEAR_BUFFER, sizeof evt);
   evt.header.id     = SL_WFX_CONNECT_IND_ID;
   evt.header.length = sizeof evt;
 #ifdef RS911X_WIFI
   evt.body.channel = wfx_rsi.ap_chan;
 #endif
-  memcpy(&evt.body.mac[0], &ap->octet[0], 6);
+  memcpy(&evt.body.mac[0], &ap->octet[0], COPY_6_CHAR);
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
@@ -90,7 +90,7 @@ void wfx_disconnected_notify(int32_t status)
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&evt, 0, sizeof evt);
+  memset(&evt, CLEAR_BUFFER, sizeof evt);
   evt.header.id     = SL_WFX_DISCONNECT_IND_ID;
   evt.header.length = sizeof evt;
   evt.body.reason   = status;
@@ -103,7 +103,7 @@ void wfx_ipv6_notify(int got_ip)
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&eventData, 0, sizeof(eventData));
+  memset(&eventData, CLEAR_BUFFER, sizeof(eventData));
   eventData.header.id     = got_ip ? IP_EVENT_GOT_IP6 : IP_EVENT_STA_LOST_IP;
   eventData.header.length = sizeof(eventData.header);
   PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
@@ -124,7 +124,7 @@ void wfx_ip_changed_notify(int got_ip)
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&eventData, 0, sizeof(eventData));
+  memset(&eventData, CLEAR_BUFFER, sizeof(eventData));
   eventData.header.id     = got_ip ? IP_EVENT_STA_GOT_IP : IP_EVENT_STA_LOST_IP;
   eventData.header.length = sizeof(eventData.header);
   PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);

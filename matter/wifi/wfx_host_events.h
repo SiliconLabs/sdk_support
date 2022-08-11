@@ -76,6 +76,96 @@
 
 #include "sl_status.h"
 
+// wf 200 S
+#define STACK_SIZE_1K	1024
+#define TASK_PRIORITY_1    1
+#define ETH_FRAME	0
+#define CMP_SUCCESS		0
+#define COPY_6_CHAR		6 
+#define RETRY_CNT		5
+#define STATUS_0		0
+#define BITS_TO_WAIT	0
+#define DELAY_250MS		250
+#define CONNECTION_STATUS_SUCCESS	0
+#define IP_STATUS_FAIL		0
+#define INDEX 	0
+#define LENGTH_16   16
+#define GET_IPV6_SUCCESS	1
+#define GET_IPV6_FAIL	0
+#define BEACON_1	0
+#define EMPTY_BUFFER	0
+#define CHANNEL_LIST	(const uint8_t *)0
+#define CHANNEL_COUNT	0
+#define IE_DATA	(const uint8_t *)0
+#define IE_DATA_LENGTH	0
+#define BSSID_SCAN	(const uint8_t *)0
+#define	CHANNEL_0	0
+#define	PREVENT_ROAMING		1
+#define DISABLE_PMF_MODE	0
+#define STA_IP_FAIL		0
+#define IP_STATUS_SUCCESS		1
+#define	ACTIVE_CHANNEL_TIME_100		100
+#define	PASSIVE_CHANNEL_TIME_0		0
+#define	PROBE_NUM_REQ_1				1
+
+#define PINOUT_CLEAR_STATUS    0
+#define TICKS_TO_WAIT_0   0
+#define TICKS_TO_WAIT_3   3
+#define TICKS_TO_WAIT_1   1
+#define TICKS_TO_WAIT_500   500
+// wf200 E
+
+
+#define CLEAR_BUFFER	  0
+#define SUCCESS_STATUS	0
+#define LINK_UP			    1
+#define LINK_DOWN			  0
+#define MAC_48_BIT_SET	1
+#define LEN_0		        0
+#define LEN_60		      60
+#define STRUCT_PBUF	(struct pbuf *)0
+#define INT_VALUE_64	  64
+#define INT_VALUE_10	  10
+#define	PRIORITY_0		  0
+#define HEX_VALUE_FF	  0XFF
+#define SHIFT_8		      8
+#define SHIFT_16  	    16
+#define SHIFT_24		    24
+
+#define DELAY_10MS        10
+#define DELAY_3MS         3
+#define UINT8_BUFF_0  (uint8_t *)0
+#define MAX_XLEN          16
+#define MIN_XLEN          0
+#define VOID_BUFF0     (void *)0
+#define PINOUT_CLEAR      0
+#define PINOUT_SET        1
+#define NVIC_PRIORITY     5
+#define CB_USER_PARAM  (void *)0
+#define CB_VALUE        (DMADRV_Callback_t)0
+
+#define DELAY0	        0
+#define HANDLE0         (TimerHandle_t)0
+#define TIMER_ID0       (void *)0
+#define BLOCK_TIME      0
+#define CONVERSION_VALUE 	1000
+
+#define JOIN_CNT0 	        0
+#define BUFF_SIZE_28	      28
+#define BUF_SIZE_128	      128
+#define RSI_DRIVER_STATUS   0
+#define OPER_MODE_0         0
+#define COEX_MODE_0         0
+#define RESP_BUFF_SIZE      6
+#define AP_CHANNEL_NO_0     0
+#define SCAN_BITMAP_OPTN_1  1
+#define JOIN_RETRIES_CNT_5  5
+#define IP_CONF_RSP_BUFF_LENGTH_4     4
+#define STATION             0
+#define BG_SCAN_RES_SIZE    500
+
+#define SPI_CONFIG_SUCESS	 0
+
 typedef enum {
   WIFI_EVENT,
   IP_EVENT,

@@ -42,11 +42,20 @@
 /******************************************************
  *                      Macros
  ******************************************************/
-
+#define MAC_KEY_FAIL_BYTE		0XFF
+#define KEY_DIGEST_SIZE		92
+#define MEMCMP_FAIL		0
+#define MPI_SET		1
+#define	SUCCESS_STATUS_WIFI_SECURE_LINK_EXCHANGE	0
+#define	SHA224_0	0
+#define HMAC_SIZE		92
+#define MEMSET_LEN	1
+#define LABLE_LEN	24
+#define ADDRESS_LENGTH		0
+#define CCM_STATUS_SUCCESS	0
 /******************************************************
  *                    Constants
  ******************************************************/
-
 /* Semaphore to signal wfx driver available */
 extern TaskHandle_t wfx_securelink_task;
 extern SemaphoreHandle_t wfx_securelink_rx_mutex;
@@ -99,7 +108,7 @@ sl_status_t sl_wfx_host_get_secure_link_mac_key(uint8_t *sl_mac_key)
 
   for (uint8_t index = 0; index < SL_WFX_SECURE_LINK_MAC_KEY_LENGTH; ++index) {
     // Assuming 0xFF... when not written
-    if (sl_mac_key[index] != 0xFF) {
+    if (sl_mac_key[index] != MAC_KEY_FAIL_BYTE) {
       result = SL_STATUS_OK;
       break;
     }
@@ -159,7 +168,7 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
                                        uint8_t *sl_host_pub_key)
 {
   sl_status_t status = SL_STATUS_OK;
-  uint8_t shared_key_digest[92];
+  uint8_t shared_key_digest[KEY_DIGEST_SIZE];
 
   if (xSemaphoreTake(wfx_securelink_rx_mutex, portMAX_DELAY) != pdTRUE) {
     return SL_STATUS_WIFI_SECURE_LINK_EXCHANGE_FAILED;
@@ -175,7 +184,7 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
   SL_WFX_ERROR_CHECK(status);
 
   // Calculate session key if public key/SHA512 digest matches
-  if (memcmp(temp_key_location, response_packet->body.ncp_pub_key_mac, SL_WFX_HOST_PUB_KEY_MAC_SIZE) != 0) {
+  if (memcmp(temp_key_location, response_packet->body.ncp_pub_key_mac, SL_WFX_HOST_PUB_KEY_MAC_SIZE) != MEMCMP_FAIL) {
     status = SL_STATUS_WIFI_SECURE_LINK_EXCHANGE_FAILED;
     goto error_handler;
   }
@@ -183,7 +192,7 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
 #if SL_WFX_SLK_CURVE25519
   SL_WFX_UNUSED_PARAMETER(sl_host_pub_key);
 
-  mbedtls_mpi_lset(&mbedtls_host_context.Qp.Z, 1);
+  mbedtls_mpi_lset(&mbedtls_host_context.Qp.Z, MPI_SET);
 
   // Read Ineo public key
   reverse_bytes(response_packet->body.ncp_pub_key, SL_WFX_NCP_PUB_KEY_SIZE);
@@ -196,7 +205,7 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
                                   &mbedtls_host_context.d,
                                   mbedtls_ctr_drbg_random,
                                   &host_drbg_context)
-      != 0) {
+      != SUCCESS_STATUS_WIFI_SECURE_LINK_EXCHANGE) {
     status = SL_STATUS_WIFI_SECURE_LINK_EXCHANGE_FAILED;
     goto error_handler;
   }
@@ -204,13 +213,13 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
   // Generate session key
   mbedtls_mpi_write_binary(&mbedtls_host_context.z, temp_key_location, SL_WFX_HOST_PUB_KEY_SIZE);
   reverse_bytes(temp_key_location, SL_WFX_HOST_PUB_KEY_SIZE);
-  mbedtls_sha256(temp_key_location, SL_WFX_HOST_PUB_KEY_SIZE, shared_key_digest, 0);
+  mbedtls_sha256(temp_key_location, SL_WFX_HOST_PUB_KEY_SIZE, shared_key_digest, SHA224_0);
 #else
-  uint8_t hmac_input[92] = { 0 };
-  char label[24]         = "SecureLink!KeyDerivation";
+  uint8_t hmac_input[HMAC_SIZE] = { 0 };
+  char label[LABLE_LEN]         = "SecureLink!KeyDerivation";
 
-  memset((uint16_t *)&hmac_input[0], (uint16_t)sl_wfx_htole16(1), 1);
-  memcpy((uint8_t *)&hmac_input[2], (uint8_t *)label, 24);
+  memset((uint16_t *)&hmac_input[0], (uint16_t)sl_wfx_htole16(1), MEMSET_LEN);
+  memcpy((uint8_t *)&hmac_input[2], (uint8_t *)label, LABLE_LEN);
   memcpy((uint8_t *)&hmac_input[26], sl_host_pub_key, SL_WFX_NCP_PUB_KEY_SIZE);
   memcpy((uint8_t *)&hmac_input[58], (uint8_t *)response_packet->body.ncp_pub_key, SL_WFX_NCP_PUB_KEY_SIZE);
   memset((uint16_t *)&hmac_input[90], (uint16_t)sl_wfx_htole16(128), 1);
@@ -220,7 +229,7 @@ sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t
                            sl_mac_key,
                            SL_WFX_HOST_PUB_KEY_SIZE,
                            (uint8_t *)hmac_input,
-                           92,
+                           HMAC_SIZE,
                            shared_key_digest);
 #endif
 
@@ -279,7 +288,7 @@ sl_status_t sl_wfx_host_decode_secure_link_data(uint8_t *buffer, uint32_t length
                                 (uint8_t *)&nonce,
                                 SL_WFX_SECURE_LINK_NONCE_SIZE_BYTES,
                                 NULL,
-                                0,
+                                ADDRESS_LENGTH,
                                 (uint8_t *)buffer,
                                 (uint8_t *)buffer,
                                 (uint8_t *)buffer + length,
@@ -307,13 +316,13 @@ sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer
 
   mbedtls_ccm_init(&ccm_context);
   if (mbedtls_ccm_setkey(&ccm_context, MBEDTLS_CIPHER_ID_AES, session_key, SL_WFX_SECURE_LINK_SESSION_KEY_BIT_COUNT)
-      == 0) {
+      == CCM_STATUS_SUCCESS) {
     mbedtls_ccm_encrypt_and_tag(&ccm_context,
                                 data_length,
                                 nonce,
                                 SL_WFX_SECURE_LINK_NONCE_SIZE_BYTES,
                                 NULL,
-                                0,
+                                ADDRESS_LENGTH,
                                 (uint8_t *)&buffer->header.id,
                                 (uint8_t *)&buffer->header.id,
                                 (uint8_t *)&buffer->header.id + data_length,

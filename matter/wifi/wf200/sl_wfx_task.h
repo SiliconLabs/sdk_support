@@ -40,7 +40,6 @@
 #include "FreeRTOS.h"
 #include "sl_wfx_constants.h"
 #include "task.h"
-
 typedef struct {
   sl_wfx_send_frame_req_t *frame;
   uint32_t data_length;

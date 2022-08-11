@@ -98,10 +98,10 @@ uint8_t dhcpclient_poll(void *arg)
         dhcp_state = DHCP_ADDRESS_ASSIGNED;
 
         EFR32_LOG("DHCP IP: %d.%d.%d.%d",
-                  (netif->ip_addr.u_addr.ip4.addr & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 8) & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 16) & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 24) & 0xff));
+                  (netif->ip_addr.u_addr.ip4.addr & HEX_VALUE_FF),
+                  ((netif->ip_addr.u_addr.ip4.addr >> SHIFT_8) & HEX_VALUE_FF),
+                  ((netif->ip_addr.u_addr.ip4.addr >> SHIFT_16) & HEX_VALUE_FF),
+                  ((netif->ip_addr.u_addr.ip4.addr >> SHIFT_24) & HEX_VALUE_FF));
       } else {
         dhcp = (struct dhcp *)netif_get_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
 

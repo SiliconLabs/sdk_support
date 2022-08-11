@@ -204,7 +204,7 @@ sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
   CORE_DECLARE_IRQ_STATE;
 
   CORE_ENTER_ATOMIC();
-  if (state > 0) {
+  if (state > PINOUT_CLEAR_STATUS) {
 #ifdef SLEEP_ENABLED
 #ifdef SL_WFX_USE_SDIO
     sl_wfx_host_enable_sdio();
@@ -249,8 +249,8 @@ sl_status_t sl_wfx_host_reset_chip(void)
 
 sl_status_t sl_wfx_host_wait_for_wake_up(void)
 {
-  xSemaphoreTake(wfx_wakeup_sem, 0);
-  xSemaphoreTake(wfx_wakeup_sem, 3 / portTICK_PERIOD_MS);
+  xSemaphoreTake(wfx_wakeup_sem, TICKS_TO_WAIT_0);
+  xSemaphoreTake(wfx_wakeup_sem, TICKS_TO_WAIT_3 / portTICK_PERIOD_MS);
 
   return SL_STATUS_OK;
 }
@@ -279,7 +279,7 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t 
   uint8_t posted_event_id;
   for (uint32_t i = 0; i < timeout; i++) {
     /* Wait for an event posted by the function sl_wfx_host_post_event() */
-    if (xQueueReceive(wfx_event_Q, &posted_event_id, 1) == pdTRUE) {
+    if (xQueueReceive(wfx_event_Q, &posted_event_id, TICKS_TO_WAIT_1) == pdTRUE) {
       /* Once a message is received, check if it is the expected ID */
       if (confirmation_id == posted_event_id) {
         /* Pass the confirmation reply and return*/
@@ -305,7 +305,7 @@ sl_status_t sl_wfx_host_lock(void)
 
   sl_status_t status = SL_STATUS_OK;
 
-  if (xSemaphoreTake(wfx_mutex, 500) != pdTRUE) {
+  if (xSemaphoreTake(wfx_mutex, TICKS_TO_WAIT_500) != pdTRUE) {
     EFR32_LOG("*ERR*Wi-Fi driver mutex timo");
     status = SL_STATUS_TIMEOUT;
   }
