@@ -23,9 +23,9 @@ typedef struct {
   || defined(EFR32MG12_BRD4164A) || defined(BRD4164A)
 // BRD4161-63-64 are pin to pin compatible for SPI
 #include "brd4161a.h"
-#elif  defined(EFR32MG12_BRD4186A) || defined(BRD4186A)
+#elif  defined(EFR32MG24_BRD4186C) || defined(BRD4186C)
 #include "brd4186c.h"
-#elif defined(EFR32MG24_BRD4187A) || defined(BRD4187A)
+#elif defined(EFR32MG24_BRD4187C) || defined(BRD4187C)
 #include "brd4187c.h"
 #else
 #error "Need SPI Pins"
