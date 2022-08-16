@@ -37,9 +37,13 @@ StaticTask_t secureLinkTaskStruct;
 
 StaticSemaphore_t xSlMutexBuffer;
 
-/*
+/*********************************************************************
+ * @fn  static void prvSecureLinkTask(void *p_arg)
+ * @brief
  * The task that implements the Secure Link renegotiation with WFX.
- */
+ * @param[in] p_arg:
+ * @return None
+ *************************************************************************/
 static void prvSecureLinkTask(void *p_arg)
 {
   sl_status_t result;
@@ -60,8 +64,11 @@ static void prvSecureLinkTask(void *p_arg)
 }
 
 /****************************************************************************
- * @brief Creates WFX securelink key renegotiation
- *task.
+ * @fn  void wfx_securelink_task_start(void)
+ * @brief 
+ * Creates WFX securelink key renegotiation task.
+ * @param[in] None
+ * @return None
  ******************************************************************************/
 void wfx_securelink_task_start(void)
 {

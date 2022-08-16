@@ -57,9 +57,11 @@ uint8_t sta_gw_addr3      = STA_GW_ADDR3_DEFAULT;
 static volatile uint8_t dhcp_state = DHCP_OFF;
 
 /*****************************************************************************
+ * @fn  void dhcpclient_set_link_state(int link_up)
+ * @brief
  * Notify DHCP client task about the wifi status
- *
  * @param link_up link status
+ * @return None
  ******************************************************************************/
 void dhcpclient_set_link_state(int link_up)
 {
@@ -72,9 +74,12 @@ void dhcpclient_set_link_state(int link_up)
   }
 }
 
-/*
+/**********************************************************************************
+ * @fn  uint8_t dhcpclient_poll(void *arg)
+ * @brief
  * Don't need a task here. We get polled every 250ms
- */
+ * @return  None
+ ************************************************************************************/
 uint8_t dhcpclient_poll(void *arg)
 {
   struct netif *netif = (struct netif *)arg;

@@ -39,6 +39,9 @@
  *governing permissions and limitations under the
  *License.
  *****************************************************************************/
+
+/* Includes */
+
 #include "em_gpio.h"
 
 #include "sl_wfx.h"
@@ -98,7 +101,12 @@ sl_status_t sl_wfx_host_disable_spi(void);
 #endif
 
 /****************************************************************************
+ * @fn  sl_status_t wfx_soft_init(void)
+ * @brief
  * WFX FMAC driver host interface initialization
+ * @param[in] None
+ * @returns Returns SL_STATUS_OK if successful,
+ *          SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t wfx_soft_init(void)
 {
@@ -117,7 +125,14 @@ sl_status_t wfx_soft_init(void)
 
   return SL_STATUS_OK;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_init(void)
+ * @brief
+ * Notify driver init function
+ * @param[in] None
+ * @returns Returns SL_STATUS_OK if successful,
+ *          SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 sl_status_t sl_wfx_host_init(void)
 {
   EFR32_LOG("WFX: Host Init");
@@ -127,7 +142,13 @@ sl_status_t sl_wfx_host_init(void)
 }
 
 /****************************************************************************
+ * @fn   sl_status_t sl_wfx_host_get_firmware_data(const uint8_t **data, uint32_t data_size)
+ * @brief
  * Get firmware data
+ * @param[in] data:
+ * @param[in] data_size:
+ * @returns Returns SL_STATUS_OK if successful,
+ *          SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_get_firmware_data(const uint8_t **data, uint32_t data_size)
 {
@@ -137,7 +158,12 @@ sl_status_t sl_wfx_host_get_firmware_data(const uint8_t **data, uint32_t data_si
 }
 
 /****************************************************************************
+ * @fn   sl_status_t sl_wfx_host_get_firmware_size(uint32_t *firmware_size)
+ * @brief
  * Get firmware size
+ * @param[in] firmware_size:
+ * @returns Returns SL_STATUS_OK if successful,
+ *         SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_get_firmware_size(uint32_t *firmware_size)
 {
@@ -146,7 +172,13 @@ sl_status_t sl_wfx_host_get_firmware_size(uint32_t *firmware_size)
 }
 
 /****************************************************************************
+ * @fn   sl_status_t sl_wfx_host_get_pds_data(const char **pds_data, uint16_t index)
+ * @brief
  * Get PDS data
+ * @param[in] pds_data:
+ * @param[in] index:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_get_pds_data(const char **pds_data, uint16_t index)
 {
@@ -155,7 +187,12 @@ sl_status_t sl_wfx_host_get_pds_data(const char **pds_data, uint16_t index)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_get_pds_size(uint16_t *pds_size)
+ * @brief
  * Get PDS size
+ * @param[in] pds_size:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_get_pds_size(uint16_t *pds_size)
 {
@@ -164,7 +201,12 @@ sl_status_t sl_wfx_host_get_pds_size(uint16_t *pds_size)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_deinit(void)
+ * @brief
  * Deinit host interface
+ * @param[in] None
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_deinit(void)
 {
@@ -172,7 +214,14 @@ sl_status_t sl_wfx_host_deinit(void)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_allocate_buffer(void **buffer, sl_wfx_buffer_type_t type, uint32_t buffer_size)
+ * @brief
  * Allocate buffer (Should allocate either Ethernet - from LWIP or Control) - TODO
+ * @param[in] buffer:
+ * @param[in] type:
+ * @param[in] buffer_size:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_allocate_buffer(void **buffer, sl_wfx_buffer_type_t type, uint32_t buffer_size)
 {
@@ -183,7 +232,13 @@ sl_status_t sl_wfx_host_allocate_buffer(void **buffer, sl_wfx_buffer_type_t type
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_free_buffer(void *buffer, sl_wfx_buffer_type_t type)
+ * @brief
  * Free host buffer (CHECK LWIP buffer)
+ * @param[in] buffer:
+ * @param[in] type:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_free_buffer(void *buffer, sl_wfx_buffer_type_t type)
 {
@@ -192,7 +247,12 @@ sl_status_t sl_wfx_host_free_buffer(void *buffer, sl_wfx_buffer_type_t type)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_hold_in_reset(void)
+ * @brief
  * Set reset pin low
+ * @param[in] None
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_hold_in_reset(void)
 {
@@ -202,7 +262,12 @@ sl_status_t sl_wfx_host_hold_in_reset(void)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
+ * @brief
  * Set wakeup pin status
+ * @param[in] state:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
 {
@@ -233,7 +298,13 @@ sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
   CORE_EXIT_ATOMIC();
   return SL_STATUS_OK;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_reset_chip(void)
+ * @brief
+ * reset the host chip
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 sl_status_t sl_wfx_host_reset_chip(void)
 {
   // Pull it low for at least 1 ms to issue a reset sequence
@@ -251,7 +322,13 @@ sl_status_t sl_wfx_host_reset_chip(void)
   host_context.wf200_initialized = 0;
   return SL_STATUS_OK;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_wait_for_wake_up(void)
+ * @brief
+ * wait for the host wake up
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 sl_status_t sl_wfx_host_wait_for_wake_up(void)
 {
   xSemaphoreTake(wfx_wakeup_sem, 0);
@@ -259,12 +336,31 @@ sl_status_t sl_wfx_host_wait_for_wake_up(void)
 
   return SL_STATUS_OK;
 }
+
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_wait(uint32_t wait_time)
+ * @brief
+ * wait for the host
+ * @param[in]  wait_time:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
+ *****************************************************************************/
+
 sl_status_t sl_wfx_host_wait(uint32_t wait_time)
 {
   uint32_t ticks = pdMS_TO_TICKS(wait_time);
   vTaskDelay(ticks ? ticks : 10);
   return SL_STATUS_OK;
 }
+
+/****************************************************************************
+ * @fn   sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
+ * @brief
+ * Called when the driver needs to setup the waited event
+ * @param[in] event_id:
+ * @returns Returns SL_STATUS_OK if successful,
+ *SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 
 sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
 {
@@ -274,10 +370,28 @@ sl_status_t sl_wfx_host_setup_waited_event(uint8_t event_id)
   return SL_STATUS_OK;
 }
 
+/****************************************************************************
+ * @fn  uint8_t sl_wfx_host_get_waited_event(void)
+ * @brief
+ * Called when the driver get waited event
+ * @returns returns host_context.waited_event_id
+ *****************************************************************************/
+
 uint8_t sl_wfx_host_get_waited_event(void)
 {
   return host_context.waited_event_id;
 }
+
+/******************************************************************************
+ * @fn  sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t timeout, void **event_payload_out)
+ * @brief
+ * wait for the host confirmation
+ * @param[in] confirmation_id:
+ * @param[in] timeout:
+ * @param[in] event_payload_out:
+ * @returns Returns SL_STATUS_OK if successful,
+ * Timeout, SL_STATUS_TIMEOUT otherwise
+ *****************************************************************************/
 
 sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t timeout, void **event_payload_out)
 {
@@ -300,10 +414,11 @@ sl_status_t sl_wfx_host_wait_for_confirmation(uint8_t confirmation_id, uint32_t 
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_lock(void)
+ * @brief
  * Called when the driver needs to lock its access
- *
  * @returns Returns SL_STATUS_OK if successful,
- *SL_STATUS_FAIL otherwise
+ *SL_STATUS_TIMEOUT otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_lock(void)
 {
@@ -319,10 +434,10 @@ sl_status_t sl_wfx_host_lock(void)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_unlock(void)
+ * @brief
  * Called when the driver needs to unlock its access
- *
- * @returns Returns SL_STATUS_OK if successful,
- *SL_STATUS_FAIL otherwise
+ * @returns Returns SL_STATUS_OK 
  *****************************************************************************/
 sl_status_t sl_wfx_host_unlock(void)
 {
@@ -331,12 +446,12 @@ sl_status_t sl_wfx_host_unlock(void)
   return SL_STATUS_OK;
 }
 
-/**************************************************************************/
-/**
+/******************************************************************************
+ * @fn  sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
+ * @brief
  * Called when the driver needs to post an event
- *
- * @returns Returns SL_STATUS_OK if successful,
- *SL_STATUS_FAIL otherwise
+ * @param[in]  event_payload:
+ * @returns Returns status
  *****************************************************************************/
 sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
 {
@@ -358,10 +473,12 @@ sl_status_t sl_wfx_host_post_event(sl_wfx_generic_message_t *event_payload)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_transmit_frame(void *frame, uint32_t frame_len)
+ * @brief
  * Called when the driver needs to transmit a frame
- *
- * @returns Returns SL_STATUS_OK if successful,
- *SL_STATUS_FAIL otherwise
+ * @param[in] frame:
+ * @param[in] frame_len:
+ * @returns returns sl_wfx_data_write(frame, frame_len)
  *****************************************************************************/
 sl_status_t sl_wfx_host_transmit_frame(void *frame, uint32_t frame_len)
 {
@@ -369,8 +486,15 @@ sl_status_t sl_wfx_host_transmit_frame(void *frame, uint32_t frame_len)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type,
+                                    sl_wfx_register_address_t address,
+                                    uint32_t length)
+ * @brief
  * Called when the driver is considering putting the
- *WFx in sleep mode
+ * WFx in sleep mode
+ * @param[in] type:
+ * @param[in] address:
+ * @param[in] length:
  * @returns SL_WIFI_SLEEP_GRANTED to let the WFx go to
  *sleep, SL_WIFI_SLEEP_NOT_GRANTED otherwise
  *****************************************************************************/
@@ -387,7 +511,11 @@ sl_status_t sl_wfx_host_sleep_grant(sl_wfx_host_bus_transfer_type_t type,
 
 #if SL_WFX_DEBUG_MASK
 /****************************************************************************
+ * @fn  void sl_wfx_host_log(const char *str, ...)
+ * @brief
  * Host debug output
+ * @param[in] str: string
+ * @return None
  *****************************************************************************/
 void sl_wfx_host_log(const char *str, ...)
 {
@@ -404,6 +532,13 @@ void sl_wfx_host_log(const char *str, ...)
  * shut it off
  */
 #if !CHIP_ENABLE_OPENTHREAD
+/****************************************************************************
+ * @fn  void otSysEventSignalPending(void)
+ * @brief
+ * system event signal pending 
+ * @param[in] None
+ * @return None
+ *****************************************************************************/
 void otSysEventSignalPending(void)
 {
   // BaseType_t yieldRequired = ThreadStackMgrImpl().SignalThreadActivityPendingFromISR();

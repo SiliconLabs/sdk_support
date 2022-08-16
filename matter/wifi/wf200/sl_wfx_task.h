@@ -56,11 +56,15 @@ extern "C" {
 #endif
 
 /****************************************************************************
+ * @fn void wfx_bus_start(void)
+ * @brief
  * Start wfx bus communication task.
  *****************************************************************************/
 void wfx_bus_start(void);
 
 /****************************************************************************
+ * @fn  bool wfx_bus_is_receive_processing(void)
+ * @brief
  * Returns status of wfx receive frames.
  *****************************************************************************/
 bool wfx_bus_is_receive_processing(void);

@@ -16,11 +16,15 @@
 #include "wfx_host_events.h"
 
 extern uint8_t wirq_irq_nb;
-/*
+/*********************************************************************************
+ * @fn  static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
+ * @brief
  * IRQ for SPI callback
  * Clear the Interrupt and wake up the task that
  * handles the actions of the interrupt (typically - wfx_bus_task ())
- */
+ * @param[in]  irqNumber:
+ * @return  None
+ **********************************************************************************/
 static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
 {
   BaseType_t bus_task_woken;
@@ -38,7 +42,11 @@ static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
 }
 
 /****************************************************************************
+ * @fn  void sl_wfx_host_gpio_init(void)
+ * @brief
  * Init some actions pins to the WF-200 expansion board
+ * @param[in] None
+ * @return  None
  *****************************************************************************/
 void sl_wfx_host_gpio_init(void)
 {

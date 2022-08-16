@@ -260,7 +260,12 @@ sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time) {
 }
 
 /*******************************************************************************
- * Init Sleeptimer and Set current time.
+ * @fn  int32_t rsi_rtc_set_time(uint32_t time)
+ * @brief
+ *      Init Sleeptimer and Set current time.
+ * @param[in] time:
+ * @return
+ *      None
  ******************************************************************************/
 int32_t rsi_rtc_set_time(uint32_t time) {
   sl_status_t ret_val = SL_STATUS_OK;

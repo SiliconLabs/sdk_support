@@ -55,9 +55,15 @@ bool hasNotifiedWifiConnectivity = false;
 static uint8_t wfx_rsi_drv_buf[WFX_RSI_BUF_SZ];
 wfx_wifi_scan_ext_t *temp_reset;
 uint8_t security;
-/*
- * Getting the AP details
- */
+
+/******************************************************************
+ * @fn   int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap)
+ * @brief
+ *       Getting the AP details
+ * @param[in] ap: access point
+ * @return
+ *        status
+ *********************************************************************/
 int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
   int32_t status;
   uint8_t rssi;
@@ -70,6 +76,15 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
   }
   return status;
 }
+
+/******************************************************************
+ * @fn   int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
+ * @brief
+ *       Getting the AP extra details
+ * @param[in] extra info: access point extra information
+ * @return
+ *        status
+ *********************************************************************/
 int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   int32_t status;
   uint8_t buff[28] = {0};
@@ -94,6 +109,15 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   }
   return status;
 }
+
+/******************************************************************
+ * @fn   int32_t wfx_rsi_reset_count()
+ * @brief
+ *       Getting the driver reset count
+ * @param[in] None
+ * @return
+ *        status
+ *********************************************************************/
 int32_t wfx_rsi_reset_count() {
   int32_t status;
   uint8_t buff[28] = {0};
@@ -112,10 +136,30 @@ int32_t wfx_rsi_reset_count() {
   }
   return status;
 }
+
+/******************************************************************
+ * @fn   wfx_rsi_disconnect()
+ * @brief
+ *       Getting the driver disconnect status
+ * @param[in] None
+ * @return
+ *        status
+ *********************************************************************/
 int32_t wfx_rsi_disconnect() {
   int32_t status = rsi_wlan_disconnect();
   return status;
 }
+
+/******************************************************************
+ * @fn   wfx_rsi_join_cb(uint16_t status, const uint8_t *buf, const uint16_t len)
+ * @brief
+ *       called when driver join with cb
+ * @param[in] status:
+ * @param[in] buf:
+ * @param[in] len:
+ * @return
+ *        None
+ *********************************************************************/
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
                             const uint16_t len) {
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
@@ -145,6 +189,17 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
 #endif
   }
 }
+
+/******************************************************************
+ * @fn  wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len)
+ * @brief
+ *       called when driver fail to join with cb
+ * @param[in] status:
+ * @param[in] buf:
+ * @param[in] len:
+ * @return
+ *        None
+ *********************************************************************/
 static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   WFX_RSI_LOG("%s: error: failed status: %02x on try %d", __func__, status,
               wfx_rsi.join_retries);
@@ -153,9 +208,17 @@ static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   xEventGroupSetBits(wfx_rsi.events, WFX_EVT_STA_START_JOIN);
 }
 #ifdef RS911X_SOCKETS
-/*
- * DHCP should end up here.
- */
+
+/******************************************************************
+ * @fn  wfx_rsi_ipchange_cb(uint16_t status, uint8_t *buf, uint32_t len)
+ * @brief
+ *       DHCP should end up here
+ * @param[in] status:
+ * @param[in] buf:
+ * @param[in] len:
+ * @return
+ *        None
+ *********************************************************************/
 static void wfx_rsi_ipchange_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
   if (status != RSI_SUCCESS) {
@@ -166,10 +229,18 @@ static void wfx_rsi_ipchange_cb(uint16_t status, uint8_t *buf, uint32_t len) {
     xEventGroupSetBits(wfx_rsi.events, WFX_EVT_STA_DHCP_DONE);
   }
 }
+
 #else
-/*
- * Got RAW WLAN data pkt
- */
+/*************************************************************************************
+ * @fn  wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len)
+ * @brief
+ *      Got RAW WLAN data pkt
+ * @param[in]  status:
+ * @param[in]  buf:
+ * @param[in]  len:
+ * @return
+ *        None
+ *****************************************************************************************/
 static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   // WFX_RSI_LOG("%s: status=%d, len=%d", __func__, status, len);
   if (status != RSI_SUCCESS) {
@@ -178,17 +249,21 @@ static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   wfx_host_received_sta_frame_cb(buf, len);
 }
 #endif /* !Socket support */
+
+/*************************************************************************************
+ * @fn  static int32_t wfx_rsi_init(void)
+ * @brief
+ *      driver initialization
+ * @param[in]  None
+ * @return
+ *        None
+ *****************************************************************************************/
 static int32_t wfx_rsi_init(void) {
   int32_t status;
   uint8_t buf[128];
   extern void rsi_hal_board_init(void);
 
-  /*
-   * Get the GPIOs/PINs set-up
-   */
-  // rsi_hal_board_init ();
   WFX_RSI_LOG("%s: starting(HEAP_SZ = %d)", __func__, SL_HEAP_SIZE);
-  //! Driver initialization
   status = rsi_driver_init(wfx_rsi_drv_buf, WFX_RSI_BUF_SZ);
   if ((status < 0) || (status > WFX_RSI_BUF_SZ)) {
     WFX_RSI_LOG("%s: error: RSI drv init failed with status: %02x", __func__,
@@ -254,12 +329,6 @@ static int32_t wfx_rsi_init(void) {
   /*
    * Register callbacks - We are only interested in the connectivity CBs
    */
-#if 0  /* missing in sapi library */
-        if ((status = rsi_wlan_register_callbacks (RSI_WLAN_JOIN_RESPONSE_HANDLER, wfx_rsi_join_cb)) != RSI_SUCCESS) {
-                WFX_RSI_LOG ("*ERR*RSI CB register join cb");
-                return status;
-        }
-#endif /* missing in sapi */
   if ((status = rsi_wlan_register_callbacks(
            RSI_JOIN_FAIL_CB, wfx_rsi_join_fail_cb)) != RSI_SUCCESS) {
     WFX_RSI_LOG("%s: RSI callback register join failed with status: %02x",
@@ -283,10 +352,26 @@ static int32_t wfx_rsi_init(void) {
   WFX_RSI_LOG("%s: RSI: OK", __func__);
   return RSI_SUCCESS;
 }
+
+/*************************************************************************************
+ * @fn  void wfx_show_err(char *msg)
+ * @brief
+ *      driver shows error message
+ * @param[in]  msg
+ * @return
+ *        None
+ *****************************************************************************************/
 void wfx_show_err(char *msg) { WFX_RSI_LOG("%s: message: %d", __func__, msg); }
-/*
- * Saving the details of the AP
- */
+
+
+/***************************************************************************************
+ * @fn   static void wfx_rsi_save_ap_info()
+ * @brief
+ *       Saving the details of the AP
+ * @param[in]  None
+ * @return
+ *       None
+ *******************************************************************************************/
 static void wfx_rsi_save_ap_info() {
   int32_t status;
   rsi_rsp_scan_t rsp;
@@ -316,9 +401,14 @@ static void wfx_rsi_save_ap_info() {
               &wfx_rsi.sec.ssid[0], &wfx_rsi.sec.passkey[0],
               wfx_rsi.sec.security, status);
 }
-/*
- * Start an async Join command
- */
+
+/********************************************************************************************
+ * @fn   static void wfx_rsi_do_join(void)
+ * @brief
+ *        Start an async Join command
+ * @return
+ *        None
+ **********************************************************************************************/
 static void wfx_rsi_do_join(void) {
   int32_t status;
 
@@ -356,11 +446,16 @@ static void wfx_rsi_do_join(void) {
     }
   }
 }
-/*
+/*********************************************************************************
+ * @fn  void wfx_rsi_task(void *arg)
+ * @brief
  * The main WLAN task - started by wfx_wifi_start () that interfaces with RSI.
  * The rest of RSI stuff come in call-backs.
  * The initialization has been already done.
- */
+ * @param[in] arg:
+ * @return 
+ *       None
+ **********************************************************************************/
 /* ARGSUSED */
 void wfx_rsi_task(void *arg) {
   EventBits_t flags;
@@ -559,6 +654,15 @@ void wfx_rsi_task(void *arg) {
 #endif /* SL_WFX_CONFIG_SOFTAP */
   }
 }
+
+/********************************************************************************************
+ * @fn   void wfx_dhcp_got_ipv4(uint32_t ip)
+ * @brief
+ *        Acquire the new ip address
+ * @param[in] ip: internet protocol
+ * @return
+ *        None
+ **********************************************************************************************/
 void wfx_dhcp_got_ipv4(uint32_t ip) {
   /*
    * Acquire the new IP address
@@ -573,14 +677,25 @@ void wfx_dhcp_got_ipv4(uint32_t ip) {
   wfx_ip_changed_notify(1);
   wfx_rsi.dev_state |= WFX_RSI_ST_STA_READY;
 }
+
+
 /*
  * WARNING - Taken from RSI and broken up
  * This is my own RSI stuff for not copying code and allocating an extra
  * level of indirection - when using LWIP buffers
  * see also: int32_t rsi_wlan_send_data_xx(uint8_t *buffer, uint32_t length)
  */
+/********************************************************************************************
+ * @fn   void *wfx_rsi_alloc_pkt()
+ * @brief
+ *       Allocate packet to send data
+ * @param[in] None
+ * @return
+ *        None
+ **********************************************************************************************/
 void *wfx_rsi_alloc_pkt() {
   rsi_pkt_t *pkt;
+
   // Allocate packet to send data
   if ((pkt = rsi_pkt_alloc(&rsi_driver_cb->wlan_cb->wlan_tx_pool)) == NULL) {
     return (void *)0;
@@ -588,12 +703,34 @@ void *wfx_rsi_alloc_pkt() {
 
   return (void *)pkt;
 }
+
+/********************************************************************************************
+ * @fn   void wfx_rsi_pkt_add_data(void *p, uint8_t *buf, uint16_t len, uint16_t off)
+ * @brief
+ *       add the data into packet
+ * @param[in]  p:
+ * @param[in]  buf:
+ * @param[in]  len:
+ * @param[in]  off:
+ * @return
+ *        None
+ **********************************************************************************************/
 void wfx_rsi_pkt_add_data(void *p, uint8_t *buf, uint16_t len, uint16_t off) {
   rsi_pkt_t *pkt;
 
   pkt = (rsi_pkt_t *)p;
   memcpy(((char *)pkt->data) + off, buf, len);
 }
+
+/********************************************************************************************
+ * @fn   int32_t wfx_rsi_send_data(void *p, uint16_t len)
+ * @brief
+ *       Driver send a data
+ * @param[in]  p:
+ * @param[in]  len:
+ * @return
+ *        None
+ **********************************************************************************************/
 int32_t wfx_rsi_send_data(void *p, uint16_t len) {
   int32_t status;
   register uint8_t *host_desc;
@@ -625,4 +762,5 @@ int32_t wfx_rsi_send_data(void *p, uint16_t len) {
 
   return status;
 }
+
 struct wfx_rsi wfx_rsi;

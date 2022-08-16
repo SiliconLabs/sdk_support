@@ -26,11 +26,9 @@ static UARTDRV_Handle_t sli_uartdrv_default_handle = NULL;
 #endif
 #endif
 
-
 /* Define RX and TX buffer queues */
 DEFINE_BUF_QUEUE(SL_UARTDRV_USART_VCOM_RX_BUFFER_SIZE, sl_uartdrv_usart_vcom_rx_buffer);
 DEFINE_BUF_QUEUE(SL_UARTDRV_USART_VCOM_TX_BUFFER_SIZE, sl_uartdrv_usart_vcom_tx_buffer);
-
 
 /* Create uartdrv initialization structs */
 UARTDRV_InitUart_t sl_uartdrv_usart_init_vcom = { 
@@ -67,12 +65,23 @@ UARTDRV_InitUart_t sl_uartdrv_usart_init_vcom = {
 #endif
 };
 
-
+/***************************************************************************//**
+ * Notify UARTDRV initialization
+ *
+ * @param void
+ ******************************************************************************/
 void sl_uartdrv_init_instances(void){
   UARTDRV_InitUart(sl_uartdrv_usart_vcom_handle, &sl_uartdrv_usart_init_vcom);
   sl_uartdrv_set_default(sl_uartdrv_usart_vcom_handle);
 }
 
+/***************************************************************************//**
+ * Set the handle as the default UARTDRV handle.
+ *
+ * @param[in] handle    UARTDRV handle to set as default.
+ *
+ * @return  Status result
+ ******************************************************************************/
 sl_status_t sl_uartdrv_set_default(UARTDRV_Handle_t handle)
 {
   sl_status_t status = SL_STATUS_INVALID_HANDLE;
@@ -85,6 +94,11 @@ sl_status_t sl_uartdrv_set_default(UARTDRV_Handle_t handle)
   return status;
 }
 
+/***************************************************************************//**
+ * Get the default UARTDRV handle configured.
+ *
+ * @return  UARTDRV handle
+ ******************************************************************************/
 UARTDRV_Handle_t sl_uartdrv_get_default(void)
 {
   return sli_uartdrv_default_handle;

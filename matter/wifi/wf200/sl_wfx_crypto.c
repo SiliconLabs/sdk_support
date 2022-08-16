@@ -17,6 +17,8 @@
 
 #ifdef SL_WFX_USE_SECURE_LINK
 
+/* Includes */
+
 #include "sl_wfx.h"
 #include <stdio.h>
 
@@ -90,7 +92,13 @@ static const uint8_t secure_link_mac_key[SL_WFX_SECURE_LINK_MAC_KEY_LENGTH] = {
 /******************************************************
  *               Function Definitions
  ******************************************************/
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_get_secure_link_mac_key(uint8_t *sl_mac_key)
+ * @brief
+ * Get secure link mac key
+ * @param[in]  sl_mac_key:
+ * @return  returns SL_STATUS_OK
+ *****************************************************************************/
 sl_status_t sl_wfx_host_get_secure_link_mac_key(uint8_t *sl_mac_key)
 {
   sl_status_t result = SL_STATUS_WIFI_SECURE_LINK_MAC_KEY_ERROR;
@@ -107,7 +115,15 @@ sl_status_t sl_wfx_host_get_secure_link_mac_key(uint8_t *sl_mac_key)
 
   return result;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_compute_pub_key(sl_wfx_securelink_exchange_pub_keys_req_body_t *request,
+                                        const uint8_t *sl_mac_key)
+ * @brief
+ * compute host public key
+ * @param[in] request :
+ * @param[in] sl_mac_key :
+ * @return  returns SL_STATUS_OK
+ *****************************************************************************/
 sl_status_t sl_wfx_host_compute_pub_key(sl_wfx_securelink_exchange_pub_keys_req_body_t *request,
                                         const uint8_t *sl_mac_key)
 {
@@ -153,7 +169,18 @@ error_handler:
   }
   return status;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t *response_packet,
+                                       const uint8_t *sl_mac_key,
+                                       uint8_t *sl_host_pub_key)
+ * @brief
+ * verify host public key
+ * @param[in]  response_packet:
+ * @param[in]  sl_mac_key:
+ * @param[in]  sl_host_pub_key:
+ * @return returns SL_STATUS_OK if successful,
+ *         SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t *response_packet,
                                        const uint8_t *sl_mac_key,
                                        uint8_t *sl_host_pub_key)
@@ -237,7 +264,13 @@ error_handler:
   }
   return status;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_free_crypto_context(void)
+ * @brief
+ * Free host crypto context
+ * @param[in] None
+ * @return returns SL_STATUS_OK
+ *****************************************************************************/
 sl_status_t sl_wfx_host_free_crypto_context(void)
 {
 #if SL_WFX_SLK_CURVE25519
@@ -248,9 +281,17 @@ sl_status_t sl_wfx_host_free_crypto_context(void)
 
   return SL_STATUS_OK;
 }
-
-// Decode receive data
-// Length excludes size of CCM tag and secure link header
+/********************************************************************************
+ * @fn   sl_status_t sl_wfx_host_decode_secure_link_data(uint8_t *buffer, uint32_t length, uint8_t *session_key)
+ * @brief
+ * Decode receive data
+ * Length excludes size of CCM tag and secure link header
+ * @param[in] buffer:
+ * @param[in] length:
+ * @param[in] session_key:
+ * @return returns SL_STATUS_OK if successful,
+ *         SL_STATUS_FAIL otherwise
+ ********************************************************************************/
 sl_status_t sl_wfx_host_decode_secure_link_data(uint8_t *buffer, uint32_t length, uint8_t *session_key)
 {
   mbedtls_ccm_context ccm_context;
@@ -294,9 +335,21 @@ error_handler:
   }
   return status;
 }
-
-// Encode transmit data
-// Length excludes size of CCM tag and secure link header
+/*********************************************************************
+ * @fn  sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer,
+                                                uint32_t data_length,
+                                                uint8_t *session_key,
+                                                uint8_t *nonce)
+ * @brief 
+ * Encode transmit data
+ * Length excludes size of CCM tag and secure link header
+ * @param[in]  buffer:
+ * @param[in]  data_length:
+ * @param[in]  session_key:
+ * @param[in]  nonce:
+ * @return  returns SL_STATUS_OK if successful,
+ *         SL_STATUS_FAIL otherwise
+*************************************************************************/
 sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer,
                                                 uint32_t data_length,
                                                 uint8_t *session_key,
@@ -325,14 +378,28 @@ sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer
 
   return status;
 }
-
+/****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_schedule_secure_link_renegotiation(void)
+ * @brief
+ * Called when the driver needs to schedule secure link renegotiation
+ * @param[in] None
+ * @returns Returns SL_STATUS_OK if successful,
+ *          SL_STATUS_FAIL otherwise
+ *****************************************************************************/
 sl_status_t sl_wfx_host_schedule_secure_link_renegotiation(void)
 {
   // call sl_wfx_secure_link_renegotiate_session_key() as soon as it makes sense for the host to do so
   xTaskNotifyGive(wfx_securelink_task);
   return SL_STATUS_OK;
 }
-
+/****************************************************************************
+ * @fn  static inline void reverse_bytes(uint8_t *src, uint8_t length)
+ * @brief
+ *         reverse the bytes
+ * @param[in] src: source
+ * @param[in] length:
+ * @returns None
+ *****************************************************************************/
 static inline void reverse_bytes(uint8_t *src, uint8_t length)
 {
   uint8_t *lo = src;

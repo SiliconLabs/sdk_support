@@ -69,7 +69,11 @@ SemaphoreHandle_t wfxtask_mutex;
 static bool wfx_bus_rx_in_process = false;
 
 /***************************************************************************
+ * @fn  bool wfx_bus_is_receive_processing(void)
+ * @brief
  * Check receive frame status
+ * @param[in]  None
+ * @return returns wfx_bus_rx_in_process
  ******************************************************************************/
 bool wfx_bus_is_receive_processing(void)
 {
@@ -77,7 +81,11 @@ bool wfx_bus_is_receive_processing(void)
 }
 
 /*****************************************************************************
+ * @fn  static sl_status_t receive_frames()
+ * @brief
  * Receives frames from the WFX.
+ * @param[in] None
+ * @return returns result
  ******************************************************************************/
 static sl_status_t receive_frames()
 {
@@ -94,9 +102,13 @@ error_handler:
   return result;
 }
 
-/*
+/********************************************************************************
+ * @fn  static void wfx_bus_task(void *p_arg)
+ * @brief
  * WFX bus communication task.
  * receives frames from the Bus interface
+ * @param[in] p_arg:
+ * @return None
  */
 static void wfx_bus_task(void *p_arg)
 {
@@ -119,7 +131,11 @@ static void wfx_bus_task(void *p_arg)
 }
 
 /***************************************************************************
+ * @fn  void wfx_bus_start()
+ * @brief
  * Creates WFX bus communication task.
+ * @param[in] None
+ * @return None
  ******************************************************************************/
 void wfx_bus_start()
 {

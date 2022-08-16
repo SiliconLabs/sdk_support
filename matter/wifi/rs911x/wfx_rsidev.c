@@ -21,7 +21,6 @@
 #include "rsi_utils.h"
 #include "rsi_socket.h"
 #include "rsi_nwk.h"
-//#include "rsi_wlan_non_rom.h"
 #include "rsi_error.h"
 #include "FreeRTOS.h"
 #include "event_groups.h"
@@ -32,11 +31,25 @@
 
 /* The following stuff comes from hal/rsi_hal_mcu_interrupt.c */
 static void (*rsi_intr_cb)(void);
+/*********************************************************************
+ * @fn  void rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
+ * @brief  
+ *      get the hal intr configuration
+ * @param[in]  rsi_interrupt_handler:
+ * @return
+ *      None
+ ***********************************************************************/
 void rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
 {
   rsi_intr_cb = rsi_interrupt_handler;
 }
-/* end of stuff from hal/rsi_hal_mcu_interrupt.c */
+/***********************************************************************
+ * @fn  static void wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
+ * @brief
+ *       end of stuff from hal/rsi_hal_mcu_interrupt.c 
+ * @param[in]  irqNumber:
+ * @return  None
+ * **********************************************************************/
 static void wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
 {
   BaseType_t bus_task_woken;
@@ -49,11 +62,14 @@ static void wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
   GPIO_IntClear(interrupt_mask);
   if (rsi_intr_cb)
     (*rsi_intr_cb)();
-  //bus_task_woken = pdFALSE;
-  //xSemaphoreGiveFromISR(wfx_wakeup_sem, &bus_task_woken);
-  //vTaskNotifyGiveFromISR(wfx_bus_task_handle, &bus_task_woken);
-  //portYIELD_FROM_ISR(bus_task_woken);
 }
+/***********************************************************************
+ * @fn   static void wfx_host_gpio_init(void)
+ * @brief
+ *       function called when host gpio intialization
+ * @param[in]  None
+ * @return  None
+ * **********************************************************************/
 static void wfx_host_gpio_init(void)
 {
   // Enable GPIO clock.
@@ -97,7 +113,14 @@ static uint32_t usart_tx_signal;
 static bool spi_enabled = false;
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 #endif
-
+/***********************************************************************
+ * @fn   static int sl_wfx_host_spi_set_config(void *usart)
+ * @brief
+ *       set the configuration of spi
+ * @param[in]  usart:
+ * @return  returns 0 if sucessful,
+ *         -1 otherwise
+ * **********************************************************************/
 static int sl_wfx_host_spi_set_config(void *usart)
 {
   int ret = -1;
@@ -165,7 +188,12 @@ static int sl_wfx_host_spi_set_config(void *usart)
 }
 
 /****************************************************************************
+ * @fn  sl_status_t sl_wfx_host_init_bus(void)
+ * @brief
  * Initialize SPI peripheral
+ * @param[in] None
+ * @return  returns SL_STATUS_OK if successful,
+ *        SL_STATUS_FAIL otherwise
  *****************************************************************************/
 sl_status_t sl_wfx_host_init_bus(void)
 {
@@ -208,11 +236,15 @@ sl_status_t sl_wfx_host_init_bus(void)
 
   return SL_STATUS_OK;
 }
-
+/***********************************************************************
+ * @fn   void wfx_rsidev_init(void)
+ * @brief
+ *       function called when driver rsidev intialization
+ * @param[in]  None
+ * @return  None
+ * **********************************************************************/
 void wfx_rsidev_init(void)
 {
   wfx_host_gpio_init();
-  //spi_sem = xSemaphoreCreateBinary();
-  //xSemaphoreGive(spi_sem);
 }
 #endif /* _NOT_USED */

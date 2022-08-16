@@ -44,7 +44,6 @@ extern void xPortSysTickHandler(void);
 #include "rsi_utils.h"
 #include "rsi_socket.h"
 #include "rsi_nwk.h"
-//#include "rsi_wlan_non_rom.h"
 #include "rsi_bootup_config.h"
 #include "rsi_error.h"
 #include "wfx_rsi.h"

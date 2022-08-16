@@ -63,6 +63,7 @@ StaticSemaphore_t xEthernetIfSemaBuffer;
  ******************************************************************************/
 
 /*****************************************************************************
+ * @fn static void low_level_init(struct netif *netif)
  * @brief
  *    Initializes the hardware parameters. Called from ethernetif_init().
  *
@@ -94,13 +95,17 @@ static void low_level_init(struct netif *netif)
   /* Accept broadcast address and ARP traffic */
   netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_IGMP;
 
-  /* Set netif link flag */
-  //    netif->flags |= NETIF_FLAG_LINK_UP|NETIF_FLAG_UP;
 }
 
-/*
+/********************************************************************************
+ * @fn  static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
+ * @brief  
  * Make PBUF out of a linear buffer - that can be fed into lwip
- */
+ * @param[in]  netif: the already initialized lwip network interface structure
+ * @param[in]  len: length
+ * @return
+ *     None
+ ************************************************************************************/
 static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
 {
   struct pbuf *p, *q;
@@ -117,7 +122,6 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
     for (q = p, bufferoffset = 0; q != NULL; q = q->next) {
       memcpy((uint8_t *)q->payload, (uint8_t *)b + bufferoffset, q->len);
       bufferoffset += q->len;
-      // ASSERT(bufferoffset <= len);
     }
 #if 0
                 EFR32_LOG ("EN:IN %d,[%02x:%02x:%02x:%02x:%02x%02x][%02x:%02x:%02x:%02x:%02x:%02x]type=%02x%02x", bufferoffset,
@@ -132,7 +136,8 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
 }
 
 /*****************************************************************************
- * @brief
+ *  @fn  static err_t low_level_output(struct netif *netif, struct pbuf *p)
+ *  @brief
  *    This function should does the actual transmission of the packet(s).
  *    The packet is contained in the pbuf that is passed to the function.
  *    This pbuf might be chained.
@@ -185,7 +190,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   /* transmit */
   int i  = 0;
   result = SL_STATUS_FAIL;
-
+  
   //EFR32_LOG ("WF200: Out %d", (int)framelength);
   while ((result != SL_STATUS_OK) && (i++ < 10)) {
     result = sl_wfx_send_ethernet_frame(tx_buffer, framelength, SL_WFX_STA_INTERFACE, 0);
@@ -200,6 +205,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 }
 
 /*****************************************************************************
+ * @fn   void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer)
  * @brief
  *    This function implements the wf200 received frame callback.
  *    Called from the context of the bus_task (not ISR)
@@ -225,15 +231,27 @@ void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer)
       buffer = (uint8_t *)&(rx_buffer->body.frame[rx_buffer->body.frame_padding]);
       //EFR32_LOG ("WF200: In %d", (int)len);
       low_level_input(netif, buffer, len);
-    } else {
+    }else {
       //EFR32_LOG ("WF200: NO-INTF");
-    }
+     }
   } else {
     //EFR32_LOG ("WF200: Invalid frame IN");
   }
 }
 #else /* For RS911x - using LWIP */
 static SemaphoreHandle_t ethout_sem;
+/*****************************************************************************
+ *  @fn  static err_t low_level_output(struct netif *netif, struct pbuf *p)
+ *  @brief
+ *    low level output
+ *
+ * @param[in] netif: the lwip network interface structure
+ *
+ * @param[in] p: the packet to send
+ *
+ * @return
+ *    ERR_OK if successful
+ ******************************************************************************/
 static err_t low_level_output(struct netif *netif, struct pbuf *p)
 {
   void *rsipkt;
@@ -249,7 +267,6 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
   }
-  //    netif->flags |= NETIF_FLAG_LINK_UP|NETIF_FLAG_UP;
   rsipkt = wfx_rsi_alloc_pkt();
   if (!rsipkt) {
     EFR32_LOG("EN-RSI:No buf");
@@ -278,12 +295,24 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
   }
-
+  
   //EFR32_LOG ("EN-RSI:Xmit %d", framelength);
   xSemaphoreGive(ethout_sem);
 
   return ERR_OK;
 }
+/*****************************************************************************
+ *  @fn  void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
+ *  @brief
+ *    host received frame cb
+ *
+ * @param[in] buf: buffer
+ *
+ * @param[in] len: length
+ *
+ * @return
+ *    None
+ ******************************************************************************/
 void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
 {
   struct netif *ifp;
@@ -294,7 +323,16 @@ void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
 }
 
 #endif /* RS911x - with LWIP */
-
+/*****************************************************************************
+ *  @fn  err_t sta_ethernetif_init(struct netif *netif)
+ *  @brief
+ *    sta ethernet if initialization
+ *
+ * @param[in] netif: the lwip network interface structure
+ *
+ * @return
+ *    ERR_OK if successful
+ ******************************************************************************/
 err_t sta_ethernetif_init(struct netif *netif)
 {
   LWIP_ASSERT("netif != NULL", (netif != NULL));
@@ -309,7 +347,6 @@ err_t sta_ethernetif_init(struct netif *netif)
 
   /* initialize the hardware */
   low_level_init(netif);
-  //wfx_SetStationNetif (netif); /* I think netif already points to station */
 #ifndef WF200_WIFI
   /* Need single output only */
   ethout_sem = xSemaphoreCreateBinaryStatic(&xEthernetIfSemaBuffer);

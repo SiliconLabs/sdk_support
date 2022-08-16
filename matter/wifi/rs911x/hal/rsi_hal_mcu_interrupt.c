@@ -55,12 +55,10 @@ uint8_t current_pin_set, prev_pin_set;
 /* ARGSUSED */
 void rsi_gpio_irq_cb(uint8_t irqnum)
 {
-  //uint32_t interrupt_mask;
 
   //WFX_RSI_LOG ("RSI: Got Int=%d", irqnum)
   if (irqnum != SL_WFX_HOST_PINOUT_SPI_IRQ)
     return;
-  //interrupt_mask = GPIO_IntGet ();
   GPIO_IntClear(1 << SL_WFX_HOST_PINOUT_SPI_IRQ);
 
   //WFX_RSI_LOG ("Got SPI intr, cb=%x", (uint32_t)call_back);

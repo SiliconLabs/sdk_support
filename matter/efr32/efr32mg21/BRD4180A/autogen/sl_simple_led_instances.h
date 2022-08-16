@@ -31,7 +31,11 @@ extern const sl_led_t *sl_simple_led_array[];
 
 #define SL_SIMPLE_LED_COUNT 2
 #define SL_SIMPLE_LED_INSTANCE(n) (sl_simple_led_array[n])
-
+/*****************************************************************************
+*  Notify Device LED initialization
+*
+*  @param void
+******************************************************************************/
 void sl_simple_led_init_instances(void);
 
 #ifdef __cplusplus

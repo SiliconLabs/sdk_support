@@ -54,10 +54,15 @@ void wfx_started_notify()
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
 
-/*
+/***********************************************************************************
+ * @fn  void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
+ * @brief
  * For now we are not notifying anything other than AP Mac -
  * Other stuff such as DTIM etc. may be required for later
- */
+ * @param[in] status:
+ * @param[in] ap: access point
+ * @return None
+ *************************************************************************************/
 void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 {
   sl_wfx_connect_ind_t evt;
@@ -81,9 +86,13 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
-/*
- * The network is down - RS911x will take down the link etc.
- */
+/**************************************************************************************
+ * @fn  void wfx_disconnected_notify(int32_t status)
+ * @brief
+ *    notification of disconnection
+ * @param[in] status:
+ * @return None
+ ********************************************************************************************/
 void wfx_disconnected_notify(int32_t status)
 {
   sl_wfx_disconnect_ind_t evt;
@@ -96,7 +105,13 @@ void wfx_disconnected_notify(int32_t status)
   evt.body.reason   = status;
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
-
+/**************************************************************************************
+ * @fn  void wfx_ipv6_notify(int got_ip)
+ * @brief
+ *      notification of ipv6
+ * @param[in]  got_ip:
+ * @return None
+ ********************************************************************************************/
 void wfx_ipv6_notify(int got_ip)
 {
   sl_wfx_generic_message_t eventData;
@@ -117,7 +132,13 @@ void wfx_ipv6_notify(int got_ip)
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
-
+/**************************************************************************************
+ * @fn   void wfx_ip_changed_notify(int got_ip)
+ * @brief
+ *      notification of ip change
+ * @param[in]  got_ip:
+ * @return None
+ ********************************************************************************************/
 void wfx_ip_changed_notify(int got_ip)
 {
   sl_wfx_generic_message_t eventData;
