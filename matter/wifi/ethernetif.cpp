@@ -50,6 +50,8 @@ void efr32Log(const char *aFormat, ...);
 }
 #endif
 
+StaticSemaphore_t xEthernetIfSemaBuffer;
+
 /*****************************************************************************
  * Defines
  ******************************************************************************/
@@ -310,7 +312,7 @@ err_t sta_ethernetif_init(struct netif *netif)
   //wfx_SetStationNetif (netif); /* I think netif already points to station */
 #ifndef WF200_WIFI
   /* Need single output only */
-  ethout_sem = xSemaphoreCreateBinary();
+  ethout_sem = xSemaphoreCreateBinaryStatic(&xEthernetIfSemaBuffer);
   xSemaphoreGive(ethout_sem);
 #endif
   return ERR_OK;

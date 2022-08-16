@@ -19,6 +19,12 @@
 #include "wfx_host_events.h"
 #include "wfx_rsi.h"
 
+/* wfxRsi Task will use as its stack */
+StackType_t wfxRsiTaskStack[WFX_RSI_TASK_SZ] = { 0 };
+
+/* Structure that will hold the TCB of the wfxRsi Task being created. */
+StaticTask_t wfxRsiTaskBuffer;
+
 /*
  * Called from ConnectivityManagerImpl.cpp - to enable the device
  * Create the RSI task and let it deal with life.
@@ -34,10 +40,19 @@ sl_status_t wfx_wifi_start(void)
   /*
      * Create the driver task
      */
+#if 1
+  wfx_rsi.wlan_task = xTaskCreateStatic(wfx_rsi_task, "wfx_rsi",
+  			WFX_RSI_TASK_SZ, NULL, 1, wfxRsiTaskStack, &wfxRsiTaskBuffer);
+  if (NULL == wfx_rsi.wlan_task) {
+    WFX_RSI_LOG("%s: error: failed to create task.", __func__);
+    return SL_STATUS_FAIL;
+  }
+#else
   if (xTaskCreate(wfx_rsi_task, "wfx_rsi", WFX_RSI_TASK_SZ, NULL, 1, &wfx_rsi.wlan_task) != pdPASS) {
     WFX_RSI_LOG("%s: error: failed to create task.", __func__);
     return SL_STATUS_FAIL;
   }
+#endif  
   return SL_STATUS_OK;
 }
 void wfx_enable_sta_mode(void)

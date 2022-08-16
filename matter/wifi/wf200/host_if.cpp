@@ -70,6 +70,15 @@
 using namespace ::chip;
 using namespace ::chip::DeviceLayer;
 
+/* wfxRsi Task will use as its stack */
+StackType_t wfxEventTaskStack[1024] = { 0 };
+
+/* Structure that will hold the TCB of the wfxRsi Task being created. */
+StaticTask_t wfxEventTaskBuffer;
+
+/* Declare a variable to hold the data associated with the created event group. */
+StaticEventGroup_t wfxEventGroup;
+
 EventGroupHandle_t sl_wfx_event_group;
 TaskHandle_t wfx_events_task_handle;
 static sl_wfx_mac_address_t ap_mac;
@@ -133,9 +142,11 @@ static void sl_wfx_ap_client_rejected_callback(uint32_t status, uint8_t *mac);
 static void wfx_events_task_start()
 {
   /* create an event group to track Wi-Fi events */
-  sl_wfx_event_group = xEventGroupCreate();
+  sl_wfx_event_group = xEventGroupCreateStatic(&wfxEventGroup);
 
-  if (xTaskCreate(wfx_events_task, "wfx_events", 1024, NULL, 1, &wfx_events_task_handle) != pdPASS) {
+  wfx_events_task_handle = xTaskCreateStatic(wfx_events_task, "wfx_events",
+  			1024, NULL, 1, wfxEventTaskStack, &wfxEventTaskBuffer);
+  if (NULL == wfx_events_task_handle) {
     EFR32_LOG("Failed to create WFX wfx_events");
   }
 }

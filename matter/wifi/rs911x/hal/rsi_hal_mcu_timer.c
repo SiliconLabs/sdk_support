@@ -50,6 +50,9 @@ extern void xPortSysTickHandler(void);
 #include "wfx_rsi.h"
 
 #ifndef _use_the_rsi_defined_functions
+
+StaticTimer_t sRsiTimerBuffer;
+
 /*
  * We (Matter port) need a few functions out of this file
  * They are at the top
@@ -114,11 +117,12 @@ found:
   tp->name[1] = timer_node;
   tp->name[2] = 0;
   tp->func    = rsi_timer_cb;
-  tp->handle  = xTimerCreate((char *)&tp->name[0],
+  tp->handle  = xTimerCreateStatic((char *)&tp->name[0],
                             pdMS_TO_TICKS(duration),
                             ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
                             (void *)0,
-                            timer_cb);
+                            timer_cb,
+                            &sRsiTimerBuffer);
   if (tp->handle == (TimerHandle_t)0)
     return RSI_ERROR_INSUFFICIENT_BUFFER;
   (void)xTimerStart(tp->handle, 0);

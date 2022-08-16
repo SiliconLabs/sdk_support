@@ -67,9 +67,14 @@
 #define SL_WFX_EVENT_MAX_SIZE  512
 #define SL_WFX_EVENT_LIST_SIZE 1
 
+StaticSemaphore_t xWfxWakeupSemaBuffer;
+uint8_t sWfxEventQueueBuffer[SL_WFX_EVENT_LIST_SIZE * sizeof(uint8_t)];
+StaticQueue_t sWfxEventQueueStruct;
 QueueHandle_t wfx_event_Q;
 SemaphoreHandle_t wfx_wakeup_sem;
 SemaphoreHandle_t wfx_mutex;
+
+StaticSemaphore_t xWfxMutexBuffer;
 
 struct {
   uint32_t wf200_firmware_download_progress;
@@ -98,15 +103,15 @@ sl_status_t sl_wfx_host_disable_spi(void);
 sl_status_t wfx_soft_init(void)
 {
   EFR32_LOG("WF200:Soft Init");
-  if ((wfx_event_Q == NULL) && ((wfx_event_Q = xQueueCreate(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t))) == NULL)) {
+  if ((wfx_event_Q == NULL) && ((wfx_event_Q = xQueueCreateStatic(SL_WFX_EVENT_LIST_SIZE, sizeof(uint8_t), sWfxEventQueueBuffer, &sWfxEventQueueStruct)) == NULL)) {
     return SL_STATUS_FAIL;
   }
 
-  if ((wfx_wakeup_sem == NULL) && ((wfx_wakeup_sem = xSemaphoreCreateBinary()) == NULL)) {
+  if ((wfx_wakeup_sem == NULL) && ((wfx_wakeup_sem = xSemaphoreCreateBinaryStatic(&xWfxWakeupSemaBuffer)) == NULL)) {
     return SL_STATUS_FAIL;
   }
 
-  if ((wfx_mutex == NULL) && ((wfx_mutex = xSemaphoreCreateMutex()) == NULL)) {
+  if ((wfx_mutex == NULL) && ((wfx_mutex = xSemaphoreCreateMutexStatic(&xWfxMutexBuffer)) == NULL)) {
     return SL_STATUS_FAIL;
   }
 

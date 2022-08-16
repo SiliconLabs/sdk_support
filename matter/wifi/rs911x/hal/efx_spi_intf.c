@@ -45,6 +45,7 @@
 #include "sl_device_init_dpll.h"
 #include "sl_device_init_hfxo.h"
 
+StaticSemaphore_t xEfxSpiIntfSemaBuffer;
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_chan, rx_dma_chan;
 /*TODO -  FIX This - It belongs somewhere else depending on which USART is used */
@@ -196,7 +197,7 @@ void sl_wfx_host_reset_chip(void)
 }
 void rsi_hal_board_init(void)
 {
-  spi_sem = xSemaphoreCreateBinary();
+  spi_sem = xSemaphoreCreateBinaryStatic(&xEfxSpiIntfSemaBuffer);
   xSemaphoreGive(spi_sem);
   WFX_RSI_LOG("RSI_HAL: init GPIO");
   sl_wfx_host_gpio_init();

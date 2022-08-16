@@ -35,6 +35,15 @@
 #include "wfx_host_events.h"
 #include "wfx_rsi.h"
 
+/* Rsi driver Task will use as its stack */
+StackType_t driverRsiTaskStack[WFX_RSI_WLAN_TASK_SZ] = { 0 };
+
+/* Structure that will hold the TCB of the wfxRsi Task being created. */
+StaticTask_t driverRsiTaskBuffer;
+
+/* Declare a variable to hold the data associated with the created event group. */
+StaticEventGroup_t rsiDriverEventGroup;
+
 bool hasNotifiedIPV6 = false;
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
 bool hasNotifiedIPV4 = false;
@@ -198,8 +207,9 @@ static int32_t wfx_rsi_init(void) {
   /*
    * Create the driver task
    */
-  if (xTaskCreate((TaskFunction_t)rsi_wireless_driver_task, "rsi_drv",
-                  WFX_RSI_WLAN_TASK_SZ, NULL, 1, &wfx_rsi.drv_task) != pdPASS) {
+  wfx_rsi.drv_task = xTaskCreateStatic((TaskFunction_t)rsi_wireless_driver_task, "rsi_drv",
+                  WFX_RSI_WLAN_TASK_SZ, NULL, 1, driverRsiTaskStack, &driverRsiTaskBuffer);
+  if (NULL == wfx_rsi.drv_task) {
     WFX_RSI_LOG("%s: error: rsi_wireless_driver_task failed", __func__);
     return RSI_ERROR_INVALID_PARAM;
   }
@@ -240,7 +250,7 @@ static int32_t wfx_rsi_init(void) {
               wfx_rsi.sta_mac.octet[0], wfx_rsi.sta_mac.octet[1],
               wfx_rsi.sta_mac.octet[2], wfx_rsi.sta_mac.octet[3],
               wfx_rsi.sta_mac.octet[4], wfx_rsi.sta_mac.octet[5]);
-  wfx_rsi.events = xEventGroupCreate();
+  wfx_rsi.events = xEventGroupCreateStatic(&rsiDriverEventGroup);
   /*
    * Register callbacks - We are only interested in the connectivity CBs
    */

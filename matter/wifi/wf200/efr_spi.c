@@ -65,6 +65,7 @@
 
 #define USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
 
+StaticSemaphore_t xEfrSpiSemaBuffer;
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_channel;
 static unsigned int rx_dma_channel;
@@ -137,7 +138,7 @@ sl_status_t sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 0);
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
 
-  spi_sem = xSemaphoreCreateBinary();
+  spi_sem = xSemaphoreCreateBinaryStatic(&xEfrSpiSemaBuffer);
   xSemaphoreGive(spi_sem);
 
   DMADRV_Init();
