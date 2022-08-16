@@ -135,7 +135,7 @@ static void wfx_events_task_start()
   /* create an event group to track Wi-Fi events */
   sl_wfx_event_group = xEventGroupCreate();
 
-  if (xTaskCreate(wfx_events_task, "wfx_events", STACK_SIZE_1K, NULL, TASK_PRIORITY_1, &wfx_events_task_handle) != pdPASS) {
+  if (xTaskCreate(wfx_events_task, "wfx_events", WLAN_TASK_STACK_SIZE, NULL, WLAN_TASK_PRIORITY, &wfx_events_task_handle) != pdPASS) {
     EFR32_LOG("Failed to create WFX wfx_events");
   }
 }
@@ -308,7 +308,7 @@ static void sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t *scan_resu
     }
     ap->scan.chan = scan_result->channel;
     ap->scan.rssi = scan_result->rcpi;
-    memcpy(&ap->scan.bssid[0], &scan_result->mac[0], COPY_6_CHAR);
+    memcpy(&ap->scan.bssid[0], &scan_result->mac[0], BSSID_MAX_STR_LEN);
     scan_count++;
   }
 }
@@ -334,7 +334,7 @@ static void sl_wfx_connect_callback(uint8_t *mac, uint32_t status)
   switch (status) {
     case WFM_STATUS_SUCCESS: {
       EFR32_LOG("STA-Connected\r\n");
-      memcpy(&ap_mac.octet[0], mac, COPY_6_CHAR);
+      memcpy(&ap_mac.octet[0], mac, MAC_ADDRESS_FIRST_OCTET);
       sl_wfx_context->state = static_cast<sl_wfx_state_t>(static_cast<int>(sl_wfx_context->state)
                                                           | static_cast<int>(SL_WFX_STA_INTERFACE_CONNECTED));
       xEventGroupSetBits(sl_wfx_event_group, SL_WFX_CONNECT);
@@ -365,7 +365,7 @@ static void sl_wfx_connect_callback(uint8_t *mac, uint32_t status)
     }
   }
 
-      if ( (status != WFM_STATUS_SUCCESS) && retryJoin < RETRY_CNT) {
+      if ( (status != WFM_STATUS_SUCCESS) && retryJoin < MAX_JOIN_RETRIES_COUNT) {
         retryJoin += 1;
         retryInProgress = false;
         EFR32_LOG("WFX Retry to connect to network count: %d",retryJoin);
@@ -393,7 +393,7 @@ static void sl_wfx_disconnect_callback(uint8_t *mac, uint16_t reason)
  *****************************************************************************/
 static void sl_wfx_start_ap_callback(uint32_t status)
 {
-  if (status == STATUS_0) {
+  if (status == AP_START_SUCCESS) {
     EFR32_LOG("AP started\r\n");
     sl_wfx_context->state =
       static_cast<sl_wfx_state_t>(static_cast<int>(sl_wfx_context->state) | static_cast<int>(SL_WFX_AP_INTERFACE_UP));
@@ -580,7 +580,7 @@ static void wfx_events_task(void *p_arg)
       sl_wfx_ssid_def_t ssid, *sp;
       uint16_t num_ssid, slen;
       if (scan_ssid) {
-        memset(&ssid, EMPTY_BUFFER, sizeof(ssid));
+        memset(&ssid, CLEAR_BUFFER, sizeof(ssid));
         slen = strlen(scan_ssid);
         memcpy(&ssid.ssid[0], scan_ssid, slen);
         ssid.ssid_length = slen;
@@ -792,7 +792,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig)
 
 void wfx_clear_wifi_provision(void)
 {
-  memset(&wifi_provision, EMPTY_BUFFER, sizeof(wifi_provision));
+  memset(&wifi_provision, CLEAR_BUFFER, sizeof(wifi_provision));
 }
 bool wfx_is_sta_provisioned(void)
 {
@@ -802,7 +802,7 @@ sl_status_t wfx_connect_to_ap(void)
 {
   sl_status_t result;
 
-  if (wifi_provision.ssid[0] == EMPTY_BUFFER) {
+  if (wifi_provision.ssid[0] == CLEAR_BUFFER) {
     return SL_STATUS_NOT_AVAILABLE;
   }
   EFR32_LOG("WIFI:JOIN to %s", &wifi_provision.ssid[0]);

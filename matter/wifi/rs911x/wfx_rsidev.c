@@ -60,12 +60,12 @@ static void wfx_host_gpio_init(void)
   CMU_ClockEnable(cmuClock_GPIO, true);
 
   // Configure WF200 reset pin.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN, gpioModePushPull, CLEAR_BUFFER);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN, gpioModePushPull, PINOUT_CLEAR);
   // Configure WF200 WUP pin.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_WUP_PORT, SL_WFX_HOST_PINOUT_WUP_PIN, gpioModePushPull, CLEAR_BUFFER);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_WUP_PORT, SL_WFX_HOST_PINOUT_WUP_PIN, gpioModePushPull, PINOUT_CLEAR);
 
   // GPIO used as IRQ.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, gpioModeInputPull, CLEAR_BUFFER);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, gpioModeInputPull, PINOUT_CLEAR);
   CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
   // Set up interrupt based callback function - trigger on both edges.
@@ -79,8 +79,8 @@ static void wfx_host_gpio_init(void)
   GPIOINT_CallbackRegister(SL_WFX_HOST_PINOUT_SPI_IRQ, wfx_spi_wakeup_irq_callback);
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
-  NVIC_SetPriority(GPIO_EVEN_IRQn, NVIC_PRIORITY);
-  NVIC_SetPriority(GPIO_ODD_IRQn, NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_GPIO_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_GPIO_NVIC_PRIORITY);
 }
 
 #define USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
@@ -196,9 +196,9 @@ sl_status_t sl_wfx_host_init_bus(void)
 
   USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
   GPIO_DriveStrengthSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, gpioDriveStrengthStrongAlternateStrong);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, CLEAR_BUFFER);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, CLEAR_BUFFER);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, CLEAR_BUFFER);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PINOUT_CLEAR);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, PINOUT_CLEAR);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, PINOUT_CLEAR);
 
   DMADRV_Init();
   DMADRV_AllocateChannel(&tx_dma_channel, NULL);

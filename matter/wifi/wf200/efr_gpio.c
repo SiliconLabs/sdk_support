@@ -68,6 +68,6 @@ void sl_wfx_host_gpio_init(void)
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
   NVIC_ClearPendingIRQ(1 << wirq_irq_nb);
-  NVIC_SetPriority(GPIO_EVEN_IRQn, NVIC_PRIORITY);
-  NVIC_SetPriority(GPIO_ODD_IRQn, NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_SPI_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_SPI_NVIC_PRIORITY);
 }

@@ -26,12 +26,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ZONE0 0
-#define CH_SELECTOR 1u
-#define CNT_VALUE 0u
-#define FREQ_VALUE 0
-#define TIME_ZONE_OFFSET 0u
-#define VAL_1	1
+#define ZONE0 			0
+#define CH_SELECTOR 		1u
+#define CNT_VALUE 		0u
+#define RSI_RTC_FREQ_VALUE 	0
+#define TIME_ZONE_OFFSET 	0u
+#define VAL_1 			1
 
 #define SLEEPTIMER_EVENT_OF (0x01)
 #define SLEEPTIMER_EVENT_COMP (0x02)
@@ -194,7 +194,7 @@ sl_status_t rsi_rtc_init(void) {
     rsi_rtc_init_timer();
     rsi_rtc_enable_int(SLEEPTIMER_EVENT_OF);
     timer_frequency = rsi_rtc_get_hal_timer_frequency();
-    if (timer_frequency == FREQ_VALUE) {
+    if (timer_frequency == RSI_RTC_FREQ_VALUE) {
       CORE_EXIT_ATOMIC();
       return SL_STATUS_INVALID_PARAMETER;
     }

@@ -76,95 +76,108 @@
 
 #include "sl_status.h"
 
-// wf 200 S
-#define STACK_SIZE_1K	1024
-#define TASK_PRIORITY_1    1
-#define ETH_FRAME	0
-#define CMP_SUCCESS		0
-#define COPY_6_CHAR		6 
-#define RETRY_CNT		5
-#define STATUS_0		0
-#define BITS_TO_WAIT	0
-#define DELAY_250MS		250
-#define CONNECTION_STATUS_SUCCESS	0
-#define IP_STATUS_FAIL		0
-#define INDEX 	0
-#define LENGTH_16   16
-#define GET_IPV6_SUCCESS	1
-#define GET_IPV6_FAIL	0
-#define BEACON_1	0
-#define EMPTY_BUFFER	0
-#define CHANNEL_LIST	(const uint8_t *)0
-#define CHANNEL_COUNT	0
-#define IE_DATA	(const uint8_t *)0
-#define IE_DATA_LENGTH	0
-#define BSSID_SCAN	(const uint8_t *)0
-#define	CHANNEL_0	0
-#define	PREVENT_ROAMING		1
-#define DISABLE_PMF_MODE	0
-#define STA_IP_FAIL		0
+#ifdef RS911X_WIFI
+#define WLAN_TASK_STACK_SIZE		1024
+#define WLAN_TASK_PRIORITY    		1
+#define WLAN_DRIVER_TASK_PRIORITY	1
+#define MAX_JOIN_RETRIES_COUNT		5
+
+#else  /* WF200 */
+#define WLAN_TASK_STACK_SIZE		1024
+#define WLAN_TASK_PRIORITY    		1
+#define MAX_JOIN_RETRIES_COUNT		5
+#endif
+
+// WLAN related Macros
+#define ETH_FRAME			0
+#define CMP_SUCCESS			0
+#define BSSID_MAX_STR_LEN		6 
+#define MAC_ADDRESS_FIRST_OCTET		6 
+#define AP_START_SUCCESS		0
+#define BITS_TO_WAIT			0
+#define DELAY_250MS			250
+#define CONNECTION_STATUS_SUCCESS	1
+#define IP_STATUS_FAIL			0
+#define INDEX 				0
+#define LENGTH_16   			16
+#define GET_IPV6_SUCCESS		1
+#define GET_IPV6_FAIL			0
+#define BEACON_1			0
+#define CLEAR_BUFFER			0
+#define CHANNEL_LIST			(const uint8_t *)0
+#define CHANNEL_COUNT			0
+#define IE_DATA				(const uint8_t *)0
+#define IE_DATA_LENGTH			0
+#define BSSID_SCAN			(const uint8_t *)0
+#define	CHANNEL_0			0
+#define	PREVENT_ROAMING			1
+#define DISABLE_PMF_MODE		0
+#define STA_IP_FAIL			0
 #define IP_STATUS_SUCCESS		1
 #define	ACTIVE_CHANNEL_TIME_100		100
 #define	PASSIVE_CHANNEL_TIME_0		0
-#define	PROBE_NUM_REQ_1				1
+#define	PROBE_NUM_REQ_1			1
 
-#define PINOUT_CLEAR_STATUS    0
-#define TICKS_TO_WAIT_0   0
-#define TICKS_TO_WAIT_3   3
-#define TICKS_TO_WAIT_1   1
-#define TICKS_TO_WAIT_500   500
-// wf200 E
+#define PINOUT_CLEAR_STATUS    		0
+#define TICKS_TO_WAIT_0   		0
+#define TICKS_TO_WAIT_3   		3
+#define TICKS_TO_WAIT_1   		1
+#define TICKS_TO_WAIT_500   		500
 
 
-#define CLEAR_BUFFER	  0
-#define SUCCESS_STATUS	0
-#define LINK_UP			    1
-#define LINK_DOWN			  0
-#define MAC_48_BIT_SET	1
-#define LEN_0		        0
-#define LEN_60		      60
-#define STRUCT_PBUF	(struct pbuf *)0
-#define INT_VALUE_64	  64
-#define INT_VALUE_10	  10
-#define	PRIORITY_0		  0
-#define HEX_VALUE_FF	  0XFF
-#define SHIFT_8		      8
-#define SHIFT_16  	    16
-#define SHIFT_24		    24
+// TASK and Interrupt Macros
+#define CLEAR_BUFFER			0
+#define SUCCESS_STATUS			1
+#define LINK_UP			    	1
+#define LINK_DOWN			0
+#define MAC_48_BIT_SET			1
+#define LEN_0		        	0
+#define LEN_60		      		60
+#define STRUCT_PBUF			(struct pbuf *)0
+#define INT_VALUE_64	  		64
+#define INT_VALUE_10	  		10
+#define	PRIORITY_0		  	0
+#define HEX_VALUE_FF	  		0XFF
+#define SHIFT_8		      		8
+#define SHIFT_16  	    		16
+#define SHIFT_24		    	24
 
-#define DELAY_10MS        10
-#define DELAY_3MS         3
-#define UINT8_BUFF_0  (uint8_t *)0
-#define MAX_XLEN          16
-#define MIN_XLEN          0
-#define VOID_BUFF0     (void *)0
-#define PINOUT_CLEAR      0
-#define PINOUT_SET        1
-#define NVIC_PRIORITY     5
-#define CB_USER_PARAM  (void *)0
-#define CB_VALUE        (DMADRV_Callback_t)0
+// Timer Delay
+#define DELAY_10MS        		10
+#define DELAY_3MS         		3
+#define MAX_XLEN          		16
+#define MIN_XLEN          		0
+#define PINOUT_CLEAR      		0
+#define PINOUT_SET        		1
+#define WFX_SPI_NVIC_PRIORITY     	5
+#define WFX_GPIO_NVIC_PRIORITY     	5
+#define CB_VALUE        		(DMADRV_Callback_t)0
 
-#define DELAY0	        0
-#define HANDLE0         (TimerHandle_t)0
-#define TIMER_ID0       (void *)0
-#define BLOCK_TIME      0
-#define CONVERSION_VALUE 	1000
+#define DELAY0	        		0
+#define HANDLE0         		(TimerHandle_t)0
 
-#define JOIN_CNT0 	        0
-#define BUFF_SIZE_28	      28
-#define BUF_SIZE_128	      128
-#define RSI_DRIVER_STATUS   0
-#define OPER_MODE_0         0
-#define COEX_MODE_0         0
-#define RESP_BUFF_SIZE      6
-#define AP_CHANNEL_NO_0     0
-#define SCAN_BITMAP_OPTN_1  1
-#define JOIN_RETRIES_CNT_5  5
-#define IP_CONF_RSP_BUFF_LENGTH_4     4
-#define STATION             0
-#define BG_SCAN_RES_SIZE    500
+/* TIMER_TICKS_TO_WAIT Specifies the time, in ticks, that the calling task should
+ * be held in the Blocked state to wait for the start command to be successfully
+ * sent to the timer command queue.
+ */
+#define TIMER_TICKS_TO_WAIT_0      	0
 
-#define SPI_CONFIG_SUCESS	 0
+#define CONVERT_SEC_TO_MSEC 		1000
+#define CONVERT_USEC_TO_MSEC 		(1/1000)
+
+#define RSI_RESPONSE_MAX_SIZE		28
+#define RSI_RESPONSE_HOLD_BUFF_SIZE	128
+#define RSI_DRIVER_STATUS   		0
+#define OPER_MODE_0         		0
+#define COEX_MODE_0         		0
+#define RESP_BUFF_SIZE      		6
+#define AP_CHANNEL_NO_0     		0
+#define SCAN_BITMAP_OPTN_1  		1
+#define IP_CONF_RSP_BUFF_LENGTH_4     	4
+#define STATION             		0
+#define BG_SCAN_RES_SIZE    		500
+
+#define SPI_CONFIG_SUCESS	 	0
 
 typedef enum {
   WIFI_EVENT,

@@ -34,7 +34,7 @@ sl_status_t wfx_wifi_start(void)
   /*
      * Create the driver task
      */
-  if (xTaskCreate(wfx_rsi_task, "wfx_rsi", WFX_RSI_TASK_SZ, NULL, TASK_PRIORITY_1, &wfx_rsi.wlan_task) != pdPASS) {
+  if (xTaskCreate(wfx_rsi_task, "wfx_rsi", WFX_RSI_TASK_SZ, NULL, WLAN_DRIVER_TASK_PRIORITY, &wfx_rsi.wlan_task) != pdPASS) {
     WFX_RSI_LOG("%s: error: failed to create task.", __func__);
     return SL_STATUS_FAIL;
   }

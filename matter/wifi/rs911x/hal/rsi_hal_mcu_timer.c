@@ -117,11 +117,11 @@ found:
   tp->handle  = xTimerCreate((char *)&tp->name[0],
                             pdMS_TO_TICKS(duration),
                             ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
-                            TIMER_ID0,
+                            NULL,
                             timer_cb);
   if (tp->handle == HANDLE0)
     return RSI_ERROR_INSUFFICIENT_BUFFER;
-  (void)xTimerStart(tp->handle, BLOCK_TIME);
+  (void)xTimerStart(tp->handle, TIMER_TICKS_TO_WAIT_0);
 
   return RSI_ERROR_NONE;
 }
@@ -296,7 +296,7 @@ uint32_t rsi_hal_gettickcount(void)
   // Define your API to get the tick count delay in milli seconds from systic ISR and return the resultant value
   struct rsi_timeval tv1;
   gettimeofday(&tv1, NULL);
-  return (tv1.tv_sec * CONVERSION_VALUE + tv1.tv_usec / CONVERSION_VALUE);
+  return (tv1.tv_sec * CONVERT_SEC_TO_MSEC + tv1.tv_usec * CONVERT_USEC_TO_MSEC);
 #endif
 }
 #else

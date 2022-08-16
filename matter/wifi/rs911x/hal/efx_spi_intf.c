@@ -174,8 +174,8 @@ void sl_wfx_host_gpio_init(void)
   GPIO_IntDisable(1 << SL_WFX_HOST_PINOUT_SPI_IRQ); /* Will be enabled by RSI */
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
-  NVIC_SetPriority(GPIO_EVEN_IRQn, NVIC_PRIORITY);
-  NVIC_SetPriority(GPIO_ODD_IRQn, NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_SPI_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_SPI_NVIC_PRIORITY);
 }
 /*
  * To reset the WiFi CHIP
@@ -241,8 +241,8 @@ static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
   ldmaRXConfig     = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(MY_USART_RX_SIGNAL);
 
   // Start both channels
-  DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, CB_USER_PARAM);
-  DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, CB_VALUE, CB_USER_PARAM);
+  DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, NULL);
+  DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, CB_VALUE, NULL);
   // LDMA_StartTransfer(RX_LDMA_CHANNEL, &ldmaRXConfig, &ldmaRXDescriptor);
   // LDMA_StartTransfer(TX_LDMA_CHANNEL, &ldmaTXConfig, &ldmaTXDescriptor);
 }
@@ -298,7 +298,7 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
      * TODO - the caller specified 8/32 bit - we should use this
      * instead of dmadrvDataSize1 always
      */
-  if (rx_buf == UINT8_BUFF_0) {
+  if (rx_buf == (uint8_t *)NULL) {
     buf    = &dummy_data;
     srcinc = false;
   } else {
@@ -358,7 +358,7 @@ int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) != pdTRUE) {
       return RSI_FALSE;
     }
-    if (tx_buf == VOID_BUFF0) {
+    if (tx_buf == NULL) {
       rx_do_dma(rx_buf, xlen);
     } else {
       tx_do_dma(rx_buf, tx_buf, xlen);

@@ -49,7 +49,7 @@ void wfx_started_notify()
   evt.header.length = sizeof evt;
   evt.body.status   = 0;
   wfx_get_wifi_mac_addr(SL_WFX_STA_INTERFACE, &mac);
-  memcpy(&evt.body.mac_addr[0], &mac.octet[0], COPY_6_CHAR);
+  memcpy(&evt.body.mac_addr[0], &mac.octet[0], MAC_ADDRESS_FIRST_OCTET);
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
@@ -77,7 +77,7 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 #ifdef RS911X_WIFI
   evt.body.channel = wfx_rsi.ap_chan;
 #endif
-  memcpy(&evt.body.mac[0], &ap->octet[0], COPY_6_CHAR);
+  memcpy(&evt.body.mac[0], &ap->octet[0], MAC_ADDRESS_FIRST_OCTET);
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }

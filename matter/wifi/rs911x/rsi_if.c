@@ -54,7 +54,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
   uint8_t rssi;
   ap->security = security;
   ap->chan = wfx_rsi.ap_chan;
-  memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], COPY_6_CHAR);
+  memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], BSSID_MAX_STR_LEN);
   status = rsi_wlan_get(RSI_RSSI, &rssi, sizeof(rssi));
   if (status == RSI_SUCCESS) {
     ap->rssi = (-1) * rssi;
@@ -63,7 +63,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
 }
 int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   int32_t status;
-  uint8_t buff[28] = {0};
+  uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
   status = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
   if (status != RSI_SUCCESS) {
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
@@ -87,7 +87,7 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
 }
 int32_t wfx_rsi_reset_count() {
   int32_t status;
-  uint8_t buff[BUFF_SIZE_28] = {0};
+  uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
   status = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
   if (status != RSI_SUCCESS) {
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
@@ -118,7 +118,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
      * We should enable retry.. (Need config variable for this)
      */
     WFX_RSI_LOG("%s: failed. retry: %d", __func__, wfx_rsi.join_retries);
-#if (WFX_RSI_CONFIG_MAX_JOIN != JOIN_CNT0)
+#if (WFX_RSI_CONFIG_MAX_JOIN != 0)
     if (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN)
 #endif
     {
@@ -171,7 +171,7 @@ static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len) {
 #endif /* !Socket support */
 static int32_t wfx_rsi_init(void) {
   int32_t status;
-  uint8_t buf[BUF_SIZE_128];
+  uint8_t buf[RSI_RESPONSE_HOLD_BUFF_SIZE];
   extern void rsi_hal_board_init(void);
 
   /*
@@ -199,7 +199,7 @@ static int32_t wfx_rsi_init(void) {
    * Create the driver task
    */
   if (xTaskCreate((TaskFunction_t)rsi_wireless_driver_task, "rsi_drv",
-                  WFX_RSI_WLAN_TASK_SZ, NULL, TASK_PRIORITY_1, &wfx_rsi.drv_task) != pdPASS) {
+                  WFX_RSI_WLAN_TASK_SZ, NULL, WLAN_TASK_PRIORITY, &wfx_rsi.drv_task) != pdPASS) {
     WFX_RSI_LOG("%s: error: rsi_wireless_driver_task failed", __func__);
     return RSI_ERROR_INVALID_PARAM;
   }
@@ -290,7 +290,7 @@ static void wfx_rsi_save_ap_info() {
   } else {
     wfx_rsi.sec.security = rsp.scan_info->security_mode;
     wfx_rsi.ap_chan = rsp.scan_info->rf_channel;
-    memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], COPY_6_CHAR);
+    memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], BSSID_MAX_STR_LEN);
   }
   if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
     // saving the security before changing into mixed mode
@@ -326,6 +326,10 @@ static void wfx_rsi_do_join(void) {
      * Right now it's done by hand - we need something better
      */
     wfx_rsi.dev_state |= WFX_RSI_ST_STA_CONNECTING;
+
+    /* Try to connect Wifi with given Credentials
+     * untill there is a success or maximum number of tries allowed
+     */
     while (((status = rsi_wlan_connect_async(
                  (int8_t *)&wfx_rsi.sec.ssid[0],
                  (rsi_security_mode_t)wfx_rsi.sec.security,
@@ -338,7 +342,7 @@ static void wfx_rsi_do_join(void) {
       vTaskDelay(4000);
       /* TODO - Start a timer.. to retry */
     }
-    if (wfx_rsi.join_retries == JOIN_RETRIES_CNT_5) {
+    if (wfx_rsi.join_retries == MAX_JOIN_RETRIES_COUNT) {
       WFX_RSI_LOG("Connect failed after %d tries", wfx_rsi.join_retries);
     } else {
       WFX_RSI_LOG("%s: starting JOIN to %s after %d tries\n", __func__,
@@ -517,14 +521,14 @@ void wfx_rsi_task(void *arg) {
                 WFX_RSI_LOG("Inside ap details");
                 ap.security = scan->security_mode;
                 ap.rssi = (-1) * scan->rssi_val;
-                memcpy(&ap.bssid[0], &scan->bssid[0], COPY_6_CHAR);
+                memcpy(&ap.bssid[0], &scan->bssid[0], BSSID_MAX_STR_LEN);
                 (*wfx_rsi.scan_cb)(&ap);
               }
             } else {
               WFX_RSI_LOG("Inside else");
               ap.security = scan->security_mode;
               ap.rssi = (-1) * scan->rssi_val;
-              memcpy(&ap.bssid[0], &scan->bssid[0], COPY_6_CHAR);
+              memcpy(&ap.bssid[0], &scan->bssid[0], BSSID_MAX_STR_LEN);
               (*wfx_rsi.scan_cb)(&ap);
             }
           }

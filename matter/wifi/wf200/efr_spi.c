@@ -76,7 +76,7 @@ uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ
 
 #define LENGTH_0        	0
 #define PIN_OUT_SET	    	1
-#define PIN_OUT_CLEAR	    0
+#define PIN_OUT_CLEAR		0
 
 /****************************************************************************
  * Initialize SPI peripheral
