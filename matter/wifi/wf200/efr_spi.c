@@ -77,7 +77,7 @@ uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ
 /****************************************************************************
  * Initialize SPI peripheral
  *****************************************************************************/
-sl_status_t sl_wfx_host_init_bus(void)
+void sl_wfx_host_init_bus(void)
 {
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
@@ -145,8 +145,6 @@ sl_status_t sl_wfx_host_init_bus(void)
   DMADRV_AllocateChannel(&rx_dma_channel, NULL);
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull, 1);
   MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
-
-  return SL_STATUS_OK;
 }
 
 /****************************************************************************

@@ -52,7 +52,6 @@
 #define SL_WFX_DISCONNECT_IND_ID 3
 #define SL_WFX_SCAN_COMPLETE_ID 4
 #define WFX_RSI_SSID_SIZE 64
-
 #endif /* WF200 */
 
 #ifndef RS911X_SOCKETS
@@ -71,7 +70,6 @@
 #define SL_WFX_SCAN_START (1 << 5)
 #define SL_WFX_SCAN_COMPLETE (1 << 6)
 #define SL_WFX_RETRY_CONNECT (1 << 7)
-
 #endif /* RS911X_SOCKETS */
 
 #include "sl_status.h"
@@ -156,11 +154,15 @@ typedef enum {
 } sl_wfx_interface_t;
 
 #endif /* RS911X_WIFI */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 void sl_wfx_host_gpio_init(void);
+void sl_wfx_host_init_bus(void);
+void sl_wfx_host_reset_chip(void);
+
 sl_status_t wfx_wifi_start(void);
 void wfx_enable_sta_mode(void);
 sl_wfx_state_t wfx_get_wifi_state(void);

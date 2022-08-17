@@ -687,7 +687,6 @@ static void wfx_wifi_hw_start(void)
   EFR32_LOG("STARTING WF200\n");
   wifi_extra |= WE_ST_HW_STARTED;
 
-  sl_wfx_host_gpio_init();
   if ((status = wfx_init()) == SL_STATUS_OK) {
     /* Initialize the LwIP stack */
     EFR32_LOG("WF200:Start LWIP");

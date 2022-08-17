@@ -63,6 +63,16 @@ static void dma_init(void)
 /****************************************************************************
  * Initialize SPI peripheral
  *****************************************************************************/
+void rsi_sem_init(void)
+{
+  spi_sem = xSemaphoreCreateBinary();
+  xSemaphoreGive(spi_sem);
+  dma_init();
+}
+
+/****************************************************************************
+ * Initialize host bus
+ *****************************************************************************/
 void sl_wfx_host_init_bus(void)
 {
   // Initialize and enable the USART
@@ -153,6 +163,9 @@ void sl_wfx_host_init_bus(void)
  */
 void sl_wfx_host_gpio_init(void)
 {
+  /* Semaphore and dma init */
+  rsi_sem_init();
+
 #if defined(EFR32MG24)
   sl_device_init_hfxo();
   sl_device_init_dpll();
@@ -193,19 +206,6 @@ void sl_wfx_host_reset_chip(void)
 
   // Delay for 3ms
   vTaskDelay(pdMS_TO_TICKS(3));
-}
-void rsi_hal_board_init(void)
-{
-  spi_sem = xSemaphoreCreateBinary();
-  xSemaphoreGive(spi_sem);
-  WFX_RSI_LOG("RSI_HAL: init GPIO");
-  sl_wfx_host_gpio_init();
-  WFX_RSI_LOG("RSI_HAL: init SPI");
-  sl_wfx_host_init_bus();
-  dma_init();
-  WFX_RSI_LOG("RSI_HAL: Reset Wifi");
-  sl_wfx_host_reset_chip ();
-  WFX_RSI_LOG("RSI_HAL: Init done");
 }
 
 static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)

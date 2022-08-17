@@ -229,7 +229,7 @@ sl_status_t sl_wfx_host_set_wake_up_pin(uint8_t state)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_reset_chip(void)
+void  sl_wfx_host_reset_chip(void)
 {
   // Pull it low for at least 1 ms to issue a reset sequence
   GPIO_PinOutClear(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN);
@@ -244,7 +244,6 @@ sl_status_t sl_wfx_host_reset_chip(void)
   vTaskDelay(pdMS_TO_TICKS(3));
 
   host_context.wf200_initialized = 0;
-  return SL_STATUS_OK;
 }
 
 sl_status_t sl_wfx_host_wait_for_wake_up(void)
