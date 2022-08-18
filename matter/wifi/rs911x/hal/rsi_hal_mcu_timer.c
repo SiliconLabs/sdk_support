@@ -63,7 +63,7 @@ void rsi_delay_ms(uint32_t delay_ms)
 #ifndef RSI_WITH_OS
   uint32_t start;
 #endif
-  if (delay_ms == DELAY0)
+  if (delay_ms == 0) // Check if delay is 0msec
     return;
 
 #ifdef RSI_WITH_OS
@@ -119,8 +119,11 @@ found:
                             ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
                             NULL,
                             timer_cb);
-  if (tp->handle == HANDLE0)
+
+  if (tp->handle == HANDLE0) {
     return RSI_ERROR_INSUFFICIENT_BUFFER;
+  }
+
   (void)xTimerStart(tp->handle, TIMER_TICKS_TO_WAIT_0);
 
   return RSI_ERROR_NONE;

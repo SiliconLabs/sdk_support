@@ -230,9 +230,10 @@ sl_status_t sl_wfx_host_process_event(sl_wfx_generic_message_t *event_payload)
       sl_wfx_exception_ind_t *firmware_exception = (sl_wfx_exception_ind_t *)event_payload;
       uint8_t *exception_tmp                     = (uint8_t *)firmware_exception;
       EFR32_LOG("firmware exception\r\n");
-      for (uint16_t i = 0; i < firmware_exception->header.length; i += LENGTH_16) {
+      /* Header length size is 16bit */
+      for (uint16_t i = 0; i < firmware_exception->header.length; i += 16) {
         EFR32_LOG("hif: %.8x:", i);
-        for (uint8_t j = 0; (j < LENGTH_16) && ((i + j) < firmware_exception->header.length); j++) {
+        for (uint8_t j = 0; (j < 16) && ((i + j) < firmware_exception->header.length); j++) {
           EFR32_LOG(" %.2x", *exception_tmp);
           exception_tmp++;
         }
@@ -244,9 +245,10 @@ sl_status_t sl_wfx_host_process_event(sl_wfx_generic_message_t *event_payload)
       sl_wfx_error_ind_t *firmware_error = (sl_wfx_error_ind_t *)event_payload;
       uint8_t *error_tmp                 = (uint8_t *)firmware_error;
       EFR32_LOG("firmware error %lu\r\n", firmware_error->body.type);
-      for (uint16_t i = 0; i < firmware_error->header.length; i += LENGTH_16) {
+      /* Header length size is 16bit */
+      for (uint16_t i = 0; i < firmware_error->header.length; i += 16) {
         EFR32_LOG("hif: %.8x:", i);
-        for (uint8_t j = 0; (j < LENGTH_16) && ((i + j) < firmware_error->header.length); j++) {
+        for (uint8_t j = 0; (j < 16) && ((i + j) < firmware_error->header.length); j++) {
           EFR32_LOG(" %.2x", *error_tmp);
           error_tmp++;
         }
@@ -498,7 +500,7 @@ static void wfx_events_task(void *p_arg)
                                   | BITS_TO_WAIT,
                                 pdTRUE,
                                 pdFALSE,
-                                pdMS_TO_TICKS(DELAY_250MS));
+                                pdMS_TO_TICKS(250)); /* 250 msec delay converted to ticks */
     if (flags & SL_WFX_RETRY_CONNECT) {
         if (!retryInProgress) {
             EFR32_LOG("WFX sending the connect command");
@@ -508,7 +510,7 @@ static void wfx_events_task(void *p_arg)
     }
 
     if (wifi_extra & WE_ST_STA_CONN) {
-      if ((now = xTaskGetTickCount()) > (last_dhcp_poll + pdMS_TO_TICKS(DELAY_250MS))) {
+      if ((now = xTaskGetTickCount()) > (last_dhcp_poll + pdMS_TO_TICKS(250))) {
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
          uint8_t dhcp_state = dhcpclient_poll(&sta_netif);
 
@@ -525,7 +527,7 @@ static void wfx_events_task(void *p_arg)
             hasNotifiedIPV4 = false;
          }
 #endif // CHIP_DEVICE_CONFIG_ENABLE_IPV4
-        if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, INDEX))) && !hasNotifiedIPV6) {
+        if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) && !hasNotifiedIPV6) {
           wfx_ipv6_notify(GET_IPV6_SUCCESS);
           hasNotifiedIPV6 = true;
           if (!hasNotifiedWifiConnectivity) {

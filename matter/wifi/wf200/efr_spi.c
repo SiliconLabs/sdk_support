@@ -74,7 +74,6 @@ static bool spi_enabled = false;
 
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 
-#define LENGTH_0        	0
 #define PIN_OUT_SET	    	1
 #define PIN_OUT_CLEAR		0
 
@@ -266,7 +265,8 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
   }
   MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
-  if (header_length > LENGTH_0) {
+  /* header length should be greater than 0 */
+  if (header_length > 0) {
     for (uint8_t *buffer_ptr = header; header_length > 0; --header_length, ++buffer_ptr) {
       MY_USART->TXDATA = (uint32_t)(*buffer_ptr);
 
@@ -276,7 +276,9 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
     while (!(MY_USART->STATUS & USART_STATUS_TXBL)) {
     }
   }
-  if (buffer_length > LENGTH_0) {
+
+  /* buffer length should be greater than 0 */
+  if (buffer_length > 0) {
     MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) == pdTRUE) {
       if (is_read) {

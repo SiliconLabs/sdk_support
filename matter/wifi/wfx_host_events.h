@@ -95,11 +95,8 @@
 #define MAC_ADDRESS_FIRST_OCTET		6 
 #define AP_START_SUCCESS		0
 #define BITS_TO_WAIT			0
-#define DELAY_250MS			250
 #define CONNECTION_STATUS_SUCCESS	1
 #define IP_STATUS_FAIL			0
-#define INDEX 				0
-#define LENGTH_16   			16
 #define GET_IPV6_SUCCESS		1
 #define GET_IPV6_FAIL			0
 #define BEACON_1			0
@@ -124,27 +121,17 @@
 #define TICKS_TO_WAIT_1   		1
 #define TICKS_TO_WAIT_500   		500
 
-
 // TASK and Interrupt Macros
 #define CLEAR_BUFFER			0
 #define SUCCESS_STATUS			1
 #define LINK_UP			    	1
 #define LINK_DOWN			0
 #define MAC_48_BIT_SET			1
-#define LEN_0		        	0
-#define LEN_60		      		60
 #define STRUCT_PBUF			(struct pbuf *)0
-#define INT_VALUE_64	  		64
-#define INT_VALUE_10	  		10
 #define	PRIORITY_0		  	0
 #define HEX_VALUE_FF	  		0XFF
-#define SHIFT_8		      		8
-#define SHIFT_16  	    		16
-#define SHIFT_24		    	24
 
 // Timer Delay
-#define DELAY_10MS        		10
-#define DELAY_3MS         		3
 #define MAX_XLEN          		16
 #define MIN_XLEN          		0
 #define PINOUT_CLEAR      		0
@@ -153,7 +140,6 @@
 #define WFX_GPIO_NVIC_PRIORITY     	5
 #define CB_VALUE        		(DMADRV_Callback_t)0
 
-#define DELAY0	        		0
 #define HANDLE0         		(TimerHandle_t)0
 
 /* TIMER_TICKS_TO_WAIT Specifies the time, in ticks, that the calling task should
@@ -178,6 +164,7 @@
 #define BG_SCAN_RES_SIZE    		500
 
 #define SPI_CONFIG_SUCESS	 	0
+#define WPA3_SECURITY 			3
 
 typedef enum {
   WIFI_EVENT,
@@ -206,7 +193,7 @@ typedef enum {
   WFX_SEC_PUSH_BTN = 11,
   WFX_SEC_WPA3 = 11,
 } wfx_sec_t;
-#define WPA3_SECURITY 3
+
 typedef struct {
   char ssid[32 + 1];
   char passkey[64 + 1];

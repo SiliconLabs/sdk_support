@@ -39,6 +39,7 @@ bool hasNotifiedIPV6 = false;
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
 bool hasNotifiedIPV4 = false;
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
+
 bool hasNotifiedWifiConnectivity = false;
 /*
  * This file implements the interface to the RSI SAPIs
@@ -46,6 +47,7 @@ bool hasNotifiedWifiConnectivity = false;
 static uint8_t wfx_rsi_drv_buf[WFX_RSI_BUF_SZ];
 wfx_wifi_scan_ext_t *temp_reset;
 uint8_t security;
+
 /*
  * Getting the AP details
  */
@@ -61,6 +63,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
   }
   return status;
 }
+
 int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   int32_t status;
   uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
@@ -85,6 +88,7 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   }
   return status;
 }
+
 int32_t wfx_rsi_reset_count() {
   int32_t status;
   uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
@@ -103,10 +107,12 @@ int32_t wfx_rsi_reset_count() {
   }
   return status;
 }
+
 int32_t wfx_rsi_disconnect() {
   int32_t status = rsi_wlan_disconnect();
   return status;
 }
+
 static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
                             const uint16_t len) {
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
@@ -136,6 +142,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
 #endif
   }
 }
+
 static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   WFX_RSI_LOG("%s: error: failed status: %02x on try %d", __func__, status,
               wfx_rsi.join_retries);
@@ -143,6 +150,7 @@ static void wfx_rsi_join_fail_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
   xEventGroupSetBits(wfx_rsi.events, WFX_EVT_STA_START_JOIN);
 }
+
 #ifdef RS911X_SOCKETS
 /*
  * DHCP should end up here.
@@ -157,6 +165,7 @@ static void wfx_rsi_ipchange_cb(uint16_t status, uint8_t *buf, uint32_t len) {
     xEventGroupSetBits(wfx_rsi.events, WFX_EVT_STA_DHCP_DONE);
   }
 }
+
 #else
 /*
  * Got RAW WLAN data pkt
@@ -169,6 +178,7 @@ static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len) {
   wfx_host_received_sta_frame_cb(buf, len);
 }
 #endif /* !Socket support */
+
 static int32_t wfx_rsi_init(void) {
   int32_t status;
   uint8_t buf[RSI_RESPONSE_HOLD_BUFF_SIZE];
@@ -273,7 +283,9 @@ static int32_t wfx_rsi_init(void) {
   WFX_RSI_LOG("%s: RSI: OK", __func__);
   return RSI_SUCCESS;
 }
+
 void wfx_show_err(char *msg) { WFX_RSI_LOG("%s: message: %d", __func__, msg); }
+
 /*
  * Saving the details of the AP
  */
@@ -306,6 +318,7 @@ static void wfx_rsi_save_ap_info() {
               &wfx_rsi.sec.ssid[0], &wfx_rsi.sec.passkey[0],
               wfx_rsi.sec.security, status);
 }
+
 /*
  * Start an async Join command
  */
@@ -330,17 +343,24 @@ static void wfx_rsi_do_join(void) {
     /* Try to connect Wifi with given Credentials
      * untill there is a success or maximum number of tries allowed
      */
-    while (((status = rsi_wlan_connect_async(
-                 (int8_t *)&wfx_rsi.sec.ssid[0],
-                 (rsi_security_mode_t)wfx_rsi.sec.security,
-                 &wfx_rsi.sec.passkey[0], wfx_rsi_join_cb)) != RSI_SUCCESS) &&
-           (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN)) {
-      wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
-      WFX_RSI_LOG(
-          "%s: rsi_wlan_connect_async failed with status: %02x on try %d",
-          __func__, status, wfx_rsi.join_retries);
-      vTaskDelay(4000);
-      /* TODO - Start a timer.. to retry */
+    while (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN) {
+
+      /* Call rsi connect call with given ssid and password
+       * And check there is a success
+       */
+      if ((status = rsi_wlan_connect_async((int8_t *)&wfx_rsi.sec.ssid[0],
+		(rsi_security_mode_t)wfx_rsi.sec.security,
+		&wfx_rsi.sec.passkey[0], wfx_rsi_join_cb)) != RSI_SUCCESS) {
+
+        wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
+        WFX_RSI_LOG(
+            "%s: rsi_wlan_connect_async failed with status: %02x on try %d",
+            __func__, status, wfx_rsi.join_retries);
+        vTaskDelay(4000);
+        /* TODO - Start a timer.. to retry */
+      } else {
+        break;  // exit while loop
+      }
     }
     if (wfx_rsi.join_retries == MAX_JOIN_RETRIES_COUNT) {
       WFX_RSI_LOG("Connect failed after %d tries", wfx_rsi.join_retries);
@@ -350,6 +370,7 @@ static void wfx_rsi_do_join(void) {
     }
   }
 }
+
 /*
  * The main WLAN task - started by wfx_wifi_start () that interfaces with RSI.
  * The rest of RSI stuff come in call-backs.
@@ -398,7 +419,7 @@ void wfx_rsi_task(void *arg) {
             | 0,
         pdTRUE,  /* Clear the bits */
         pdFALSE, /* Wait for any bit */
-        pdMS_TO_TICKS(DELAY_250MS));
+        pdMS_TO_TICKS(250)); /* 250 mSec */
 
     if (flags) {
       WFX_RSI_LOG("%s: wait event encountered: %x", __func__, flags);
@@ -420,7 +441,7 @@ void wfx_rsi_task(void *arg) {
      * Let's handle DHCP polling here
      */
     if (wfx_rsi.dev_state & WFX_RSI_ST_STA_CONNECTED) {
-      if ((now = xTaskGetTickCount()) > (last_dhcp_poll + pdMS_TO_TICKS(DELAY_250MS))) {
+      if ((now = xTaskGetTickCount()) > (last_dhcp_poll + pdMS_TO_TICKS(250))) {
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
         uint8_t dhcp_state = dhcpclient_poll(sta_netif);
         if (dhcp_state == DHCP_ADDRESS_ASSIGNED && !hasNotifiedIPV4) {
@@ -435,7 +456,7 @@ void wfx_rsi_task(void *arg) {
           hasNotifiedIPV4 = false;
         }
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
-        if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, INDEX))) &&
+        if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) &&
             !hasNotifiedIPV6) {
           wfx_ipv6_notify(GET_IPV6_SUCCESS);
           hasNotifiedIPV6 = true;
@@ -553,20 +574,22 @@ void wfx_rsi_task(void *arg) {
 #endif /* SL_WFX_CONFIG_SOFTAP */
   }
 }
+
 void wfx_dhcp_got_ipv4(uint32_t ip) {
   /*
    * Acquire the new IP address
    */
   wfx_rsi.ip4_addr[0] = (ip)& HEX_VALUE_FF;
-  wfx_rsi.ip4_addr[1] = (ip >> SHIFT_8)  & HEX_VALUE_FF;
-  wfx_rsi.ip4_addr[2] = (ip >> SHIFT_16) & HEX_VALUE_FF;
-  wfx_rsi.ip4_addr[3] = (ip >> SHIFT_24) & HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[1] = (ip >> 8)  & HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[2] = (ip >> 16) & HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[3] = (ip >> 24) & HEX_VALUE_FF;
   WFX_RSI_LOG("%s: DHCP OK: IP=%d.%d.%d.%d", __func__, wfx_rsi.ip4_addr[0],
               wfx_rsi.ip4_addr[1], wfx_rsi.ip4_addr[2], wfx_rsi.ip4_addr[3]);
   /* Notify the Connectivity Manager - via the app */
   wfx_ip_changed_notify(IP_STATUS_SUCCESS);
   wfx_rsi.dev_state |= WFX_RSI_ST_STA_READY;
 }
+
 /*
  * WARNING - Taken from RSI and broken up
  * This is my own RSI stuff for not copying code and allocating an extra
@@ -582,12 +605,14 @@ void *wfx_rsi_alloc_pkt() {
 
   return (void *)pkt;
 }
+
 void wfx_rsi_pkt_add_data(void *p, uint8_t *buf, uint16_t len, uint16_t off) {
   rsi_pkt_t *pkt;
 
   pkt = (rsi_pkt_t *)p;
   memcpy(((char *)pkt->data) + off, buf, len);
 }
+
 int32_t wfx_rsi_send_data(void *p, uint16_t len) {
   int32_t status;
   register uint8_t *host_desc;
@@ -619,4 +644,5 @@ int32_t wfx_rsi_send_data(void *p, uint16_t len) {
 
   return status;
 }
+
 struct wfx_rsi wfx_rsi;

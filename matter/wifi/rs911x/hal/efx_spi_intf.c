@@ -186,13 +186,13 @@ void sl_wfx_host_reset_chip(void)
   GPIO_PinOutClear(WFX_RESET_PIN.port, WFX_RESET_PIN.pin);
 
   // Delay for 10ms
-  vTaskDelay(pdMS_TO_TICKS(DELAY_10MS));
+  vTaskDelay(pdMS_TO_TICKS(10));
 
   // Hold pin high to get chip out of reset
   GPIO_PinOutSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin);
 
   // Delay for 3ms
-  vTaskDelay(pdMS_TO_TICKS(DELAY_3MS));
+  vTaskDelay(pdMS_TO_TICKS(3));
 }
 void rsi_hal_board_init(void)
 {
@@ -298,7 +298,7 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
      * TODO - the caller specified 8/32 bit - we should use this
      * instead of dmadrvDataSize1 always
      */
-  if (rx_buf == (uint8_t *)NULL) {
+  if (rx_buf == NULL) {
     buf    = &dummy_data;
     srcinc = false;
   } else {
