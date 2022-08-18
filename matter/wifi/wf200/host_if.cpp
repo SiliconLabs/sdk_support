@@ -75,6 +75,11 @@ TaskHandle_t wfx_events_task_handle;
 static sl_wfx_mac_address_t ap_mac;
 static uint32_t sta_ip;
 
+// Set Scan Parameters
+#define ACTIVE_CHANNEL_TIME    110
+#define PASSIVE_CHANNEL_TIME   0
+#define NUM_PROBE_REQUEST 2
+
 // wfx_fmac_driver context
 sl_wfx_context_t wifiContext;
 static uint8_t wifi_extra;
@@ -591,7 +596,8 @@ static void wfx_events_task(void *p_arg)
         sp       = (sl_wfx_ssid_def_t *)0;
       }
 
-      (void)sl_wfx_set_scan_parameters(100,0,1);
+      EFR32_LOG("WIFI Scan Paramter set to Active channel time %d, Passive Channel Time: %d, Number of prob: %d", ACTIVE_CHANNEL_TIME, PASSIVE_CHANNEL_TIME, NUM_PROBE_REQUEST);
+      (void)sl_wfx_set_scan_parameters(ACTIVE_CHANNEL_TIME,PASSIVE_CHANNEL_TIME,NUM_PROBE_REQUEST);
       (void)sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
                                      (const uint8_t *)0, /* Channel list */
                                      0,                  /* Scan all chans */
@@ -807,7 +813,8 @@ sl_status_t wfx_connect_to_ap(void)
   }
   EFR32_LOG("WIFI:JOIN to %s", &wifi_provision.ssid[0]);
 
-  (void)sl_wfx_set_scan_parameters(100,0,1);
+  EFR32_LOG("WIFI Scan Paramter set to Active channel time %d, Passive Channel Time: %d, Number of prob: %d", ACTIVE_CHANNEL_TIME, PASSIVE_CHANNEL_TIME, NUM_PROBE_REQUEST);
+  (void)sl_wfx_set_scan_parameters(ACTIVE_CHANNEL_TIME,PASSIVE_CHANNEL_TIME,NUM_PROBE_REQUEST);
   result = sl_wfx_send_join_command((uint8_t *)wifi_provision.ssid,
                                     strlen(wifi_provision.ssid),
                                     NULL,
