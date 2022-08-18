@@ -122,8 +122,11 @@ found:
                             (void *)0,
                             timer_cb,
                             &sRsiTimerBuffer);
-  if (tp->handle == (TimerHandle_t)0)
+
+  if (tp->handle == (TimerHandle_t)0) {
     return RSI_ERROR_INSUFFICIENT_BUFFER;
+  }
+
   (void)xTimerStart(tp->handle, 0);
 
   return RSI_ERROR_NONE;

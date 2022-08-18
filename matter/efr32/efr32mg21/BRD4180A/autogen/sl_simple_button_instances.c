@@ -19,9 +19,6 @@
 #include "sl_simple_button_btn0_config.h"
 #include "sl_simple_button_btn1_config.h"
 
-/*****************************************************************************
-* Device button 0 configuration
-******************************************************************************/
 sl_simple_button_context_t simple_btn0_context = {
   .state = 0,
   .history = 0,
@@ -30,10 +27,6 @@ sl_simple_button_context_t simple_btn0_context = {
   .mode = SL_SIMPLE_BUTTON_BTN0_MODE,
 };
 
-/*****************************************************************************
-* Device button 0 initialization with callback function and inturrpt
-* type for button 0
-******************************************************************************/
 const sl_button_t sl_button_btn0 = {
   .context = &simple_btn0_context,
   .init = sl_simple_button_init,
@@ -42,10 +35,6 @@ const sl_button_t sl_button_btn0 = {
   .enable = sl_simple_button_enable,
   .disable = sl_simple_button_disable,
 };
-
-/*****************************************************************************
-*  Device button 1 configuration
-******************************************************************************/
 sl_simple_button_context_t simple_btn1_context = {
   .state = 0,
   .history = 0,
@@ -54,10 +43,6 @@ sl_simple_button_context_t simple_btn1_context = {
   .mode = SL_SIMPLE_BUTTON_BTN1_MODE,
 };
 
-/*****************************************************************************
-* Device button 1 initialization with callback function and interrupt
-* type for button 1
-******************************************************************************/
 const sl_button_t sl_button_btn1 = {
   .context = &simple_btn1_context,
   .init = sl_simple_button_init,
@@ -67,31 +52,18 @@ const sl_button_t sl_button_btn1 = {
   .disable = sl_simple_button_disable,
 };
 
-/*****************************************************************************
-*  Notify Device button related handlers
-******************************************************************************/
 const sl_button_t *sl_simple_button_array[] = {
   &sl_button_btn0, 
   &sl_button_btn1
 };
 const uint8_t simple_button_count = 2;
 
-/*****************************************************************************
-*  Notify Device button initialization
-*
-* @param void
-******************************************************************************/
 void sl_simple_button_init_instances(void)
 {
   sl_button_init(&sl_button_btn0);
   sl_button_init(&sl_button_btn1);
 }
 
-/*****************************************************************************
-*  Device button configuration interrupt polling method
-*
-* @param void
-******************************************************************************/
 void sl_simple_button_poll_instances(void)
 {
   sl_button_poll_step(&sl_button_btn0);

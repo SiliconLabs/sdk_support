@@ -20,19 +20,12 @@
 #include "sl_simple_led_led0_config.h"
 #include "sl_simple_led_led1_config.h"
 
-/*****************************************************************************
-* Device LED 0 configuration
-******************************************************************************/
 sl_simple_led_context_t simple_led0_context = {
   .port = SL_SIMPLE_LED_LED0_PORT,
   .pin = SL_SIMPLE_LED_LED0_PIN,
   .polarity = SL_SIMPLE_LED_LED0_POLARITY,
 };
 
-/*****************************************************************************
-* Device LED 0 initialization with callback function and inturrpt
-* type for LED 0
-******************************************************************************/
 const sl_led_t sl_led_led0 = {
   .context = &simple_led0_context,
   .init = sl_simple_led_init,
@@ -41,20 +34,12 @@ const sl_led_t sl_led_led0 = {
   .toggle = sl_simple_led_toggle,
   .get_state = sl_simple_led_get_state,
 };
-
-/*****************************************************************************
-* Device LED 1 configuration
-******************************************************************************/
 sl_simple_led_context_t simple_led1_context = {
   .port = SL_SIMPLE_LED_LED1_PORT,
   .pin = SL_SIMPLE_LED_LED1_PIN,
   .polarity = SL_SIMPLE_LED_LED1_POLARITY,
 };
 
-/*****************************************************************************
-* Device LED 1 initialization with callback function and inturrpt
-* type for LED 1
-******************************************************************************/
 const sl_led_t sl_led_led1 = {
   .context = &simple_led1_context,
   .init = sl_simple_led_init,
@@ -64,19 +49,11 @@ const sl_led_t sl_led_led1 = {
   .get_state = sl_simple_led_get_state,
 };
 
-/*****************************************************************************
-*  Notify Device LED related handlers
-******************************************************************************/
 const sl_led_t *sl_simple_led_array[] = {
   &sl_led_led0,
   &sl_led_led1
 };
 
-/*****************************************************************************
-*  Notify Device LED 0 and 1 initialization
-*
-* @param void
-******************************************************************************/
 void sl_simple_led_init_instances(void)
 {
   sl_led_init(&sl_led_led0);

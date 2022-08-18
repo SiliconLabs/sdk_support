@@ -31,11 +31,6 @@
 
 #include "em_cmu.h"
 
-/*****************************************************************************
-* Device clock initialization
-*
-* @param void
-******************************************************************************/
 sl_status_t sl_device_init_clocks(void)
 {
     CMU_ClockSelectSet(cmuClock_HF, cmuSelect_HFXO);

@@ -238,6 +238,7 @@ void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer)
     //EFR32_LOG ("WF200: Invalid frame IN");
   }
 }
+
 #else /* For RS911x - using LWIP */
 static SemaphoreHandle_t ethout_sem;
 /*****************************************************************************
@@ -301,6 +302,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
   return ERR_OK;
 }
+
 /*****************************************************************************
  *  @fn  void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
  *  @brief
@@ -323,6 +325,7 @@ void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
 }
 
 #endif /* RS911x - with LWIP */
+
 /*****************************************************************************
  *  @fn  err_t sta_ethernetif_init(struct netif *netif)
  *  @brief

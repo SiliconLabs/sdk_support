@@ -82,7 +82,7 @@ void sl_wfx_host_init_bus(void)
 
   dummy_data          = 0;
   config.master       = true;            // master mode
-  config.baudrate     = 10000000u;       //1000000;         // CLK freq is 1 MHz
+  config.baudrate     = 10000000u;       // CLK freq is 1 MHz
   config.autoCsEnable = true;            // CS pin controlled by hardware, not firmware
   config.clockMode    = usartClockMode0; // clock idle low, sample on rising/first edge
   config.msbf         = true;            // send MSB first
@@ -100,7 +100,7 @@ void sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, 0);
 
   // Configure CS pin as an output initially high
- // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
+  // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
   // SPI advanced configuration (part of the initializer)
   EUSART_SpiAdvancedInit_TypeDef adv = EUSART_SPI_ADVANCED_INIT_DEFAULT;
 
@@ -158,6 +158,7 @@ void sl_wfx_host_init_bus(void)
 #error "EFRxx - No UART/HAL"
 #endif
 }
+
 /********************************************************
  * @fn   sl_wfx_host_gpio_init(void)
  * @brief
@@ -192,6 +193,7 @@ void sl_wfx_host_gpio_init(void)
   NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
   NVIC_SetPriority(GPIO_ODD_IRQn, 5);
 }
+
 /*****************************************************************
  * @fn  void sl_wfx_host_reset_chip(void)
  * @brief
@@ -213,6 +215,7 @@ void sl_wfx_host_reset_chip(void)
   // Delay for 3ms
   vTaskDelay(pdMS_TO_TICKS(3));
 }
+
 /*****************************************************************
  * @fn   void rsi_hal_board_init(void)
  * @brief
@@ -233,6 +236,7 @@ void rsi_hal_board_init(void)
   sl_wfx_host_reset_chip ();
   WFX_RSI_LOG("RSI_HAL: Init done");
 }
+
 /*****************************************************************************
 *@fn static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
 *
@@ -295,6 +299,7 @@ static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
   DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, (DMADRV_Callback_t)0, (void *)0);
 }
 #endif /*  RS911X_USE_LDMA */
+
 /*************************************************************
  * @fn   static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
  * @brief
@@ -338,6 +343,7 @@ static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
                           NULL);
 #endif
 }
+
 /*****************************************************************************
 *@fn static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
 *@brief
@@ -391,6 +397,7 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
                           NULL);
 #endif /* USE_LDMA */
 }
+
 /*********************************************************************
  * @fn   int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
  * @brief

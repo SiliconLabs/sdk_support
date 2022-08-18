@@ -45,21 +45,15 @@ sl_status_t wfx_wifi_start(void)
   /*
      * Create the driver task
      */
-#if 1
   wfx_rsi.wlan_task = xTaskCreateStatic(wfx_rsi_task, "wfx_rsi",
   			WFX_RSI_TASK_SZ, NULL, 1, wfxRsiTaskStack, &wfxRsiTaskBuffer);
   if (NULL == wfx_rsi.wlan_task) {
     WFX_RSI_LOG("%s: error: failed to create task.", __func__);
     return SL_STATUS_FAIL;
   }
-#else
-  if (xTaskCreate(wfx_rsi_task, "wfx_rsi", WFX_RSI_TASK_SZ, NULL, 1, &wfx_rsi.wlan_task) != pdPASS) {
-    WFX_RSI_LOG("%s: error: failed to create task.", __func__);
-    return SL_STATUS_FAIL;
-  }
-#endif  
   return SL_STATUS_OK;
 }
+
 /*********************************************************************
  * @fn  void wfx_enable_sta_mode(void)
  * @brief  
@@ -71,6 +65,7 @@ void wfx_enable_sta_mode(void)
 {
   wfx_rsi.dev_state |= WFX_RSI_ST_STA_MODE;
 }
+
 /*********************************************************************
  * @fn  bool wfx_is_sta_mode_enabled(void)
  * @brief  
@@ -85,6 +80,7 @@ bool wfx_is_sta_mode_enabled(void)
   // WFX_RSI_LOG("%s: %d", __func__, (mode ? "yes" : "no"));
   return mode;
 }
+
 /*********************************************************************
  * @fn  sl_wfx_state_t wfx_get_wifi_state(void)
  * @brief  
@@ -103,6 +99,7 @@ sl_wfx_state_t wfx_get_wifi_state(void)
   }
   return SL_WFX_NOT_INIT;
 }
+
 /*********************************************************************
  * @fn  sl_wfx_state_t wfx_get_wifi_state(void)
  * @brief  
@@ -131,6 +128,7 @@ void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *a
               mac->octet[4],
               mac->octet[5]);
 }
+
 /*********************************************************************
  * @fn  void wfx_set_wifi_provision(wfx_wifi_provision_t *cfg)
  * @brief  
@@ -146,6 +144,7 @@ void wfx_set_wifi_provision(wfx_wifi_provision_t *cfg)
   wfx_rsi.sec = *cfg;
   wfx_rsi.dev_state |= WFX_RSI_ST_STA_PROVISIONED;
 }
+
 /*********************************************************************
  * @fn  bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig)
  * @brief  
@@ -164,6 +163,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig)
   }
   return false;
 }
+
 /*********************************************************************
  * @fn  bool wfx_is_sta_provisioned(void)
  * @brief  
@@ -180,6 +180,7 @@ bool wfx_is_sta_provisioned(void)
               (status ? "provisioned" : "not provisioned"));
   return status;
 }
+
 /*********************************************************************
  * @fn  void wfx_clear_wifi_provision(void)
  * @brief  
@@ -193,6 +194,7 @@ void wfx_clear_wifi_provision(void)
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_PROVISIONED;
   WFX_RSI_LOG("%s: completed.", __func__);
 }
+
 /*************************************************************************
  * @fn sl_status_t wfx_connect_to_ap(void)
  * @brief
@@ -215,6 +217,7 @@ sl_status_t wfx_connect_to_ap(void)
   }
   return SL_STATUS_OK;
 }
+
 /*********************************************************************
  * @fn  void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif)
  * @brief  
@@ -230,6 +233,7 @@ void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif)
    */
   WFX_RSI_LOG("%s: warning: not implemented.", __func__);
 }
+
 /*********************************************************************
  * @fn  bool wfx_is_sta_connected(void)
  * @brief  
@@ -245,6 +249,7 @@ bool wfx_is_sta_connected(void)
   WFX_RSI_LOG("%s: status: %s", __func__, (status ? "connected" : "not connected"));
   return status;
 }
+
 /*********************************************************************
  * @fn  wifi_mode_t wfx_get_wifi_mode()
  * @brief  
@@ -259,6 +264,7 @@ wifi_mode_t wfx_get_wifi_mode()
     return WIFI_MODE_STA;
   return WIFI_MODE_NULL;
 }
+
 /*********************************************************************
  * @fn  sl_status_t wfx_sta_discon(void)
  * @brief  
@@ -276,6 +282,7 @@ sl_status_t wfx_sta_discon(void)
   WFX_RSI_LOG("%s: completed.", __func__);
   return status;
 }
+
 /*********************************************************************
  * @fn  bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
  * @brief  
@@ -295,6 +302,7 @@ bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
   WFX_RSI_LOG("%s: status: %d", __func__, status);
   return status;
 }
+
 /*********************************************************************
  * @fn  bool wfx_have_ipv6_addr(sl_wfx_interface_t which_if)
  * @brief  
@@ -314,6 +322,7 @@ bool wfx_have_ipv6_addr(sl_wfx_interface_t which_if)
   WFX_RSI_LOG("%s: status: %d", __func__, status);
   return status;
 }
+
 /*********************************************************************
  * @fn  bool wfx_hw_ready(void)
  * @brief  
@@ -326,6 +335,7 @@ bool wfx_hw_ready(void)
 {
   return (wfx_rsi.dev_state & WFX_RSI_ST_DEV_READY) ? true : false;
 }
+
 /*********************************************************************
  * @fn  int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap)
  * @brief  
@@ -338,6 +348,7 @@ int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap)
 {
   return wfx_rsi_get_ap_info(ap);
 }
+
 /*********************************************************************
  * @fn   int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
  * @brief  
@@ -350,6 +361,7 @@ int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
 {
   return wfx_rsi_get_ap_ext(extra_info);
 }
+
 /***************************************************************************
  * @fn   int32_t wfx_reset_counts(){
  * @brief  
@@ -361,6 +373,7 @@ int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
 int32_t wfx_reset_counts(){
   return wfx_rsi_reset_count();
 }
+
 #ifdef SL_WFX_CONFIG_SCAN
 /*******************************************************************************
  * @fn   bool wfx_start_scan(char *ssid, void (*callback)(wfx_wifi_scan_result_t *))
@@ -388,6 +401,7 @@ bool wfx_start_scan(char *ssid, void (*callback)(wfx_wifi_scan_result_t *))
 
   return true;
 }
+
 /***************************************************************************
  * @fn   void wfx_cancel_scan(void)
  * @brief  

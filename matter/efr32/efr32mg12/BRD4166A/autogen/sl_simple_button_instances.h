@@ -27,17 +27,8 @@ extern const sl_button_t *sl_simple_button_array[];
 
 #define SL_SIMPLE_BUTTON_COUNT 2
 #define SL_SIMPLE_BUTTON_INSTANCE(n) (sl_simple_button_array[n])
-/*****************************************************************************
-*  Notify Device button initialization
-*
-* @param void
-******************************************************************************/
+
 void sl_simple_button_init_instances(void);
-/*****************************************************************************
-*  Notify Device button interrupt configuration
-*
-* @param void
-******************************************************************************/
 void sl_simple_button_poll_instances(void);
 
 #endif // SL_SIMPLE_BUTTON_INSTANCES_H

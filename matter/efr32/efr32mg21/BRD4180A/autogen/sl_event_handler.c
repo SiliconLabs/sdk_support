@@ -25,12 +25,6 @@
 #include "sl_power_manager.h"
 #endif
 
-/*****************************************************************************
-* Notify platform init function
-* @brief
-*   This initialization function configures the device 
-* @param void
-******************************************************************************/
 void sl_platform_init(void)
 {
     CHIP_Init();
@@ -49,24 +43,11 @@ void sl_platform_init(void)
 #endif
 }
 
-/*****************************************************************************
-* Notify kernal start function
-* @brief
-*   This function start task schedular
-* @param void
-******************************************************************************/
 void sl_kernel_start(void)
 {
     osKernelStart();
 }
 
-/*****************************************************************************
-* Notify driver init function
-* @brief
-*   This initialization function configures the device GPIO pins
-*   for NVIC IRQ, LED, BUTTON and UART etc. 
-* @param void
-******************************************************************************/
 void sl_driver_init(void)
 {
     GPIOINT_Init();
@@ -77,23 +58,12 @@ void sl_driver_init(void)
 #endif // CONFIG_ENABLE_UART
 }
 
-/*****************************************************************************
-* Notify service init function
-* @brief
-*   This function configures the sleep timer
-* @param void
-******************************************************************************/
 void sl_service_init(void)
 {
     sl_sleeptimer_init();
     sl_hfxo_manager_init();
 }
 
-/*****************************************************************************
-* Notify stack init function
-*
-* @param void
-******************************************************************************/
 void sl_stack_init(void)
 {
     sl_rail_util_pa_init();
