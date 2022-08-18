@@ -488,7 +488,7 @@ static void wfx_events_task(void *p_arg)
   TickType_t last_dhcp_poll, now;
   EventBits_t flags;
   (void)p_arg;
-  
+
   sta_netif            = wfx_get_netif(SL_WFX_STA_INTERFACE);
   last_dhcp_poll = xTaskGetTickCount();
   while (1) {
