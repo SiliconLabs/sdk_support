@@ -77,8 +77,8 @@ void wfx_lwip_set_sta_link_up(void)
   netifapi_netif_set_link_up(&sta_netif);
   dhcpclient_set_link_state(1);
   /*
-     * Enable IPV6
-     */
+   * Enable IPV6
+   */
   netif_create_ip6_linklocal_address(&sta_netif, 1);
 }
 

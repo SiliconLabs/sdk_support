@@ -29,6 +29,7 @@
 #include "wfx_rsi.h"
 #include "wfx_host_pinout.h"
 
+
 /* The following stuff comes from hal/rsi_hal_mcu_interrupt.c */
 static void (*rsi_intr_cb)(void);
 /*********************************************************************
@@ -43,6 +44,7 @@ void rsi_hal_intr_config(void (*rsi_interrupt_handler)(void))
 {
   rsi_intr_cb = rsi_interrupt_handler;
 }
+
 /***********************************************************************
  * @fn  static void wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
  * @brief
@@ -63,6 +65,7 @@ static void wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
   if (rsi_intr_cb)
     (*rsi_intr_cb)();
 }
+
 /***********************************************************************
  * @fn   static void wfx_host_gpio_init(void)
  * @brief
@@ -101,18 +104,6 @@ static void wfx_host_gpio_init(void)
 
 #define USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
 
-#if 0
-static SemaphoreHandle_t spi_sem;
-static unsigned int tx_dma_channel;
-static unsigned int rx_dma_channel;
-static uint32_t dummy_rx_data;
-static uint32_t dummy_tx_data;
-static uint32_t usart_clock;
-static uint32_t usart_rx_signal;
-static uint32_t usart_tx_signal;
-static bool spi_enabled = false;
-uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
-#endif
 /***********************************************************************
  * @fn   static int sl_wfx_host_spi_set_config(void *usart)
  * @brief
@@ -236,6 +227,7 @@ sl_status_t sl_wfx_host_init_bus(void)
 
   return SL_STATUS_OK;
 }
+
 /***********************************************************************
  * @fn   void wfx_rsidev_init(void)
  * @brief

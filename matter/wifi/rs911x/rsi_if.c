@@ -49,6 +49,7 @@ bool hasNotifiedIPV6 = false;
 bool hasNotifiedIPV4 = false;
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
 bool hasNotifiedWifiConnectivity = false;
+
 /*
  * This file implements the interface to the RSI SAPIs
  */
@@ -272,7 +273,7 @@ static int32_t wfx_rsi_init(void) {
   }
 
   WFX_RSI_LOG("%s: rsi_device_init", __func__);
-  //! Redpine module intialisation
+  /* ! Redpine module intialisation */
   if ((status = rsi_device_init(LOAD_NWP_FW)) != RSI_SUCCESS) {
     WFX_RSI_LOG("%s: error: rsi_device_init failed with status: %02x", __func__,
                 status);
@@ -289,12 +290,14 @@ static int32_t wfx_rsi_init(void) {
     return RSI_ERROR_INVALID_PARAM;
   }
 
+  /* Initialize WiSeConnect or Module features. */
   WFX_RSI_LOG("%s: rsi_wireless_init", __func__);
   if ((status = rsi_wireless_init(0, 0)) != RSI_SUCCESS) {
     WFX_RSI_LOG("%s: error: rsi_wireless_init failed with status: %02x",
                 __func__, status);
     return status;
   }
+
   WFX_RSI_LOG("%s: get FW version..", __func__);
   /*
    * Get the MAC and other info to let the user know about it.
@@ -305,6 +308,7 @@ static int32_t wfx_rsi_init(void) {
         __func__, status);
     return status;
   }
+
   buf[sizeof(buf) - 1] = 0;
   WFX_RSI_LOG("%s: RSI firmware version: %s", __func__, buf);
   //! Send feature frame
@@ -313,7 +317,10 @@ static int32_t wfx_rsi_init(void) {
                 __func__, status);
     return status;
   }
+
   WFX_RSI_LOG("%s: sent rsi_send_feature_frame", __func__);
+  /* initializes wlan radio parameters and WLAN supplicant parameters.
+   */
   (void)rsi_wlan_radio_init(); /* Required so we can get MAC address */
   if ((status = rsi_wlan_get(RSI_MAC_ADDRESS, &wfx_rsi.sta_mac.octet[0], 6)) !=
       RSI_SUCCESS) {
@@ -321,6 +328,7 @@ static int32_t wfx_rsi_init(void) {
                 status);
     return status;
   }
+
   WFX_RSI_LOG("%s: WLAN: MAC %02x:%02x:%02x %02x:%02x:%02x", __func__,
               wfx_rsi.sta_mac.octet[0], wfx_rsi.sta_mac.octet[1],
               wfx_rsi.sta_mac.octet[2], wfx_rsi.sta_mac.octet[3],
@@ -446,6 +454,7 @@ static void wfx_rsi_do_join(void) {
     }
   }
 }
+
 /*********************************************************************************
  * @fn  void wfx_rsi_task(void *arg)
  * @brief

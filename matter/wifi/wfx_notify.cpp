@@ -34,9 +34,14 @@ using namespace ::chip::DeviceLayer;
  * Notifications to the upper-layer
  * All done in the context of the RSI/WiFi task (rsi_if.c)
  */
-/*
- * Device started..
- */
+
+/***********************************************************************************
+ * @fn  wfx_started_notify()
+ * @brief
+ *       Wifi device started notification
+ * @param[in]: None
+ * @return None
+ *************************************************************************************/
 void wfx_started_notify()
 {
   sl_wfx_startup_ind_t evt;
@@ -79,6 +84,7 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
   memset(&evt, 0, sizeof evt);
   evt.header.id     = SL_WFX_CONNECT_IND_ID;
   evt.header.length = sizeof evt;
+
 #ifdef RS911X_WIFI
   evt.body.channel = wfx_rsi.ap_chan;
 #endif
@@ -86,6 +92,7 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
+
 /**************************************************************************************
  * @fn  void wfx_disconnected_notify(int32_t status)
  * @brief
@@ -105,6 +112,7 @@ void wfx_disconnected_notify(int32_t status)
   evt.body.reason   = status;
   PlatformMgrImpl().HandleWFXSystemEvent(WIFI_EVENT, (sl_wfx_generic_message_t *)&evt);
 }
+
 /**************************************************************************************
  * @fn  void wfx_ipv6_notify(int got_ip)
  * @brief
@@ -122,16 +130,17 @@ void wfx_ipv6_notify(int got_ip)
   eventData.header.id     = got_ip ? IP_EVENT_GOT_IP6 : IP_EVENT_STA_LOST_IP;
   eventData.header.length = sizeof(eventData.header);
   PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
+
   /* So the other threads can run and have the connectivity OK */
   if (got_ip) {
     /* Should remember this */
     vTaskDelay(1);
-    //chip::app::MdnsServer::Instance().StartServer();
     chip::DeviceLayer::PlatformMgr().LockChipStack();
     chip::app::DnssdServer::Instance().StartServer(/*Dnssd::CommissioningMode::kEnabledBasic*/);
     chip::DeviceLayer::PlatformMgr().UnlockChipStack();
   }
 }
+
 /**************************************************************************************
  * @fn   void wfx_ip_changed_notify(int got_ip)
  * @brief
@@ -149,6 +158,7 @@ void wfx_ip_changed_notify(int got_ip)
   eventData.header.id     = got_ip ? IP_EVENT_STA_GOT_IP : IP_EVENT_STA_LOST_IP;
   eventData.header.length = sizeof(eventData.header);
   PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);
+
   /* So the other threads can run and have the connectivity OK */
   if (got_ip) {
     /* Should remember this */

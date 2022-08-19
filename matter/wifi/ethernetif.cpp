@@ -123,12 +123,14 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
       memcpy((uint8_t *)q->payload, (uint8_t *)b + bufferoffset, q->len);
       bufferoffset += q->len;
     }
-#if 0
+
+#ifdef WIFI_DEBUG_ENABLED
                 EFR32_LOG ("EN:IN %d,[%02x:%02x:%02x:%02x:%02x%02x][%02x:%02x:%02x:%02x:%02x:%02x]type=%02x%02x", bufferoffset,
                            b [0], b [1], b [2], b [3], b [4], b [5],
                            b [6], b [7], b [8], b [9], b [10], b [11],
                            b[12], b [13]);
 #endif
+
     if (netif->input(p, netif) != ERR_OK) {
       pbuf_free(p);
     }
@@ -191,7 +193,11 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   int i  = 0;
   result = SL_STATUS_FAIL;
   
-  //EFR32_LOG ("WF200: Out %d", (int)framelength);
+#ifdef WIFI_DEBUG_ENABLED
+  EFR32_LOG ("WF200: Out %d", (int)framelength);
+#endif
+
+  /* send the generated frame over Wifi network */
   while ((result != SL_STATUS_OK) && (i++ < 10)) {
     result = sl_wfx_send_ethernet_frame(tx_buffer, framelength, SL_WFX_STA_INTERFACE, 0);
   }
@@ -222,20 +228,29 @@ void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer)
   /* Check packet interface to send to AP or STA interface */
   if ((rx_buffer->header.info & SL_WFX_MSG_INFO_INTERFACE_MASK)
       == (SL_WFX_STA_INTERFACE << SL_WFX_MSG_INFO_INTERFACE_OFFSET)) {
-    /* Send to station interface */
+
+    /* Send received frame to station interface */
     if ((netif = wfx_get_netif(SL_WFX_STA_INTERFACE)) != NULL) {
       uint8_t *buffer;
       uint16_t len;
 
       len    = rx_buffer->body.frame_length;
       buffer = (uint8_t *)&(rx_buffer->body.frame[rx_buffer->body.frame_padding]);
-      //EFR32_LOG ("WF200: In %d", (int)len);
+
+#ifdef WIFI_DEBUG_ENABLED
+      EFR32_LOG ("WF200: In %d", (int)len);
+#endif
+
       low_level_input(netif, buffer, len);
     }else {
-      //EFR32_LOG ("WF200: NO-INTF");
+#ifdef WIFI_DEBUG_ENABLED
+      EFR32_LOG ("WF200: NO-INTF");
+#endif
      }
   } else {
-    //EFR32_LOG ("WF200: Invalid frame IN");
+#ifdef WIFI_DEBUG_ENABLED
+    EFR32_LOG ("WF200: Invalid frame IN");
+#endif
   }
 }
 
@@ -244,9 +259,10 @@ static SemaphoreHandle_t ethout_sem;
 /*****************************************************************************
  *  @fn  static err_t low_level_output(struct netif *netif, struct pbuf *p)
  *  @brief
- *    low level output
+ *    This function is called from LWIP task when LWIP stack
+ *    has some data to be forwarded over WiFi Network
  *
- * @param[in] netif: the lwip network interface structure
+ * @param[in] netif: lwip network interface
  *
  * @param[in] p: the packet to send
  *
@@ -262,12 +278,15 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   if (xSemaphoreTake(ethout_sem, portMAX_DELAY) != pdTRUE) {
     return ERR_IF;
   }
-  //EFR32_LOG ("EN-RSI: Output");
+#ifdef WIFI_DEBUG_ENABLED
+  EFR32_LOG ("EN-RSI: Output");
+#endif
   if ((netif->flags & (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) != (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) {
     EFR32_LOG("EN-RSI:NOT UP");
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
   }
+  /* Confirm if packet is allocated */
   rsipkt = wfx_rsi_alloc_pkt();
   if (!rsipkt) {
     EFR32_LOG("EN-RSI:No buf");
@@ -275,13 +294,14 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     return ERR_IF;
   }
 
-#if 0
+#ifdef WIFI_DEBUG_ENABLED
         uint8_t *b = (uint8_t *)p->payload;
         EFR32_LOG ("EN-RSI: Out [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x]type=%02x%02x",
                            b [0], b [1], b [2], b [3], b [4], b [5],
                            b [6], b [7], b [8], b [9], b [10], b [11],
                            b[12], b [13]);
 #endif
+  /* Generate the packet */
   for (q = p, framelength = 0; q != NULL; q = q->next) {
     wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len, framelength);
     framelength += q->len;
@@ -290,14 +310,22 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     /* Add junk data to the end */
     wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), 60 - framelength, framelength);
   }
-  //EFR32_LOG ("EN-RSI: Sending %d", framelength);
+#ifdef WIFI_DEBUG_ENABLED
+  EFR32_LOG ("EN-RSI: Sending %d", framelength);
+#endif
+
+  /* forward the generated packet to RSI to
+   * send the data over wifi network
+   */
   if (wfx_rsi_send_data(rsipkt, framelength)) {
     EFR32_LOG("*ERR*EN-RSI:Send fail");
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
   }
   
-  //EFR32_LOG ("EN-RSI:Xmit %d", framelength);
+#ifdef WIFI_DEBUG_ENABLED
+  EFR32_LOG ("EN-RSI:Xmit %d", framelength);
+#endif
   xSemaphoreGive(ethout_sem);
 
   return ERR_OK;
@@ -319,6 +347,9 @@ void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
 {
   struct netif *ifp;
 
+  /* get the network interface for STATION interface,
+   * and forward the received frame buffer to LWIP
+   */
   if ((ifp = wfx_get_netif(SL_WFX_STA_INTERFACE)) != (struct netif *)0) {
     low_level_input(ifp, buf, len);
   }

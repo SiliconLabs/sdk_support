@@ -89,6 +89,7 @@ static uint32_t sta_ip;
 // wfx_fmac_driver context
 sl_wfx_context_t wifiContext;
 static uint8_t wifi_extra;
+
 /*****************************************************************************
  * macros
  ******************************************************************************/
@@ -475,7 +476,7 @@ static void sl_wfx_client_connected_callback(uint8_t *mac)
 {
   EFR32_LOG("Client connected, MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   // TODO
-  // EFR32_LOG("Open a web browser and go to http://%d.%d.%d.%d\r\n", ap_ip_addr0, ap_ip_addr1, ap_ip_addr2, ap_ip_addr3);
+  EFR32_LOG("Open a web browser and go to http://%d.%d.%d.%d\r\n", ap_ip_addr0, ap_ip_addr1, ap_ip_addr2, ap_ip_addr3);
 }
 
 /****************************************************************************
@@ -686,6 +687,7 @@ static void wfx_events_task(void *p_arg)
 #endif /* SL_WFX_CONFIG_SCAN */
   }
 }
+
 /****************************************************************************
  * @fn   static sl_status_t wfx_init(void)
  * @brief
@@ -766,6 +768,7 @@ static void wfx_wifi_hw_start(void)
     EFR32_LOG("*ERR*WF200:init failed");
   }
 }
+
 /************************************************************************
  * @fn   int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap)
  * @brief
@@ -777,6 +780,7 @@ int32_t wfx_get_ap_info(wfx_wifi_scan_result_t *ap){
   /* TODO */
   return -1;
 }
+
 /************************************************************************
  * @fn   int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info)
  * @brief
@@ -788,6 +792,7 @@ int32_t wfx_get_ap_ext(wfx_wifi_scan_ext_t *extra_info){
   /* TODO */
   return -1;
 }
+
 /************************************************************************
  * @fn    int32_t wfx_reset_counts()
  * @brief
@@ -799,6 +804,7 @@ int32_t wfx_reset_counts(){
   /* TODO */
   return -1;
 }
+
 /*************************************************************************
  * @fn   sl_status_t wfx_wifi_start(void)
  * @brief
@@ -818,6 +824,7 @@ sl_status_t wfx_wifi_start(void)
 
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn sl_wfx_state_t wfx_get_wifi_state(void)
  * @brief
@@ -829,6 +836,7 @@ sl_wfx_state_t wfx_get_wifi_state(void)
 {
   return wifiContext.state;
 }
+
 /****************************************************************************
  * @fn  struct netif *wfx_GetNetif(sl_wfx_interface_t interface)
  * @brief
@@ -849,6 +857,7 @@ struct netif *wfx_GetNetif(sl_wfx_interface_t interface)
 #endif
   return SelectedNetif;
 }
+
 /****************************************************************************
  * @fn  sl_wfx_mac_address_t wfx_get_wifi_mac_addr(sl_wfx_interface_t interface)
  * @brief
@@ -862,6 +871,7 @@ sl_wfx_mac_address_t wfx_get_wifi_mac_addr(sl_wfx_interface_t interface)
   // return Mac address used by WFX SL_WFX_STA_INTERFACE or SL_WFX_SOFTAP_INTERFACE,
   return (interface == SL_WFX_STA_INTERFACE) ? wifiContext.mac_addr_0 : wifiContext.mac_addr_1;
 }
+
 /****************************************************************************
  * @fn  void wfx_set_wifi_provision(wfx_wifi_provision_t *wifiConfig)
  * @brief
@@ -925,6 +935,7 @@ void wfx_clear_wifi_provision(void)
 {
   memset(&wifi_provision, 0, sizeof(wifi_provision));
 }
+
 /****************************************************************************
  * @fn  bool wfx_is_sta_provisioned(void)
  * @brief
@@ -937,6 +948,7 @@ bool wfx_is_sta_provisioned(void)
 {
   return (wifi_provision.ssid[0]) ? true : false;
 }
+
 /****************************************************************************
  * @fn  sl_status_t wfx_connect_to_ap(void)
  * @brief
@@ -968,6 +980,7 @@ sl_status_t wfx_connect_to_ap(void)
 
   return result;
 }
+
 /****************************************************************************
  * @fn  void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *addr)
  * @brief 
@@ -994,6 +1007,7 @@ void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *a
             mac->octet[4],
             mac->octet[5]);
 }
+
 /****************************************************************************
  * @fn  bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
  * @brief 
@@ -1010,6 +1024,7 @@ bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
     return false; /* TODO */
   }
 }
+
 /****************************************************************************
  * @fn  bool wfx_have_ipv6_addr(sl_wfx_interface_t which_if)
  * @brief 
@@ -1031,6 +1046,7 @@ wfx_have_ipv6_addr (sl_wfx_interface_t which_if)
     EFR32_LOG ("%s: status: %d", __func__, status);
     return status;
 }
+
 /****************************************************************************
  * @fn   sl_status_t wfx_sta_discon(void)
  * @brief
@@ -1047,6 +1063,7 @@ sl_status_t wfx_sta_discon(void)
   xEventGroupSetBits(sl_wfx_event_group, SL_WFX_RETRY_CONNECT);
   return status;
 }
+
 /****************************************************************************
  * @fn  bool wfx_is_sta_mode_enabled(void)
  * @brief 
@@ -1058,6 +1075,7 @@ bool wfx_is_sta_mode_enabled(void)
 {
   return true; /* It always is */
 }
+
 /****************************************************************************
  * @fn  bool wfx_is_sta_connected(void)
  * @brief 
@@ -1076,6 +1094,7 @@ bool wfx_is_sta_connected(void)
 
   return val;
 }
+
 /****************************************************************************
  * @fn  void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif)
  * @brief 
@@ -1088,6 +1107,7 @@ void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif)
 {
   EFR32_LOG("Setup-IP6: TODO"); /* It is automatically done when lwip link up */
 }
+
 /****************************************************************************
  * @fn  wifi_mode_t wfx_get_wifi_mode()
  * @brief 
@@ -1116,6 +1136,7 @@ bool wfx_hw_ready(void)
 {
   return (wifiContext.state & SL_WFX_STARTED) ? true : false;
 }
+
 /*****************************************************************************
  * @fn  void wfx_dhcp_got_ipv4(uint32_t ip)
  * @brief
@@ -1172,6 +1193,7 @@ bool wfx_start_scan(char *ssid, void (*callback)(wfx_wifi_scan_result_t *))
 
   return true;
 }
+
 /****************************************************************************
  * @fn  void wfx_cancel_scan(void)
  * @brief

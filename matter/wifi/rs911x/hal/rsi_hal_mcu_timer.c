@@ -238,6 +238,7 @@ void SysTick_Handler(void)
 {
   _dwTickCount++;
 }
+
 uint32_t GetTickCount(void)
 {
   return _dwTickCount; // gets the tick count from systic ISR
@@ -305,6 +306,7 @@ uint32_t rsi_hal_gettickcount(void)
   return (tv1.tv_sec * 1000 + tv1.tv_usec / 1000);
 #endif
 }
+
 #else
 uint32_t rsi_hal_gettickcount(void)
 {

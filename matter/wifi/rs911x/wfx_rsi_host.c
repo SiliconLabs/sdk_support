@@ -43,10 +43,11 @@ sl_status_t wfx_wifi_start(void)
   wfx_rsi.dev_state |= WFX_RSI_ST_STARTED;
   WFX_RSI_LOG("%s: starting..", __func__);
   /*
-     * Create the driver task
-     */
+   * Create the Wifi driver task
+   */
   wfx_rsi.wlan_task = xTaskCreateStatic(wfx_rsi_task, "wfx_rsi",
   			WFX_RSI_TASK_SZ, NULL, 1, wfxRsiTaskStack, &wfxRsiTaskBuffer);
+
   if (NULL == wfx_rsi.wlan_task) {
     WFX_RSI_LOG("%s: error: failed to create task.", __func__);
     return SL_STATUS_FAIL;

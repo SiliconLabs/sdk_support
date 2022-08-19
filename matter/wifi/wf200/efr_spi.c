@@ -153,6 +153,7 @@ sl_status_t sl_wfx_host_init_bus(void)
 
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_deinit_bus(void)
  * @brief
@@ -172,6 +173,7 @@ sl_status_t sl_wfx_host_deinit_bus(void)
   USART_Reset(MY_USART);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_spi_cs_assert()
  * @brief
@@ -184,6 +186,7 @@ sl_status_t sl_wfx_host_spi_cs_assert()
   GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_spi_cs_deassert()
  * @brief
@@ -196,6 +199,7 @@ sl_status_t sl_wfx_host_spi_cs_deassert()
   GPIO_PinOutSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn  static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
  * @brief
@@ -218,6 +222,7 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
 
   return true;
 }
+
 /****************************************************************************
  * @fn   void receiveDMA(uint8_t *buffer, uint16_t buffer_length)
  * @brief
@@ -250,6 +255,7 @@ void receiveDMA(uint8_t *buffer, uint16_t buffer_length)
                           NULL,
                           NULL);
 }
+
 /****************************************************************************
  * @fn   void transmitDMA(uint8_t *buffer, uint16_t buffer_length)
  * @brief
@@ -370,6 +376,7 @@ sl_status_t sl_wfx_host_disable_platform_interrupt(void)
   GPIO_IntDisable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn   sl_status_t sl_wfx_host_enable_platform_interrupt(void)
  * @brief 
@@ -383,6 +390,7 @@ sl_status_t sl_wfx_host_enable_platform_interrupt(void)
   GPIO_IntEnable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn   sl_status_t sl_wfx_host_enable_spi(void)
  * @brief 
@@ -402,6 +410,7 @@ sl_status_t sl_wfx_host_enable_spi(void)
   }
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn   sl_status_t sl_wfx_host_disable_spi(void)
  * @brief 

@@ -65,6 +65,7 @@ void rsi_gpio_irq_cb(uint8_t irqnum)
   if (call_back != NULL)
     (*call_back)();
 }
+
 /*===================================================*/
 /**
  * @fn           void rsi_hal_intr_config(void (* rsi_interrupt_handler)())
@@ -97,6 +98,7 @@ void rsi_hal_log_stats_intr_config(void (*rsi_give_wakeup_indication)())
   gpio_callback = rsi_give_wakeup_indication;
 }
 #endif
+
 /*===================================================*/
 /**
  * @fn           void rsi_hal_intr_mask(void)

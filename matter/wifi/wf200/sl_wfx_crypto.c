@@ -115,6 +115,7 @@ sl_status_t sl_wfx_host_get_secure_link_mac_key(uint8_t *sl_mac_key)
 
   return result;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_compute_pub_key(sl_wfx_securelink_exchange_pub_keys_req_body_t *request,
                                         const uint8_t *sl_mac_key)
@@ -169,6 +170,7 @@ error_handler:
   }
   return status;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_verify_pub_key(sl_wfx_securelink_exchange_pub_keys_ind_t *response_packet,
                                        const uint8_t *sl_mac_key,
@@ -264,6 +266,7 @@ error_handler:
   }
   return status;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_free_crypto_context(void)
  * @brief
@@ -281,6 +284,7 @@ sl_status_t sl_wfx_host_free_crypto_context(void)
 
   return SL_STATUS_OK;
 }
+
 /********************************************************************************
  * @fn   sl_status_t sl_wfx_host_decode_secure_link_data(uint8_t *buffer, uint32_t length, uint8_t *session_key)
  * @brief
@@ -335,6 +339,7 @@ error_handler:
   }
   return status;
 }
+
 /*********************************************************************
  * @fn  sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer,
                                                 uint32_t data_length,
@@ -378,6 +383,7 @@ sl_status_t sl_wfx_host_encode_secure_link_data(sl_wfx_generic_message_t *buffer
 
   return status;
 }
+
 /****************************************************************************
  * @fn  sl_status_t sl_wfx_host_schedule_secure_link_renegotiation(void)
  * @brief
@@ -392,6 +398,7 @@ sl_status_t sl_wfx_host_schedule_secure_link_renegotiation(void)
   xTaskNotifyGive(wfx_securelink_task);
   return SL_STATUS_OK;
 }
+
 /****************************************************************************
  * @fn  static inline void reverse_bytes(uint8_t *src, uint8_t length)
  * @brief
