@@ -103,7 +103,7 @@ int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t
     return RSI_ERROR_INVALID_OPTION; /* Not supported for now - Fix this later */
   for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
     tp = &rsi_timer[x];
-    if (tp->handle == HANDLE0) {
+    if (tp->handle == NULL) {
       goto found;
     }
   }
@@ -120,7 +120,7 @@ found:
                             NULL,
                             timer_cb);
 
-  if (tp->handle == HANDLE0) {
+  if (tp->handle == NULL) {
     return RSI_ERROR_INSUFFICIENT_BUFFER;
   }
 

@@ -140,8 +140,6 @@
 #define WFX_GPIO_NVIC_PRIORITY     	5
 #define CB_VALUE        		(DMADRV_Callback_t)0
 
-#define HANDLE0         		(TimerHandle_t)0
-
 /* TIMER_TICKS_TO_WAIT Specifies the time, in ticks, that the calling task should
  * be held in the Blocked state to wait for the start command to be successfully
  * sent to the timer command queue.

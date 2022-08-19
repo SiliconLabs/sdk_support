@@ -56,6 +56,8 @@ void efr32Log(const char *aFormat, ...);
 #define STATION_NETIF0 's'
 #define STATION_NETIF1 't'
 
+#define LWIP_FRAME_ALIGNMENT 60
+
 /*****************************************************************************
  * Variables
  ******************************************************************************/
@@ -156,8 +158,8 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   for (q = p, framelength = 0; q != NULL; q = q->next) {
     framelength += q->len;
   }
-  if (framelength < 60) { /* 60 : Frame alignment for LWIP */
-    padding = 60 - framelength;
+  if (framelength < LWIP_FRAME_ALIGNMENT) { /* 60 : Frame alignment for LWIP */
+    padding = LWIP_FRAME_ALIGNMENT - framelength;
   } else {
     padding = 0;
   }
@@ -268,9 +270,9 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len, framelength);
     framelength += q->len;
   }
-  if (framelength < 60) {
+  if (framelength < LWIP_FRAME_ALIGNMENT) {
     /* Add junk data to the end for frame alignment if framelength is less than 60 */
-    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), 60 - framelength, framelength);
+    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), LWIP_FRAME_ALIGNMENT - framelength, framelength);
   }
   //EFR32_LOG ("EN-RSI: Sending %d", framelength);
   if (wfx_rsi_send_data(rsipkt, framelength)) {
