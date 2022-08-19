@@ -874,7 +874,8 @@ void wfx_setup_ip6_link_local(sl_wfx_interface_t whichif) {
   EFR32_LOG("Setup-IP6: TODO"); /* It is automatically done when lwip link up */
 }
 
-void wfx_enable_sta_mode(void) { /* Nothing to do - default is that it is */ }
+void wfx_enable_sta_mode(void) { /* Nothing to do - default is that it is */
+}
 wifi_mode_t wfx_get_wifi_mode() {
   if (wifiContext.state & SL_WFX_STARTED)
     return WIFI_MODE_STA;
