@@ -9,6 +9,8 @@
 
 /* standard device header from emlib */
 #define CMSIS_device_header        "em_device.h"
+#define RTE_CMSIS_RTOS2
+
 
 /* components are auto-generated here */
 
