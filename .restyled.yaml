@@ -43,7 +43,7 @@ exclude:
     - ".github/workflows/*" # https://github.com/restyled-io/restyler/issues/73
     - ".github/**/*" # https://github.com/restyled-io/restyler/issues/73
     - ".github/*" # https://github.com/restyled-io/restyler/issues/73
-    - "matter/efr32/**/*" #ignore Simplicity Studio generated files  
+    - "matter/efr32/**/*" #ignore Simplicity Studio generated files
 
 
 changed_paths:
