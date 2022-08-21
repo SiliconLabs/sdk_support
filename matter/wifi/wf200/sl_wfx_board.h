@@ -10,6 +10,8 @@
 #include "brd4161a.h"
 #elif defined(EFR32MG24_BRD4187A) || defined(BRD4187A)
 #include "brd4187c.h"
+#elif defined(EFR32MG24_BRD4186C) || defined(BRD4186C)
+#include "brd4186c.h"
 #else
 #error "Need SPI Pins"
 #endif /* EFR32MG21_BRD4180A */
