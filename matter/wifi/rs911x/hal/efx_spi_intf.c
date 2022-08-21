@@ -45,13 +45,20 @@
 #include "sl_device_init_dpll.h"
 #include "sl_device_init_hfxo.h"
 
+StaticSemaphore_t xEfxSpiIntfSemaBuffer;
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_chan, rx_dma_chan;
 /*TODO -  FIX This - It belongs somewhere else depending on which USART is used */
 static uint32_t dummy_data; /* Used for DMA - when results don't matter */
 extern void rsi_gpio_irq_cb(uint8_t irqnum);
-//#define RS911X_USE_LDMA
 
+/****************************************************************************
+ * @fn    static void dma_init(void)
+ * @brief  
+ *        Initialize DMA
+ * @return 
+ *        None
+ *****************************************************************************/
 static void dma_init(void)
 {
   /* Note LDMA is init'd by DMADRV_Init */
@@ -61,7 +68,11 @@ static void dma_init(void)
 }
 
 /****************************************************************************
- * Initialize SPI peripheral
+ * @fn   sl_wfx_host_init_bus(void)
+ * @brief  
+ *       Initialize SPI peripheral
+ * @return
+ *       None
  *****************************************************************************/
 void sl_wfx_host_init_bus(void)
 {
@@ -71,7 +82,7 @@ void sl_wfx_host_init_bus(void)
 
   dummy_data          = 0;
   config.master       = true;            // master mode
-  config.baudrate     = 10000000u;       // 5000000;//1000000;         // CLK freq is 1 MHz
+  config.baudrate     = 10000000u;       // CLK freq is 1 MHz
   config.autoCsEnable = true;            // CS pin controlled by hardware, not firmware
   config.clockMode    = usartClockMode0; // clock idle low, sample on rising/first edge
   config.msbf         = true;            // send MSB first
@@ -89,7 +100,7 @@ void sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, 0);
 
   // Configure CS pin as an output initially high
- // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
+  // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
   // SPI advanced configuration (part of the initializer)
   EUSART_SpiAdvancedInit_TypeDef adv = EUSART_SPI_ADVANCED_INIT_DEFAULT;
 
@@ -100,7 +111,7 @@ void sl_wfx_host_init_bus(void)
   // Default asynchronous initializer (main/master mode and 8-bit data)
   EUSART_SpiInit_TypeDef init = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
 
-  init.bitRate = 12000000;         // 10 MHz shift clock
+  init.bitRate = 12000000;         // 12 MHz shift clock
   init.advancedSettings = &adv;   // Advanced settings structure
 #endif
 #if defined(EFR32MG12)
@@ -123,11 +134,11 @@ void sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
 
 #elif defined(EFR32MG21) || defined(EFR32MG24)
-  /*
+  /**********************************************************************
    * Route EUSART1 MOSI, MISO, and SCLK to the specified pins.  CS is
    * not controlled by EUSART1 so there is no write to the corresponding
    * EUSARTROUTE register to do this.
-   */
+   ****************************************************************************/
   GPIO->EUSARTROUTE[1].TXROUTE = (EUS1MOSI_PORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
       | (EUS1MOSI_PIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
   GPIO->EUSARTROUTE[1].RXROUTE = (EUS1MISO_PORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
@@ -147,10 +158,15 @@ void sl_wfx_host_init_bus(void)
 #error "EFRxx - No UART/HAL"
 #endif
 }
-/*
- * Deal with the PINS that are not associated with SPI -
- * Ie. RESET, Wakeup
- */
+
+/********************************************************
+ * @fn   sl_wfx_host_gpio_init(void)
+ * @brief
+ *        Deal with the PINS that are not associated with SPI -
+ *        Ie. RESET, Wakeup
+ * @return 
+ *        None
+ **********************************************************/
 void sl_wfx_host_gpio_init(void)
 {
 #if defined(EFR32MG24)
@@ -177,9 +193,14 @@ void sl_wfx_host_gpio_init(void)
   NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
   NVIC_SetPriority(GPIO_ODD_IRQn, 5);
 }
-/*
- * To reset the WiFi CHIP
- */
+
+/*****************************************************************
+ * @fn  void sl_wfx_host_reset_chip(void)
+ * @brief
+ *      To reset the WiFi CHIP
+ * @return 
+ *      None
+ ****************************************************************/
 void sl_wfx_host_reset_chip(void)
 {
   // Pull it low for at least 1 ms to issue a reset sequence
@@ -194,9 +215,17 @@ void sl_wfx_host_reset_chip(void)
   // Delay for 3ms
   vTaskDelay(pdMS_TO_TICKS(3));
 }
+
+/*****************************************************************
+ * @fn   void rsi_hal_board_init(void)
+ * @brief
+ *       Initialize the board
+ * @return 
+ *       None
+ ****************************************************************/
 void rsi_hal_board_init(void)
 {
-  spi_sem = xSemaphoreCreateBinary();
+  spi_sem = xSemaphoreCreateBinaryStatic(&xEfxSpiIntfSemaBuffer);
   xSemaphoreGive(spi_sem);
   WFX_RSI_LOG("RSI_HAL: init GPIO");
   sl_wfx_host_gpio_init();
@@ -208,10 +237,22 @@ void rsi_hal_board_init(void)
   WFX_RSI_LOG("RSI_HAL: Init done");
 }
 
+/*****************************************************************************
+*@fn static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
+*
+*@brief
+*    complete dma
+*
+* @param[in] channel:
+* @param[in] sequenceNO: sequence number
+* @param[in] userParam :user parameter
+*
+* @return
+*    None
+******************************************************************************/
 static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-  // uint8_t *buf = (void *)userParam;
 
   (void)channel;
   (void)sequenceNo;
@@ -225,6 +266,19 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
 }
 
 #ifdef RS911X_USE_LDMA
+/*****************************************************************************
+*@fn static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
+*
+*@brief
+*    ldma usart
+*
+* @param[in] rx_buf:
+* @param[in] tx_buf:
+* @param[in] xlen:
+*
+* @return
+*    None
+******************************************************************************/
 static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
 {
   LDMA_Descriptor_t ldmaTXDescriptor;
@@ -243,15 +297,20 @@ static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
   // Start both channels
   DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, (void *)0);
   DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, (DMADRV_Callback_t)0, (void *)0);
-  // LDMA_StartTransfer(RX_LDMA_CHANNEL, &ldmaRXConfig, &ldmaRXDescriptor);
-  // LDMA_StartTransfer(TX_LDMA_CHANNEL, &ldmaTXConfig, &ldmaTXDescriptor);
 }
 #endif /*  RS911X_USE_LDMA */
-/*
- * RX buf was specified
- * TX buf was not specified by caller - so we
- * transmit dummy data (typically 0
- */
+
+/*************************************************************
+ * @fn   static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
+ * @brief
+ *       RX buf was specified
+ *       TX buf was not specified by caller - so we
+ *       transmit dummy data (typically 0)
+ * @param[in] rx_buf:
+ * @param[in] xlen:
+ * @return
+ *        None
+ *******************************************************************/
 static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
 {
 #ifdef RS911X_USE_LDMA
@@ -284,6 +343,19 @@ static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
                           NULL);
 #endif
 }
+
+/*****************************************************************************
+*@fn static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
+*@brief
+*    we have a tx_buf. There are some instances where
+*    a rx_buf is not specifed. If one is specified then
+*    the caller wants results (auto increment src)
+* @param[in] rx_buf: 
+* @param[in] tx_buf:
+* @param[in] xlen:
+* @return
+*     None
+******************************************************************************/
 static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
 {
 #ifdef RS911X_USE_LDMA
@@ -292,9 +364,6 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
   void *buf;
   bool srcinc;
   /*
-     * we have a tx_buf. There are some instances where
-     * a rx_buf is not specifed. If one is specified then
-     * the caller wants results (auto increment src)
      * TODO - the caller specified 8/32 bit - we should use this
      * instead of dmadrvDataSize1 always
      */
@@ -328,9 +397,18 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
                           NULL);
 #endif /* USE_LDMA */
 }
-/*
- * Do a SPI transfer - Mode is 8/16 bit - But every 8 bit is aligned
- */
+
+/*********************************************************************
+ * @fn   int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
+ * @brief
+ *       Do a SPI transfer - Mode is 8/16 bit - But every 8 bit is aligned
+ * @param[in] tx_buf:
+ * @param[in] rx_buf:
+ * @param[in] xlen:
+ * @param[in] mode:
+ * @return
+ *        None
+ **************************************************************************/
 int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
 {
   // WFX_RSI_LOG ("SPI: Xfer: tx=%x,rx=%x,len=%d",(uint32_t)tx_buf, (uint32_t)rx_buf, xlen);
@@ -363,7 +441,6 @@ int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_
     } else {
       tx_do_dma(rx_buf, tx_buf, xlen);
     }
-    // vTaskDelay(pdMS_TO_TICKS(10));
     /*
          * Wait for the call-back to complete
          */

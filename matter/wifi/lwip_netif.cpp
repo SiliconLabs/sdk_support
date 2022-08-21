@@ -29,6 +29,14 @@ static struct netif sta_netif;
 static struct netif ap_netif;
 #endif
 
+/****************************************************************************
+ * @fn   static void netif_config(struct netif *sta_if, struct netif *ap_if)
+ * @brief
+ *      netif configuration
+ * @param[in]  sta_if:
+ * @param[in]  ap_if:
+ * @return None
+ *****************************************************************************/
 static void netif_config(struct netif *sta_if, struct netif *ap_if)
 {
   if (sta_if != NULL) {
@@ -54,22 +62,14 @@ static void netif_config(struct netif *sta_if, struct netif *ap_if)
     netif_set_default(sta_if);
   }
 
-#ifdef SL_WFX_CONFIG_SOFTAP
-  if (ap_if != NULL) {
-    // ip_addr_t ap_ipaddr;
-    // ip_addr_t ap_netmask;
-    // ip_addr_t ap_gw;
-    // /* Initialize the SoftAP information */
-    // IP_ADDR4(&ap_ipaddr, ap_ip_addr0, ap_ip_addr1, ap_ip_addr2, ap_ip_addr3);
-    // IP_ADDR4(&ap_netmask, ap_netmask_addr0, ap_netmask_addr1, ap_netmask_addr2, ap_netmask_addr3);
-    // IP_ADDR4(&ap_gw, ap_gw_addr0, ap_gw_addr1, ap_gw_addr2, ap_gw_addr3);
-    // netif_add(apNetif, &ap_ipaddr, &ap_netmask, &ap_gw, NULL, &ap_ethernetif_init, &ethernet_input);
-  }
-#endif /* SL_WFX_CONFIG_SOFTAP */
 }
 
 /****************************************************************************
+ * @fn  void wfx_lwip_set_sta_link_up(void)
+ * @brief
  * Set station link status to up.
+ * @param[in]  None
+ * @return None
  *****************************************************************************/
 void wfx_lwip_set_sta_link_up(void)
 {
@@ -77,13 +77,17 @@ void wfx_lwip_set_sta_link_up(void)
   netifapi_netif_set_link_up(&sta_netif);
   dhcpclient_set_link_state(1);
   /*
-     * Enable IPV6
-     */
+   * Enable IPV6
+   */
   netif_create_ip6_linklocal_address(&sta_netif, 1);
 }
 
 /***************************************************************************
+ * @fn  void wfx_lwip_set_sta_link_down(void)
+ * @brief
  * Set station link status to down.
+ * @param[in] None
+ * @return None
  *****************************************************************************/
 void wfx_lwip_set_sta_link_down(void)
 {
@@ -92,11 +96,26 @@ void wfx_lwip_set_sta_link_down(void)
   netifapi_netif_set_down(&sta_netif);
 }
 
+/***************************************************************************
+ * @fn  void wfx_lwip_start(void)
+ * @brief
+ * Initialize the LwIP stack
+ * @param[in] None
+ * @return None
+ *****************************************************************************/
 void wfx_lwip_start(void)
 {
   /* Initialize the LwIP stack */
   netif_config(&sta_netif, NULL);
 }
+
+/***************************************************************************
+ * @fn   struct netif *wfx_get_netif(sl_wfx_interface_t interface)
+ * @brief
+ * get the netif
+ * @param[in] interface:
+ * @return None
+ *****************************************************************************/
 struct netif *wfx_get_netif(sl_wfx_interface_t interface)
 {
   if (interface == SL_WFX_STA_INTERFACE) {

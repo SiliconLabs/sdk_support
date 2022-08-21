@@ -35,16 +35,22 @@ SemaphoreHandle_t s_xSLSemaphore;
 StackType_t secureLinkStack[WFX_SECURELINK_TASK_STK_SIZE];
 StaticTask_t secureLinkTaskStruct;
 
-/*
+StaticSemaphore_t xSlMutexBuffer;
+
+/*********************************************************************
+ * @fn  static void prvSecureLinkTask(void *p_arg)
+ * @brief
  * The task that implements the Secure Link renegotiation with WFX.
- */
+ * @param[in] p_arg:
+ * @return None
+ *************************************************************************/
 static void prvSecureLinkTask(void *p_arg)
 {
   sl_status_t result;
   (void)p_arg;
 
   /* Create a mutex used for making Secure Link renegotiations atomic */
-  s_xSLSemaphore = xSemaphoreCreateMutex();
+  s_xSLSemaphore = xSemaphoreCreateMutexStatic(&xSlMutexBuffer);
 
   for (;;) {
     /* Wait for a key renegotiation request */
@@ -58,8 +64,11 @@ static void prvSecureLinkTask(void *p_arg)
 }
 
 /****************************************************************************
- * @brief Creates WFX securelink key renegotiation
- *task.
+ * @fn  void wfx_securelink_task_start(void)
+ * @brief 
+ * Creates WFX securelink key renegotiation task.
+ * @param[in] None
+ * @return None
  ******************************************************************************/
 void wfx_securelink_task_start(void)
 {
