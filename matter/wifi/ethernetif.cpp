@@ -58,6 +58,8 @@ StaticSemaphore_t xEthernetIfSemaBuffer;
 #define STATION_NETIF0 's'
 #define STATION_NETIF1 't'
 
+#define LWIP_FRAME_ALIGNMENT 60
+
 /*****************************************************************************
  * Variables
  ******************************************************************************/
@@ -113,12 +115,12 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
 
   if (len <= 0)
     return;
-  if (len < 60)
+  if (len < 60)  /* 60 : LWIP frame alignment */
     len = 60;
   /* We allocate a pbuf chain of pbufs from the Lwip buffer pool
          * and copy the data to the pbuf chain
          */
-  if ((p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL)) != (struct pbuf *)0) {
+  if ((p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL)) != STRUCT_PBUF) {
     for (q = p, bufferoffset = 0; q != NULL; q = q->next) {
       memcpy((uint8_t *)q->payload, (uint8_t *)b + bufferoffset, q->len);
       bufferoffset += q->len;
@@ -165,12 +167,13 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   for (q = p, framelength = 0; q != NULL; q = q->next) {
     framelength += q->len;
   }
-  if (framelength < 60) {
-    padding = 60 - framelength;
+  if (framelength < LWIP_FRAME_ALIGNMENT) { /* 60 : Frame alignment for LWIP */
+    padding = LWIP_FRAME_ALIGNMENT - framelength;
   } else {
     padding = 0;
   }
-
+  
+  /* choose padding of 64 */
   asize = SL_WFX_ROUND_UP(framelength + padding, 64) + sizeof(sl_wfx_send_frame_req_t);
   // 12 is size of other data in buffer struct, user shouldn't have to care about this?
   if (sl_wfx_host_allocate_buffer((void **)&tx_buffer, SL_WFX_TX_FRAME_BUFFER, asize) != SL_STATUS_OK) {
@@ -186,7 +189,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   }
   /* No requirement to do this - but we should for security */
   if (padding) {
-    memset(buffer + bufferoffset, 0, padding);
+    memset(buffer + bufferoffset, CLEAR_BUFFER, padding);
     framelength += padding;
   }
   /* transmit */
@@ -199,7 +202,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
   /* send the generated frame over Wifi network */
   while ((result != SL_STATUS_OK) && (i++ < 10)) {
-    result = sl_wfx_send_ethernet_frame(tx_buffer, framelength, SL_WFX_STA_INTERFACE, 0);
+    result = sl_wfx_send_ethernet_frame(tx_buffer, framelength, SL_WFX_STA_INTERFACE, PRIORITY_0);
   }
   sl_wfx_host_free_buffer(tx_buffer, SL_WFX_TX_FRAME_BUFFER);
 
@@ -306,9 +309,9 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len, framelength);
     framelength += q->len;
   }
-  if (framelength < 60) {
-    /* Add junk data to the end */
-    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), 60 - framelength, framelength);
+  if (framelength < LWIP_FRAME_ALIGNMENT) {
+    /* Add junk data to the end for frame alignment if framelength is less than 60 */
+    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), LWIP_FRAME_ALIGNMENT - framelength, framelength);
   }
 #ifdef WIFI_DEBUG_ENABLED
   EFR32_LOG ("EN-RSI: Sending %d", framelength);

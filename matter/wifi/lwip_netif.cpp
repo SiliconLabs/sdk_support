@@ -75,11 +75,11 @@ void wfx_lwip_set_sta_link_up(void)
 {
   netifapi_netif_set_up(&sta_netif);
   netifapi_netif_set_link_up(&sta_netif);
-  dhcpclient_set_link_state(1);
+  dhcpclient_set_link_state(LINK_UP);
   /*
-   * Enable IPV6
-   */
-  netif_create_ip6_linklocal_address(&sta_netif, 1);
+     * Enable IPV6
+     */
+  netif_create_ip6_linklocal_address(&sta_netif, MAC_48_BIT_SET);
 }
 
 /***************************************************************************
@@ -91,7 +91,7 @@ void wfx_lwip_set_sta_link_up(void)
  *****************************************************************************/
 void wfx_lwip_set_sta_link_down(void)
 {
-  dhcpclient_set_link_state(0);
+  dhcpclient_set_link_state(LINK_DOWN);
   netifapi_netif_set_link_down(&sta_netif);
   netifapi_netif_set_down(&sta_netif);
 }

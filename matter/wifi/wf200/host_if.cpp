@@ -163,7 +163,7 @@ static void wfx_events_task_start()
   sl_wfx_event_group = xEventGroupCreateStatic(&wfxEventGroup);
 
   wfx_events_task_handle = xTaskCreateStatic(wfx_events_task, "wfx_events",
-  			1024, NULL, 1, wfxEventTaskStack, &wfxEventTaskBuffer);
+  			WLAN_TASK_STACK_SIZE, NULL, WLAN_TASK_PRIORITY, wfxEventTaskStack, &wfxEventTaskBuffer);
   if (NULL == wfx_events_task_handle) {
     EFR32_LOG("Failed to create WFX wfx_events");
   }
@@ -202,7 +202,7 @@ sl_status_t sl_wfx_host_process_event(sl_wfx_generic_message_t *event_payload) {
   case SL_WFX_RECEIVED_IND_ID: {
     sl_wfx_received_ind_t *ethernet_frame =
         (sl_wfx_received_ind_t *)event_payload;
-    if (ethernet_frame->body.frame_type == 0) {
+      if (ethernet_frame->body.frame_type == ETH_FRAME) {
       sl_wfx_host_received_frame_callback(ethernet_frame);
     }
     break;
@@ -328,7 +328,7 @@ sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t *scan_result) {
   EFR32_LOG("\r\n");
   /* don't save if filter only wants specific ssid */
   if (scan_ssid != (char *)0) {
-    if (strcmp(scan_ssid, (char *)&scan_result->ssid_def.ssid[0]) != 0)
+    if (strcmp(scan_ssid, (char *)&scan_result->ssid_def.ssid[0]) != CMP_SUCCESS)
       return;
   }
   if ((ap = (struct scan_result_holder *)pvPortMalloc(sizeof(*ap))) ==
@@ -357,7 +357,7 @@ sl_wfx_scan_result_callback(sl_wfx_scan_result_ind_body_t *scan_result) {
     }
     ap->scan.chan = scan_result->channel;
     ap->scan.rssi = scan_result->rcpi;
-    memcpy(&ap->scan.bssid[0], &scan_result->mac[0], 6);
+    memcpy(&ap->scan.bssid[0], &scan_result->mac[0], BSSID_MAX_STR_LEN);
     scan_count++;
   }
 }
@@ -390,7 +390,7 @@ static void sl_wfx_connect_callback(uint8_t *mac, uint32_t status) {
   switch (status) {
   case WFM_STATUS_SUCCESS: {
     EFR32_LOG("STA-Connected\r\n");
-    memcpy(&ap_mac.octet[0], mac, 6);
+      memcpy(&ap_mac.octet[0], mac, MAC_ADDRESS_FIRST_OCTET);
     sl_wfx_context->state = static_cast<sl_wfx_state_t>(
         static_cast<int>(sl_wfx_context->state) |
         static_cast<int>(SL_WFX_STA_INTERFACE_CONNECTED));
@@ -422,7 +422,7 @@ static void sl_wfx_connect_callback(uint8_t *mac, uint32_t status) {
   }
   }
 
-  if ((status != WFM_STATUS_SUCCESS) && retryJoin < 5) {
+  if ((status != WFM_STATUS_SUCCESS) && retryJoin < MAX_JOIN_RETRIES_COUNT) {
     retryJoin += 1;
     retryInProgress = false;
     EFR32_LOG("WFX Retry to connect to network count: %d", retryJoin);
@@ -459,7 +459,7 @@ static void sl_wfx_disconnect_callback(uint8_t *mac, uint16_t reason) {
  * @return None
  *****************************************************************************/
 static void sl_wfx_start_ap_callback(uint32_t status) {
-  if (status == 0) {
+  if (status == AP_START_SUCCESS) {
     EFR32_LOG("AP started\r\n");
     sl_wfx_context->state =
         static_cast<sl_wfx_state_t>(static_cast<int>(sl_wfx_context->state) |
@@ -571,7 +571,7 @@ static void wfx_events_task(void *p_arg) {
 
   sta_netif = wfx_get_netif(SL_WFX_STA_INTERFACE);
   last_dhcp_poll = xTaskGetTickCount();
-  while (1) {
+  while (true) {
     flags = xEventGroupWaitBits(sl_wfx_event_group,
                                 SL_WFX_CONNECT | SL_WFX_DISCONNECT
 #ifdef SL_WFX_CONFIG_SOFTAP
@@ -580,8 +580,10 @@ static void wfx_events_task(void *p_arg) {
 #ifdef SL_WFX_CONFIG_SCAN
                                     | SL_WFX_SCAN_START | SL_WFX_SCAN_COMPLETE
 #endif /* SL_WFX_CONFIG_SCAN */
-                                    | 0,
-                                pdTRUE, pdFALSE, pdMS_TO_TICKS(250));
+                                  | BITS_TO_WAIT,
+                                pdTRUE,
+                                pdFALSE,
+                                pdMS_TO_TICKS(250)); /* 250 msec delay converted to ticks */
     if (flags & SL_WFX_RETRY_CONNECT) {
       if (!retryInProgress) {
         EFR32_LOG("WFX sending the connect command");
@@ -600,20 +602,20 @@ static void wfx_events_task(void *p_arg) {
           hasNotifiedIPV4 = true;
           if (!hasNotifiedWifiConnectivity) {
             EFR32_LOG("WIFI: Has Notified Wifi Connectivity");
-            wfx_connected_notify(0, &ap_mac);
+            wfx_connected_notify(CONNECTION_STATUS_SUCCESS, &ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
         } else if (dhcp_state == DHCP_OFF) {
-          wfx_ip_changed_notify(0);
-          hasNotifiedIPV4 = false;
+            wfx_ip_changed_notify (IP_STATUS_FAIL);
+            hasNotifiedIPV4 = false;
         }
 #endif // CHIP_DEVICE_CONFIG_ENABLE_IPV4
         if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) &&
             !hasNotifiedIPV6) {
-          wfx_ipv6_notify(1);
+          wfx_ipv6_notify(GET_IPV6_SUCCESS);
           hasNotifiedIPV6 = true;
           if (!hasNotifiedWifiConnectivity) {
-            wfx_connected_notify(0, &ap_mac);
+            wfx_connected_notify(CONNECTION_STATUS_SUCCESS, &ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
         }
@@ -623,10 +625,10 @@ static void wfx_events_task(void *p_arg) {
 
     if (flags & SL_WFX_CONNECT) {
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
-      wfx_ip_changed_notify(0);
+      wfx_ip_changed_notify (IP_STATUS_FAIL);
       hasNotifiedIPV4 = false;
 #endif // CHIP_DEVICE_CONFIG_ENABLE_IPV4
-      wfx_ipv6_notify(0);
+      wfx_ipv6_notify (GET_IPV6_FAIL);
       hasNotifiedIPV6 = false;
       hasNotifiedWifiConnectivity = false;
       EFR32_LOG("WIFI: Connected to AP");
@@ -635,7 +637,7 @@ static void wfx_events_task(void *p_arg) {
 #ifdef SLEEP_ENABLED
       if (!(wfx_get_wifi_state() & SL_WFX_AP_INTERFACE_UP)) {
         // Enable the power save
-        sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_UAPSD, 1);
+        sl_wfx_set_power_mode(WFM_PM_MODE_PS, WFM_PM_POLL_UAPSD, BEACON_1);
         sl_wfx_enable_device_power_save();
       }
 #endif // SLEEP_ENABLED
@@ -644,10 +646,10 @@ static void wfx_events_task(void *p_arg) {
     if (flags & SL_WFX_DISCONNECT) {
 
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
-      wfx_ip_changed_notify(0);
+      wfx_ip_changed_notify (IP_STATUS_FAIL);
       hasNotifiedIPV4 = false;
 #endif // CHIP_DEVICE_CONFIG_ENABLE_IPV4
-      wfx_ipv6_notify(0);
+      wfx_ipv6_notify(GET_IPV6_FAIL);
       hasNotifiedIPV6 = false;
       hasNotifiedWifiConnectivity = false;
       wifi_extra &= ~WE_ST_STA_CONN;
@@ -662,7 +664,7 @@ static void wfx_events_task(void *p_arg) {
       sl_wfx_ssid_def_t ssid, *sp;
       uint16_t num_ssid, slen;
       if (scan_ssid) {
-        memset(&ssid, 0, sizeof(ssid));
+        memset(&ssid, CLEAR_BUFFER, sizeof(ssid));
         slen = strlen(scan_ssid);
         memcpy(&ssid.ssid[0], scan_ssid, slen);
         ssid.ssid_length = slen;
@@ -678,11 +680,14 @@ static void wfx_events_task(void *p_arg) {
                 ACTIVE_CHANNEL_TIME, PASSIVE_CHANNEL_TIME, NUM_PROBE_REQUEST);
       (void)sl_wfx_set_scan_parameters(ACTIVE_CHANNEL_TIME,
                                        PASSIVE_CHANNEL_TIME, NUM_PROBE_REQUEST);
-      (void)sl_wfx_send_scan_command(
-          WFM_SCAN_MODE_ACTIVE, (const uint8_t *)0, /* Channel list */
-          0,                                        /* Scan all chans */
-          sp, num_ssid, (const uint8_t *)0,         /* IE we're looking for */
-          0, (const uint8_t *)0);
+      (void)sl_wfx_send_scan_command(WFM_SCAN_MODE_ACTIVE,
+                                     CHANNEL_LIST, /* Channel list */
+                                     CHANNEL_COUNT,                  /* Scan all chans */
+                                     sp,
+                                     num_ssid,
+                                     IE_DATA, /* IE we're looking for */
+                                     IE_DATA_LENGTH,
+                                     BSSID_SCAN);
     }
     if (flags & SL_WFX_SCAN_COMPLETE) {
       struct scan_result_holder *hp, *next;
@@ -953,7 +958,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig)
  *****************************************************************************/
 void wfx_clear_wifi_provision(void)
 {
-  memset(&wifi_provision, 0, sizeof(wifi_provision));
+  memset(&wifi_provision, CLEAR_BUFFER, sizeof(wifi_provision));
 }
 
 /****************************************************************************
@@ -980,7 +985,7 @@ sl_status_t wfx_connect_to_ap(void)
 {
   sl_status_t result;
 
-  if (wifi_provision.ssid[0] == 0) {
+  if (wifi_provision.ssid[0] == CLEAR_BUFFER) {
     return SL_STATUS_NOT_AVAILABLE;
   }
   EFR32_LOG("WIFI:JOIN to %s", &wifi_provision.ssid[0]);
@@ -990,11 +995,17 @@ sl_status_t wfx_connect_to_ap(void)
             ACTIVE_CHANNEL_TIME, PASSIVE_CHANNEL_TIME, NUM_PROBE_REQUEST);
   (void)sl_wfx_set_scan_parameters(ACTIVE_CHANNEL_TIME, PASSIVE_CHANNEL_TIME,
                                    NUM_PROBE_REQUEST);
-  result = sl_wfx_send_join_command(
-      (uint8_t *)wifi_provision.ssid, strlen(wifi_provision.ssid), NULL, 0,
-      static_cast<sl_wfx_security_mode_t>(wifi_provision.security), 1, 0,
-      (uint8_t *)wifi_provision.passkey, strlen(wifi_provision.passkey), NULL,
-      0);
+  result = sl_wfx_send_join_command((uint8_t *)wifi_provision.ssid,
+                                    strlen(wifi_provision.ssid),
+                                    NULL,
+                                    CHANNEL_0,
+                                    static_cast<sl_wfx_security_mode_t>(wifi_provision.security),
+                                    PREVENT_ROAMING,
+                                    DISABLE_PMF_MODE,
+                                    (uint8_t *)wifi_provision.passkey,
+                                    strlen(wifi_provision.passkey),
+                                    NULL,
+                                    IE_DATA_LENGTH);
 
   return result;
 }
@@ -1034,7 +1045,7 @@ void wfx_get_wifi_mac_addr(sl_wfx_interface_t interface, sl_wfx_mac_address_t *a
 bool wfx_have_ipv4_addr(sl_wfx_interface_t which_if)
 {
   if (which_if == SL_WFX_STA_INTERFACE) {
-    return (sta_ip == 0) ? false : true;
+    return (sta_ip == STA_IP_FAIL) ? false : true;
   } else {
     return false; /* TODO */
   }
@@ -1164,7 +1175,7 @@ void wfx_dhcp_got_ipv4(uint32_t ip)
   /* Acquire the new IP address
    */
   sta_ip = ip;
-  wfx_ip_changed_notify(1);
+  wfx_ip_changed_notify(IP_STATUS_SUCCESS);
 }
 
 

@@ -46,7 +46,7 @@ sl_status_t wfx_wifi_start(void)
    * Create the Wifi driver task
    */
   wfx_rsi.wlan_task = xTaskCreateStatic(wfx_rsi_task, "wfx_rsi",
-  			WFX_RSI_TASK_SZ, NULL, 1, wfxRsiTaskStack, &wfxRsiTaskBuffer);
+  			WFX_RSI_TASK_SZ, NULL, WLAN_DRIVER_TASK_PRIORITY, wfxRsiTaskStack, &wfxRsiTaskBuffer);
 
   if (NULL == wfx_rsi.wlan_task) {
     WFX_RSI_LOG("%s: error: failed to create task.", __func__);
@@ -191,7 +191,7 @@ bool wfx_is_sta_provisioned(void)
  ***********************************************************************/
 void wfx_clear_wifi_provision(void)
 {
-  memset(&wfx_rsi.sec, 0, sizeof(wfx_rsi.sec));
+  memset(&wfx_rsi.sec, CLEAR_BUFFER, sizeof(wfx_rsi.sec));
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_PROVISIONED;
   WFX_RSI_LOG("%s: completed.", __func__);
 }

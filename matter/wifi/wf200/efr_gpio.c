@@ -55,12 +55,12 @@ void sl_wfx_host_gpio_init(void)
   CMU_ClockEnable(cmuClock_GPIO, true);
 
   // Configure WF200 reset pin.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN, gpioModePushPull, PINOUT_CLEAR);
   // Configure WF200 WUP pin.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_WUP_PORT, SL_WFX_HOST_PINOUT_WUP_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_WUP_PORT, SL_WFX_HOST_PINOUT_WUP_PIN, gpioModePushPull, PINOUT_CLEAR);
 
   // GPIO used as IRQ.
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, gpioModeInputPull, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, gpioModeInputPull, PINOUT_CLEAR);
   CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
   // Set up interrupt based callback function - trigger on both edges.
@@ -76,6 +76,6 @@ void sl_wfx_host_gpio_init(void)
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
   NVIC_ClearPendingIRQ(1 << wirq_irq_nb);
-  NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
-  NVIC_SetPriority(GPIO_ODD_IRQn, 5);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_SPI_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_SPI_NVIC_PRIORITY);
 }

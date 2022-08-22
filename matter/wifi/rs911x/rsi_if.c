@@ -70,7 +70,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
   uint8_t rssi;
   ap->security = security;
   ap->chan = wfx_rsi.ap_chan;
-  memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], 6);
+  memcpy(&ap->bssid[0], &wfx_rsi.ap_mac.octet[0], BSSID_MAX_STR_LEN);
   status = rsi_wlan_get(RSI_RSSI, &rssi, sizeof(rssi));
   if (status == RSI_SUCCESS) {
     ap->rssi = (-1) * rssi;
@@ -88,7 +88,7 @@ int32_t wfx_rsi_get_ap_info(wfx_wifi_scan_result_t *ap) {
  *********************************************************************/
 int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
   int32_t status;
-  uint8_t buff[28] = {0};
+  uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
   status = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
   if (status != RSI_SUCCESS) {
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
@@ -121,7 +121,7 @@ int32_t wfx_rsi_get_ap_ext(wfx_wifi_scan_ext_t *extra_info) {
  *********************************************************************/
 int32_t wfx_rsi_reset_count() {
   int32_t status;
-  uint8_t buff[28] = {0};
+  uint8_t buff[RSI_RESPONSE_MAX_SIZE] = {0};
   status = rsi_wlan_get(RSI_WLAN_EXT_STATS, buff, sizeof(buff));
   if (status != RSI_SUCCESS) {
     WFX_RSI_LOG("\r\n Failed, Error Code : 0x%lX\r\n", status);
@@ -166,7 +166,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
   temp_reset = (wfx_wifi_scan_ext_t *)malloc(sizeof(wfx_wifi_scan_ext_t));
-  memset(temp_reset, 0, sizeof(wfx_wifi_scan_ext_t));
+  memset(temp_reset, CLEAR_BUFFER, sizeof(wfx_wifi_scan_ext_t));
   if (status != RSI_SUCCESS) {
     /*
      * We should enable retry.. (Need config variable for this)
@@ -261,13 +261,13 @@ static void wfx_rsi_wlan_pkt_cb(uint16_t status, uint8_t *buf, uint32_t len) {
  *****************************************************************************************/
 static int32_t wfx_rsi_init(void) {
   int32_t status;
-  uint8_t buf[128];
+  uint8_t buf[RSI_RESPONSE_HOLD_BUFF_SIZE];
   extern void rsi_hal_board_init(void);
 
   WFX_RSI_LOG("%s: starting(HEAP_SZ = %d)", __func__, SL_HEAP_SIZE);
   //! Driver initialization
   status = rsi_driver_init(wfx_rsi_drv_buf, WFX_RSI_BUF_SZ);
-  if ((status < 0) || (status > WFX_RSI_BUF_SZ)) {
+  if ((status < RSI_DRIVER_STATUS) || (status > WFX_RSI_BUF_SZ)) {
     WFX_RSI_LOG("%s: error: RSI drv init failed with status: %02x", __func__,
                 status);
     return status;
@@ -285,7 +285,7 @@ static int32_t wfx_rsi_init(void) {
    * Create the driver task
    */
   wfx_rsi.drv_task = xTaskCreateStatic((TaskFunction_t)rsi_wireless_driver_task, "rsi_drv",
-                  WFX_RSI_WLAN_TASK_SZ, NULL, 1, driverRsiTaskStack, &driverRsiTaskBuffer);
+                  WFX_RSI_WLAN_TASK_SZ, NULL, WLAN_TASK_PRIORITY, driverRsiTaskStack, &driverRsiTaskBuffer);
   if (NULL == wfx_rsi.drv_task) {
     WFX_RSI_LOG("%s: error: rsi_wireless_driver_task failed", __func__);
     return RSI_ERROR_INVALID_PARAM;
@@ -293,7 +293,7 @@ static int32_t wfx_rsi_init(void) {
 
   /* Initialize WiSeConnect or Module features. */
   WFX_RSI_LOG("%s: rsi_wireless_init", __func__);
-  if ((status = rsi_wireless_init(0, 0)) != RSI_SUCCESS) {
+  if ((status = rsi_wireless_init(OPER_MODE_0, COEX_MODE_0)) != RSI_SUCCESS) {
     WFX_RSI_LOG("%s: error: rsi_wireless_init failed with status: %02x",
                 __func__, status);
     return status;
@@ -323,7 +323,7 @@ static int32_t wfx_rsi_init(void) {
   /* initializes wlan radio parameters and WLAN supplicant parameters.
    */
   (void)rsi_wlan_radio_init(); /* Required so we can get MAC address */
-  if ((status = rsi_wlan_get(RSI_MAC_ADDRESS, &wfx_rsi.sta_mac.octet[0], 6)) !=
+  if ((status = rsi_wlan_get(RSI_MAC_ADDRESS, &wfx_rsi.sta_mac.octet[0], RESP_BUFF_SIZE)) !=
       RSI_SUCCESS) {
     WFX_RSI_LOG("%s: error: rsi_wlan_get failed with status: %02x", __func__,
                 status);
@@ -385,8 +385,8 @@ static void wfx_rsi_save_ap_info() {
   int32_t status;
   rsi_rsp_scan_t rsp;
 
-  status = rsi_wlan_scan_with_bitmap_options((int8_t *)&wfx_rsi.sec.ssid[0], 0,
-                                             &rsp, sizeof(rsp), 1);
+  status = rsi_wlan_scan_with_bitmap_options((int8_t *)&wfx_rsi.sec.ssid[0], AP_CHANNEL_NO_0,
+                                             &rsp, sizeof(rsp), SCAN_BITMAP_OPTN_1);
   if (status) {
     /*
      * Scan is done - failed
@@ -394,7 +394,7 @@ static void wfx_rsi_save_ap_info() {
   } else {
     wfx_rsi.sec.security = rsp.scan_info->security_mode;
     wfx_rsi.ap_chan = rsp.scan_info->rf_channel;
-    memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], 6);
+    memcpy(&wfx_rsi.ap_mac.octet[0], &rsp.scan_info->bssid[0], BSSID_MAX_STR_LEN);
   }
   if ((wfx_rsi.sec.security == RSI_WPA) || (wfx_rsi.sec.security == RSI_WPA2)) {
     // saving the security before changing into mixed mode
@@ -435,19 +435,30 @@ static void wfx_rsi_do_join(void) {
      * Right now it's done by hand - we need something better
      */
     wfx_rsi.dev_state |= WFX_RSI_ST_STA_CONNECTING;
-    while (((status = rsi_wlan_connect_async(
-                 (int8_t *)&wfx_rsi.sec.ssid[0],
-                 (rsi_security_mode_t)wfx_rsi.sec.security,
-                 &wfx_rsi.sec.passkey[0], wfx_rsi_join_cb)) != RSI_SUCCESS) &&
-           (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN)) {
-      wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
-      WFX_RSI_LOG(
-          "%s: rsi_wlan_connect_async failed with status: %02x on try %d",
-          __func__, status, wfx_rsi.join_retries);
-      vTaskDelay(4000);
-      /* TODO - Start a timer.. to retry */
+
+    /* Try to connect Wifi with given Credentials
+     * untill there is a success or maximum number of tries allowed
+     */
+    while (++wfx_rsi.join_retries < WFX_RSI_CONFIG_MAX_JOIN) {
+
+      /* Call rsi connect call with given ssid and password
+       * And check there is a success
+       */
+      if ((status = rsi_wlan_connect_async((int8_t *)&wfx_rsi.sec.ssid[0],
+		(rsi_security_mode_t)wfx_rsi.sec.security,
+		&wfx_rsi.sec.passkey[0], wfx_rsi_join_cb)) != RSI_SUCCESS) {
+
+        wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
+        WFX_RSI_LOG(
+            "%s: rsi_wlan_connect_async failed with status: %02x on try %d",
+            __func__, status, wfx_rsi.join_retries);
+        vTaskDelay(4000);
+        /* TODO - Start a timer.. to retry */
+      } else {
+        break;  // exit while loop
+      }
     }
-    if (wfx_rsi.join_retries == 5) {
+    if (wfx_rsi.join_retries == MAX_JOIN_RETRIES_COUNT) {
       WFX_RSI_LOG("Connect failed after %d tries", wfx_rsi.join_retries);
     } else {
       WFX_RSI_LOG("%s: starting JOIN to %s after %d tries\n", __func__,
@@ -509,7 +520,7 @@ void wfx_rsi_task(void *arg) {
             | 0,
         pdTRUE,  /* Clear the bits */
         pdFALSE, /* Wait for any bit */
-        pdMS_TO_TICKS(250));
+        pdMS_TO_TICKS(250)); /* 250 mSec */
 
     if (flags) {
       WFX_RSI_LOG("%s: wait event encountered: %x", __func__, flags);
@@ -521,7 +532,7 @@ void wfx_rsi_task(void *arg) {
        */
       if ((status = rsi_config_ipaddress(
                RSI_IP_VERSION_4, RSI_DHCP | RSI_DHCP_UNICAST_OFFER, NULL, NULL,
-               NULL, &wfx_rsi.ip4_addr[0], 4, 0)) != RSI_SUCCESS) {
+               NULL, &wfx_rsi.ip4_addr[0], IP_CONF_RSP_BUFF_LENGTH_4, STATION)) != RSI_SUCCESS) {
         /* We should try this again.. (perhaps sleep) */
         /* TODO - Figure out what to do here */
       }
@@ -538,20 +549,23 @@ void wfx_rsi_task(void *arg) {
           wfx_dhcp_got_ipv4((uint32_t)sta_netif->ip_addr.u_addr.ip4.addr);
           hasNotifiedIPV4 = true;
           if (!hasNotifiedWifiConnectivity) {
-            wfx_connected_notify(0, &wfx_rsi.ap_mac);
+            wfx_connected_notify(CONNECTION_STATUS_SUCCESS, &wfx_rsi.ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
         } else if (dhcp_state == DHCP_OFF) {
-          wfx_ip_changed_notify(0);
+          wfx_ip_changed_notify(IP_STATUS_FAIL);
           hasNotifiedIPV4 = false;
         }
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
+	/* Checks if the assigned IPv6 address is preferred by evaluating
+	 * the first block of IPv6 address ( block 0)
+	 */
         if ((ip6_addr_ispreferred(netif_ip6_addr_state(sta_netif, 0))) &&
             !hasNotifiedIPV6) {
-          wfx_ipv6_notify(1);
+          wfx_ipv6_notify(GET_IPV6_SUCCESS);
           hasNotifiedIPV6 = true;
           if (!hasNotifiedWifiConnectivity) {
-            wfx_connected_notify(0, &wfx_rsi.ap_mac);
+            wfx_connected_notify(CONNECTION_STATUS_SUCCESS, &wfx_rsi.ap_mac);
             hasNotifiedWifiConnectivity = true;
           }
         }
@@ -594,10 +608,10 @@ void wfx_rsi_task(void *arg) {
       wfx_lwip_set_sta_link_down(); // Internally dhcpclient_poll(netif) ->
                                     // wfx_ip_changed_notify(0) for IPV4
 #if (CHIP_DEVICE_CONFIG_ENABLE_IPV4)
-      wfx_ip_changed_notify(0);
+      wfx_ip_changed_notify(IP_STATUS_FAIL);
       hasNotifiedIPV4 = false;
 #endif /* CHIP_DEVICE_CONFIG_ENABLE_IPV4 */
-      wfx_ipv6_notify(0);
+      wfx_ipv6_notify(GET_IPV6_FAIL);
       hasNotifiedIPV6 = false;
       hasNotifiedWifiConnectivity = false;
 #endif /* !RS911X_SOCKETS */
@@ -610,11 +624,11 @@ void wfx_rsi_task(void *arg) {
         wfx_wifi_scan_result_t ap;
         rsi_scan_info_t *scan;
         int32_t status;
-        uint8_t bgscan_results[500] = {0};
+        uint8_t bgscan_results[BG_SCAN_RES_SIZE] = {0};
         status =
-            rsi_wlan_bgscan_profile(1, (rsi_rsp_scan_t *)bgscan_results, 500);
+            rsi_wlan_bgscan_profile(1, (rsi_rsp_scan_t *)bgscan_results, BG_SCAN_RES_SIZE);
 
-        WFX_RSI_LOG("%s: status: %02x size = %d", __func__, status, 500);
+        WFX_RSI_LOG("%s: status: %02x size = %d", __func__, status, BG_SCAN_RES_SIZE);
         rsi_rsp_scan_t *rsp = (rsi_rsp_scan_t *)bgscan_results;
         if (status) {
           /*
@@ -628,18 +642,18 @@ void wfx_rsi_task(void *arg) {
               WFX_RSI_LOG("Inside scan_ssid");
               WFX_RSI_LOG("SCAN SSID: %s , ap scan: %s", wfx_rsi.scan_ssid,
                           ap.ssid);
-              if (strcmp(wfx_rsi.scan_ssid, ap.ssid) == 0) {
+              if (strcmp(wfx_rsi.scan_ssid, ap.ssid) == CMP_SUCCESS) {
                 WFX_RSI_LOG("Inside ap details");
                 ap.security = scan->security_mode;
                 ap.rssi = (-1) * scan->rssi_val;
-                memcpy(&ap.bssid[0], &scan->bssid[0], 6);
+                memcpy(&ap.bssid[0], &scan->bssid[0], BSSID_MAX_STR_LEN);
                 (*wfx_rsi.scan_cb)(&ap);
               }
             } else {
               WFX_RSI_LOG("Inside else");
               ap.security = scan->security_mode;
               ap.rssi = (-1) * scan->rssi_val;
-              memcpy(&ap.bssid[0], &scan->bssid[0], 6);
+              memcpy(&ap.bssid[0], &scan->bssid[0], BSSID_MAX_STR_LEN);
               (*wfx_rsi.scan_cb)(&ap);
             }
           }
@@ -677,14 +691,14 @@ void wfx_dhcp_got_ipv4(uint32_t ip) {
   /*
    * Acquire the new IP address
    */
-  wfx_rsi.ip4_addr[0] = (ip)&0xff;
-  wfx_rsi.ip4_addr[1] = (ip >> 8) & 0xff;
-  wfx_rsi.ip4_addr[2] = (ip >> 16) & 0xff;
-  wfx_rsi.ip4_addr[3] = (ip >> 24) & 0xff;
+  wfx_rsi.ip4_addr[0] = (ip)& HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[1] = (ip >> 8)  & HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[2] = (ip >> 16) & HEX_VALUE_FF;
+  wfx_rsi.ip4_addr[3] = (ip >> 24) & HEX_VALUE_FF;
   WFX_RSI_LOG("%s: DHCP OK: IP=%d.%d.%d.%d", __func__, wfx_rsi.ip4_addr[0],
               wfx_rsi.ip4_addr[1], wfx_rsi.ip4_addr[2], wfx_rsi.ip4_addr[3]);
   /* Notify the Connectivity Manager - via the app */
-  wfx_ip_changed_notify(1);
+  wfx_ip_changed_notify(IP_STATUS_SUCCESS);
   wfx_rsi.dev_state |= WFX_RSI_ST_STA_READY;
 }
 
@@ -748,7 +762,7 @@ int32_t wfx_rsi_send_data(void *p, uint16_t len) {
 
   pkt = (rsi_pkt_t *)p;
   host_desc = pkt->desc;
-  memset(host_desc, 0, RSI_HOST_DESC_LENGTH);
+  memset(host_desc, CLEAR_BUFFER, RSI_HOST_DESC_LENGTH);
   rsi_uint16_to_2bytes(host_desc, (len & 0xFFF));
 
   // Fill packet type

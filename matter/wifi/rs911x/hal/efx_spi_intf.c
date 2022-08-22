@@ -91,13 +91,13 @@ void sl_wfx_host_init_bus(void)
 #elif defined(EFR32MG21) || defined(EFR32MG24)
   CMU_ClockEnable(cmuClock_EUSART1, true);
   // Configure MOSI (TX) pin as an output
-  GPIO_PinModeSet(EUS1MOSI_PORT, EUS1MOSI_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(EUS1MOSI_PORT, EUS1MOSI_PIN, gpioModePushPull, PINOUT_CLEAR);
 
   // Configure MISO (RX) pin as an input
-  GPIO_PinModeSet(EUS1MISO_PORT, EUS1MISO_PIN, gpioModeInput, 0);
+  GPIO_PinModeSet(EUS1MISO_PORT, EUS1MISO_PIN, gpioModeInput, PINOUT_CLEAR);
 
   // Configure SCLK pin as an output low (CPOL = 0)
-  GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, PINOUT_CLEAR);
 
   // Configure CS pin as an output initially high
   // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
@@ -129,9 +129,9 @@ void sl_wfx_host_init_bus(void)
   MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN;
   MY_USART->CMD      = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
   USART_Enable(MY_USART, usartEnable);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PINOUT_SET);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, PINOUT_SET);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, PINOUT_CLEAR);
 
 #elif defined(EFR32MG21) || defined(EFR32MG24)
   /**********************************************************************
@@ -177,21 +177,21 @@ void sl_wfx_host_gpio_init(void)
     // Enable GPIO clock.
     CMU_ClockEnable(cmuClock_GPIO, true);
 
-  GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, 1);
-  GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, 0);
+  GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, PINOUT_SET);
+  GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, PINOUT_CLEAR);
 
   CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
   // Set up interrupt based callback function - trigger on both edges.
   GPIOINT_Init();
-  GPIO_PinModeSet(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, gpioModeInputPull, 0);
+  GPIO_PinModeSet(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, gpioModeInputPull, PINOUT_CLEAR);
   GPIO_ExtIntConfig(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, SL_WFX_HOST_PINOUT_SPI_IRQ, true, false, true);
   GPIOINT_CallbackRegister(SL_WFX_HOST_PINOUT_SPI_IRQ, rsi_gpio_irq_cb);
   GPIO_IntDisable(1 << SL_WFX_HOST_PINOUT_SPI_IRQ); /* Will be enabled by RSI */
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
-  NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
-  NVIC_SetPriority(GPIO_ODD_IRQn, 5);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_SPI_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_SPI_NVIC_PRIORITY);
 }
 
 /*****************************************************************
@@ -295,8 +295,8 @@ static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
   ldmaRXConfig     = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(MY_USART_RX_SIGNAL);
 
   // Start both channels
-  DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, (void *)0);
-  DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, (DMADRV_Callback_t)0, (void *)0);
+  DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, NULL);
+  DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, CB_VALUE, NULL);
 }
 #endif /*  RS911X_USE_LDMA */
 
@@ -364,10 +364,13 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
   void *buf;
   bool srcinc;
   /*
+     * we have a tx_buf. There are some instances where
+     * a rx_buf is not specifed. If one is specified then
+     * the caller wants results (auto increment src)
      * TODO - the caller specified 8/32 bit - we should use this
      * instead of dmadrvDataSize1 always
      */
-  if (rx_buf == (uint8_t *)0) {
+  if (rx_buf == NULL) {
     buf    = &dummy_data;
     srcinc = false;
   } else {
@@ -420,8 +423,8 @@ int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_
   /*
      * Short stuff should be done via programmed I/O
      */
-  if (xlen < 16 && tx_buf && !rx_buf) {
-    for (; xlen > 0; --xlen, ++tx_buf) {
+  if (xlen < MAX_XLEN && tx_buf && !rx_buf) {
+    for (; xlen > MIN_XLEN; --xlen, ++tx_buf) {
       MY_USART->TXDATA = (uint32_t)(*txbuf);
 
       while (!(MY_USART->STATUS & USART_STATUS_TXC)) {
@@ -431,12 +434,12 @@ int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_
     }
   }
 #endif /* not_yet_tested_programmed_io */
-  if (xlen > 0) {
+  if (xlen > MIN_XLEN) {
     MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) != pdTRUE) {
       return RSI_FALSE;
     }
-    if (tx_buf == (void *)0) {
+    if (tx_buf == NULL) {
       rx_do_dma(rx_buf, xlen);
     } else {
       tx_do_dma(rx_buf, tx_buf, xlen);

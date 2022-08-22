@@ -65,7 +65,7 @@ void rsi_hal_config_gpio(uint8_t gpio_number, uint8_t mode, uint8_t value)
   //WFX_RSI_LOG ("RSI: CFG GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
     case RSI_HAL_RESET_PIN:
-      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, 1);
+      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, PINOUT_SET);
       break;
     default:
       break;
@@ -86,7 +86,7 @@ void rsi_hal_set_gpio(uint8_t gpio_number)
   //WFX_RSI_LOG ("RSI: SET GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
     case RSI_HAL_RESET_PIN:
-      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModeWiredOrPullDown, 1);
+      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModeWiredOrPullDown, PINOUT_SET);
       break;
     default:
       break;
