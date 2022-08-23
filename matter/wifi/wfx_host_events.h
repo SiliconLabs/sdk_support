@@ -100,7 +100,6 @@
 #define GET_IPV6_SUCCESS		1
 #define GET_IPV6_FAIL			0
 #define BEACON_1			0
-#define CLEAR_BUFFER			0
 #define CHANNEL_LIST			(const uint8_t *)0
 #define CHANNEL_COUNT			0
 #define IE_DATA				(const uint8_t *)0
@@ -122,7 +121,6 @@
 #define TICKS_TO_WAIT_500   		500
 
 // TASK and Interrupt Macros
-#define CLEAR_BUFFER			0
 #define SUCCESS_STATUS			1
 #define LINK_UP			    	1
 #define LINK_DOWN			0

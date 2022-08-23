@@ -664,7 +664,7 @@ static void wfx_events_task(void *p_arg) {
       sl_wfx_ssid_def_t ssid, *sp;
       uint16_t num_ssid, slen;
       if (scan_ssid) {
-        memset(&ssid, CLEAR_BUFFER, sizeof(ssid));
+        memset(&ssid, 0, sizeof(ssid));
         slen = strlen(scan_ssid);
         memcpy(&ssid.ssid[0], scan_ssid, slen);
         ssid.ssid_length = slen;
@@ -958,7 +958,7 @@ bool wfx_get_wifi_provision(wfx_wifi_provision_t *wifiConfig)
  *****************************************************************************/
 void wfx_clear_wifi_provision(void)
 {
-  memset(&wifi_provision, CLEAR_BUFFER, sizeof(wifi_provision));
+  memset(&wifi_provision, 0, sizeof(wifi_provision));
 }
 
 /****************************************************************************
@@ -985,7 +985,7 @@ sl_status_t wfx_connect_to_ap(void)
 {
   sl_status_t result;
 
-  if (wifi_provision.ssid[0] == CLEAR_BUFFER) {
+  if (wifi_provision.ssid[0] == 0) {
     return SL_STATUS_NOT_AVAILABLE;
   }
   EFR32_LOG("WIFI:JOIN to %s", &wifi_provision.ssid[0]);

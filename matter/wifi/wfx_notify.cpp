@@ -49,7 +49,7 @@ void wfx_started_notify()
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&evt, CLEAR_BUFFER, sizeof evt);
+  memset(&evt, 0, sizeof(evt));
   evt.header.id     = SL_WFX_STARTUP_IND_ID;
   evt.header.length = sizeof evt;
   evt.body.status   = 0;
@@ -81,7 +81,7 @@ void wfx_connected_notify(int32_t status, sl_wfx_mac_address_t *ap)
 
   EFR32_LOG("%s: connected.", __func__);
 
-  memset(&evt, CLEAR_BUFFER, sizeof evt);
+  memset(&evt, 0, sizeof(evt));
   evt.header.id     = SL_WFX_CONNECT_IND_ID;
   evt.header.length = sizeof evt;
 
@@ -106,7 +106,7 @@ void wfx_disconnected_notify(int32_t status)
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&evt, CLEAR_BUFFER, sizeof evt);
+  memset(&evt, 0, sizeof(evt));
   evt.header.id     = SL_WFX_DISCONNECT_IND_ID;
   evt.header.length = sizeof evt;
   evt.body.reason   = status;
@@ -126,7 +126,7 @@ void wfx_ipv6_notify(int got_ip)
 
   EFR32_LOG("%s: started.", __func__);
 
-  memset(&eventData, CLEAR_BUFFER, sizeof(eventData));
+  memset(&eventData, 0, sizeof(eventData));
   eventData.header.id     = got_ip ? IP_EVENT_GOT_IP6 : IP_EVENT_STA_LOST_IP;
   eventData.header.length = sizeof(eventData.header);
   PlatformMgrImpl().HandleWFXSystemEvent(IP_EVENT, &eventData);

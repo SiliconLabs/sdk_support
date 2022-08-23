@@ -166,7 +166,7 @@ static void wfx_rsi_join_cb(uint16_t status, const uint8_t *buf,
   WFX_RSI_LOG("%s: status: %02x", __func__, status);
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_CONNECTING;
   temp_reset = (wfx_wifi_scan_ext_t *)malloc(sizeof(wfx_wifi_scan_ext_t));
-  memset(temp_reset, CLEAR_BUFFER, sizeof(wfx_wifi_scan_ext_t));
+  memset(temp_reset, 0, sizeof(wfx_wifi_scan_ext_t));
   if (status != RSI_SUCCESS) {
     /*
      * We should enable retry.. (Need config variable for this)
@@ -762,7 +762,7 @@ int32_t wfx_rsi_send_data(void *p, uint16_t len) {
 
   pkt = (rsi_pkt_t *)p;
   host_desc = pkt->desc;
-  memset(host_desc, CLEAR_BUFFER, RSI_HOST_DESC_LENGTH);
+  memset(host_desc, 0, RSI_HOST_DESC_LENGTH);
   rsi_uint16_to_2bytes(host_desc, (len & 0xFFF));
 
   // Fill packet type

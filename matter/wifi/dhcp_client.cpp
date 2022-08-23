@@ -38,7 +38,7 @@
 #include "AppConfig.h"
 
 #define MAX_DHCP_TRIES 4
-#define NETIF_IPV4_ADDRESS(X) ((netif->ip_addr.u_addr.ip4.addr >> (8 * X)) && 0xFF)
+#define NETIF_IPV4_ADDRESS(X, Y) ((X >> (8 * Y)) && 0xFF)
 
 /* Station IP address */
 uint8_t sta_ip_addr0      = STA_IP_ADDR0_DEFAULT;
@@ -103,11 +103,12 @@ uint8_t dhcpclient_poll(void *arg)
       if (dhcp_supplied_address(netif)) {
         dhcp_state = DHCP_ADDRESS_ASSIGNED;
 
+        uint64_t addr = netif->ip_addr.u_addr.ip4.addr;
         EFR32_LOG("DHCP IP: %d.%d.%d.%d",
-                  NETIF_IPV4_ADDRESS(0),
-                  NETIF_IPV4_ADDRESS(1),
-                  NETIF_IPV4_ADDRESS(2),
-                  NETIF_IPV4_ADDRESS(3));
+                  NETIF_IPV4_ADDRESS(addr, 0),
+                  NETIF_IPV4_ADDRESS(addr, 1),
+                  NETIF_IPV4_ADDRESS(addr, 2),
+                  NETIF_IPV4_ADDRESS(addr, 3));
       } else {
         dhcp = (struct dhcp *)netif_get_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
 

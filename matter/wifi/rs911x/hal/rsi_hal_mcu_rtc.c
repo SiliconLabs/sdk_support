@@ -26,12 +26,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ZONE0 			0
-#define CH_SELECTOR 		1u
-#define CNT_VALUE 		0u
-#define RSI_RTC_FREQ_VALUE 	0
-#define TIME_ZONE_OFFSET 	0u
-#define VAL_1 			1
+#define ZONE0 					0
+#define CH_SELECTOR 				1u
+#define RTC_DEFAULT_COUNTER_VALUE 		0u
+#define RSI_RTC_FREQ_VALUE 			0
+#define TIME_ZONE_OFFSET 			0u
 
 #define SLEEPTIMER_EVENT_OF (0x01)
 #define SLEEPTIMER_EVENT_COMP (0x02)
@@ -125,8 +124,13 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
  * Gets RTCC timer frequency.
  ******************************************************************************/
 uint32_t rsi_rtc_get_hal_timer_frequency(void) {
+  /* CMU_PrescToLog2 converts prescaler dividend to a logarithmic value. It only works for even
+   * numbers equal to 2^n.
+   * An unscaled dividend (dividend = argument + 1).
+   * So we need to send argument substracted by 1
+   */
   return (CMU_ClockFreqGet(cmuClock_RTCC) >>
-          (CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - VAL_1)));
+          (CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1)));
 }
 
 /******************************************************************************
@@ -139,8 +143,14 @@ void rsi_rtc_init_timer(void) {
   CMU_ClockEnable(cmuClock_RTCC, true);
 
   rtcc_init.enable = false;
+
+  /* CMU_PrescToLog2 converts prescaler dividend to a logarithmic value. It only works for even
+   * numbers equal to 2^n.
+   * An unscaled dividend (dividend = argument + 1).
+   * So we need to send argument substracted by 1
+   */
   rtcc_init.presc =
-      (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - VAL_1));
+      (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
 
   RTCC_Init(&rtcc_init);
 
@@ -151,7 +161,7 @@ void rsi_rtc_init_timer(void) {
 
   RTCC_IntDisable(_RTCC_IEN_MASK);
   RTCC_IntClear(_RTCC_IF_MASK);
-  RTCC_CounterSet(CNT_VALUE);
+  RTCC_CounterSet(RTC_DEFAULT_COUNTER_VALUE);
 
   RTCC_Enable(true);
 

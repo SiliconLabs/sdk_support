@@ -191,7 +191,7 @@ bool wfx_is_sta_provisioned(void)
  ***********************************************************************/
 void wfx_clear_wifi_provision(void)
 {
-  memset(&wfx_rsi.sec, CLEAR_BUFFER, sizeof(wfx_rsi.sec));
+  memset(&wfx_rsi.sec, 0, sizeof(wfx_rsi.sec));
   wfx_rsi.dev_state &= ~WFX_RSI_ST_STA_PROVISIONED;
   WFX_RSI_LOG("%s: completed.", __func__);
 }
