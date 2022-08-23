@@ -77,6 +77,7 @@ void dhcpclient_set_link_state(int link_up)
  */
 uint8_t dhcpclient_poll(void *arg)
 {
+#if (LWIP_IPV4)
   struct netif *netif = (struct netif *)arg;
   ip_addr_t ipaddr;
   ip_addr_t netmask;
@@ -132,5 +133,6 @@ uint8_t dhcpclient_poll(void *arg)
     default:
       break;
   }
+#endif /* LWIP_IPV4 */
   return dhcp_state;
 }

@@ -32,20 +32,26 @@ static struct netif ap_netif;
 static void netif_config(struct netif *sta_if, struct netif *ap_if)
 {
   if (sta_if != NULL) {
+#if LWIP_IPV4
     ip_addr_t sta_ipaddr;
     ip_addr_t sta_netmask;
     ip_addr_t sta_gw;
+#endif /* LWIP_IPV4 */
 
-    /* Initialize the Station information */
+/* Initialize the Station information */
+#if LWIP_IPV4
     ip_addr_set_zero_ip4(&sta_ipaddr);
     ip_addr_set_zero_ip4(&sta_netmask);
     ip_addr_set_zero_ip4(&sta_gw);
+#endif /* LWIP_IPV4 */
 
     /* Add station interfaces */
     netif_add(sta_if,
+#if LWIP_IPV4
               (const ip4_addr_t *)&sta_ipaddr,
               (const ip4_addr_t *)&sta_netmask,
               (const ip4_addr_t *)&sta_gw,
+#endif /* LWIP_IPV4 */
               NULL,
               &sta_ethernetif_init,
               &tcpip_input);
@@ -75,10 +81,15 @@ void wfx_lwip_set_sta_link_up(void)
 {
   netifapi_netif_set_up(&sta_netif);
   netifapi_netif_set_link_up(&sta_netif);
+#if LWIP_IPV4
   dhcpclient_set_link_state(1);
+#endif /* LWIP_IPV4 */
   /*
-     * Enable IPV6
-     */
+   * Enable IPV6
+   */
+#if LWIP_IPV6_AUTOCONFIG
+  sta_netif.ip6_autoconfig_enabled = 1;
+#endif /* LWIP_IPV6_AUTOCONFIG */
   netif_create_ip6_linklocal_address(&sta_netif, 1);
 }
 
@@ -87,7 +98,9 @@ void wfx_lwip_set_sta_link_up(void)
  *****************************************************************************/
 void wfx_lwip_set_sta_link_down(void)
 {
+#if LWIP_IPV4
   dhcpclient_set_link_state(0);
+#endif /* LWIP_IPV4 */
   netifapi_netif_set_link_down(&sta_netif);
   netifapi_netif_set_down(&sta_netif);
 }

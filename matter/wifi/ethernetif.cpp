@@ -93,7 +93,7 @@ static void low_level_init(struct netif *netif)
   netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP | NETIF_FLAG_IGMP;
 
   /* Set netif link flag */
-  //    netif->flags |= NETIF_FLAG_LINK_UP|NETIF_FLAG_UP;
+  // netif->flags |= NETIF_FLAG_LINK_UP | NETIF_FLAG_UP;
 }
 
 /*
@@ -117,12 +117,25 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
       bufferoffset += q->len;
       // ASSERT(bufferoffset <= len);
     }
-#if 0
-                EFR32_LOG ("EN:IN %d,[%02x:%02x:%02x:%02x:%02x%02x][%02x:%02x:%02x:%02x:%02x:%02x]type=%02x%02x", bufferoffset,
-                           b [0], b [1], b [2], b [3], b [4], b [5],
-                           b [6], b [7], b [8], b [9], b [10], b [11],
-                           b[12], b [13]);
-#endif
+#if EFR32_RAW_LWIP_DEBUG
+    EFR32_LOG("%s: offset:%d, [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], type: %02x%02x",
+              __func__,
+              bufferoffset,
+              b[0],
+              b[1],
+              b[2],
+              b[3],
+              b[4],
+              b[5],
+              b[6],
+              b[7],
+              b[8],
+              b[9],
+              b[10],
+              b[11],
+              b[12],
+              b[13]);
+#endif /* EFR32_RAW_LWIP_DEBUG */
     if (netif->input(p, netif) != ERR_OK) {
       pbuf_free(p);
     }
@@ -255,13 +268,25 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     return ERR_IF;
   }
 
-#if 0
-        uint8_t *b = (uint8_t *)p->payload;
-        EFR32_LOG ("EN-RSI: Out [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x]type=%02x%02x",
-                           b [0], b [1], b [2], b [3], b [4], b [5],
-                           b [6], b [7], b [8], b [9], b [10], b [11],
-                           b[12], b [13]);
-#endif
+#if EFR32_RAW_LWIP_DEBUG
+  uint8_t *b = (uint8_t *)p->payload;
+  EFR32_LOG("%s: buffer: [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], type: %02x%02x",
+            __func__,
+            b[0],
+            b[1],
+            b[2],
+            b[3],
+            b[4],
+            b[5],
+            b[6],
+            b[7],
+            b[8],
+            b[9],
+            b[10],
+            b[11],
+            b[12],
+            b[13]);
+#endif /* EFR32_RAW_LWIP_DEBUG */
   for (q = p, framelength = 0; q != NULL; q = q->next) {
     wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len, framelength);
     framelength += q->len;
@@ -301,8 +326,12 @@ err_t sta_ethernetif_init(struct netif *netif)
   netif->name[0] = STATION_NETIF0;
   netif->name[1] = STATION_NETIF1;
 
-  netif->output     = etharp_output;
+#if LWIP_IPV4 && LWIP_ARP
+  netif->output = etharp_output;
+#endif /* #if LWIP_IPV4 && LWIP_ARP */
+#if LWIP_IPV6 && LWIP_ETHERNET
   netif->output_ip6 = ethip6_output;
+#endif /* LWIP_IPV6 && LWIP_ETHERNET */
   netif->linkoutput = low_level_output;
 
   /* initialize the hardware */
