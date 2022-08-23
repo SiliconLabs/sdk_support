@@ -56,7 +56,9 @@
 
 #include "AppConfig.h"
 
-#define BUS_TASK_STACK_SIZE 1024
+#define	CHECK_VAL			0
+#define WFX_BUS_TASK_PRIORITY    	2
+#define BUS_TASK_STACK_SIZE 		1024
 static StackType_t busStack[BUS_TASK_STACK_SIZE];
 StaticTask_t busTaskStruct;
 TaskHandle_t wfx_bus_task_handle;
@@ -69,7 +71,11 @@ SemaphoreHandle_t wfxtask_mutex;
 static bool wfx_bus_rx_in_process = false;
 
 /***************************************************************************
+ * @fn  bool wfx_bus_is_receive_processing(void)
+ * @brief
  * Check receive frame status
+ * @param[in]  None
+ * @return returns wfx_bus_rx_in_process
  ******************************************************************************/
 bool wfx_bus_is_receive_processing(void)
 {
@@ -77,7 +83,11 @@ bool wfx_bus_is_receive_processing(void)
 }
 
 /*****************************************************************************
+ * @fn  static sl_status_t receive_frames()
+ * @brief
  * Receives frames from the WFX.
+ * @param[in] None
+ * @return returns result
  ******************************************************************************/
 static sl_status_t receive_frames()
 {
@@ -87,16 +97,20 @@ static sl_status_t receive_frames()
   do {
     result = sl_wfx_receive_frame(&control_register);
     SL_WFX_ERROR_CHECK(result);
-  } while ((control_register & SL_WFX_CONT_NEXT_LEN_MASK) != 0);
+  } while ((control_register & SL_WFX_CONT_NEXT_LEN_MASK) != CHECK_VAL);
 
 error_handler:
   wfx_bus_rx_in_process = false;
   return result;
 }
 
-/*
+/********************************************************************************
+ * @fn  static void wfx_bus_task(void *p_arg)
+ * @brief
  * WFX bus communication task.
  * receives frames from the Bus interface
+ * @param[in] p_arg:
+ * @return None
  */
 static void wfx_bus_task(void *p_arg)
 {
@@ -119,12 +133,16 @@ static void wfx_bus_task(void *p_arg)
 }
 
 /***************************************************************************
+ * @fn  void wfx_bus_start()
+ * @brief
  * Creates WFX bus communication task.
+ * @param[in] None
+ * @return None
  ******************************************************************************/
 void wfx_bus_start()
 {
   wfx_bus_task_handle =
-    xTaskCreateStatic(wfx_bus_task, "wfxbus", BUS_TASK_STACK_SIZE, NULL, 2, busStack, &busTaskStruct);
+    xTaskCreateStatic(wfx_bus_task, "wfxbus", BUS_TASK_STACK_SIZE, NULL, WFX_BUS_TASK_PRIORITY, busStack, &busTaskStruct);
   if (wfx_bus_task_handle == NULL) {
     EFR32_LOG("*ERR*WFX BusTask");
   }

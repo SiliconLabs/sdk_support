@@ -5,10 +5,6 @@ typedef struct {
   unsigned char pin;
 } rsi_pin_t;
 
-//#define CONCAT(a, b)      a ## b
-//#define CONCAT3(a, b, c)  a ## b ## c
-//#define CONCAT_EXPAND(a, b)      CONCAT(a,b)
-//#define CONCAT3_EXPAND(a, b, c)  CONCAT3(a,b,c)
 
 #define MY_USART           USART2
 #define MY_USART_CLOCK     cmuClock_USART2
