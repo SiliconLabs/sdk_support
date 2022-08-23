@@ -28,9 +28,8 @@ extern "C" {
 #define DHCP_LINK_DOWN        (uint8_t)5
 
 /*****************************************************************************
- * @fn  void dhcpclient_set_link_state(int link_up)
- * @brief
  * Notify DHCP client task about the wifi status
+ *
  * @param link_up link status
  ******************************************************************************/
 void dhcpclient_set_link_state(int link_up);

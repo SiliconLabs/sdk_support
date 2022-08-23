@@ -44,14 +44,12 @@ extern void xPortSysTickHandler(void);
 #include "rsi_utils.h"
 #include "rsi_socket.h"
 #include "rsi_nwk.h"
+//#include "rsi_wlan_non_rom.h"
 #include "rsi_bootup_config.h"
 #include "rsi_error.h"
 #include "wfx_rsi.h"
 
 #ifndef _use_the_rsi_defined_functions
-
-StaticTimer_t sRsiTimerBuffer;
-
 /*
  * We (Matter port) need a few functions out of this file
  * They are at the top
@@ -65,7 +63,7 @@ void rsi_delay_ms(uint32_t delay_ms)
 #ifndef RSI_WITH_OS
   uint32_t start;
 #endif
-  if (delay_ms == 0) // Check if delay is 0msec
+  if (delay_ms == 0)
     return;
 
 #ifdef RSI_WITH_OS
@@ -105,7 +103,7 @@ int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t
     return RSI_ERROR_INVALID_OPTION; /* Not supported for now - Fix this later */
   for (x = 0; x < WFX_RSI_NUM_TIMERS; x++) {
     tp = &rsi_timer[x];
-    if (tp->handle == NULL) {
+    if (tp->handle == (TimerHandle_t)0) {
       goto found;
     }
   }
@@ -116,18 +114,14 @@ found:
   tp->name[1] = timer_node;
   tp->name[2] = 0;
   tp->func    = rsi_timer_cb;
-  tp->handle  = xTimerCreateStatic((char *)&tp->name[0],
+  tp->handle  = xTimerCreate((char *)&tp->name[0],
                             pdMS_TO_TICKS(duration),
                             ((mode == RSI_HAL_TIMER_TYPE_SINGLE_SHOT) ? pdFALSE : pdTRUE),
-                            NULL,
-                            timer_cb,
-                            &sRsiTimerBuffer);
-
-  if (tp->handle == NULL) {
+                            (void *)0,
+                            timer_cb);
+  if (tp->handle == (TimerHandle_t)0)
     return RSI_ERROR_INSUFFICIENT_BUFFER;
-  }
-
-  (void)xTimerStart(tp->handle, TIMER_TICKS_TO_WAIT_0);
+  (void)xTimerStart(tp->handle, 0);
 
   return RSI_ERROR_NONE;
 }
@@ -238,7 +232,6 @@ void SysTick_Handler(void)
 {
   _dwTickCount++;
 }
-
 uint32_t GetTickCount(void)
 {
   return _dwTickCount; // gets the tick count from systic ISR
@@ -259,7 +252,7 @@ void rsi_delay_ms(uint32_t delay_ms)
 #ifndef RSI_WITH_OS
   uint32_t start;
 #endif
-  if (delay_ms == DELAY0)
+  if (delay_ms == 0)
     return;
 
 #ifdef RSI_WITH_OS
@@ -303,10 +296,9 @@ uint32_t rsi_hal_gettickcount(void)
   // Define your API to get the tick count delay in milli seconds from systic ISR and return the resultant value
   struct rsi_timeval tv1;
   gettimeofday(&tv1, NULL);
-  return (tv1.tv_sec * CONVERT_SEC_TO_MSEC + tv1.tv_usec * CONVERT_USEC_TO_MSEC);
+  return (tv1.tv_sec * 1000 + tv1.tv_usec / 1000);
 #endif
 }
-
 #else
 uint32_t rsi_hal_gettickcount(void)
 {
