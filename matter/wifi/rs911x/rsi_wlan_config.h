@@ -49,7 +49,6 @@
 #else /* Don't use RSI_SOCKETS */
 #define RSI_TCP_IP_BYPASS          RSI_ENABLE
 #define RSI_TCP_IP_FEATURE_BIT_MAP (TCP_IP_FEAT_BYPASS /*| TCP_IP_FEAT_EXTENSION_VALID*/)
-//#define RSI_EXT_TCPIP_FEATURE_BITMAP CONFIG_FEAT_EXTENTION_VALID
 #endif
 
 //! To set Extended custom feature select bit map

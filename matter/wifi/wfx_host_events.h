@@ -76,6 +76,92 @@
 
 #include "sl_status.h"
 
+#ifdef RS911X_WIFI
+#define WLAN_TASK_STACK_SIZE		1024
+#define WLAN_TASK_PRIORITY    		1
+#define WLAN_DRIVER_TASK_PRIORITY	1
+#define MAX_JOIN_RETRIES_COUNT		5
+
+#else  /* WF200 */
+#define WLAN_TASK_STACK_SIZE		1024
+#define WLAN_TASK_PRIORITY    		1
+#define MAX_JOIN_RETRIES_COUNT		5
+#endif
+
+// WLAN related Macros
+#define ETH_FRAME			0
+#define CMP_SUCCESS			0
+#define BSSID_MAX_STR_LEN		6 
+#define MAC_ADDRESS_FIRST_OCTET		6 
+#define AP_START_SUCCESS		0
+#define BITS_TO_WAIT			0
+#define CONNECTION_STATUS_SUCCESS	1
+#define IP_STATUS_FAIL			0
+#define GET_IPV6_SUCCESS		1
+#define GET_IPV6_FAIL			0
+#define BEACON_1			0
+#define CHANNEL_LIST			(const uint8_t *)0
+#define CHANNEL_COUNT			0
+#define IE_DATA				(const uint8_t *)0
+#define IE_DATA_LENGTH			0
+#define BSSID_SCAN			(const uint8_t *)0
+#define	CHANNEL_0			0
+#define	PREVENT_ROAMING			1
+#define DISABLE_PMF_MODE		0
+#define STA_IP_FAIL			0
+#define IP_STATUS_SUCCESS		1
+#define	ACTIVE_CHANNEL_TIME_100		100
+#define	PASSIVE_CHANNEL_TIME_0		0
+#define	PROBE_NUM_REQ_1			1
+
+#define PINOUT_CLEAR_STATUS    		0
+#define TICKS_TO_WAIT_0   		0
+#define TICKS_TO_WAIT_3   		3
+#define TICKS_TO_WAIT_1   		1
+#define TICKS_TO_WAIT_500   		500
+
+// TASK and Interrupt Macros
+#define SUCCESS_STATUS			1
+#define LINK_UP			    	1
+#define LINK_DOWN			0
+#define MAC_48_BIT_SET			1
+#define STRUCT_PBUF			(struct pbuf *)0
+#define	PRIORITY_0		  	0
+#define HEX_VALUE_FF	  		0XFF
+
+// Timer Delay
+#define MAX_XLEN          		16
+#define MIN_XLEN          		0
+#define PINOUT_CLEAR      		0
+#define PINOUT_SET        		1
+#define WFX_SPI_NVIC_PRIORITY     	5
+#define WFX_GPIO_NVIC_PRIORITY     	5
+#define CB_VALUE        		(DMADRV_Callback_t)0
+
+/* TIMER_TICKS_TO_WAIT Specifies the time, in ticks, that the calling task should
+ * be held in the Blocked state to wait for the start command to be successfully
+ * sent to the timer command queue.
+ */
+#define TIMER_TICKS_TO_WAIT_0      	0
+
+#define CONVERT_SEC_TO_MSEC 		1000
+#define CONVERT_USEC_TO_MSEC 		(1/1000)
+
+#define RSI_RESPONSE_MAX_SIZE		28
+#define RSI_RESPONSE_HOLD_BUFF_SIZE	128
+#define RSI_DRIVER_STATUS   		0
+#define OPER_MODE_0         		0
+#define COEX_MODE_0         		0
+#define RESP_BUFF_SIZE      		6
+#define AP_CHANNEL_NO_0     		0
+#define SCAN_BITMAP_OPTN_1  		1
+#define IP_CONF_RSP_BUFF_LENGTH_4     	4
+#define STATION             		0
+#define BG_SCAN_RES_SIZE    		500
+
+#define SPI_CONFIG_SUCESS	 	0
+#define WPA3_SECURITY 			3
+
 typedef enum {
   WIFI_EVENT,
   IP_EVENT,
@@ -103,7 +189,9 @@ typedef enum {
   WFX_SEC_PUSH_BTN = 11,
   WFX_SEC_WPA3 = 11,
 } wfx_sec_t;
+
 #define WPA3_SECURITY 3
+
 typedef struct {
   char ssid[32 + 1];
   char passkey[64 + 1];
