@@ -24,8 +24,6 @@
 extern "C" {
 #endif
 /***************************************************************************
- * @fn  err_t sta_ethernetif_init(struct netif *netif)
- * @brief
  * Sets up the station network interface.
  *
  * @param netif the lwip network interface structure
@@ -34,8 +32,6 @@ extern "C" {
 err_t sta_ethernetif_init(struct netif *netif);
 
 /***************************************************************************
- * @fn err_t ap_ethernetif_init(struct netif *netif
- * @brief
  * Sets up the AP network interface.
  *
  * @param netif the lwip network interface structure

@@ -26,12 +26,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define ZONE0 					0
-#define CH_SELECTOR 				1u
-#define RTC_DEFAULT_COUNTER_VALUE 		0u
-#define RSI_RTC_FREQ_VALUE 			0
-#define TIME_ZONE_OFFSET 			0u
-
 #define SLEEPTIMER_EVENT_OF (0x01)
 #define SLEEPTIMER_EVENT_COMP (0x02)
 #define SLEEPTIMER_ENUM(name)                                                  \
@@ -97,8 +91,8 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
   bool valid_time = false;
 
   // Check for overflow.
-  if ((time_zone < ZONE0 && time > (uint32_t)abs(time_zone)) ||
-      (time_zone >= ZONE0 && (time <= UINT32_MAX - time_zone))) {
+  if ((time_zone < 0 && time > (uint32_t)abs(time_zone)) ||
+      (time_zone >= 0 && (time <= UINT32_MAX - time_zone))) {
     valid_time = true;
   }
   if (format == TIME_FORMAT_UNIX) {
@@ -124,11 +118,6 @@ static bool is_valid_time(sl_sleeptimer_timestamp_t time,
  * Gets RTCC timer frequency.
  ******************************************************************************/
 uint32_t rsi_rtc_get_hal_timer_frequency(void) {
-  /* CMU_PrescToLog2 converts prescaler dividend to a logarithmic value. It only works for even
-   * numbers equal to 2^n.
-   * An unscaled dividend (dividend = argument + 1).
-   * So we need to send argument substracted by 1
-   */
   return (CMU_ClockFreqGet(cmuClock_RTCC) >>
           (CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1)));
 }
@@ -143,12 +132,6 @@ void rsi_rtc_init_timer(void) {
   CMU_ClockEnable(cmuClock_RTCC, true);
 
   rtcc_init.enable = false;
-
-  /* CMU_PrescToLog2 converts prescaler dividend to a logarithmic value. It only works for even
-   * numbers equal to 2^n.
-   * An unscaled dividend (dividend = argument + 1).
-   * So we need to send argument substracted by 1
-   */
   rtcc_init.presc =
       (RTCC_CntPresc_TypeDef)(CMU_PrescToLog2(SL_SLEEPTIMER_FREQ_DIVIDER - 1));
 
@@ -157,11 +140,11 @@ void rsi_rtc_init_timer(void) {
   // Compare channel starts disabled and is enabled only when compare match
   // interrupt is enabled.
   channel.chMode = rtccCapComChModeOff;
-  RTCC_ChannelInit(CH_SELECTOR, &channel);
+  RTCC_ChannelInit(1u, &channel);
 
   RTCC_IntDisable(_RTCC_IEN_MASK);
   RTCC_IntClear(_RTCC_IF_MASK);
-  RTCC_CounterSet(RTC_DEFAULT_COUNTER_VALUE);
+  RTCC_CounterSet(0u);
 
   RTCC_Enable(true);
 
@@ -204,7 +187,7 @@ sl_status_t rsi_rtc_init(void) {
     rsi_rtc_init_timer();
     rsi_rtc_enable_int(SLEEPTIMER_EVENT_OF);
     timer_frequency = rsi_rtc_get_hal_timer_frequency();
-    if (timer_frequency == RSI_RTC_FREQ_VALUE) {
+    if (timer_frequency == 0) {
       CORE_EXIT_ATOMIC();
       return SL_STATUS_INVALID_PARAMETER;
     }
@@ -252,7 +235,7 @@ sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time) {
   uint32_t cnt = 0;
   CORE_DECLARE_IRQ_STATE;
 
-  if (!is_valid_time(time, TIME_FORMAT_UNIX, TIME_ZONE_OFFSET)) {
+  if (!is_valid_time(time, TIME_FORMAT_UNIX, 0u)) {
     return SL_STATUS_INVALID_CONFIGURATION;
   }
 
@@ -277,12 +260,7 @@ sl_status_t rsi_rtc_settime(sl_sleeptimer_timestamp_t time) {
 }
 
 /*******************************************************************************
- * @fn  int32_t rsi_rtc_set_time(uint32_t time)
- * @brief
- *      Init Sleeptimer and Set current time.
- * @param[in] time:
- * @return
- *      None
+ * Init Sleeptimer and Set current time.
  ******************************************************************************/
 int32_t rsi_rtc_set_time(uint32_t time) {
   sl_status_t ret_val = SL_STATUS_OK;

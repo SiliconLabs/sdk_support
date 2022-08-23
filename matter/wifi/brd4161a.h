@@ -49,9 +49,14 @@
 #define SL_WFX_HOST_PINOUT_SPI_TX_LDMA_SIGNAL ldmaPeripheralSignal_USART2_TXBL
 
 #ifdef RS911X_WIFI
-#define WFX_RESET_PIN     PIN(D, 12)
+//#define SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT gpioPortC /* SPI IRQ port*/
+//#define SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN 9          /* SPI IRQ pin */
+//#define SL_WFX_HOST_PINOUT_RESET_PORT gpioPortD
+//#define SL_WFX_HOST_PINOUT_RESET_PIN 12
+#define WFX_RESET_PIN PIN(D, 12)
 #define WFX_INTERRUPT_PIN PIN(C, 9)
-#define WFX_SLEEP_CONFIRM_PIN      PIN(D, 13)
+//#define WFX_INTERRUPT_PIN       PIN(D, 3)
+#define WFX_SLEEP_CONFIRM_PIN PIN(D, 13)
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 9
 #else /* WF200 */
 #define SL_WFX_HOST_PINOUT_RESET_PORT gpioPortD
