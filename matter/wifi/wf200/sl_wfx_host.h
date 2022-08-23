@@ -66,3 +66,5 @@ typedef struct __attribute__((__packed__)) scan_result_list_s {
 
 void sl_wfx_host_start_platform_interrupt(void);
 extern SemaphoreHandle_t wfx_wakeup_sem;
+void sl_wf200_host_gpio_init(void);
+sl_status_t sl_wf200_host_init_bus(void);

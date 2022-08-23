@@ -42,6 +42,13 @@ static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
  *****************************************************************************/
 void sl_wfx_host_gpio_init(void)
 {
+  /* Place holder for a call from gecko SDK code
+   * TODO
+   */
+}
+
+void sl_wf200_host_gpio_init(void)
+{
   EFR32_LOG("WIFI: GPIO Init:IRQ=%d", wirq_irq_nb);
   // Enable GPIO clock.
   CMU_ClockEnable(cmuClock_GPIO, true);

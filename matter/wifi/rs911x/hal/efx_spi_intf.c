@@ -196,16 +196,25 @@ void sl_wfx_host_reset_chip(void)
 }
 void rsi_hal_board_init(void)
 {
-  spi_sem = xSemaphoreCreateBinary();
-  xSemaphoreGive(spi_sem);
-  WFX_RSI_LOG("RSI_HAL: init GPIO");
-  sl_wfx_host_gpio_init();
-  WFX_RSI_LOG("RSI_HAL: init SPI");
-  sl_wfx_host_init_bus();
-  dma_init();
   WFX_RSI_LOG("RSI_HAL: Reset Wifi");
   sl_wfx_host_reset_chip ();
+
   WFX_RSI_LOG("RSI_HAL: Init done");
+}
+
+void wifi_board_init(void)
+{
+  spi_sem = xSemaphoreCreateBinary();
+  xSemaphoreGive(spi_sem);
+
+  WFX_RSI_LOG("Wifi board: init GPIO");
+  sl_wfx_host_gpio_init();
+
+  WFX_RSI_LOG("Wifi board: init SPI");
+  sl_wfx_host_init_bus();
+
+  WFX_RSI_LOG("Wifi board: init DMA");
+  dma_init();
 }
 
 static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)

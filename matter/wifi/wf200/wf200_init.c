@@ -121,6 +121,15 @@ sl_status_t sl_wfx_host_init(void)
   return SL_STATUS_OK;
 }
 
+void wifi_board_init(void)
+{
+  //WFX: Host gpio Init
+  sl_wf200_host_gpio_init();
+
+  //WFX: Host SPI bus Init
+  sl_wf200_host_init_bus();
+}
+
 /****************************************************************************
  * Get firmware data
  *****************************************************************************/

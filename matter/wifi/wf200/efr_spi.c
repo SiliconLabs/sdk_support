@@ -79,6 +79,14 @@ uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ
  *****************************************************************************/
 sl_status_t sl_wfx_host_init_bus(void)
 {
+  /* TODO
+   * Place holder for a call from Gecko SDK code
+   */
+  return SL_STATUS_OK;
+}
+
+sl_status_t sl_wf200_host_init_bus(void)
+{
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
 
