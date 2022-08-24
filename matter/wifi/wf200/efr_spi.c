@@ -68,13 +68,13 @@ static uint32_t dummy_rx_data;
 static uint32_t dummy_tx_data;
 static bool spi_enabled = false;
 
-uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
+uint8_t wirq_irq_nb =
+    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 
 /****************************************************************************
  * Initialize SPI peripheral
  *****************************************************************************/
-sl_status_t sl_wfx_host_init_bus(void)
-{
+sl_status_t sl_wfx_host_init_bus(void) {
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
   spi_enabled = true;
@@ -90,45 +90,55 @@ sl_status_t sl_wfx_host_init_bus(void)
 #if defined(EFR32MG12)
   CMU_ClockEnable(cmuClock_HFPER, true);
   MY_USART->ROUTELOC0 =
-    (MY_USART->ROUTELOC0 & ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK | _USART_ROUTELOC0_CLKLOC_MASK))
-    | (SL_WFX_HOST_PINOUT_SPI_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_RX_LOC << _USART_ROUTELOC0_RXLOC_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT);
+      (MY_USART->ROUTELOC0 &
+       ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK |
+         _USART_ROUTELOC0_CLKLOC_MASK)) |
+      (SL_WFX_HOST_PINOUT_SPI_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT) |
+      (SL_WFX_HOST_PINOUT_SPI_RX_LOC << _USART_ROUTELOC0_RXLOC_SHIFT) |
+      (SL_WFX_HOST_PINOUT_SPI_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT);
 
-  MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
-  GPIO_DriveStrengthSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, gpioDriveStrengthStrongAlternateStrong);
-    /* Configure CS pin as output and drive strength to inactive high */
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, 0);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 0);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
+  MY_USART->ROUTEPEN =
+      USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
+  GPIO_DriveStrengthSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
+                        gpioDriveStrengthStrongAlternateStrong);
+  /* Configure CS pin as output and drive strength to inactive high */
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN,
+                  gpioModePushPull, 1);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN,
+                  gpioModePushPull, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN,
+                  gpioModeInput, 0);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
+                  SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
 
-#elif defined(EFR32MG24)  /* Series 2 */
+#elif defined(EFR32MG24) /* Series 2 */
 
-  GPIO->USARTROUTE[0].TXROUTE = (SL_WFX_HOST_PINOUT_SPI_TX_PORT
-                                  << _GPIO_USART_TXROUTE_PORT_SHIFT)
-                                | (SL_WFX_HOST_PINOUT_SPI_TX_PIN
-                                  << _GPIO_USART_TXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[0].TXROUTE =
+      (SL_WFX_HOST_PINOUT_SPI_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT) |
+      (SL_WFX_HOST_PINOUT_SPI_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
 
-  GPIO->USARTROUTE[0].RXROUTE = (SL_WFX_HOST_PINOUT_SPI_RX_PORT
-                                  << _GPIO_USART_RXROUTE_PORT_SHIFT)
-                                | (SL_WFX_HOST_PINOUT_SPI_RX_PIN
-                                  << _GPIO_USART_RXROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[0].RXROUTE =
+      (SL_WFX_HOST_PINOUT_SPI_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT) |
+      (SL_WFX_HOST_PINOUT_SPI_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
 
-  GPIO->USARTROUTE[0].CLKROUTE = (SL_WFX_HOST_PINOUT_SPI_CLK_PORT
-                                  << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-                                | (SL_WFX_HOST_PINOUT_SPI_CLK_PIN
-                                  << _GPIO_USART_CLKROUTE_PIN_SHIFT);
+  GPIO->USARTROUTE[0].CLKROUTE =
+      (SL_WFX_HOST_PINOUT_SPI_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT) |
+      (SL_WFX_HOST_PINOUT_SPI_CLK_PIN << _GPIO_USART_CLKROUTE_PIN_SHIFT);
 
-  GPIO->USARTROUTE[0].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN  |
-                                GPIO_USART_ROUTEEN_TXPEN  |
+  GPIO->USARTROUTE[0].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN |
+                                GPIO_USART_ROUTEEN_TXPEN |
                                 GPIO_USART_ROUTEEN_CLKPEN;
 
-	/* Configure CS pin as output and drive strength to inactive high */
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull,PIN_OUT_SET);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PIN_OUT_CLEAR);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, PIN_OUT_CLEAR);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, PIN_OUT_CLEAR);
+  /* Configure CS pin as output and drive strength to inactive high */
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN,
+                  gpioModePushPull, PIN_OUT_SET);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN,
+                  gpioModePushPull, PIN_OUT_CLEAR);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN,
+                  gpioModeInput, PIN_OUT_CLEAR);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
+                  SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull,
+                  PIN_OUT_CLEAR);
 #else
 #error "EFR32 type not supported"
 #endif
@@ -139,7 +149,8 @@ sl_status_t sl_wfx_host_init_bus(void)
   DMADRV_AllocateChannel(&tx_dma_channel, NULL);
   DMADRV_AllocateChannel(&rx_dma_channel, NULL);
 #if defined(EFR32MG12)
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull, PIN_OUT_SET);
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN,
+                  gpioModePushPull, PIN_OUT_SET);
 #endif
   MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
@@ -149,8 +160,7 @@ sl_status_t sl_wfx_host_init_bus(void)
 /****************************************************************************
  * De-initialize SPI peripheral and DMAs
  *****************************************************************************/
-sl_status_t sl_wfx_host_deinit_bus(void)
-{
+sl_status_t sl_wfx_host_deinit_bus(void) {
   vSemaphoreDelete(spi_sem);
   // Stop DMAs.
   DMADRV_StopTransfer(rx_dma_channel);
@@ -165,23 +175,22 @@ sl_status_t sl_wfx_host_deinit_bus(void)
 /****************************************************************************
  * Assert chip select.
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_cs_assert()
-{
-  GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
+sl_status_t sl_wfx_host_spi_cs_assert() {
+  GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT,
+                   SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
 
 /****************************************************************************
  * De-assert chip select.
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_cs_deassert()
-{
+sl_status_t sl_wfx_host_spi_cs_deassert() {
   GPIO_PinOutSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
 
-static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
-{
+static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo,
+                            void *userParam) {
   (void)channel;
   (void)sequenceNo;
   (void)userParam;
@@ -193,65 +202,37 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
   return true;
 }
 
-void receiveDMA(uint8_t *buffer, uint16_t buffer_length)
-{
+void receiveDMA(uint8_t *buffer, uint16_t buffer_length) {
   // Start receive DMA.
-  DMADRV_PeripheralMemory(rx_dma_channel,
-                          MY_USART_RX_SIGNAL,
-                          (void *)buffer,
-                          (void *)&(MY_USART->RXDATA),
-                          true,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          rx_dma_complete,
-                          NULL);
+  DMADRV_PeripheralMemory(rx_dma_channel, MY_USART_RX_SIGNAL, (void *)buffer,
+                          (void *)&(MY_USART->RXDATA), true, buffer_length,
+                          dmadrvDataSize1, rx_dma_complete, NULL);
 
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_channel,
-                          MY_USART_TX_SIGNAL,
-                          (void *)&(MY_USART->TXDATA),
-                          (void *)&(dummy_tx_data),
-                          false,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          NULL,
-                          NULL);
+  DMADRV_MemoryPeripheral(tx_dma_channel, MY_USART_TX_SIGNAL,
+                          (void *)&(MY_USART->TXDATA), (void *)&(dummy_tx_data),
+                          false, buffer_length, dmadrvDataSize1, NULL, NULL);
 }
 
-void transmitDMA(uint8_t *buffer, uint16_t buffer_length)
-{
+void transmitDMA(uint8_t *buffer, uint16_t buffer_length) {
   // Receive DMA runs only to initiate callback
   // Start receive DMA.
-  DMADRV_PeripheralMemory(rx_dma_channel,
-                          MY_USART_RX_SIGNAL,
-                          &dummy_rx_data,
-                          (void *)&(MY_USART->RXDATA),
-                          false,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          rx_dma_complete,
-                          NULL);
+  DMADRV_PeripheralMemory(rx_dma_channel, MY_USART_RX_SIGNAL, &dummy_rx_data,
+                          (void *)&(MY_USART->RXDATA), false, buffer_length,
+                          dmadrvDataSize1, rx_dma_complete, NULL);
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_channel,
-                          MY_USART_TX_SIGNAL,
-                          (void *)&(MY_USART->TXDATA),
-                          (void *)buffer,
-                          true,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          NULL,
-                          NULL);
+  DMADRV_MemoryPeripheral(tx_dma_channel, MY_USART_TX_SIGNAL,
+                          (void *)&(MY_USART->TXDATA), (void *)buffer, true,
+                          buffer_length, dmadrvDataSize1, NULL, NULL);
 }
 
 /****************************************************************************
  * WFX SPI transfer implementation
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_t type,
-                                                  uint8_t *header,
-                                                  uint16_t header_length,
-                                                  uint8_t *buffer,
-                                                  uint16_t buffer_length)
-{
+sl_status_t
+sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_t type,
+                                      uint8_t *header, uint16_t header_length,
+                                      uint8_t *buffer, uint16_t buffer_length) {
   sl_status_t result = SL_STATUS_FAIL;
   const bool is_read = (type == SL_WFX_BUS_READ);
 
@@ -261,7 +242,8 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
 
   /* header length should be greater than 0 */
   if (header_length > 0) {
-    for (uint8_t *buffer_ptr = header; header_length > 0; --header_length, ++buffer_ptr) {
+    for (uint8_t *buffer_ptr = header; header_length > 0;
+         --header_length, ++buffer_ptr) {
       MY_USART->TXDATA = (uint32_t)(*buffer_ptr);
 
       while (!(MY_USART->STATUS & USART_STATUS_TXC)) {
@@ -297,14 +279,14 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
 /****************************************************************************
  * Enable WFX interrupt
  *****************************************************************************/
-void sl_wfx_host_start_platform_interrupt(void)
-{
+void sl_wfx_host_start_platform_interrupt(void) {
   // Enable (and clear) the bus interrupt
-  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false, true);
+  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT,
+                    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false,
+                    true);
 }
 
-sl_status_t sl_wfx_host_enable_platform_interrupt(void)
-{
+sl_status_t sl_wfx_host_enable_platform_interrupt(void) {
   GPIO_IntEnable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
@@ -312,14 +294,12 @@ sl_status_t sl_wfx_host_enable_platform_interrupt(void)
 /****************************************************************************
  * Disable WFX interrupt
  *****************************************************************************/
-sl_status_t sl_wfx_host_disable_platform_interrupt(void)
-{
+sl_status_t sl_wfx_host_disable_platform_interrupt(void) {
   GPIO_IntDisable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_enable_spi(void)
-{
+sl_status_t sl_wfx_host_enable_spi(void) {
   if (spi_enabled == false) {
 #ifdef SLEEP_ENABLED
     // Prevent the host to use lower EM than EM1
@@ -330,8 +310,7 @@ sl_status_t sl_wfx_host_enable_spi(void)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_disable_spi(void)
-{
+sl_status_t sl_wfx_host_disable_spi(void) {
   if (spi_enabled == true) {
     spi_enabled = false;
 #ifdef SLEEP_ENABLED
