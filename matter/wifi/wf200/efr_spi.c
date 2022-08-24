@@ -102,7 +102,7 @@ sl_status_t sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, 0);
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, 0);
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
-  
+
 #elif defined(EFR32MG24)  /* Series 2 */
 
   GPIO->USARTROUTE[0].TXROUTE = (SL_WFX_HOST_PINOUT_SPI_TX_PORT
@@ -123,7 +123,7 @@ sl_status_t sl_wfx_host_init_bus(void)
   GPIO->USARTROUTE[0].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN  |
                                 GPIO_USART_ROUTEEN_TXPEN  |
                                 GPIO_USART_ROUTEEN_CLKPEN;
-								
+
 	/* Configure CS pin as output and drive strength to inactive high */
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull,PIN_OUT_SET);
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PIN_OUT_CLEAR);
