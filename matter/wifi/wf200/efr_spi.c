@@ -62,11 +62,6 @@
 #include "sl_power_manager.h"
 #endif
 #include "AppConfig.h"
-#if defined(EFR32MG12)
-#define USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
-#elif defined(EFR32MG24)
-#define MY_USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
-#endif
 
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_channel;
@@ -74,36 +69,28 @@ static unsigned int rx_dma_channel;
 static uint32_t dummy_rx_data;
 static uint32_t dummy_tx_data;
 static bool spi_enabled = false;
-#if defined(EFR32MG24)
-static uint32_t            MY_USART_CLOCK;
-static uint32_t            MY_USART_TX_SIGNAL;
-static uint32_t            MY_USART_RX_SIGNAL;
-#endif
 
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
-
-#define PIN_OUT_SET	    	1
-#define PIN_OUT_CLEAR		0
 
 /****************************************************************************
  * Initialize SPI peripheral
  *****************************************************************************/
 sl_status_t sl_wfx_host_init_bus(void)
 {
-#if defined(EFR32MG12)
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
-
-  EFR32_LOG("WIFI: Spi Init");
-  spi_enabled        = true;
-  dummy_tx_data      = 0;
-  usartInit.msbf     = true;
+  spi_enabled = true;
+  dummy_tx_data = 0;
   usartInit.baudrate = 36000000u;
-  CMU_ClockEnable(cmuClock_HFPER, true);
+  usartInit.msbf = true;
+
   CMU_ClockEnable(cmuClock_GPIO, true);
   CMU_ClockEnable(MY_USART_CLOCK, true);
   USART_InitSync(MY_USART, &usartInit);
   MY_USART->CTRL |= (1u << _USART_CTRL_SMSDELAY_SHIFT);
+
+#if defined(EFR32MG12)
+  CMU_ClockEnable(cmuClock_HFPER, true);
   MY_USART->ROUTELOC0 =
     (MY_USART->ROUTELOC0 & ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK | _USART_ROUTELOC0_CLKLOC_MASK))
     | (SL_WFX_HOST_PINOUT_SPI_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT)
@@ -119,23 +106,6 @@ sl_status_t sl_wfx_host_init_bus(void)
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
   
 #elif defined(EFR32MG24)  /* Series 2 */
-  // Initialize and enable the USART
-  USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
-
-  MY_USART_CLOCK     = cmuClock_USART0;
-  MY_USART_TX_SIGNAL = dmadrvPeripheralSignal_USART0_TXBL;
-  MY_USART_RX_SIGNAL = dmadrvPeripheralSignal_USART0_RXDATAV;
-
-  spi_enabled = true;
-  dummy_tx_data = 0;
-  usartInit.baudrate = 36000000u;
-  usartInit.msbf = true;
-
-  CMU_ClockEnable(cmuClock_GPIO, true);
-  CMU_ClockEnable(MY_USART_CLOCK, true);
-  USART_InitSync(MY_USART, &usartInit);
-  MY_USART->CTRL |= (1u << _USART_CTRL_SMSDELAY_SHIFT);
-
 
   GPIO->USARTROUTE[0].TXROUTE = (SL_WFX_HOST_PINOUT_SPI_TX_PORT
                                   << _GPIO_USART_TXROUTE_PORT_SHIFT)
@@ -325,7 +295,7 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
 
   return result;
 }
-#if defined(EFR32MG12)
+
 /****************************************************************************
  * Enable WFX interrupt
  *****************************************************************************/
@@ -340,25 +310,7 @@ sl_status_t sl_wfx_host_enable_platform_interrupt(void)
   GPIO_IntEnable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
-#elif defined(EFR32MG24)
-void sl_wfx_host_start_platform_interrupt(void)
-{
-  // Enable (and clear) the bus interrupt
-  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false, true);
-}
 
-sl_status_t sl_wfx_host_enable_platform_interrupt(void)
-{
-  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT,
-                    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN,
-                    wirq_irq_nb,
-                    true,
-                    false,
-                    true);
-
-  return SL_STATUS_OK;
-}
-#endif
 /****************************************************************************
  * Disable WFX interrupt
  *****************************************************************************/
@@ -392,4 +344,4 @@ sl_status_t sl_wfx_host_disable_spi(void)
   return SL_STATUS_OK;
 }
 
-#endif
+#endif //SL_WFX_USE_SPI
