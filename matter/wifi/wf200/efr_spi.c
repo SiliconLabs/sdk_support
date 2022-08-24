@@ -42,8 +42,6 @@
  *****************************************************************************/
 #include "sl_wfx_configuration_defaults.h"
 
-#ifdef SL_WFX_USE_SPI
-
 #include "sl_wfx.h"
 #include "sl_wfx_board.h"
 #include "sl_wfx_host_api.h"
@@ -343,5 +341,3 @@ sl_status_t sl_wfx_host_disable_spi(void)
   }
   return SL_STATUS_OK;
 }
-
-#endif //SL_WFX_USE_SPI
