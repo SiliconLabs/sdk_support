@@ -101,15 +101,6 @@ sl_status_t sl_wfx_host_init_bus(void) {
       USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
   GPIO_DriveStrengthSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
                         gpioDriveStrengthStrongAlternateStrong);
-  /* Configure CS pin as output and drive strength to inactive high */
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN,
-                  gpioModePushPull, 1);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN,
-                  gpioModePushPull, 0);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN,
-                  gpioModeInput, 0);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
-                  SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, 0);
 
 #elif defined(EFR32MG24) /* Series 2 */
 
@@ -129,6 +120,10 @@ sl_status_t sl_wfx_host_init_bus(void) {
                                 GPIO_USART_ROUTEEN_TXPEN |
                                 GPIO_USART_ROUTEEN_CLKPEN;
 
+#else
+#error "EFR32 type not supported"
+#endif
+
   /* Configure CS pin as output and drive strength to inactive high */
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN,
                   gpioModePushPull, PIN_OUT_SET);
@@ -139,9 +134,7 @@ sl_status_t sl_wfx_host_init_bus(void) {
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
                   SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull,
                   PIN_OUT_CLEAR);
-#else
-#error "EFR32 type not supported"
-#endif
+                  
   spi_sem = xSemaphoreCreateBinary();
   xSemaphoreGive(spi_sem);
 
