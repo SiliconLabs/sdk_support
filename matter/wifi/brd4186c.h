@@ -35,9 +35,6 @@
 
 #else /* WF200 */
 
-#define PIN_OUT_SET 1
-#define PIN_OUT_CLEAR 0
-
 #define MY_USART USART0
 #define MY_USART_CLOCK cmuClock_USART0
 #define MY_USART_TX_SIGNAL dmadrvPeripheralSignal_USART0_TXBL

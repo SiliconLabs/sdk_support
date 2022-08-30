@@ -61,6 +61,9 @@
 #endif
 #include "AppConfig.h"
 
+#define PIN_OUT_SET 1
+#define PIN_OUT_CLEAR 0
+
 static SemaphoreHandle_t spi_sem;
 static unsigned int tx_dma_channel;
 static unsigned int rx_dma_channel;
@@ -69,13 +72,9 @@ static uint32_t dummy_tx_data;
 static bool spi_enabled = false;
 
 #if defined(EFR32MG12)
-
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ;
-
 #elif defined(EFR32MG24)
-
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
-
 #endif
 
 /****************************************************************************
