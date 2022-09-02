@@ -74,14 +74,14 @@ static bool spi_enabled = false;
 #if defined(EFR32MG12)
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ;
 #elif defined(EFR32MG24)
-uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
+uint8_t wirq_irq_nb =
+    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 #endif
 
 /****************************************************************************
  * Initialize SPI peripheral
  *****************************************************************************/
-sl_status_t sl_wfx_host_init_bus(void)
-{
+sl_status_t sl_wfx_host_init_bus(void) {
   // Initialize and enable the USART
   USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
   spi_enabled = true;
@@ -159,8 +159,7 @@ sl_status_t sl_wfx_host_init_bus(void)
 /****************************************************************************
  * De-initialize SPI peripheral and DMAs
  *****************************************************************************/
-sl_status_t sl_wfx_host_deinit_bus(void)
-{
+sl_status_t sl_wfx_host_deinit_bus(void) {
   vSemaphoreDelete(spi_sem);
   // Stop DMAs.
   DMADRV_StopTransfer(rx_dma_channel);
@@ -175,23 +174,22 @@ sl_status_t sl_wfx_host_deinit_bus(void)
 /****************************************************************************
  * Assert chip select.
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_cs_assert()
-{
-  GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
+sl_status_t sl_wfx_host_spi_cs_assert() {
+  GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT,
+                   SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
 
 /****************************************************************************
  * De-assert chip select.
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_cs_deassert()
-{
+sl_status_t sl_wfx_host_spi_cs_deassert() {
   GPIO_PinOutSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
   return SL_STATUS_OK;
 }
 
-static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
-{
+static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo,
+                            void *userParam) {
   (void)channel;
   (void)sequenceNo;
   (void)userParam;
@@ -203,65 +201,37 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
   return true;
 }
 
-void receiveDMA(uint8_t *buffer, uint16_t buffer_length)
-{
+void receiveDMA(uint8_t *buffer, uint16_t buffer_length) {
   // Start receive DMA.
-  DMADRV_PeripheralMemory(rx_dma_channel,
-                          MY_USART_RX_SIGNAL,
-                          (void *)buffer,
-                          (void *)&(MY_USART->RXDATA),
-                          true,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          rx_dma_complete,
-                          NULL);
+  DMADRV_PeripheralMemory(rx_dma_channel, MY_USART_RX_SIGNAL, (void *)buffer,
+                          (void *)&(MY_USART->RXDATA), true, buffer_length,
+                          dmadrvDataSize1, rx_dma_complete, NULL);
 
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_channel,
-                          MY_USART_TX_SIGNAL,
-                          (void *)&(MY_USART->TXDATA),
-                          (void *)&(dummy_tx_data),
-                          false,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          NULL,
-                          NULL);
+  DMADRV_MemoryPeripheral(tx_dma_channel, MY_USART_TX_SIGNAL,
+                          (void *)&(MY_USART->TXDATA), (void *)&(dummy_tx_data),
+                          false, buffer_length, dmadrvDataSize1, NULL, NULL);
 }
 
-void transmitDMA(uint8_t *buffer, uint16_t buffer_length)
-{
+void transmitDMA(uint8_t *buffer, uint16_t buffer_length) {
   // Receive DMA runs only to initiate callback
   // Start receive DMA.
-  DMADRV_PeripheralMemory(rx_dma_channel,
-                          MY_USART_RX_SIGNAL,
-                          &dummy_rx_data,
-                          (void *)&(MY_USART->RXDATA),
-                          false,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          rx_dma_complete,
-                          NULL);
+  DMADRV_PeripheralMemory(rx_dma_channel, MY_USART_RX_SIGNAL, &dummy_rx_data,
+                          (void *)&(MY_USART->RXDATA), false, buffer_length,
+                          dmadrvDataSize1, rx_dma_complete, NULL);
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_channel,
-                          MY_USART_TX_SIGNAL,
-                          (void *)&(MY_USART->TXDATA),
-                          (void *)buffer,
-                          true,
-                          buffer_length,
-                          dmadrvDataSize1,
-                          NULL,
-                          NULL);
+  DMADRV_MemoryPeripheral(tx_dma_channel, MY_USART_TX_SIGNAL,
+                          (void *)&(MY_USART->TXDATA), (void *)buffer, true,
+                          buffer_length, dmadrvDataSize1, NULL, NULL);
 }
 
 /****************************************************************************
  * WFX SPI transfer implementation
  *****************************************************************************/
-sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_t type,
-                                                  uint8_t *header,
-                                                  uint16_t header_length,
-                                                  uint8_t *buffer,
-                                                  uint16_t buffer_length)
-{
+sl_status_t
+sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_t type,
+                                      uint8_t *header, uint16_t header_length,
+                                      uint8_t *buffer, uint16_t buffer_length) {
   sl_status_t result = SL_STATUS_FAIL;
   const bool is_read = (type == SL_WFX_BUS_READ);
 
@@ -270,7 +240,8 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
   MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
   if (header_length > 0) {
-    for (uint8_t *buffer_ptr = header; header_length > 0; --header_length, ++buffer_ptr) {
+    for (uint8_t *buffer_ptr = header; header_length > 0;
+         --header_length, ++buffer_ptr) {
       MY_USART->TXDATA = (uint32_t)(*buffer_ptr);
 
       while (!(MY_USART->STATUS & USART_STATUS_TXC)) {
@@ -304,29 +275,27 @@ sl_status_t sl_wfx_host_spi_transfer_no_cs_assert(sl_wfx_host_bus_transfer_type_
 /****************************************************************************
  * Enable WFX interrupt
  *****************************************************************************/
-void sl_wfx_host_start_platform_interrupt(void)
-{
+void sl_wfx_host_start_platform_interrupt(void) {
   // Enable (and clear) the bus interrupt
-  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false, true);
+  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT,
+                    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, wirq_irq_nb, true, false,
+                    true);
 }
 
 /****************************************************************************
  * Disable WFX interrupt
  *****************************************************************************/
-sl_status_t sl_wfx_host_disable_platform_interrupt(void)
-{
+sl_status_t sl_wfx_host_disable_platform_interrupt(void) {
   GPIO_IntDisable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_enable_platform_interrupt(void)
-{
+sl_status_t sl_wfx_host_enable_platform_interrupt(void) {
   GPIO_IntEnable(1 << wirq_irq_nb);
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_enable_spi(void)
-{
+sl_status_t sl_wfx_host_enable_spi(void) {
   if (spi_enabled == false) {
 #ifdef SLEEP_ENABLED
     // Prevent the host to use lower EM than EM1
@@ -337,8 +306,7 @@ sl_status_t sl_wfx_host_enable_spi(void)
   return SL_STATUS_OK;
 }
 
-sl_status_t sl_wfx_host_disable_spi(void)
-{
+sl_status_t sl_wfx_host_disable_spi(void) {
   if (spi_enabled == true) {
     spi_enabled = false;
 #ifdef SLEEP_ENABLED
