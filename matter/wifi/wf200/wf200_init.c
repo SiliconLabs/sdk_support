@@ -64,6 +64,9 @@
 #include "sl_wfx_task.h"
 #include "wfx_host_events.h"
 
+#include "spidrv.h"
+#include "sl_spidrv_instances.h"
+
 #define SL_WFX_EVENT_MAX_SIZE  512
 #define SL_WFX_EVENT_LIST_SIZE 1
 
