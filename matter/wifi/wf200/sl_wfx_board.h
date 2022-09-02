@@ -10,6 +10,8 @@
     defined(EFR32MG12_BRD4163A) || defined(BRD4163A) ||                        \
     defined(EFR32MG12_BRD4164A) || defined(BRD4164A)
 #include "brd4161a.h"
+#elif defined(EFR32MG24_BRD4186C) || defined(BRD4186C)
+#include "brd4186c.h"
 #elif defined(EFR32MG24_BRD4187A) || defined(BRD4187A)
 #include "brd4187c.h"
 #else
