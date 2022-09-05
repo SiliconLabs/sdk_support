@@ -74,7 +74,8 @@ static bool spi_enabled = false;
 #if defined(EFR32MG12)
 uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ;
 #elif defined(EFR32MG24)
-uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
+uint8_t wirq_irq_nb =
+    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
 #endif
 
 /****************************************************************************
