@@ -140,7 +140,7 @@ sl_status_t sl_wfx_host_init_bus(void) {
   GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT,
                   SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull,
                   PIN_OUT_CLEAR);
-                  
+
   spi_sem = xSemaphoreCreateBinary();
   xSemaphoreGive(spi_sem);
 
