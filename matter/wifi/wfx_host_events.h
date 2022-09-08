@@ -204,7 +204,8 @@ void wfx_dhcp_got_ipv4(uint32_t);
 bool wfx_hw_ready(void);
 void wfx_ip_changed_notify(int got_ip);
 void wfx_ipv6_notify(int got_ip);
-
+void init_rsiPlatform(void);
+void Ble_ConnectEvent_notify();
 #ifdef RS911X_WIFI
 /* RSI for LWIP */
 void *wfx_rsi_alloc_pkt(void);

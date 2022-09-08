@@ -16,6 +16,7 @@ rs911x_src_plat = [
   "${wifi_sdk_dir}/rs911x/hal/rsi_hal_mcu_ioports.c",
   "${wifi_sdk_dir}/rs911x/hal/rsi_hal_mcu_timer.c",
   "${wifi_sdk_dir}/rs911x/hal/efx_spi_intf.c",
+  "${wifi_sdk_dir}/rs911x/rsi_init.c",
 ]
 rs911x_plat_incs = [
   "${wifi_sdk_dir}",
@@ -95,6 +96,7 @@ rs911x_defs = [
   "RSI_WLAN_ENABLE",
   "RSI_SPI_INTERFACE",
   "RSI_WITH_OS",
+  "RSI_BLE_ENABLE",
 ]
 rs911x_sock_defs = [
   "RS911X_SOCKETS",

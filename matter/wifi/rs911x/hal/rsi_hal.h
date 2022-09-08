@@ -40,7 +40,7 @@
 /******************************************************
  * *               Function Declarations
  * ******************************************************/
-
+void init_rsiPlatform(void);
 void rsi_hal_board_init(void);
 void rsi_switch_to_high_clk_freq(void);
 void rsi_hal_intr_config(void (*rsi_interrupt_handler)(void));
