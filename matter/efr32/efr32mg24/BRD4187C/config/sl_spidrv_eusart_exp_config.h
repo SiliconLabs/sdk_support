@@ -70,6 +70,8 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,SCLK,(CS)> SL_SPIDRV_EUSART_EXP
 // $[EUSART_SL_SPIDRV_EUSART_EXP]
+#define MY_USART EUSART1
+
 #define SL_SPIDRV_EUSART_EXP_PERIPHERAL          EUSART1
 #define SL_SPIDRV_EUSART_EXP_PERIPHERAL_NO       1
 

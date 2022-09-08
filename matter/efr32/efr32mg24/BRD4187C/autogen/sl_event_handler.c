@@ -19,6 +19,7 @@
 #include "sl_sleeptimer.h"
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
+#include "sl_spidrv_instances.h"
 #endif // CONFIG_ENABLE_UART
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"

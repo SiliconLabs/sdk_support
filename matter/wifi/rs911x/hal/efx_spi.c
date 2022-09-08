@@ -47,11 +47,16 @@
 #include "sl_device_init_dpll.h"
 #include "sl_device_init_hfxo.h"
 
+StaticSemaphore_t xEfxSpiIntfSemaBuffer;
 static SemaphoreHandle_t spi_sem;
 
 #if defined(EFR32MG12)
+#include "sl_spidrv_exp_config.h"
 extern SPIDRV_Handle_t sl_spidrv_exp_handle;
-#elif defined(EFR32MG24)
+#endif
+
+#if defined(EFR32MG24)
+#include "sl_spidrv_eusart_exp_config.h"
 extern SPIDRV_Handle_t sl_spidrv_eusart_exp_handle;
 #endif
 
@@ -63,34 +68,43 @@ static uint32_t dummy_data; /* Used for DMA - when results don't matter */
 extern void rsi_gpio_irq_cb(uint8_t irqnum);
 //#define RS911X_USE_LDMA
 
-/*
- * Deal with the PINS that are not associated with SPI -
- * Ie. RESET, Wakeup
- */
+/********************************************************
+ * @fn   sl_wfx_host_gpio_init(void)
+ * @brief
+ *        Deal with the PINS that are not associated with SPI -
+ *        Ie. RESET, Wakeup
+ * @return 
+ *        None
+ **********************************************************/
 void sl_wfx_host_gpio_init(void)
 {
   // Enable GPIO clock.
   CMU_ClockEnable(cmuClock_GPIO, true);
 
-  GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, 1);
-  GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, 0);
+  GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, PINOUT_SET);
+  GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, PINOUT_CLEAR);
 
   CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
 
   // Set up interrupt based callback function - trigger on both edges.
   GPIOINT_Init();
-  GPIO_PinModeSet(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, gpioModeInputPull, 0);
+  GPIO_PinModeSet(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, gpioModeInputPull, PINOUT_CLEAR);
   GPIO_ExtIntConfig(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin, SL_WFX_HOST_PINOUT_SPI_IRQ, true, false, true);
   GPIOINT_CallbackRegister(SL_WFX_HOST_PINOUT_SPI_IRQ, rsi_gpio_irq_cb);
   GPIO_IntDisable(1 << SL_WFX_HOST_PINOUT_SPI_IRQ); /* Will be enabled by RSI */
 
   // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
-  NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
-  NVIC_SetPriority(GPIO_ODD_IRQn, 5);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, WFX_SPI_NVIC_PRIORITY);
+  NVIC_SetPriority(GPIO_ODD_IRQn, WFX_SPI_NVIC_PRIORITY);
 }
-/*
- * To reset the WiFi CHIP
- */
+
+/*****************************************************************
+ * @fn  void sl_wfx_host_reset_chip(void)
+ * @brief
+ *      To reset the WiFi CHIP
+ * @return 
+ *      None
+ ****************************************************************/
 void sl_wfx_host_reset_chip(void)
 {
   // Pull it low for at least 1 ms to issue a reset sequence
@@ -105,28 +119,54 @@ void sl_wfx_host_reset_chip(void)
   // Delay for 3ms
   vTaskDelay(pdMS_TO_TICKS(3));
 }
+
+/*****************************************************************
+ * @fn   void rsi_hal_board_init(void)
+ * @brief
+ *       Initialize the board
+ * @return 
+ *       None
+ ****************************************************************/
 void rsi_hal_board_init(void)
 {
-  spi_sem = xSemaphoreCreateBinary();
+  spi_sem = xSemaphoreCreateBinaryStatic(&xEfxSpiIntfSemaBuffer);
   xSemaphoreGive(spi_sem);
 
   /* Assign DMA channel from Handle*/
 #if defined(EFR32MG12)
+  /* MG12 + rs9116 combination uses USART driver */
   tx_dma_channel= sl_spidrv_exp_handle->txDMACh;
   rx_dma_channel= sl_spidrv_exp_handle->rxDMACh;
 
 #elif defined(EFR32MG24)
+  /* MG24 + rs9116 combination uses EUSART driver */
   tx_dma_channel= sl_spidrv_eusart_exp_handle->txDMACh;
   rx_dma_channel= sl_spidrv_eusart_exp_handle->rxDMACh;
 #endif
 
+  /* GPIO INIT of MG12 & MG24 : Reset, Wakeup, Interrupt */
   WFX_RSI_LOG("RSI_HAL: init GPIO");
   sl_wfx_host_gpio_init();
+
+  /* Reset of Wifi chip */
   WFX_RSI_LOG("RSI_HAL: Reset Wifi");
   sl_wfx_host_reset_chip ();
   WFX_RSI_LOG("RSI_HAL: Init done");
 }
 
+/*****************************************************************************
+*@fn static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
+*
+*@brief
+*    complete dma
+*
+* @param[in] channel:
+* @param[in] sequenceNO: sequence number
+* @param[in] userParam :user parameter
+*
+* @return
+*    None
+******************************************************************************/
 static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
@@ -143,11 +183,17 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
   return true;
 }
 
-/*
- * RX buf was specified
- * TX buf was not specified by caller - so we
- * transmit dummy data (typically 0
- */
+/*************************************************************
+ * @fn   static void receiveDMA(uint8_t *rx_buf, uint16_t xlen)
+ * @brief
+ *       RX buf was specified
+ *       TX buf was not specified by caller - so we
+ *       transmit dummy data (typically 0)
+ * @param[in] rx_buf:
+ * @param[in] xlen:
+ * @return
+ *        None
+ *******************************************************************/
 static void receiveDMA(uint8_t *rx_buf, uint16_t xlen)
 {
   /*
@@ -176,6 +222,19 @@ static void receiveDMA(uint8_t *rx_buf, uint16_t xlen)
                           NULL,
                           NULL);
 }
+
+/*****************************************************************************
+*@fn static void transmitDMA(void *rx_buf, void *tx_buf, uint8_t xlen)
+*@brief
+*    we have a tx_buf. There are some instances where
+*    a rx_buf is not specifed. If one is specified then
+*    the caller wants results (auto increment src)
+* @param[in] rx_buf: 
+* @param[in] tx_buf:
+* @param[in] xlen:
+* @return
+*     None
+******************************************************************************/
 static void transmitDMA(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
 {
   void *buf;
@@ -187,7 +246,7 @@ static void transmitDMA(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
      * TODO - the caller specified 8/32 bit - we should use this
      * instead of dmadrvDataSize1 always
      */
-  if (rx_buf == (uint8_t *)0) {
+  if (rx_buf == NULL) {
     buf    = &dummy_data;
     srcinc = false;
   } else {
@@ -216,18 +275,27 @@ static void transmitDMA(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
                           NULL,
                           NULL);
 }
-/*
- * Do a SPI transfer - Mode is 8/16 bit - But every 8 bit is aligned
- */
+
+/*********************************************************************
+ * @fn   int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
+ * @brief
+ *       Do a SPI transfer - Mode is 8/16 bit - But every 8 bit is aligned
+ * @param[in] tx_buf:
+ * @param[in] rx_buf:
+ * @param[in] xlen:
+ * @param[in] mode:
+ * @return
+ *        None
+ **************************************************************************/
 int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
 {
   // WFX_RSI_LOG ("SPI: Xfer: tx=%x,rx=%x,len=%d",(uint32_t)tx_buf, (uint32_t)rx_buf, xlen);
-  if (xlen > 0) {
+  if (xlen > MIN_XLEN) {
     MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) != pdTRUE) {
       return RSI_FALSE;
     }
-    if (tx_buf == (void *)0) {
+    if (tx_buf == NULL) {
       receiveDMA(rx_buf, xlen);
     } else {
       transmitDMA(rx_buf, tx_buf, xlen);
