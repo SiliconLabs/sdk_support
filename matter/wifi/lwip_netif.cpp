@@ -9,8 +9,8 @@
 #include "em_ldma.h"
 #include "em_usart.h"
 
-#include "wifi_config.h"
 #include "wfx_host_events.h"
+#include "wifi_config.h"
 
 #include "AppConfig.h"
 #include "dhcp_client.h"
@@ -29,8 +29,7 @@ static struct netif sta_netif;
 static struct netif ap_netif;
 #endif
 
-static void netif_config(struct netif *sta_if, struct netif *ap_if)
-{
+static void netif_config(struct netif *sta_if, struct netif *ap_if) {
   if (sta_if != NULL) {
 #if LWIP_IPV4
     ip_addr_t sta_ipaddr;
@@ -48,13 +47,10 @@ static void netif_config(struct netif *sta_if, struct netif *ap_if)
     /* Add station interfaces */
     netif_add(sta_if,
 #if LWIP_IPV4
-              (const ip4_addr_t *)&sta_ipaddr,
-              (const ip4_addr_t *)&sta_netmask,
+              (const ip4_addr_t *)&sta_ipaddr, (const ip4_addr_t *)&sta_netmask,
               (const ip4_addr_t *)&sta_gw,
 #endif /* LWIP_IPV4 */
-              NULL,
-              &sta_ethernetif_init,
-              &tcpip_input);
+              NULL, &sta_ethernetif_init, &tcpip_input);
 
     /* Registers the default network interface */
     netif_set_default(sta_if);
@@ -67,9 +63,10 @@ static void netif_config(struct netif *sta_if, struct netif *ap_if)
     // ip_addr_t ap_gw;
     // /* Initialize the SoftAP information */
     // IP_ADDR4(&ap_ipaddr, ap_ip_addr0, ap_ip_addr1, ap_ip_addr2, ap_ip_addr3);
-    // IP_ADDR4(&ap_netmask, ap_netmask_addr0, ap_netmask_addr1, ap_netmask_addr2, ap_netmask_addr3);
-    // IP_ADDR4(&ap_gw, ap_gw_addr0, ap_gw_addr1, ap_gw_addr2, ap_gw_addr3);
-    // netif_add(apNetif, &ap_ipaddr, &ap_netmask, &ap_gw, NULL, &ap_ethernetif_init, &ethernet_input);
+    // IP_ADDR4(&ap_netmask, ap_netmask_addr0, ap_netmask_addr1,
+    // ap_netmask_addr2, ap_netmask_addr3); IP_ADDR4(&ap_gw, ap_gw_addr0,
+    // ap_gw_addr1, ap_gw_addr2, ap_gw_addr3); netif_add(apNetif, &ap_ipaddr,
+    // &ap_netmask, &ap_gw, NULL, &ap_ethernetif_init, &ethernet_input);
   }
 #endif /* SL_WFX_CONFIG_SOFTAP */
 }
@@ -77,8 +74,7 @@ static void netif_config(struct netif *sta_if, struct netif *ap_if)
 /****************************************************************************
  * Set station link status to up.
  *****************************************************************************/
-void wfx_lwip_set_sta_link_up(void)
-{
+void wfx_lwip_set_sta_link_up(void) {
   netifapi_netif_set_up(&sta_netif);
   netifapi_netif_set_link_up(&sta_netif);
 #if LWIP_IPV4
@@ -96,8 +92,7 @@ void wfx_lwip_set_sta_link_up(void)
 /***************************************************************************
  * Set station link status to down.
  *****************************************************************************/
-void wfx_lwip_set_sta_link_down(void)
-{
+void wfx_lwip_set_sta_link_down(void) {
 #if LWIP_IPV4
   dhcpclient_set_link_state(0);
 #endif /* LWIP_IPV4 */
@@ -105,13 +100,11 @@ void wfx_lwip_set_sta_link_down(void)
   netifapi_netif_set_down(&sta_netif);
 }
 
-void wfx_lwip_start(void)
-{
+void wfx_lwip_start(void) {
   /* Initialize the LwIP stack */
   netif_config(&sta_netif, NULL);
 }
-struct netif *wfx_get_netif(sl_wfx_interface_t interface)
-{
+struct netif *wfx_get_netif(sl_wfx_interface_t interface) {
   if (interface == SL_WFX_STA_INTERFACE) {
     return &sta_netif;
   }

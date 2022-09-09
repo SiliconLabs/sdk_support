@@ -32,16 +32,16 @@
 #include "task.h"
 #endif
 
-#include "wifi_config.h"
 #include "wfx_host_events.h"
+#include "wifi_config.h"
 #ifdef WF200_WIFI
 #include "sl_wfx.h"
 #endif
 /* LwIP includes. */
 #include "ethernetif.h"
+#include "lwip/ethip6.h"
 #include "lwip/timeouts.h"
 #include "netif/etharp.h"
-#include "lwip/ethip6.h"
 
 #ifndef EFR32_LOG
 extern "C" {
@@ -69,8 +69,7 @@ void efr32Log(const char *aFormat, ...);
  * @return
  *    None
  ******************************************************************************/
-static void low_level_init(struct netif *netif)
-{
+static void low_level_init(struct netif *netif) {
   /* set netif MAC hardware address length */
   netif->hwaddr_len = ETH_HWADDR_LEN;
 
@@ -99,8 +98,7 @@ static void low_level_init(struct netif *netif)
 /*
  * Make PBUF out of a linear buffer - that can be fed into lwip
  */
-static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
-{
+static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len) {
   struct pbuf *p, *q;
   uint32_t bufferoffset;
 
@@ -109,8 +107,8 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
   if (len < 60)
     len = 60;
   /* We allocate a pbuf chain of pbufs from the Lwip buffer pool
-         * and copy the data to the pbuf chain
-         */
+   * and copy the data to the pbuf chain
+   */
   if ((p = pbuf_alloc(PBUF_RAW, len, PBUF_POOL)) != (struct pbuf *)0) {
     for (q = p, bufferoffset = 0; q != NULL; q = q->next) {
       memcpy((uint8_t *)q->payload, (uint8_t *)b + bufferoffset, q->len);
@@ -118,23 +116,11 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
       // ASSERT(bufferoffset <= len);
     }
 #if EFR32_RAW_LWIP_DEBUG
-    EFR32_LOG("%s: offset:%d, [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], type: %02x%02x",
-              __func__,
-              bufferoffset,
-              b[0],
-              b[1],
-              b[2],
-              b[3],
-              b[4],
-              b[5],
-              b[6],
-              b[7],
-              b[8],
-              b[9],
-              b[10],
-              b[11],
-              b[12],
-              b[13]);
+    EFR32_LOG("%s: offset:%d, "
+              "[%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], "
+              "type: %02x%02x",
+              __func__, bufferoffset, b[0], b[1], b[2], b[3], b[4], b[5], b[6],
+              b[7], b[8], b[9], b[10], b[11], b[12], b[13]);
 #endif /* EFR32_RAW_LWIP_DEBUG */
     if (netif->input(p, netif) != ERR_OK) {
       pbuf_free(p);
@@ -156,8 +142,7 @@ static void low_level_input(struct netif *netif, uint8_t *b, uint16_t len)
  *    ERR_OK if successful
  ******************************************************************************/
 #ifdef WF200_WIFI
-static err_t low_level_output(struct netif *netif, struct pbuf *p)
-{
+static err_t low_level_output(struct netif *netif, struct pbuf *p) {
   struct pbuf *q;
   sl_wfx_send_frame_req_t *tx_buffer;
   uint8_t *buffer;
@@ -175,9 +160,12 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     padding = 0;
   }
 
-  asize = SL_WFX_ROUND_UP(framelength + padding, 64) + sizeof(sl_wfx_send_frame_req_t);
-  // 12 is size of other data in buffer struct, user shouldn't have to care about this?
-  if (sl_wfx_host_allocate_buffer((void **)&tx_buffer, SL_WFX_TX_FRAME_BUFFER, asize) != SL_STATUS_OK) {
+  asize = SL_WFX_ROUND_UP(framelength + padding, 64) +
+          sizeof(sl_wfx_send_frame_req_t);
+  // 12 is size of other data in buffer struct, user shouldn't have to care
+  // about this?
+  if (sl_wfx_host_allocate_buffer((void **)&tx_buffer, SL_WFX_TX_FRAME_BUFFER,
+                                  asize) != SL_STATUS_OK) {
     EFR32_LOG("*ERR*EN-Out: No mem frame len=%d", framelength);
     return ERR_MEM;
   }
@@ -185,7 +173,8 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   /* copy frame from pbufs to driver buffers */
   for (q = p, bufferoffset = 0; q != NULL; q = q->next) {
     /* Get bytes in current lwIP buffer */
-    memcpy((uint8_t *)((uint8_t *)buffer + bufferoffset), (uint8_t *)((uint8_t *)q->payload), q->len);
+    memcpy((uint8_t *)((uint8_t *)buffer + bufferoffset),
+           (uint8_t *)((uint8_t *)q->payload), q->len);
     bufferoffset += q->len;
   }
   /* No requirement to do this - but we should for security */
@@ -194,12 +183,13 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
     framelength += padding;
   }
   /* transmit */
-  int i  = 0;
+  int i = 0;
   result = SL_STATUS_FAIL;
 
-  //EFR32_LOG ("WF200: Out %d", (int)framelength);
+  // EFR32_LOG ("WF200: Out %d", (int)framelength);
   while ((result != SL_STATUS_OK) && (i++ < 10)) {
-    result = sl_wfx_send_ethernet_frame(tx_buffer, framelength, SL_WFX_STA_INTERFACE, 0);
+    result = sl_wfx_send_ethernet_frame(tx_buffer, framelength,
+                                        SL_WFX_STA_INTERFACE, 0);
   }
   sl_wfx_host_free_buffer(tx_buffer, SL_WFX_TX_FRAME_BUFFER);
 
@@ -220,33 +210,32 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
  * @return
  *    None
  ******************************************************************************/
-void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer)
-{
+void sl_wfx_host_received_frame_callback(sl_wfx_received_ind_t *rx_buffer) {
   struct netif *netif;
 
   /* Check packet interface to send to AP or STA interface */
-  if ((rx_buffer->header.info & SL_WFX_MSG_INFO_INTERFACE_MASK)
-      == (SL_WFX_STA_INTERFACE << SL_WFX_MSG_INFO_INTERFACE_OFFSET)) {
+  if ((rx_buffer->header.info & SL_WFX_MSG_INFO_INTERFACE_MASK) ==
+      (SL_WFX_STA_INTERFACE << SL_WFX_MSG_INFO_INTERFACE_OFFSET)) {
     /* Send to station interface */
     if ((netif = wfx_get_netif(SL_WFX_STA_INTERFACE)) != NULL) {
       uint8_t *buffer;
       uint16_t len;
 
-      len    = rx_buffer->body.frame_length;
-      buffer = (uint8_t *)&(rx_buffer->body.frame[rx_buffer->body.frame_padding]);
-      //EFR32_LOG ("WF200: In %d", (int)len);
+      len = rx_buffer->body.frame_length;
+      buffer =
+          (uint8_t *)&(rx_buffer->body.frame[rx_buffer->body.frame_padding]);
+      // EFR32_LOG ("WF200: In %d", (int)len);
       low_level_input(netif, buffer, len);
     } else {
-      //EFR32_LOG ("WF200: NO-INTF");
+      // EFR32_LOG ("WF200: NO-INTF");
     }
   } else {
-    //EFR32_LOG ("WF200: Invalid frame IN");
+    // EFR32_LOG ("WF200: Invalid frame IN");
   }
 }
 #else /* For RS911x - using LWIP */
 static SemaphoreHandle_t ethout_sem;
-static err_t low_level_output(struct netif *netif, struct pbuf *p)
-{
+static err_t low_level_output(struct netif *netif, struct pbuf *p) {
   void *rsipkt;
   struct pbuf *q;
   uint16_t framelength;
@@ -254,8 +243,9 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   if (xSemaphoreTake(ethout_sem, portMAX_DELAY) != pdTRUE) {
     return ERR_IF;
   }
-  //EFR32_LOG ("EN-RSI: Output");
-  if ((netif->flags & (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) != (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) {
+  // EFR32_LOG ("EN-RSI: Output");
+  if ((netif->flags & (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) !=
+      (NETIF_FLAG_LINK_UP | NETIF_FLAG_UP)) {
     EFR32_LOG("EN-RSI:NOT UP");
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
@@ -270,45 +260,35 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
 
 #if EFR32_RAW_LWIP_DEBUG
   uint8_t *b = (uint8_t *)p->payload;
-  EFR32_LOG("%s: buffer: [%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], type: %02x%02x",
-            __func__,
-            b[0],
-            b[1],
-            b[2],
-            b[3],
-            b[4],
-            b[5],
-            b[6],
-            b[7],
-            b[8],
-            b[9],
-            b[10],
-            b[11],
-            b[12],
-            b[13]);
+  EFR32_LOG("%s: buffer: "
+            "[%02x:%02x:%02x:%02x:%02x:%02x][%02x:%02x:%02x:%02x:%02x:%02x], "
+            "type: %02x%02x",
+            __func__, b[0], b[1], b[2], b[3], b[4], b[5], b[6], b[7], b[8],
+            b[9], b[10], b[11], b[12], b[13]);
 #endif /* EFR32_RAW_LWIP_DEBUG */
   for (q = p, framelength = 0; q != NULL; q = q->next) {
-    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len, framelength);
+    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(q->payload), (uint16_t)q->len,
+                         framelength);
     framelength += q->len;
   }
   if (framelength < 60) {
     /* Add junk data to the end */
-    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), 60 - framelength, framelength);
+    wfx_rsi_pkt_add_data(rsipkt, (uint8_t *)(p->payload), 60 - framelength,
+                         framelength);
   }
-  //EFR32_LOG ("EN-RSI: Sending %d", framelength);
+  // EFR32_LOG ("EN-RSI: Sending %d", framelength);
   if (wfx_rsi_send_data(rsipkt, framelength)) {
     EFR32_LOG("*ERR*EN-RSI:Send fail");
     xSemaphoreGive(ethout_sem);
     return ERR_IF;
   }
 
-  //EFR32_LOG ("EN-RSI:Xmit %d", framelength);
+  // EFR32_LOG ("EN-RSI:Xmit %d", framelength);
   xSemaphoreGive(ethout_sem);
 
   return ERR_OK;
 }
-void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
-{
+void wfx_host_received_sta_frame_cb(uint8_t *buf, int len) {
   struct netif *ifp;
 
   if ((ifp = wfx_get_netif(SL_WFX_STA_INTERFACE)) != (struct netif *)0) {
@@ -318,8 +298,7 @@ void wfx_host_received_sta_frame_cb(uint8_t *buf, int len)
 
 #endif /* RS911x - with LWIP */
 
-err_t sta_ethernetif_init(struct netif *netif)
-{
+err_t sta_ethernetif_init(struct netif *netif) {
   LWIP_ASSERT("netif != NULL", (netif != NULL));
 
   /* Set the netif name to identify the interface */
@@ -336,7 +315,7 @@ err_t sta_ethernetif_init(struct netif *netif)
 
   /* initialize the hardware */
   low_level_init(netif);
-  //wfx_SetStationNetif (netif); /* I think netif already points to station */
+  // wfx_SetStationNetif (netif); /* I think netif already points to station */
 #ifndef WF200_WIFI
   /* Need single output only */
   ethout_sem = xSemaphoreCreateBinary();
