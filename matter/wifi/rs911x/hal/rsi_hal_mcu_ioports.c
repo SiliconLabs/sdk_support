@@ -41,10 +41,6 @@
 #include "rsi_driver.h"
 #include "rsi_board_configuration.h"
 
-//#include "rsi_driver.h"
-//#include "em_gpio.h"
-//#include "em_cmu.h"
-//#include "rsi_board_configuration.h"
 
 /*===========================================================*/
 /**
@@ -68,14 +64,9 @@ void rsi_hal_config_gpio(uint8_t gpio_number, uint8_t mode, uint8_t value)
 
   //WFX_RSI_LOG ("RSI: CFG GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
-    //case RSI_HAL_SLEEP_CONFIRM_PIN:     GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModeWiredOrPullDown, 1); break;
-#ifndef LOGGING_STATS
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: GPIO_PinModeSet(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin, gpioModeWiredOrPullDown, 0); break;
-#endif
     case RSI_HAL_RESET_PIN:
-      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, 1);
+      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, PINOUT_SET);
       break;
-      //     case RSI_HAL_LP_SLEEP_CONFIRM_PIN: break;
     default:
       break;
   }
@@ -94,16 +85,9 @@ void rsi_hal_set_gpio(uint8_t gpio_number)
 {
   //WFX_RSI_LOG ("RSI: SET GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
-    //case RSI_HAL_SLEEP_CONFIRM_PIN:     GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModeWiredOrPullDown, 1); break;
-#ifndef LOGGING_STATS
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: GPIO_PinModeSet(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin, gpioModeInput, 1); break;
-#else
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: GPIO_PinModeSet(LOGGING_WAKE_INDICATOR_PIN.port, LOGGING_WAKE_INDICATOR_PIN.pin, gpioModeInput, 1); break;
-#endif
     case RSI_HAL_RESET_PIN:
-      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModeWiredOrPullDown, 1);
+      GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModeWiredOrPullDown, PINOUT_SET);
       break;
-      //    case RSI_HAL_LP_SLEEP_CONFIRM_PIN: break;
     default:
       break;
   }
@@ -122,17 +106,10 @@ uint8_t rsi_hal_get_gpio(uint8_t gpio_number)
 {
   //WFX_RSI_LOG ("RSI: GET GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
-    //case RSI_HAL_SLEEP_CONFIRM_PIN:     return GPIO_PinInGet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin);
-#ifndef LOGGING_STATS
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: return GPIO_PinInGet(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin);
-#else
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: return GPIO_PinInGet(LOGGING_WAKE_INDICATOR_PIN.port, LOGGING_WAKE_INDICATOR_PIN.pin);
-#endif
     case RSI_HAL_RESET_PIN:
       return GPIO_PinInGet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin);
     case RSI_HAL_MODULE_INTERRUPT_PIN:
       return GPIO_PinInGet(WFX_INTERRUPT_PIN.port, WFX_INTERRUPT_PIN.pin);
-      //    case RSI_HAL_LP_SLEEP_CONFIRM_PIN: break;
     default:
       break;
   }
@@ -153,15 +130,8 @@ void rsi_hal_clear_gpio(uint8_t gpio_number)
 {
   //WFX_RSI_LOG ("RSI: CLR GPIO: 0x%x", gpio_number);
   switch (gpio_number) {
-    //case RSI_HAL_SLEEP_CONFIRM_PIN:     return GPIO_PinOutClear(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin);
-#ifndef LOGGING_STATS
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: return GPIO_PinOutClear(WAKE_INDICATOR_PIN.port, WAKE_INDICATOR_PIN.pin);
-#else
-    //case RSI_HAL_WAKEUP_INDICATION_PIN: return GPIO_PinOutClear(LOGGING_WAKE_INDICATOR_PIN.port, LOGGING_WAKE_INDICATOR_PIN.pin);
-#endif
     case RSI_HAL_RESET_PIN:
       return GPIO_PinOutClear(WFX_RESET_PIN.port, WFX_RESET_PIN.pin);
-      //    case RSI_HAL_LP_SLEEP_CONFIRM_PIN: break;
     default:
       break;
   }

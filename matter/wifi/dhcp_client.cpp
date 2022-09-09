@@ -38,6 +38,7 @@
 #include "AppConfig.h"
 
 #define MAX_DHCP_TRIES 4
+#define NETIF_IPV4_ADDRESS(X, Y) ((X >> (8 * Y)) && 0xFF)
 
 /* Station IP address */
 uint8_t sta_ip_addr0      = STA_IP_ADDR0_DEFAULT;
@@ -57,9 +58,11 @@ uint8_t sta_gw_addr3      = STA_GW_ADDR3_DEFAULT;
 static volatile uint8_t dhcp_state = DHCP_OFF;
 
 /*****************************************************************************
+ * @fn  void dhcpclient_set_link_state(int link_up)
+ * @brief
  * Notify DHCP client task about the wifi status
- *
  * @param link_up link status
+ * @return None
  ******************************************************************************/
 void dhcpclient_set_link_state(int link_up)
 {
@@ -72,9 +75,12 @@ void dhcpclient_set_link_state(int link_up)
   }
 }
 
-/*
+/**********************************************************************************
+ * @fn  uint8_t dhcpclient_poll(void *arg)
+ * @brief
  * Don't need a task here. We get polled every 250ms
- */
+ * @return  None
+ ************************************************************************************/
 uint8_t dhcpclient_poll(void *arg)
 {
   struct netif *netif = (struct netif *)arg;
@@ -97,11 +103,12 @@ uint8_t dhcpclient_poll(void *arg)
       if (dhcp_supplied_address(netif)) {
         dhcp_state = DHCP_ADDRESS_ASSIGNED;
 
+        uint64_t addr = netif->ip_addr.u_addr.ip4.addr;
         EFR32_LOG("DHCP IP: %d.%d.%d.%d",
-                  (netif->ip_addr.u_addr.ip4.addr & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 8) & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 16) & 0xff),
-                  ((netif->ip_addr.u_addr.ip4.addr >> 24) & 0xff));
+                  NETIF_IPV4_ADDRESS(addr, 0),
+                  NETIF_IPV4_ADDRESS(addr, 1),
+                  NETIF_IPV4_ADDRESS(addr, 2),
+                  NETIF_IPV4_ADDRESS(addr, 3));
       } else {
         dhcp = (struct dhcp *)netif_get_client_data(netif, LWIP_NETIF_CLIENT_DATA_INDEX_DHCP);
 
