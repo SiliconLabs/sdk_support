@@ -50,7 +50,11 @@
 
 #include "dmadrv.h"
 #include "em_cmu.h"
+#include "em_bus.h"
+#include "em_gpio.h"
+#include "em_ldma.h"
 #include "em_usart.h"
+#include "spidrv.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -63,17 +67,33 @@
 #endif
 #include "AppConfig.h"
 
+#include "gpiointerrupt.h"
+
+#include "sl_wfx_board.h"
+#include "sl_wfx_host.h"
+#include "sl_wfx_task.h"
+#include "wfx_host_events.h"
+#include "sl_spidrv_exp_config.h"
+
+extern SPIDRV_Handle_t sl_spidrv_exp_handle;
+
 #define USART SL_WFX_HOST_PINOUT_SPI_PERIPHERAL
 
 StaticSemaphore_t xEfrSpiSemaBuffer;
 static SemaphoreHandle_t spi_sem;
+
 static unsigned int tx_dma_channel;
 static unsigned int rx_dma_channel;
+
 static uint32_t dummy_rx_data;
 static uint32_t dummy_tx_data;
 static bool spi_enabled = false;
 
-uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
+#if defined(EFR32MG12)
+uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ;
+#elif defined(EFR32MG24)
+uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN; // SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN;
+#endif
 
 #define PIN_OUT_SET	    	1
 #define PIN_OUT_CLEAR		0
@@ -87,72 +107,29 @@ uint8_t wirq_irq_nb = SL_WFX_HOST_PINOUT_SPI_IRQ; // SL_WFX_HOST_PINOUT_SPI_WIRQ
  *****************************************************************************/
 sl_status_t sl_wfx_host_init_bus(void)
 {
-  // Initialize and enable the USART
-  USART_InitSync_TypeDef usartInit = USART_INITSYNC_DEFAULT;
+  spi_enabled = true;
 
-  EFR32_LOG("WIFI: Spi Init");
-  spi_enabled        = true;
-  dummy_tx_data      = 0;
-  usartInit.msbf     = true;
-  usartInit.baudrate = 36000000u;
-#if defined(EFR32MG12)
-  CMU_ClockEnable(cmuClock_HFPER, true);
-#endif
-  CMU_ClockEnable(cmuClock_GPIO, true);
-  CMU_ClockEnable(MY_USART_CLOCK, true);
-  USART_InitSync(MY_USART, &usartInit);
-#if defined(EFR32MG12)
-  MY_USART->CTRL |= (1u << _USART_CTRL_SMSDELAY_SHIFT);
-  MY_USART->ROUTELOC0 =
-    (MY_USART->ROUTELOC0 & ~(_USART_ROUTELOC0_TXLOC_MASK | _USART_ROUTELOC0_RXLOC_MASK | _USART_ROUTELOC0_CLKLOC_MASK))
-    | (SL_WFX_HOST_PINOUT_SPI_TX_LOC << _USART_ROUTELOC0_TXLOC_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_RX_LOC << _USART_ROUTELOC0_RXLOC_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CLK_LOC << _USART_ROUTELOC0_CLKLOC_SHIFT);
+  /* Assign allocated DMA channel */
+  tx_dma_channel= sl_spidrv_exp_handle->txDMACh;
+  rx_dma_channel= sl_spidrv_exp_handle->rxDMACh;
 
-  MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
-  GPIO_DriveStrengthSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, gpioDriveStrengthStrongAlternateStrong);
-
-#elif defined(EFR32MG24) || defined(EFR32MG21) /* Series 2 */
   /*
-     * Route USART0 RX, TX, and CLK to the specified pins.  Note that CS is
-     * not controlled by USART0 so there is no write to the corresponding
-     * USARTROUTE register to do this.
-     */
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].RXROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_RX_PORT << _GPIO_USART_RXROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_RX_PIN << _GPIO_USART_RXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].TXROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_TX_PORT << _GPIO_USART_TXROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_TX_PIN << _GPIO_USART_TXROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].CLKROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_CLK_PORT << _GPIO_USART_CLKROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CLK_PIN << _GPIO_USART_CLKROUTE_PIN_SHIFT);
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].CSROUTE =
-    (SL_WFX_HOST_PINOUT_SPI_CS_PORT << _GPIO_USART_CSROUTE_PORT_SHIFT)
-    | (SL_WFX_HOST_PINOUT_SPI_CS_PIN << _GPIO_USART_CSROUTE_PIN_SHIFT);
-
-  // Enable USART interface pins
-  GPIO->USARTROUTE[SL_WFX_HOST_PINOUT_SPI_PERIPHERAL_NO].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | // MISO
-                                                                   GPIO_USART_ROUTEEN_TXPEN | // MOSI
-                                                                   GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
-
-#else
-#error "EFR32 type not supported"
+   * Route EUSART1 MOSI, MISO, and SCLK to the specified pins.  CS is
+   * not controlled by EUSART so there is no write to the corresponding
+   * EUSARTROUTE register to do this.
+   */
+#if defined(EFR32MG12)
+  MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN;
 #endif
-  /* Configure CS pin as output and drive strength to inactive high */
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull,PIN_OUT_SET);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PIN_OUT_CLEAR);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, PIN_OUT_CLEAR);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, PIN_OUT_CLEAR);
+
+#if defined(EFR32MG24)
+  GPIO->USARTROUTE[0].ROUTEEN = GPIO_USART_ROUTEEN_RXPEN | // MISO
+                                GPIO_USART_ROUTEEN_TXPEN | // MOSI
+                                GPIO_USART_ROUTEEN_CLKPEN | GPIO_USART_ROUTEEN_CSPEN;
+#endif
 
   spi_sem = xSemaphoreCreateBinaryStatic(&xEfrSpiSemaBuffer);
   xSemaphoreGive(spi_sem);
-
-  DMADRV_Init();
-  DMADRV_AllocateChannel(&tx_dma_channel, NULL);
-  DMADRV_AllocateChannel(&rx_dma_channel, NULL);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN, gpioModePushPull, PIN_OUT_SET);
-  MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
 
   return SL_STATUS_OK;
 }
@@ -186,7 +163,7 @@ sl_status_t sl_wfx_host_deinit_bus(void)
  *****************************************************************************/
 sl_status_t sl_wfx_host_spi_cs_assert()
 {
-  GPIO_PinOutClear(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
+  GPIO_PinOutClear(SL_SPIDRV_EXP_CS_PORT, SL_SPIDRV_EXP_CS_PIN);
   return SL_STATUS_OK;
 }
 
@@ -199,7 +176,7 @@ sl_status_t sl_wfx_host_spi_cs_assert()
  *****************************************************************************/
 sl_status_t sl_wfx_host_spi_cs_deassert()
 {
-  GPIO_PinOutSet(SL_WFX_HOST_PINOUT_SPI_CS_PORT, SL_WFX_HOST_PINOUT_SPI_CS_PIN);
+  GPIO_PinOutSet(SL_SPIDRV_EXP_CS_PORT, SL_SPIDRV_EXP_CS_PIN);
   return SL_STATUS_OK;
 }
 
@@ -438,3 +415,60 @@ sl_status_t sl_wfx_host_disable_spi(void)
 }
 
 #endif
+
+/*
+ * IRQ for SPI callback
+ * Clear the Interrupt and wake up the task that
+ * handles the actions of the interrupt (typically - wfx_bus_task ())
+ */
+static void sl_wfx_spi_wakeup_irq_callback(uint8_t irqNumber)
+{
+  BaseType_t bus_task_woken;
+  uint32_t interrupt_mask;
+
+  if (irqNumber != wirq_irq_nb)
+    return;
+  // Get and clear all pending GPIO interrupts
+  interrupt_mask = GPIO_IntGet();
+  GPIO_IntClear(interrupt_mask);
+  bus_task_woken = pdFALSE;
+  xSemaphoreGiveFromISR(wfx_wakeup_sem, &bus_task_woken);
+  vTaskNotifyGiveFromISR(wfx_bus_task_handle, &bus_task_woken);
+  portYIELD_FROM_ISR(bus_task_woken);
+}
+
+/****************************************************************************
+ * Init some actions pins to the WF-200 expansion board
+ *****************************************************************************/
+void sl_wfx_host_gpio_init(void)
+{
+  EFR32_LOG("WIFI: GPIO Init:IRQ=%d", wirq_irq_nb);
+  // Enable GPIO clock.
+  CMU_ClockEnable(cmuClock_GPIO, true);
+
+  // Configure WF200 reset pin.
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_RESET_PORT, SL_WFX_HOST_PINOUT_RESET_PIN, gpioModePushPull, 0);
+  // Configure WF200 WUP pin.
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_WUP_PORT, SL_WFX_HOST_PINOUT_WUP_PIN, gpioModePushPull, 0);
+
+  // GPIO used as IRQ.
+  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT, SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN, gpioModeInputPull, 0);
+  CMU_OscillatorEnable(cmuOsc_LFXO, true, true);
+
+  // Set up interrupt based callback function - trigger on both edges.
+  GPIOINT_Init();
+  GPIO_ExtIntConfig(SL_WFX_HOST_PINOUT_SPI_WIRQ_PORT,
+                    SL_WFX_HOST_PINOUT_SPI_WIRQ_PIN,
+                    wirq_irq_nb,
+                    true,
+                    false,
+                    false); /* Don't enable it */
+
+  GPIOINT_CallbackRegister(wirq_irq_nb, sl_wfx_spi_wakeup_irq_callback);
+
+  // Change GPIO interrupt priority (FreeRTOS asserts unless this is done here!)
+  NVIC_ClearPendingIRQ(1 << wirq_irq_nb);
+  NVIC_SetPriority(GPIO_EVEN_IRQn, 5);
+  NVIC_SetPriority(GPIO_ODD_IRQn, 5);
+}
+

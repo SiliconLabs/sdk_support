@@ -25,7 +25,6 @@ wifi_sdk_dir = "${chip_root}/third_party/silabs/matter_support/matter/wifi"
         "${wifi_sdk_dir}/wfx_notify.cpp",
         "${wifi_sdk_dir}/wf200/sl_wfx_task.c",
         "${wifi_sdk_dir}/wf200/wf200_init.c",
-        "${wifi_sdk_dir}/wf200/efr_gpio.c",
         "${wifi_sdk_dir}/wf200/efr_spi.c",
         "${wifi_sdk_dir}/wf200/host_if.cpp",
      ]

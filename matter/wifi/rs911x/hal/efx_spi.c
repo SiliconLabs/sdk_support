@@ -29,6 +29,8 @@
 #elif defined(EFR32MG24)
 #include "em_eusart.h"
 #endif
+#include "spidrv.h"
+
 #include "gpiointerrupt.h"
 #include "sl_device_init_clocks.h"
 #include "sl_status.h"
@@ -47,117 +49,24 @@
 
 StaticSemaphore_t xEfxSpiIntfSemaBuffer;
 static SemaphoreHandle_t spi_sem;
-static unsigned int tx_dma_chan, rx_dma_chan;
+
+#if defined(EFR32MG12)
+#include "sl_spidrv_exp_config.h"
+extern SPIDRV_Handle_t sl_spidrv_exp_handle;
+#endif
+
+#if defined(EFR32MG24)
+#include "sl_spidrv_eusart_exp_config.h"
+extern SPIDRV_Handle_t sl_spidrv_eusart_exp_handle;
+#endif
+
+static unsigned int tx_dma_channel;
+static unsigned int rx_dma_channel;
+
 /*TODO -  FIX This - It belongs somewhere else depending on which USART is used */
 static uint32_t dummy_data; /* Used for DMA - when results don't matter */
 extern void rsi_gpio_irq_cb(uint8_t irqnum);
-
-/****************************************************************************
- * @fn    static void dma_init(void)
- * @brief  
- *        Initialize DMA
- * @return 
- *        None
- *****************************************************************************/
-static void dma_init(void)
-{
-  /* Note LDMA is init'd by DMADRV_Init */
-  DMADRV_Init();
-  DMADRV_AllocateChannel(&tx_dma_chan, NULL);
-  DMADRV_AllocateChannel(&rx_dma_chan, NULL);
-}
-
-/****************************************************************************
- * @fn   sl_wfx_host_init_bus(void)
- * @brief  
- *       Initialize SPI peripheral
- * @return
- *       None
- *****************************************************************************/
-void sl_wfx_host_init_bus(void)
-{
-  // Initialize and enable the USART
-#if defined(EFR32MG12)
-  USART_InitSync_TypeDef config = USART_INITSYNC_DEFAULT;
-
-  dummy_data          = 0;
-  config.master       = true;            // master mode
-  config.baudrate     = 10000000u;       // CLK freq is 1 MHz
-  config.autoCsEnable = true;            // CS pin controlled by hardware, not firmware
-  config.clockMode    = usartClockMode0; // clock idle low, sample on rising/first edge
-  config.msbf         = true;            // send MSB first
-  config.enable       = usartDisable;    // Make sure to keep USART disabled until it's all set up
-  CMU_ClockEnable(cmuClock_HFPER, true);
-#elif defined(EFR32MG21) || defined(EFR32MG24)
-  CMU_ClockEnable(cmuClock_EUSART1, true);
-  // Configure MOSI (TX) pin as an output
-  GPIO_PinModeSet(EUS1MOSI_PORT, EUS1MOSI_PIN, gpioModePushPull, PINOUT_CLEAR);
-
-  // Configure MISO (RX) pin as an input
-  GPIO_PinModeSet(EUS1MISO_PORT, EUS1MISO_PIN, gpioModeInput, PINOUT_CLEAR);
-
-  // Configure SCLK pin as an output low (CPOL = 0)
-  GPIO_PinModeSet(EUS1SCLK_PORT, EUS1SCLK_PIN, gpioModePushPull, PINOUT_CLEAR);
-
-  // Configure CS pin as an output initially high
-  // GPIO_PinModeSet(EUS1CS_PORT, EUS1CS_PIN, gpioModePushPull, 0);
-  // SPI advanced configuration (part of the initializer)
-  EUSART_SpiAdvancedInit_TypeDef adv = EUSART_SPI_ADVANCED_INIT_DEFAULT;
-
-  adv.msbFirst = true;        // SPI standard MSB first
-  adv.autoInterFrameTime = 7; // 7 bit times of delay between frames
-                              // to accommodate non-DMA secondaries
-
-  // Default asynchronous initializer (main/master mode and 8-bit data)
-  EUSART_SpiInit_TypeDef init = EUSART_SPI_MASTER_INIT_DEFAULT_HF;
-
-  init.bitRate = 12000000;         // 12 MHz shift clock
-  init.advancedSettings = &adv;   // Advanced settings structure
-#endif
-#if defined(EFR32MG12)
-  CMU_ClockEnable(MY_USART_CLOCK, true);
-  USART_InitSync(MY_USART, &config);
-#endif
-#if defined(EFR32MG12)
-  MY_USART->CTRL |= (1u << _USART_CTRL_SMSDELAY_SHIFT);
-  MY_USART->ROUTELOC0 =
-    (USART_ROUTELOC0_CLKLOC_LOC1) | // US2_CLK n location 1 = PA8 per datasheet section 6.4 = EXP Header pin 8
-    (USART_ROUTELOC0_CSLOC_LOC1) |  // US2_CS on location 1 = PA9 per datasheet section 6.4 = EXP Header pin 10
-    (USART_ROUTELOC0_TXLOC_LOC1) |  // US2_TX (MOSI) on location 1 = PA6 per datasheet section 6.4 = EXP Header pin 4
-    (USART_ROUTELOC0_RXLOC_LOC1);   // US2_RX (MISO) on location 1 = PA7 per datasheet section 6.4 = EXP Header pin 6
-
-  MY_USART->ROUTEPEN = USART_ROUTEPEN_TXPEN | USART_ROUTEPEN_RXPEN | USART_ROUTEPEN_CLKPEN | USART_ROUTEPEN_CSPEN;
-  MY_USART->CMD      = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
-  USART_Enable(MY_USART, usartEnable);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_TX_PORT, SL_WFX_HOST_PINOUT_SPI_TX_PIN, gpioModePushPull, PINOUT_SET);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_RX_PORT, SL_WFX_HOST_PINOUT_SPI_RX_PIN, gpioModeInput, PINOUT_SET);
-  GPIO_PinModeSet(SL_WFX_HOST_PINOUT_SPI_CLK_PORT, SL_WFX_HOST_PINOUT_SPI_CLK_PIN, gpioModePushPull, PINOUT_CLEAR);
-
-#elif defined(EFR32MG21) || defined(EFR32MG24)
-  /**********************************************************************
-   * Route EUSART1 MOSI, MISO, and SCLK to the specified pins.  CS is
-   * not controlled by EUSART1 so there is no write to the corresponding
-   * EUSARTROUTE register to do this.
-   ****************************************************************************/
-  GPIO->EUSARTROUTE[1].TXROUTE = (EUS1MOSI_PORT << _GPIO_EUSART_TXROUTE_PORT_SHIFT)
-      | (EUS1MOSI_PIN << _GPIO_EUSART_TXROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[1].RXROUTE = (EUS1MISO_PORT << _GPIO_EUSART_RXROUTE_PORT_SHIFT)
-      | (EUS1MISO_PIN << _GPIO_EUSART_RXROUTE_PIN_SHIFT);
-  GPIO->EUSARTROUTE[1].SCLKROUTE = (EUS1SCLK_PORT << _GPIO_EUSART_SCLKROUTE_PORT_SHIFT)
-      | (EUS1SCLK_PIN << _GPIO_EUSART_SCLKROUTE_PIN_SHIFT);
-
-  // Enable EUSART interface pins
-  GPIO->EUSARTROUTE[1].ROUTEEN = GPIO_EUSART_ROUTEEN_RXPEN |    // MISO
-                                 GPIO_EUSART_ROUTEEN_TXPEN |    // MOSI
-                                 GPIO_EUSART_ROUTEEN_SCLKPEN;
-
-  // Configure and enable EUSART1
-  EUSART_SpiInit(EUSART1, &init);
-
-#else
-#error "EFRxx - No UART/HAL"
-#endif
-}
+//#define RS911X_USE_LDMA
 
 /********************************************************
  * @fn   sl_wfx_host_gpio_init(void)
@@ -169,13 +78,8 @@ void sl_wfx_host_init_bus(void)
  **********************************************************/
 void sl_wfx_host_gpio_init(void)
 {
-#if defined(EFR32MG24)
-  sl_device_init_hfxo();
-  sl_device_init_dpll();
-  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
-#endif
-    // Enable GPIO clock.
-    CMU_ClockEnable(cmuClock_GPIO, true);
+  // Enable GPIO clock.
+  CMU_ClockEnable(cmuClock_GPIO, true);
 
   GPIO_PinModeSet(WFX_RESET_PIN.port, WFX_RESET_PIN.pin, gpioModePushPull, PINOUT_SET);
   GPIO_PinModeSet(WFX_SLEEP_CONFIRM_PIN.port, WFX_SLEEP_CONFIRM_PIN.pin, gpioModePushPull, PINOUT_CLEAR);
@@ -227,11 +131,24 @@ void rsi_hal_board_init(void)
 {
   spi_sem = xSemaphoreCreateBinaryStatic(&xEfxSpiIntfSemaBuffer);
   xSemaphoreGive(spi_sem);
+
+  /* Assign DMA channel from Handle*/
+#if defined(EFR32MG12)
+  /* MG12 + rs9116 combination uses USART driver */
+  tx_dma_channel= sl_spidrv_exp_handle->txDMACh;
+  rx_dma_channel= sl_spidrv_exp_handle->rxDMACh;
+
+#elif defined(EFR32MG24)
+  /* MG24 + rs9116 combination uses EUSART driver */
+  tx_dma_channel= sl_spidrv_eusart_exp_handle->txDMACh;
+  rx_dma_channel= sl_spidrv_eusart_exp_handle->rxDMACh;
+#endif
+
+  /* GPIO INIT of MG12 & MG24 : Reset, Wakeup, Interrupt */
   WFX_RSI_LOG("RSI_HAL: init GPIO");
   sl_wfx_host_gpio_init();
-  WFX_RSI_LOG("RSI_HAL: init SPI");
-  sl_wfx_host_init_bus();
-  dma_init();
+
+  /* Reset of Wifi chip */
   WFX_RSI_LOG("RSI_HAL: Reset Wifi");
   sl_wfx_host_reset_chip ();
   WFX_RSI_LOG("RSI_HAL: Init done");
@@ -253,6 +170,7 @@ void rsi_hal_board_init(void)
 static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void *userParam)
 {
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+  // uint8_t *buf = (void *)userParam;
 
   (void)channel;
   (void)sequenceNo;
@@ -265,43 +183,8 @@ static bool rx_dma_complete(unsigned int channel, unsigned int sequenceNo, void 
   return true;
 }
 
-#ifdef RS911X_USE_LDMA
-/*****************************************************************************
-*@fn static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
-*
-*@brief
-*    ldma usart
-*
-* @param[in] rx_buf:
-* @param[in] tx_buf:
-* @param[in] xlen:
-*
-* @return
-*    None
-******************************************************************************/
-static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
-{
-  LDMA_Descriptor_t ldmaTXDescriptor;
-  LDMA_TransferCfg_t ldmaTXConfig;
-  LDMA_Descriptor_t ldmaRXDescriptor;
-  LDMA_TransferCfg_t ldmaRXConfig;
-
-  WFX_RSI_LOG("SPI: LDMA len=%d", xlen)
-
-  ldmaTXDescriptor = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_M2P_BYTE(tx_buf, &(MY_USART->TXDATA), xlen);
-  ldmaTXConfig     = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(MY_USART_TX_SIGNAL);
-
-  ldmaRXDescriptor = (LDMA_Descriptor_t)LDMA_DESCRIPTOR_SINGLE_P2M_BYTE(&(MY_USART->RXDATA), rx_buf, xlen);
-  ldmaRXConfig     = (LDMA_TransferCfg_t)LDMA_TRANSFER_CFG_PERIPHERAL(MY_USART_RX_SIGNAL);
-
-  // Start both channels
-  DMADRV_LdmaStartTransfer(rx_dma_chan, &ldmaRXConfig, &ldmaRXDescriptor, rx_dma_complete, NULL);
-  DMADRV_LdmaStartTransfer(tx_dma_chan, &ldmaTXConfig, &ldmaTXDescriptor, CB_VALUE, NULL);
-}
-#endif /*  RS911X_USE_LDMA */
-
 /*************************************************************
- * @fn   static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
+ * @fn   static void receiveDMA(uint8_t *rx_buf, uint16_t xlen)
  * @brief
  *       RX buf was specified
  *       TX buf was not specified by caller - so we
@@ -311,17 +194,14 @@ static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
  * @return
  *        None
  *******************************************************************/
-static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
+static void receiveDMA(uint8_t *rx_buf, uint16_t xlen)
 {
-#ifdef RS911X_USE_LDMA
-  do_ldma_usart(rx_buf, (void *)&dummy_data, xlen);
-#else
   /*
      * The caller wants to receive data -
      * The xmit can be dummy data (no src increment for tx)
      */
   dummy_data = 0;
-  DMADRV_PeripheralMemory(rx_dma_chan,
+  DMADRV_PeripheralMemory(rx_dma_channel,
                           MY_USART_RX_SIGNAL,
                           (void *)rx_buf,
                           (void *)&(MY_USART->RXDATA),
@@ -332,7 +212,7 @@ static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
                           NULL);
 
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_chan,
+  DMADRV_MemoryPeripheral(tx_dma_channel,
                           MY_USART_TX_SIGNAL,
                           (void *)&(MY_USART->TXDATA),
                           (void *)&(dummy_data),
@@ -341,11 +221,10 @@ static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
                           dmadrvDataSize1,
                           NULL,
                           NULL);
-#endif
 }
 
 /*****************************************************************************
-*@fn static void do_ldma_usart(void *rx_buf, void *tx_buf, uint8_t xlen)
+*@fn static void transmitDMA(void *rx_buf, void *tx_buf, uint8_t xlen)
 *@brief
 *    we have a tx_buf. There are some instances where
 *    a rx_buf is not specifed. If one is specified then
@@ -356,11 +235,8 @@ static void rx_do_dma(uint8_t *rx_buf, uint16_t xlen)
 * @return
 *     None
 ******************************************************************************/
-static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
+static void transmitDMA(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
 {
-#ifdef RS911X_USE_LDMA
-  do_ldma_usart(rx_buf, tx_buf, xlen);
-#else
   void *buf;
   bool srcinc;
   /*
@@ -379,7 +255,7 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
     /* DEBUG */ rx_buf[0] = 0xAA;
     rx_buf[1]             = 0x55;
   }
-  DMADRV_PeripheralMemory(rx_dma_chan,
+  DMADRV_PeripheralMemory(rx_dma_channel,
                           MY_USART_RX_SIGNAL,
                           buf,
                           (void *)&(MY_USART->RXDATA),
@@ -389,7 +265,7 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
                           rx_dma_complete,
                           buf);
   // Start transmit DMA.
-  DMADRV_MemoryPeripheral(tx_dma_chan,
+  DMADRV_MemoryPeripheral(tx_dma_channel,
                           MY_USART_TX_SIGNAL,
                           (void *)&(MY_USART->TXDATA),
                           (void *)tx_buf,
@@ -398,7 +274,6 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
                           dmadrvDataSize1,
                           NULL,
                           NULL);
-#endif /* USE_LDMA */
 }
 
 /*********************************************************************
@@ -415,35 +290,17 @@ static void tx_do_dma(uint8_t *rx_buf, uint8_t *tx_buf, uint16_t xlen)
 int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_t mode)
 {
   // WFX_RSI_LOG ("SPI: Xfer: tx=%x,rx=%x,len=%d",(uint32_t)tx_buf, (uint32_t)rx_buf, xlen);
-#ifdef not_yet_tested_programmed_io
-  while (!(MY_USART->STATUS & USART_STATUS_TXBL)) {
-  }
-  MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
-
-  /*
-     * Short stuff should be done via programmed I/O
-     */
-  if (xlen < MAX_XLEN && tx_buf && !rx_buf) {
-    for (; xlen > MIN_XLEN; --xlen, ++tx_buf) {
-      MY_USART->TXDATA = (uint32_t)(*txbuf);
-
-      while (!(MY_USART->STATUS & USART_STATUS_TXC)) {
-      }
-    }
-    while (!(MY_USART->STATUS & USART_STATUS_TXBL)) {
-    }
-  }
-#endif /* not_yet_tested_programmed_io */
   if (xlen > MIN_XLEN) {
     MY_USART->CMD = USART_CMD_CLEARRX | USART_CMD_CLEARTX;
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) != pdTRUE) {
       return RSI_FALSE;
     }
     if (tx_buf == NULL) {
-      rx_do_dma(rx_buf, xlen);
+      receiveDMA(rx_buf, xlen);
     } else {
-      tx_do_dma(rx_buf, tx_buf, xlen);
+      transmitDMA(rx_buf, tx_buf, xlen);
     }
+    // vTaskDelay(pdMS_TO_TICKS(10));
     /*
          * Wait for the call-back to complete
          */
