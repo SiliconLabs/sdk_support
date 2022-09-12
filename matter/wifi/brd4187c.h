@@ -24,12 +24,14 @@
 
 #define MY_USART EUSART1
 #define MY_USART_CLOCK cmuClock_EUSART1
-#define MY_USART_TX_SIGNAL dmadrvPeripheralSignal_EUSART1_TXBL //dmadrvPeripheralSignal_USART0_TXBL
-#define MY_USART_RX_SIGNAL dmadrvPeripheralSignal_EUSART1_RXDATAV //dmadrvPeripheralSignal_USART0_RXDATAV
+#define MY_USART_TX_SIGNAL                                                     \
+	  dmadrvPeripheralSignal_EUSART1_TXBL // dmadrvPeripheralSignal_USART0_TXBL
+#define MY_USART_RX_SIGNAL                                                     \
+	  dmadrvPeripheralSignal_EUSART1_RXDATAV // dmadrvPeripheralSignal_USART0_RXDATAV
 
-#define WFX_RESET_PIN           PIN(A, 6)
-#define WFX_INTERRUPT_PIN       PIN(A, 7)
-#define WFX_SLEEP_CONFIRM_PIN   PIN(A, 5) /* Exp hdr 7 */
+#define WFX_RESET_PIN PIN(A, 6)
+#define WFX_INTERRUPT_PIN PIN(A, 7)
+#define WFX_SLEEP_CONFIRM_PIN PIN(A, 5) /* Exp hdr 7 */
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 5
 
 #else /* WF200 */
