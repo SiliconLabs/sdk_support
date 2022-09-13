@@ -63,7 +63,6 @@ extern SPIDRV_Handle_t sl_spidrv_eusart_exp_handle;
 static unsigned int tx_dma_channel;
 static unsigned int rx_dma_channel;
 
-/*TODO -  FIX This - It belongs somewhere else depending on which USART is used */
 static uint32_t dummy_data; /* Used for DMA - when results don't matter */
 extern void rsi_gpio_irq_cb(uint8_t irqnum);
 //#define RS911X_USE_LDMA
@@ -300,10 +299,9 @@ int16_t rsi_spi_transfer(uint8_t *tx_buf, uint8_t *rx_buf, uint16_t xlen, uint8_
     } else {
       transmitDMA(rx_buf, tx_buf, xlen);
     }
-    // vTaskDelay(pdMS_TO_TICKS(10));
     /*
-         * Wait for the call-back to complete
-         */
+     * Wait for the call-back to complete
+     */
     if (xSemaphoreTake(spi_sem, portMAX_DELAY) == pdTRUE) {
       xSemaphoreGive(spi_sem);
     }

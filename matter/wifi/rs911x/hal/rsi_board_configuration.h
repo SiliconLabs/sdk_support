@@ -10,9 +10,7 @@ typedef struct {
 #define PIN(port_id, pin_id)                                                   \
   (rsi_pin_t) { .port = gpioPort##port_id, .pin = pin_id }
 
-#if defined(EFR32MG21_BRD4180A) || defined(BRD4180A)
-#include "brd4180a.h"
-#elif defined(EFR32MG12_BRD4161A) || defined(BRD4161A) ||                      \
+#if defined(EFR32MG12_BRD4161A) || defined(BRD4161A) ||                      \
     defined(EFR32MG12_BRD4162A) || defined(BRD4162A) ||                        \
     defined(EFR32MG12_BRD4163A) || defined(BRD4163A) ||                        \
     defined(EFR32MG12_BRD4164A) || defined(BRD4164A)
@@ -24,6 +22,6 @@ typedef struct {
 #include "brd4187c.h"
 #else
 #error "Need SPI Pins"
-#endif /* EFR32MG24_BRD4187A */
+#endif /* EFR32MG12_BRD4161A */
 
 #endif /* _RSI_BOARD_CONFIGURATION_H_ */

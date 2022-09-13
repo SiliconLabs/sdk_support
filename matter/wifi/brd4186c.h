@@ -26,9 +26,9 @@
 #define MY_USART_CLOCK cmuClock_EUSART1
 
 #define MY_USART_TX_SIGNAL                                                     \
-	  dmadrvPeripheralSignal_EUSART1_TXBL // dmadrvPeripheralSignal_USART0_TXBL
+	  dmadrvPeripheralSignal_EUSART1_TXBL
 #define MY_USART_RX_SIGNAL                                                     \
-	  dmadrvPeripheralSignal_EUSART1_RXDATAV // dmadrvPeripheralSignal_USART0_RXDATAV
+	  dmadrvPeripheralSignal_EUSART1_RXDATAV
 
 #define WFX_RESET_PIN PIN(A, 6)
 #define WFX_INTERRUPT_PIN PIN(A, 7)
