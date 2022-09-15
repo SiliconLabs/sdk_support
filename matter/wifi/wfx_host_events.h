@@ -73,7 +73,7 @@
 #define SL_WFX_RETRY_CONNECT (1 << 7)
 
 #endif /* RS911X_SOCKETS */
-
+#include "sl_bt_api.h"
 #include "sl_status.h"
 
 typedef enum {
@@ -205,7 +205,10 @@ bool wfx_hw_ready(void);
 void wfx_ip_changed_notify(int got_ip);
 void wfx_ipv6_notify(int got_ip);
 void init_rsiPlatform(void);
-void Ble_ConnectEvent_notify();
+void Ble_ConnectEvent_notify(sl_bt_msg_t * evt);
+void Ble_Init();
+void Ble_write_Notify(sl_bt_msg_t * evt);
+void Ble_MTU_update(sl_bt_msg_t * evt);
 #ifdef RS911X_WIFI
 /* RSI for LWIP */
 void *wfx_rsi_alloc_pkt(void);

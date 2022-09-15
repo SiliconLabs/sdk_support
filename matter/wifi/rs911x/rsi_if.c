@@ -43,7 +43,7 @@
 //! BLE attribute service types uuid values
 #define RSI_BLE_CHAR_SERV_UUID 0x2803
 #define RSI_BLE_CLIENT_CHAR_UUID 0x2902
-
+#define MAX_ADV_DATA_LEN 31
 //! BLE characteristic service uuid
 #define RSI_BLE_HEART_RATE_SERVICE_UUID 0x180D
 #define RSI_BLE_HEART_RATE_MEASUREMENT_UUID 0x2A37
@@ -89,9 +89,7 @@ uint8_t retry;
 static int8_t ble_wifi_flag = 0;
 uint8_t ble_conn_id = 0xFF;
 uint8_t coex_ssid[50], dis_ssid[50], pwd[RSI_BLE_MAX_DATA_LEN], sec_type;
-
-
-
+static sl_bt_msg_t * evt;
 /*
  * Getting the AP details
  */
@@ -331,12 +329,22 @@ static int32_t rsi_ble_app_get_event(void)
 
 void rsi_ble_on_enhance_conn_status_event(rsi_ble_event_enhance_conn_status_t * resp_enh_conn)
 {
+   evt =(void *)malloc(sizeof(sl_bt_msg_t));
+
+
     conn_event_to_app.dev_addr_type = resp_enh_conn->dev_addr_type;
     memcpy(conn_event_to_app.dev_addr, resp_enh_conn->dev_addr, RSI_DEV_ADDR_LEN);
     conn_event_to_app.status = resp_enh_conn->status;
     memcpy(&resp_connect, &conn_event_to_app, sizeof(rsi_ble_event_conn_status_t));
+    memcpy(&(evt->data.evt_connection_opened.master),&resp_enh_conn->role,sizeof(rsi_ble_event_enhance_conn_status_t));
+  memcpy(&(evt->data.evt_connection_opened.address),&resp_enh_conn->dev_addr,sizeof(rsi_ble_event_enhance_conn_status_t));
+  memcpy(&(evt->data.evt_connection_opened.address_type),&resp_enh_conn->dev_addr_type,sizeof(rsi_ble_event_enhance_conn_status_t));
 
-    //Ble_ConnectEvent_notify();
+
+   memcpy(&(evt->data.evt_connection_parameters.interval),&resp_enh_conn->conn_interval,sizeof(rsi_ble_event_enhance_conn_status_t)); 
+   memcpy(&(evt->data.evt_connection_parameters.latency),&resp_enh_conn->conn_latency,sizeof(rsi_ble_event_enhance_conn_status_t));
+   memcpy(&(evt->data.evt_connection_parameters.timeout),&resp_enh_conn->supervision_timeout,sizeof(rsi_ble_event_enhance_conn_status_t));
+    Ble_ConnectEvent_notify(evt);
     rsi_ble_app_set_event(RSI_BLE_CONN_EVENT);
 }
 static void rsi_ble_on_connect_event(rsi_ble_event_conn_status_t * resp_conn)
@@ -370,23 +378,39 @@ void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t * rsi_
 {
     UNUSED_PARAMETER(event_id); // This statement is added only to resolve compilation warning, value is unchanged
    // uint8_t cmdid;
-    // sl_bt_msg_t * evt;
-    // evt =(void *)malloc(sizeof(sl_bt_msg_t));
-    // memcpy(&(evt->data.evt_gatt_server_user_write_request.value.len),&rsi_ble_write->length,sizeof(rsi_ble_event_write_t));
-    // memcpy(&(evt->data.handle),&rsi_ble_write->handle,sizeof(rsi_ble_event_write_t));
+     evt =(void *)malloc(sizeof(sl_bt_msg_t));
+     memcpy(&(evt->data.handle),&rsi_ble_write->handle,sizeof(rsi_ble_event_write_t));
+     memcpy(&(evt->data.evt_gatt_server_user_write_request.value.len),&rsi_ble_write->length,sizeof(rsi_ble_event_write_t));
 
-    int length = rsi_ble_write->length;
-    for (int j=0; j < length; j++)
-    {
-    for (int i = j; i < length; i++)
+
+
+if(rsi_ble_write->pkt_type==0x01)
+{
+rsi_ble_write->pkt_type=0x52;
+}
+else if(rsi_ble_write->pkt_type==0x02)
+{
+rsi_ble_write->pkt_type=0x12;
+}
+else if(rsi_ble_write->pkt_type==0x03)
+{
+rsi_ble_write->pkt_type=0x1b;
+}
+else if(rsi_ble_write->pkt_type==0x04)
+{
+rsi_ble_write->pkt_type=0x1d;
+}
+
+
+   memcpy(&(evt->data.evt_gatt_server_user_write_request.att_opcode),&rsi_ble_write->pkt_type,sizeof(rsi_ble_event_write_t));
+    for (int i = 0; i < rsi_ble_write->length; i++)
     {
         WFX_RSI_LOG("value : %d", rsi_ble_write->att_value[i]);
     }
     WFX_RSI_LOG(" done \n");
-    memset(rsi_ble_write, 0, sizeof(rsi_ble_event_write_t));
-    }
-   //Ble_write_Notify(evt);
-       rsi_ble_app_set_event(RSI_BLE_GATT_WRITE_EVENT);
+    
+   Ble_write_Notify(evt);
+    rsi_ble_app_set_event(RSI_BLE_GATT_WRITE_EVENT);
 
     return;
 }
@@ -401,7 +425,10 @@ void rsi_ble_on_gatt_write_event(uint16_t event_id, rsi_ble_event_write_t * rsi_
  */
 static void rsi_ble_on_mtu_event(rsi_ble_event_mtu_t * rsi_ble_mtu)
 {
+   evt =(void *)malloc(sizeof(sl_bt_msg_t));
+ memcpy(&(evt->data.evt_gatt_mtu_exchanged.mtu),&rsi_ble_mtu->mtu_size,sizeof(rsi_ble_event_mtu_t));
 
+   Ble_MTU_update(evt);
     rsi_ble_mtu_exchange = rsi_ble_mtu;
     //set conn specific event
     rsi_ble_app_set_event(RSI_BLE_MTU_EVENT);
@@ -601,14 +628,7 @@ static uint32_t rsi_ble_add_simple_chat_serv3(void)
     uuid_t custom_service    = { 0 };
     custom_service.size      = 2;
     custom_service.val.val16 = 0xFFF6;
-    uint8_t data1[254]       = {
-              0x00,
-              0x00,
-              0x00,
-              0x00,
-              0x00,
-              0x00,
-              0x00,
+    uint8_t data1[247]       = {
               0x00,
               0x00,
               0x00,
@@ -859,6 +879,7 @@ void rsi_ble_task(void * arg)
     uint8_t advData[31] = { 2, 1, 6 };
     uint32_t index      = 0;
 
+     Ble_Init();
     rsi_wifi_ble_init();
     ble_wifi_flag = 1;
     

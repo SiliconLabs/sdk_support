@@ -18,6 +18,18 @@
 
 #include "wfx_host_events.h"
 
+
+#include "rsi_ble.h"
+#include "rsi_ble_apis.h"
+#include "rsi_ble_common_config.h"
+#include "rsi_ble_config.h"
+#include "rsi_bootup_config.h"
+#include "rsi_bt_common.h"
+#include "rsi_bt_common_apis.h"
+#include "rsi_error.h"
+
+#include "rsi_common_apis.h"
+#include "rsi_data_types.h"
 #ifdef RS911X_WIFI
 #include "wfx_rsi.h"
 #endif
@@ -29,6 +41,8 @@
 
 using namespace ::chip;
 using namespace ::chip::DeviceLayer;
+using namespace ::chip::DeviceLayer::Internal;
+//sl_bt_msg_t * bluetooth_evt1 = NULL;
 
 /*
  * Notifications to the upper-layer
@@ -37,7 +51,30 @@ using namespace ::chip::DeviceLayer;
 /*
  * Device started..
  */
-void wfx_started_notify()
+
+
+void Ble_write_Notify(sl_bt_msg_t * evt)
+{
+      BLEMgrImpl().HandleWriteEvent(evt);
+}
+
+void Ble_ConnectEvent_notify(sl_bt_msg_t * evt)
+{
+BLEMgrImpl().HandleConnectEvent(evt);
+}
+
+void Ble_MTU_update(sl_bt_msg_t * evt)
+{
+ BLEMgrImpl().UpdateMtu(evt);
+}
+void Ble_Init()
+{
+BLEMgrImpl()._Init();
+
+}
+
+void
+wfx_started_notify ()
 {
   sl_wfx_startup_ind_t evt;
   sl_wfx_mac_address_t mac;
