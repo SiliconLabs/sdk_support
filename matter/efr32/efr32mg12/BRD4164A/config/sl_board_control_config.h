@@ -9,7 +9,7 @@
 
 // <q SL_BOARD_ENABLE_DISPLAY> Enable Display
 // <i> Default: 0
-#define SL_BOARD_ENABLE_DISPLAY                 1
+#define SL_BOARD_ENABLE_DISPLAY                 0
 
 // <q SL_BOARD_ENABLE_SENSOR_RHT> Enable Relative Humidity and Temperature sensor
 // <i> Default: 0
