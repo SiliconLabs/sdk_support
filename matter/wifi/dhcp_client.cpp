@@ -38,7 +38,7 @@
 #include "AppConfig.h"
 
 #define MAX_DHCP_TRIES 4
-#define NETIF_IPV4_ADDRESS(X, Y) ((X >> (8 * Y)) && 0xFF)
+#define NETIF_IPV4_ADDRESS(X, Y) (((X) >> (8 * Y)) & 0xFF)
 
 /* Station IP address */
 uint8_t sta_ip_addr0      = STA_IP_ADDR0_DEFAULT;
