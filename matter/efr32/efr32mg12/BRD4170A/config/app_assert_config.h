@@ -1,9 +1,9 @@
-/***************************************************************************//**
+/*****************************************************************************
  * @file
- * @brief DEVICE_INIT_DCDC Config
+ * @brief Application assert configuration
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2021 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,31 +28,27 @@
  *
  ******************************************************************************/
 
-#ifndef SL_DEVICE_INIT_DCDC_CONFIG_H
-#define SL_DEVICE_INIT_DCDC_CONFIG_H
+#ifndef APP_ASSERT_CONFIG_H
+#define APP_ASSERT_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <q SL_DEVICE_INIT_DCDC_ENABLE> Enable DC/DC Converter
-// <i>
-// <i> Default: 1
-#define SL_DEVICE_INIT_DCDC_ENABLE         1
+// <e APP_ASSERT_ENABLE> Assert component
+// <i> Enables Assert.
+#define APP_ASSERT_ENABLE      1
 
-// <q SL_DEVICE_INIT_DCDC_BYPASS> Set DC/DC Converter in Bypass Mode
-// <i>
-// <i> Default: 0
-#define SL_DEVICE_INIT_DCDC_BYPASS         0
+// <e APP_ASSERT_LOG_ENABLE> Logging
+// <i> Enables logging for assert.
+#define APP_ASSERT_LOG_ENABLE      1
 
-// <q SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE> Override for DCDC PFMX Mode Peak Current Setting
-// <i>
-// <i> Default: 0
-#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE  0
+// <q APP_ASSERT_TRACE_ENABLE> Enable trace
+// <i> Enables trace for assert.
+#define APP_ASSERT_TRACE_ENABLE      1
 
-// <o SL_DEVICE_INIT_DCDC_PFMX_IPKVAL> DCDC PFMX Mode Peak Current Setting <0-15>
-// <i>
-// <i> Default: DCDC_PFMXCTRL_IPKVAL_DEFAULT
-#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL    DCDC_PFMXCTRL_IPKVAL_DEFAULT
+// </e>
+
+// </e>
 
 // <<< end of configuration section >>>
 
-#endif // SL_DEVICE_INIT_DCDC_CONFIG_H
+#endif // APP_ASSERT_CONFIG_H
