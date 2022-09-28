@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Simple Button Driver User Config
  *******************************************************************************
@@ -28,15 +28,16 @@
 // <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
 // <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
 // <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE SL_SIMPLE_BUTTON_MODE_INTERRUPT
+#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
 
 // <gpio> SL_SIMPLE_BUTTON_BTN0
 // $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN 1
+#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
+#define SL_SIMPLE_BUTTON_BTN0_PIN                1
+
 // [GPIO_SL_SIMPLE_BUTTON_BTN0]$
 
 // <<< sl:end pin_tool >>>

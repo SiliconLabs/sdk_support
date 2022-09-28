@@ -12,8 +12,6 @@
 
 /* components are auto-generated here */
 
-#define RTE_CMSIS_RTOS2
-
 #define RTE_RTOS_FreeRTOS_CORE
 
 #define RTE_RTOS_FreeRTOS_CONFIG_RTOS2

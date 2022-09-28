@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief SL_MX25_FLASH_SHUTDOWN_USART Config
  *******************************************************************************
@@ -21,28 +21,28 @@
 // <<< sl:start pin_tool >>>
 // {usart signal=TX,RX,CLK} SL_MX25_FLASH_SHUTDOWN
 // [USART_SL_MX25_FLASH_SHUTDOWN]
-#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL USART0
-#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO 0
+#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL        USART0
+#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO     0
 
 // USART0 TX on PC01
-#define SL_MX25_FLASH_SHUTDOWN_TX_PORT gpioPortC
-#define SL_MX25_FLASH_SHUTDOWN_TX_PIN 1
+#define SL_MX25_FLASH_SHUTDOWN_TX_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_TX_PIN            1
 
 // USART0 RX on PC02
-#define SL_MX25_FLASH_SHUTDOWN_RX_PORT gpioPortC
-#define SL_MX25_FLASH_SHUTDOWN_RX_PIN 2
+#define SL_MX25_FLASH_SHUTDOWN_RX_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_RX_PIN            2
 
 // USART0 CLK on PC03
-#define SL_MX25_FLASH_SHUTDOWN_CLK_PORT gpioPortC
-#define SL_MX25_FLASH_SHUTDOWN_CLK_PIN 3
+#define SL_MX25_FLASH_SHUTDOWN_CLK_PORT          gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_CLK_PIN           3
 
 // [USART_SL_MX25_FLASH_SHUTDOWN]
 
 // <gpio> SL_MX25_FLASH_SHUTDOWN_CS
 
 // $[GPIO_SL_MX25_FLASH_SHUTDOWN_CS]
-#define SL_MX25_FLASH_SHUTDOWN_CS_PORT gpioPortC
-#define SL_MX25_FLASH_SHUTDOWN_CS_PIN 4
+#define SL_MX25_FLASH_SHUTDOWN_CS_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_CS_PIN            4
 
 // [GPIO_SL_MX25_FLASH_SHUTDOWN_CS]$
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Simple Led Driver Configuration
  *******************************************************************************
@@ -34,8 +34,8 @@
 
 // <gpio> SL_SIMPLE_LED_LED0
 // $[GPIO_SL_SIMPLE_LED_LED0]
-#define SL_SIMPLE_LED_LED0_PORT gpioPortB
-#define SL_SIMPLE_LED_LED0_PIN 2
+#define SL_SIMPLE_LED_LED0_PORT                  gpioPortB
+#define SL_SIMPLE_LED_LED0_PIN                   2
 
 // [GPIO_SL_SIMPLE_LED_LED0]$
 

@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief DEVICE_INIT_LFXO Config
  *******************************************************************************
@@ -39,15 +39,15 @@
 // <cmuLfxoOscMode_AcCoupledSine=> AC-coupled buffer
 // <cmuLfxoOscMode_External=> External digital clock
 // <i> Default: cmuLfxoOscMode_Crystal
-#define SL_DEVICE_INIT_LFXO_MODE cmuLfxoOscMode_Crystal
+#define SL_DEVICE_INIT_LFXO_MODE           cmuLfxoOscMode_Crystal
 
 // <o SL_DEVICE_INIT_LFXO_CTUNE> CTUNE <0-127>
 // <i> Default: 63
-#define SL_DEVICE_INIT_LFXO_CTUNE 44
+#define SL_DEVICE_INIT_LFXO_CTUNE          44
 
 // <o SL_DEVICE_INIT_LFXO_PRECISION> LFXO precision in PPM <0-65535>
 // <i> Default: 500
-#define SL_DEVICE_INIT_LFXO_PRECISION 100
+#define SL_DEVICE_INIT_LFXO_PRECISION      100
 
 // <o SL_DEVICE_INIT_LFXO_TIMEOUT> Startup Timeout Delay
 // <i>
@@ -60,7 +60,7 @@
 // <cmuLfxoStartupDelay_16KCycles=> 16K cycles
 // <cmuLfxoStartupDelay_32KCycles=> 32K cycles
 // <i> Default: cmuLfxoStartupDelay_4KCycles
-#define SL_DEVICE_INIT_LFXO_TIMEOUT cmuLfxoStartupDelay_4KCycles
+#define SL_DEVICE_INIT_LFXO_TIMEOUT           cmuLfxoStartupDelay_4KCycles
 // <<< end of configuration section >>>
 
 #endif // SL_DEVICE_INIT_LFXO_CONFIG_H

@@ -48,6 +48,12 @@
 // <i> Default: 0
 #define SL_SIMPLE_BUTTON_POLARITY         0U
 
+// <q SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT> Allow the app to manage Buttons and LEDs on the same pin
+// <i> 0  Error if Buttons and LEDs are on the same pin
+// <i> 1  Do not error if Buttons and LEDs are on the same pin
+// <i> Default: 0
+#define SL_SIMPLE_BUTTON_ALLOW_LED_CONFLICT  0U
+
 // </h>
 
 // <<< end of configuration section >>>

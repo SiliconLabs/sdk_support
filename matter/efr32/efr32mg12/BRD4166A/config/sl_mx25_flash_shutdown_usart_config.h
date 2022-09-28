@@ -46,6 +46,7 @@
 // $[GPIO_SL_MX25_FLASH_SHUTDOWN_CS]
 #define SL_MX25_FLASH_SHUTDOWN_CS_PORT           gpioPortK
 #define SL_MX25_FLASH_SHUTDOWN_CS_PIN            1
+
 // [GPIO_SL_MX25_FLASH_SHUTDOWN_CS]$
 
 // <<< sl:end pin_tool >>>

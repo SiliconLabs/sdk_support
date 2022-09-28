@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Simple Button Driver Instances
  *******************************************************************************
@@ -20,50 +20,54 @@
 #include "sl_simple_button_btn1_config.h"
 
 sl_simple_button_context_t simple_btn0_context = {
-    .state = 0,
-    .history = 0,
-    .port = SL_SIMPLE_BUTTON_BTN0_PORT,
-    .pin = SL_SIMPLE_BUTTON_BTN0_PIN,
-    .mode = SL_SIMPLE_BUTTON_BTN0_MODE,
+  .state = 0,
+  .history = 0,
+  .port = SL_SIMPLE_BUTTON_BTN0_PORT,
+  .pin = SL_SIMPLE_BUTTON_BTN0_PIN,
+  .mode = SL_SIMPLE_BUTTON_BTN0_MODE,
 };
 
 const sl_button_t sl_button_btn0 = {
-    .context = &simple_btn0_context,
-    .init = sl_simple_button_init,
-    .get_state = sl_simple_button_get_state,
-    .poll = sl_simple_button_poll_step,
-    .enable = sl_simple_button_enable,
-    .disable = sl_simple_button_disable,
+  .context = &simple_btn0_context,
+  .init = sl_simple_button_init,
+  .get_state = sl_simple_button_get_state,
+  .poll = sl_simple_button_poll_step,
+  .enable = sl_simple_button_enable,
+  .disable = sl_simple_button_disable,
 };
 sl_simple_button_context_t simple_btn1_context = {
-    .state = 0,
-    .history = 0,
-    .port = SL_SIMPLE_BUTTON_BTN1_PORT,
-    .pin = SL_SIMPLE_BUTTON_BTN1_PIN,
-    .mode = SL_SIMPLE_BUTTON_BTN1_MODE,
+  .state = 0,
+  .history = 0,
+  .port = SL_SIMPLE_BUTTON_BTN1_PORT,
+  .pin = SL_SIMPLE_BUTTON_BTN1_PIN,
+  .mode = SL_SIMPLE_BUTTON_BTN1_MODE,
 };
 
 const sl_button_t sl_button_btn1 = {
-    .context = &simple_btn1_context,
-    .init = sl_simple_button_init,
-    .get_state = sl_simple_button_get_state,
-    .poll = sl_simple_button_poll_step,
-    .enable = sl_simple_button_enable,
-    .disable = sl_simple_button_disable,
+  .context = &simple_btn1_context,
+  .init = sl_simple_button_init,
+  .get_state = sl_simple_button_get_state,
+  .poll = sl_simple_button_poll_step,
+  .enable = sl_simple_button_enable,
+  .disable = sl_simple_button_disable,
 };
 
 // the table of buttons and button count are generated as a
 // convenience for the application
-const sl_button_t *sl_simple_button_array[] = {&sl_button_btn0,
-                                               &sl_button_btn1};
+const sl_button_t *sl_simple_button_array[] = {
+  &sl_button_btn0, 
+  &sl_button_btn1
+};
 const uint8_t simple_button_count = 2;
 
-void sl_simple_button_init_instances(void) {
+void sl_simple_button_init_instances(void)
+{
   sl_button_init(&sl_button_btn0);
   sl_button_init(&sl_button_btn1);
 }
 
-void sl_simple_button_poll_instances(void) {
+void sl_simple_button_poll_instances(void)
+{
   sl_button_poll_step(&sl_button_btn0);
   sl_button_poll_step(&sl_button_btn1);
 }

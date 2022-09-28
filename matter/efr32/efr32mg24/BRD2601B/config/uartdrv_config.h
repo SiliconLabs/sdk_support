@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief UARTDRV configuration file.
  *******************************************************************************
@@ -30,7 +30,7 @@
 #ifndef __SILICON_LABS_UARTDRV_CONFIG_H__
 #define __SILICON_LABS_UARTDRV_CONFIG_H__
 
-/*******************************************************************************
+/***************************************************************************//**
  * @addtogroup uartdrv
  * @{
  ******************************************************************************/
@@ -44,7 +44,7 @@
 ///   with the @ref DEFINE_BUF_QUEUE macro by the user of the driver to allocate
 ///   instances of the @ref UARTDRV_Buffer_FifoQueue_t struct.
 #if !defined(EMDRV_UARTDRV_MAX_CONCURRENT_RX_BUFS)
-#define EMDRV_UARTDRV_MAX_CONCURRENT_RX_BUFS 6
+#define EMDRV_UARTDRV_MAX_CONCURRENT_RX_BUFS    6
 #endif
 
 /// Size of the transmit operation queue.
@@ -57,7 +57,7 @@
 ///   with the @ref DEFINE_BUF_QUEUE macro by the user of the driver to allocate
 ///   instances of the @ref UARTDRV_Buffer_FifoQueue_t struct.
 #if !defined(EMDRV_UARTDRV_MAX_CONCURRENT_TX_BUFS)
-#define EMDRV_UARTDRV_MAX_CONCURRENT_TX_BUFS 6
+#define EMDRV_UARTDRV_MAX_CONCURRENT_TX_BUFS    6
 #endif
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -69,7 +69,7 @@
 // <1=> Enable
 // <0=> Disable
 // <i> Default: 1
-#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE 0
+#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       0
 #endif
 
 /// Maximum number of driver instances.
@@ -77,31 +77,32 @@
 // <o EMDRV_UARTDRV_MAX_DRIVER_INSTANCES> Maximum number of driver instances
 // <i> This maximum only applies when UARTDRV_FLOW_CONTROL_ENABLE = 1
 // <i> Default: 4
-#define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES 4
+#define EMDRV_UARTDRV_MAX_DRIVER_INSTANCES      4
 #endif
 
 /// UART software flow control code: request peer to start TX
 #if !defined(UARTDRV_FC_SW_XON)
-// <o UARTDRV_FC_SW_XON> UART software flow control code: request peer to start
-// TX <i> Default: 0x11
-#define UARTDRV_FC_SW_XON 0x11
+// <o UARTDRV_FC_SW_XON> UART software flow control code: request peer to start TX
+// <i> Default: 0x11
+#define UARTDRV_FC_SW_XON                       0x11
 #endif
 
 /// UART software flow control code: request peer to stop TX
 #if !defined(UARTDRV_FC_SW_XOFF)
-// <o UARTDRV_FC_SW_XOFF> UART software flow control code: request peer to stop
-// TX <i> Default: 0x13
-#define UARTDRV_FC_SW_XOFF 0x13
+// <o UARTDRV_FC_SW_XOFF> UART software flow control code: request peer to stop TX
+// <i> Default: 0x13
+#define UARTDRV_FC_SW_XOFF                      0x13
 #endif
 
 /// UART enable reception when sleeping.
 #if !defined(UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION)
-// <o UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION>  Enable reception when
-// sleeping <i> Enable reception when sleeping will use the power manager and
-// add EM1 <i> requirement during receive operations that use DMA. <1=> Enable
+// <o UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION>  Enable reception when sleeping
+// <i> Enable reception when sleeping will use the power manager and add EM1
+// <i> requirement during receive operations that use DMA.
+// <1=> Enable
 // <0=> Disable
 // <i> Default: 1
-#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION 1
+#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         1
 #endif
 
 //</h>
