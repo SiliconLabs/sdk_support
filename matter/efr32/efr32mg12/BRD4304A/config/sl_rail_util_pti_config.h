@@ -57,7 +57,7 @@
 // $[PTI_SL_RAIL_UTIL_PTI]
 #define SL_RAIL_UTIL_PTI_PERIPHERAL              PTI
 
-// PTI DOUT on PB12
+// PTI DOUT on PB11
 #define SL_RAIL_UTIL_PTI_DOUT_PORT               gpioPortB
 #define SL_RAIL_UTIL_PTI_DOUT_PIN                11
 #define SL_RAIL_UTIL_PTI_DOUT_LOC                5
