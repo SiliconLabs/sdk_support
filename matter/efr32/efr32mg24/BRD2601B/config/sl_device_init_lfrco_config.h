@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Packet Trace Information configuration file.
+ * @brief DEVICE_INIT_LFRCO Config
  *******************************************************************************
  * # License
- * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,46 +28,26 @@
  *
  ******************************************************************************/
 
-#ifndef SL_RAIL_UTIL_PTI_CONFIG_H
-#define SL_RAIL_UTIL_PTI_CONFIG_H
-
-#include "rail_types.h"
+#ifndef SL_DEVICE_INIT_LFRCO_CONFIG_H
+#define SL_DEVICE_INIT_LFRCO_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
-// <h> PTI Configuration
 
-// <o SL_RAIL_UTIL_PTI_MODE> PTI mode
-// <RAIL_PTI_MODE_UART=> UART
-// <RAIL_PTI_MODE_UART_ONEWIRE=> UART onewire
-// <RAIL_PTI_MODE_SPI=> SPI
-// <RAIL_PTI_MODE_DISABLED=> Disabled
-// <i> Default: RAIL_PTI_MODE_UART
-#define SL_RAIL_UTIL_PTI_MODE           RAIL_PTI_MODE_UART
+// <o SL_DEVICE_INIT_LFRCO_PRECISION> Precision Mode
+// <i> Precision mode uses hardware to automatically re-calibrate the LFRCO
+// <i> against a crystal driven by the HFXO. Hardware detects temperature
+// <i> changes and initiates a re-calibration of the LFRCO as needed when
+// <i> operating in EM0, EM1, or EM2. If a re-calibration is necessary and the
+// <i> HFXO is not active, the precision mode hardware will automatically
+// <i> enable HFXO for a short time to perform the calibration. EM4 operation is
+// <i> not allowed while precision mode is enabled.
+// <i> If high precision is selected on devices that do not support it, default
+// <i> precision will be used.
+// <cmuPrecisionDefault=> Default precision
+// <cmuPrecisionHigh=> High precision
+// <i> Default: cmuPrecisionHigh
+#define SL_DEVICE_INIT_LFRCO_PRECISION          cmuPrecisionHigh
 
-// <o SL_RAIL_UTIL_PTI_BAUD_RATE_HZ> PTI Baud Rate (Hertz)
-// <147800-20000000:1>
-// <i> Default: 1600000
-#define SL_RAIL_UTIL_PTI_BAUD_RATE_HZ   1600000
-
-// </h>
 // <<< end of configuration section >>>
 
-// <<< sl:start pin_tool >>>
-// <pti signal=DOUT,(DFRAME),(DCLK)> SL_RAIL_UTIL_PTI
-// $[PTI_SL_RAIL_UTIL_PTI]
-#define SL_RAIL_UTIL_PTI_PERIPHERAL              PTI
-
-// PTI DOUT on PC06
-#define SL_RAIL_UTIL_PTI_DOUT_PORT               gpioPortC
-#define SL_RAIL_UTIL_PTI_DOUT_PIN                6
-
-// PTI DFRAME on PC07
-#define SL_RAIL_UTIL_PTI_DFRAME_PORT             gpioPortC
-#define SL_RAIL_UTIL_PTI_DFRAME_PIN              7
-
-
-// [PTI_SL_RAIL_UTIL_PTI]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_RAIL_UTIL_PTI_CONFIG_H
+#endif // SL_DEVICE_INIT_LFRCO_CONFIG_H
