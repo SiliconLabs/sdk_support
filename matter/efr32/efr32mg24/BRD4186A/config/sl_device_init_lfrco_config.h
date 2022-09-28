@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief DEVICE_INIT_DCDC Config
+ * @brief DEVICE_INIT_LFRCO Config
  *******************************************************************************
  * # License
  * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,31 +28,26 @@
  *
  ******************************************************************************/
 
-#ifndef SL_DEVICE_INIT_DCDC_CONFIG_H
-#define SL_DEVICE_INIT_DCDC_CONFIG_H
+#ifndef SL_DEVICE_INIT_LFRCO_CONFIG_H
+#define SL_DEVICE_INIT_LFRCO_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <q SL_DEVICE_INIT_DCDC_ENABLE> Enable DC/DC Converter
-// <i>
-// <i> Default: 1
-#define SL_DEVICE_INIT_DCDC_ENABLE         1
-
-// <q SL_DEVICE_INIT_DCDC_BYPASS> Set DC/DC Converter in Bypass Mode
-// <i>
-// <i> Default: 0
-#define SL_DEVICE_INIT_DCDC_BYPASS         0
-
-// <q SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE> Override for DCDC PFMX Mode Peak Current Setting
-// <i>
-// <i> Default: 1
-#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL_OVERRIDE  1
-
-// <o SL_DEVICE_INIT_DCDC_PFMX_IPKVAL> DCDC PFMX Mode Peak Current Setting <0-15>
-// <i>
-// <i> Default: DCDC_PFMXCTRL_IPKVAL_DEFAULT
-#define SL_DEVICE_INIT_DCDC_PFMX_IPKVAL    12
+// <o SL_DEVICE_INIT_LFRCO_PRECISION> Precision Mode
+// <i> Precision mode uses hardware to automatically re-calibrate the LFRCO
+// <i> against a crystal driven by the HFXO. Hardware detects temperature
+// <i> changes and initiates a re-calibration of the LFRCO as needed when
+// <i> operating in EM0, EM1, or EM2. If a re-calibration is necessary and the
+// <i> HFXO is not active, the precision mode hardware will automatically
+// <i> enable HFXO for a short time to perform the calibration. EM4 operation is
+// <i> not allowed while precision mode is enabled.
+// <i> If high precision is selected on devices that do not support it, default
+// <i> precision will be used.
+// <cmuPrecisionDefault=> Default precision
+// <cmuPrecisionHigh=> High precision
+// <i> Default: cmuPrecisionHigh
+#define SL_DEVICE_INIT_LFRCO_PRECISION          cmuPrecisionHigh
 
 // <<< end of configuration section >>>
 
-#endif // SL_DEVICE_INIT_DCDC_CONFIG_H
+#endif // SL_DEVICE_INIT_LFRCO_CONFIG_H

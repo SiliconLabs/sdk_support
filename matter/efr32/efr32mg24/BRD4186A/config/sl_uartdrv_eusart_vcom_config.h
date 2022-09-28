@@ -100,6 +100,7 @@
 // EUSART0 RTS on PA00
 #define SL_UARTDRV_EUSART_VCOM_RTS_PORT          gpioPortA
 #define SL_UARTDRV_EUSART_VCOM_RTS_PIN           0
+
 // [EUSART_SL_UARTDRV_EUSART_VCOM]$
 // <<< sl:end pin_tool >>>
 #endif // SL_UARTDRV_EUSART_VCOM_CONFIG_H
