@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Packet Trace Information configuration file.
  *******************************************************************************
@@ -42,12 +42,12 @@
 // <RAIL_PTI_MODE_SPI=> SPI
 // <RAIL_PTI_MODE_DISABLED=> Disabled
 // <i> Default: RAIL_PTI_MODE_UART
-#define SL_RAIL_UTIL_PTI_MODE RAIL_PTI_MODE_UART
+#define SL_RAIL_UTIL_PTI_MODE           RAIL_PTI_MODE_UART
 
 // <o SL_RAIL_UTIL_PTI_BAUD_RATE_HZ> PTI Baud Rate (Hertz)
 // <147800-20000000:1>
 // <i> Default: 1600000
-#define SL_RAIL_UTIL_PTI_BAUD_RATE_HZ 1600000
+#define SL_RAIL_UTIL_PTI_BAUD_RATE_HZ   1600000
 
 // </h>
 // <<< end of configuration section >>>
@@ -55,15 +55,16 @@
 // <<< sl:start pin_tool >>>
 // <pti signal=DOUT,(DFRAME),(DCLK)> SL_RAIL_UTIL_PTI
 // $[PTI_SL_RAIL_UTIL_PTI]
-#define SL_RAIL_UTIL_PTI_PERIPHERAL PTI
+#define SL_RAIL_UTIL_PTI_PERIPHERAL              PTI
 
 // PTI DOUT on PD04
-#define SL_RAIL_UTIL_PTI_DOUT_PORT gpioPortD
-#define SL_RAIL_UTIL_PTI_DOUT_PIN 4
+#define SL_RAIL_UTIL_PTI_DOUT_PORT               gpioPortD
+#define SL_RAIL_UTIL_PTI_DOUT_PIN                4
 
 // PTI DFRAME on PD05
-#define SL_RAIL_UTIL_PTI_DFRAME_PORT gpioPortD
-#define SL_RAIL_UTIL_PTI_DFRAME_PIN 5
+#define SL_RAIL_UTIL_PTI_DFRAME_PORT             gpioPortD
+#define SL_RAIL_UTIL_PTI_DFRAME_PIN              5
+
 
 // [PTI_SL_RAIL_UTIL_PTI]$
 
