@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief DEVICE_INIT_HFXO Config
+ * @brief HFXO Manager configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,26 +28,29 @@
  *
  ******************************************************************************/
 
-#ifndef SL_DEVICE_INIT_HFXO_CONFIG_H
-#define SL_DEVICE_INIT_HFXO_CONFIG_H
-
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <o SL_DEVICE_INIT_HFXO_MODE> Mode
-// <i>
-// <cmuHfxoOscMode_Crystal=> Crystal oscillator
-// <cmuHfxoOscMode_ExternalSine=> External sine wave
-// <i> Default: cmuHfxoOscMode_Crystal
-#define SL_DEVICE_INIT_HFXO_MODE           cmuHfxoOscMode_Crystal
+#ifndef SL_HFXO_MANAGER_CONFIG_H
+#define SL_HFXO_MANAGER_CONFIG_H
 
-// <o SL_DEVICE_INIT_HFXO_FREQ> Frequency <38000000-40000000>
-// <i> Default: 39000000
-#define SL_DEVICE_INIT_HFXO_FREQ           39000000
+// <h>Power Manager Configuration
 
-// <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-255>
-// <i> Default: 140
-#define SL_DEVICE_INIT_HFXO_CTUNE          95
+// <q SL_HFXO_MANAGER_CUSTOM_HFXO_IRQ_HANDLER> Enable custom IRQ handler for crystal HF oscillator.
+// <i> Enable if HFXO0_IRQHandler is needed from your application.
+// <i> The HFXO IRQ priority must not be changed as the HFXO Manager module needs it to be high priority
+// <i> and to stay enabled through atomic sections.
+// <i> The function sl_hfxo_manager_irq_handler() will have to be called from you custom handler if this is enabled.
+// <i> Default: 0
+#define SL_HFXO_MANAGER_CUSTOM_HFXO_IRQ_HANDLER  0
+
+// <q SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT> Enable support for Sleepy Crystals.
+// <i> If Enabled and if HFXO fails to startup due to a sleepy crystal, HFXO Manager will retry the startup with more aggressive settings
+// <i> before falling back to the configured settings.
+// <i> Default: 0
+#define SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT  0
+
+// </h>
+
+#endif /* SL_HFXO_MANAGER_CONFIG_H */
 
 // <<< end of configuration section >>>
-
-#endif // SL_DEVICE_INIT_HFXO_CONFIG_H
