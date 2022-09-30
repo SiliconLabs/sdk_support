@@ -33,12 +33,12 @@
 
 sl_status_t sl_device_init_clocks(void)
 {
-    CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFXO);
+    CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
 #if defined(_CMU_EM01GRPACLKCTRL_MASK)
-    CMU_ClockSelectSet(cmuClock_EM01GRPACLK, cmuSelect_HFXO);
+    CMU_ClockSelectSet(cmuClock_EM01GRPACLK, cmuSelect_HFRCODPLL);
 #endif
 #if defined(_CMU_EM01GRPBCLKCTRL_MASK)
-    CMU_ClockSelectSet(cmuClock_EM01GRPBCLK, cmuSelect_HFXO);
+    CMU_ClockSelectSet(cmuClock_EM01GRPBCLK, cmuSelect_HFRCODPLL);
 #endif
 
     CMU_Select_TypeDef lfOcillator = cmuSelect_LFXO;

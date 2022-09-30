@@ -4,8 +4,6 @@
 #include "sl_component_catalog.h"
 #endif
 
-#include "freertos_bluetooth.h"
-
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Bluetooth Stack Configuration
@@ -103,11 +101,11 @@
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
-// void sli_bt_rtos_ll_callback();
-// void sli_bt_rtos_stack_callback();
+  void sli_bt_rtos_ll_callback();
+  void sli_bt_rtos_stack_callback();
   #define SL_BT_CONFIG_FLAGS         (SL_BT_CONFIG_FLAG_RTOS | BT_EM2_LFCLK_REQ_FLAG)
-  #define SL_BT_CONFIG_LL_CALLBACK    BluetoothLLCallback
-  #define SL_BT_CONFIG_STACK_CALLBACK BluetoothUpdate
+  #define SL_BT_CONFIG_LL_CALLBACK    sli_bt_rtos_ll_callback
+  #define SL_BT_CONFIG_STACK_CALLBACK sli_bt_rtos_stack_callback
 #else
   #define SL_BT_CONFIG_FLAGS          (BT_EM2_LFCLK_REQ_FLAG)
   #define SL_BT_CONFIG_LL_CALLBACK    0

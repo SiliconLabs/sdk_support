@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief UARTDRV_EUSART Config
  *******************************************************************************
@@ -24,19 +24,19 @@
 // <h> EUSART settings
 // <o SL_UARTDRV_EUSART_VCOM_BAUDRATE> Baud rate
 // <i> Default: 115200
-#define SL_UARTDRV_EUSART_VCOM_BAUDRATE 115200
+#define SL_UARTDRV_EUSART_VCOM_BAUDRATE        115200
 
 // <o SL_UARTDRV_EUSART_VCOM_LF_MODE> Low frequency mode
 // <true=> True
 // <false=> False
-#define SL_UARTDRV_EUSART_VCOM_LF_MODE false
+#define SL_UARTDRV_EUSART_VCOM_LF_MODE         false
 
 // <o SL_UARTDRV_EUSART_VCOM_PARITY> Parity mode to use
 // <eusartNoParity=> No Parity
 // <eusartEvenParity=> Even parity
 // <eusartOddParity=> Odd parity
 // <i> Default: eusartNoParity
-#define SL_UARTDRV_EUSART_VCOM_PARITY eusartNoParity
+#define SL_UARTDRV_EUSART_VCOM_PARITY          eusartNoParity
 
 // <o SL_UARTDRV_EUSART_VCOM_STOP_BITS> Number of stop bits to use.
 // <eusartStopbits0p5=> 0.5 stop bits
@@ -44,7 +44,7 @@
 // <eusartStopbits1p5=> 1.5 stop bits
 // <eusartStopbits2=> 2 stop bits
 // <i> Default: eusartStopbits1
-#define SL_UARTDRV_EUSART_VCOM_STOP_BITS eusartStopbits1
+#define SL_UARTDRV_EUSART_VCOM_STOP_BITS       eusartStopbits1
 
 // <o SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE> Flow control method
 // <uartdrvFlowControlNone=> None
@@ -61,20 +61,20 @@
 // <eusartOVS4=> 4x oversampling
 // <eusartOVS0=> Oversampling disabled
 // <i> Default: eusartOVS16
-#define SL_UARTDRV_EUSART_VCOM_OVERSAMPLING eusartOVS16
+#define SL_UARTDRV_EUSART_VCOM_OVERSAMPLING      eusartOVS16
 
-// <o SL_UARTDRV_EUSART_VCOM_MVDIS> Majority vote disable for 16x, 8x and 6x
-// oversampling modes <eusartMajorityVoteEnable=> False
+// <o SL_UARTDRV_EUSART_VCOM_MVDIS> Majority vote disable for 16x, 8x and 6x oversampling modes
+// <eusartMajorityVoteEnable=> False
 // <eusartMajorityVoteDisable=> True
 // <i> Default: eusartMajorityVoteEnable
-#define SL_UARTDRV_EUSART_VCOM_MVDIS eusartMajorityVoteEnable
+#define SL_UARTDRV_EUSART_VCOM_MVDIS             eusartMajorityVoteEnable
 
 // <o SL_UARTDRV_EUSART_VCOM_RX_BUFFER_SIZE> Size of the receive operation queue
 // <i> Default: 6
-#define SL_UARTDRV_EUSART_VCOM_RX_BUFFER_SIZE 6
+#define SL_UARTDRV_EUSART_VCOM_RX_BUFFER_SIZE  6
 
-// <o SL_UARTDRV_EUSART_VCOM_TX_BUFFER_SIZE> Size of the transmit operation
-// queue <i> Default: 6
+// <o SL_UARTDRV_EUSART_VCOM_TX_BUFFER_SIZE> Size of the transmit operation queue
+// <i> Default: 6
 #define SL_UARTDRV_EUSART_VCOM_TX_BUFFER_SIZE 6
 // </h>
 // <<< end of configuration section >>>
@@ -82,24 +82,25 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_UARTDRV_EUSART_VCOM
 // $[EUSART_SL_UARTDRV_EUSART_VCOM]
-#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL EUSART0
-#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL_NO 0
+#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL        EUSART0
+#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL_NO     0
 
 // EUSART0 TX on PA08
-#define SL_UARTDRV_EUSART_VCOM_TX_PORT gpioPortA
-#define SL_UARTDRV_EUSART_VCOM_TX_PIN 8
+#define SL_UARTDRV_EUSART_VCOM_TX_PORT           gpioPortA
+#define SL_UARTDRV_EUSART_VCOM_TX_PIN            8
 
 // EUSART0 RX on PA09
-#define SL_UARTDRV_EUSART_VCOM_RX_PORT gpioPortA
-#define SL_UARTDRV_EUSART_VCOM_RX_PIN 9
+#define SL_UARTDRV_EUSART_VCOM_RX_PORT           gpioPortA
+#define SL_UARTDRV_EUSART_VCOM_RX_PIN            9
 
 // EUSART0 CTS on PB05
-#define SL_UARTDRV_EUSART_VCOM_CTS_PORT gpioPortB
-#define SL_UARTDRV_EUSART_VCOM_CTS_PIN 5
+#define SL_UARTDRV_EUSART_VCOM_CTS_PORT          gpioPortB
+#define SL_UARTDRV_EUSART_VCOM_CTS_PIN           5
 
 // EUSART0 RTS on PA00
-#define SL_UARTDRV_EUSART_VCOM_RTS_PORT gpioPortA
-#define SL_UARTDRV_EUSART_VCOM_RTS_PIN 0
+#define SL_UARTDRV_EUSART_VCOM_RTS_PORT          gpioPortA
+#define SL_UARTDRV_EUSART_VCOM_RTS_PIN           0
+
 // [EUSART_SL_UARTDRV_EUSART_VCOM]$
 // <<< sl:end pin_tool >>>
 #endif // SL_UARTDRV_EUSART_VCOM_CONFIG_H

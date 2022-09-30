@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Simple Led Driver Configuration
  *******************************************************************************
@@ -34,8 +34,9 @@
 
 // <gpio> SL_SIMPLE_LED_LED1
 // $[GPIO_SL_SIMPLE_LED_LED1]
-#define SL_SIMPLE_LED_LED1_PORT gpioPortA
-#define SL_SIMPLE_LED_LED1_PIN 7
+#define SL_SIMPLE_LED_LED1_PORT                  gpioPortA
+#define SL_SIMPLE_LED_LED1_PIN                   7
+
 // [GPIO_SL_SIMPLE_LED_LED1]$
 
 // <<< sl:end pin_tool >>>

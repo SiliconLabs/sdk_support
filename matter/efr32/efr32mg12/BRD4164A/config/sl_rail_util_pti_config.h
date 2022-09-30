@@ -67,6 +67,7 @@
 #define SL_RAIL_UTIL_PTI_DFRAME_PIN              13
 #define SL_RAIL_UTIL_PTI_DFRAME_LOC              6
 
+
 // [PTI_SL_RAIL_UTIL_PTI]$
 
 // <<< sl:end pin_tool >>>

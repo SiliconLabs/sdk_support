@@ -55,7 +55,7 @@
 // <usartOVS6=> 6x oversampling
 // <usartOVS4=> 4x oversampling
 // <i> Default: usartOVS16
-#define SL_UARTDRV_USART_VCOM_OVERSAMPLING      usartOVS16
+#define SL_UARTDRV_USART_VCOM_OVERSAMPLING      usartOVS4
 
 // <o SL_UARTDRV_USART_VCOM_MVDIS> Majority vote disable for 16x, 8x and 6x oversampling modes
 // <true=> True

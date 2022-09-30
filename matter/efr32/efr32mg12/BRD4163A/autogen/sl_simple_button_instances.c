@@ -52,6 +52,8 @@ const sl_button_t sl_button_btn1 = {
   .disable = sl_simple_button_disable,
 };
 
+// the table of buttons and button count are generated as a
+// convenience for the application
 const sl_button_t *sl_simple_button_array[] = {
   &sl_button_btn0, 
   &sl_button_btn1

@@ -14,6 +14,7 @@
 #include "sl_device_init_nvic.h"
 #include "sl_hfxo_manager.h"
 #include "sl_rail_util_pti.h"
+#include "sl_bt_rtos_adaptation.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
@@ -25,6 +26,7 @@
 #include "sl_spidrv_instances.h"
 #endif
 
+#include "sl_bluetooth.h"
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
@@ -73,6 +75,7 @@ void sl_stack_init(void)
 {
     sl_rail_util_pa_init();
     sl_rail_util_pti_init();
+    sl_bt_rtos_init();
 }
 
 void sl_internal_app_init(void) {}

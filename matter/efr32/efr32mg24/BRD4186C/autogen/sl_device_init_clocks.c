@@ -1,4 +1,4 @@
-/*******************************************************************************
+/***************************************************************************//**
  * @file
  * @brief Device initialization for clocks.
  *******************************************************************************
@@ -31,7 +31,8 @@
 
 #include "em_cmu.h"
 
-sl_status_t sl_device_init_clocks(void) {
+sl_status_t sl_device_init_clocks(void)
+{
   CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
 #if defined(_CMU_EM01GRPACLKCTRL_MASK)
   CMU_ClockSelectSet(cmuClock_EM01GRPACLK, cmuSelect_HFRCODPLL);

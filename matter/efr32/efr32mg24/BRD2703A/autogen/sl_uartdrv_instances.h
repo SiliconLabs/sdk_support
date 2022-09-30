@@ -8,11 +8,12 @@ extern "C" {
 #include "sl_status.h"
 #include "uartdrv.h"
 
+
 extern UARTDRV_Handle_t sl_uartdrv_eusart_vcom_handle;
 
 void sl_uartdrv_init_instances(void);
 
-/*******************************************************************************
+/***************************************************************************//**
  * Set the handle as the default UARTDRV handle.
  *
  * @param[in] handle    UARTDRV handle to set as default.
@@ -21,7 +22,7 @@ void sl_uartdrv_init_instances(void);
  ******************************************************************************/
 sl_status_t sl_uartdrv_set_default(UARTDRV_Handle_t handle);
 
-/*******************************************************************************
+/***************************************************************************//**
  * Get the default UARTDRV handle configured.
  *
  * @return  UARTDRV handle
