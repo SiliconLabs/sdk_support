@@ -25,6 +25,10 @@
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+#include "sl_i2cspm_instances.h"
+#endif
+
 
 void sl_platform_init(void)
 {
@@ -52,6 +56,9 @@ void sl_driver_init(void)
 {
     GPIOINT_Init();
     sl_simple_button_init_instances();
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+    sl_i2cspm_init_instances();
+#endif
     sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
     sl_uartdrv_init_instances();
