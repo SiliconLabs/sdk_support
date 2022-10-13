@@ -88,4 +88,3 @@ void sl_stack_process_action(void)
 void sl_internal_app_process_action(void)
 {
 }
-
