@@ -40,7 +40,7 @@ void sl_platform_init(void)
   osKernelInitialize();
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_power_manager_init();
-#endif
+#endif // SL_CATALOG_POWER_MANAGER_PRESENT
 }
 
 void sl_kernel_start(void)
@@ -68,6 +68,7 @@ void sl_stack_init(void)
 {
   sl_rail_util_pa_init();
   sl_rail_util_pti_init();
+  sl_bt_rtos_init();
 }
 
 void sl_internal_app_init(void)
