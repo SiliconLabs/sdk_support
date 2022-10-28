@@ -20,6 +20,7 @@
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
+#include "SEGGER_SYSVIEW.h"
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
 #endif // CONFIG_ENABLE_UART
@@ -55,6 +56,8 @@ void sl_platform_init(void)
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_power_manager_init();
 #endif
+  SEGGER_SYSVIEW_Conf();
+  SEGGER_SYSVIEW_Start();
 }
 
 void sl_kernel_start(void)
