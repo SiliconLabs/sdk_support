@@ -23,6 +23,9 @@
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+#include "sl_i2cspm_instances.h"
+#endif
 
 void sl_platform_init(void)
 {
@@ -55,6 +58,9 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
+#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+  sl_i2cspm_init_instances();
+#endif
 }
 
 void sl_service_init(void)
