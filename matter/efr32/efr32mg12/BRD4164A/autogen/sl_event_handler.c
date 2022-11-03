@@ -20,6 +20,11 @@
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
 #endif // CONFIG_ENABLE_UART
+
+#ifdef SL_WIFI
+#include "sl_spidrv_instances.h"
+#endif
+
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
 #endif
@@ -52,6 +57,9 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
     GPIOINT_Init();
+#ifdef SL_WIFI
+    sl_spidrv_init_instances();
+#endif
     sl_simple_button_init_instances();
 #if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
     sl_i2cspm_init_instances();
