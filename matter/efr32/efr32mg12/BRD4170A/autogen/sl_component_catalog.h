@@ -58,5 +58,4 @@
 #define SL_CATALOG_SENSOR_RHT_PRESENT
 #endif
 
-
 #endif // SL_COMPONENT_CATALOG_H
