@@ -75,7 +75,9 @@ void sl_stack_init(void)
 {
     sl_rail_util_pa_init();
     sl_rail_util_pti_init();
-    // sl_bt_rtos_init();
+#if !RS91X_BLE_ENABLE
+     sl_bt_rtos_init();
+#endif
 }
 
 void sl_internal_app_init(void) {}
