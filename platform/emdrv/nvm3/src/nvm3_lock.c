@@ -1,32 +1,32 @@
-/***************************************************************************/ /**
-                                                                               * @file
-                                                                               * @brief NVM3 data access lock API implementation
-                                                                               *******************************************************************************
-                                                                               * # License
-                                                                               * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
-                                                                               *******************************************************************************
-                                                                               *
-                                                                               * SPDX-License-Identifier: Zlib
-                                                                               *
-                                                                               * The licensor of this software is Silicon Laboratories Inc.
-                                                                               *
-                                                                               * This software is provided 'as-is', without any express or implied
-                                                                               * warranty. In no event will the authors be held liable for any damages
-                                                                               * arising from the use of this software.
-                                                                               *
-                                                                               * Permission is granted to anyone to use this software for any purpose,
-                                                                               * including commercial applications, and to alter it and redistribute it
-                                                                               * freely, subject to the following restrictions:
-                                                                               *
-                                                                               * 1. The origin of this software must not be misrepresented; you must not
-                                                                               *    claim that you wrote the original software. If you use this software
-                                                                               *    in a product, an acknowledgment in the product documentation would be
-                                                                               *    appreciated but is not required.
-                                                                               * 2. Altered source versions must be plainly marked as such, and must not be
-                                                                               *    misrepresented as being the original software.
-                                                                               * 3. This notice may not be removed or altered from any source distribution.
-                                                                               *
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @file
+ * @brief NVM3 data access lock API implementation
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2018 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied
+ * warranty. In no event will the authors be held liable for any damages
+ * arising from the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software
+ *    in a product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
 
 #include "nvm3_lock.h"
 #include "nvm3.h"
@@ -57,10 +57,10 @@ CORE_DECLARE_IRQ_STATE;
 /// @endcond
 #endif
 
-/***************************************************************************/ /**
-                                                                               * @addtogroup nvm3
-                                                                               * @{
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @addtogroup nvm3
+ * @{
+ ******************************************************************************/
 
 /// @cond DO_NOT_INCLUDE_WITH_DOXYGEN
 nvm3_Obj_t nvm3_internalObjectHandleA;
@@ -72,15 +72,15 @@ const size_t nvm3_objHandleSize = sizeof(nvm3_Obj_t);
 
 /// @endcond
 
-/***************************************************************************/ /**
-                                                                               * @addtogroup nvm3lock
-                                                                               * @{
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @addtogroup nvm3lock
+ * @{
+ ******************************************************************************/
 
-/***************************************************************************/ /**
-                                                                               * @details
-                                                                               * The default lock-begin implementation.
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @details
+ * The default lock-begin implementation.
+ ******************************************************************************/
 SL_WEAK void nvm3_lockBegin(void) {
 #ifdef NVM3_CRITICAL_CHECK
   lockCount++;
@@ -91,10 +91,10 @@ SL_WEAK void nvm3_lockBegin(void) {
 #endif
 }
 
-/***************************************************************************/ /**
-                                                                               * @details
-                                                                               * The default lock-end implementation.
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @details
+ * The default lock-end implementation.
+ ******************************************************************************/
 SL_WEAK void nvm3_lockEnd(void) {
 #ifdef NVM3_CRITICAL_CHECK
   lockCount--;
@@ -103,14 +103,14 @@ SL_WEAK void nvm3_lockEnd(void) {
 #endif
 }
 
-/***************************************************************************/ /**
-                                                                               * @details
-                                                                               *  Disable execution from data area.
-                                                                               *
-                                                                               * @param[in]  address Start of memory range
-                                                                               *
-                                                                               * @param[in]  size Size of memory range.
-                                                                               ******************************************************************************/
+/*******************************************************************************
+ * @details
+ *  Disable execution from data area.
+ *
+ * @param[in]  address Start of memory range
+ *
+ * @param[in]  size Size of memory range.
+ ******************************************************************************/
 void nvm3_lockDisableExecute(void *address, size_t size) {
 #if defined(__MPU_PRESENT) && (__MPU_PRESENT == 1U) &&                         \
     defined(SL_CATALOG_MPU_PRESENT)
