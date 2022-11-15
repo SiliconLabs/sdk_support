@@ -1,6 +1,6 @@
 /*******************************************************************************
 * @file  FlashPrg.c
-* @brief 
+* @brief
 *******************************************************************************
 * # License
 * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -27,7 +27,7 @@
  *                    fnc:  Function Code (1 - Erase, 2 - Program, 3 - Verify)
  *    Return Value:   0 - OK,  1 - Failed
  */
-int Init (unsigned long adr, unsigned long clk, unsigned long fnc) 
+int Init (unsigned long adr, unsigned long clk, unsigned long fnc)
 {
 	return RSI_FLASH_Initialize();
 }
@@ -39,7 +39,7 @@ int Init (unsigned long adr, unsigned long clk, unsigned long fnc)
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-int UnInit (unsigned long fnc) 
+int UnInit (unsigned long fnc)
 {
 	return RSI_FLASH_UnInitialize();
 }
@@ -50,7 +50,7 @@ int UnInit (unsigned long fnc)
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-int EraseChip (void) 
+int EraseChip (void)
 {
 	return RSI_FLASH_Erasechip();
 }
@@ -62,7 +62,7 @@ int EraseChip (void)
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-int EraseSector (unsigned long adr) 
+int EraseSector (unsigned long adr)
 {
 	//adr &= 0x00FFFFFF;
 	return RSI_FLASH_EraseSector(adr);
@@ -77,12 +77,12 @@ int EraseSector (unsigned long adr)
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-int ProgramPage (unsigned long adr, unsigned long sz, unsigned char *buf) 
+int ProgramPage (unsigned long adr, unsigned long sz, unsigned char *buf)
 {
   //adr &= 0x00FFFFFF;
 	//return RSI_FLASH_ProgramPage(adr, buf, sz);
 	return RSI_FLASH_Write(adr, buf, sz);
-                                   
+
 }
 
 /*
@@ -93,22 +93,22 @@ int ProgramPage (unsigned long adr, unsigned long sz, unsigned char *buf)
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-int ReadFlash (unsigned long adr, unsigned long sz, unsigned char *buf) 
+int ReadFlash (unsigned long adr, unsigned long sz, unsigned char *buf)
 {
   //adr &= 0x00FFFFFF;
 	//return RSI_FLASH_ProgramPage(adr, buf, sz);
 	return RSI_FLASH_Read(adr, buf, sz, 0);  //0 -> automode
-                                   
+
 }
 
-/*  
+/*
  *  Verify Flash Contents
  *    Parameter:      adr:  Start Address
  *                    sz:   Size (in bytes)
  *                    buf:  Data
  *    Return Value:   (adr+sz) - OK, Failed Address
  */
-unsigned long Verify (unsigned long adr, unsigned long sz, unsigned char *buf) 
+unsigned long Verify (unsigned long adr, unsigned long sz, unsigned char *buf)
 {
 	return RSI_FLASH_Verify(adr, buf, sz);
 }

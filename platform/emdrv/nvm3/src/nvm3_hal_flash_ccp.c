@@ -142,7 +142,7 @@ static Ecode_t nvm3_halFlashGetInfo(nvm3_HalInfo_t *halInfo)
   halInfo->pageSize = 1024;
   halInfo->systemUnique = 0;
   return ECODE_NVM3_OK;
-  
+
 }
 
 static void nvm3_halFlashAccess(nvm3_HalNvmAccessCode_t access)
@@ -177,7 +177,7 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src, si
   byteCnt = wordCnt * sizeof(uint32_t);
 
   /* CCP flash Write */
-  ProgramPage(pDst, byteCnt, (char *)pSrc); 
+  ProgramPage(pDst, byteCnt, (char *)pSrc);
   //halSta = convertMscStatusToNvm3Status(mscSta);
 
 #if CHECK_DATA

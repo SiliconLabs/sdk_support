@@ -1,6 +1,6 @@
 /*******************************************************************************
 * @file  Flash_Intf.c
-* @brief 
+* @brief
 *******************************************************************************
 * # License
 * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -94,7 +94,7 @@ void RSI_QSPI_PinMuxInit(void)
 }
 
 
-/* QSPI HAL wrapper for NVM3 */ 
+/* QSPI HAL wrapper for NVM3 */
 uint32_t RSI_FLASH_Initialize(void)
 {
   /*Init the QSPI configurations structure */
@@ -114,24 +114,24 @@ uint32_t RSI_FLASH_Initialize(void)
 
 uint32_t RSI_FLASH_EraseSector(uint32_t sector_address)
 {
-	spi_config_t spi_configs_erase; 
+	spi_config_t spi_configs_erase;
 	GetQspiConfig(&spi_configs_erase);
 	//ROMAPI_QSPI_API->qspi_spi_erase((qspi_reg_t *)(M4_QSPI_BASE_ADDRESS),&spi_configs_erase,SECTOR_ERASE, sector_address, 1, 0);
 	/* The erase function does the erase and takes care of any missing configurations to successfully erase the sector*/
 	//return 0;
-	
+
   /* Erases the SECTOR   */
   DEBUGOUT("\r\n Erase Sector \r\n");
   RSI_QSPI_SpiErase((qspi_reg_t *)QSPI_BASE, &spi_configs_erase, SECTOR_ERASE, sector_address, 1, 0);
-	
+
 	/* The erase function does the erase and takes care of any missing configurations to successfully erase the sector*/
-	return 0;	
+	return 0;
 }
 
 uint32_t RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length)
 {
-	spi_config_t spi_configs_program; 
-	uint32_t check_sum = 0; 
+	spi_config_t spi_configs_program;
+	uint32_t check_sum = 0;
 	GetQspiConfig(&spi_configs_program);
 
   /* writes the data to required address using qspi */
@@ -150,16 +150,16 @@ uint32_t RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length)
                     0,
                     0,
                     0);
-	
-	return 0;	
+
+	return 0;
 }
 
 uint32_t RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length, uint8_t auto_mode)
 {
-	spi_config_t spi_configs_program; 
-	uint32_t check_sum = 0; 
+	spi_config_t spi_configs_program;
+	uint32_t check_sum = 0;
 	GetQspiConfig(&spi_configs_program);
-	
+
   /* IO_READ - Manual Mode */
 	if (0 == auto_mode) {
     /* IO Read config */
@@ -176,13 +176,13 @@ uint32_t RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length, 
                       0);
 	} else { /* DMA_READ - Auto mode */
   /* Read the data by using UDMA */
-#if 0 //Need to Implement		
+#if 0 //Need to Implement
   DEBUGOUT("\r\n Read Data From Flash Memory Using DMA \r\n");
   UDMA_Read();
   /* Wait till dma done */
   while (!done)
     ;
-#endif		
+#endif
 	}
 
 	return 0;
@@ -191,11 +191,11 @@ uint32_t RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length, 
 uint32_t RSI_FLASH_Erasechip()
 {
 	volatile int sector_off_set_addr = 0;
-	
-	spi_config_t spi_configs_erase_chip; 
+
+	spi_config_t spi_configs_erase_chip;
 	GetQspiConfig(&spi_configs_erase_chip);
 
-  /*Note : This function will not erase the MBR content of the flash but erases the rest of the flash from 72K*/	
+  /*Note : This function will not erase the MBR content of the flash but erases the rest of the flash from 72K*/
 	//! Initial offset of the flash to be erased.
 	sector_off_set_addr = INIT_FLASH_OFFSET;
 
@@ -204,7 +204,7 @@ uint32_t RSI_FLASH_Erasechip()
 		//! Increment the sector address by 4K
 		sector_off_set_addr = (sector_off_set_addr + (4*SIZE_1K));
 		//! This loop will be terminated once it reaches to the 1Mb range of memory
-	//! Compare with 4Mb flash size 	
+	//! Compare with 4Mb flash size
 	}while(sector_off_set_addr < FLASH_SECTOR_OFFSET);
 	// The erase function does the erase and takes care of any missing configurations to successfully erase the sector of the flash
 	return 0;
@@ -231,13 +231,13 @@ uint32_t checksum_addition(uint8_t *buf, uint32_t size, uint32_t prev_sum)
 		if(sum < dword)
 		{
 			/* In addition operation, if result is lesser than any one of the operand
-			 * it means carry is generated. 
+			 * it means carry is generated.
 			 * Incrementing the sum to get ones compliment addition */
 
 			sum++;
 		}
 	}
-	
+
 	/* Handle non dword-sized case */
   if(size & 0x3) {
 		dword = DWORD_ADDR_COMP;
@@ -257,8 +257,8 @@ uint32_t checksum_addition(uint8_t *buf, uint32_t size, uint32_t prev_sum)
 
 uint32_t RSI_FLASH_ProgramPage(uint32_t address, unsigned char *data, uint32_t length)
 {
-	spi_config_t spi_configs_program; 
-	uint32_t check_sum = 0; 
+	spi_config_t spi_configs_program;
+	uint32_t check_sum = 0;
 	GetQspiConfig(&spi_configs_program);
 	if(address == INIT_FLASH_OFFSET)
 	{
@@ -267,7 +267,7 @@ uint32_t RSI_FLASH_ProgramPage(uint32_t address, unsigned char *data, uint32_t l
 	}
  	if (ROMAPI_QSPI_API->qspi_spi_write((qspi_reg_t *)(M4_QSPI_BASE_ADDRESS),
 								&spi_configs_program,0x2 ,
-									address,(uint8_t *) data, 
+									address,(uint8_t *) data,
 											length, FLASH_PAGE_SIZE, _1BYTE, 1,0,1,0,0,0) == RSI_OK){
 		return 0; // Success
 	}
@@ -279,12 +279,12 @@ uint32_t RSI_FLASH_ProgramPage(uint32_t address, unsigned char *data, uint32_t l
 
 uint32_t RSI_FLASH_Verify(uint32_t address, unsigned char *data, uint32_t length)
 {
-	uint32_t check_sum = 0, i; 
+	uint32_t check_sum = 0, i;
 	uint8_t *buffer = (uint8_t *)address;
-	
+
 	if((address & FLASH_VERIFY_ADDR)== INIT_FLASH_OFFSET)	{
 		check_sum  = checksum_addition(data , CRC_LEN_VAL , 1);
-		memcpy(&data[CRC_LEN_VAL] ,(uint8_t*)&check_sum,4);	
+		memcpy(&data[CRC_LEN_VAL] ,(uint8_t*)&check_sum,4);
 		for(i=0;i<length;i++)
 			if(buffer[i] != data[i])
 				break;

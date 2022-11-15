@@ -1,6 +1,6 @@
 /*******************************************************************************
 * @file  FlashDev.c
-* @brief 
+* @brief
 *******************************************************************************
 * # License
 * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,10 +28,8 @@ struct FlashDevice const FlashDevice __attribute__ ((section ("DevDscr")))  =  {
    0xFF,                       // Initial Content of Erased Memory
    10000,                 		 // Program Page Timeout in mSec
    10000,                 		 // Erase Sector Timeout in mSec
-	
+
 // Specify Size and Address of Sectors
    0x001000, 0x000000,         // Sector Size  4kB (1024 Sectors)
    SECTOR_END
 };
-
-
