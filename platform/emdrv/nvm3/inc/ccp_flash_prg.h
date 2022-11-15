@@ -71,12 +71,12 @@ struct FlashDevice {
 
 // Flash Programming Functions (Called by FlashOS)
 extern bool Init(unsigned long adr, // Initialize Flash
-                unsigned long clk, unsigned long fnc)
+                 unsigned long clk, unsigned long fnc)
     __attribute__((section("sec_ram")));
 extern bool UnInit(unsigned long fnc)
     __attribute__((section("sec_ram"))); // De-initialize Flash
 extern bool EraseSector(unsigned long adr)
-    __attribute__((section("sec_ram")));  // Erase Sector Function
+    __attribute__((section("sec_ram")));   // Erase Sector Function
 extern bool ProgramPage(unsigned long adr, // Program Page Function
-                       unsigned long sz, unsigned char *buf)
+                        unsigned long sz, unsigned char *buf)
     __attribute__((section("sec_ram")));

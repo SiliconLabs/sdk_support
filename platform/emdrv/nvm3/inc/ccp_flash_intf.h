@@ -28,13 +28,15 @@ extern "C" {
 #include "rsi_qspi.h"
 #include "rsi_rom_egpio.h"
 
-#define ECODE_QSPI_OK                               (0)
-#define ECODE_QSPI_ERROR                            (1)
+#define ECODE_QSPI_OK (0)
+#define ECODE_QSPI_ERROR (1)
 
-#define M4SS_CLK_PWR_CTRL_BASE_ADDR   0x46000000
-#define M4SS_CLK_ENABLE_SET_REG1     *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x00)
-#define M4SS_CLK_ENABLE_CLEAR_REG1   *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x04)
-#define M4SS_STATIC_CLK_SWITCH        BIT(19)
+#define M4SS_CLK_PWR_CTRL_BASE_ADDR 0x46000000
+#define M4SS_CLK_ENABLE_SET_REG1                                               \
+  *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x00)
+#define M4SS_CLK_ENABLE_CLEAR_REG1                                             \
+  *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x04)
+#define M4SS_STATIC_CLK_SWITCH BIT(19)
 
 #define CLK_ENABLE_SET_2_REG_QSPI                                              \
   (*((volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x08)))
@@ -106,7 +108,8 @@ bool RSI_FLASH_Initialize(void);
 
 bool RSI_FLASH_EraseSector(uint32_t sector_address);
 
-bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length, uint8_t auto_mode);
+bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
+                    uint8_t auto_mode);
 
 bool RSI_FLASH_UnInitialize(void);
 

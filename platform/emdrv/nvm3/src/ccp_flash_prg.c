@@ -45,9 +45,7 @@ bool UnInit(unsigned long fnc) { return RSI_FLASH_UnInitialize(); }
  *    Return Value:   0 - OK,  1 - Failed
  */
 
-bool EraseSector(unsigned long adr) {
-  return RSI_FLASH_EraseSector(adr);
-}
+bool EraseSector(unsigned long adr) { return RSI_FLASH_EraseSector(adr); }
 
 /*
  *  Program Page in Flash Memory
