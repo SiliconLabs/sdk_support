@@ -139,7 +139,7 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src,
   byteCnt = wordCnt * sizeof(uint32_t);
 
   /* CCP flash Write */
-  ret = ProgramPage(pDst, byteCnt, (char *)pSrc); 
+  ret = ProgramPage(pDst, byteCnt, (char *)pSrc);
   if(!ret)
   	halSta = ECODE_NVM3_OK;
 

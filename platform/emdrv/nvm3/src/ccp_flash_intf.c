@@ -92,7 +92,7 @@ void RSI_QSPI_PinMuxInit(void) {
 }
 
 
-/* QSPI HAL wrapper for NVM3 */ 
+/* QSPI HAL wrapper for NVM3 */
 bool RSI_FLASH_Initialize(void)
 {
   /*Init the QSPI configurations structure */
@@ -112,15 +112,15 @@ bool RSI_FLASH_Initialize(void)
 
 bool RSI_FLASH_EraseSector(uint32_t sector_address)
 {
-	spi_config_t spi_configs_erase; 
+	spi_config_t spi_configs_erase;
 	GetQspiConfig(&spi_configs_erase);
-	
+
 	/* Erases the SECTOR   */
 	DEBUGOUT("\r\n Erase Sector \r\n");
 	RSI_QSPI_SpiErase((qspi_reg_t *)QSPI_BASE, &spi_configs_erase, SECTOR_ERASE, sector_address, 1, 0);
-	
+
 	/* The erase function does the erase and takes care of any missing configurations to successfully erase the sector*/
-	return ECODE_QSPI_OK;	
+	return ECODE_QSPI_OK;
 }
 
 bool RSI_FLASH_Write(uint32_t address, unsigned char *data,
