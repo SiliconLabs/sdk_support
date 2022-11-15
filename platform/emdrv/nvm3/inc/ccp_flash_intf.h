@@ -27,12 +27,14 @@ extern "C" {
 
 #include "rsi_qspi.h"
 #include "rsi_rom_egpio.h"
-#define M4SS_CLK_PWR_CTRL_BASE_ADDR 0x46000000
-#define M4SS_CLK_ENABLE_SET_REG1                                               \
-  *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x00)
-#define M4SS_CLK_ENABLE_CLEAR_REG1                                             \
-  *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x04)
-#define M4SS_STATIC_CLK_SWITCH BIT(19)
+
+#define ECODE_QSPI_OK                               (0)
+#define ECODE_QSPI_ERROR                            (1)
+
+#define M4SS_CLK_PWR_CTRL_BASE_ADDR   0x46000000
+#define M4SS_CLK_ENABLE_SET_REG1     *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x00)
+#define M4SS_CLK_ENABLE_CLEAR_REG1   *(volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x04)
+#define M4SS_STATIC_CLK_SWITCH        BIT(19)
 
 #define CLK_ENABLE_SET_2_REG_QSPI                                              \
   (*((volatile uint32_t *)(M4SS_CLK_PWR_CTRL_BASE_ADDR + 0x08)))
@@ -52,49 +54,6 @@ extern "C" {
 #define VAL_11 11
 #define VAL_15 15
 #define VAL_6 6
-
-#ifdef SECONDARY_FLASH
-#define PadSelectionEnable_CLK 16
-#define PadSelectionEnable_D0 17
-#define PadSelectionEnable_D1 18
-#define PadSelectionEnable_CSN0 19
-#define PadSelectionEnable_D2 20
-#define PadSelectionEnable_D3 21
-
-#define QSPI_MODE 9
-
-/*M4 QSPI  pin set */
-#define M4SS_QSPI_CLK 52
-#define M4SS_QSPI_D0 53
-#define M4SS_QSPI_D1 54
-#define M4SS_QSPI_CSN0 55
-#define M4SS_QSPI_D2 56
-#define M4SS_QSPI_D3 57
-#endif
-
-#ifdef PRIMARY_FLASH
-#define PadSelectionEnable 0
-#define QSPI_MODE 1
-/*M4 QSPI  pin set */
-#define M4SS_QSPI_CLK 0
-#define M4SS_QSPI_CSN0 1
-#define M4SS_QSPI_D0 2
-#define M4SS_QSPI_D1 3
-#define M4SS_QSPI_D2 4
-#define M4SS_QSPI_D3 5
-#endif
-#ifdef EXTERNAL_FLASH
-#define PadSelectionEnable_1 11
-#define PadSelectionEnable_2 12
-#define QSPI_MODE 10
-/*M4 QSPI  pin set */
-#define M4SS_QSPI_CLK 46
-#define M4SS_QSPI_CSN0 49
-#define M4SS_QSPI_D0 47
-#define M4SS_QSPI_D1 48
-#define M4SS_QSPI_D2 50
-#define M4SS_QSPI_D3 51
-#endif
 
 /******************************************
  *              FLASH CMDS
@@ -143,24 +102,13 @@ extern "C" {
 #define GPIO_58_AND_52 12
 #define GPIO_DDR_PADS 13
 
-uint32_t RSI_FLASH_Initialize(void);
+bool RSI_FLASH_Initialize(void);
 
-uint32_t RSI_FLASH_EraseSector(uint32_t sector_address);
+bool RSI_FLASH_EraseSector(uint32_t sector_address);
 
-uint32_t RSI_FLASH_Erasechip(void);
+bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length, uint8_t auto_mode);
 
-uint32_t checksum_addition(uint8_t *buf, uint32_t size, uint32_t prev_sum);
-
-uint32_t RSI_FLASH_ProgramPage(uint32_t address, unsigned char *data,
-                               uint32_t length);
-
-uint32_t RSI_FLASH_Verify(uint32_t address, unsigned char *data,
-                          uint32_t length);
-
-uint32_t RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
-                        uint8_t auto_mode);
-
-uint32_t RSI_FLASH_UnInitialize(void);
+bool RSI_FLASH_UnInitialize(void);
 
 void qspi_gpio_revert_m4(void);
 

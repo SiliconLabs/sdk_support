@@ -28,7 +28,9 @@
 /* History:
  *  Version 1.00
  *    Initial release
- */
+ */ 
+
+#include <stdbool.h>
 
 #define VERS 1 // Interface Version 1.01
 
@@ -68,20 +70,13 @@ struct FlashDevice {
 #define FLASH_DRV_VERS (0x0100 + VERS) // Driver Version, do not modify!
 
 // Flash Programming Functions (Called by FlashOS)
-extern int Init(unsigned long adr, // Initialize Flash
+extern bool Init(unsigned long adr, // Initialize Flash
                 unsigned long clk, unsigned long fnc)
     __attribute__((section("sec_ram")));
-extern int UnInit(unsigned long fnc)
+extern bool UnInit(unsigned long fnc)
     __attribute__((section("sec_ram"))); // De-initialize Flash
-extern int BlankCheck(unsigned long adr, // Blank Check
-                      unsigned long sz, unsigned char pat)
-    __attribute__((section("sec_ram")));
-extern int EraseChip(void); // Erase complete Device
-extern int EraseSector(unsigned long adr)
+extern bool EraseSector(unsigned long adr)
     __attribute__((section("sec_ram")));  // Erase Sector Function
-extern int ProgramPage(unsigned long adr, // Program Page Function
+extern bool ProgramPage(unsigned long adr, // Program Page Function
                        unsigned long sz, unsigned char *buf)
-    __attribute__((section("sec_ram")));
-extern unsigned long Verify(unsigned long adr, // Verify Function
-                            unsigned long sz, unsigned char *buf)
     __attribute__((section("sec_ram")));

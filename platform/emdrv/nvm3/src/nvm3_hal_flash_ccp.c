@@ -28,6 +28,7 @@
  *
  ******************************************************************************/
 
+#include "ccp_flash_intf.h"
 #include "nvm3.h"
 #include "nvm3_hal_flash.h"
 #include <stdbool.h>
@@ -49,9 +50,6 @@
 
 #define CHECK_DATA 0 ///< Macro defining if data should be checked
 
-// CCP check flash operation
-#define _FLASH_BASE_ADDR (0x802B000) //(0x08000000)
-
 /******************************************************************************
  ***************************   LOCAL VARIABLES   ******************************
  *****************************************************************************/
@@ -61,40 +59,6 @@
  *****************************************************************************/
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
-
-/*******************************************************************************
- * @brief
- *   Convert return type.
- *
- * @details
- *   This function converts between the return type of the emlib and the
- *   NVM3 API.
- *
- * @param[in] result
- *   Operation result.
- *
- * @return
- *   Returns remapped status code.
- ******************************************************************************/
-#ifndef CCP_SI917_BRINGUP
-static Ecode_t convertMscStatusToNvm3Status(MSC_Status_TypeDef result) {
-  Ecode_t ret;
-
-  switch (result) {
-  case mscReturnOk:
-    ret = ECODE_NVM3_OK;
-    break;
-  case mscReturnInvalidAddr:
-    ret = ECODE_NVM3_ERR_INT_ADDR_INVALID;
-    break;
-  default:
-    ret = ECODE_NVM3_ERR_INT_EMULATOR;
-    break;
-  }
-
-  return ret;
-}
-#endif /* !CCP_SI917_BRINGUP */
 
 // Check if the page is erased.
 static bool isErased(void *adr, size_t len) {
@@ -118,11 +82,15 @@ static bool isErased(void *adr, size_t len) {
 static Ecode_t nvm3_halFlashOpen(nvm3_HalPtr_t nvmAdr, size_t flashSize) {
   (void)nvmAdr;
   (void)flashSize;
+  Ecode_t halSta = ECODE_NVM3_ERR_NOT_OPENED;
+  bool ret = ECODE_QSPI_ERROR;
 
   /* CCP flash Initilize */
-  Init(0, 0, 0);
+  ret = Init(0, 0, 0);
+  if(!ret)
+  	halSta = ECODE_NVM3_OK;
 
-  return ECODE_NVM3_OK;
+  return halSta;
 }
 
 static void nvm3_halFlashClose(void) {
@@ -164,14 +132,16 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src,
                                        size_t wordCnt) {
   const uint32_t *pSrc = src;
   uint32_t *pDst = (uint32_t *)nvmAdr;
-  Ecode_t halSta = ECODE_NVM3_OK;
+  Ecode_t halSta = ECODE_NVM3_ERR_WRITE_FAILED;
+  bool ret = ECODE_QSPI_ERROR;
   size_t byteCnt;
 
   byteCnt = wordCnt * sizeof(uint32_t);
 
   /* CCP flash Write */
-  ProgramPage(pDst, byteCnt, (char *)pSrc);
-  // halSta = convertMscStatusToNvm3Status(mscSta);
+  ret = ProgramPage(pDst, byteCnt, (char *)pSrc); 
+  if(!ret)
+  	halSta = ECODE_NVM3_OK;
 
 #if CHECK_DATA
   if (halSta == ECODE_NVM3_OK) {
@@ -185,11 +155,13 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src,
 }
 
 static Ecode_t nvm3_halFlashPageErase(nvm3_HalPtr_t nvmAdr) {
-  Ecode_t halSta = ECODE_NVM3_OK;
+  Ecode_t halSta = ECODE_NVM3_ERR_ERASE_FAILED;
+  bool ret = ECODE_QSPI_ERROR;
 
   /* CCP flash Erase */
-  EraseSector((uint32_t *)nvmAdr);
-  // halSta = convertMscStatusToNvm3Status(mscSta);
+  ret = EraseSector((uint32_t *)nvmAdr);
+  if(!ret)
+  	halSta = ECODE_NVM3_OK;
 
 #if CHECK_DATA
   if (halSta == ECODE_NVM3_OK) {
