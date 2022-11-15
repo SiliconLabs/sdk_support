@@ -42,8 +42,8 @@
  * @{
  ******************************************************************************/
 
-extern nvm3_Handle_t *nvm3_defaultHandle;       ///< The default handle.
-extern nvm3_Init_t   *nvm3_defaultInit;         ///< Default initialization data.
+extern nvm3_Handle_t *nvm3_defaultHandle; ///< The default handle.
+extern nvm3_Init_t *nvm3_defaultInit;     ///< Default initialization data.
 
 /*******************************************************************************
  * @brief

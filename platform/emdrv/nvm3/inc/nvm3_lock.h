@@ -31,8 +31,8 @@
 #ifndef NVM3_LOCK_H
 #define NVM3_LOCK_H
 
-#include <stdint.h>
 #include <stddef.h>
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -75,7 +75,7 @@ void nvm3_lockEnd(void);
  * @brief
  *  Disable execution from data area.
  ******************************************************************************/
-void nvm3_lockDisableExecute(void* address, size_t size);
+void nvm3_lockDisableExecute(void *address, size_t size);
 
 /** @} (end addtogroup nvm3lock) */
 /** @} (end addtogroup nvm3) */
@@ -84,4 +84,4 @@ void nvm3_lockDisableExecute(void* address, size_t size);
 }
 #endif
 
-#endif //NVM3_LOCK_H
+#endif // NVM3_LOCK_H

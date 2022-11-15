@@ -31,9 +31,9 @@
 #ifndef SL_COMMON_H
 #define SL_COMMON_H
 
-#include <stdint.h>
-#include <stdbool.h>
 #include "sl_assert.h"
+#include <stdbool.h>
+#include <stdint.h>
 
 #if !defined(__STATIC_INLINE)
 #if !defined(__unix__) && defined(__arm__)
@@ -62,19 +62,19 @@ extern "C" {
  *  @li Keil µVision IDE
  *  @li Plain armgcc
  *
- * Certain compiler features such as alignment is implemented differently in the tools.
- * Therefore, macros such as @ref SL_ALIGN are provided to enable compiler independent
- * code.
+ * Certain compiler features such as alignment is implemented differently in the
+ *tools. Therefore, macros such as @ref SL_ALIGN are provided to enable compiler
+ *independent code.
  *
  * @note RAM code macros are implemented in [RAMFUNC](../../emlib/api).
- * Cross-compiler RAM code support needs extended documentation and it is therefore
- * implemented as a separate module.
+ * Cross-compiler RAM code support needs extended documentation and it is
+ *therefore implemented as a separate module.
  *
  * @{
  ******************************************************************************/
 
 /** @brief Round n up to closest interval of i. */
-#define SL_CEILING(n, i)   ((((n) + (i) - 1U) / (i)) * (i))
+#define SL_CEILING(n, i) ((((n) + (i)-1U) / (i)) * (i))
 
 /** @brief Round n down to closest interval of i. */
 #define SL_FLOOR(n, i) ((n / i) * i)
@@ -93,7 +93,7 @@ extern "C" {
 
 /** @brief Macros for handling packed structures. */
 #define SL_PACK_START(X) _Pragma(STRINGIZE(pack(X)))
-#define SL_PACK_END()    _Pragma("pack()")
+#define SL_PACK_END() _Pragma("pack()")
 #define SL_ATTRIBUTE_PACKED
 
 #if defined(__CC_ARM)
@@ -101,13 +101,13 @@ extern "C" {
 #define SL_ALIGN(X) __align(X)
 
 /** MDK-ARM compiler: Macro for handling weak symbols. */
-#define SL_WEAK __attribute__ ((weak))
+#define SL_WEAK __attribute__((weak))
 
 /** MDK-ARM compiler: Macro for handling non-returning functions. */
-#define SL_NORETURN __attribute__ ((noreturn))
+#define SL_NORETURN __attribute__((noreturn))
 
 /** MDK-ARM compiler: Macro for handling section placement */
-#define SL_ATTRIBUTE_SECTION(X) __attribute__ ((section(X)))
+#define SL_ATTRIBUTE_SECTION(X) __attribute__((section(X)))
 #endif
 
 #if defined(__ICCARM__)
@@ -125,12 +125,13 @@ extern "C" {
 /** @brief IAR Embedded Workbench: Macros for handling weak symbols. */
 #define SL_WEAK __weak
 
-/** @brief IAR Embedded Workbench: Macro for handling non-returning functions. */
+/** @brief IAR Embedded Workbench: Macro for handling non-returning functions.
+ */
 #define SL_NORETURN __noreturn
 
 /* *INDENT-OFF* */
 /** IAR Embedded Workbench: Macro for handling section placement */
-#define SL_ATTRIBUTE_SECTION(X) @ X
+#define SL_ATTRIBUTE_SECTION(X) @X
 #endif
 /* *INDENT-ON* */
 
@@ -147,70 +148,83 @@ extern "C" {
 #else // !defined(__GNUC__)
 /* GCC compilers */
 
-/** @brief A macro for getting the minimum value. No side-effects, a and b are evaluated one time only. */
-#define SL_MIN(a, b) __extension__({ __typeof__(a)_a = (a); __typeof__(b)_b = (b); _a < _b ? _a : _b; })
+/** @brief A macro for getting the minimum value. No side-effects, a and b are
+ * evaluated one time only. */
+#define SL_MIN(a, b)                                                           \
+  __extension__({                                                              \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a < _b ? _a : _b;                                                         \
+  })
 
-/** @brief A macro for getting the maximum value. No side-effects, a and b are evaluated one time only. */
-#define SL_MAX(a, b) __extension__({ __typeof__(a)_a = (a); __typeof__(b)_b = (b); _a > _b ? _a : _b; })
+/** @brief A macro for getting the maximum value. No side-effects, a and b are
+ * evaluated one time only. */
+#define SL_MAX(a, b)                                                           \
+  __extension__({                                                              \
+    __typeof__(a) _a = (a);                                                    \
+    __typeof__(b) _b = (b);                                                    \
+    _a > _b ? _a : _b;                                                         \
+  })
 
 /** @brief A GCC style macro for handling packed structures. */
-#define SL_ATTRIBUTE_PACKED __attribute__ ((packed))
+#define SL_ATTRIBUTE_PACKED __attribute__((packed))
 
 /** @brief A macro for handling packed structures.
  *  @n Use this macro before the structure definition.
- *  @n X denotes the maximum alignment of structure members. X is not supported with
- *  GCC. GCC always uses 1 byte maximum alignment.
+ *  @n X denotes the maximum alignment of structure members. X is not supported
+ * with GCC. GCC always uses 1 byte maximum alignment.
  */
 #define SL_PACK_START(x)
 
 /** @brief A macro for handling packed structures.
  *  @n Use this macro after the structure definition.
- *  @n With GCC, add SL_ATTRIBUTE_PACKED after the closing curly braces of the structure
- *  definition.
+ *  @n With GCC, add SL_ATTRIBUTE_PACKED after the closing curly braces of the
+ * structure definition.
  */
 #define SL_PACK_END()
 
 /** @brief GCC style macro for aligning a variable. */
-#define SL_ATTRIBUTE_ALIGN(X) __attribute__ ((aligned(X)))
+#define SL_ATTRIBUTE_ALIGN(X) __attribute__((aligned(X)))
 
 /** @brief A macro for aligning a variable.
  *  @n Use this macro before the variable definition.
  *  @n X denotes the storage alignment value in bytes.
- *  @n To be GCC-compatible, use SL_ATTRIBUTE_ALIGN(X) before the semicolon on normal
- *  variables. Use SL_ATTRIBUTE_ALIGN(X) before the opening curly brace on structure variables.
+ *  @n To be GCC-compatible, use SL_ATTRIBUTE_ALIGN(X) before the semicolon on
+ * normal variables. Use SL_ATTRIBUTE_ALIGN(X) before the opening curly brace on
+ * structure variables.
  */
 #define SL_ALIGN(X)
 
 /** @brief A macro for defining a weak symbol. */
-#define SL_WEAK __attribute__ ((weak))
+#define SL_WEAK __attribute__((weak))
 
 /** @brief A macro for handling non-returning functions. */
-#define SL_NORETURN __attribute__ ((noreturn))
+#define SL_NORETURN __attribute__((noreturn))
 
 /** A macro for placing a variable in a section.
- *  @n Use this macro after the variable definition, before the equal sign or a semicolon.
+ *  @n Use this macro after the variable definition, before the equal sign or a
+ * semicolon.
  *  @n X denotes the section to place the variable in.
  */
-#define SL_ATTRIBUTE_SECTION(X) __attribute__ ((section(X)))
+#define SL_ATTRIBUTE_SECTION(X) __attribute__((section(X)))
 
 /** @brief A macro for notifying the compiler of an intended
  *  switch case fallthrough. */
 #if __GNUC__ >= 7
-  #define SL_FALLTHROUGH __attribute__ ((fallthrough));
+#define SL_FALLTHROUGH __attribute__((fallthrough));
 #else
-  #define SL_FALLTHROUGH
+#define SL_FALLTHROUGH
 #endif
 
 /** @brief A macro for notifying the compiler to ignore type limit check. */
 #if __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
-  #define SL_IGNORE_TYPE_LIMIT_BEGIN \
-  _Pragma("GCC diagnostic push")     \
-  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
-  #define SL_IGNORE_TYPE_LIMIT_END \
-  _Pragma("GCC diagnostic pop")
+#define SL_IGNORE_TYPE_LIMIT_BEGIN                                             \
+  _Pragma("GCC diagnostic push")                                               \
+      _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+#define SL_IGNORE_TYPE_LIMIT_END _Pragma("GCC diagnostic pop")
 #else
-  #define SL_IGNORE_TYPE_LIMIT_BEGIN
-  #define SL_IGNORE_TYPE_LIMIT_END
+#define SL_IGNORE_TYPE_LIMIT_BEGIN
+#define SL_IGNORE_TYPE_LIMIT_END
 #endif
 
 #endif // !defined(__GNUC__)
@@ -230,25 +244,25 @@ extern "C" {
 #ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_0
 #define SL_DEPRECATED_API_SDK_3_0
 #else
-#define SL_DEPRECATED_API_SDK_3_0 __attribute__ ((deprecated))
+#define SL_DEPRECATED_API_SDK_3_0 __attribute__((deprecated))
 #endif
 
 #ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_2
 #define SL_DEPRECATED_API_SDK_3_2
 #else
-#define SL_DEPRECATED_API_SDK_3_2 __attribute__ ((deprecated))
+#define SL_DEPRECATED_API_SDK_3_2 __attribute__((deprecated))
 #endif
 
 #ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_3_3
 #define SL_DEPRECATED_API_SDK_3_3
 #else
-#define SL_DEPRECATED_API_SDK_3_3 __attribute__ ((deprecated))
+#define SL_DEPRECATED_API_SDK_3_3 __attribute__((deprecated))
 #endif
 
 #ifdef SL_SUPPRESS_DEPRECATION_WARNINGS_SDK_4_1
 #define SL_DEPRECATED_API_SDK_4_1
 #else
-#define SL_DEPRECATED_API_SDK_4_1 __attribute__ ((deprecated))
+#define SL_DEPRECATED_API_SDK_4_1 __attribute__((deprecated))
 #endif
 /** @endcond */
 
@@ -262,8 +276,7 @@ extern "C" {
  * @return
  *   A number of trailing zeros in value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t SL_CTZ(uint32_t value)
-{
+__STATIC_INLINE uint32_t SL_CTZ(uint32_t value) {
 #if defined(__CORTEX_M) && (__CORTEX_M >= 3U)
   return __CLZ(__RBIT(value));
 
@@ -278,10 +291,7 @@ __STATIC_INLINE uint32_t SL_CTZ(uint32_t value)
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 /* Deprecated function. New code should use @ref SL_CTZ. */
-__STATIC_INLINE uint32_t EFM32_CTZ(uint32_t value)
-{
-  return SL_CTZ(value);
-}
+__STATIC_INLINE uint32_t EFM32_CTZ(uint32_t value) { return SL_CTZ(value); }
 /** @endcond */
 
 /*******************************************************************************
@@ -294,8 +304,7 @@ __STATIC_INLINE uint32_t EFM32_CTZ(uint32_t value)
  * @return
  *   A reversed value.
  ******************************************************************************/
-__STATIC_INLINE uint32_t SL_RBIT(uint32_t value)
-{
+__STATIC_INLINE uint32_t SL_RBIT(uint32_t value) {
   uint32_t result;
 
 #if defined(__CORTEX_M) && (__CORTEX_M >= 0x03U)
@@ -324,8 +333,7 @@ __STATIC_INLINE uint32_t SL_RBIT(uint32_t value)
  * @return
  *   A 16-bit reversed value.
  ******************************************************************************/
-__STATIC_INLINE uint16_t SL_RBIT16(uint16_t value)
-{
+__STATIC_INLINE uint16_t SL_RBIT16(uint16_t value) {
   return (uint16_t)(SL_RBIT(value) >> 16);
 }
 
@@ -339,8 +347,7 @@ __STATIC_INLINE uint16_t SL_RBIT16(uint16_t value)
  * @return
  *   A 8-bit reversed value.
  ******************************************************************************/
-__STATIC_INLINE uint8_t SL_RBIT8(uint8_t value)
-{
+__STATIC_INLINE uint8_t SL_RBIT8(uint8_t value) {
   return (uint8_t)(SL_RBIT(value) >> 24);
 }
 
@@ -354,8 +361,7 @@ __STATIC_INLINE uint8_t SL_RBIT8(uint8_t value)
  * @return
  *   Dividend.
  ******************************************************************************/
-__STATIC_INLINE uint32_t SL_Log2ToDiv(uint32_t log2)
-{
+__STATIC_INLINE uint32_t SL_Log2ToDiv(uint32_t log2) {
   EFM_ASSERT(log2 < 32U);
   return 1UL << log2;
 }

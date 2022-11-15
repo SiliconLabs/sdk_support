@@ -426,11 +426,10 @@
                         ///< Secure Simple Pairing even though the receiving
                         ///< Link Manager does.
 #define SL_STATUS_BT_CTRL_HOST_BUSY_PAIRING                                    \
-  (                                                                            \
-      (sl_status_t)0x1038) ///< The Host is busy with another pairing operation
-                           ///< and unable to support the requested pairing. The
-                           ///< receiving device should retry pairing again
-                           ///< later.
+  ((sl_status_t)0x1038) ///< The Host is busy with another pairing operation
+                        ///< and unable to support the requested pairing. The
+                        ///< receiving device should retry pairing again
+                        ///< later.
 #define SL_STATUS_BT_CTRL_CONNECTION_REJECTED_DUE_TO_NO_SUITABLE_CHANNEL_FOUND \
   ((sl_status_t)0x1039) ///< The Controller could not calculate an appropriate
                         ///< value for the Channel selection operation.
@@ -445,10 +444,9 @@
                         ///< directed advertising, that advertising completed
                         ///< without a connection being created.
 #define SL_STATUS_BT_CTRL_CONNECTION_TERMINATED_DUE_TO_MIC_FAILURE             \
-  (                                                                            \
-      (sl_status_t)0x103D) ///< Connection was terminated because the Message
-                           ///< Integrity Check (MIC) failed on a received
-                           ///< packet.
+  ((sl_status_t)0x103D) ///< Connection was terminated because the Message
+                        ///< Integrity Check (MIC) failed on a received
+                        ///< packet.
 #define SL_STATUS_BT_CTRL_CONNECTION_FAILED_TO_BE_ESTABLISHED                  \
   ((sl_status_t)0x103E) ///< LL initiated a connection but the connection has
                         ///< failed to be established. Controller did not
@@ -715,10 +713,9 @@
 #define SL_STATUS_BT_MESH_FOUNDATION_UNSPECIFIED                               \
   ((sl_status_t)0x1310) ///< Returned when an unspecified error took place
 #define SL_STATUS_BT_MESH_FOUNDATION_INVALID_BINDING                           \
-  (                                                                            \
-      (sl_status_t)0x1311) ///< Returned when the NetKeyIndex and AppKeyIndex
-                           ///< combination is not valid for a Config AppKey
-                           ///< Update
+  ((sl_status_t)0x1311) ///< Returned when the NetKeyIndex and AppKeyIndex
+                        ///< combination is not valid for a Config AppKey
+                        ///< Update
 
 // -----------------------------------------------------------------------------
 // Wi-Fi Errors

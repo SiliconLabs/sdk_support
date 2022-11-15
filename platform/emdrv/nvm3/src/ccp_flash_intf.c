@@ -111,8 +111,8 @@ uint32_t RSI_FLASH_EraseSector(uint32_t sector_address) {
   spi_config_t spi_configs_erase;
   GetQspiConfig(&spi_configs_erase);
   // ROMAPI_QSPI_API->qspi_spi_erase((qspi_reg_t
-  // *)(M4_QSPI_BASE_ADDRESS),&spi_configs_erase,SECTOR_ERASE, sector_address, 1,
-  // 0);
+  // *)(M4_QSPI_BASE_ADDRESS),&spi_configs_erase,SECTOR_ERASE, sector_address,
+  // 1, 0);
   /* The erase function does the erase and takes care of any missing
    * configurations to successfully erase the sector*/
   // return 0;
@@ -158,8 +158,8 @@ uint32_t RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
                         address, (uint8_t *)data, 0 /*_32BIT*/, length, 0, 0,
                         0);
   } else { /* DMA_READ - Auto mode */
-    /* Read the data by using UDMA */
-#if 0 // Need to Implement
+           /* Read the data by using UDMA */
+#if 0      // Need to Implement
   DEBUGOUT("\r\n Read Data From Flash Memory Using DMA \r\n");
   UDMA_Read();
   /* Wait till dma done */
