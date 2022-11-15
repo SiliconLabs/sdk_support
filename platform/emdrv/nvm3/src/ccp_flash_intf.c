@@ -20,10 +20,9 @@
 #include "rsi_chip.h"
 #include "system_RS1xxxx.h"
 
-bool RSI_FLASH_UnInitialize(void)
-{
-	/* This function not supported so always returns zero */
-	return ECODE_QSPI_OK;
+bool RSI_FLASH_UnInitialize(void) {
+  /* This function not supported so always returns zero */
+  return ECODE_QSPI_OK;
 }
 
 void qspi_gpio_revert_m4(void) {
@@ -40,22 +39,22 @@ void qspi_gpio_revert_m4(void) {
 }
 
 #ifdef CHIP_9117
-#define PadSelectionEnable_CLK  16
-#define PadSelectionEnable_D0   17
-#define PadSelectionEnable_D1   18
+#define PadSelectionEnable_CLK 16
+#define PadSelectionEnable_D0 17
+#define PadSelectionEnable_D1 18
 #define PadSelectionEnable_CSN0 19
-#define PadSelectionEnable_D2   20
-#define PadSelectionEnable_D3   21
+#define PadSelectionEnable_D2 20
+#define PadSelectionEnable_D3 21
 
 #define QSPI_MODE 9
 
 /*M4 QSPI  pin set */
-#define M4SS_QSPI_CLK  52
-#define M4SS_QSPI_D0   53
-#define M4SS_QSPI_D1   54
+#define M4SS_QSPI_CLK 52
+#define M4SS_QSPI_D0 53
+#define M4SS_QSPI_D1 54
 #define M4SS_QSPI_CSN0 55
-#define M4SS_QSPI_D2   56
-#define M4SS_QSPI_D3   57
+#define M4SS_QSPI_D2 56
+#define M4SS_QSPI_D3 57
 #endif
 
 void RSI_QSPI_PinMuxInit(void) {
@@ -91,10 +90,8 @@ void RSI_QSPI_PinMuxInit(void) {
   RSI_EGPIO_SetPinMux(EGPIO, 0, M4SS_QSPI_D3, QSPI_MODE);
 }
 
-
-/* QSPI HAL wrapper for NVM3 */ 
-bool RSI_FLASH_Initialize(void)
-{
+/* QSPI HAL wrapper for NVM3 */
+bool RSI_FLASH_Initialize(void) {
   /*Init the QSPI configurations structure */
   spi_config_t spi_configs_init;
 
@@ -110,21 +107,21 @@ bool RSI_FLASH_Initialize(void)
   return ECODE_QSPI_OK;
 }
 
-bool RSI_FLASH_EraseSector(uint32_t sector_address)
-{
-	spi_config_t spi_configs_erase; 
-	GetQspiConfig(&spi_configs_erase);
-	
-	/* Erases the SECTOR   */
-	DEBUGOUT("\r\n Erase Sector \r\n");
-	RSI_QSPI_SpiErase((qspi_reg_t *)QSPI_BASE, &spi_configs_erase, SECTOR_ERASE, sector_address, 1, 0);
-	
-	/* The erase function does the erase and takes care of any missing configurations to successfully erase the sector*/
-	return ECODE_QSPI_OK;	
+bool RSI_FLASH_EraseSector(uint32_t sector_address) {
+  spi_config_t spi_configs_erase;
+  GetQspiConfig(&spi_configs_erase);
+
+  /* Erases the SECTOR   */
+  DEBUGOUT("\r\n Erase Sector \r\n");
+  RSI_QSPI_SpiErase((qspi_reg_t *)QSPI_BASE, &spi_configs_erase, SECTOR_ERASE,
+                    sector_address, 1, 0);
+
+  /* The erase function does the erase and takes care of any missing
+   * configurations to successfully erase the sector*/
+  return ECODE_QSPI_OK;
 }
 
-bool RSI_FLASH_Write(uint32_t address, unsigned char *data,
-                         uint32_t length) {
+bool RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length) {
   spi_config_t spi_configs_program;
   uint32_t check_sum = 0;
   GetQspiConfig(&spi_configs_program);
@@ -132,15 +129,14 @@ bool RSI_FLASH_Write(uint32_t address, unsigned char *data,
   /* writes the data to required address using qspi */
   DEBUGOUT("\r\n Write Data to Flash Memory \r\n");
   RSI_QSPI_SpiWrite((qspi_reg_t *)QSPI_BASE, &spi_configs_program, 0x2, address,
-                    (uint8_t *)&data[0], length,
-                    FLASH_PAGE_SIZE,
-                    _1BYTE, 0, 0, 0, 0, 0, 0);
+                    (uint8_t *)&data[0], length, FLASH_PAGE_SIZE, _1BYTE, 0, 0,
+                    0, 0, 0, 0);
 
   return ECODE_QSPI_OK;
 }
 
 bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
-                        uint8_t auto_mode) {
+                    uint8_t auto_mode) {
   spi_config_t spi_configs_program;
   uint32_t check_sum = 0;
   GetQspiConfig(&spi_configs_program);
@@ -151,8 +147,7 @@ bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
     /* Reads from the address in manual mode */
     DEBUGOUT("\r\n Read Data From Flash Memory Using Manual Mode\r\n");
     RSI_QSPI_ManualRead((qspi_reg_t *)(QSPI_BASE), &spi_configs_program,
-                        address, (uint8_t *)data, _8BIT, length, 0, 0,
-                        0);
+                        address, (uint8_t *)data, _8BIT, length, 0, 0, 0);
   } else { /* DMA_READ - Auto mode */
            /* Read the data by using UDMA */
 #if 0      // Need to Implement
@@ -167,23 +162,21 @@ bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
   return ECODE_QSPI_OK;
 }
 
-void GetQspiConfig(spi_config_t *spi_config)
-{
-	memset(spi_config, 0, sizeof(spi_config_t));
-	spi_config->spi_config_1.inst_mode         = SINGLE_MODE;
-	spi_config->spi_config_1.addr_mode         = SINGLE_MODE;
-	spi_config->spi_config_1.data_mode         = SINGLE_MODE;
-	spi_config->spi_config_1.dummy_mode        = SINGLE_MODE;
-	spi_config->spi_config_1.extra_byte_mode   = SINGLE_MODE;
-	spi_config->spi_config_1.prefetch_en       = DIS_PREFETCH;
-	spi_config->spi_config_1.dummy_W_or_R      = DUMMY_READS;
-	spi_config->spi_config_1.extra_byte_en     = 0;
-	spi_config->spi_config_1.d3d2_data         = 3;
-	spi_config->spi_config_1.continuous        = DIS_CONTINUOUS;
-	spi_config->spi_config_1.read_cmd          = READ;
-	spi_config->spi_config_1.flash_type        = SST_SPI_FLASH;
-	spi_config->spi_config_1.no_of_dummy_bytes = 0;
-
+void GetQspiConfig(spi_config_t *spi_config) {
+  memset(spi_config, 0, sizeof(spi_config_t));
+  spi_config->spi_config_1.inst_mode = SINGLE_MODE;
+  spi_config->spi_config_1.addr_mode = SINGLE_MODE;
+  spi_config->spi_config_1.data_mode = SINGLE_MODE;
+  spi_config->spi_config_1.dummy_mode = SINGLE_MODE;
+  spi_config->spi_config_1.extra_byte_mode = SINGLE_MODE;
+  spi_config->spi_config_1.prefetch_en = DIS_PREFETCH;
+  spi_config->spi_config_1.dummy_W_or_R = DUMMY_READS;
+  spi_config->spi_config_1.extra_byte_en = 0;
+  spi_config->spi_config_1.d3d2_data = 3;
+  spi_config->spi_config_1.continuous = DIS_CONTINUOUS;
+  spi_config->spi_config_1.read_cmd = READ;
+  spi_config->spi_config_1.flash_type = SST_SPI_FLASH;
+  spi_config->spi_config_1.no_of_dummy_bytes = 0;
 
   spi_config->spi_config_2.auto_mode = EN_AUTO_MODE;
   spi_config->spi_config_2.cs_no = CHIP_ZERO;

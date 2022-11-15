@@ -87,8 +87,8 @@ static Ecode_t nvm3_halFlashOpen(nvm3_HalPtr_t nvmAdr, size_t flashSize) {
 
   /* CCP flash Initilize */
   ret = Init(0, 0, 0);
-  if(!ret)
-  	halSta = ECODE_NVM3_OK;
+  if (!ret)
+    halSta = ECODE_NVM3_OK;
 
   return halSta;
 }
@@ -139,9 +139,9 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src,
   byteCnt = wordCnt * sizeof(uint32_t);
 
   /* CCP flash Write */
-  ret = ProgramPage(pDst, byteCnt, (char *)pSrc); 
-  if(!ret)
-  	halSta = ECODE_NVM3_OK;
+  ret = ProgramPage(pDst, byteCnt, (char *)pSrc);
+  if (!ret)
+    halSta = ECODE_NVM3_OK;
 
 #if CHECK_DATA
   if (halSta == ECODE_NVM3_OK) {
@@ -160,8 +160,8 @@ static Ecode_t nvm3_halFlashPageErase(nvm3_HalPtr_t nvmAdr) {
 
   /* CCP flash Erase */
   ret = EraseSector((uint32_t *)nvmAdr);
-  if(!ret)
-  	halSta = ECODE_NVM3_OK;
+  if (!ret)
+    halSta = ECODE_NVM3_OK;
 
 #if CHECK_DATA
   if (halSta == ECODE_NVM3_OK) {
