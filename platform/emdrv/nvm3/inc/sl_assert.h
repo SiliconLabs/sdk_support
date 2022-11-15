@@ -36,9 +36,9 @@ extern "C" {
 #endif
 
 #if defined(DOXY_DOC_ONLY)
-/** Included for documentation purposes only. This define is not present by default.
- *  DEBUG_EFM should be defined from the compiler to enable the default internal
- *  assert handler. */
+/** Included for documentation purposes only. This define is not present by
+ * default. DEBUG_EFM should be defined from the compiler to enable the default
+ * internal assert handler. */
 #define DEBUG_EFM
 #endif
 
@@ -74,12 +74,12 @@ extern "C" {
 /* not the assert expression (nor function name (C99)) */
 void assertEFM(const char *file, int line);
 /** Default assertion is not operational */
-#define EFM_ASSERT(expr)    ((expr) ? ((void)0) : assertEFM(__FILE__, __LINE__))
+#define EFM_ASSERT(expr) ((expr) ? ((void)0) : assertEFM(__FILE__, __LINE__))
 
 #else
 
 /** Default assertion is not operational */
-#define EFM_ASSERT(expr)    ((void)(expr))
+#define EFM_ASSERT(expr) ((void)(expr))
 
 #endif /* defined(DEBUG_EFM) || defined(DEBUG_EFM_USER) */
 

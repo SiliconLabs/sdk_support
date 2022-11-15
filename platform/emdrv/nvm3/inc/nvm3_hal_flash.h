@@ -56,7 +56,7 @@ extern "C" {
  ***************************   GLOBAL VARIABLES   ******************************
  ******************************************************************************/
 
-extern const nvm3_HalHandle_t nvm3_halFlashHandle;      ///< The HAL flash handle.
+extern const nvm3_HalHandle_t nvm3_halFlashHandle; ///< The HAL flash handle.
 
 /** @} (end addtogroup nvm3hal) */
 /** @} (end addtogroup nvm3) */
