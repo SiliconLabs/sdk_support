@@ -49,7 +49,7 @@
 //#define MBEDTLS_PEM_PARSE_C
 //#define MBEDTLS_BASE64_C
 
-#include "mbedtls/config_psa.h"
 #include "mbedtls/check_config.h"
+#include "mbedtls/config_psa.h"
 
 #endif /* MBEDTLS_CONFIG_H */

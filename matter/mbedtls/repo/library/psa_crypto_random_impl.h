@@ -34,16 +34,15 @@
 
 #if defined(MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG)
 
-#include <string.h>
 #include <mbedtls/entropy.h> // only for error codes
 #include <psa/crypto.h>
+#include <string.h>
 
 typedef mbedtls_psa_external_random_context_t mbedtls_psa_random_context_t;
 
 /* Trivial wrapper around psa_generate_random(). */
-int mbedtls_psa_get_random( void *p_rng,
-                            unsigned char *output,
-                            size_t output_size );
+int mbedtls_psa_get_random(void *p_rng, unsigned char *output,
+                           size_t output_size);
 
 /* The PSA RNG API doesn't need any externally maintained state. */
 #define MBEDTLS_PSA_RANDOM_STATE NULL
@@ -89,12 +88,11 @@ int mbedtls_psa_get_random( void *p_rng,
  *
  * \param p_rng        Pointer to the Mbed TLS DRBG state.
  */
-static inline void mbedtls_psa_drbg_init( mbedtls_psa_drbg_context_t *p_rng )
-{
+static inline void mbedtls_psa_drbg_init(mbedtls_psa_drbg_context_t *p_rng) {
 #if defined(MBEDTLS_CTR_DRBG_C)
-    mbedtls_ctr_drbg_init( p_rng );
+  mbedtls_ctr_drbg_init(p_rng);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
-    mbedtls_hmac_drbg_init( p_rng );
+  mbedtls_hmac_drbg_init(p_rng);
 #endif
 }
 
@@ -102,12 +100,11 @@ static inline void mbedtls_psa_drbg_init( mbedtls_psa_drbg_context_t *p_rng )
  *
  * \param p_rng        Pointer to the Mbed TLS DRBG state.
  */
-static inline void mbedtls_psa_drbg_free( mbedtls_psa_drbg_context_t *p_rng )
-{
+static inline void mbedtls_psa_drbg_free(mbedtls_psa_drbg_context_t *p_rng) {
 #if defined(MBEDTLS_CTR_DRBG_C)
-    mbedtls_ctr_drbg_free( p_rng );
+  mbedtls_ctr_drbg_free(p_rng);
 #elif defined(MBEDTLS_HMAC_DRBG_C)
-    mbedtls_hmac_drbg_free( p_rng );
+  mbedtls_hmac_drbg_free(p_rng);
 #endif
 }
 
@@ -116,12 +113,11 @@ static inline void mbedtls_psa_drbg_free( mbedtls_psa_drbg_context_t *p_rng )
  * The random generator context is composed of an entropy context and
  * a DRBG context.
  */
-typedef struct
-{
-    void (* entropy_init )( mbedtls_entropy_context *ctx );
-    void (* entropy_free )( mbedtls_entropy_context *ctx );
-    mbedtls_entropy_context entropy;
-    mbedtls_psa_drbg_context_t drbg;
+typedef struct {
+  void (*entropy_init)(mbedtls_entropy_context *ctx);
+  void (*entropy_free)(mbedtls_entropy_context *ctx);
+  mbedtls_entropy_context entropy;
+  mbedtls_psa_drbg_context_t drbg;
 } mbedtls_psa_random_context_t;
 
 /* Defined in include/mbedtls/psa_util.h so that it's visible to
@@ -130,8 +126,8 @@ typedef struct
  * accidentally causes the implementation to diverge from the interface
  * will be noticed. */
 /* Do not include the declaration under MSVC because it doesn't accept it
- * ("error C2370: 'mbedtls_psa_get_random' : redefinition; different storage class").
- * Observed with Visual Studio 2013. A known bug apparently:
+ * ("error C2370: 'mbedtls_psa_get_random' : redefinition; different storage
+ * class"). Observed with Visual Studio 2013. A known bug apparently:
  * https://stackoverflow.com/questions/8146541/duplicate-external-static-declarations-not-allowed-in-visual-studio
  */
 #if !defined(_MSC_VER)
@@ -180,23 +176,17 @@ extern mbedtls_psa_drbg_context_t *const mbedtls_psa_random_state;
  * \return              \c 0 on success.
  * \return              An Mbed TLS error code (\c MBEDTLS_ERR_xxx) on failure.
  */
-static inline int mbedtls_psa_drbg_seed(
-    mbedtls_entropy_context *entropy,
-    const unsigned char *custom, size_t len )
-{
+static inline int mbedtls_psa_drbg_seed(mbedtls_entropy_context *entropy,
+                                        const unsigned char *custom,
+                                        size_t len) {
 #if defined(MBEDTLS_CTR_DRBG_C)
-    return( mbedtls_ctr_drbg_seed( MBEDTLS_PSA_RANDOM_STATE,
-                                   mbedtls_entropy_func,
-                                   entropy,
-                                   custom, len ) );
+  return (mbedtls_ctr_drbg_seed(MBEDTLS_PSA_RANDOM_STATE, mbedtls_entropy_func,
+                                entropy, custom, len));
 #elif defined(MBEDTLS_HMAC_DRBG_C)
-    const mbedtls_md_info_t *md_info =
-        mbedtls_md_info_from_type( MBEDTLS_PSA_HMAC_DRBG_MD_TYPE );
-    return( mbedtls_hmac_drbg_seed( MBEDTLS_PSA_RANDOM_STATE,
-                                    md_info,
-                                    mbedtls_entropy_func,
-                                    entropy,
-                                    custom, len ) );
+  const mbedtls_md_info_t *md_info =
+      mbedtls_md_info_from_type(MBEDTLS_PSA_HMAC_DRBG_MD_TYPE);
+  return (mbedtls_hmac_drbg_seed(MBEDTLS_PSA_RANDOM_STATE, md_info,
+                                 mbedtls_entropy_func, entropy, custom, len));
 #endif
 }
 

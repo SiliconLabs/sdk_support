@@ -32,7 +32,6 @@
 
 #include <stddef.h>
 
-
 /** Turn a value into a mask:
  * - if \p value == 0, return the all-bits 0 mask, aka 0
  * - otherwise, return the all-bits 1 mask, aka (unsigned) -1
@@ -44,7 +43,7 @@
  *
  * \return          Zero if \p value is zero, otherwise all-bits-one.
  */
-unsigned mbedtls_ct_uint_mask( unsigned value );
+unsigned mbedtls_ct_uint_mask(unsigned value);
 
 #if defined(MBEDTLS_SSL_SOME_SUITES_USE_TLS_CBC)
 
@@ -59,7 +58,7 @@ unsigned mbedtls_ct_uint_mask( unsigned value );
  *
  * \return          Zero if \p value is zero, otherwise all-bits-one.
  */
-size_t mbedtls_ct_size_mask( size_t value );
+size_t mbedtls_ct_size_mask(size_t value);
 
 #endif /* MBEDTLS_SSL_SOME_SUITES_USE_TLS_CBC */
 
@@ -76,7 +75,7 @@ size_t mbedtls_ct_size_mask( size_t value );
  *
  * \return          Zero if \p value is zero, otherwise all-bits-one.
  */
-mbedtls_mpi_uint mbedtls_ct_mpi_uint_mask( mbedtls_mpi_uint value );
+mbedtls_mpi_uint mbedtls_ct_mpi_uint_mask(mbedtls_mpi_uint value);
 
 #endif /* MBEDTLS_BIGNUM_C */
 
@@ -95,8 +94,7 @@ mbedtls_mpi_uint mbedtls_ct_mpi_uint_mask( mbedtls_mpi_uint value );
  * \return      All-bits-one if \p x is greater or equal than \p y,
  *              otherwise zero.
  */
-size_t mbedtls_ct_size_mask_ge( size_t x,
-                                size_t y );
+size_t mbedtls_ct_size_mask_ge(size_t x, size_t y);
 
 #endif /* MBEDTLS_SSL_SOME_SUITES_USE_TLS_CBC */
 
@@ -111,8 +109,7 @@ size_t mbedtls_ct_size_mask_ge( size_t x,
  *
  * \return      1 if \p x equals to \p y, otherwise 0.
  */
-unsigned mbedtls_ct_size_bool_eq( size_t x,
-                                  size_t y );
+unsigned mbedtls_ct_size_bool_eq(size_t x, size_t y);
 
 #if defined(MBEDTLS_BIGNUM_C)
 
@@ -126,8 +123,8 @@ unsigned mbedtls_ct_size_bool_eq( size_t x,
  *
  * \return      1 if \p x is less than \p y, otherwise 0.
  */
-unsigned mbedtls_ct_mpi_uint_lt( const mbedtls_mpi_uint x,
-                                 const mbedtls_mpi_uint y );
+unsigned mbedtls_ct_mpi_uint_lt(const mbedtls_mpi_uint x,
+                                const mbedtls_mpi_uint y);
 
 #endif /* MBEDTLS_BIGNUM_C */
 
@@ -142,9 +139,7 @@ unsigned mbedtls_ct_mpi_uint_lt( const mbedtls_mpi_uint x,
  *
  * \return  \c if1 if \p condition is nonzero, otherwise \c if0.
  */
-unsigned mbedtls_ct_uint_if( unsigned condition,
-                             unsigned if1,
-                             unsigned if0 );
+unsigned mbedtls_ct_uint_if(unsigned condition, unsigned if1, unsigned if0);
 
 #if defined(MBEDTLS_BIGNUM_C)
 
@@ -160,10 +155,9 @@ unsigned mbedtls_ct_uint_if( unsigned condition,
  *                      initialized MPI.
  * \param condition     Condition to test, must be 0 or 1.
  */
-void mbedtls_ct_mpi_uint_cond_assign( size_t n,
-                                      mbedtls_mpi_uint *dest,
-                                      const mbedtls_mpi_uint *src,
-                                      unsigned char condition );
+void mbedtls_ct_mpi_uint_cond_assign(size_t n, mbedtls_mpi_uint *dest,
+                                     const mbedtls_mpi_uint *src,
+                                     unsigned char condition);
 
 #endif /* MBEDTLS_BIGNUM_C */
 
@@ -178,7 +172,7 @@ void mbedtls_ct_mpi_uint_cond_assign( size_t n,
  *
  * \return          A base64 digit converted from \p value.
  */
-unsigned char mbedtls_ct_base64_enc_char( unsigned char value );
+unsigned char mbedtls_ct_base64_enc_char(unsigned char value);
 
 /** Given a Base64 digit, return its value.
  *
@@ -192,7 +186,7 @@ unsigned char mbedtls_ct_base64_enc_char( unsigned char value );
  *
  * \return      The value of the base64 digit \p c.
  */
-signed char mbedtls_ct_base64_dec_value( unsigned char c );
+signed char mbedtls_ct_base64_dec_value(unsigned char c);
 
 #endif /* MBEDTLS_BASE64_C */
 
@@ -209,10 +203,8 @@ signed char mbedtls_ct_base64_dec_value( unsigned char c );
  * \param c1        The first value to analyze in the condition.
  * \param c2        The second value to analyze in the condition.
  */
-void mbedtls_ct_memcpy_if_eq( unsigned char *dest,
-                              const unsigned char *src,
-                              size_t len,
-                              size_t c1, size_t c2 );
+void mbedtls_ct_memcpy_if_eq(unsigned char *dest, const unsigned char *src,
+                             size_t len, size_t c1, size_t c2);
 
 /** Copy data from a secret position with constant flow.
  *
@@ -240,12 +232,9 @@ void mbedtls_ct_memcpy_if_eq( unsigned char *dest,
  * \param offset_max    The maximal value of \p offset.
  * \param len           The number of bytes to copy.
  */
-void mbedtls_ct_memcpy_offset( unsigned char *dest,
-                               const unsigned char *src,
-                               size_t offset,
-                               size_t offset_min,
-                               size_t offset_max,
-                               size_t len );
+void mbedtls_ct_memcpy_offset(unsigned char *dest, const unsigned char *src,
+                              size_t offset, size_t offset_min,
+                              size_t offset_max, size_t len);
 
 /** Compute the HMAC of variable-length data with constant flow.
  *
@@ -283,40 +272,36 @@ void mbedtls_ct_memcpy_offset( unsigned char *dest,
  * \retval #MBEDTLS_ERR_PLATFORM_HW_ACCEL_FAILED
  *         The hardware accelerator failed.
  */
-int mbedtls_ct_hmac( mbedtls_md_context_t *ctx,
-                     const unsigned char *add_data,
-                     size_t add_data_len,
-                     const unsigned char *data,
-                     size_t data_len_secret,
-                     size_t min_data_len,
-                     size_t max_data_len,
-                     unsigned char *output );
+int mbedtls_ct_hmac(mbedtls_md_context_t *ctx, const unsigned char *add_data,
+                    size_t add_data_len, const unsigned char *data,
+                    size_t data_len_secret, size_t min_data_len,
+                    size_t max_data_len, unsigned char *output);
 
 #endif /* MBEDTLS_SSL_SOME_SUITES_USE_TLS_CBC */
 
-#if defined(MBEDTLS_PKCS1_V15) && defined(MBEDTLS_RSA_C) && !defined(MBEDTLS_RSA_ALT)
+#if defined(MBEDTLS_PKCS1_V15) && defined(MBEDTLS_RSA_C) &&                    \
+    !defined(MBEDTLS_RSA_ALT)
 
 /** This function performs the unpadding part of a PKCS#1 v1.5 decryption
  *  operation (EME-PKCS1-v1_5 decoding).
  *
  * \note The return value from this function is a sensitive value
  *       (this is unusual). #MBEDTLS_ERR_RSA_OUTPUT_TOO_LARGE shouldn't happen
- *       in a well-written application, but 0 vs #MBEDTLS_ERR_RSA_INVALID_PADDING
- *       is often a situation that an attacker can provoke and leaking which
- *       one is the result is precisely the information the attacker wants.
+ *       in a well-written application, but 0 vs
+ * #MBEDTLS_ERR_RSA_INVALID_PADDING is often a situation that an attacker can
+ * provoke and leaking which one is the result is precisely the information the
+ * attacker wants.
  *
  * \param mode           The mode of operation. This must be either
- *                       #MBEDTLS_RSA_PRIVATE or #MBEDTLS_RSA_PUBLIC (deprecated).
- * \param input          The input buffer which is the payload inside PKCS#1v1.5
- *                       encryption padding, called the "encoded message EM"
- *                       by the terminology.
- * \param ilen           The length of the payload in the \p input buffer.
- * \param output         The buffer for the payload, called "message M" by the
- *                       PKCS#1 terminology. This must be a writable buffer of
- *                       length \p output_max_len bytes.
- * \param olen           The address at which to store the length of
- *                       the payload. This must not be \c NULL.
- * \param output_max_len The length in bytes of the output buffer \p output.
+ *                       #MBEDTLS_RSA_PRIVATE or #MBEDTLS_RSA_PUBLIC
+ * (deprecated). \param input          The input buffer which is the payload
+ * inside PKCS#1v1.5 encryption padding, called the "encoded message EM" by the
+ * terminology. \param ilen           The length of the payload in the \p input
+ * buffer. \param output         The buffer for the payload, called "message M"
+ * by the PKCS#1 terminology. This must be a writable buffer of length \p
+ * output_max_len bytes. \param olen           The address at which to store the
+ * length of the payload. This must not be \c NULL. \param output_max_len The
+ * length in bytes of the output buffer \p output.
  *
  * \return      \c 0 on success.
  * \return      #MBEDTLS_ERR_RSA_OUTPUT_TOO_LARGE
@@ -324,12 +309,9 @@ int mbedtls_ct_hmac( mbedtls_md_context_t *ctx,
  * \return      #MBEDTLS_ERR_RSA_INVALID_PADDING
  *              The input doesn't contain properly formatted padding.
  */
-int mbedtls_ct_rsaes_pkcs1_v15_unpadding( int mode,
-                                          unsigned char *input,
-                                          size_t ilen,
-                                          unsigned char *output,
-                                          size_t output_max_len,
-                                          size_t *olen );
+int mbedtls_ct_rsaes_pkcs1_v15_unpadding(int mode, unsigned char *input,
+                                         size_t ilen, unsigned char *output,
+                                         size_t output_max_len, size_t *olen);
 
 #endif /* MBEDTLS_PKCS1_V15 && MBEDTLS_RSA_C && ! MBEDTLS_RSA_ALT */
 

@@ -36,7 +36,8 @@
 
 #include "psa/crypto_driver_common.h"
 
-/* Include the context structure definitions for the Mbed TLS software drivers */
+/* Include the context structure definitions for the Mbed TLS software drivers
+ */
 #include "psa/crypto_builtin_composites.h"
 
 /* Include the context structure definitions for those drivers that were
@@ -47,28 +48,27 @@
 #endif
 
 #if defined(PSA_CRYPTO_DRIVER_TEST)
-#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) &&                                    \
     defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_MAC)
 typedef libtestdriver1_mbedtls_psa_mac_operation_t
-        mbedtls_transparent_test_driver_mac_operation_t;
+    mbedtls_transparent_test_driver_mac_operation_t;
 typedef libtestdriver1_mbedtls_psa_mac_operation_t
-        mbedtls_opaque_test_driver_mac_operation_t;
+    mbedtls_opaque_test_driver_mac_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT \
-        LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
-#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT \
-        LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT                     \
+  LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT                          \
+  LIBTESTDRIVER1_MBEDTLS_PSA_MAC_OPERATION_INIT
 
 #else
 typedef mbedtls_psa_mac_operation_t
-        mbedtls_transparent_test_driver_mac_operation_t;
-typedef mbedtls_psa_mac_operation_t
-        mbedtls_opaque_test_driver_mac_operation_t;
+    mbedtls_transparent_test_driver_mac_operation_t;
+typedef mbedtls_psa_mac_operation_t mbedtls_opaque_test_driver_mac_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT \
-        MBEDTLS_PSA_MAC_OPERATION_INIT
-#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT \
-        MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_MAC_OPERATION_INIT                     \
+  MBEDTLS_PSA_MAC_OPERATION_INIT
+#define MBEDTLS_OPAQUE_TEST_DRIVER_MAC_OPERATION_INIT                          \
+  MBEDTLS_PSA_MAC_OPERATION_INIT
 
 #endif /* MBEDTLS_TEST_LIBTESTDRIVER1 */
 #endif /* PSA_CRYPTO_DRIVER_TEST */
@@ -81,11 +81,11 @@ typedef mbedtls_psa_mac_operation_t
  * of both this file and the content of psa_crypto_driver_wrappers.c */
 
 typedef union {
-    unsigned dummy; /* Make sure this union is always non-empty */
-    mbedtls_psa_mac_operation_t mbedtls_ctx;
+  unsigned dummy; /* Make sure this union is always non-empty */
+  mbedtls_psa_mac_operation_t mbedtls_ctx;
 #if defined(PSA_CRYPTO_DRIVER_TEST)
-    mbedtls_transparent_test_driver_mac_operation_t transparent_test_driver_ctx;
-    mbedtls_opaque_test_driver_mac_operation_t opaque_test_driver_ctx;
+  mbedtls_transparent_test_driver_mac_operation_t transparent_test_driver_ctx;
+  mbedtls_opaque_test_driver_mac_operation_t opaque_test_driver_ctx;
 #endif
 } psa_driver_mac_context_t;
 

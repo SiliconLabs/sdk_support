@@ -4,11 +4,11 @@
 #ifndef __KREMLIN_TARGET_H
 #define __KREMLIN_TARGET_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <inttypes.h>
 #include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "kremlin/internal/callconv.h"
 
@@ -19,41 +19,38 @@
 /* For "bare" targets that do not have a C stdlib, the user might want to use
  * [-add-early-include '"mydefinitions.h"'] and override these. */
 #ifndef KRML_HOST_PRINTF
-#  define KRML_HOST_PRINTF printf
+#define KRML_HOST_PRINTF printf
 #endif
 
-#if (                                                                          \
-    (defined __STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&             \
-    (!(defined KRML_HOST_EPRINTF)))
-#  define KRML_HOST_EPRINTF(...) fprintf(stderr, __VA_ARGS__)
+#if ((defined __STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&            \
+     (!(defined KRML_HOST_EPRINTF)))
+#define KRML_HOST_EPRINTF(...) fprintf(stderr, __VA_ARGS__)
 #endif
 
 #ifndef KRML_HOST_EXIT
-#  define KRML_HOST_EXIT exit
+#define KRML_HOST_EXIT exit
 #endif
 
 #ifndef KRML_HOST_MALLOC
-#  define KRML_HOST_MALLOC malloc
+#define KRML_HOST_MALLOC malloc
 #endif
 
 #ifndef KRML_HOST_CALLOC
-#  define KRML_HOST_CALLOC calloc
+#define KRML_HOST_CALLOC calloc
 #endif
 
 #ifndef KRML_HOST_FREE
-#  define KRML_HOST_FREE free
+#define KRML_HOST_FREE free
 #endif
 
 #ifndef KRML_HOST_TIME
 
-#  include <time.h>
+#include <time.h>
 
 /* Prims_nat not yet in scope */
-inline static int32_t krml_time() {
-  return (int32_t)time(NULL);
-}
+inline static int32_t krml_time() { return (int32_t)time(NULL); }
 
-#  define KRML_HOST_TIME krml_time
+#define KRML_HOST_TIME krml_time
 #endif
 
 /* In statement position, exiting is easy. */
@@ -75,10 +72,10 @@ inline static int32_t krml_time() {
  */
 
 #ifdef __GNUC__
-#  define _KRML_CHECK_SIZE_PRAGMA                                              \
-    _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+#define _KRML_CHECK_SIZE_PRAGMA                                                \
+  _Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
 #else
-#  define _KRML_CHECK_SIZE_PRAGMA
+#define _KRML_CHECK_SIZE_PRAGMA
 #endif
 
 #define KRML_CHECK_SIZE(size_elt, sz)                                          \
@@ -94,9 +91,10 @@ inline static int32_t krml_time() {
   } while (0)
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
-#  define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) _snprintf_s(buf, sz, _TRUNCATE, fmt, arg)
+#define KRML_HOST_SNPRINTF(buf, sz, fmt, arg)                                  \
+  _snprintf_s(buf, sz, _TRUNCATE, fmt, arg)
 #else
-#  define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) snprintf(buf, sz, fmt, arg)
+#define KRML_HOST_SNPRINTF(buf, sz, fmt, arg) snprintf(buf, sz, fmt, arg)
 #endif
 
 #endif

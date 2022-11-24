@@ -64,7 +64,7 @@
 #endif
 
 #if defined(TINYCRYPT_PRIMITIVES)
-#include "ecc.h"
+#include "tinycrypt/ecc.h"
 #include "mbedtls/platform_util.h"
 #include "mbedtls/sha256.h"
 #include <string.h>

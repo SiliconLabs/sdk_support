@@ -2,7 +2,8 @@
  * Only used for a few test configurations.
  *
  * Typical usage (note multiple levels of quoting):
- *     make CFLAGS="'-DMBEDTLS_USER_CONFIG_FILE=\"../tests/configs/user-config-for-test.h\"'"
+ *     make
+ * CFLAGS="'-DMBEDTLS_USER_CONFIG_FILE=\"../tests/configs/user-config-for-test.h\"'"
  */
 
 /*
@@ -56,4 +57,4 @@
 #define MBEDTLS_PSA_ACCEL_ALG_CMAC
 #define MBEDTLS_PSA_ACCEL_ALG_HMAC
 
-#endif  /* PSA_CRYPTO_DRIVER_TEST_ALL */
+#endif /* PSA_CRYPTO_DRIVER_TEST_ALL */

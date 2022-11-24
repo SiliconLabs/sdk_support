@@ -1,7 +1,8 @@
 /**
  * \file config-no-entropy.h
  *
- * \brief Minimal configuration of features that do not require an entropy source
+ * \brief Minimal configuration of features that do not require an entropy
+ * source
  */
 /*
  *  Copyright The Mbed TLS Contributors

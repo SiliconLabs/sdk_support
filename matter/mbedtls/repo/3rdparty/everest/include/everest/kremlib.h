@@ -22,8 +22,8 @@
 #ifndef __KREMLIB_H
 #define __KREMLIB_H
 
+#include "kremlin/c_endianness.h"
 #include "kremlin/internal/target.h"
 #include "kremlin/internal/types.h"
-#include "kremlin/c_endianness.h"
 
-#endif     /* __KREMLIB_H */
+#endif /* __KREMLIB_H */

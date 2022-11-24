@@ -3,7 +3,8 @@
  * \brief This file contains SHA-384 and SHA-512 definitions and functions.
  *
  * The Secure Hash Algorithms 384 and 512 (SHA-384 and SHA-512) cryptographic
- * hash functions are defined in <em>FIPS 180-4: Secure Hash Standard (SHS)</em>.
+ * hash functions are defined in <em>FIPS 180-4: Secure Hash Standard
+ * (SHS)</em>.
  */
 /*
  *  Copyright The Mbed TLS Contributors
@@ -35,9 +36,9 @@
 
 /* MBEDTLS_ERR_SHA512_HW_ACCEL_FAILED is deprecated and should not be used. */
 /** SHA-512 hardware accelerator failed */
-#define MBEDTLS_ERR_SHA512_HW_ACCEL_FAILED                -0x0039
+#define MBEDTLS_ERR_SHA512_HW_ACCEL_FAILED -0x0039
 /** SHA-512 input data was malformed. */
-#define MBEDTLS_ERR_SHA512_BAD_INPUT_DATA                 -0x0075
+#define MBEDTLS_ERR_SHA512_BAD_INPUT_DATA -0x0075
 
 #ifdef __cplusplus
 extern "C" {
@@ -54,19 +55,17 @@ extern "C" {
  *                 checksum calculations. The choice between these two is
  *                 made in the call to mbedtls_sha512_starts_ret().
  */
-typedef struct mbedtls_sha512_context
-{
-    uint64_t total[2];          /*!< The number of Bytes processed. */
-    uint64_t state[8];          /*!< The intermediate digest state. */
-    unsigned char buffer[128];  /*!< The data block being processed. */
+typedef struct mbedtls_sha512_context {
+  uint64_t total[2];         /*!< The number of Bytes processed. */
+  uint64_t state[8];         /*!< The intermediate digest state. */
+  unsigned char buffer[128]; /*!< The data block being processed. */
 #if !defined(MBEDTLS_SHA512_NO_SHA384)
-    int is384;                  /*!< Determines which function to use:
-                                     0: Use SHA-512, or 1: Use SHA-384. */
+  int is384; /*!< Determines which function to use:
+                  0: Use SHA-512, or 1: Use SHA-384. */
 #endif
-}
-mbedtls_sha512_context;
+} mbedtls_sha512_context;
 
-#else  /* MBEDTLS_SHA512_ALT */
+#else /* MBEDTLS_SHA512_ALT */
 #include "sha512_alt.h"
 #endif /* MBEDTLS_SHA512_ALT */
 
@@ -76,7 +75,7 @@ mbedtls_sha512_context;
  * \param ctx      The SHA-512 context to initialize. This must
  *                 not be \c NULL.
  */
-void mbedtls_sha512_init( mbedtls_sha512_context *ctx );
+void mbedtls_sha512_init(mbedtls_sha512_context *ctx);
 
 /**
  * \brief          This function clears a SHA-512 context.
@@ -86,7 +85,7 @@ void mbedtls_sha512_init( mbedtls_sha512_context *ctx );
  *                 is not \c NULL, it must point to an initialized
  *                 SHA-512 context.
  */
-void mbedtls_sha512_free( mbedtls_sha512_context *ctx );
+void mbedtls_sha512_free(mbedtls_sha512_context *ctx);
 
 /**
  * \brief          This function clones the state of a SHA-512 context.
@@ -94,8 +93,8 @@ void mbedtls_sha512_free( mbedtls_sha512_context *ctx );
  * \param dst      The destination context. This must be initialized.
  * \param src      The context to clone. This must be initialized.
  */
-void mbedtls_sha512_clone( mbedtls_sha512_context *dst,
-                           const mbedtls_sha512_context *src );
+void mbedtls_sha512_clone(mbedtls_sha512_context *dst,
+                          const mbedtls_sha512_context *src);
 
 /**
  * \brief          This function starts a SHA-384 or SHA-512 checksum
@@ -112,7 +111,7 @@ void mbedtls_sha512_clone( mbedtls_sha512_context *dst,
  * \return         \c 0 on success.
  * \return         A negative error code on failure.
  */
-int mbedtls_sha512_starts_ret( mbedtls_sha512_context *ctx, int is384 );
+int mbedtls_sha512_starts_ret(mbedtls_sha512_context *ctx, int is384);
 
 /**
  * \brief          This function feeds an input buffer into an ongoing
@@ -127,9 +126,8 @@ int mbedtls_sha512_starts_ret( mbedtls_sha512_context *ctx, int is384 );
  * \return         \c 0 on success.
  * \return         A negative error code on failure.
  */
-int mbedtls_sha512_update_ret( mbedtls_sha512_context *ctx,
-                    const unsigned char *input,
-                    size_t ilen );
+int mbedtls_sha512_update_ret(mbedtls_sha512_context *ctx,
+                              const unsigned char *input, size_t ilen);
 
 /**
  * \brief          This function finishes the SHA-512 operation, and writes
@@ -143,8 +141,8 @@ int mbedtls_sha512_update_ret( mbedtls_sha512_context *ctx,
  * \return         \c 0 on success.
  * \return         A negative error code on failure.
  */
-int mbedtls_sha512_finish_ret( mbedtls_sha512_context *ctx,
-                               unsigned char output[64] );
+int mbedtls_sha512_finish_ret(mbedtls_sha512_context *ctx,
+                              unsigned char output[64]);
 
 /**
  * \brief          This function processes a single data block within
@@ -158,11 +156,11 @@ int mbedtls_sha512_finish_ret( mbedtls_sha512_context *ctx,
  * \return         \c 0 on success.
  * \return         A negative error code on failure.
  */
-int mbedtls_internal_sha512_process( mbedtls_sha512_context *ctx,
-                                     const unsigned char data[128] );
+int mbedtls_internal_sha512_process(mbedtls_sha512_context *ctx,
+                                    const unsigned char data[128]);
 #if !defined(MBEDTLS_DEPRECATED_REMOVED)
 #if defined(MBEDTLS_DEPRECATED_WARNING)
-#define MBEDTLS_DEPRECATED      __attribute__((deprecated))
+#define MBEDTLS_DEPRECATED __attribute__((deprecated))
 #else
 #define MBEDTLS_DEPRECATED
 #endif
@@ -179,8 +177,8 @@ int mbedtls_internal_sha512_process( mbedtls_sha512_context *ctx,
  * \note           When \c MBEDTLS_SHA512_NO_SHA384 is defined, \p is384 must
  *                 be \c 0, or the function will fail to work.
  */
-MBEDTLS_DEPRECATED void mbedtls_sha512_starts( mbedtls_sha512_context *ctx,
-                                               int is384 );
+MBEDTLS_DEPRECATED void mbedtls_sha512_starts(mbedtls_sha512_context *ctx,
+                                              int is384);
 
 /**
  * \brief          This function feeds an input buffer into an ongoing
@@ -194,9 +192,9 @@ MBEDTLS_DEPRECATED void mbedtls_sha512_starts( mbedtls_sha512_context *ctx,
  *                 buffer of length \p ilen Bytes.
  * \param ilen     The length of the input data in Bytes.
  */
-MBEDTLS_DEPRECATED void mbedtls_sha512_update( mbedtls_sha512_context *ctx,
-                                               const unsigned char *input,
-                                               size_t ilen );
+MBEDTLS_DEPRECATED void mbedtls_sha512_update(mbedtls_sha512_context *ctx,
+                                              const unsigned char *input,
+                                              size_t ilen);
 
 /**
  * \brief          This function finishes the SHA-512 operation, and writes
@@ -209,8 +207,8 @@ MBEDTLS_DEPRECATED void mbedtls_sha512_update( mbedtls_sha512_context *ctx,
  * \param output   The SHA-384 or SHA-512 checksum result. This must
  *                 be a writable buffer of size \c 64 Bytes.
  */
-MBEDTLS_DEPRECATED void mbedtls_sha512_finish( mbedtls_sha512_context *ctx,
-                                               unsigned char output[64] );
+MBEDTLS_DEPRECATED void mbedtls_sha512_finish(mbedtls_sha512_context *ctx,
+                                              unsigned char output[64]);
 
 /**
  * \brief          This function processes a single data block within
@@ -223,9 +221,8 @@ MBEDTLS_DEPRECATED void mbedtls_sha512_finish( mbedtls_sha512_context *ctx,
  * \param data     The buffer holding one block of data. This must be
  *                 a readable buffer of length \c 128 Bytes.
  */
-MBEDTLS_DEPRECATED void mbedtls_sha512_process(
-                                            mbedtls_sha512_context *ctx,
-                                            const unsigned char data[128] );
+MBEDTLS_DEPRECATED void mbedtls_sha512_process(mbedtls_sha512_context *ctx,
+                                               const unsigned char data[128]);
 
 #undef MBEDTLS_DEPRECATED
 #endif /* !MBEDTLS_DEPRECATED_REMOVED */
@@ -255,14 +252,12 @@ MBEDTLS_DEPRECATED void mbedtls_sha512_process(
  * \return         \c 0 on success.
  * \return         A negative error code on failure.
  */
-int mbedtls_sha512_ret( const unsigned char *input,
-                        size_t ilen,
-                        unsigned char output[64],
-                        int is384 );
+int mbedtls_sha512_ret(const unsigned char *input, size_t ilen,
+                       unsigned char output[64], int is384);
 
 #if !defined(MBEDTLS_DEPRECATED_REMOVED)
 #if defined(MBEDTLS_DEPRECATED_WARNING)
-#define MBEDTLS_DEPRECATED      __attribute__((deprecated))
+#define MBEDTLS_DEPRECATED __attribute__((deprecated))
 #else
 #define MBEDTLS_DEPRECATED
 #endif
@@ -290,23 +285,21 @@ int mbedtls_sha512_ret( const unsigned char *input,
  * \note           When \c MBEDTLS_SHA512_NO_SHA384 is defined, \p is384 must
  *                 be \c 0, or the function will fail to work.
  */
-MBEDTLS_DEPRECATED void mbedtls_sha512( const unsigned char *input,
-                                        size_t ilen,
-                                        unsigned char output[64],
-                                        int is384 );
+MBEDTLS_DEPRECATED void mbedtls_sha512(const unsigned char *input, size_t ilen,
+                                       unsigned char output[64], int is384);
 
 #undef MBEDTLS_DEPRECATED
 #endif /* !MBEDTLS_DEPRECATED_REMOVED */
 
 #if defined(MBEDTLS_SELF_TEST)
 
- /**
+/**
  * \brief          The SHA-384 or SHA-512 checkup routine.
  *
  * \return         \c 0 on success.
  * \return         \c 1 on failure.
  */
-int mbedtls_sha512_self_test( int verbose );
+int mbedtls_sha512_self_test(int verbose);
 #endif /* MBEDTLS_SELF_TEST */
 
 #ifdef __cplusplus

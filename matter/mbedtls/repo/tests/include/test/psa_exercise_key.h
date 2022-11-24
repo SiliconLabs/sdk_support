@@ -109,7 +109,7 @@
  * This is used in some smoke tests.
  */
 #if defined(KNOWN_SUPPORTED_HASH_ALG) && defined(PSA_WANT_ALG_HMAC)
-#define KNOWN_SUPPORTED_MAC_ALG ( PSA_ALG_HMAC( KNOWN_SUPPORTED_HASH_ALG ) )
+#define KNOWN_SUPPORTED_MAC_ALG (PSA_ALG_HMAC(KNOWN_SUPPORTED_HASH_ALG))
 #define KNOWN_SUPPORTED_MAC_KEY_TYPE PSA_KEY_TYPE_HMAC
 #elif defined(KNOWN_SUPPORTED_BLOCK_CIPHER) && defined(MBEDTLS_CMAC_C)
 #define KNOWN_SUPPORTED_MAC_ALG PSA_ALG_CMAC
@@ -168,12 +168,9 @@
  * \return                  \c 1 on success, \c 0 on failure.
  */
 int mbedtls_test_psa_setup_key_derivation_wrap(
-    psa_key_derivation_operation_t* operation,
-    mbedtls_svc_key_id_t key,
-    psa_algorithm_t alg,
-    const unsigned char* input1, size_t input1_length,
-    const unsigned char* input2, size_t input2_length,
-    size_t capacity );
+    psa_key_derivation_operation_t *operation, mbedtls_svc_key_id_t key,
+    psa_algorithm_t alg, const unsigned char *input1, size_t input1_length,
+    const unsigned char *input2, size_t input2_length, size_t capacity);
 
 /** Perform a key agreement using the given key pair against its public key
  * using psa_raw_key_agreement().
@@ -187,9 +184,9 @@ int mbedtls_test_psa_setup_key_derivation_wrap(
  *
  * \return                  \c 1 on success, \c 0 on failure.
  */
-psa_status_t mbedtls_test_psa_raw_key_agreement_with_self(
-    psa_algorithm_t alg,
-    mbedtls_svc_key_id_t key );
+psa_status_t
+mbedtls_test_psa_raw_key_agreement_with_self(psa_algorithm_t alg,
+                                             mbedtls_svc_key_id_t key);
 
 /** Perform a key agreement using the given key pair against its public key
  * using psa_key_derivation_raw_key().
@@ -207,8 +204,7 @@ psa_status_t mbedtls_test_psa_raw_key_agreement_with_self(
  * \return                  \c 1 on success, \c 0 on failure.
  */
 psa_status_t mbedtls_test_psa_key_agreement_with_self(
-    psa_key_derivation_operation_t *operation,
-    mbedtls_svc_key_id_t key );
+    psa_key_derivation_operation_t *operation, mbedtls_svc_key_id_t key);
 
 /** Perform sanity checks on the given key representation.
  *
@@ -228,9 +224,9 @@ psa_status_t mbedtls_test_psa_key_agreement_with_self(
  *
  * \return                  \c 1 if all checks passed, \c 0 on failure.
  */
-int mbedtls_test_psa_exported_key_sanity_check(
-    psa_key_type_t type, size_t bits,
-    const uint8_t *exported, size_t exported_length );
+int mbedtls_test_psa_exported_key_sanity_check(psa_key_type_t type, size_t bits,
+                                               const uint8_t *exported,
+                                               size_t exported_length);
 
 /** Do smoke tests on a key.
  *
@@ -259,11 +255,10 @@ int mbedtls_test_psa_exported_key_sanity_check(
  * \retval 0 The key failed the smoke tests.
  * \retval 1 The key passed the smoke tests.
  */
-int mbedtls_test_psa_exercise_key( mbedtls_svc_key_id_t key,
-                                   psa_key_usage_t usage,
-                                   psa_algorithm_t alg );
+int mbedtls_test_psa_exercise_key(mbedtls_svc_key_id_t key,
+                                  psa_key_usage_t usage, psa_algorithm_t alg);
 
-psa_key_usage_t mbedtls_test_psa_usage_to_exercise( psa_key_type_t type,
-                                                    psa_algorithm_t alg );
+psa_key_usage_t mbedtls_test_psa_usage_to_exercise(psa_key_type_t type,
+                                                   psa_algorithm_t alg);
 
 #endif /* PSA_EXERCISE_KEY_H */

@@ -35,7 +35,8 @@
 
 #include "psa/crypto_driver_common.h"
 
-/* Include the context structure definitions for the Mbed TLS software drivers */
+/* Include the context structure definitions for the Mbed TLS software drivers
+ */
 #include "psa/crypto_builtin_primitives.h"
 
 /* Include the context structure definitions for those drivers that were
@@ -47,45 +48,45 @@
 
 #if defined(PSA_CRYPTO_DRIVER_TEST)
 
-#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) &&                                    \
     defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_CIPHER)
 typedef libtestdriver1_mbedtls_psa_cipher_operation_t
-        mbedtls_transparent_test_driver_cipher_operation_t;
+    mbedtls_transparent_test_driver_cipher_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT \
-        LIBTESTDRIVER1_MBEDTLS_PSA_CIPHER_OPERATION_INIT
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT                  \
+  LIBTESTDRIVER1_MBEDTLS_PSA_CIPHER_OPERATION_INIT
 #else
 typedef mbedtls_psa_cipher_operation_t
-        mbedtls_transparent_test_driver_cipher_operation_t;
+    mbedtls_transparent_test_driver_cipher_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT \
-        MBEDTLS_PSA_CIPHER_OPERATION_INIT
-#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 &&
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT                  \
+  MBEDTLS_PSA_CIPHER_OPERATION_INIT
+#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 &&                                       \
           LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_CIPHER */
 
-#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) && \
+#if defined(MBEDTLS_TEST_LIBTESTDRIVER1) &&                                    \
     defined(LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_HASH)
 typedef libtestdriver1_mbedtls_psa_hash_operation_t
-        mbedtls_transparent_test_driver_hash_operation_t;
+    mbedtls_transparent_test_driver_hash_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_HASH_OPERATION_INIT \
-        LIBTESTDRIVER1_MBEDTLS_PSA_HASH_OPERATION_INIT
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_HASH_OPERATION_INIT                    \
+  LIBTESTDRIVER1_MBEDTLS_PSA_HASH_OPERATION_INIT
 #else
 typedef mbedtls_psa_hash_operation_t
-        mbedtls_transparent_test_driver_hash_operation_t;
+    mbedtls_transparent_test_driver_hash_operation_t;
 
-#define MBEDTLS_TRANSPARENT_TEST_DRIVER_HASH_OPERATION_INIT \
-        MBEDTLS_PSA_HASH_OPERATION_INIT
-#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 &&
+#define MBEDTLS_TRANSPARENT_TEST_DRIVER_HASH_OPERATION_INIT                    \
+  MBEDTLS_PSA_HASH_OPERATION_INIT
+#endif /* MBEDTLS_TEST_LIBTESTDRIVER1 &&                                       \
           LIBTESTDRIVER1_MBEDTLS_PSA_BUILTIN_HASH */
 
 typedef struct {
-    unsigned int initialised : 1;
-    mbedtls_transparent_test_driver_cipher_operation_t ctx;
+  unsigned int initialised : 1;
+  mbedtls_transparent_test_driver_cipher_operation_t ctx;
 } mbedtls_opaque_test_driver_cipher_operation_t;
 
-#define MBEDTLS_OPAQUE_TEST_DRIVER_CIPHER_OPERATION_INIT \
-     { 0, MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT }
+#define MBEDTLS_OPAQUE_TEST_DRIVER_CIPHER_OPERATION_INIT                       \
+  { 0, MBEDTLS_TRANSPARENT_TEST_DRIVER_CIPHER_OPERATION_INIT }
 
 #endif /* PSA_CRYPTO_DRIVER_TEST */
 
@@ -97,19 +98,20 @@ typedef struct {
  * of both this file and the content of psa_crypto_driver_wrappers.c */
 
 typedef union {
-    unsigned dummy; /* Make sure this union is always non-empty */
-    mbedtls_psa_hash_operation_t mbedtls_ctx;
+  unsigned dummy; /* Make sure this union is always non-empty */
+  mbedtls_psa_hash_operation_t mbedtls_ctx;
 #if defined(PSA_CRYPTO_DRIVER_TEST)
-    mbedtls_transparent_test_driver_hash_operation_t test_driver_ctx;
+  mbedtls_transparent_test_driver_hash_operation_t test_driver_ctx;
 #endif
 } psa_driver_hash_context_t;
 
 typedef union {
-    unsigned dummy; /* Make sure this union is always non-empty */
-    mbedtls_psa_cipher_operation_t mbedtls_ctx;
+  unsigned dummy; /* Make sure this union is always non-empty */
+  mbedtls_psa_cipher_operation_t mbedtls_ctx;
 #if defined(PSA_CRYPTO_DRIVER_TEST)
-    mbedtls_transparent_test_driver_cipher_operation_t transparent_test_driver_ctx;
-    mbedtls_opaque_test_driver_cipher_operation_t opaque_test_driver_ctx;
+  mbedtls_transparent_test_driver_cipher_operation_t
+      transparent_test_driver_ctx;
+  mbedtls_opaque_test_driver_cipher_operation_t opaque_test_driver_ctx;
 #endif
 } psa_driver_cipher_context_t;
 

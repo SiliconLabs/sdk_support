@@ -67,8 +67,8 @@
 #endif
 
 #if defined(TINYCRYPT_PRIMITIVES)
-#include "ecc.h"
-#include "ecc_dsa.h"
+#include "tinycrypt/ecc.h"
+#include "tinycrypt/ecc_dsa.h"
 #include "mbedtls/asn1.h"
 #include "mbedtls/asn1write.h"
 #include "mbedtls/platform_util.h"

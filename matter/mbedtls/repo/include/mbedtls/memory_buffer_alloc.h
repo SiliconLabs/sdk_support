@@ -39,15 +39,18 @@
  */
 
 #if !defined(MBEDTLS_MEMORY_ALIGN_MULTIPLE)
-#define MBEDTLS_MEMORY_ALIGN_MULTIPLE       4 /**< Align on multiples of this value */
+#define MBEDTLS_MEMORY_ALIGN_MULTIPLE                                          \
+  4 /**< Align on multiples of this value                                      \
+     */
 #endif
 
 /** \} name SECTION: Module settings */
 
-#define MBEDTLS_MEMORY_VERIFY_NONE         0
-#define MBEDTLS_MEMORY_VERIFY_ALLOC        (1 << 0)
-#define MBEDTLS_MEMORY_VERIFY_FREE         (1 << 1)
-#define MBEDTLS_MEMORY_VERIFY_ALWAYS       (MBEDTLS_MEMORY_VERIFY_ALLOC | MBEDTLS_MEMORY_VERIFY_FREE)
+#define MBEDTLS_MEMORY_VERIFY_NONE 0
+#define MBEDTLS_MEMORY_VERIFY_ALLOC (1 << 0)
+#define MBEDTLS_MEMORY_VERIFY_FREE (1 << 1)
+#define MBEDTLS_MEMORY_VERIFY_ALWAYS                                           \
+  (MBEDTLS_MEMORY_VERIFY_ALLOC | MBEDTLS_MEMORY_VERIFY_FREE)
 
 #ifdef __cplusplus
 extern "C" {
@@ -68,22 +71,23 @@ extern "C" {
  * \param buf   buffer to use as heap
  * \param len   size of the buffer
  */
-void mbedtls_memory_buffer_alloc_init( unsigned char *buf, size_t len );
+void mbedtls_memory_buffer_alloc_init(unsigned char *buf, size_t len);
 
 /**
  * \brief   Free the mutex for thread-safety and clear remaining memory
  */
-void mbedtls_memory_buffer_alloc_free( void );
+void mbedtls_memory_buffer_alloc_free(void);
 
 /**
  * \brief   Determine when the allocator should automatically verify the state
  *          of the entire chain of headers / meta-data.
  *          (Default: MBEDTLS_MEMORY_VERIFY_NONE)
  *
- * \param verify    One of MBEDTLS_MEMORY_VERIFY_NONE, MBEDTLS_MEMORY_VERIFY_ALLOC,
- *                  MBEDTLS_MEMORY_VERIFY_FREE or MBEDTLS_MEMORY_VERIFY_ALWAYS
+ * \param verify    One of MBEDTLS_MEMORY_VERIFY_NONE,
+ * MBEDTLS_MEMORY_VERIFY_ALLOC, MBEDTLS_MEMORY_VERIFY_FREE or
+ * MBEDTLS_MEMORY_VERIFY_ALWAYS
  */
-void mbedtls_memory_buffer_set_verify( int verify );
+void mbedtls_memory_buffer_set_verify(int verify);
 
 #if defined(MBEDTLS_MEMORY_DEBUG)
 /**
@@ -92,7 +96,7 @@ void mbedtls_memory_buffer_set_verify( int verify );
  *          Prints out a list of 'still allocated' blocks and their stack
  *          trace if MBEDTLS_MEMORY_BACKTRACE is defined.
  */
-void mbedtls_memory_buffer_alloc_status( void );
+void mbedtls_memory_buffer_alloc_status(void);
 
 /**
  * \brief   Get the peak heap usage so far
@@ -102,12 +106,12 @@ void mbedtls_memory_buffer_alloc_status( void );
  *                      into smaller blocks but larger than the requested size.
  * \param max_blocks    Peak number of blocks in use, including free and used
  */
-void mbedtls_memory_buffer_alloc_max_get( size_t *max_used, size_t *max_blocks );
+void mbedtls_memory_buffer_alloc_max_get(size_t *max_used, size_t *max_blocks);
 
 /**
  * \brief   Reset peak statistics
  */
-void mbedtls_memory_buffer_alloc_max_reset( void );
+void mbedtls_memory_buffer_alloc_max_reset(void);
 
 /**
  * \brief   Get the current heap usage
@@ -117,7 +121,7 @@ void mbedtls_memory_buffer_alloc_max_reset( void );
  *                      into smaller blocks but larger than the requested size.
  * \param cur_blocks    Current number of blocks in use, including free and used
  */
-void mbedtls_memory_buffer_alloc_cur_get( size_t *cur_used, size_t *cur_blocks );
+void mbedtls_memory_buffer_alloc_cur_get(size_t *cur_used, size_t *cur_blocks);
 #endif /* MBEDTLS_MEMORY_DEBUG */
 
 /**
@@ -131,7 +135,7 @@ void mbedtls_memory_buffer_alloc_cur_get( size_t *cur_used, size_t *cur_blocks )
  *
  * \return             0 if verified, 1 otherwise
  */
-int mbedtls_memory_buffer_alloc_verify( void );
+int mbedtls_memory_buffer_alloc_verify(void);
 
 #if defined(MBEDTLS_SELF_TEST)
 /**
@@ -139,7 +143,7 @@ int mbedtls_memory_buffer_alloc_verify( void );
  *
  * \return         0 if successful, or 1 if a test failed
  */
-int mbedtls_memory_buffer_alloc_self_test( int verbose );
+int mbedtls_memory_buffer_alloc_self_test(int verbose);
 #endif
 
 #ifdef __cplusplus

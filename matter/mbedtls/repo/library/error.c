@@ -241,7 +241,7 @@
 #endif
 
 #if defined(TINYCRYPT_PRIMITIVES)
-#include "ecc.h"
+#include "tinycrypt/ecc.h"
 #endif
 
 

@@ -78,7 +78,7 @@
 #include "mbedtls/pkcs12.h"
 #endif
 #if defined(TINYCRYPT_PRIMITIVES)
-#include "ecc.h"
+#include "tinycrypt/ecc.h"
 #endif
 
 #if defined(MBEDTLS_PLATFORM_C)

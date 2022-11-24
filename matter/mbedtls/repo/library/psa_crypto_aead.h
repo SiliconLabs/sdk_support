@@ -77,13 +77,12 @@
  * \retval #PSA_ERROR_CORRUPTION_DETECTED
  */
 psa_status_t mbedtls_psa_aead_encrypt(
-    const psa_key_attributes_t *attributes,
-    const uint8_t *key_buffer, size_t key_buffer_size,
-    psa_algorithm_t alg,
-    const uint8_t *nonce, size_t nonce_length,
-    const uint8_t *additional_data, size_t additional_data_length,
-    const uint8_t *plaintext, size_t plaintext_length,
-    uint8_t *ciphertext, size_t ciphertext_size, size_t *ciphertext_length );
+    const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
+    size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
+    size_t nonce_length, const uint8_t *additional_data,
+    size_t additional_data_length, const uint8_t *plaintext,
+    size_t plaintext_length, uint8_t *ciphertext, size_t ciphertext_size,
+    size_t *ciphertext_length);
 
 /**
  * \brief Process an authenticated decryption operation.
@@ -140,12 +139,11 @@ psa_status_t mbedtls_psa_aead_encrypt(
  * \retval #PSA_ERROR_CORRUPTION_DETECTED
  */
 psa_status_t mbedtls_psa_aead_decrypt(
-    const psa_key_attributes_t *attributes,
-    const uint8_t *key_buffer, size_t key_buffer_size,
-    psa_algorithm_t alg,
-    const uint8_t *nonce, size_t nonce_length,
-    const uint8_t *additional_data, size_t additional_data_length,
-    const uint8_t *ciphertext, size_t ciphertext_length,
-    uint8_t *plaintext, size_t plaintext_size, size_t *plaintext_length );
+    const psa_key_attributes_t *attributes, const uint8_t *key_buffer,
+    size_t key_buffer_size, psa_algorithm_t alg, const uint8_t *nonce,
+    size_t nonce_length, const uint8_t *additional_data,
+    size_t additional_data_length, const uint8_t *ciphertext,
+    size_t ciphertext_length, uint8_t *plaintext, size_t plaintext_size,
+    size_t *plaintext_length);
 
 #endif /* PSA_CRYPTO_AEAD */

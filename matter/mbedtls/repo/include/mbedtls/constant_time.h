@@ -22,7 +22,6 @@
 
 #include <stddef.h>
 
-
 /** Constant-time buffer comparison without branches.
  *
  * This is equivalent to the standard memcmp function, but is likely to be
@@ -38,8 +37,6 @@
  * \return      Zero if the content of the two buffer is the same,
  *              otherwise non-zero.
  */
-int mbedtls_ct_memcmp( const void *a,
-                       const void *b,
-                       size_t n );
+int mbedtls_ct_memcmp(const void *a, const void *b, size_t n);
 
 #endif /* MBEDTLS_CONSTANT_TIME_H */
