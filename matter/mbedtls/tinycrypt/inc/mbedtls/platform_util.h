@@ -56,16 +56,16 @@ extern "C" {
 #define MBEDTLS_PARAM_FAILED_ALT
 
 #elif defined(MBEDTLS_CHECK_PARAMS_ASSERT)
-#define MBEDTLS_PARAM_FAILED( cond ) assert( cond )
+#define MBEDTLS_PARAM_FAILED(cond) assert(cond)
 #define MBEDTLS_PARAM_FAILED_ALT
 
 #else /* MBEDTLS_PARAM_FAILED */
-#define MBEDTLS_PARAM_FAILED( cond ) \
-    mbedtls_param_failed( #cond, __FILE__, __LINE__ )
+#define MBEDTLS_PARAM_FAILED(cond)                                             \
+  mbedtls_param_failed(#cond, __FILE__, __LINE__)
 
 /**
- * \brief       User supplied callback function for parameter validation failure.
- *              See #MBEDTLS_CHECK_PARAMS for context.
+ * \brief       User supplied callback function for parameter validation
+ * failure. See #MBEDTLS_CHECK_PARAMS for context.
  *
  *              This function will be called unless an alternative treatment
  *              is defined through the #MBEDTLS_PARAM_FAILED macro.
@@ -78,36 +78,37 @@ extern "C" {
  * \param file  The file where the assertion failed.
  * \param line  The line in the file where the assertion failed.
  */
-void mbedtls_param_failed( const char *failure_condition,
-                           const char *file,
-                           int line );
+void mbedtls_param_failed(const char *failure_condition, const char *file,
+                          int line);
 #endif /* MBEDTLS_PARAM_FAILED */
 
 /* Internal macro meant to be called only from within the library. */
-#define MBEDTLS_INTERNAL_VALIDATE_RET( cond, ret )  \
-    do {                                            \
-        if( !(cond) )                               \
-        {                                           \
-            MBEDTLS_PARAM_FAILED( cond );           \
-            return( ret );                          \
-        }                                           \
-    } while( 0 )
+#define MBEDTLS_INTERNAL_VALIDATE_RET(cond, ret)                               \
+  do {                                                                         \
+    if (!(cond)) {                                                             \
+      MBEDTLS_PARAM_FAILED(cond);                                              \
+      return (ret);                                                            \
+    }                                                                          \
+  } while (0)
 
 /* Internal macro meant to be called only from within the library. */
-#define MBEDTLS_INTERNAL_VALIDATE( cond )           \
-    do {                                            \
-        if( !(cond) )                               \
-        {                                           \
-            MBEDTLS_PARAM_FAILED( cond );           \
-            return;                                 \
-        }                                           \
-    } while( 0 )
+#define MBEDTLS_INTERNAL_VALIDATE(cond)                                        \
+  do {                                                                         \
+    if (!(cond)) {                                                             \
+      MBEDTLS_PARAM_FAILED(cond);                                              \
+      return;                                                                  \
+    }                                                                          \
+  } while (0)
 
 #else /* MBEDTLS_CHECK_PARAMS */
 
 /* Internal macros meant to be called only from within the library. */
-#define MBEDTLS_INTERNAL_VALIDATE_RET( cond, ret )  do { } while( 0 )
-#define MBEDTLS_INTERNAL_VALIDATE( cond )           do { } while( 0 )
+#define MBEDTLS_INTERNAL_VALIDATE_RET(cond, ret)                               \
+  do {                                                                         \
+  } while (0)
+#define MBEDTLS_INTERNAL_VALIDATE(cond)                                        \
+  do {                                                                         \
+  } while (0)
 
 #endif /* MBEDTLS_CHECK_PARAMS */
 
@@ -119,16 +120,16 @@ void mbedtls_param_failed( const char *failure_condition,
  * it, too. We might want to move all these definitions here at
  * some point for uniformity. */
 #define MBEDTLS_DEPRECATED __attribute__((deprecated))
-MBEDTLS_DEPRECATED typedef char const * mbedtls_deprecated_string_constant_t;
-#define MBEDTLS_DEPRECATED_STRING_CONSTANT( VAL )       \
-    ( (mbedtls_deprecated_string_constant_t) ( VAL ) )
+MBEDTLS_DEPRECATED typedef char const *mbedtls_deprecated_string_constant_t;
+#define MBEDTLS_DEPRECATED_STRING_CONSTANT(VAL)                                \
+  ((mbedtls_deprecated_string_constant_t)(VAL))
 MBEDTLS_DEPRECATED typedef int mbedtls_deprecated_numeric_constant_t;
-#define MBEDTLS_DEPRECATED_NUMERIC_CONSTANT( VAL )       \
-    ( (mbedtls_deprecated_numeric_constant_t) ( VAL ) )
+#define MBEDTLS_DEPRECATED_NUMERIC_CONSTANT(VAL)                               \
+  ((mbedtls_deprecated_numeric_constant_t)(VAL))
 #undef MBEDTLS_DEPRECATED
 #else /* MBEDTLS_DEPRECATED_WARNING */
-#define MBEDTLS_DEPRECATED_STRING_CONSTANT( VAL ) VAL
-#define MBEDTLS_DEPRECATED_NUMERIC_CONSTANT( VAL ) VAL
+#define MBEDTLS_DEPRECATED_STRING_CONSTANT(VAL) VAL
+#define MBEDTLS_DEPRECATED_NUMERIC_CONSTANT(VAL) VAL
 #endif /* MBEDTLS_DEPRECATED_WARNING */
 #endif /* MBEDTLS_DEPRECATED_REMOVED */
 
@@ -218,7 +219,7 @@ MBEDTLS_DEPRECATED typedef int mbedtls_deprecated_numeric_constant_t;
  * https://stackoverflow.com/questions/40576003/ignoring-warning-wunused-result
  * https://gcc.gnu.org/bugzilla/show_bug.cgi?id=66425#c34
  */
-#define MBEDTLS_IGNORE_RETURN(result) ( (void) !( result ) )
+#define MBEDTLS_IGNORE_RETURN(result) ((void)!(result))
 #endif
 
 #if defined(TINYCRYPT_PRIMITIVES)
@@ -247,7 +248,7 @@ MBEDTLS_DEPRECATED typedef int mbedtls_deprecated_numeric_constant_t;
  * \return      NULL if a potential FI attack was detected or input parameters
  *              are not valid.
  */
-void *mbedtls_platform_zeroize( void *buf, size_t len );
+void *mbedtls_platform_zeroize(void *buf, size_t len);
 
 /**
  * \brief       Secure memset
@@ -264,7 +265,7 @@ void *mbedtls_platform_zeroize( void *buf, size_t len );
  * \return      The value of \p ptr if the operation was successful.
  * \return      NULL if a potential FI attack was detected.
  */
-void *mbedtls_platform_memset( void *ptr, int value, size_t num );
+void *mbedtls_platform_memset(void *ptr, int value, size_t num);
 
 /**
  * \brief       Secure memcpy
@@ -281,7 +282,7 @@ void *mbedtls_platform_memset( void *ptr, int value, size_t num );
  * \return      The value of \p dst.
  * \return      NULL if a potential FI attack was detected.
  */
-void *mbedtls_platform_memcpy( void *dst, const void *src, size_t num );
+void *mbedtls_platform_memcpy(void *dst, const void *src, size_t num);
 
 /**
  * \brief       Secure memmove
@@ -297,11 +298,11 @@ void *mbedtls_platform_memcpy( void *dst, const void *src, size_t num );
  * \return      0 if the operation was successful
  * \return      #MBEDTLS_ERR_PLATFORM_ALLOC_FAILED if a memory allocation failed
  */
-int mbedtls_platform_memmove( void *dst, const void *src, size_t num );
+int mbedtls_platform_memmove(void *dst, const void *src, size_t num);
 
 #if !defined(MBEDTLS_DEPRECATED_REMOVED)
 #if defined(MBEDTLS_DEPRECATED_WARNING)
-#define MBEDTLS_DEPRECATED      __attribute__((deprecated))
+#define MBEDTLS_DEPRECATED __attribute__((deprecated))
 #else
 #define MBEDTLS_DEPRECATED
 #endif
@@ -309,28 +310,31 @@ int mbedtls_platform_memmove( void *dst, const void *src, size_t num );
 /**
  * \brief       Secure memcmp
  *
- *              This is a constant-time version of memcmp(), but without checking
- *              if the bytes are greater or lower. The order is also randomised
- *              using the RNG in order to further harden against side-channel attacks.
+ *              This is a constant-time version of memcmp(), but without
+ * checking if the bytes are greater or lower. The order is also randomised
+ *              using the RNG in order to further harden against side-channel
+ * attacks.
  *
  * \param buf1  First buffer to compare.
  * \param buf2  Second buffer to compare against.
  * \param num   The length of the buffers in bytes.
  *
- * \deprecated  Superseded by mbedtls_platform_memequal(), and is only an alias to it.
+ * \deprecated  Superseded by mbedtls_platform_memequal(), and is only an alias
+ * to it.
  *
  * \return      0 if the buffers were equal or an unspecified non-zero value
  *              otherwise.
  */
-int mbedtls_platform_memcmp( const void *buf1, const void *buf2, size_t num );
+int mbedtls_platform_memcmp(const void *buf1, const void *buf2, size_t num);
 
 #endif
 /**
  * \brief       Secure check if the buffers have the same data.
  *
- *              This is a constant-time version of memcmp(), but without checking
- *              if the bytes are greater or lower. The order is also randomised
- *              using the RNG in order to further harden against side-channel attacks.
+ *              This is a constant-time version of memcmp(), but without
+ * checking if the bytes are greater or lower. The order is also randomised
+ *              using the RNG in order to further harden against side-channel
+ * attacks.
  *
  * \param buf1  First buffer to compare.
  * \param buf2  Second buffer to compare against.
@@ -339,14 +343,14 @@ int mbedtls_platform_memcmp( const void *buf1, const void *buf2, size_t num );
  * \return      0 if the buffers were equal or an unspecified non-zero value
  *              otherwise.
  */
-int mbedtls_platform_memequal( const void *buf1, const void *buf2, size_t num );
+int mbedtls_platform_memequal(const void *buf1, const void *buf2, size_t num);
 
 /**
  * \brief       RNG-function for getting a random 32-bit integer.
  *
  * \return      The generated random number.
  */
-uint32_t mbedtls_platform_random_uint32( void );
+uint32_t mbedtls_platform_random_uint32(void);
 
 /**
  * \brief       RNG-function for getting a random in given range.
@@ -365,7 +369,7 @@ uint32_t mbedtls_platform_random_uint32( void );
  *
  * \return      The generated random number.
  */
-uint32_t mbedtls_platform_random_in_range( uint32_t num );
+uint32_t mbedtls_platform_random_in_range(uint32_t num);
 
 /**
  * \brief       Random delay function.
@@ -380,7 +384,7 @@ uint32_t mbedtls_platform_random_in_range( uint32_t num );
  *              is defined in the configuration. Otherwise, the function does
  *              nothing.
  */
-void mbedtls_platform_random_delay( void );
+void mbedtls_platform_random_delay(void);
 
 /**
  * \brief       RNG-function for getting a random buffer.
@@ -389,7 +393,7 @@ void mbedtls_platform_random_delay( void );
  * \param len   Length of the buffer in bytes
  *
  */
-void mbedtls_platform_random_buf( uint8_t *buf, size_t len);
+void mbedtls_platform_random_buf(uint8_t *buf, size_t len);
 
 #else
 
@@ -415,7 +419,7 @@ void mbedtls_platform_random_buf( uint8_t *buf, size_t len);
  * \param len   Length of the buffer in bytes
  *
  */
-void mbedtls_platform_zeroize( void *buf, size_t len );
+void mbedtls_platform_zeroize(void *buf, size_t len);
 
 #endif
 
@@ -446,8 +450,8 @@ void mbedtls_platform_zeroize( void *buf, size_t len );
  * \return      Pointer to an object of type struct tm on success, otherwise
  *              NULL
  */
-struct tm *mbedtls_platform_gmtime_r( const mbedtls_time_t *tt,
-                                      struct tm *tm_buf );
+struct tm *mbedtls_platform_gmtime_r(const mbedtls_time_t *tt,
+                                     struct tm *tm_buf);
 #endif /* MBEDTLS_HAVE_TIME_DATE */
 
 #ifdef __cplusplus
