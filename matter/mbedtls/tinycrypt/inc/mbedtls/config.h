@@ -1393,7 +1393,7 @@ typedef void mbedtls_ecp_restart_ctx;
 // mbedtls_platform_std_nv_seed_read /**< Default nv_seed_read function to use,
 // can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_WRITE
 // mbedtls_platform_std_nv_seed_write /**< Default nv_seed_write function to
-// use, can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_FILE  "seedfile"
+// use, can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_FILE "seedfile"
 // /**< Seed file to read/write with default implementation */
 
 /* To Use Function Macros MBEDTLS_PLATFORM_C must be enabled */

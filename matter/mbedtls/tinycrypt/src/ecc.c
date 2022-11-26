@@ -261,9 +261,9 @@ __asm uECC_word_t uECC_vli_isZero(const uECC_word_t *vli) {
   LDMIA r0 !, {r1, r2, r3} ORRS r1, r2 ORRS r1, r3 LDMIA r0 !, {r2, r3} ORRS r1,
       r2 ORRS r1, r3 LDMIA r0, {r0, r2, r3} ORRS r1, r0 ORRS r1, r2 ORRS r1,
       r3 RSBS r1, r1,
-      #0 // C set if zero
+# 0 // C set if zero
       MOVS r0,
-      #0 ADCS r0, r0 BX lr
+# 0 ADCS r0, r0 BX lr
 #else
   LDMIA r0 !, {r1, r2, r3, ip} ORRS r1, r2 ORRS r1, r3 ORRS r1, ip LDMIA r0,
       {r0, r2, r3, ip} ORRS r1, r0 ORRS r1, r2 ORRS r1, r3 ORRS r1,
@@ -273,13 +273,13 @@ __asm uECC_word_t uECC_vli_isZero(const uECC_word_t *vli) {
       r1 // 32 if zero
           LSRS r0,
       r0,
-      #5
+# 5
 #else
           RSBS r1,
       r1,
-      #0 // C set if zero
+# 0 // C set if zero
       MOVS r0,
-      #0 ADCS r0,
+# 0 ADCS r0,
       r0
 #endif
       BX lr
@@ -470,7 +470,7 @@ __asm uECC_word_t uECC_vli_sub(uECC_word_t *result, const uECC_word_t *left,
       r0 // r0 := r0 - r0 - borrow = -borrow
           RSBS r0,
       r0,
-      #0 // r0 := borrow
+# 0 // r0 := borrow
       POP {
     r4 - r6, pc
   }
@@ -483,7 +483,7 @@ __asm uECC_word_t uECC_vli_sub(uECC_word_t *result, const uECC_word_t *left,
       r0 // r0 := r0 - r0 - borrow = -borrow
           RSBS r0,
       r0,
-      #0 // r0 := borrow
+# 0 // r0 := borrow
       POP {
     r4 - r8, pc
   }
@@ -583,7 +583,7 @@ static __asm uECC_word_t uECC_vli_add(uECC_word_t *result,
       {r3, r4} LDMIA r1 !, {r3, r4} LDMIA r2 !, {r5, r6} ADCS r3, r5 ADCS r4,
       r6 STMIA r0 !, {r3, r4} LDMIA r1 !, {r3, r4} LDMIA r2 !, {r5, r6} ADCS r3,
       r5 ADCS r4, r6 STMIA r0 !, {r3, r4} MOVS r0,
-      #0 // does not affect C flag
+# 0 // does not affect C flag
       ADCS r0,
       r0 // r0 := 0 + 0 + C = carry
           POP {
@@ -595,7 +595,7 @@ static __asm uECC_word_t uECC_vli_add(uECC_word_t *result,
       lr STMIA r0 !, {r3 - r6} LDMIA r1 !, {r3 - r6} LDMIA r2 !,
       {r7, r8, r12, lr} ADCS r3, r7 ADCS r4, r8 ADCS r5, r12 ADCS r6,
       lr STMIA r0 !, {r3 - r6} MOVS r0,
-      #0 // does not affect C flag
+# 0 // does not affect C flag
       ADCS r0,
       r0 // r0 := 0 + 0 + C = carry
           POP {
@@ -693,10 +693,10 @@ static __asm void uECC_vli_rshift1(uECC_word_t *vli) {
   // can use C flag, it's not that effective. Does at
   // least save one working register, meaning we don't need stack
   MOVS r3,
-      #0 // initial carry = 0
+# 0 // initial carry = 0
       MOVS r2,
-      #__cpp(4 * (NUM_ECC_WORDS - 1)) 01 LDR r1, [ r0, r2 ] LSRS r1, r1,
-      #1 // r2 = word >> 1
+#__cpp(4 * (NUM_ECC_WORDS - 1)) 01 LDR r1, [r0, r2] LSRS r1, r1,
+# 1 // r2 = word >> 1
       ORRS r1,
       r3 // merge in the previous carry
           STR r1,
@@ -704,9 +704,8 @@ static __asm void uECC_vli_rshift1(uECC_word_t *vli) {
       r3 // put C into bottom bit of r3
           LSLS r3,
       r3,
-      #31 // shift it up to the top ready for next word
-      SUBS r2,
-      r2, #4 BPL % B01 BX lr
+# 31 // shift it up to the top ready for next word
+      SUBS r2, r2, #4 BPL % B01 BX lr
 #else
 #if NUM_ECC_WORDS != 8
 #error adjust ARM assembly to handle NUM_ECC_WORDS != 8
@@ -773,15 +772,14 @@ static __asm void muladd(uECC_word_t a, uECC_word_t b, uECC_word_t r[3]) {
       r0 // r3 := a.lo
           LSRS r4,
       r0,
-      #16 // r4 := a.hi
+# 16 // r4 := a.hi
       UXTH r5,
       r1 // r5 := b.lo
           LSRS r1,
       r1,
-      #16 // r1 := b.hi
+# 16 // r1 := b.hi
       // Multiply halfword pairs
-      MOVS r0,
-      r3 MULS r0, r5,
+      MOVS r0, r3 MULS r0, r5,
       r0 // r0 := a.lo * b.lo
           MULS r3,
       r1,
@@ -792,40 +790,36 @@ static __asm void muladd(uECC_word_t a, uECC_word_t b, uECC_word_t r[3]) {
           MULS r1,
       r4,
       r1 // r1 := a.hi * b.hi
-          // Split, shift and add a.lo * b.hi
+         // Split, shift and add a.lo * b.hi
           LSRS r4,
       r3,
-      #16 // r4 := (a.lo * b.hi).hi
-      LSLS r3,
-      r3,
-      #16 // r3 := (a.lo * b.hi).lo
-      ADDS r0,
-      r0,
+# 16 // r4 := (a.lo * b.hi).hi
+      LSLS r3, r3,
+# 16 // r3 := (a.lo * b.hi).lo
+      ADDS r0, r0,
       r3 // r0 := a.lo * b.lo + (a.lo * b.hi).lo
           ADCS r1,
       r4 // r1 := a.hi * b.hi + (a.lo * b.hi).hi + carry
-          // Split, shift and add a.hi * b.lo
+         // Split, shift and add a.hi * b.lo
           LSRS r4,
       r5,
-      #16 // r4 := (a.hi * b.lo).hi
-      LSLS r5,
-      r5,
-      #16 // r5 := (a.hi * b.lo).lo
-      ADDS r0,
-      r0,
+# 16 // r4 := (a.hi * b.lo).hi
+      LSLS r5, r5,
+# 16 // r5 := (a.hi * b.lo).lo
+      ADDS r0, r0,
       r5 // r0 := a.lo * b.lo + (a.lo * b.hi).lo + (a.hi * b.lo).lo
           ADCS r1,
       r4 // r1 := a.hi * b.hi + (a.lo * b.hi).hi + (a.hi * b.lo).hi + carries
-          // Finally add r[]
+         // Finally add r[]
           LDMIA r2 !,
       {r3, r4, r5} ADDS r3, r3, r0 ADCS r4, r1 MOVS r0, #0 ADCS r5, r0 SUBS r2,
-      #12 STMIA r2 !, {r3, r4, r5} POP{r4 - r5} FRAME POP{r4 - r5} BX lr
+# 12 STMIA r2 !, {r3, r4, r5 } POP{r4 - r5 } FRAME POP{r4 - r5 } BX lr
 #else
   UMULL r3, ip, r0,
       r1 // pre-ARMv6 requires Rd[Lo|Hi] != Rn
           LDMIA r2,
       {r0, r1} ADDS r0, r0, r3 LDR r3, [ r2, #8 ] ADCS r1, r1, ip ADC r3, r3,
-      #0 STMIA r2 !, {r0, r1, r3} BX lr
+# 0 STMIA r2 !, {r0, r1, r3 } BX lr
 #endif
 }
 #elif defined OPTIMIZE_TINYCRYPT_ASM && defined __GNUC__ && defined __arm__
