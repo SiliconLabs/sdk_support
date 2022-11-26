@@ -327,8 +327,9 @@ typedef void mbedtls_ecp_restart_ctx;
 #define MBEDTLS_X509_USE_C
 
 #define MBEDTLS_MPI_WINDOW_SIZE 1 /**< Maximum windows size used. */
-#define MBEDTLS_MPI_MAX_SIZE 32 /**< Maximum number of bytes for usable MPIs.  \
-                                 */
+#define MBEDTLS_MPI_MAX_SIZE                                                   \
+  32 /**< Maximum number of bytes for usable MPIs.                             \
+      */
 //#define MBEDTLS_ECP_MAX_BITS 256        /**< Maximum bit size of groups */
 #define MBEDTLS_ECP_WINDOW_SIZE 2 /**< Maximum window size used */
 #define MBEDTLS_SSL_DTLS_CLIENT_PORT_REUSE
@@ -337,11 +338,13 @@ typedef void mbedtls_ecp_restart_ctx;
   2 /**< Maximum number of sources supported */
 #define MBEDTLS_SSL_DTLS_BADMAC_LIMIT
 #if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
-#define MBEDTLS_SSL_MAX_CONTENT_LEN 900 /**< Maxium fragment length in bytes   \
-                                         */
+#define MBEDTLS_SSL_MAX_CONTENT_LEN                                            \
+  900 /**< Maxium fragment length in bytes                                     \
+       */
 #else
-#define MBEDTLS_SSL_MAX_CONTENT_LEN 768 /**< Maxium fragment length in bytes   \
-                                         */
+#define MBEDTLS_SSL_MAX_CONTENT_LEN                                            \
+  768 /**< Maxium fragment length in bytes                                     \
+       */
 #endif
 
 #define MBEDTLS_SSL_SESSION_TICKETS
@@ -1331,90 +1334,91 @@ typedef void mbedtls_ecp_restart_ctx;
 /* MPI / BIGNUM options */
 //#define MBEDTLS_MPI_WINDOW_SIZE            6 /**< Maximum window size used. */
 //#define MBEDTLS_MPI_MAX_SIZE            1024 /**< Maximum number of bytes for
-//usable MPIs. */
+// usable MPIs. */
 
 /* CTR_DRBG options */
 //#define MBEDTLS_CTR_DRBG_ENTROPY_LEN               48 /**< Amount of entropy
-//used per seed by default (48 with SHA-512, 32 with SHA-256) */ #define
-//MBEDTLS_CTR_DRBG_RESEED_INTERVAL        10000 /**< Interval before reseed is
-//performed by default */ #define MBEDTLS_CTR_DRBG_MAX_INPUT                256
+// used per seed by default (48 with SHA-512, 32 with SHA-256) */ #define
+// MBEDTLS_CTR_DRBG_RESEED_INTERVAL        10000 /**< Interval before reseed is
+// performed by default */ #define MBEDTLS_CTR_DRBG_MAX_INPUT                256
 ///**< Maximum number of additional input bytes */ #define
-//MBEDTLS_CTR_DRBG_MAX_REQUEST             1024 /**< Maximum number of requested
-//bytes per call */ #define MBEDTLS_CTR_DRBG_MAX_SEED_INPUT           384 /**<
-//Maximum size of (re)seed buffer */
+// MBEDTLS_CTR_DRBG_MAX_REQUEST             1024 /**< Maximum number of
+// requested bytes per call */ #define MBEDTLS_CTR_DRBG_MAX_SEED_INPUT 384 /**<
+// Maximum size of (re)seed buffer */
 
 /* HMAC_DRBG options */
 //#define MBEDTLS_HMAC_DRBG_RESEED_INTERVAL   10000 /**< Interval before reseed
-//is performed by default */ #define MBEDTLS_HMAC_DRBG_MAX_INPUT           256
+// is performed by default */ #define MBEDTLS_HMAC_DRBG_MAX_INPUT           256
 ///**< Maximum number of additional input bytes */ #define
-//MBEDTLS_HMAC_DRBG_MAX_REQUEST        1024 /**< Maximum number of requested
-//bytes per call */ #define MBEDTLS_HMAC_DRBG_MAX_SEED_INPUT      384 /**<
-//Maximum size of (re)seed buffer */
+// MBEDTLS_HMAC_DRBG_MAX_REQUEST        1024 /**< Maximum number of requested
+// bytes per call */ #define MBEDTLS_HMAC_DRBG_MAX_SEED_INPUT      384 /**<
+// Maximum size of (re)seed buffer */
 
 /* ECP options */
 //#define MBEDTLS_ECP_MAX_BITS             521 /**< Maximum bit size of groups.
-//Normally determined automatically from the configured curves. */ #define
-//MBEDTLS_ECP_WINDOW_SIZE            4 /**< Maximum window size used */ #define
-//MBEDTLS_ECP_FIXED_POINT_OPTIM      1 /**< Enable fixed-point speed-up */
+// Normally determined automatically from the configured curves. */ #define
+// MBEDTLS_ECP_WINDOW_SIZE            4 /**< Maximum window size used */ #define
+// MBEDTLS_ECP_FIXED_POINT_OPTIM      1 /**< Enable fixed-point speed-up */
 
 /* Entropy options */
 //#define MBEDTLS_ENTROPY_MAX_SOURCES                20 /**< Maximum number of
-//sources supported */ #define MBEDTLS_ENTROPY_MAX_GATHER                128
+// sources supported */ #define MBEDTLS_ENTROPY_MAX_GATHER                128
 ///**< Maximum amount requested from entropy sources */ #define
-//MBEDTLS_ENTROPY_MIN_HARDWARE               32 /**< Default minimum number of
-//bytes required for the hardware entropy source mbedtls_hardware_poll() before
-//entropy is released */
+// MBEDTLS_ENTROPY_MIN_HARDWARE               32 /**< Default minimum number of
+// bytes required for the hardware entropy source mbedtls_hardware_poll() before
+// entropy is released */
 
 /* Memory buffer allocator options */
 //#define MBEDTLS_MEMORY_ALIGN_MULTIPLE      4 /**< Align on multiples of this
-//value */
+// value */
 
 /* Platform options */
 //#define MBEDTLS_PLATFORM_STD_MEM_HDR   <stdlib.h> /**< Header to include if
-//MBEDTLS_PLATFORM_NO_STD_FUNCTIONS is defined. Don't define if no header is
-//needed. */ #define MBEDTLS_PLATFORM_STD_CALLOC        calloc /**< Default
-//allocator to use, can be undefined */ #define MBEDTLS_PLATFORM_STD_FREE free
+// MBEDTLS_PLATFORM_NO_STD_FUNCTIONS is defined. Don't define if no header is
+// needed. */ #define MBEDTLS_PLATFORM_STD_CALLOC        calloc /**< Default
+// allocator to use, can be undefined */ #define MBEDTLS_PLATFORM_STD_FREE free
 ///**< Default free to use, can be undefined */ #define
-//MBEDTLS_PLATFORM_STD_EXIT            exit /**< Default exit to use, can be
-//undefined */ #define MBEDTLS_PLATFORM_STD_TIME            time /**< Default
-//time to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */ #define
-//MBEDTLS_PLATFORM_STD_FPRINTF      fprintf /**< Default fprintf to use, can be
-//undefined */ #define MBEDTLS_PLATFORM_STD_PRINTF        printf /**< Default
-//printf to use, can be undefined */
+// MBEDTLS_PLATFORM_STD_EXIT            exit /**< Default exit to use, can be
+// undefined */ #define MBEDTLS_PLATFORM_STD_TIME            time /**< Default
+// time to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */ #define
+// MBEDTLS_PLATFORM_STD_FPRINTF      fprintf /**< Default fprintf to use, can be
+// undefined */ #define MBEDTLS_PLATFORM_STD_PRINTF        printf /**< Default
+// printf to use, can be undefined */
 /* Note: your snprintf must correctly zero-terminate the buffer! */
 //#define MBEDTLS_PLATFORM_STD_SNPRINTF    snprintf /**< Default snprintf to
-//use, can be undefined */ #define MBEDTLS_PLATFORM_STD_EXIT_SUCCESS       0
+// use, can be undefined */ #define MBEDTLS_PLATFORM_STD_EXIT_SUCCESS       0
 ///**< Default exit value to use, can be undefined */ #define
-//MBEDTLS_PLATFORM_STD_EXIT_FAILURE       1 /**< Default exit value to use, can
-//be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_READ
-//mbedtls_platform_std_nv_seed_read /**< Default nv_seed_read function to use,
-//can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_WRITE
-//mbedtls_platform_std_nv_seed_write /**< Default nv_seed_write function to use,
-//can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_FILE  "seedfile" /**<
-//Seed file to read/write with default implementation */
+// MBEDTLS_PLATFORM_STD_EXIT_FAILURE       1 /**< Default exit value to use, can
+// be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_READ
+// mbedtls_platform_std_nv_seed_read /**< Default nv_seed_read function to use,
+// can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_WRITE
+// mbedtls_platform_std_nv_seed_write /**< Default nv_seed_write function to
+// use, can be undefined */ #define MBEDTLS_PLATFORM_STD_NV_SEED_FILE  "seedfile"
+// /**< Seed file to read/write with default implementation */
 
 /* To Use Function Macros MBEDTLS_PLATFORM_C must be enabled */
 /* MBEDTLS_PLATFORM_XXX_MACRO and MBEDTLS_PLATFORM_XXX_ALT cannot both be
  * defined */
 //#define MBEDTLS_PLATFORM_CALLOC_MACRO        calloc /**< Default allocator
-//macro to use, can be undefined */ #define MBEDTLS_PLATFORM_FREE_MACRO free
+// macro to use, can be undefined */ #define MBEDTLS_PLATFORM_FREE_MACRO free
 ///**< Default free macro to use, can be undefined */ #define
-//MBEDTLS_PLATFORM_EXIT_MACRO            exit /**< Default exit macro to use,
-//can be undefined */ #define MBEDTLS_PLATFORM_TIME_MACRO            time /**<
-//Default time macro to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled
+// MBEDTLS_PLATFORM_EXIT_MACRO            exit /**< Default exit macro to use,
+// can be undefined */ #define MBEDTLS_PLATFORM_TIME_MACRO            time /**<
+// Default time macro to use, can be undefined. MBEDTLS_HAVE_TIME must be
+// enabled
 //*/ #define MBEDTLS_PLATFORM_TIME_TYPE_MACRO       time_t /**< Default time
-//macro to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */ #define
-//MBEDTLS_PLATFORM_FPRINTF_MACRO      fprintf /**< Default fprintf macro to use,
-//can be undefined */ #define MBEDTLS_PLATFORM_PRINTF_MACRO        printf /**<
-//Default printf macro to use, can be undefined */
+// macro to use, can be undefined. MBEDTLS_HAVE_TIME must be enabled */ #define
+// MBEDTLS_PLATFORM_FPRINTF_MACRO      fprintf /**< Default fprintf macro to
+// use, can be undefined */ #define MBEDTLS_PLATFORM_PRINTF_MACRO        printf
+// /**< Default printf macro to use, can be undefined */
 /* Note: your snprintf must correctly zero-terminate the buffer! */
 //#define MBEDTLS_PLATFORM_SNPRINTF_MACRO    snprintf /**< Default snprintf
-//macro to use, can be undefined */ #define MBEDTLS_PLATFORM_VSNPRINTF_MACRO
-//vsnprintf /**< Default vsnprintf macro to use, can be undefined */ #define
-//MBEDTLS_PLATFORM_NV_SEED_READ_MACRO   mbedtls_platform_std_nv_seed_read /**<
-//Default nv_seed_read function to use, can be undefined */ #define
-//MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO  mbedtls_platform_std_nv_seed_write /**<
-//Default nv_seed_write function to use, can be undefined */
+// macro to use, can be undefined */ #define MBEDTLS_PLATFORM_VSNPRINTF_MACRO
+// vsnprintf /**< Default vsnprintf macro to use, can be undefined */ #define
+// MBEDTLS_PLATFORM_NV_SEED_READ_MACRO   mbedtls_platform_std_nv_seed_read /**<
+// Default nv_seed_read function to use, can be undefined */ #define
+// MBEDTLS_PLATFORM_NV_SEED_WRITE_MACRO  mbedtls_platform_std_nv_seed_write /**<
+// Default nv_seed_write function to use, can be undefined */
 
 /**
  * \brief       This macro is invoked by the library when an invalid parameter
@@ -1502,7 +1506,7 @@ typedef void mbedtls_ecp_restart_ctx;
 /* SSL Cache options */
 //#define MBEDTLS_SSL_CACHE_DEFAULT_TIMEOUT       86400 /**< 1 day  */
 //#define MBEDTLS_SSL_CACHE_DEFAULT_MAX_ENTRIES      50 /**< Maximum entries in
-//cache */
+// cache */
 
 /* SSL options */
 
@@ -1646,10 +1650,10 @@ typedef void mbedtls_ecp_restart_ctx;
 //#define MBEDTLS_SSL_DTLS_MAX_BUFFERING             32768
 
 //#define MBEDTLS_SSL_DEFAULT_TICKET_LIFETIME     86400 /**< Lifetime of session
-//tickets (if enabled) */ #define MBEDTLS_PSK_MAX_LEN               32 /**< Max
-//size of TLS pre-shared keys, in bytes (default 256 bits) */ #define
-//MBEDTLS_SSL_COOKIE_TIMEOUT        60 /**< Default expiration delay of DTLS
-//cookies, in seconds if HAVE_TIME, or in number of cookies issued */
+// tickets (if enabled) */ #define MBEDTLS_PSK_MAX_LEN               32 /**< Max
+// size of TLS pre-shared keys, in bytes (default 256 bits) */ #define
+// MBEDTLS_SSL_COOKIE_TIMEOUT        60 /**< Default expiration delay of DTLS
+// cookies, in seconds if HAVE_TIME, or in number of cookies issued */
 
 /** \def MBEDTLS_TLS_EXT_CID
  *
@@ -1675,13 +1679,13 @@ typedef void mbedtls_ecp_restart_ctx;
  * The value below is only an example, not the default.
  */
 //#define MBEDTLS_SSL_CIPHERSUITES
-//MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+// MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
 
 /* X509 options */
 //#define MBEDTLS_X509_MAX_INTERMEDIATE_CA   8   /**< Maximum number of
-//intermediate CAs in a verification chain. */ #define
-//MBEDTLS_X509_MAX_FILE_PATH_LEN     512 /**< Maximum length of a path/filename
-//string in bytes including the null terminator character ('\0'). */
+// intermediate CAs in a verification chain. */ #define
+// MBEDTLS_X509_MAX_FILE_PATH_LEN     512 /**< Maximum length of a path/filename
+// string in bytes including the null terminator character ('\0'). */
 
 /**
  * Allow SHA-1 in the default TLS configuration for TLS 1.2 handshake
