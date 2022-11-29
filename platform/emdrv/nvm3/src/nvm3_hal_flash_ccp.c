@@ -90,10 +90,11 @@ static Ecode_t nvm3_halFlashOpen(nvm3_HalPtr_t nvmAdr, size_t flashSize) {
 
 #if CCP_FLASH_DELAY
   /* Delay is added for flash (Qspi) operations.
-   * It is added to resolve target connection lost (mcu reset) issue in SiWx917 SOC Device.
+   * It is added to resolve target connection lost (mcu reset) issue in SiWx917
+   * SOC Device.
    */
   for (int i = 0; i < CCP_FLASH_DELAY; i++)
-    __asm__ ( "nop;");
+    __asm__("nop;");
 #endif /* CCP_FLASH_DELAY */
 
   /* CCP flash Initilize */
