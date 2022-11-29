@@ -50,6 +50,9 @@
 
 #define CHECK_DATA 0 ///< Macro defining if data should be checked
 
+/* Enable delay for flash (Qspi) operations.*/
+#define CCP_FLASH_DELAY 100000
+
 /******************************************************************************
  ***************************   LOCAL VARIABLES   ******************************
  *****************************************************************************/
@@ -84,6 +87,14 @@ static Ecode_t nvm3_halFlashOpen(nvm3_HalPtr_t nvmAdr, size_t flashSize) {
   (void)flashSize;
   Ecode_t halSta = ECODE_NVM3_ERR_NOT_OPENED;
   bool ret = ECODE_QSPI_ERROR;
+
+#if CCP_FLASH_DELAY
+  /* Delay is added for flash (Qspi) operations.
+   * It is added to resolve target connection lost (mcu reset) issue in SiWx917 SOC Device.
+   */
+  for (int i = 0; i < CCP_FLASH_DELAY; i++)
+    __asm__ ( "nop;");
+#endif /* CCP_FLASH_DELAY */
 
   /* CCP flash Initilize */
   ret = Init(0, 0, 0);
