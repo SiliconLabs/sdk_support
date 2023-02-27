@@ -18,9 +18,9 @@
 #include "sl_simple_led_instances.h"
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
+#endif // CONFIG_ENABLE_UART
 #include "psa/crypto.h"
 #include "cmsis_os2.h"
-#endif // CONFIG_ENABLE_UART
 
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
