@@ -8,7 +8,7 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
-#include "sl_bt_in_place_ota_dfu.h"
+
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 /**
  * Override @ref PendSV_Handler for the Link Layer task when Bluetooth runs
@@ -44,7 +44,6 @@ SL_WEAK void sl_bt_on_event(sl_bt_msg_t* evt)
 
 void sl_bt_process_event(sl_bt_msg_t *evt)
 {
-  sl_bt_in_place_ota_dfu_on_event(evt);
   sl_bt_on_event(evt);
 }
 

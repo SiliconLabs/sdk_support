@@ -6,7 +6,7 @@
 #ifdef SL_COMPONENT_CATALOG_PRESENT
 #include "sl_component_catalog.h"
 #endif // SL_COMPONENT_CATALOG_PRESENT
-// #include "sl_bt_in_place_ota_dfu.h"
+// 
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 /**
  * Override @ref PendSV_Handler for the Link Layer task when Bluetooth runs
