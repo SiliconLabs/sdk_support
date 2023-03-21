@@ -223,18 +223,6 @@ typedef struct {
 typedef void mbedtls_pk_restart_ctx;
 #endif /* MBEDTLS_ECDSA_C && MBEDTLS_ECP_RESTARTABLE */
 
-#if defined(MBEDTLS_RSA_C)
-/**
- * Quick access to an RSA context inside a PK context.
- *
- * \warning You must make sure the PK context actually holds an RSA context
- * before using this function!
- */
-static inline mbedtls_rsa_context *mbedtls_pk_rsa(const mbedtls_pk_context pk) {
-  return ((mbedtls_rsa_context *)(pk).pk_ctx);
-}
-#endif /* MBEDTLS_RSA_C */
-
 #if defined(TINYCRYPT_PRIMITIVES)
 
 static inline mbedtls_uecc_keypair *
