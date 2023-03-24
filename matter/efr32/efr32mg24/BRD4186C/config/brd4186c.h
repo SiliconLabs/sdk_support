@@ -1,14 +1,25 @@
 #ifndef _BRD4186C_H_
 #define _BRD4186C_H_
+
 #ifndef LOGGING_STATS
-#define WAKE_INDICATOR_PIN  PIN(D, 3)
-#endif
+#ifdef EXP_BOARD
+#define WAKE_INDICATOR_PIN PIN(A, 5)
+#else
+#define WAKE_INDICATOR_PIN PIN(D, 2)
+#endif /* EXP_BOARD */
+#endif /* LOGGING_STATS */
 
 #ifdef LOGGING_STATS
-#define LOGGING_WAKE_INDICATOR_PIN  PIN(D, 3)
-#define LOGGING_STATS_PORT    gpioPortD
-#define LOGGING_STATS_PIN     03
-#endif
+#ifdef EXP_BOARD
+#define LOGGING_WAKE_INDICATOR_PIN PIN(A, 5)
+#define LOGGING_STATS_PORT gpioPortA
+#define LOGGING_STATS_PIN 05
+#else
+#define LOGGING_WAKE_INDICATOR_PIN PIN(D, 2)
+#define LOGGING_STATS_PORT gpioPortD
+#define LOGGING_STATS_PIN 02
+#endif /* EXP_BOARD */
+#endif /* LOGGING_STAT */
 
 #ifdef RS911X_WIFI
 // SPI ports and pins
@@ -32,7 +43,11 @@
 
 #define WFX_RESET_PIN PIN(A, 6)
 #define WFX_INTERRUPT_PIN PIN(A, 7)
+#ifdef EXP_BOARD
+#define WFX_SLEEP_CONFIRM_PIN PIN(D, 2) /* Exp hdr 7 */
+#else
 #define WFX_SLEEP_CONFIRM_PIN PIN(A, 5) /* Exp hdr 7 */
+#endif /* EXP_BOARD */
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 5
 
 #else /* WF200 */
