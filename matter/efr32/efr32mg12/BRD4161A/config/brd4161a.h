@@ -30,9 +30,9 @@
 #define WFX_RESET_PIN     PIN(D, 12)
 #define WFX_INTERRUPT_PIN PIN(C, 9)
 #ifdef EXP_BOARD
-#define WFX_SLEEP_CONFIRM_PIN PIN(D, 10) /* Exp hdr 7 */
+#define WFX_SLEEP_CONFIRM_PIN PIN(D, 11)
 #else
-#define WFX_SLEEP_CONFIRM_PIN PIN(D, 11) /* Exp hdr 7 */
+#define WFX_SLEEP_CONFIRM_PIN PIN(D, 10)
 #endif /* EXP_BOARD */
 #define SL_WFX_HOST_PINOUT_SPI_IRQ 9
 #else /* WF200 */

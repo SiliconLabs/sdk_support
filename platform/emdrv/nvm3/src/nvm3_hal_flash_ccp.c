@@ -114,7 +114,7 @@ static Ecode_t nvm3_halFlashGetInfo(nvm3_HalInfo_t *halInfo) {
   halInfo->deviceFamilyPartNumber = 19;
   halInfo->writeSize = 1;
   halInfo->memoryMapped = 1;
-  halInfo->pageSize = 2048;
+  halInfo->pageSize = 4096;
   halInfo->systemUnique = 0;
   return ECODE_NVM3_OK;
 }
