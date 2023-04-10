@@ -111,6 +111,8 @@ bool RSI_FLASH_EraseSector(uint32_t sector_address);
 bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
                     uint8_t auto_mode);
 
+bool RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length);
+
 bool RSI_FLASH_UnInitialize(void);
 
 void qspi_gpio_revert_m4(void);

@@ -777,7 +777,7 @@ static __asm void muladd(uECC_word_t a, uECC_word_t b, uECC_word_t r[3]) {
       r1 // r5 := b.lo
           LSRS r1,
       r1,
-# 16 // r1 := b.hi                                                             \
+# 16 // r1 := b.hi
     // Multiply halfword pairs
       MOVS r0, r3 MULS r0, r5,
       r0 // r0 := a.lo * b.lo

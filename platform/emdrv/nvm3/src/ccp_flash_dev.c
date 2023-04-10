@@ -16,7 +16,6 @@
  ******************************************************************************/
 
 #include "ccp_flash_prg.h" // FlashOS Structures
-
 struct FlashDevice const FlashDevice __attribute__((section("DevDscr"))) = {
     FLASH_DRV_VERS, // Driver Version, do not modify!
     "RS9117_4MB_FLASH",
@@ -30,5 +29,5 @@ struct FlashDevice const FlashDevice __attribute__((section("DevDscr"))) = {
     10000, // Erase Sector Timeout in mSec
 
     // Specify Size and Address of Sectors
-    0x001000, 0x000000, // Sector Size  4kB (1024 Sectors)
-    SECTOR_END};
+    { {0x001000, 0x000000} , {SECTOR_END }} // Sector Size  4kB (1024 Sectors)
+    };
