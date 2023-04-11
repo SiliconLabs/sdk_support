@@ -29,9 +29,9 @@
  ******************************************************************************/
 
 #include "ccp_flash_intf.h"
+#include "ccp_flash_prg.h"
 #include "nvm3.h"
 #include "nvm3_hal_flash.h"
-#include "ccp_flash_prg.h"
 #include <stdbool.h>
 #include <string.h>
 

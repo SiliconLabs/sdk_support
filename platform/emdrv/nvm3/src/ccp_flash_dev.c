@@ -29,5 +29,5 @@ struct FlashDevice const FlashDevice __attribute__((section("DevDscr"))) = {
     10000, // Erase Sector Timeout in mSec
 
     // Specify Size and Address of Sectors
-    {{0x001000, 0x000000}, {SECTOR_END }} // Sector Size  4kB (1024 Sectors)
-    };
+    {{0x001000, 0x000000}, {SECTOR_END}} // Sector Size  4kB (1024 Sectors)
+};
