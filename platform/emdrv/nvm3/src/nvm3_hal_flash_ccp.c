@@ -31,6 +31,7 @@
 #include "ccp_flash_intf.h"
 #include "nvm3.h"
 #include "nvm3_hal_flash.h"
+#include "ccp_flash_prg.h"
 #include <stdbool.h>
 #include <string.h>
 
@@ -63,6 +64,7 @@
 
 /** @cond DO_NOT_INCLUDE_WITH_DOXYGEN */
 
+#if CHECK_DATA
 // Check if the page is erased.
 static bool isErased(void *adr, size_t len) {
   size_t i;
@@ -79,6 +81,7 @@ static bool isErased(void *adr, size_t len) {
 
   return true;
 }
+#endif // CHECK_DATA
 
 /** @endcond */
 
@@ -151,7 +154,7 @@ static Ecode_t nvm3_halFlashWriteWords(nvm3_HalPtr_t nvmAdr, void const *src,
   byteCnt = wordCnt * sizeof(uint32_t);
 
   /* CCP flash Write */
-  ret = ProgramPage(pDst, byteCnt, (char *)pSrc);
+  ret = ProgramPage((unsigned long)pDst, byteCnt, (unsigned char *)pSrc);
   if (!ret)
     halSta = ECODE_NVM3_OK;
 
@@ -171,7 +174,7 @@ static Ecode_t nvm3_halFlashPageErase(nvm3_HalPtr_t nvmAdr) {
   bool ret = ECODE_QSPI_ERROR;
 
   /* CCP flash Erase */
-  ret = EraseSector((uint32_t *)nvmAdr);
+  ret = EraseSector((unsigned long)nvmAdr);
   if (!ret)
     halSta = ECODE_NVM3_OK;
 
