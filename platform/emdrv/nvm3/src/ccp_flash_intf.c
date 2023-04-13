@@ -123,7 +123,6 @@ bool RSI_FLASH_EraseSector(uint32_t sector_address) {
 
 bool RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length) {
   spi_config_t spi_configs_program;
-  uint32_t check_sum = 0;
   GetQspiConfig(&spi_configs_program);
 
   /* writes the data to required address using qspi */
@@ -138,7 +137,6 @@ bool RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length) {
 bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
                     uint8_t auto_mode) {
   spi_config_t spi_configs_program;
-  uint32_t check_sum = 0;
   GetQspiConfig(&spi_configs_program);
 
   /* IO_READ - Manual Mode */

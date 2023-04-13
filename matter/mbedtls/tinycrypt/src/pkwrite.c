@@ -474,7 +474,7 @@ int mbedtls_pk_write_key_der(mbedtls_pk_context *key, unsigned char *buf,
 #endif /* MBEDTLS_RSA_C */
 #if defined(MBEDTLS_ECP_C) || defined(TINYCRYPT_PRIMITIVES)
       if (mbedtls_pk_get_type(key) == MBEDTLS_PK_ECKEY) {
-    mbedtls_ecp_keypair *ec = mbedtls_pk_ec(*key);
+    mbedtls_pk_ec(*key);
     size_t pub_len = 0, par_len = 0;
 
     /*

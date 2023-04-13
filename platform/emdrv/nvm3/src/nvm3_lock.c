@@ -49,6 +49,11 @@ static int lockCount = 0;
 #define SL_WEAK
 #endif
 
+#ifndef CORE_DECLARE_IRQ_STATE
+typedef uint32_t CORE_irqState_t;
+#define CORE_DECLARE_IRQ_STATE CORE_irqState_t irqState
+#endif // CORE_DECLARE_IRQ_STATE
+
 #ifdef NVM3_HOST_BUILD
 static int lockCount = 0;
 #else
