@@ -14,6 +14,7 @@
 #include "sl_rail_util_pti.h"
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
+#include "nvm3_default.h"
 #include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
 #include "sl_simple_button_instances.h"
@@ -45,6 +46,7 @@ void sl_platform_init(void)
   sl_device_init_emu();
   sl_board_init();
   osKernelInitialize();
+  nvm3_initDefault();
 #if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
   sl_power_manager_init();
 #endif
