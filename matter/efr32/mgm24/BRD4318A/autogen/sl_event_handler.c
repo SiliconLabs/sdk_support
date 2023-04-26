@@ -16,6 +16,7 @@
 #include "sl_rail_util_rssi.h"
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
+#include "nvm3_default.h"
 // #include "platform-efr32.h"
 #include "sl_sleeptimer.h"
 #include "sl_debug_swo.h"
@@ -46,8 +47,8 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
-  nvm3_initDefault();
   osKernelInitialize();
+  nvm3_initDefault();
   sl_power_manager_init();
 }
 
