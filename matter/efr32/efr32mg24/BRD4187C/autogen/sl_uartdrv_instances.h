@@ -8,7 +8,7 @@ extern "C" {
 #include "sl_status.h"
 #include "uartdrv.h"
 
-
+extern UARTDRV_Handle_t sl_uartdrv_usart_vcom_handle;
 extern UARTDRV_Handle_t sl_uartdrv_eusart_vcom_handle;
 
 void sl_uartdrv_init_instances(void);
