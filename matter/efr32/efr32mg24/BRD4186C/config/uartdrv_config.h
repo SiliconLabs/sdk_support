@@ -69,7 +69,7 @@
 // <1=> Enable
 // <0=> Disable
 // <i> Default: 1
-#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       0
+#define EMDRV_UARTDRV_FLOW_CONTROL_ENABLE       1
 #endif
 
 /// Maximum number of driver instances.
@@ -102,7 +102,7 @@
 // <1=> Enable
 // <0=> Disable
 // <i> Default: 1
-#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         1
+#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         0
 #endif
 
 //</h>
