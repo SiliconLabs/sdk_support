@@ -64,11 +64,13 @@ void sl_driver_init(void)
 {
     sl_debug_swo_init();
     GPIOINT_Init();
-    sl_i2cspm_init_instances();
     sl_simple_button_init_instances();
     sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
     sl_uartdrv_init_instances();
+#endif
+#if defined(USE_TEMP_SENSOR)
+  sl_i2cspm_init_instances();
 #endif
     sl_cos_send_config();
 }
