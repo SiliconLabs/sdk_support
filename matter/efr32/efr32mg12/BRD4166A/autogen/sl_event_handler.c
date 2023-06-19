@@ -63,7 +63,7 @@ void sl_driver_init(void)
     sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
     sl_uartdrv_init_instances();
-#endif CONFIG_ENABLE_UART
+#endif //CONFIG_ENABLE_UART
     sl_cos_send_config();
 }
 
