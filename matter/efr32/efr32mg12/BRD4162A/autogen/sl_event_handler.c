@@ -15,29 +15,25 @@
 #include "nvm3_default.h"
 #include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
+#include "sl_debug_swo.h"
+#include "sl_mbedtls.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
-
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
 #endif // CONFIG_ENABLE_UART
+#include "cmsis_os2.h"
+#include "psa/crypto.h"
+#include "sl_bluetooth.h"
+#include "sl_cos.h"
+#include "sl_power_manager.h"
 
+#ifdef USE_TEMP_SENSOR
+#include "sl_i2cspm_instances.h"
+#endif
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-
-#include "psa/crypto.h"
-#include "cmsis_os2.h"
-#include "sl_bluetooth.h"
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
-#include "sl_power_manager.h"
-#endif
-
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
-#include "sl_i2cspm_instances.h"
-#endif
-
 
 void sl_platform_init(void)
 {
@@ -50,11 +46,9 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
-  osKernelInitialize();
   nvm3_initDefault();
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  osKernelInitialize();
   sl_power_manager_init();
-#endif
 }
 
 void sl_kernel_start(void)
@@ -64,24 +58,27 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
+  sl_debug_swo_init();
   GPIOINT_Init();
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
 #endif
-  sl_simple_button_init_instances();
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+#ifdef USE_TEMP_SENSOR
   sl_i2cspm_init_instances();
 #endif
+  sl_simple_button_init_instances();
   sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
+  sl_cos_send_config();
 }
 
 void sl_service_init(void)
 {
-  sl_board_configure_vcom();
   sl_sleeptimer_init();
+  sl_mbedtls_init();
+  psa_crypto_init();
 }
 
 void sl_stack_init(void)
@@ -89,26 +86,10 @@ void sl_stack_init(void)
   sl_rail_util_pa_init();
   sl_rail_util_pti_init();
 #if !RSI_BLE_ENABLE
-     sl_bt_rtos_init();
+  sl_bt_rtos_init();
 #endif
 }
 
 void sl_internal_app_init(void)
-{
-}
-
-void sl_platform_process_action(void)
-{
-}
-
-void sl_service_process_action(void)
-{
-}
-
-void sl_stack_process_action(void)
-{
-}
-
-void sl_internal_app_process_action(void)
 {
 }

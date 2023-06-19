@@ -33,24 +33,27 @@
 
 sl_status_t sl_device_init_clocks(void)
 {
-  CMU_ClockSelectSet(cmuClock_SYSCLK, cmuSelect_HFRCODPLL);
+  CMU_CLOCK_SELECT_SET(SYSCLK, HFRCODPLL);
 #if defined(_CMU_EM01GRPACLKCTRL_MASK)
-  CMU_ClockSelectSet(cmuClock_EM01GRPACLK, cmuSelect_HFRCODPLL);
+  CMU_CLOCK_SELECT_SET(EM01GRPACLK, HFRCODPLL);
 #endif
 #if defined(_CMU_EM01GRPBCLKCTRL_MASK)
-  CMU_ClockSelectSet(cmuClock_EM01GRPBCLK, cmuSelect_HFRCODPLL);
+  CMU_CLOCK_SELECT_SET(EM01GRPBCLK, HFRCODPLL);
 #endif
-  CMU_ClockSelectSet(cmuClock_EM23GRPACLK, cmuSelect_LFXO);
-  CMU_ClockSelectSet(cmuClock_EM4GRPACLK, cmuSelect_LFXO);
+#if defined(_CMU_EM01GRPCCLKCTRL_MASK)
+  CMU_CLOCK_SELECT_SET(EM01GRPCCLK, HFRCODPLL);
+#endif
+  CMU_CLOCK_SELECT_SET(EM23GRPACLK, LFXO);
+  CMU_CLOCK_SELECT_SET(EM4GRPACLK, LFXO);
 #if defined(RTCC_PRESENT)
-  CMU_ClockSelectSet(cmuClock_RTCC, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(RTCC, LFXO);
 #endif
 #if defined(SYSRTC_PRESENT)
-  CMU_ClockSelectSet(cmuClock_SYSRTC, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(SYSRTC, LFXO);
 #endif
-  CMU_ClockSelectSet(cmuClock_WDOG0, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(WDOG0, LFXO);
 #if WDOG_COUNT > 1
-  CMU_ClockSelectSet(cmuClock_WDOG1, cmuSelect_LFXO);
+  CMU_CLOCK_SELECT_SET(WDOG1, LFXO);
 #endif
 
   return SL_STATUS_OK;

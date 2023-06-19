@@ -102,7 +102,7 @@
 // <1=> Enable
 // <0=> Disable
 // <i> Default: 1
-#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         1
+#define UARTDRV_RESTRICT_ENERGY_MODE_TO_ALLOW_RECEPTION         0
 #endif
 
 //</h>

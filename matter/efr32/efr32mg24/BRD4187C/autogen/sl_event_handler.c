@@ -16,8 +16,10 @@
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
 #include "nvm3_default.h"
-#include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
+#include "sl_cos.h"
+#include "sl_debug_swo.h"
+#include "sl_mbedtls.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
 #include "sl_sleeptimer.h"
@@ -33,11 +35,8 @@
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
 #include "sl_bluetooth.h"
-
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
 #include "sl_power_manager.h"
-#endif
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+#if defined(USE_TEMP_SENSOR)
 #include "sl_i2cspm_instances.h"
 #endif
 
@@ -55,11 +54,9 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
-  osKernelInitialize();
   nvm3_initDefault();
-#if defined(SL_CATALOG_POWER_MANAGER_PRESENT)
+  osKernelInitialize();
   sl_power_manager_init();
-#endif
 }
 
 void sl_kernel_start(void)
@@ -69,6 +66,7 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
+  sl_debug_swo_init();
   GPIOINT_Init();
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
@@ -78,15 +76,19 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
-#if defined(SL_CATALOG_SENSOR_RHT_PRESENT)
+#if defined(USE_TEMP_SENSOR)
   sl_i2cspm_init_instances();
 #endif
+  sl_cos_send_config();
 }
 
 void sl_service_init(void)
 {
   sl_sleeptimer_init();
   sl_hfxo_manager_init();
+  sl_mbedtls_init();
+  psa_crypto_init();
+  sli_aes_seed_mask();
 }
 
 void sl_stack_init(void)
@@ -99,21 +101,5 @@ void sl_stack_init(void)
 }
 
 void sl_internal_app_init(void)
-{
-}
-
-void sl_platform_process_action(void)
-{
-}
-
-void sl_service_process_action(void)
-{
-}
-
-void sl_stack_process_action(void)
-{
-}
-
-void sl_internal_app_process_action(void)
 {
 }

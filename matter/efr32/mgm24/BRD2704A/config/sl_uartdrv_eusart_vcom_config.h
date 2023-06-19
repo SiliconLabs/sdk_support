@@ -52,7 +52,7 @@
 // <uartdrvFlowControlHw=> nRTS/nCTS hardware handshake
 // <uartdrvFlowControlHwUart=> UART peripheral controls nRTS/nCTS
 // <i> Default: uartdrvFlowControlHw
-#define SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE uartdrvFlowControlHwUart
+#define SL_UARTDRV_EUSART_VCOM_FLOW_CONTROL_TYPE uartdrvFlowControlNone
 
 // <o SL_UARTDRV_EUSART_VCOM_OVERSAMPLING> Oversampling selection
 // <eusartOVS16=> 16x oversampling
@@ -82,24 +82,19 @@
 // <<< sl:start pin_tool >>>
 // <eusart signal=TX,RX,(CTS),(RTS)> SL_UARTDRV_EUSART_VCOM
 // $[EUSART_SL_UARTDRV_EUSART_VCOM]
-#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL        EUSART0
-#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL_NO     0
+#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL        EUSART1
+#define SL_UARTDRV_EUSART_VCOM_PERIPHERAL_NO     1
 
-// EUSART0 TX on PA05
-#define SL_UARTDRV_EUSART_VCOM_TX_PORT           gpioPortC
-#define SL_UARTDRV_EUSART_VCOM_TX_PIN            6
+// EUSART1 TX on PA05
+#define SL_UARTDRV_EUSART_VCOM_TX_PORT           gpioPortA
+#define SL_UARTDRV_EUSART_VCOM_TX_PIN            5
 
-// EUSART0 RX on PA06
-#define SL_UARTDRV_EUSART_VCOM_RX_PORT           gpioPortC
-#define SL_UARTDRV_EUSART_VCOM_RX_PIN            3
+// EUSART1 RX on PA06
+#define SL_UARTDRV_EUSART_VCOM_RX_PORT           gpioPortA
+#define SL_UARTDRV_EUSART_VCOM_RX_PIN            6
 
-// EUSART0 CTS on PA08
-#define SL_UARTDRV_EUSART_VCOM_CTS_PORT          gpioPortC
-#define SL_UARTDRV_EUSART_VCOM_CTS_PIN           2
 
-// EUSART0 RTS on PA07
-#define SL_UARTDRV_EUSART_VCOM_RTS_PORT          gpioPortC
-#define SL_UARTDRV_EUSART_VCOM_RTS_PIN           4
+
 // [EUSART_SL_UARTDRV_EUSART_VCOM]$
 // <<< sl:end pin_tool >>>
 #endif // SL_UARTDRV_EUSART_VCOM_CONFIG_H

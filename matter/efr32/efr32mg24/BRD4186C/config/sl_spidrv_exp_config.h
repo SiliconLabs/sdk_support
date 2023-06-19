@@ -24,7 +24,7 @@
 // <h> SPIDRV settings
 
 // <o SL_SPIDRV_EXP_BITRATE> SPI bitrate
-// <i> Default: 1000000
+// <i> Default: 20000000
 #define SL_SPIDRV_EXP_BITRATE           20000000
 
 // <o SL_SPIDRV_EXP_FRAME_LENGTH> SPI frame length <4-16>
