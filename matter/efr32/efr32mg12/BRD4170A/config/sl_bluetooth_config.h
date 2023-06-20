@@ -101,8 +101,8 @@
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
-  void sli_bt_rtos_ll_callback();
-  void sli_bt_rtos_stack_callback();
+void sli_bt_rtos_ll_callback();
+void sli_bt_rtos_stack_callback();
   #define SL_BT_CONFIG_FLAGS         (SL_BT_CONFIG_FLAG_RTOS | BT_EM2_LFCLK_REQ_FLAG)
   #define SL_BT_CONFIG_LL_CALLBACK    sli_bt_rtos_ll_callback
   #define SL_BT_CONFIG_STACK_CALLBACK sli_bt_rtos_stack_callback

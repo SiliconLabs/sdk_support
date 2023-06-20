@@ -39,6 +39,8 @@
 #define SL_SLEEPTIMER_PERIPHERAL_RTC     3
 #define SL_SLEEPTIMER_PERIPHERAL_SYSRTC  4
 #define SL_SLEEPTIMER_PERIPHERAL_BURTC   5
+#define SL_SLEEPTIMER_PERIPHERAL_WTIMER  6
+#define SL_SLEEPTIMER_PERIPHERAL_TIMER   7
 
 // <o SL_SLEEPTIMER_PERIPHERAL> Timer Peripheral Used by Sleeptimer
 //   <SL_SLEEPTIMER_PERIPHERAL_DEFAULT=> Default (auto select)
@@ -47,15 +49,23 @@
 //   <SL_SLEEPTIMER_PERIPHERAL_RTC=> RTC
 //   <SL_SLEEPTIMER_PERIPHERAL_SYSRTC=> SYSRTC
 //   <SL_SLEEPTIMER_PERIPHERAL_BURTC=> Back-Up RTC (BURTC)
+//   <SL_SLEEPTIMER_PERIPHERAL_WTIMER=> WTIMER
+//   <SL_SLEEPTIMER_PERIPHERAL_TIMER=> TIMER
 // <i> Selection of the Timer Peripheral Used by the Sleeptimer
 #define SL_SLEEPTIMER_PERIPHERAL  SL_SLEEPTIMER_PERIPHERAL_DEFAULT
+
+// <o SL_SLEEPTIMER_TIMER_INSTANCE> TIMER/WTIMER Instance Used by Sleeptimer (not applicable for other peripherals)
+// <i> Make sure TIMER instance size is 32bits. Check datasheet for 32bits TIMERs.
+// <i> Default: 0
+#define SL_SLEEPTIMER_TIMER_INSTANCE  0
 
 // <q SL_SLEEPTIMER_WALLCLOCK_CONFIG> Enable wallclock functionality
 // <i> Enable or disable wallclock functionalities (get_time, get_date, etc).
 // <i> Default: 0
 #define SL_SLEEPTIMER_WALLCLOCK_CONFIG  0
 
-// <o SL_SLEEPTIMER_FREQ_DIVIDER> Timer frequency divider
+// <o SL_SLEEPTIMER_FREQ_DIVIDER> Timer frequency divider (not applicable for WTIMER/TIMER)
+// <i> WTIMER/TIMER peripherals are always prescaled to 1024.
 // <i> Default: 1
 #define SL_SLEEPTIMER_FREQ_DIVIDER  1
 

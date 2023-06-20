@@ -17,8 +17,6 @@ extern const sli_bt_gattdb_t gattdb;
 #define gattdb_CHIPoBLEChar_Rx                23
 #define gattdb_CHIPoBLEChar_Tx                25
 #define gattdb_CHIPoBLEChar_C3                28
-#define gattdb_ota                            29
-#define gattdb_ota_control                    31
 
 
 #endif // __GATT_DB_H

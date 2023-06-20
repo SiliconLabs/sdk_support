@@ -38,25 +38,7 @@
 #endif
 
 
-#define SLI_SSL_IN_CONTENT_LEN_REQUIREMENT    900
 
-// If the SDK requires a certain SSL buffer size, configure Mbed TLS
-// to size the buffer to the highest of the user/default or SDK setting.
-#if MBEDTLS_SSL_IN_CONTENT_LEN < SLI_SSL_IN_CONTENT_LEN_REQUIREMENT
-  #undef MBEDTLS_SSL_IN_CONTENT_LEN
-  #define MBEDTLS_SSL_IN_CONTENT_LEN SLI_SSL_IN_CONTENT_LEN_REQUIREMENT
-#endif
-
-
-
-#define SLI_SSL_OUT_CONTENT_LEN_REQUIREMENT    900
-
-// If the SDK requires a certain SSL buffer size, configure Mbed TLS
-// to size the buffer to the highest of the user/default or SDK setting.
-#if MBEDTLS_SSL_OUT_CONTENT_LEN < SLI_SSL_OUT_CONTENT_LEN_REQUIREMENT
-  #undef MBEDTLS_SSL_OUT_CONTENT_LEN
-  #define MBEDTLS_SSL_OUT_CONTENT_LEN SLI_SSL_OUT_CONTENT_LEN_REQUIREMENT
-#endif
 
 
 #endif // SL_MBEDTLS_CONFIG_TRANSFORM_AUTOGEN_H
