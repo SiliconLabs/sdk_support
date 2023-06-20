@@ -7,7 +7,6 @@
 #include "sl_board_control.h"
 #include "sl_board_init.h"
 #include "sl_bt_rtos_adaptation.h"
-#include "sl_debug_swo.h"
 #include "sl_device_init_clocks.h"
 #include "sl_device_init_dcdc.h"
 #include "sl_device_init_emu.h"
@@ -30,7 +29,6 @@
 #if defined(USE_TEMP_SENSOR)
 #include "sl_i2cspm_instances.h"
 #endif
-#include "sl_cos.h"
 
 void sl_platform_init(void)
 {
@@ -55,7 +53,6 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-    sl_debug_swo_init();
     GPIOINT_Init();
     sl_simple_button_init_instances();
 #if defined(USE_TEMP_SENSOR)
@@ -65,7 +62,6 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
     sl_uartdrv_init_instances();
 #endif
-    sl_cos_send_config();
 }
 
 void sl_service_init(void)
