@@ -10,8 +10,6 @@
 #include "sl_board_control.h"
 #include "sl_board_init.h"
 #include "sl_bt_rtos_adaptation.h"
-#include "sl_cos.h"
-#include "sl_debug_swo.h"
 #include "sl_device_init_clocks.h"
 #include "sl_device_init_dcdc.h"
 #include "sl_device_init_emu.h"
@@ -59,7 +57,6 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-    sl_debug_swo_init();
     GPIOINT_Init();
 #ifdef SL_WIFI
     sl_spidrv_init_instances();
@@ -72,8 +69,7 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
     sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
-    sl_cos_send_config();
-}
+  }
 
 void sl_service_init(void)
 {

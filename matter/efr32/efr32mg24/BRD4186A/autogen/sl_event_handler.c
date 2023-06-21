@@ -18,8 +18,6 @@
 #include "nvm3_default.h"
 #include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
-#include "sl_cos.h"
-#include "sl_debug_swo.h"
 #include "sl_mbedtls.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
@@ -61,7 +59,6 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-    sl_debug_swo_init();
     GPIOINT_Init();
     sl_simple_button_init_instances();
     sl_simple_led_init_instances();
@@ -71,7 +68,6 @@ void sl_driver_init(void)
 #if defined(USE_TEMP_SENSOR)
     sl_i2cspm_init_instances();
 #endif
-    sl_cos_send_config();
 }
 
 void sl_service_init(void)

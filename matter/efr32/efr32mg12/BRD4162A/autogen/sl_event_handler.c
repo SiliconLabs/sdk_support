@@ -15,7 +15,6 @@
 #include "nvm3_default.h"
 #include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
-#include "sl_debug_swo.h"
 #include "sl_mbedtls.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
@@ -25,7 +24,6 @@
 #include "cmsis_os2.h"
 #include "psa/crypto.h"
 #include "sl_bluetooth.h"
-#include "sl_cos.h"
 #include "sl_power_manager.h"
 
 #ifdef USE_TEMP_SENSOR
@@ -58,7 +56,6 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-  sl_debug_swo_init();
   GPIOINT_Init();
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
@@ -71,7 +68,6 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
-  sl_cos_send_config();
 }
 
 void sl_service_init(void)
