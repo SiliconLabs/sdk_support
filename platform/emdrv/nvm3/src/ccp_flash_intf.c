@@ -112,7 +112,7 @@ bool RSI_FLASH_EraseSector(uint32_t sector_address) {
   GetQspiConfig(&spi_configs_erase);
 
   /* Erases the SECTOR   */
-  //DEBUGOUT("\r\n Erase Sector \r\n");
+  // DEBUGOUT("\r\n Erase Sector \r\n");
   RSI_QSPI_SpiErase((qspi_reg_t *)QSPI_BASE, &spi_configs_erase, SECTOR_ERASE,
                     sector_address, 1, 0);
 
@@ -126,7 +126,7 @@ bool RSI_FLASH_Write(uint32_t address, unsigned char *data, uint32_t length) {
   GetQspiConfig(&spi_configs_program);
 
   /* writes the data to required address using qspi */
-  //DEBUGOUT("\r\n Write Data to Flash Memory \r\n");
+  // DEBUGOUT("\r\n Write Data to Flash Memory \r\n");
   RSI_QSPI_SpiWrite((qspi_reg_t *)QSPI_BASE, &spi_configs_program, 0x2, address,
                     (uint8_t *)&data[0], length, FLASH_PAGE_SIZE, _1BYTE, 0, 0,
                     0, 0, 0, 0);
@@ -143,7 +143,7 @@ bool RSI_FLASH_Read(uint32_t address, unsigned char *data, uint32_t length,
   if (!auto_mode) {
     /* IO Read config */
     /* Reads from the address in manual mode */
-    //DEBUGOUT("\r\n Read Data From Flash Memory Using Manual Mode\r\n");
+    // DEBUGOUT("\r\n Read Data From Flash Memory Using Manual Mode\r\n");
     RSI_QSPI_ManualRead((qspi_reg_t *)(QSPI_BASE), &spi_configs_program,
                         address, (uint8_t *)data, _8BIT, length, 0, 0, 0);
   } else { /* DMA_READ - Auto mode */
