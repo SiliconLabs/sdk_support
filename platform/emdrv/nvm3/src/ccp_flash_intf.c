@@ -16,7 +16,6 @@
  ******************************************************************************/
 #include "ccp_flash_intf.h"
 #include "RS1xxxx_9117.h"
-//#include "rsi_board.h"
 #include "rsi_chip.h"
 #include "system_RS1xxxx.h"
 
