@@ -1,0 +1,8 @@
+#CRC Codes for initially generated config files -- do not modify!
+FreeRTOSConfig.h=-720506484
+SEGGER_RTT_Conf.h=-1668074135
+common/lighting-app.zap=958365080
+emlib_core_debug_config.h=171843933
+sl_matter_config.h=783247880
+sl_matter_wifi_config.h=724805409
+sl_net_default_values.h=2122509837
