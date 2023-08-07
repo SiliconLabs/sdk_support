@@ -1,0 +1,46 @@
+[
+  {
+    "channel_name": "WiSunConf_Protocol_Configuration_1-WiSunConf_Channel_Group_1",
+    "result_code": "0",
+    "error_message": "",
+    "logs": [],
+    "cfg_logs": [
+      {
+        "name": "Preamble Binary Pattern",
+        "value": "0101010101010101010101010101010101010101010101010101010101010101"
+      },
+      {
+        "name": "Sync Word Binary Pattern",
+        "value": "1001000001001110"
+      },
+      {
+        "name": "Actual Bandwidth",
+        "value": 192176
+      },
+      {
+        "name": "Desired baudrate",
+        "value": 50000.0
+      },
+      {
+        "name": "Actual sample frequency",
+        "value": null
+      },
+      {
+        "name": "FEC enabled flag",
+        "value": 0
+      },
+      {
+        "name": "Base Channel Frequency",
+        "value": 902200000
+      },
+      {
+        "name": "Channel Spacing",
+        "value": 200000
+      },
+      {
+        "name": "RF Frequency Planning Band",
+        "value": "FpllBandEnum.BAND_9xx"
+      }
+    ]
+  }
+]
