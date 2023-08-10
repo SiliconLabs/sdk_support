@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,31 +28,21 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#ifndef SL_RAIL_UTIL_SEQUENCER_H
+#define SL_RAIL_UTIL_SEQUENCER_H
 
-#include "em_gpio.h"
-#include "sl_simple_button.h"
+#include "rail.h"
 
-// <<< Use Configuration Wizard in Context Menu >>>
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// <o SL_SIMPLE_BUTTON_BTN0_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
-// <<< end of configuration section >>>
+#define SL_RAIL_UTIL_SEQUENCER_RUNTIME_IMAGE_SELECTION 0
 
-// <<< sl:start pin_tool >>>
+#define SL_RAIL_UTIL_SEQUENCER_IMAGE RAIL_SEQ_IMAGE_PA_20_DBM
 
-// <gpio> SL_SIMPLE_BUTTON_BTN0
-// $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN                1
+#ifdef __cplusplus
+}
+#endif
 
-// [GPIO_SL_SIMPLE_BUTTON_BTN0]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#endif // SL_RAIL_UTIL_SEQUENCER_H
