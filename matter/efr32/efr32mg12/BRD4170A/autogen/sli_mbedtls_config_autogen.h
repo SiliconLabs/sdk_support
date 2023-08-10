@@ -4,7 +4,10 @@
 #define SLI_MBEDTLS_CONFIG_AUTOGEN_H
 
 
-#define MBEDTLS_MPI_MAX_SIZE  32
+// Added definition check because of DIC specific configs
+#ifndef MBEDTLS_MPI_MAX_SIZE
+#define MBEDTLS_MPI_MAX_SIZE 32
+#endif
 
 
 #define MBEDTLS_AES_C

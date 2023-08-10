@@ -24,7 +24,6 @@
 #define SL_MBEDTLS_SSL_IN_CONTENT_LEN 768
 #endif
 
-// Removing define because of the configuration change when using COAP secure. 
 // <o SL_MBEDTLS_SSL_OUT_CONTENT_LEN> Maximum TLS/DTLS fragment length in bytes (output).
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O
