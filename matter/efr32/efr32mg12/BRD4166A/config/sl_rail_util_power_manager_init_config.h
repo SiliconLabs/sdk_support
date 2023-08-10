@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver Instances
+ * @brief RAIL power manager configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,20 +28,17 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_INSTANCES_H
-#define SL_SIMPLE_BUTTON_INSTANCES_H
+#ifndef SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
+#define SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
 
-#include "sl_simple_button.h"
+// <<< Use Configuration Wizard in Context Menu >>>
 
-extern const sl_button_t sl_button_btn0;
-extern const sl_button_t sl_button_btn1;
+// <h> RAIL power manager configuration
 
-extern const sl_button_t *sl_simple_button_array[];
+// <o SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT> Enable RAIL power manager initialization
+// <i> Default: 1
+#define SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT 1
 
-#define SL_SIMPLE_BUTTON_COUNT 2
-#define SL_SIMPLE_BUTTON_INSTANCE(n) (sl_simple_button_array[n])
-
-void sl_simple_button_init_instances(void);
-void sl_simple_button_poll_instances(void);
-
-#endif // SL_SIMPLE_BUTTON_INSTANCES_H
+// </h>
+// <<< end of configuration section >>>
+#endif // SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
