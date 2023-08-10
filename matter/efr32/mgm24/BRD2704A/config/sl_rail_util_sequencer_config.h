@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Led Driver Configuration
+ * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,30 +28,21 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_LED_LED0_CONFIG_H
-#define SL_SIMPLE_LED_LED0_CONFIG_H
+#ifndef SL_RAIL_UTIL_SEQUENCER_H
+#define SL_RAIL_UTIL_SEQUENCER_H
 
-// <<< Use Configuration Wizard in Context Menu >>>
+#include "rail.h"
 
-// <h> Simple LED configuration
-// <o SL_SIMPLE_LED_LED0_POLARITY>
-// <SL_SIMPLE_LED_POLARITY_ACTIVE_LOW=> Active low
-// <SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH=> Active high
-// <i> Default: SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
-#define SL_SIMPLE_LED_LED0_POLARITY SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
-// </h> end led configuration
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// <<< end of configuration section >>>
+#define SL_RAIL_UTIL_SEQUENCER_RUNTIME_IMAGE_SELECTION 0
 
-// <<< sl:start pin_tool >>>
+#define SL_RAIL_UTIL_SEQUENCER_IMAGE RAIL_SEQ_IMAGE_PA_20_DBM
 
-// <gpio> SL_SIMPLE_LED_LED0
-// $[GPIO_SL_SIMPLE_LED_LED0]
-#define SL_SIMPLE_LED_LED0_PORT                  gpioPortA
-#define SL_SIMPLE_LED_LED0_PIN                   8
+#ifdef __cplusplus
+}
+#endif
 
-// [GPIO_SL_SIMPLE_LED_LED0]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_SIMPLE_LED_LED0_CONFIG_H
+#endif // SL_RAIL_UTIL_SEQUENCER_H

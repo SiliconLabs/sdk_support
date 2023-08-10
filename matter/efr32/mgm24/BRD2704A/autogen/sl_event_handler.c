@@ -26,6 +26,7 @@
 #include "cmsis_os2.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
+#include "sl_rail_util_power_manager_init.h"
 
 void sl_platform_init(void)
 {
@@ -74,8 +75,10 @@ void sl_stack_init(void)
   sl_rail_util_pa_init();
   sl_rail_util_pti_init();
   sl_bt_rtos_init();
+  sl_rail_util_power_manager_init();
 }
 
 void sl_internal_app_init(void)
 {
 }
+

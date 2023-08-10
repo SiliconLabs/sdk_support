@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Led Driver Configuration
+ * @brief RAIL power manager configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,30 +28,17 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_LED_LED0_CONFIG_H
-#define SL_SIMPLE_LED_LED0_CONFIG_H
+#ifndef SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
+#define SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <h> Simple LED configuration
-// <o SL_SIMPLE_LED_LED0_POLARITY>
-// <SL_SIMPLE_LED_POLARITY_ACTIVE_LOW=> Active low
-// <SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH=> Active high
-// <i> Default: SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
-#define SL_SIMPLE_LED_LED0_POLARITY SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
-// </h> end led configuration
+// <h> RAIL power manager configuration
 
+// <o SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT> Enable RAIL power manager initialization
+// <i> Default: 1
+#define SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT 1
+
+// </h>
 // <<< end of configuration section >>>
-
-// <<< sl:start pin_tool >>>
-
-// <gpio> SL_SIMPLE_LED_LED0
-// $[GPIO_SL_SIMPLE_LED_LED0]
-#define SL_SIMPLE_LED_LED0_PORT                  gpioPortA
-#define SL_SIMPLE_LED_LED0_PIN                   8
-
-// [GPIO_SL_SIMPLE_LED_LED0]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_SIMPLE_LED_LED0_CONFIG_H
+#endif // SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
