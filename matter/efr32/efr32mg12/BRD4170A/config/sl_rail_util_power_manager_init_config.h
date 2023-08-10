@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief RAIL power manager configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,31 +28,17 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_BTN1_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN1_CONFIG_H
-
-#include "em_gpio.h"
-#include "sl_simple_button.h"
+#ifndef SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
+#define SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <o SL_SIMPLE_BUTTON_BTN1_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN1_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
+// <h> RAIL power manager configuration
+
+// <o SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT> Enable RAIL power manager initialization
+// <i> Default: 1
+#define SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT 1
+
+// </h>
 // <<< end of configuration section >>>
-
-// <<< sl:start pin_tool >>>
-
-// <gpio> SL_SIMPLE_BUTTON_BTN1
-// $[GPIO_SL_SIMPLE_BUTTON_BTN1]
-#define SL_SIMPLE_BUTTON_BTN1_PORT               gpioPortF
-#define SL_SIMPLE_BUTTON_BTN1_PIN                7
-
-// [GPIO_SL_SIMPLE_BUTTON_BTN1]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_SIMPLE_BUTTON_BTN1_CONFIG_H
+#endif // SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
