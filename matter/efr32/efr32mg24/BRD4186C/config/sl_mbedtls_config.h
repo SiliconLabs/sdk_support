@@ -14,7 +14,6 @@
 // <i> The value of this configuration should be updated for the application needs.
 #define MBEDTLS_SSL_CIPHERSUITES         MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
 
-// Removing define because of the configuration change when using COAP secure. 
 // <o SL_MBEDTLS_SSL_IN_CONTENT_LEN> Maximum TLS/DTLS fragment length in bytes (input).
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O

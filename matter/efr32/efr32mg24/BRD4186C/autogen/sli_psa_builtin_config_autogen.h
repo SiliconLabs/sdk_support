@@ -16,5 +16,7 @@
 #define MBEDTLS_PSA_BUILTIN_ALG_HMAC                1
 #define MBEDTLS_PSA_BUILTIN_ALG_SHA_224             1
 #define MBEDTLS_PSA_BUILTIN_ALG_SHA_256             1
+#define MBEDTLS_PSA_BUILTIN_ALG_SHA_384             1
+#define MBEDTLS_PSA_BUILTIN_ALG_SHA_512             1
 
 #endif // SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
