@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver Instances
+ * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,20 +28,21 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_INSTANCES_H
-#define SL_SIMPLE_BUTTON_INSTANCES_H
+#ifndef SL_RAIL_UTIL_SEQUENCER_H
+#define SL_RAIL_UTIL_SEQUENCER_H
 
-#include "sl_simple_button.h"
+#include "rail.h"
 
-extern const sl_button_t sl_button_btn0;
-extern const sl_button_t sl_button_btn1;
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-extern const sl_button_t *sl_simple_button_array[];
+#define SL_RAIL_UTIL_SEQUENCER_RUNTIME_IMAGE_SELECTION 0
 
-#define SL_SIMPLE_BUTTON_COUNT 2
-#define SL_SIMPLE_BUTTON_INSTANCE(n) (sl_simple_button_array[n])
+#define SL_RAIL_UTIL_SEQUENCER_IMAGE RAIL_SEQ_IMAGE_PA_10_DBM
 
-void sl_simple_button_init_instances(void);
-void sl_simple_button_poll_instances(void);
+#ifdef __cplusplus
+}
+#endif
 
-#endif // SL_SIMPLE_BUTTON_INSTANCES_H
+#endif // SL_RAIL_UTIL_SEQUENCER_H
