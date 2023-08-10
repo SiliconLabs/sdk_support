@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief SL_MX25_FLASH_SHUTDOWN_USART Config
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,31 +28,37 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-
-#include "em_gpio.h"
-#include "sl_simple_button.h"
-
-// <<< Use Configuration Wizard in Context Menu >>>
-
-// <o SL_SIMPLE_BUTTON_BTN0_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
-// <<< end of configuration section >>>
+#ifndef SL_MX25_FLASH_SHUTDOWN_CONFIG_H
+#define SL_MX25_FLASH_SHUTDOWN_CONFIG_H
 
 // <<< sl:start pin_tool >>>
+// {usart signal=TX,RX,CLK} SL_MX25_FLASH_SHUTDOWN
+// [USART_SL_MX25_FLASH_SHUTDOWN]
+#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL        USART0
+#define SL_MX25_FLASH_SHUTDOWN_PERIPHERAL_NO     0
 
-// <gpio> SL_SIMPLE_BUTTON_BTN0
-// $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN                1
+// USART0 TX on PC01
+#define SL_MX25_FLASH_SHUTDOWN_TX_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_TX_PIN            1
 
-// [GPIO_SL_SIMPLE_BUTTON_BTN0]$
+// USART0 RX on PC02
+#define SL_MX25_FLASH_SHUTDOWN_RX_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_RX_PIN            2
+
+// USART0 CLK on PC03
+#define SL_MX25_FLASH_SHUTDOWN_CLK_PORT          gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_CLK_PIN           3
+
+// [USART_SL_MX25_FLASH_SHUTDOWN]
+
+// <gpio> SL_MX25_FLASH_SHUTDOWN_CS
+
+// $[GPIO_SL_MX25_FLASH_SHUTDOWN_CS]
+#define SL_MX25_FLASH_SHUTDOWN_CS_PORT           gpioPortC
+#define SL_MX25_FLASH_SHUTDOWN_CS_PIN            4
+
+// [GPIO_SL_MX25_FLASH_SHUTDOWN_CS]$
 
 // <<< sl:end pin_tool >>>
 
-#endif // SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#endif // SL_MX25_FLASH_SHUTDOWN_CONFIG_H

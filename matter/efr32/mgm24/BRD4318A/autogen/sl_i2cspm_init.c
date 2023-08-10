@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief I2C simple poll-based master mode driver instance initialilization
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,31 +28,37 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#include "sl_i2cspm.h"
+#include "em_cmu.h"
+// Include instance config 
+#include "sl_i2cspm_sensor_config.h"
 
-#include "em_gpio.h"
-#include "sl_simple_button.h"
+sl_i2cspm_t *sl_i2cspm_sensor = SL_I2CSPM_SENSOR_PERIPHERAL;
 
-// <<< Use Configuration Wizard in Context Menu >>>
+#if SL_I2CSPM_SENSOR_SPEED_MODE == 0
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRStandard
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_STANDARD_MAX
+#elif SL_I2CSPM_SENSOR_SPEED_MODE == 1
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRAsymetric
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_FAST_MAX
+#elif SL_I2CSPM_SENSOR_SPEED_MODE == 2
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRFast
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_FASTPLUS_MAX
+#endif
 
-// <o SL_SIMPLE_BUTTON_BTN0_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
-// <<< end of configuration section >>>
+I2CSPM_Init_TypeDef init_sensor = { 
+  .port = SL_I2CSPM_SENSOR_PERIPHERAL,
+  .sclPort = SL_I2CSPM_SENSOR_SCL_PORT,
+  .sclPin = SL_I2CSPM_SENSOR_SCL_PIN,
+  .sdaPort = SL_I2CSPM_SENSOR_SDA_PORT,
+  .sdaPin = SL_I2CSPM_SENSOR_SDA_PIN,
+  .i2cRefFreq = 0,
+  .i2cMaxFreq = SL_I2CSPM_SENSOR_MAX_FREQ,
+  .i2cClhr = SL_I2CSPM_SENSOR_HLR
+};
 
-// <<< sl:start pin_tool >>>
-
-// <gpio> SL_SIMPLE_BUTTON_BTN0
-// $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN                1
-
-// [GPIO_SL_SIMPLE_BUTTON_BTN0]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+void sl_i2cspm_init_instances(void)
+{
+  CMU_ClockEnable(cmuClock_GPIO, true);
+  I2CSPM_Init(&init_sensor);
+}

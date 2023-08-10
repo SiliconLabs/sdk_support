@@ -1,6 +1,6 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief I2CSPM Config
  *******************************************************************************
  * # License
  * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,31 +28,44 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#ifndef SL_I2CSPM_SENSOR_CONFIG_H
+#define SL_I2CSPM_SENSOR_CONFIG_H
 
-#include "em_gpio.h"
-#include "sl_simple_button.h"
+// <<< Use Configuration Wizard in Context Menu
 
-// <<< Use Configuration Wizard in Context Menu >>>
+// <h>I2CSPM settings
 
-// <o SL_SIMPLE_BUTTON_BTN0_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
+// <o SL_I2CSPM_SENSOR_REFERENCE_CLOCK> Reference clock frequency
+// <i> Frequency in Hz of the reference clock.
+// <i> Select 0 to use the frequency of the currently selected clock.
+// <i> Default: 0
+#define SL_I2CSPM_SENSOR_REFERENCE_CLOCK 0
+
+// <o SL_I2CSPM_SENSOR_SPEED_MODE> Speed mode
+// <0=> Standard mode (100kbit/s)
+// <1=> Fast mode (400kbit/s)
+// <2=> Fast mode plus (1Mbit/s)
+// <i> Default: 0
+#define SL_I2CSPM_SENSOR_SPEED_MODE      0
+// </h> end I2CSPM config
+
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
+// <i2c signal=SCL,SDA> SL_I2CSPM_SENSOR
+// $[I2C_SL_I2CSPM_SENSOR]
+#define SL_I2CSPM_SENSOR_PERIPHERAL              I2C1
+#define SL_I2CSPM_SENSOR_PERIPHERAL_NO           1
 
-// <gpio> SL_SIMPLE_BUTTON_BTN0
-// $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN                1
+// I2C1 SCL on PC05
+#define SL_I2CSPM_SENSOR_SCL_PORT                gpioPortC
+#define SL_I2CSPM_SENSOR_SCL_PIN                 5
 
-// [GPIO_SL_SIMPLE_BUTTON_BTN0]$
+// I2C1 SDA on PC07
+#define SL_I2CSPM_SENSOR_SDA_PORT                gpioPortC
+#define SL_I2CSPM_SENSOR_SDA_PIN                 7
 
+// [I2C_SL_I2CSPM_SENSOR]$
 // <<< sl:end pin_tool >>>
 
-#endif // SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#endif // SL_I2CSPM_SENSOR_CONFIG_H

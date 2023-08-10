@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Simple Button Driver User Config
+ * @brief I2C simple poll-based master mode driver instances
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -27,32 +27,26 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+ 
+#ifndef SL_I2CSPM_INSTANCES_H
+#define SL_I2CSPM_INSTANCES_H
 
-#ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
-#define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#include "em_gpio.h"
-#include "sl_simple_button.h"
+#include "sl_i2cspm.h"
 
-// <<< Use Configuration Wizard in Context Menu >>>
 
-// <o SL_SIMPLE_BUTTON_BTN0_MODE>
-// <SL_SIMPLE_BUTTON_MODE_INTERRUPT=> Interrupt
-// <SL_SIMPLE_BUTTON_MODE_POLL_AND_DEBOUNCE=> Poll and Debounce
-// <SL_SIMPLE_BUTTON_MODE_POLL=> Poll
-// <i> Default: SL_SIMPLE_BUTTON_MODE_INTERRUPT
-#define SL_SIMPLE_BUTTON_BTN0_MODE       SL_SIMPLE_BUTTON_MODE_INTERRUPT
-// <<< end of configuration section >>>
+#define SL_I2CSPM_SENSOR_PRESENT
 
-// <<< sl:start pin_tool >>>
 
-// <gpio> SL_SIMPLE_BUTTON_BTN0
-// $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortB
-#define SL_SIMPLE_BUTTON_BTN0_PIN                1
+extern sl_i2cspm_t *sl_i2cspm_sensor;
 
-// [GPIO_SL_SIMPLE_BUTTON_BTN0]$
+void sl_i2cspm_init_instances(void);
 
-// <<< sl:end pin_tool >>>
+#ifdef __cplusplus
+}
+#endif
 
-#endif // SL_SIMPLE_BUTTON_BTN0_CONFIG_H
+#endif // SL_I2CSPM_INSTANCES_H
