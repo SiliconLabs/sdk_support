@@ -33,7 +33,7 @@
 #ifndef SL_HFXO_MANAGER_CONFIG_H
 #define SL_HFXO_MANAGER_CONFIG_H
 
-// <h>Power Manager Configuration
+// <h>HFXO Manager Configuration
 
 // <q SL_HFXO_MANAGER_CUSTOM_HFXO_IRQ_HANDLER> Enable custom IRQ handler for crystal HF oscillator.
 // <i> Enable if HFXO0_IRQHandler is needed from your application.
@@ -46,8 +46,8 @@
 // <q SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT> Enable support for Sleepy Crystals.
 // <i> If Enabled and if HFXO fails to startup due to a sleepy crystal, HFXO Manager will retry the startup with more aggressive settings
 // <i> before falling back to the configured settings.
-// <i> Default: 1
-#define SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT  1
+// <i> Default: 0
+#define SL_HFXO_MANAGER_SLEEPY_CRYSTAL_SUPPORT  0
 
 // </h>
 
