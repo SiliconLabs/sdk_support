@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief DEVICE_INIT_HFXO Config
+ * @brief RAIL power manager configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,30 +28,17 @@
  *
  ******************************************************************************/
 
-#ifndef SL_DEVICE_INIT_HFXO_CONFIG_H
-#define SL_DEVICE_INIT_HFXO_CONFIG_H
+#ifndef SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
+#define SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <o SL_DEVICE_INIT_HFXO_MODE> Mode
-// <i>
-// <cmuHfxoOscMode_Crystal=> Crystal oscillator
-// <cmuHfxoOscMode_ExternalSine=> External sine wave
-// <i> Default: cmuHfxoOscMode_Crystal
-#define SL_DEVICE_INIT_HFXO_MODE           cmuHfxoOscMode_Crystal
+// <h> RAIL power manager configuration
 
-// <o SL_DEVICE_INIT_HFXO_FREQ> Frequency <38000000-40000000>
-// <i> Default: 39000000
-#define SL_DEVICE_INIT_HFXO_FREQ           39000000
+// <o SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT> Enable RAIL power manager initialization
+// <i> Default: 1
+#define SL_RAIL_UTIL_RAIL_POWER_MANAGER_INIT 1
 
-// <o SL_DEVICE_INIT_HFXO_PRECISION> HFXO precision in PPM <0-65535>
-// <i> Default: 500
-#define SL_DEVICE_INIT_HFXO_PRECISION      500
-
-// <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-255>
-// <i> Default: 140
-#define SL_DEVICE_INIT_HFXO_CTUNE          100
-
+// </h>
 // <<< end of configuration section >>>
-
-#endif // SL_DEVICE_INIT_HFXO_CONFIG_H
+#endif // SL_RAIL_UTIL_POWER_MANAGER_INIT_CONFIG_H

@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief DEVICE_INIT_HFXO Config
+ * @brief
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,30 +28,21 @@
  *
  ******************************************************************************/
 
-#ifndef SL_DEVICE_INIT_HFXO_CONFIG_H
-#define SL_DEVICE_INIT_HFXO_CONFIG_H
+#ifndef SL_RAIL_UTIL_SEQUENCER_H
+#define SL_RAIL_UTIL_SEQUENCER_H
 
-// <<< Use Configuration Wizard in Context Menu >>>
+#include "rail.h"
 
-// <o SL_DEVICE_INIT_HFXO_MODE> Mode
-// <i>
-// <cmuHfxoOscMode_Crystal=> Crystal oscillator
-// <cmuHfxoOscMode_ExternalSine=> External sine wave
-// <i> Default: cmuHfxoOscMode_Crystal
-#define SL_DEVICE_INIT_HFXO_MODE           cmuHfxoOscMode_Crystal
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-// <o SL_DEVICE_INIT_HFXO_FREQ> Frequency <38000000-40000000>
-// <i> Default: 39000000
-#define SL_DEVICE_INIT_HFXO_FREQ           39000000
+#define SL_RAIL_UTIL_SEQUENCER_RUNTIME_IMAGE_SELECTION 0
 
-// <o SL_DEVICE_INIT_HFXO_PRECISION> HFXO precision in PPM <0-65535>
-// <i> Default: 500
-#define SL_DEVICE_INIT_HFXO_PRECISION      500
+#define SL_RAIL_UTIL_SEQUENCER_IMAGE RAIL_SEQ_IMAGE_PA_10_DBM
 
-// <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-255>
-// <i> Default: 140
-#define SL_DEVICE_INIT_HFXO_CTUNE          100
+#ifdef __cplusplus
+}
+#endif
 
-// <<< end of configuration section >>>
-
-#endif // SL_DEVICE_INIT_HFXO_CONFIG_H
+#endif // SL_RAIL_UTIL_SEQUENCER_H
