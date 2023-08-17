@@ -3,5 +3,7 @@
 #ifndef SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
 #define SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
 
+// Do not need this feature - SLC imposed
+// #define MBEDTLS_PSA_BUILTIN_ALG_ECB_NO_PADDING 1
 
 #endif // SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
