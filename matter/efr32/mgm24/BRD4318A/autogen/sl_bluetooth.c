@@ -5,7 +5,6 @@
 #include "sl_assert.h"
 #include "sl_bt_stack_init.h"
 #include "sl_component_catalog.h"
-
 #if !defined(SL_CATALOG_KERNEL_PRESENT)
 /**
  * Override @ref PendSV_Handler for the Link Layer task when Bluetooth runs
