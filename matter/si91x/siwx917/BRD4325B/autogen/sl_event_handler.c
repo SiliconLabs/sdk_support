@@ -34,4 +34,3 @@ void sl_stack_init(void)
 void sl_internal_app_init(void)
 {
 }
-
