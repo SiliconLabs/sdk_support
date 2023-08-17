@@ -65,7 +65,6 @@
 #define SL_RAIL_UTIL_PTI_DFRAME_PORT             gpioPortC
 #define SL_RAIL_UTIL_PTI_DFRAME_PIN              5
 
-
 // [PTI_SL_RAIL_UTIL_PTI]$
 
 // <<< sl:end pin_tool >>>
