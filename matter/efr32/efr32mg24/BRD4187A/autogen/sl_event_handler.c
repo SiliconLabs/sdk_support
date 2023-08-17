@@ -17,18 +17,30 @@
 #include "sl_bt_rtos_adaptation.h"
 #include "sl_sleeptimer.h"
 #include "gpiointerrupt.h"
+#if defined(USE_TEMP_SENSOR)
 #include "sl_i2cspm_instances.h"
+#endif
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
+#if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
+#endif // CONFIG_ENABLE_UART
+
+#ifdef SL_WIFI
+#include "sl_spidrv_instances.h"
+#endif
+
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
+
+#if !RSI_BLE_ENABLE
 #include "sl_rail_util_power_manager_init.h"
+#endif // !RSI_BLE_ENABLE
 
 void sl_platform_init(void)
 {
@@ -51,13 +63,18 @@ void sl_platform_init(void)
 
 void sl_kernel_start(void)
 {
+#if !RSI_BLE_ENABLE
   sli_bt_rtos_adaptation_kernel_start();
+#endif // !RSI_BLE_ENABLE
   osKernelStart();
 }
 
 void sl_driver_init(void)
 {
   GPIOINT_Init();
+#ifdef SL_WIFI
+  sl_spidrv_init_instances();
+#endif
 #if defined(USE_TEMP_SENSOR)
   sl_i2cspm_init_instances();
 #endif
@@ -80,13 +97,14 @@ void sl_service_init(void)
 
 void sl_stack_init(void)
 {
+#if !RSI_BLE_ENABLE
   sl_rail_util_pa_init();
   sl_rail_util_pti_init();
   sl_bt_rtos_init();
   sl_rail_util_power_manager_init();
+#endif
 }
 
 void sl_internal_app_init(void)
 {
 }
-
