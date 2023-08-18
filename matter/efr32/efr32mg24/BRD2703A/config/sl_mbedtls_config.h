@@ -18,7 +18,7 @@
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O
 // <i> buffer used in mbedTLS when receiving data.
-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
+#if SL_USE_COAP_CONFIG
 #define SL_MBEDTLS_SSL_IN_CONTENT_LEN 900
 #else
 #define SL_MBEDTLS_SSL_IN_CONTENT_LEN 768
@@ -28,7 +28,7 @@
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O
 // <i> buffer used in mbedTLS when sending data.
-#if OPENTHREAD_CONFIG_COAP_SECURE_API_ENABLE
+#if SL_USE_COAP_CONFIG
 #define SL_MBEDTLS_SSL_OUT_CONTENT_LEN 900
 #else
 #define SL_MBEDTLS_SSL_OUT_CONTENT_LEN 768
