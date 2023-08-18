@@ -68,7 +68,8 @@ void sl_driver_init(void)
   sl_simple_button_init_instances();
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
-#endif // CONFIG_ENABLE_UART}
+#endif // CONFIG_ENABLE_UART
+}
 
 void sl_service_init(void)
 {
@@ -92,4 +93,3 @@ void sl_stack_init(void)
 void sl_internal_app_init(void)
 {
 }
-
