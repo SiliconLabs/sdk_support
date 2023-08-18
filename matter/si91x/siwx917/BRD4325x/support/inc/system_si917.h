@@ -21,10 +21,10 @@
 extern "C" {
 #endif
 
-#include "si91x_device.h"
-#include "core_cm4.h" /* Cortex-M4 processor and core peripherals */
-#include <stdint.h>
 #include "cmsis_gcc.h"
+#include "core_cm4.h" /* Cortex-M4 processor and core peripherals */
+#include "si91x_device.h"
+#include <stdint.h>
 
 /*******************************************************************************
  * @addtogroup Parts
@@ -40,10 +40,9 @@ extern "C" {
  ******************************************************************************/
 
 /* Interrupt vectortable entry */
-typedef union
-{
-    void (*VECTOR_TABLE_Type)(void);
-    void * topOfStack;
+typedef union {
+  void (*VECTOR_TABLE_Type)(void);
+  void *topOfStack;
 } tVectorEntry;
 
 /*******************************************************************************
@@ -140,10 +139,7 @@ uint32_t SystemCoreClockGet(void);
  *the core clock outside the CMU API.
  ******************************************************************************/
 #ifndef CCP_SI917_BRINGUP
-static __INLINE void SystemCoreClockUpdate(void)
-{
-    (void) SystemCoreClockGet();
-}
+static __INLINE void SystemCoreClockUpdate(void) { (void)SystemCoreClockGet(); }
 #endif /* CCP_SI917_BRINGUP */
 
 uint32_t SystemMaxCoreClockGet(void);
