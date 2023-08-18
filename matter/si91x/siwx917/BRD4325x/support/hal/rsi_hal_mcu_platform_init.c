@@ -40,15 +40,16 @@
 #define XTAL_GOOD_TIME 31 /*Duration in us*/
 
 /*Pre-fetch and regestring */
-#define ICACHE2_ADDR_TRANSLATE_1_REG *(volatile uint32_t *) (0x20280000 + 0x24)
-#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *) (0x46008000 + 0x18)
-#define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *) (0x46008000 + 0x44)
-#define MISC_QUASI_SYNC_MODE *(volatile uint32_t *) (0x46008000 + 0x84)
+#define ICACHE2_ADDR_TRANSLATE_1_REG *(volatile uint32_t *)(0x20280000 + 0x24)
+#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(0x46008000 + 0x18)
+#define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
+#define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
 
 /**
  * @fn           void soc_pll_config()
  * @brief        This function to configure clock for SiWx917 SoC (80MHz)
- *               Configure the PLL frequency and Switch M4 clock to PLL clock for speed operations
+ *               Configure the PLL frequency and Switch M4 clock to PLL clock
+ * for speed operations
  *
  * @param[in]    none
  * @param[out]   none
@@ -57,48 +58,45 @@
  * configure clock for SiWx917 SoC
  *
  */
-int soc_pll_config(void)
-{
-    int32_t status = RSI_OK;
+int soc_pll_config(void) {
+  int32_t status = RSI_OK;
 
-    RSI_CLK_SocPllLockConfig(1, 1, 7);
+  RSI_CLK_SocPllLockConfig(1, 1, 7);
 
-    RSI_CLK_SocPllRefClkConfig(2);
+  RSI_CLK_SocPllRefClkConfig(2);
 
-    RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
+  RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
 
-    /*Enable fre-fetch and register if SOC-PLL frequency is more than or equal to 120M*/
+  /*Enable fre-fetch and register if SOC-PLL frequency is more than or equal to
+   * 120M*/
 #if (PS4_SOC_FREQ >= 120000000)
-    ICACHE2_ADDR_TRANSLATE_1_REG  = BIT(21);
-    MISC_CFG_SRAM_REDUNDANCY_CTRL = BIT(4);
-    MISC_CONFIG_MISC_CTRL1 |= BIT(4);
+  ICACHE2_ADDR_TRANSLATE_1_REG = BIT(21);
+  MISC_CFG_SRAM_REDUNDANCY_CTRL = BIT(4);
+  MISC_CONFIG_MISC_CTRL1 |= BIT(4);
 #if !(defined WISE_AOC_4)
-    MISC_QUASI_SYNC_MODE |= BIT(6);
-    MISC_QUASI_SYNC_MODE |= (BIT(6) | BIT(7));
+  MISC_QUASI_SYNC_MODE |= BIT(6);
+  MISC_QUASI_SYNC_MODE |= (BIT(6) | BIT(7));
 #endif /* !WISE_AOC_4 */
 #endif /* (PS4_SOC_FREQ > 120000000) */
 
-    RSI_CLK_SetSocPllFreq(M4CLK, PS4_SOC_FREQ, SOC_PLL_REF_FREQUENCY);
+  RSI_CLK_SetSocPllFreq(M4CLK, PS4_SOC_FREQ, SOC_PLL_REF_FREQUENCY);
 
-    RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
+  RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
 
 #ifdef SWITCH_QSPI_TO_SOC_PLL
-    /* program intf pll to 160Mhz */
-    SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
-    status                                  = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
-    if (status != RSI_OK)
-    {
-        SILABS_LOG("Failed to Config Interface PLL Clock, status:%d", status);
-    }
-    else
-    {
-        SILABS_LOG("Configured Interface PLL Clock to %d", INTF_PLL_CLK);
-    }
+  /* program intf pll to 160Mhz */
+  SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
+  status = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
+  if (status != RSI_OK) {
+    SILABS_LOG("Failed to Config Interface PLL Clock, status:%d", status);
+  } else {
+    SILABS_LOG("Configured Interface PLL Clock to %d", INTF_PLL_CLK);
+  }
 
-    RSI_CLK_QspiClkConfig(M4CLK, QSPI_INTFPLLCLK, 0, 0, 1);
+  RSI_CLK_QspiClkConfig(M4CLK, QSPI_INTFPLLCLK, 0, 0, 1);
 #endif /* SWITCH_QSPI_TO_SOC_PLL */
 
-    return 0;
+  return 0;
 }
 
 /*==============================================*/
@@ -112,67 +110,65 @@ int soc_pll_config(void)
  * This function initializes the platform
  *
  */
-void RSI_Wakeupsw_config(void)
-{
-    /*Enable the REN*/
-    RSI_NPSSGPIO_InputBufferEn(NPSS_GPIO_2, 1);
+void RSI_Wakeupsw_config(void) {
+  /*Enable the REN*/
+  RSI_NPSSGPIO_InputBufferEn(NPSS_GPIO_2, 1);
 
-    /*Configure the NPSS GPIO mode to wake up  */
-    RSI_NPSSGPIO_SetPinMux(NPSS_GPIO_2, NPSSGPIO_PIN_MUX_MODE2);
+  /*Configure the NPSS GPIO mode to wake up  */
+  RSI_NPSSGPIO_SetPinMux(NPSS_GPIO_2, NPSSGPIO_PIN_MUX_MODE2);
 
-    /*Configure the NPSS GPIO direction to input */
-    RSI_NPSSGPIO_SetDir(NPSS_GPIO_2, NPSS_GPIO_DIR_OUTPUT);
+  /*Configure the NPSS GPIO direction to input */
+  RSI_NPSSGPIO_SetDir(NPSS_GPIO_2, NPSS_GPIO_DIR_OUTPUT);
 
-    /* Enables fall edge interrupt detection for UULP_VBAT_GPIO_0 */
-    RSI_NPSSGPIO_SetIntFallEdgeEnable(NPSS_GPIO_2_INTR);
+  /* Enables fall edge interrupt detection for UULP_VBAT_GPIO_0 */
+  RSI_NPSSGPIO_SetIntFallEdgeEnable(NPSS_GPIO_2_INTR);
 
-    /* Un mask the NPSS GPIO interrupt*/
-    RSI_NPSSGPIO_IntrUnMask(NPSS_GPIO_2_INTR);
+  /* Un mask the NPSS GPIO interrupt*/
+  RSI_NPSSGPIO_IntrUnMask(NPSS_GPIO_2_INTR);
 
-    /*Select wake up sources */
-    RSI_PS_SetWkpSources(GPIO_BASED_WAKEUP);
+  /*Select wake up sources */
+  RSI_PS_SetWkpSources(GPIO_BASED_WAKEUP);
 
-    /* clear NPSS GPIO interrupt*/
-    RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
+  /* clear NPSS GPIO interrupt*/
+  RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
 
-    /*Enable the NPSS GPIO interrupt slot*/
-    NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
+  /*Enable the NPSS GPIO interrupt slot*/
+  NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
 
-    NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
+  NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 }
 
-void RSI_Wakeupsw_config_gpio0(void)
-{
-    /*Configure the NPSS GPIO mode to wake up  */
-    RSI_NPSSGPIO_SetPinMux(NPSS_GPIO_0, NPSSGPIO_PIN_MUX_MODE2);
+void RSI_Wakeupsw_config_gpio0(void) {
+  /*Configure the NPSS GPIO mode to wake up  */
+  RSI_NPSSGPIO_SetPinMux(NPSS_GPIO_0, NPSSGPIO_PIN_MUX_MODE2);
 
-    /*Configure the NPSS GPIO direction to input */
-    RSI_NPSSGPIO_SetDir(NPSS_GPIO_0, NPSS_GPIO_DIR_INPUT);
+  /*Configure the NPSS GPIO direction to input */
+  RSI_NPSSGPIO_SetDir(NPSS_GPIO_0, NPSS_GPIO_DIR_INPUT);
 
-    /*Configure the NPSS GPIO interrupt polarity */
-    RSI_NPSSGPIO_SetPolarity(NPSS_GPIO_0, NPSS_GPIO_INTR_HIGH);
+  /*Configure the NPSS GPIO interrupt polarity */
+  RSI_NPSSGPIO_SetPolarity(NPSS_GPIO_0, NPSS_GPIO_INTR_HIGH);
 
-    /*Enable the REN*/
-    RSI_NPSSGPIO_InputBufferEn(NPSS_GPIO_0, 1);
+  /*Enable the REN*/
+  RSI_NPSSGPIO_InputBufferEn(NPSS_GPIO_0, 1);
 
-    /* Set the GPIO to wake from deep sleep */
-    RSI_NPSSGPIO_SetWkpGpio(NPSS_GPIO_0_INTR);
+  /* Set the GPIO to wake from deep sleep */
+  RSI_NPSSGPIO_SetWkpGpio(NPSS_GPIO_0_INTR);
 
-    /* Enables fall edge interrupt detection for UULP_VBAT_GPIO_0 */
-    RSI_NPSSGPIO_SetIntFallEdgeEnable(NPSS_GPIO_0_INTR);
+  /* Enables fall edge interrupt detection for UULP_VBAT_GPIO_0 */
+  RSI_NPSSGPIO_SetIntFallEdgeEnable(NPSS_GPIO_0_INTR);
 
-    /* Un mask the NPSS GPIO interrupt*/
-    RSI_NPSSGPIO_IntrUnMask(NPSS_GPIO_0_INTR);
+  /* Un mask the NPSS GPIO interrupt*/
+  RSI_NPSSGPIO_IntrUnMask(NPSS_GPIO_0_INTR);
 
-    /*Select wake up sources */
-    RSI_PS_SetWkpSources(GPIO_BASED_WAKEUP);
+  /*Select wake up sources */
+  RSI_PS_SetWkpSources(GPIO_BASED_WAKEUP);
 
-    /* clear NPSS GPIO interrupt*/
-    RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_0_INTR);
+  /* clear NPSS GPIO interrupt*/
+  RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_0_INTR);
 
-    // 21 being the NPSS_TO_MCU_GPIO_INTR_IRQn
-    NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
-    NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
+  // 21 being the NPSS_TO_MCU_GPIO_INTR_IRQn
+  NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
+  NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 }
 
 /*==============================================*/
@@ -186,22 +182,21 @@ void RSI_Wakeupsw_config_gpio0(void)
  * This function initializes the platform
  *
  */
-void rsi_hal_board_init(void)
-{
-    SystemCoreClockUpdate();
+void rsi_hal_board_init(void) {
+  SystemCoreClockUpdate();
 
-    // initialize the LED pins
-    RSI_Board_Init();
+  // initialize the LED pins
+  RSI_Board_Init();
 
-    /* configure clock for SiWx917 SoC */
-    soc_pll_config();
+  /* configure clock for SiWx917 SoC */
+  soc_pll_config();
 
 #ifdef COMMON_FLASH_EN
-    /* Before TA going to power save mode ,set m4ss_ref_clk_mux_ctrl ,tass_ref_clk_mux_ctrl,
-    AON domain power supply controls form TA to M4 */
-    RSI_Set_Cntrls_To_M4();
+  /* Before TA going to power save mode ,set m4ss_ref_clk_mux_ctrl
+  ,tass_ref_clk_mux_ctrl, AON domain power supply controls form TA to M4 */
+  RSI_Set_Cntrls_To_M4();
 #endif
 #ifdef DEBUG_UART
-    DEBUGINIT();
+  DEBUGINIT();
 #endif
 }

@@ -40,8 +40,8 @@ static volatile uint32_t _dwTickCount; // systick cout variable
 
 /*===================================================*/
 /**
- * @fn           int32_t rsi_timer_start(uint8_t timer_no, uint8_t mode,uint8_t type,uint32_t duration,void (*
- * rsi_timer_expiry_handler)())
+ * @fn           int32_t rsi_timer_start(uint8_t timer_no, uint8_t mode,uint8_t
+ * type,uint32_t duration,void (* rsi_timer_expiry_handler)())
  * @brief        Starts and configures timer
  * @param[in]    timer_node, timer node to be configured.
  * @param[in]    mode , mode of the timer
@@ -51,24 +51,27 @@ static volatile uint32_t _dwTickCount; // systick cout variable
  *               0 - single shot type
  *               1 - periodic type
  * @param[in]    duration, timer duration
- * @param[in]    rsi_timer_expiry_handler() ,call back function to handle timer interrupt
+ * @param[in]    rsi_timer_expiry_handler() ,call back function to handle timer
+ * interrupt
  * @param[out]   none
  * @return       0 - success
  *               !0 - Failure
- * @description  This HAL API should contain the code to initialize the timer and start the timer
+ * @description  This HAL API should contain the code to initialize the timer
+ * and start the timer
  *
  */
 
-int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t duration, void (*rsi_timer_expiry_handler)(void))
-{
+int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type,
+                        uint32_t duration,
+                        void (*rsi_timer_expiry_handler)(void)) {
 
-    //! Initialise the timer
+  //! Initialise the timer
 
-    //! register the call back
+  //! register the call back
 
-    //! Start timer
+  //! Start timer
 
-    return 0;
+  return 0;
 }
 
 /*===================================================*/
@@ -83,12 +86,11 @@ int32_t rsi_timer_start(uint8_t timer_node, uint8_t mode, uint8_t type, uint32_t
  *
  */
 
-int32_t rsi_timer_stop(uint8_t timer_node)
-{
+int32_t rsi_timer_stop(uint8_t timer_node) {
 
-    //! Stop the timer
+  //! Stop the timer
 
-    return 0;
+  return 0;
 }
 
 /*===================================================*/
@@ -102,14 +104,13 @@ int32_t rsi_timer_stop(uint8_t timer_node)
  *
  */
 
-uint32_t rsi_timer_read(uint8_t timer_node)
-{
+uint32_t rsi_timer_read(uint8_t timer_node) {
 
-    volatile uint32_t timer_val = 0;
+  volatile uint32_t timer_val = 0;
 
-    //! read the timer and return timer value
+  //! read the timer and return timer value
 
-    return timer_val;
+  return timer_val;
 }
 
 /*===================================================*/
@@ -119,15 +120,15 @@ uint32_t rsi_timer_read(uint8_t timer_node)
  * @param[in]    delay_us, timer delay in micro seconds
  * @param[out]   none
  * @return       none
- * @description  This HAL API should contain the code to create delay in micro seconds
+ * @description  This HAL API should contain the code to create delay in micro
+ * seconds
  *
  */
-void rsi_delay_us(uint32_t delay_us)
-{
+void rsi_delay_us(uint32_t delay_us) {
 
-    //! call the API for delay in micro seconds
+  //! call the API for delay in micro seconds
 
-    return;
+  return;
 }
 
 /*===================================================*/
@@ -137,15 +138,15 @@ void rsi_delay_us(uint32_t delay_us)
  * @param[in]    delay, timer delay in micro seconds
  * @param[out]   none
  * @return       none
- * @description  This HAL API should contain the code to create delay in micro seconds
+ * @description  This HAL API should contain the code to create delay in micro
+ * seconds
  *
  */
-void rsi_delay_ms1(uint32_t delay_ms)
-{
+void rsi_delay_ms1(uint32_t delay_ms) {
 
-    //! call the API for delay in milli seconds
+  //! call the API for delay in milli seconds
 
-    return;
+  return;
 }
 
 /*===================================================*/
@@ -159,14 +160,12 @@ void rsi_delay_ms1(uint32_t delay_ms)
  *
  */
 
-void SysTick_Handler(void)
-{
-    _dwTickCount++;
+void SysTick_Handler(void) {
+  _dwTickCount++;
 #ifdef RSI_WITH_OS
-    if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED)
-    {
-        xPortSysTickHandler();
-    }
+  if (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+    xPortSysTickHandler();
+  }
 #endif
 }
 /*===================================================*/
@@ -180,9 +179,8 @@ void SysTick_Handler(void)
  *
  */
 
-uint32_t GetTickCount(void)
-{
-    return _dwTickCount; // gets the tick count from systic ISR
+uint32_t GetTickCount(void) {
+  return _dwTickCount; // gets the tick count from systic ISR
 }
 
 /*===================================================*/
@@ -192,18 +190,17 @@ uint32_t GetTickCount(void)
  * @param[in]    delay, timer delay in milli seconds
  * @param[out]   none
  * @return       none
- * @description  This HAL API should contain the code to create delay in milli seconds
+ * @description  This HAL API should contain the code to create delay in milli
+ * seconds
  *
  */
 
-void rsi_delay_ms(uint32_t delay_ms)
-{
-    uint64_t waitTime = rsi_hal_gettickcount() + delay_ms;
+void rsi_delay_ms(uint32_t delay_ms) {
+  uint64_t waitTime = rsi_hal_gettickcount() + delay_ms;
 
-    while (waitTime > rsi_hal_gettickcount())
-    {
-        // we busy wait
-    }
+  while (waitTime > rsi_hal_gettickcount()) {
+    // we busy wait
+  }
 }
 
 /*===================================================*/
@@ -211,11 +208,9 @@ void rsi_delay_ms(uint32_t delay_ms)
  * @fn           uint32_t rsi_hal_gettickcount()
  * @brief        provides a tick value in milliseconds
  * @return       tick value
- * @description  This HAL API should contain the code to read the timer tick count value in milliseconds
+ * @description  This HAL API should contain the code to read the timer tick
+ * count value in milliseconds
  *
  */
 
-uint32_t rsi_hal_gettickcount(void)
-{
-    return GetTickCount();
-}
+uint32_t rsi_hal_gettickcount(void) { return GetTickCount(); }

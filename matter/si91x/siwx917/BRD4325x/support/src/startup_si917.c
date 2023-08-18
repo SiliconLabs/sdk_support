@@ -30,7 +30,9 @@
 
 #endif
 
-#define EXT_IRQ_COUNT 51 /**< Number of External (NVIC) interrupts */ // senthil copied from "efr32mg12p432f1024gl125.h"
+#define EXT_IRQ_COUNT                                                          \
+  51 /**< Number of External (NVIC) interrupts */ // senthil copied from
+                                                  // "efr32mg12p432f1024gl125.h"
 #define TOTAL_INTERRUPTS (16 + EXT_IRQ_COUNT)
 
 #ifdef BOOTLOADER_ENABLE
@@ -227,91 +229,93 @@ extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
 const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #elif defined(__GNUC__)
 extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
-// const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __attribute__((aligned(512))) __VECTOR_TABLE_ATTRIBUTE = {
-const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __attribute__((aligned(512))) __VECTOR_TABLE_ATTRIBUTE = {
+// const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS]
+// __attribute__((aligned(512))) __VECTOR_TABLE_ATTRIBUTE = {
+const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS]
+    __attribute__((aligned(512))) __VECTOR_TABLE_ATTRIBUTE = {
 #else
 extern const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS];
 const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #endif
     /* Cortex-M Exception Handlers */
-    { .topOfStack = &__INITIAL_SP }, /* Initial Stack Pointer */
-    { Reset_Handler },               /* Reset Handler */
-    { NMI_Handler },                 /* NMI Handler */
-    { HardFault_Handler },           /* Hard Fault Handler */
-    { MemManage_Handler },           /* MPU Fault Handler */
-    { BusFault_Handler },            /* Bus Fault Handler */
-    { UsageFault_Handler },          /* Usage Fault Handler */
-    { Default_Handler },             /* Reserved */
-    { Default_Handler },             /* Reserved */
-    { Default_Handler },             /* Reserved */
+    {.topOfStack = &__INITIAL_SP}, /* Initial Stack Pointer */
+    {Reset_Handler},               /* Reset Handler */
+    {NMI_Handler},                 /* NMI Handler */
+    {HardFault_Handler},           /* Hard Fault Handler */
+    {MemManage_Handler},           /* MPU Fault Handler */
+    {BusFault_Handler},            /* Bus Fault Handler */
+    {UsageFault_Handler},          /* Usage Fault Handler */
+    {Default_Handler},             /* Reserved */
+    {Default_Handler},             /* Reserved */
+    {Default_Handler},             /* Reserved */
 #ifdef BOOTLOADER_ENABLE
-    { (VECTOR_TABLE_Type) &mainStageTable },
+    {(VECTOR_TABLE_Type)&mainStageTable},
 #else
-    { Default_Handler },   /* Reserved */
+        {Default_Handler},   /* Reserved */
 #endif
-    { SVC_Handler },      /* SVCall Handler */
-    { DebugMon_Handler }, /* Debug Monitor Handler */
+    {SVC_Handler},      /* SVCall Handler */
+    {DebugMon_Handler}, /* Debug Monitor Handler */
 #ifdef SL_APP_PROPERTIES
-    { (VECTOR_TABLE_Type) &sl_app_properties }, /* Application properties*/
+    {(VECTOR_TABLE_Type)&sl_app_properties}, /* Application properties*/
 #else
-    { sl_app_properties }, /* Application properties*/
+        {sl_app_properties}, /* Application properties*/
 #endif
-    { PendSV_Handler },  /* PendSV Handler */
-    { SysTick_Handler }, /* SysTick Handler */
+    {PendSV_Handler},  /* PendSV Handler */
+    {SysTick_Handler}, /* SysTick Handler */
 
     /* External interrupts */
 
-    { EMU_IRQHandler },       /* 0 */
-    { FRC_PRI_IRQHandler },   /* 1 */
-    { WDOG0_IRQHandler },     /* 2 */
-    { WDOG1_IRQHandler },     /* 3 */
-    { FRC_IRQHandler },       /* 4 */
-    { MODEM_IRQHandler },     /* 5 */
-    { RAC_SEQ_IRQHandler },   /* 6 */
-    { RAC_RSM_IRQHandler },   /* 7 */
-    { BUFC_IRQHandler },      /* 8 */
-    { LDMA_IRQHandler },      /* 9 */
-    { GPIO_EVEN_IRQHandler }, /* 10 */
-    { TIMER0_IRQHandler },    /* 11 */
-    { USART0_RX_IRQHandler }, /* 12 */
-    { USART0_TX_IRQHandler }, /* 13 */
-    { ACMP0_IRQHandler },     /* 14 */
-    { ADC0_IRQHandler },      /* 15 */
-    { IDAC0_IRQHandler },     /* 16 */
-    { I2C0_IRQHandler },      /* 17 */
-    { GPIO_ODD_IRQHandler },  /* 18 */
-    { TIMER1_IRQHandler },    /* 19 */
-    { USART1_RX_IRQHandler }, /* 20 */
-    { USART1_TX_IRQHandler }, /* 21 */
-    { LEUART0_IRQHandler },   /* 22 */
-    { PCNT0_IRQHandler },     /* 23 */
-    { CMU_IRQHandler },       /* 24 */
-    { MSC_IRQHandler },       /* 25 */
-    { CRYPTO0_IRQHandler },   /* 26 */
-    { LETIMER0_IRQHandler },  /* 27 */
-    { AGC_IRQHandler },       /* 28 */
-    { PROTIMER_IRQHandler },  /* 29 */
-    { RTCC_IRQHandler },      /* 30 */
-    { SYNTH_IRQHandler },     /* 31 */
-    { CRYOTIMER_IRQHandler }, /* 32 */
-    { RFSENSE_IRQHandler },   /* 33 */
-    { FPUEH_IRQHandler },     /* 34 */
-    { SMU_IRQHandler },       /* 35 */
-    { WTIMER0_IRQHandler },   /* 36 */
-    { WTIMER1_IRQHandler },   /* 37 */
-    { PCNT1_IRQHandler },     /* 38 */
-    { PCNT2_IRQHandler },     /* 39 */
-    { USART2_RX_IRQHandler }, /* 40 */
-    { USART2_TX_IRQHandler }, /* 41 */
-    { I2C1_IRQHandler },      /* 42 */
-    { USART3_RX_IRQHandler }, /* 43 */
-    { USART3_TX_IRQHandler }, /* 44 */
-    { VDAC0_IRQHandler },     /* 45 */
-    { CSEN_IRQHandler },      /* 46 */
-    { LESENSE_IRQHandler },   /* 47 */
-    { CRYPTO1_IRQHandler },   /* 48 */
-    { TRNG0_IRQHandler },     /* 49 */
-    { Default_Handler },      /* 50 - Reserved */
+    {EMU_IRQHandler},       /* 0 */
+    {FRC_PRI_IRQHandler},   /* 1 */
+    {WDOG0_IRQHandler},     /* 2 */
+    {WDOG1_IRQHandler},     /* 3 */
+    {FRC_IRQHandler},       /* 4 */
+    {MODEM_IRQHandler},     /* 5 */
+    {RAC_SEQ_IRQHandler},   /* 6 */
+    {RAC_RSM_IRQHandler},   /* 7 */
+    {BUFC_IRQHandler},      /* 8 */
+    {LDMA_IRQHandler},      /* 9 */
+    {GPIO_EVEN_IRQHandler}, /* 10 */
+    {TIMER0_IRQHandler},    /* 11 */
+    {USART0_RX_IRQHandler}, /* 12 */
+    {USART0_TX_IRQHandler}, /* 13 */
+    {ACMP0_IRQHandler},     /* 14 */
+    {ADC0_IRQHandler},      /* 15 */
+    {IDAC0_IRQHandler},     /* 16 */
+    {I2C0_IRQHandler},      /* 17 */
+    {GPIO_ODD_IRQHandler},  /* 18 */
+    {TIMER1_IRQHandler},    /* 19 */
+    {USART1_RX_IRQHandler}, /* 20 */
+    {USART1_TX_IRQHandler}, /* 21 */
+    {LEUART0_IRQHandler},   /* 22 */
+    {PCNT0_IRQHandler},     /* 23 */
+    {CMU_IRQHandler},       /* 24 */
+    {MSC_IRQHandler},       /* 25 */
+    {CRYPTO0_IRQHandler},   /* 26 */
+    {LETIMER0_IRQHandler},  /* 27 */
+    {AGC_IRQHandler},       /* 28 */
+    {PROTIMER_IRQHandler},  /* 29 */
+    {RTCC_IRQHandler},      /* 30 */
+    {SYNTH_IRQHandler},     /* 31 */
+    {CRYOTIMER_IRQHandler}, /* 32 */
+    {RFSENSE_IRQHandler},   /* 33 */
+    {FPUEH_IRQHandler},     /* 34 */
+    {SMU_IRQHandler},       /* 35 */
+    {WTIMER0_IRQHandler},   /* 36 */
+    {WTIMER1_IRQHandler},   /* 37 */
+    {PCNT1_IRQHandler},     /* 38 */
+    {PCNT2_IRQHandler},     /* 39 */
+    {USART2_RX_IRQHandler}, /* 40 */
+    {USART2_TX_IRQHandler}, /* 41 */
+    {I2C1_IRQHandler},      /* 42 */
+    {USART3_RX_IRQHandler}, /* 43 */
+    {USART3_TX_IRQHandler}, /* 44 */
+    {VDAC0_IRQHandler},     /* 45 */
+    {CSEN_IRQHandler},      /* 46 */
+    {LESENSE_IRQHandler},   /* 47 */
+    {CRYPTO1_IRQHandler},   /* 48 */
+    {TRNG0_IRQHandler},     /* 49 */
+    {Default_Handler},      /* 50 - Reserved */
 };
 
 #if defined(__GNUC__)
@@ -319,32 +323,28 @@ const tVectorEntry __VECTOR_TABLE[TOTAL_INTERRUPTS] __VECTOR_TABLE_ATTRIBUTE = {
 #endif
 
 //#if defined (__START) && defined (__GNUC__) //senthil_ccp
-void Copy_Table()
-{
-    uint32_t *pSrc, *pDest;
-    extern uint32_t __etext;
-    extern uint32_t __data_start__;
-    extern uint32_t __data_end__;
-    pSrc  = &__etext;
-    pDest = &__data_start__;
+void Copy_Table() {
+  uint32_t *pSrc, *pDest;
+  extern uint32_t __etext;
+  extern uint32_t __data_start__;
+  extern uint32_t __data_end__;
+  pSrc = &__etext;
+  pDest = &__data_start__;
 
-    for (; pDest < &__data_end__;)
-    {
-        *pDest++ = *pSrc++;
-    }
+  for (; pDest < &__data_end__;) {
+    *pDest++ = *pSrc++;
+  }
 }
 
-void Zero_Table()
-{
-    uint32_t * pDest;
-    extern uint32_t __bss_start__;
-    extern uint32_t __bss_end__;
-    pDest = &__bss_start__;
+void Zero_Table() {
+  uint32_t *pDest;
+  extern uint32_t __bss_start__;
+  extern uint32_t __bss_end__;
+  pDest = &__bss_start__;
 
-    for (; pDest < &__bss_end__;)
-    {
-        *pDest++ = 0UL;
-    }
+  for (; pDest < &__bss_end__;) {
+    *pDest++ = 0UL;
+  }
 }
 //#endif /* __START */
 
@@ -358,27 +358,26 @@ void Zero_Table()
 }
 #endif
 
-void Reset_Handler(void)
-{
+void Reset_Handler(void) {
 #ifndef __NO_SYSTEM_INIT
-    SystemInit(); /* CMSIS System Initialization */
+  SystemInit(); /* CMSIS System Initialization */
 #endif
 
 #ifdef BOOTLOADER_ENABLE
-    SystemInit2();
+  SystemInit2();
 #endif /* BOOTLOADER_ENABLE */
 
 #if defined(__GNUC__) && defined(__START)
-    Copy_Table();
-    Zero_Table();
-    __START();
+  Copy_Table();
+  Zero_Table();
+  __START();
 #else
 #if 0 // senthil_ccp
   __PROGRAM_START();               /* Enter PreMain (C library entry point) */
 #else
-    Copy_Table();
-    Zero_Table();
-    _start();
+  Copy_Table();
+  Zero_Table();
+  _start();
 #endif
 #endif /* __GNUC__ */
 }
@@ -391,11 +390,9 @@ void Reset_Handler(void)
 /*----------------------------------------------------------------------------
  * Default Handler for Exceptions / Interrupts
  *----------------------------------------------------------------------------*/
-void Default_Handler(void)
-{
-    while (true)
-    {
-    }
+void Default_Handler(void) {
+  while (true) {
+  }
 }
 
 #if defined(__ARMCC_VERSION) && (__ARMCC_VERSION >= 6010050)
