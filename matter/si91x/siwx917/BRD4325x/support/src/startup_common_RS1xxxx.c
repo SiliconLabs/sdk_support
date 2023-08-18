@@ -71,7 +71,7 @@ void WEAK IRQ017_Handler(void); /*!<  ULP Processor Interrupt   17     */
 void WEAK IRQ018_Handler(void); /*!<  ULP Processor Interrupt   18     */
 void WEAK IRQ019_Handler(void); /*!<  ULP Processor Interrupt   19     */
 void WEAK IRQ020_Handler(void);
-    /*!<  Sleep Sensor Interrupts   0      */ /*WDT*/
+/*!<  Sleep Sensor Interrupts   0      */ /*WDT*/
 void WEAK IRQ021_Handler(void); /*!<  Sleep Sensor Interrupts   1      */
 void WEAK IRQ022_Handler(void); /*!<  Sleep Sensor Interrupts   2      */
 void WEAK IRQ023_Handler(void); /*!<  Sleep Sensor Interrupts   3      */
@@ -80,9 +80,9 @@ void WEAK IRQ025_Handler(void); /*!<  Sleep Sensor Interrupts   5      */
 void WEAK IRQ026_Handler(void); /*!<  Sleep Sensor Interrupts   6      */
 void WEAK IRQ027_Handler(void); /*!<  Sleep Sensor Interrupts   7      */
 void WEAK IRQ028_Handler(void);
-    /*!<  Sleep Sensor Interrupts   8      */ /*Alarm*/
+/*!<  Sleep Sensor Interrupts   8      */ /*Alarm*/
 void WEAK IRQ029_Handler(void);
-    /*!<  Sleep Sensor Interrupts   9      */ /*Msec and sec interrupt */
+/*!<  Sleep Sensor Interrupts   9      */ /*Msec and sec interrupt */
 void WEAK IRQ030_Handler(void);  /*!<  Reserved                         */
 void WEAK IRQ031_Handler(void);  /*!<  M4SS DMA interrupt               */
 void WEAK IRQ032_Handler(void);  /*!<  Reserved                         */
