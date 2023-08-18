@@ -58,7 +58,7 @@
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED> Enable the ECDHE-ECDSA based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the ECDHE-ECDSA based ciphersuite modes in SSL / TLS.
-#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED  1
+#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED 0
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED> Enable the ECDHE-RSA based ciphersuite modes in SSL / TLS.
 // <i> Default: 0

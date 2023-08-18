@@ -24,6 +24,7 @@
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
 #include "sl_simple_button_instances.h"
+#include "sl_simple_led_instances.h"
 #include "sl_uartdrv_instances.h"
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
@@ -64,10 +65,10 @@ void sl_driver_init(void)
   sl_i2cspm_init_instances();
 #endif
   sl_simple_button_init_instances();
+  sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
-  #endif
-
+#endif
 }
 
 void sl_service_init(void)
@@ -92,4 +93,3 @@ void sl_stack_init(void)
 void sl_internal_app_init(void)
 {
 }
-

@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Board Control
+ * @brief Simple Led Driver Configuration
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,25 +28,30 @@
  *
  ******************************************************************************/
 
-#ifndef SL_BOARD_CONTROL_CONFIG_H
-#define SL_BOARD_CONTROL_CONFIG_H
+#ifndef SL_SIMPLE_LED_LED1_CONFIG_H
+#define SL_SIMPLE_LED_LED1_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
-// <q SL_BOARD_ENABLE_VCOM> Enable Virtual COM UART
-// <i> Default: 0
-#define SL_BOARD_ENABLE_VCOM                    0
+// <h> Simple LED configuration
+// <o SL_SIMPLE_LED_LED1_POLARITY>
+// <SL_SIMPLE_LED_POLARITY_ACTIVE_LOW=> Active low
+// <SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH=> Active high
+// <i> Default: SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
+#define SL_SIMPLE_LED_LED1_POLARITY SL_SIMPLE_LED_POLARITY_ACTIVE_HIGH
+// </h> end led configuration
 
 // <<< end of configuration section >>>
 
 // <<< sl:start pin_tool >>>
 
-// <gpio> SL_BOARD_ENABLE_VCOM
-// $[GPIO_SL_BOARD_ENABLE_VCOM]
-#define SL_BOARD_ENABLE_VCOM_PORT               gpioPortC
-#define SL_BOARD_ENABLE_VCOM_PIN                1
-// [GPIO_SL_BOARD_ENABLE_VCOM]$
+// <gpio> SL_SIMPLE_LED_LED1
+// $[GPIO_SL_SIMPLE_LED_LED1]
+#define SL_SIMPLE_LED_LED1_PORT                  gpioPortB
+#define SL_SIMPLE_LED_LED1_PIN                   4
+
+// [GPIO_SL_SIMPLE_LED_LED1]$
 
 // <<< sl:end pin_tool >>>
 
-#endif // SL_BOARD_CONTROL_CONFIG_H
+#endif // SL_SIMPLE_LED_LED1_CONFIG_H

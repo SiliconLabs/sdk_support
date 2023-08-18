@@ -50,7 +50,7 @@
 
 // <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-511>
 // <i> Default: 360
-#define SL_DEVICE_INIT_HFXO_CTUNE          331
+#define SL_DEVICE_INIT_HFXO_CTUNE          327
 
 // <h> Advanced Configurations
 // <o SL_DEVICE_INIT_HFXO_AUTOSTART> Auto-start HFXO. This feature is incompatible with Power Manager and can only be enabled in applications that do not use Power Manager or a radio protocol stack. - DEPRECATED

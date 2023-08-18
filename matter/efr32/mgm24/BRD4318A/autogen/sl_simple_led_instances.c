@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Board Control
+ * @brief LED Driver Instances
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,25 +28,47 @@
  *
  ******************************************************************************/
 
-#ifndef SL_BOARD_CONTROL_CONFIG_H
-#define SL_BOARD_CONTROL_CONFIG_H
+#include "sl_simple_led.h"
+#include "em_gpio.h"
+#include "sl_simple_led_led0_config.h"
+#include "sl_simple_led_led1_config.h"
 
-// <<< Use Configuration Wizard in Context Menu >>>
+sl_simple_led_context_t simple_led0_context = {
+  .port = SL_SIMPLE_LED_LED0_PORT,
+  .pin = SL_SIMPLE_LED_LED0_PIN,
+  .polarity = SL_SIMPLE_LED_LED0_POLARITY,
+};
 
-// <q SL_BOARD_ENABLE_VCOM> Enable Virtual COM UART
-// <i> Default: 0
-#define SL_BOARD_ENABLE_VCOM                    0
+const sl_led_t sl_led_led0 = {
+  .context = &simple_led0_context,
+  .init = sl_simple_led_init,
+  .turn_on = sl_simple_led_turn_on,
+  .turn_off = sl_simple_led_turn_off,
+  .toggle = sl_simple_led_toggle,
+  .get_state = sl_simple_led_get_state,
+};
+sl_simple_led_context_t simple_led1_context = {
+  .port = SL_SIMPLE_LED_LED1_PORT,
+  .pin = SL_SIMPLE_LED_LED1_PIN,
+  .polarity = SL_SIMPLE_LED_LED1_POLARITY,
+};
 
-// <<< end of configuration section >>>
+const sl_led_t sl_led_led1 = {
+  .context = &simple_led1_context,
+  .init = sl_simple_led_init,
+  .turn_on = sl_simple_led_turn_on,
+  .turn_off = sl_simple_led_turn_off,
+  .toggle = sl_simple_led_toggle,
+  .get_state = sl_simple_led_get_state,
+};
 
-// <<< sl:start pin_tool >>>
+const sl_led_t *sl_simple_led_array[] = {
+  &sl_led_led0,
+  &sl_led_led1
+};
 
-// <gpio> SL_BOARD_ENABLE_VCOM
-// $[GPIO_SL_BOARD_ENABLE_VCOM]
-#define SL_BOARD_ENABLE_VCOM_PORT               gpioPortC
-#define SL_BOARD_ENABLE_VCOM_PIN                1
-// [GPIO_SL_BOARD_ENABLE_VCOM]$
-
-// <<< sl:end pin_tool >>>
-
-#endif // SL_BOARD_CONTROL_CONFIG_H
+void sl_simple_led_init_instances(void)
+{
+  sl_led_init(&sl_led_led0);
+  sl_led_init(&sl_led_led1);
+}

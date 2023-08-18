@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Board Control
+ * @brief LED Driver Instances
  *******************************************************************************
  * # License
- * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,25 +28,19 @@
  *
  ******************************************************************************/
 
-#ifndef SL_BOARD_CONTROL_CONFIG_H
-#define SL_BOARD_CONTROL_CONFIG_H
+#ifndef SL_SIMPLE_LED_INSTANCES_H
+#define SL_SIMPLE_LED_INSTANCES_H
 
-// <<< Use Configuration Wizard in Context Menu >>>
+#include "sl_simple_led.h"
 
-// <q SL_BOARD_ENABLE_VCOM> Enable Virtual COM UART
-// <i> Default: 0
-#define SL_BOARD_ENABLE_VCOM                    0
+extern const sl_led_t sl_led_led0;
+extern const sl_led_t sl_led_led1;
 
-// <<< end of configuration section >>>
+extern const sl_led_t *sl_simple_led_array[];
 
-// <<< sl:start pin_tool >>>
+#define SL_SIMPLE_LED_COUNT 2
+#define SL_SIMPLE_LED_INSTANCE(n) (sl_simple_led_array[n])
 
-// <gpio> SL_BOARD_ENABLE_VCOM
-// $[GPIO_SL_BOARD_ENABLE_VCOM]
-#define SL_BOARD_ENABLE_VCOM_PORT               gpioPortC
-#define SL_BOARD_ENABLE_VCOM_PIN                1
-// [GPIO_SL_BOARD_ENABLE_VCOM]$
+void sl_simple_led_init_instances(void);
 
-// <<< sl:end pin_tool >>>
-
-#endif // SL_BOARD_CONTROL_CONFIG_H
+#endif // SL_SIMPLE_LED_INIT_H
