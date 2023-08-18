@@ -7,6 +7,7 @@
 #include "sl_device_init_lfxo.h"
 #include "sl_device_init_hfxo.h"
 #include "sl_device_init_clocks.h"
+#include "sl_device_init_emu.h"
 #include "pa_conversions_efr32.h"
 #include "sl_rail_util_pti.h"
 #include "sl_board_control.h"
@@ -93,4 +94,3 @@ void sl_stack_init(void)
 void sl_internal_app_init(void)
 {
 }
-
