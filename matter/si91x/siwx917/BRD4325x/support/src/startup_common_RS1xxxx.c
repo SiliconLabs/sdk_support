@@ -14,10 +14,12 @@
  *            priority is Privileged, and the Stack is set to Main.
  *******************************************************************************
  */
-#include "core_cm4.h"
-#include "rsi_ps_ram_func.h"
+// System headers
 #include "si91x_device.h"
 #include "system_si91x.h"
+// Processor specific headers
+#include "core_cm4.h"
+#include "rsi_ps_ram_func.h"
 /*----------Stack Symbols-----------------------------------------------*/
 extern uint32_t __StackTop;
 extern uint32_t __co_stackTop;
