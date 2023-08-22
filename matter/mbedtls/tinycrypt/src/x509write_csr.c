@@ -280,9 +280,9 @@ x509write_csr_der_internal(mbedtls_x509write_csr *ctx, unsigned char *buf,
    * and return MBEDTLS_ERR_ASN1_BUF_TOO_SMALL if needed.
    */
   c2 = buf + size;
-  MBEDTLS_ASN1_CHK_ADD(sig_and_oid_len,
-                       mbedtls_x509_write_sig(&c2, buf + len, sig_oid,
-                                              sig_oid_len, sig, sig_len));
+  MBEDTLS_ASN1_CHK_ADD(sig_and_oid_len, mbedtls_x509_write_sig(
+                                            &c2, buf + len, sig_oid,
+                                            sig_oid_len, sig, sig_len, pk_alg));
 
   /*
    * Compact the space between the CSR data and signature by moving the
