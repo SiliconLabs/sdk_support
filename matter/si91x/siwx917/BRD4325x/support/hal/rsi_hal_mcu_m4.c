@@ -67,8 +67,9 @@ void IRQ021_Handler(void) {
   RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_0_INTR);
   RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
   // if the btn is not pressed setting the state to 1
-  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_2)) {
+  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_2) && (!btn1)) {
     btn1 = 1;
+    sl_button_on_change(1, 0);
   }
   // geting the state of the gpio 2 pin and checking if the btn is already
   // pressed or not
