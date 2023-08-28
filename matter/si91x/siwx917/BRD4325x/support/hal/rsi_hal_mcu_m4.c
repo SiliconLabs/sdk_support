@@ -22,8 +22,21 @@
 #include "rsi_power_save.h"
 #endif
 
-uint8_t btn0 = 1;
-uint8_t btn1 = 1;
+#define BTN_RELEASED 0
+#define BTN_PRESSED 1
+
+#ifdef SI917_RADIO_BOARD_V2
+#define PIN_INT 7
+#ifndef M4_GPIO_PORT
+#define M4_GPIO_PORT 0
+#endif
+#ifndef M4_GPIO_PIN
+#define M4_GPIO_PIN (11U)
+#endif
+#endif // SI917_RADIO_BOARD_V2
+
+uint8_t gpio0 = 1;
+uint8_t gpio2 = 1;
 
 void sl_button_on_change(uint8_t btn, uint8_t btnAction);
 
@@ -59,6 +72,17 @@ void rsi_assertion(uint16_t assertion_val, const char *string) {
   }
 }
 
+#if SI917_RADIO_BOARD_V2
+void IRQ059_Handler(void) {
+  // TODO: Replace with rsi_delay once that is fixed
+  for (int i = 0; i < 10000; i++)
+    __asm__("nop;");
+
+  RSI_EGPIO_IntClr(EGPIO, PIN_INT, INTERRUPT_STATUS_CLR);
+  RSI_EGPIO_GetPin(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN) ? sl_button_on_change(1, BTN_RELEASED) :  sl_button_on_change(1, BTN_PRESSED);
+}
+#endif // SI917_RADIO_BOARD_V2
+
 void IRQ021_Handler(void) {
   // TODO: Replace with rsi_delay once that is fixed
   for (int i = 0; i < 10000; i++)
@@ -67,22 +91,30 @@ void IRQ021_Handler(void) {
   RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_0_INTR);
   RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
   // if the btn is not pressed setting the state to 1
-  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_2) && (!btn1)) {
-    btn1 = 1;
-    sl_button_on_change(1, 0);
+  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_2) && (!gpio2)) {
+    gpio2 = 1;
+#ifdef SI917_RADIO_BOARD_V2
+    sl_button_on_change(0, BTN_RELEASED);
+#else
+    sl_button_on_change(1, BTN_RELEASED);
+#endif //SI917_RADIO_BOARD_V2
   }
   // geting the state of the gpio 2 pin and checking if the btn is already
   // pressed or not
-  if (!RSI_NPSSGPIO_GetPin(NPSS_GPIO_2) && btn1) {
-    btn1 = 0;
-    sl_button_on_change(1, 1);
+  if (!RSI_NPSSGPIO_GetPin(NPSS_GPIO_2) && gpio2) {
+    gpio2 = 0;
+#ifdef SI917_RADIO_BOARD_V2
+    sl_button_on_change(0, BTN_PRESSED);
+#else
+    sl_button_on_change(1, BTN_PRESSED);
+#endif // SI917_RADIO_BOARD_V2
   }
-  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_0) && (!btn0)) {
-    btn0 = 1;
-    sl_button_on_change(0, 0);
+  if (RSI_NPSSGPIO_GetPin(NPSS_GPIO_0) && (!gpio0)) {
+    gpio0 = 1;
+    sl_button_on_change(0, BTN_RELEASED);
   }
-  if (!RSI_NPSSGPIO_GetPin(NPSS_GPIO_0) && btn0) {
-    btn0 = 0;
-    sl_button_on_change(0, 1);
+  if (!RSI_NPSSGPIO_GetPin(NPSS_GPIO_0) && gpio0) {
+    gpio0 = 0;
+    sl_button_on_change(0, BTN_PRESSED);
   }
 }

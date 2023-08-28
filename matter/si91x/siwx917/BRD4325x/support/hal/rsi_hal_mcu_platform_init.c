@@ -45,6 +45,16 @@
 #define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
 #define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
 
+
+/* for B0 2.0 board */
+#ifdef SI917_RADIO_BOARD_V2
+#include "rsi_rom_egpio.h"
+
+#define M4_GPIO_PORT 0
+#define M4_GPIO_PIN (11U)
+#define PININT_NVIC_NAME EGPIO_PIN_7_IRQn
+#define PIN_INT 7
+#endif
 /**
  * @fn           void soc_pll_config()
  * @brief        This function to configure clock for SiWx917 SoC (80MHz)
@@ -137,6 +147,43 @@ void RSI_Wakeupsw_config(void) {
 
   NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 }
+
+// For B0 2.0 board BTN1
+#ifdef SI917_RADIO_BOARD_V2
+void RSI_Wakeupsw_config_gpio11(void) {
+    uint8_t pad_sel = 1;
+
+    /*Enable clock for EGPIO module*/
+    RSI_CLK_PeripheralClkEnable(M4CLK, EGPIO_CLK, ENABLE_STATIC_CLK);
+
+    /*PAD selection*/
+    for (pad_sel = 1; pad_sel < 34; pad_sel++) {
+      if (pad_sel != 9) {
+        RSI_EGPIO_PadSelectionEnable(pad_sel);
+      }
+    }
+
+    RSI_EGPIO_SetDir(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN, 1);
+    /*REN enable */
+    RSI_EGPIO_PadReceiverEnable(M4_GPIO_PIN);
+
+    /*Configure default GPIO mode(0) */
+    RSI_EGPIO_SetPinMux(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN, EGPIO_PIN_MUX_MODE0);
+
+    /*Selects the pin interrupt for the GPIO*/
+    RSI_EGPIO_PinIntSel(EGPIO, PIN_INT, M4_GPIO_PORT, M4_GPIO_PIN);
+    RSI_EGPIO_SetIntRiseEdgeEnable(EGPIO, PIN_INT);
+    RSI_EGPIO_SetIntFallEdgeEnable(EGPIO, PIN_INT);
+
+    /*Unmask the  interrupt*/
+    RSI_EGPIO_IntUnMask(EGPIO, PIN_INT);
+
+    /*NVIC enable */
+    NVIC_EnableIRQ(PININT_NVIC_NAME);
+    NVIC_SetPriority(PININT_NVIC_NAME, 7);
+    RSI_EGPIO_IntUnMask(EGPIO, PIN_INT);
+}
+#endif // SI917_RADIO_BOARD_V2
 
 void RSI_Wakeupsw_config_gpio0(void) {
   /*Configure the NPSS GPIO mode to wake up  */
