@@ -79,7 +79,9 @@ void IRQ059_Handler(void) {
     __asm__("nop;");
 
   RSI_EGPIO_IntClr(EGPIO, PIN_INT, INTERRUPT_STATUS_CLR);
-  RSI_EGPIO_GetPin(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN) ? sl_button_on_change(1, BTN_RELEASED) :  sl_button_on_change(1, BTN_PRESSED);
+  RSI_EGPIO_GetPin(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN)
+      ? sl_button_on_change(1, BTN_RELEASED)
+      : sl_button_on_change(1, BTN_PRESSED);
 }
 #endif // SI917_RADIO_BOARD_V2
 
@@ -97,7 +99,7 @@ void IRQ021_Handler(void) {
     sl_button_on_change(0, BTN_RELEASED);
 #else
     sl_button_on_change(1, BTN_RELEASED);
-#endif //SI917_RADIO_BOARD_V2
+#endif // SI917_RADIO_BOARD_V2
   }
   // geting the state of the gpio 2 pin and checking if the btn is already
   // pressed or not
