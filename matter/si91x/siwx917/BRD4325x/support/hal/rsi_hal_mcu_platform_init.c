@@ -150,17 +150,13 @@ void RSI_Wakeupsw_config(void) {
 // For B0 2.0 board BTN1
 #ifdef SI917_RADIO_BOARD_V2
 void RSI_Wakeupsw_config_gpio11(void) {
-  uint8_t pad_sel = 1;
+  uint8_t pad_select = 6;
 
   /*Enable clock for EGPIO module*/
   RSI_CLK_PeripheralClkEnable(M4CLK, EGPIO_CLK, ENABLE_STATIC_CLK);
 
   /*PAD selection*/
-  for (pad_sel = 1; pad_sel < 34; pad_sel++) {
-    if (pad_sel != 9) {
-      RSI_EGPIO_PadSelectionEnable(pad_sel);
-    }
-  }
+  RSI_EGPIO_PadSelectionEnable(pad_select);
 
   RSI_EGPIO_SetDir(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN, 1);
   /*REN enable */
