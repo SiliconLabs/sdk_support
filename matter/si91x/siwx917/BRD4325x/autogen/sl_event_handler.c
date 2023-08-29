@@ -5,10 +5,12 @@
 #include "rsi_chip.h"
 #include "rsi_wisemcu_hardware_setup.h"
 #include "sli_siwx917_soc.h"
+#include "sl_device_init_nvic.h"
 
 void sl_platform_init(void) {
   SystemCoreClockUpdate();
   sli_si91x_platform_init();
+  sl_device_init_nvic();
   RSI_Board_Init();
   sl_si91x_hardware_setup();
   osKernelInitialize();
