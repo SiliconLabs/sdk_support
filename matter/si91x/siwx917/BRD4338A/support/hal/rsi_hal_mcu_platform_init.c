@@ -23,6 +23,7 @@
 #include "rsi_rom_clks.h"
 #include "silabs_utils.h"
 #include "sli_siwx917_soc.h"
+#include "rsi_rom_egpio.h"
 
 #define SOC_PLL_REF_FREQUENCY 32000000 /* PLL input REFERENCE clock 32MHZ */
 
@@ -44,6 +45,12 @@
 #define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(0x46008000 + 0x18)
 #define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
 #define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
+
+/* BTN1 defines */
+#define M4_GPIO_PORT 0
+#define M4_GPIO_PIN (11U)
+#define PININT_NVIC_NAME EGPIO_PIN_7_IRQn
+#define PIN_INT 7
 
 /**
  * @fn           void soc_pll_config()
@@ -138,37 +145,34 @@ void RSI_Wakeupsw_config(void) {
   NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
 }
 
-void RSI_Wakeupsw_config_gpio0(void) {
-  /*Configure the NPSS GPIO mode to wake up  */
-  RSI_NPSSGPIO_SetPinMux(NPSS_GPIO_0, NPSSGPIO_PIN_MUX_MODE2);
+void RSI_Wakeupsw_config_gpio11(void) {
+  uint8_t pad_select = 6;
 
-  /*Configure the NPSS GPIO direction to input */
-  RSI_NPSSGPIO_SetDir(NPSS_GPIO_0, NPSS_GPIO_DIR_INPUT);
+  /*Enable clock for EGPIO module*/
+  RSI_CLK_PeripheralClkEnable(M4CLK, EGPIO_CLK, ENABLE_STATIC_CLK);
 
-  /*Configure the NPSS GPIO interrupt polarity */
-  RSI_NPSSGPIO_SetPolarity(NPSS_GPIO_0, NPSS_GPIO_INTR_HIGH);
+  /*PAD selection*/
+  RSI_EGPIO_PadSelectionEnable(pad_select);
 
-  /*Enable the REN*/
-  RSI_NPSSGPIO_InputBufferEn(NPSS_GPIO_0, 1);
+  RSI_EGPIO_SetDir(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN, 1);
+  /*REN enable */
+  RSI_EGPIO_PadReceiverEnable(M4_GPIO_PIN);
 
-  /* Set the GPIO to wake from deep sleep */
-  RSI_NPSSGPIO_SetWkpGpio(NPSS_GPIO_0_INTR);
+  /*Configure default GPIO mode(0) */
+  RSI_EGPIO_SetPinMux(EGPIO, M4_GPIO_PORT, M4_GPIO_PIN, EGPIO_PIN_MUX_MODE0);
 
-  /* Enables fall edge interrupt detection for UULP_VBAT_GPIO_0 */
-  RSI_NPSSGPIO_SetIntFallEdgeEnable(NPSS_GPIO_0_INTR);
+  /*Selects the pin interrupt for the GPIO*/
+  RSI_EGPIO_PinIntSel(EGPIO, PIN_INT, M4_GPIO_PORT, M4_GPIO_PIN);
+  RSI_EGPIO_SetIntRiseEdgeEnable(EGPIO, PIN_INT);
+  RSI_EGPIO_SetIntFallEdgeEnable(EGPIO, PIN_INT);
 
-  /* Un mask the NPSS GPIO interrupt*/
-  RSI_NPSSGPIO_IntrUnMask(NPSS_GPIO_0_INTR);
+  /*Unmask the  interrupt*/
+  RSI_EGPIO_IntUnMask(EGPIO, PIN_INT);
 
-  /*Select wake up sources */
-  RSI_PS_SetWkpSources(GPIO_BASED_WAKEUP);
-
-  /* clear NPSS GPIO interrupt*/
-  RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_0_INTR);
-
-  // 21 being the NPSS_TO_MCU_GPIO_INTR_IRQn
-  NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
-  NVIC_SetPriority(NPSS_TO_MCU_GPIO_INTR_IRQn, 7);
+  /*NVIC enable */
+  NVIC_EnableIRQ(PININT_NVIC_NAME);
+  NVIC_SetPriority(PININT_NVIC_NAME, 7);
+  RSI_EGPIO_IntUnMask(EGPIO, PIN_INT);
 }
 
 /*==============================================*/
