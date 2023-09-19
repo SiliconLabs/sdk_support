@@ -14,7 +14,6 @@ void sl_platform_init(void) {
   sl_device_init_nvic();
   sli_si91x_platform_init();
   RSI_Board_Init();
-  sl_si91x_hardware_setup();
   osKernelInitialize();
 }
 
@@ -22,7 +21,10 @@ void sl_kernel_start(void) { osKernelStart(); }
 
 void sl_driver_init(void) {}
 
-void sl_service_init(void) { DEBUGINIT(); }
+void sl_service_init(void) {
+  sl_sleeptimer_init();
+  DEBUGINIT();
+}
 
 void sl_stack_init(void) {}
 
