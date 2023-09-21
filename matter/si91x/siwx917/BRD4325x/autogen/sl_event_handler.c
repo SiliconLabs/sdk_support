@@ -22,17 +22,13 @@ void sl_kernel_start(void) { osKernelStart(); }
 
 void sl_driver_init(void) {}
 
-void sl_service_init(void)
-{
-    DEBUGINIT();
-    sl_iostream_init_instances();
+void sl_service_init(void) {
+  DEBUGINIT();
+  sl_iostream_init_instances();
 }
 
 void sl_stack_init(void) {}
 
 void sl_internal_app_init(void) {}
 
-void sl_iostream_init_instances(void)
-{
-  sl_iostream_rtt_init();
-}
+void sl_iostream_init_instances(void) { sl_iostream_rtt_init(); }
