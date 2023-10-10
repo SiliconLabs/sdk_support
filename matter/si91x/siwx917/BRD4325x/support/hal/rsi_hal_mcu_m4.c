@@ -15,10 +15,10 @@
  *    limitations under the License.
  */
 
-#include "sl_si91x_button_config.h"
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
 #include "silabs_utils.h"
+#include "sl_si91x_button_config.h"
 #include "sli_siwx917_soc.h"
 
 #define SOC_PLL_REF_FREQUENCY 32000000 /* PLL input REFERENCE clock 32MHZ */
@@ -37,58 +37,56 @@
 #define XTAL_GOOD_TIME 31 /*Duration in us*/
 
 /*Pre-fetch and regestring */
-#define ICACHE2_ADDR_TRANSLATE_1_REG *(volatile uint32_t *) (0x20280000 + 0x24)
-#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *) (0x46008000 + 0x18)
-#define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *) (0x46008000 + 0x44)
-#define MISC_QUASI_SYNC_MODE *(volatile uint32_t *) (0x46008000 + 0x84)
+#define ICACHE2_ADDR_TRANSLATE_1_REG *(volatile uint32_t *)(0x20280000 + 0x24)
+#define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(0x46008000 + 0x18)
+#define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
+#define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
 
 void sl_button_on_change(uint8_t btn, uint8_t btnAction);
 
-int soc_pll_config(void)
-{
-    int32_t status = RSI_OK;
+int soc_pll_config(void) {
+  int32_t status = RSI_OK;
 
-    RSI_CLK_SocPllLockConfig(1, 1, 7);
+  RSI_CLK_SocPllLockConfig(1, 1, 7);
 
-    RSI_CLK_SocPllRefClkConfig(2);
+  RSI_CLK_SocPllRefClkConfig(2);
 
-    RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
+  RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
 
-    /*Enable fre-fetch and register if SOC-PLL frequency is more than or equal to 120M*/
+  /*Enable fre-fetch and register if SOC-PLL frequency is more than or equal to
+   * 120M*/
 #if (PS4_SOC_FREQ >= 120000000)
-    ICACHE2_ADDR_TRANSLATE_1_REG  = BIT(21);
-    MISC_CFG_SRAM_REDUNDANCY_CTRL = BIT(4);
-    MISC_CONFIG_MISC_CTRL1 |= BIT(4);
+  ICACHE2_ADDR_TRANSLATE_1_REG = BIT(21);
+  MISC_CFG_SRAM_REDUNDANCY_CTRL = BIT(4);
+  MISC_CONFIG_MISC_CTRL1 |= BIT(4);
 #if !(defined WISE_AOC_4)
-    MISC_QUASI_SYNC_MODE |= BIT(6);
-    MISC_QUASI_SYNC_MODE |= (BIT(6) | BIT(7));
+  MISC_QUASI_SYNC_MODE |= BIT(6);
+  MISC_QUASI_SYNC_MODE |= (BIT(6) | BIT(7));
 #endif /* !WISE_AOC_4 */
 #endif /* (PS4_SOC_FREQ > 120000000) */
 
-    RSI_CLK_SetSocPllFreq(M4CLK, PS4_SOC_FREQ, SOC_PLL_REF_FREQUENCY);
+  RSI_CLK_SetSocPllFreq(M4CLK, PS4_SOC_FREQ, SOC_PLL_REF_FREQUENCY);
 
-    RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
+  RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
 
 #ifdef SWITCH_QSPI_TO_SOC_PLL
-    /* program intf pll to 160Mhz */
-    SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
-    status                                  = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
-    if (status != RSI_OK)
-    {
-        SILABS_LOG("Failed to Config Interface PLL Clock, status:%d", status);
-    }
-    else
-    {
-        SILABS_LOG("Configured Interface PLL Clock to %d", INTF_PLL_CLK);
-    }
+  /* program intf pll to 160Mhz */
+  SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
+  status = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
+  if (status != RSI_OK) {
+    SILABS_LOG("Failed to Config Interface PLL Clock, status:%d", status);
+  } else {
+    SILABS_LOG("Configured Interface PLL Clock to %d", INTF_PLL_CLK);
+  }
 
-    RSI_CLK_QspiClkConfig(M4CLK, QSPI_INTFPLLCLK, 0, 0, 1);
+  RSI_CLK_QspiClkConfig(M4CLK, QSPI_INTFPLLCLK, 0, 0, 1);
 #endif /* SWITCH_QSPI_TO_SOC_PLL */
 
-    return 0;
+  return 0;
 }
 
-void sl_si91x_button_isr(uint8_t pin, uint8_t state)
-{
-  (pin == SL_BUTTON_BTN0_PIN) ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, state) : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, state);
+void sl_si91x_button_isr(uint8_t pin, uint8_t state) {
+  (pin == SL_BUTTON_BTN0_PIN)
+      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, state)
+      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, state);
 }

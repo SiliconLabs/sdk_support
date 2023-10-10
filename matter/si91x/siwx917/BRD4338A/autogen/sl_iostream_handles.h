@@ -1,9 +1,8 @@
 #ifndef SL_IOSTREAM_HANDLES_H
 #define SL_IOSTREAM_HANDLES_H
 #include "sl_iostream.h"
-#include "sl_iostream_rtt.h"
 #include "sl_iostream_init_si91x_uart.h"
-
+#include "sl_iostream_rtt.h"
 
 #ifdef __cplusplus
 extern "C" {
