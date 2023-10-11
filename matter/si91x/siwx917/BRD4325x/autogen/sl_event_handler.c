@@ -49,4 +49,3 @@ void sl_iostream_init_instances(void)
 {
   sl_iostream_rtt_init();
 }
-
