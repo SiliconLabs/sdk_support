@@ -27,6 +27,8 @@
 #endif // CONFIG_ENABLE_UART
 #include "psa/crypto.h"
 #include "cmsis_os2.h"
+#include "sl_iostream_rtt.h"
+#include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
 #include "sl_rail_util_power_manager_init.h"
@@ -74,6 +76,7 @@ void sl_service_init(void)
   sl_sleeptimer_init();
   sl_mbedtls_init();
   psa_crypto_init();
+  sl_iostream_init_instances();
 }
 
 void sl_stack_init(void)
@@ -90,3 +93,9 @@ void sl_stack_init(void)
 void sl_internal_app_init(void)
 {
 }
+
+void sl_iostream_init_instances(void)
+{
+  sl_iostream_rtt_init();
+}
+
