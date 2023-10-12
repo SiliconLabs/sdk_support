@@ -337,8 +337,9 @@ typedef void mbedtls_ecp_restart_ctx;
 #define MBEDTLS_ENTROPY_MAX_SOURCES                                            \
   2 /**< Maximum number of sources supported */
 #define MBEDTLS_SSL_DTLS_BADMAC_LIMIT
-#define MBEDTLS_SSL_MAX_CONTENT_LEN 900 /**< Maxium fragment length in bytes   \
-                                         */
+#define MBEDTLS_SSL_MAX_CONTENT_LEN                                            \
+  900 /**< Maxium fragment length in bytes                                     \
+       */
 
 #define MBEDTLS_SSL_SESSION_TICKETS
 #define MBEDTLS_SSL_CIPHERSUITES MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
