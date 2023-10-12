@@ -45,12 +45,12 @@
 #define SL_DEVICE_INIT_HFXO_FREQ           38400000
 
 // <o SL_DEVICE_INIT_HFXO_PRECISION> HFXO precision in PPM <0-65535>
-// <i> Default: 500
-#define SL_DEVICE_INIT_HFXO_PRECISION      500
+// <i> Default: 50
+#define SL_DEVICE_INIT_HFXO_PRECISION      50
 
 // <o SL_DEVICE_INIT_HFXO_CTUNE> CTUNE <0-511>
 // <i> Default: 360
-#define SL_DEVICE_INIT_HFXO_CTUNE          327
+#define SL_DEVICE_INIT_HFXO_CTUNE          331
 
 // <h> Advanced Configurations
 // <o SL_DEVICE_INIT_HFXO_AUTOSTART> Auto-start HFXO. This feature is incompatible with Power Manager and can only be enabled in applications that do not use Power Manager or a radio protocol stack. - DEPRECATED
