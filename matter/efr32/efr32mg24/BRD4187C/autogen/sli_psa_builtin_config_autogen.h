@@ -5,5 +5,7 @@
 
 // Do not need this feature - SLC imposed
 // #define MBEDTLS_PSA_BUILTIN_ALG_ECB_NO_PADDING 1
+// #define MBEDTLS_PSA_BUILTIN_ALG_CMAC 1
+
 
 #endif // SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
