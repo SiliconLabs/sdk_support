@@ -21,6 +21,7 @@
 #ifdef USE_TEMP_SENSOR
 #include "sl_i2cspm_instances.h"
 #endif
+#include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
 #include "sl_simple_button_instances.h"
@@ -28,7 +29,6 @@
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
-#include "sl_iostream_rtt.h"
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
@@ -69,7 +69,6 @@ void sl_driver_init(void)
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
   #endif
-
 }
 
 void sl_service_init(void)

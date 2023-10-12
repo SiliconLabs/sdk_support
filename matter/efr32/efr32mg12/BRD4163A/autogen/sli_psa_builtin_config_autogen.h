@@ -3,7 +3,7 @@
 #ifndef SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
 #define SLI_PSA_BUILTIN_CONFIG_AUTOGEN_H
 
-// Do not need these features
+// Do not need these features - SLC imposed
 // #define MBEDTLS_PSA_BUILTIN_ALG_CMAC 1
 // #define MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_PUBLIC_KEY 1
 // #define MBEDTLS_PSA_BUILTIN_KEY_TYPE_ECC_KEY_PAIR 1

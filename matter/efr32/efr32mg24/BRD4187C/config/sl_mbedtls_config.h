@@ -18,55 +18,39 @@
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O
 // <i> buffer used in mbedTLS when receiving data.
-// <o SL_MBEDTLS_SSL_IN_CONTENT_LEN> Maximum TLS/DTLS fragment length in bytes (input).
-// <i> Default: 768
-// <i> The size configured here determines the size of the internal I/O
-// <i> buffer used in mbedTLS when receiving data.
-#if SL_USE_COAP_CONFIG
-#define SL_MBEDTLS_SSL_IN_CONTENT_LEN 900
-#else
-#define SL_MBEDTLS_SSL_IN_CONTENT_LEN 768
-#endif
+#define SL_MBEDTLS_SSL_IN_CONTENT_LEN  768
 
 // <o SL_MBEDTLS_SSL_OUT_CONTENT_LEN> Maximum TLS/DTLS fragment length in bytes (output).
 // <i> Default: 768
 // <i> The size configured here determines the size of the internal I/O
 // <i> buffer used in mbedTLS when sending data.
-// <o SL_MBEDTLS_SSL_OUT_CONTENT_LEN> Maximum TLS/DTLS fragment length in bytes (output).
-// <i> Default: 768
-// <i> The size configured here determines the size of the internal I/O
-// <i> buffer used in mbedTLS when sending data.
-#if SL_USE_COAP_CONFIG
-#define SL_MBEDTLS_SSL_OUT_CONTENT_LEN 900
-#else
-#define SL_MBEDTLS_SSL_OUT_CONTENT_LEN 768
-#endif
+#define SL_MBEDTLS_SSL_OUT_CONTENT_LEN  768
 
 // <q SL_MBEDTLS_SSL_MAX_FRAGMENT_LENGTH> Enable support for RFC 6066 max_fragment_length extension in SSL.
 // <i> Default: 1
 // <i> Enable support for RFC 6066 max_fragment_length extension in SSL.
-#define SL_MBEDTLS_SSL_MAX_FRAGMENT_LENGTH 1
+#define SL_MBEDTLS_SSL_MAX_FRAGMENT_LENGTH  1
 
 // <q SL_MBEDTLS_SSL_EXPORT_KEYS> Enable support for exporting key block and master secret.
 // <i> Default: 1
 // <i> Enable support for exporting key block and master secret.
 // <i> This is required for certain users of TLS, e.g. EAP-TLS.
-#define SL_MBEDTLS_SSL_EXPORT_KEYS 1
+#define SL_MBEDTLS_SSL_EXPORT_KEYS  1
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED> Enable the PSK based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the PSK based ciphersuite modes in SSL / TLS.
-#define SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED 1
+#define SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED  1
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED> Enable the ECDHE-PSK based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the ECDHE-PSK based ciphersuite modes in SSL / TLS.
-#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED 0
+#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED  0
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED> Enable the ECDHE-ECDSA based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the ECDHE-ECDSA based ciphersuite modes in SSL / TLS.
-#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED 0
+#define SL_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED  0
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED> Enable the ECDHE-RSA based ciphersuite modes in SSL / TLS.
 // <i> Default: 0

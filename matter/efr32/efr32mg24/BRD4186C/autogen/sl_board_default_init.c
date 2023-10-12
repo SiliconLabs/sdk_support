@@ -29,4 +29,8 @@
  ******************************************************************************/
 #include "sl_board_control.h"
 
-void sl_board_default_init(void) { sl_board_disable_vcom(); }
+void sl_board_default_init(void)
+{
+  sl_board_disable_vcom();
+  
+}

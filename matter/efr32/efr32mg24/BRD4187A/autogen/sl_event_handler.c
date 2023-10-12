@@ -20,6 +20,7 @@
 #if defined(USE_TEMP_SENSOR)
 #include "sl_i2cspm_instances.h"
 #endif
+#include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
 #include "sl_simple_button_instances.h"
@@ -27,19 +28,15 @@
 #if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
 #endif // CONFIG_ENABLE_UART
-
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
-#include "sl_iostream_rtt.h"
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
-
 #if !RSI_BLE_ENABLE
 #include "sl_rail_util_power_manager_init.h"
 #endif // !RSI_BLE_ENABLE
@@ -116,4 +113,3 @@ void sl_iostream_init_instances(void)
 {
   sl_iostream_rtt_init();
 }
-
