@@ -18,7 +18,7 @@
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
 #include "silabs_utils.h"
-#include "sl_si91x_button_pin_config.h"
+#include "sl_si91x_button_config.h"
 #include "sli_siwx917_soc.h"
 
 #define SOC_PLL_REF_FREQUENCY 32000000 /* PLL input REFERENCE clock 32MHZ */
@@ -87,6 +87,6 @@ int soc_pll_config(void) {
 
 void sl_si91x_button_isr(uint8_t pin, uint8_t state) {
   (pin == SL_BUTTON_BTN0_PIN)
-      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, !state)
-      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, !state);
+      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, state)
+      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, state);
 }
