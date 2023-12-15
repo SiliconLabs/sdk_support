@@ -31,7 +31,9 @@ void sl_driver_init(void)
 
 void sl_service_init(void)
 {
+#ifdef DISPLAY_ENABLED
   sl_sleeptimer_init();
+#endif
   sl_iostream_init_instances();
 }
 
