@@ -35,7 +35,7 @@
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h>Clock Configuration
-#define SL_ULP_TIMER_CLK_TYPE_STATIC  1
+#define SL_ULP_TIMER_CLK_TYPE_STATIC 1
 #define SL_ULP_TIMER_CLK_TYPE_DYNAMIC 0
 
 // <o SL_ULP_TIMER_CLK_TYPE> Clock Type
@@ -50,17 +50,17 @@
 #define SL_ULP_TIMER_SYNC_TO_ULPSS_PCLK 0
 
 // <q SL_ULP_TIMER_SKIP_SWITCH_TIME> Wait for switching timer clock
-// <i> 1 : Enable waiting for switching timer clk & 0 : Skip waiting for switching timer clk.
-// <i> Default: 0
+// <i> 1 : Enable waiting for switching timer clk & 0 : Skip waiting for
+// switching timer clk. <i> Default: 0
 #define SL_ULP_TIMER_SKIP_SWITCH_TIME 0
 
-#define SL_ULP_TIMER_REF_CLK        0
-#define SL_ULP_TIMER_32KHZ_RO_CLK   1
-#define SL_ULP_TIMER_32KHZ_RC_CLK   2
+#define SL_ULP_TIMER_REF_CLK 0
+#define SL_ULP_TIMER_32KHZ_RO_CLK 1
+#define SL_ULP_TIMER_32KHZ_RC_CLK 2
 #define SL_ULP_TIMER_32KHZ_XTAL_CLK 3
-#define SL_ULP_TIMER_32MHZ_RC_CLK   4
-#define SL_ULP_TIMER_20MHZ_RO_CLK   5
-#define SL_ULP_TIMER_ULP_SOC_CLK    6
+#define SL_ULP_TIMER_32MHZ_RC_CLK 4
+#define SL_ULP_TIMER_20MHZ_RO_CLK 5
+#define SL_ULP_TIMER_ULP_SOC_CLK 6
 
 // <o SL_ULP_TIMER_CLK_INPUT_SOURCE> clock source
 //   <SL_ULP_TIMER_REF_CLK=> Ref clock
@@ -71,7 +71,8 @@
 //   <SL_ULP_TIMER_20MHZ_RO_CLK=> 20MHZ_RO
 //   <SL_ULP_TIMER_ULP_SOC_CLK=> SOC_CLK
 // <i> Selection of the Clock source
-#define SL_ULP_TIMER_CLK_INPUT_SOURCE SL_ULP_TIMER_32MHZ_RC_CLK //default timer clock input source is ref clock
+#define SL_ULP_TIMER_CLK_INPUT_SOURCE                                          \
+  SL_ULP_TIMER_32MHZ_RC_CLK // default timer clock input source is ref clock
 
 // </h>
 
@@ -91,27 +92,27 @@
 #define SL_ULP_TIMER_DEFAULT SL_ULP_TIMER_TIMER0
 
 #define SL_ULP_TIMER_TYP_DOWN_COUNTER 0
-#define SL_ULP_TIMER_TYP_1US          1
-#define SL_ULP_TIMER_TYP_256US        2
+#define SL_ULP_TIMER_TYP_1US 1
+#define SL_ULP_TIMER_TYP_256US 2
 
 // <o SL_ULP_TIMER_TYP> Timer type
 //   <SL_ULP_TIMER_TYP_DOWN_COUNTER=> Down Counter (auto select)
 //   <SL_ULP_TIMER_TYP_1US=> 1 Micro-Sec
 //   <SL_ULP_TIMER_TYP_256US=> 256-Micro-Sec
 // <i> Selection of the Timer type
-#define SL_ULP_TIMER_TYP SL_ULP_TIMER_TYP_DOWN_COUNTER //default type is 1MS
+#define SL_ULP_TIMER_TYP SL_ULP_TIMER_TYP_DOWN_COUNTER // default type is 1MS
 
-#define SL_ULP_TIMER_MODE_ONESHOT  0
+#define SL_ULP_TIMER_MODE_ONESHOT 0
 #define SL_ULP_TIMER_MODE_PERIODIC 1
 
 // <o SL_ULP_TIMER_MODE> Timer mode
 //   <SL_ULP_TIMER_MODE_ONESHOT=> One-shot
 //   <SL_ULP_TIMER_MODE_PERIODIC=> Periodic (auto select)
 // <i> Selection of the Timer mode
-#define SL_ULP_TIMER_MODE SL_ULP_TIMER_MODE_PERIODIC //default mode is periodic
+#define SL_ULP_TIMER_MODE SL_ULP_TIMER_MODE_PERIODIC // default mode is periodic
 
 #define SL_ULP_DOWN_COUNTER 0
-#define SL_ULP_UP_COUNTER   1
+#define SL_ULP_UP_COUNTER 1
 // <o SL_ULP_TIMER_DIRECTION> Timer direction
 //   <SL_ULP_DOWN_COUNTER=> Down (auto select)
 //   <SL_ULP_UP_COUNTER=> Up
