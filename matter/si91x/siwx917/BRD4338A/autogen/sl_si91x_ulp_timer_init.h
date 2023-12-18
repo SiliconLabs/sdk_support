@@ -20,8 +20,8 @@
 #define SL_SI91X_ULP_TIMER_INIT_H_
 
 #include "sl_si91x_ulp_timer.h"
-// Include instance config 
- 
+// Include instance config
+
 #include "sl_si91x_ulp_timer_timer0_config.h"
 
 #if defined(SL_ULP_TIMER_TIMER0) // To verify UC inputs existance
