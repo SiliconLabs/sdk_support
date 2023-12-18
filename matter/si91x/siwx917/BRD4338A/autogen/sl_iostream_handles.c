@@ -1,5 +1,5 @@
-#include "sl_iostream.h"
 #include "sl_iostream_handles.h"
+#include "sl_iostream.h"
 #include "string.h"
 
 const sl_iostream_instance_info_t *sl_iostream_instances_info[] = {

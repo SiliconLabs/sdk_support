@@ -37,7 +37,6 @@
 extern const sl_led_t led_led0;
 extern const sl_led_t led_led1;
 
-
 void led_init_instances(void);
 
 #endif // SL_SI91x_LED_INSTANCES_H
