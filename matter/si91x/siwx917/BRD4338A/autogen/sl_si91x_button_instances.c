@@ -28,18 +28,24 @@
                                                                                *
                                                                                ******************************************************************************/
 
-#include "sl_si91x_button.h"
-#include "sl_si91x_button_config.h"
-sl_button_t button_btn0 = {
-    .port = SL_BUTTON_BTN0_PORT,
-    .pin = SL_BUTTON_BTN0_PIN,
-    .button_number = SL_BUTTON_BTN0_NUMBER,
-};
-sl_button_t button_btn1 = {
-    .port = SL_BUTTON_BTN1_PORT,
-    .pin = SL_BUTTON_BTN1_PIN,
-    .button_number = SL_BUTTON_BTN1_NUMBER,
-};
+#include "sl_si91x_button_btn0_config.h"
+#include "sl_si91x_button_btn1_config.h"
+#include "sl_si91x_button_pin_config.h"
+
+sl_button_t button_btn0 = {.port = SL_BUTTON_BTN0_PORT,
+                           .pin = SL_BUTTON_BTN0_PIN,
+                           .button_number = SL_BUTTON_BTN0_NUMBER,
+#ifdef SL_BUTTON_BTN0_PAD
+                           .pad = SL_BUTTON_BTN0_PAD,
+#endif
+                           .interrupt_config = SL_BUTTON_CONFIG_BTN0_INTR};
+sl_button_t button_btn1 = {.port = SL_BUTTON_BTN1_PORT,
+                           .pin = SL_BUTTON_BTN1_PIN,
+                           .button_number = SL_BUTTON_BTN1_NUMBER,
+#ifdef SL_BUTTON_BTN1_PAD
+                           .pad = SL_BUTTON_BTN1_PAD,
+#endif
+                           .interrupt_config = SL_BUTTON_CONFIG_BTN1_INTR};
 
 void button_init_instances(void) {
   sl_si91x_button_init(&button_btn0);
