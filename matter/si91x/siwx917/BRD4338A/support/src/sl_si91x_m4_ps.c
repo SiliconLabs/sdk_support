@@ -23,7 +23,9 @@
 
 #define WIRELESS_WAKEUP_IRQHandler NPSS_TO_MCU_WIRELESS_INTR_IRQn
 
+#ifndef ALARM_PERIODIC_TIME
 #define ALARM_PERIODIC_TIME 30 /*<! periodic alarm configuration in SEC */
+#endif
 
 #define RTC_ALARM_INTR         BIT(16)
 #define NPSS_GPIO_2            2
@@ -105,17 +107,6 @@ void wakeup_source_config(void)
   NVIC_EnableIRQ(NPSS_TO_MCU_GPIO_INTR_IRQn);
 }
 
-/**
- * @brief  GPIO based wake up IRQ
- * @param  none
- * @return none
- */
-void IRQ021_Handler(void)
-{
-  /* clear NPSS GPIO interrupt*/
-  RSI_NPSSGPIO_ClrIntr(NPSS_GPIO_2_INTR);
-  //LOG_PRINT("BUTTON_PRESSED");
-}
 #endif /* SL_SI91X_MCU_BUTTON_BASED_WAKEUP */
 #ifdef SL_SI91X_MCU_WIRELESS_BASED_WAKEUP
 void IRQ026_Handler()
