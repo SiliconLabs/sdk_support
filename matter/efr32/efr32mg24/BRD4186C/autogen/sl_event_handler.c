@@ -13,7 +13,6 @@
 #include "sl_device_init_emu.h"
 #include "pa_conversions_efr32.h"
 #include "sl_rail_util_pti.h"
-
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
 #include "sl_sleeptimer.h"
@@ -84,7 +83,6 @@ void sl_driver_init(void)
   sl_spidrv_init_instances();
 #endif
 #endif
-
 #if defined(USE_TEMP_SENSOR)
   sl_i2cspm_init_instances();
 #endif
