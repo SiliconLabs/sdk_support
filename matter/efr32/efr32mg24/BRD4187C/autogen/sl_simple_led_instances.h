@@ -34,7 +34,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 #include "sl_simple_led.h"
 
 extern const sl_led_t sl_led_led0;

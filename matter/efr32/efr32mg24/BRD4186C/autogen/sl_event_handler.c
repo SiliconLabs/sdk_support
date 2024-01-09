@@ -31,7 +31,10 @@
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-
+#ifdef CHIP_917
+#include "btl_interface.h"
+#include "sl_mpu.h"
+#endif
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
@@ -56,6 +59,9 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
+#ifdef CHIP_917
+  bootloader_init();
+#endif
   nvm3_initDefault();
   osKernelInitialize();
   sl_power_manager_init();
@@ -72,8 +78,10 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
   GPIOINT_Init();
+#ifndef CHIP_917
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
+#endif
 #endif
 #if defined(USE_TEMP_SENSOR)
   sl_i2cspm_init_instances();
@@ -91,6 +99,9 @@ void sl_service_init(void)
   sl_sleeptimer_init();
   sl_hfxo_manager_init();
   sl_mbedtls_init();
+#ifdef CHIP_917
+  sl_mpu_disable_execute_from_ram();
+#endif
   psa_crypto_init();
   sli_aes_seed_mask();
   sl_iostream_init_instances();
