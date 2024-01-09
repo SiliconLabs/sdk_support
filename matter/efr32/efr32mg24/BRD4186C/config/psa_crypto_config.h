@@ -25,7 +25,7 @@
 // <i> gracefully in case an application opens more than its declared amount of
 // <i> keys, thereby precluding the stack from functioning.
 // <i> Default: 4
-#define SL_PSA_KEY_USER_SLOT_COUNT     21
+#define SL_PSA_KEY_USER_SLOT_COUNT     (4)
 
 // <o SL_PSA_ITS_USER_MAX_FILES> PSA Maximum User Persistent Keys Count <0-1024>
 // <i> Maximum amount of keys (or other files) that can be stored persistently

@@ -40,7 +40,7 @@
 // <q SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED> Enable the PSK based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
 // <i> Enable the PSK based ciphersuite modes in SSL / TLS.
-#define SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED  0
+#define SL_MBEDTLS_KEY_EXCHANGE_PSK_ENABLED  1
 
 // <q SL_MBEDTLS_KEY_EXCHANGE_ECDHE_PSK_ENABLED> Enable the ECDHE-PSK based ciphersuite modes in SSL / TLS.
 // <i> Default: 0
