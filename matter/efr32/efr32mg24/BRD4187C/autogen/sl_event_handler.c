@@ -99,9 +99,6 @@ void sl_service_init(void)
   sl_sleeptimer_init();
   sl_hfxo_manager_init();
   sl_mbedtls_init();
-#ifdef CHIP_917
-  sl_mpu_disable_execute_from_ram();
-#endif
   psa_crypto_init();
   sli_aes_seed_mask();
   sl_iostream_init_instances();
