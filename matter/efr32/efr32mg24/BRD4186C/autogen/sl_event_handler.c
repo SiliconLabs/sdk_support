@@ -59,9 +59,6 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
-#ifdef CHIP_917
-  bootloader_init();
-#endif
   nvm3_initDefault();
   osKernelInitialize();
   sl_power_manager_init();
