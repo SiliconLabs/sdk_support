@@ -37,7 +37,9 @@
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
+#if !RSI_BLE_ENABLE
 #include "sl_rail_util_power_manager_init.h"
+#endif // !RSI_BLE_ENABLE
 
 void sl_platform_init(void)
 {
@@ -62,18 +64,20 @@ void sl_kernel_start(void)
 {
 #if !RSI_BLE_ENABLE
   sli_bt_rtos_adaptation_kernel_start();
-#endif
+#endif // !RSI_BLE_ENABLE
   osKernelStart();
 }
 
 void sl_driver_init(void)
 {
   GPIOINT_Init();
-#if defined(USE_TEMP_SENSOR)
-  sl_i2cspm_init_instances();
-#endif
+#ifndef CHIP_917
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
+#endif
+#endif
+#if defined(USE_TEMP_SENSOR)
+  sl_i2cspm_init_instances();
 #endif
   sl_simple_button_init_instances();
   sl_simple_led_init_instances();
@@ -100,7 +104,7 @@ void sl_stack_init(void)
   sl_rail_util_pti_init();
   sl_bt_rtos_init();
   sl_rail_util_power_manager_init();
-  #endif
+#endif
 }
 
 void sl_internal_app_init(void)

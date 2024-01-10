@@ -31,7 +31,6 @@
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
@@ -72,8 +71,10 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
   GPIOINT_Init();
+#ifndef CHIP_917
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
+#endif
 #endif
 #if defined(USE_TEMP_SENSOR)
   sl_i2cspm_init_instances();
