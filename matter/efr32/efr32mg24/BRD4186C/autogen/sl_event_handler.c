@@ -31,10 +31,6 @@
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-#ifdef CHIP_917
-#include "btl_interface.h"
-#include "sl_mpu.h"
-#endif
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"

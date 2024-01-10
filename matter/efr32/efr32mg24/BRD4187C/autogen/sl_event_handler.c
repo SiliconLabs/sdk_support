@@ -31,10 +31,6 @@
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
-#ifdef CHIP_917
-#include "btl_interface.h"
-#include "sl_mpu.h"
-#endif
 #include "psa/crypto.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
@@ -59,9 +55,6 @@ void sl_platform_init(void)
   sl_device_init_clocks();
   sl_device_init_emu();
   sl_board_init();
-#ifdef CHIP_917
-  bootloader_init();
-#endif
   nvm3_initDefault();
   osKernelInitialize();
   sl_power_manager_init();
