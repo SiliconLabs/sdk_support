@@ -56,7 +56,7 @@
 // <i> If no v1 files are used, its support can be disabled for space
 // <i> optimization.
 // <i> Default: 0
-#define SL_PSA_ITS_SUPPORT_V1_DRIVER 0
+#define SL_PSA_ITS_SUPPORT_V1_DRIVER 1
 
 // <o SL_PSA_ITS_SUPPORT_V2_DRIVER> Enable V2 ITS Driver Support <0-1>
 // <i> Devices that have used GSDK 4.1.x and earlier, and used ITS have the keys
@@ -69,7 +69,7 @@
 // <i> driver before in GSDK 4.1.x and earlier, or the keys has been already
 // <i> migrated.
 // <i> Default: 0
-#define SL_PSA_ITS_SUPPORT_V2_DRIVER 0
+#define SL_PSA_ITS_SUPPORT_V2_DRIVER 1
 
 // <o SL_PSA_ITS_SUPPORT_V3_DRIVER> Enable support for V3 ITS Driver <0-1>
 // <i> Devices that have used GSDK 4.1.x and earlier, and used ITS have the keys
