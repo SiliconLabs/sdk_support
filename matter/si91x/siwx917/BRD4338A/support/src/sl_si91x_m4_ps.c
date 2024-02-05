@@ -69,13 +69,10 @@
 #define WKP_RAM_USAGE_LOCATION                                                 \
   0x24061000 /*<!Bootloader RAM usage location upon wake up for A0  */
 #endif
-#if SL_SI91X_MCU_ALARM_BASED_WAKEUP
 static RTC_TIME_CONFIG_T rtc_configuration, alarm_configuration, rtc_get_time;
-static uint8_t m4_alarm_initialization_done;
-#endif
+uint8_t m4_alarm_initialization_done;
 #define WIRELESS_WAKEUP_IRQHandler_Periority 8
 void sli_m4_ta_interrupt_init(void);
-void set_alarm_interrupt_timer(uint16_t interval);
 void m4_powersave_app(void);
 void wakeup_source_config(void);
 void vPortSetupTimerInterrupt(void);
@@ -127,7 +124,6 @@ void IRQ026_Handler() {
   return;
 }
 #endif /* SL_SI91X_MCU_WIRELESS_BASED_WAKEUP */
-#if SL_SI91X_MCU_ALARM_BASED_WAKEUP
 void set_alarm_interrupt_timer(uint16_t interval) {
   /* Get the RTC time,which is used to update alarm time as per RTC time  */
   RSI_RTC_GetDateTime(RTC, &rtc_get_time);
@@ -256,7 +252,6 @@ void RTC_ALARM_IRQHandler(void) {
   }
   return;
 }
-#endif /* SL_SI91X_MCU_ALARM_BASED_WAKEUP */
 
 /**
  * @fn         sl_si91x_m4_sleep_wakeup

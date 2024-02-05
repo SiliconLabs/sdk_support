@@ -62,7 +62,7 @@ void sl_si91x_m4_sleep_wakeup(void);
  */
 void initialize_m4_alarm(void);
 void IRQ026_Handler();
-
+void set_alarm_interrupt_timer(uint16_t interval);
 void wakeup_source_config(void);
 #endif /* SLI_SI91X_MCU_INTERFACE */
 #endif /* SL_SI91X_M4_POWERSAVE_H_ */
