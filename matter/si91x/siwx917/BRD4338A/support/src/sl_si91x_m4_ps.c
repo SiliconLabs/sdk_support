@@ -306,9 +306,6 @@ void sl_si91x_m4_sleep_wakeup(void) {
                          RSI_WAKEUP_WITH_RETENTION_WO_ULPSS_RAM);
 #else
 
-#ifdef SLI_SI91X_MCU_COMMON_FLASH_MODE
-  M4SS_P2P_INTR_SET_REG &= ~BIT(3);
-#endif
   /* Configure RAM Usage and Retention Size */
   sl_si91x_configure_ram_retention(WISEMCU_320KB_RAM_IN_USE,
                                    WISEMCU_RETAIN_DEFAULT_RAM_DURING_SLEEP);
