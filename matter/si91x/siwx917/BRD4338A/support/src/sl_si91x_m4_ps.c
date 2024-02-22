@@ -310,7 +310,7 @@ void sl_si91x_m4_sleep_wakeup(void) {
   sl_si91x_configure_ram_retention(WISEMCU_320KB_RAM_IN_USE,
                                    WISEMCU_RETAIN_DEFAULT_RAM_DURING_SLEEP);
   /* Trigger M4 Sleep*/
-  MCU_RET->NPSS_GPIO_CNTRL[0].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OUT = 0;
+  // MCU_RET->NPSS_GPIO_CNTRL[0].NPSS_GPIO_CTRLS_b.NPSS_GPIO_OUT = 0;
   sl_si91x_trigger_sleep(SLEEP_WITH_RETENTION, DISABLE_LF_MODE,
                          WKP_RAM_USAGE_LOCATION,
                          (uint32_t)RSI_PS_RestoreCpuContext, IVT_OFFSET_ADDR,
