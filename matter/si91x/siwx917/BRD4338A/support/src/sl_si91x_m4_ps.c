@@ -40,6 +40,7 @@
 #define NO_OF_HOURS_IN_A_DAY 24
 #define NO_OF_MINUTES_IN_AN_HOUR 60
 #define NO_OF_SECONDS_IN_A_MINUTE 60
+#define NO_OF_MILLISECONDS_IN_A_SECOND 1000 ///< Number of milliseconds in a second
 #define NO_OF_MONTHS_IN_A_YEAR 12
 #define BASE_YEAR 2000
 #define NO_OF_DAYS_IN_A_MONTH_1 28
