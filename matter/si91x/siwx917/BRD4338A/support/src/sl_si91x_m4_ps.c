@@ -132,15 +132,21 @@ void set_alarm_interrupt_timer(uint16_t interval) {
   alarm_configuration.DayOfWeek = rtc_get_time.DayOfWeek;
   alarm_configuration.Month = rtc_get_time.Month;
   alarm_configuration.Century = rtc_get_time.Century;
-  alarm_configuration.MilliSeconds = rtc_get_time.MilliSeconds;
   alarm_configuration.Day = rtc_get_time.Day;
   alarm_configuration.Year = rtc_get_time.Year;
   alarm_configuration.Minute = rtc_get_time.Minute;
   alarm_configuration.Hour = rtc_get_time.Hour;
   alarm_configuration.Second = rtc_get_time.Second;
+  alarm_configuration.MilliSeconds = rtc_get_time.MilliSeconds;
+
+  alarm_configuration.MilliSeconds += (interval % 1000);
+  if (alarm_configuration.MilliSeconds >= (NO_OF_MILLISECONDS_IN_A_SECOND)) {
+    alarm_configuration.MilliSeconds -= NO_OF_MILLISECONDS_IN_A_SECOND;
+    alarm_configuration.Second += 1;
+  }
 
   /*Update seconds for next boundary alarm */
-  alarm_configuration.Second = alarm_configuration.Second + (interval % 60);
+  alarm_configuration.Second = alarm_configuration.Second + (uint8_t)((interval / 1000) % 60);
   if (alarm_configuration.Second >= (NO_OF_SECONDS_IN_A_MINUTE)) {
     alarm_configuration.Second -= NO_OF_SECONDS_IN_A_MINUTE;
     alarm_configuration.Minute += 1;
@@ -148,14 +154,14 @@ void set_alarm_interrupt_timer(uint16_t interval) {
 
   /*Update minutes for next boundary alarm */
   alarm_configuration.Minute =
-      alarm_configuration.Minute + ((interval / 60) % 60);
+      alarm_configuration.Minute + (uint8_t)((interval / (1000 * 60)) % 60);
   if (alarm_configuration.Minute >= (NO_OF_MINUTES_IN_AN_HOUR)) {
     alarm_configuration.Minute -= NO_OF_MINUTES_IN_AN_HOUR;
     alarm_configuration.Hour += 1;
   }
 
   /*Update hour for next boundary alarm */
-  alarm_configuration.Hour = alarm_configuration.Hour + (interval / 3600) % 24;
+  alarm_configuration.Hour = alarm_configuration.Hour + (uint8_t)(interval / (1000 * 3600)) % 24;
   if (alarm_configuration.Hour >= (NO_OF_HOURS_IN_A_DAY)) {
     alarm_configuration.Hour -= NO_OF_HOURS_IN_A_DAY;
     alarm_configuration.Day += 1;
@@ -266,13 +272,13 @@ void sl_si91x_m4_sleep_wakeup(void) {
 
 #if SL_SI91X_MCU_ALARM_BASED_WAKEUP
   /* Initialize the M4 alarm for the first time*/
-  if (m4_alarm_initialization_done == false) {
-    initialize_m4_alarm();
-  }
+  // if (m4_alarm_initialization_done == false) {
+  //   initialize_m4_alarm();
+  // }
   /* Update the alarm time interval, when to get next interrupt  */
-  set_alarm_interrupt_timer(ALARM_PERIODIC_TIME);
+  // set_alarm_interrupt_timer(ALARM_PERIODIC_TIME);
 
-#endif
+#endif // SL_SI91X_MCU_ALARM_BASED_WAKEUP
 #ifdef SL_SI91X_MCU_WIRELESS_BASED_WAKEUP
   /* Configure Wakeup-Source */
   RSI_PS_SetWkpSources(WIRELESS_BASED_WAKEUP);
@@ -284,7 +290,7 @@ void sl_si91x_m4_sleep_wakeup(void) {
 #endif
 #if SL_SI91X_MCU_BUTTON_BASED_WAKEUP
   /*Configure the UULP GPIO 2 as wakeup source */
-  wakeup_source_config();
+  // wakeup_source_config();
 #endif
 
 #ifndef SLI_SI91X_MCU_ENABLE_FLASH_BASED_EXECUTION
