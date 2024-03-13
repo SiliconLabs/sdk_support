@@ -19,9 +19,9 @@ void sl_platform_init(void) {
   sli_si91x_platform_init();
   RSI_Board_Init();
   DEBUGINIT();
-#if SL_ICD_ENABLED && !(defined(DISPLAY_ENABLED))
+#if SL_ICD_ENABLED
   sl_si91x_hardware_setup();
-#endif // SL_ICD_ENABLED && !(defined(DISPLAY_ENABLED)
+#endif // SL_ICD_ENABLED
   osKernelInitialize();
 }
 
