@@ -8,9 +8,9 @@
 
 // <h> Secure Engine (SE) version configuration
 
-// <o SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2> Support SE firmware versions older than 1.2.2 <0-1>
-// <i> Enable software fallback for ECDH and ECC public key validation on xG21
-// <i> devices running SE firmware versions lower than 1.2.2.
+// <o SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2> Support SE firmware versions older
+// than 1.2.2 <0-1> <i> Enable software fallback for ECDH and ECC public key
+// validation on xG21 <i> devices running SE firmware versions lower than 1.2.2.
 // <i>
 // <i> Due to other stability concerns, it is strongly recommended to upgrade
 // <i> these devices to the latest firmware revision instead of turning on
@@ -22,21 +22,19 @@
 // <i> Default: 0
 #define SL_SE_SUPPORT_FW_PRIOR_TO_1_2_2 0
 
-// <o SL_SE_ASSUME_FW_AT_LEAST_1_2_2> Assume an SE firmware version newer than 1.2.2 <0-1>
-// <i> For enhanced performance: if it is guaranteed that all devices on which
-// <i> this library will run are updated to at least SE FW 1.2.2, then turning
-// <i> on this option will remove certain fallback checks, thereby reducing the
-// <i> amount of processing required for ECDH and public key verification
-// <i> operations.
-// <i> Default: 0
+// <o SL_SE_ASSUME_FW_AT_LEAST_1_2_2> Assume an SE firmware version newer
+// than 1.2.2 <0-1> <i> For enhanced performance: if it is guaranteed that all
+// devices on which <i> this library will run are updated to at least SE
+// FW 1.2.2, then turning <i> on this option will remove certain fallback
+// checks, thereby reducing the <i> amount of processing required for ECDH and
+// public key verification <i> operations. <i> Default: 0
 #define SL_SE_ASSUME_FW_AT_LEAST_1_2_2 0
 
-// <o SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA> Assume an SE firmware version that is unaffected by Ed25519 errata <0-1>
-// <i> For minimal code size and performance savings: if it is guaranteed that
-// <i> none of the devices running this library has SE FWs in the range
-// <i> [1.2.2, 1.2.8], then enabling this option will disable runtime version
-// <i> checks.
-// <i> Default: 0
+// <o SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA> Assume an SE firmware
+// version that is unaffected by Ed25519 errata <0-1> <i> For minimal code size
+// and performance savings: if it is guaranteed that <i> none of the devices
+// running this library has SE FWs in the range <i> [1.2.2, 1.2.8], then
+// enabling this option will disable runtime version <i> checks. <i> Default: 0
 #define SL_SE_ASSUME_FW_UNAFFECTED_BY_ED25519_ERRATA 0
 
 // </h>
