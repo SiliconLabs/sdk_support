@@ -9,6 +9,7 @@
 #include "sl_device_init_clocks.h"
 #include "sl_device_init_emu.h"
 #include "pa_conversions_efr32.h"
+#include "sl_rail_util_power_manager_init.h"
 #include "sl_rail_util_pti.h"
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
@@ -88,9 +89,9 @@ void sl_stack_init(void)
 {
 #if !RSI_BLE_ENABLE
   sl_rail_util_pa_init();
+  sl_rail_util_power_manager_init();
   sl_rail_util_pti_init();
   sl_bt_rtos_init();
-  sl_rail_util_power_manager_init();
   #endif
 }
 
@@ -102,3 +103,4 @@ void sl_iostream_init_instances(void)
 {
   sl_iostream_rtt_init();
 }
+

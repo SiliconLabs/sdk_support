@@ -5,6 +5,7 @@
 
 #define PSA_WANT_KEY_TYPE_AES 1
 #define PSA_WANT_ALG_CCM 1
+#define PSA_WANT_ALG_CTR 1
 #define PSA_WANT_ALG_CMAC 1
 #define PSA_WANT_ALG_SHA_224 1
 #define PSA_WANT_ALG_SHA_256 1
