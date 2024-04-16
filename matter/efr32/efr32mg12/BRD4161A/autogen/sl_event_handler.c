@@ -9,6 +9,7 @@
 #include "sl_device_init_clocks.h"
 #include "sl_device_init_emu.h"
 #include "pa_conversions_efr32.h"
+#include "sl_rail_util_power_manager_init.h"
 #include "sl_rail_util_pti.h"
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
@@ -30,7 +31,6 @@
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
 #include "sl_power_manager.h"
-#include "sl_rail_util_power_manager_init.h"
 #ifdef SL_WIFI
 #include "sl_spidrv_instances.h"
 #endif
@@ -61,17 +61,17 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-    GPIOINT_Init();
+  GPIOINT_Init();
 #ifdef SL_WIFI
     sl_spidrv_init_instances();
 #endif
 #ifdef USE_TEMP_SENSOR
-    sl_i2cspm_init_instances();
+  sl_i2cspm_init_instances();
 #endif
-    sl_simple_button_init_instances();
-    sl_simple_led_init_instances();
+  sl_simple_button_init_instances();
+  sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)
-    sl_uartdrv_init_instances();
+  sl_uartdrv_init_instances();
 #endif // CONFIG_ENABLE_UART
 }
 
@@ -88,9 +88,9 @@ void sl_stack_init(void)
 {
   #if !RSI_BLE_ENABLE
   sl_rail_util_pa_init();
+  sl_rail_util_power_manager_init();
   sl_rail_util_pti_init();
   sl_bt_rtos_init();
-  sl_rail_util_power_manager_init();
 #endif
 }
 
@@ -102,3 +102,4 @@ void sl_iostream_init_instances(void)
 {
   sl_iostream_rtt_init();
 }
+
