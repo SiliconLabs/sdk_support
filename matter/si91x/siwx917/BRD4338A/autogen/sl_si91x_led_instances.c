@@ -29,18 +29,18 @@
  *
  ******************************************************************************/
 
+#include "sl_si91x_led_instances.h"
 #include "sl_si91x_led.h"
 #include "sl_si91x_led_config.h"
-#include "sl_si91x_led_instances.h"
 sl_led_t const led_led0 = {
-  .port = SL_LED_LED0_PORT,
-  .pin = SL_LED_LED0_PIN,
-  .led_number = SL_LED_LED0_NUMBER,
+    .port = SL_LED_LED0_PORT,
+    .pin = SL_LED_LED0_PIN,
+    .led_number = SL_LED_LED0_NUMBER,
 };
 sl_led_t const led_led1 = {
-  .port = SL_LED_LED1_PORT,
-  .pin = SL_LED_LED1_PIN,
-  .led_number = SL_LED_LED1_NUMBER,
+    .port = SL_LED_LED1_PORT,
+    .pin = SL_LED_LED1_PIN,
+    .led_number = SL_LED_LED1_NUMBER,
 };
 
 void led_init_instances(void) {
