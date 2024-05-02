@@ -2254,9 +2254,9 @@ static psa_status_t find_nvm3_id(psa_storage_uid_t uid, bool find_empty_slot,
 
   if (nvm3_uid_set_cache_initialized == false) {
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-// With SKL the NVM3 instance must be initialized by the NS app. We therefore
-// check that it has been opened (which is done on init) rather than actually
-// doing the init.
+    // With SKL the NVM3 instance must be initialized by the NS app. We
+    // therefore check that it has been opened (which is done on init) rather
+    // than actually doing the init.
     if (!nvm3_defaultHandle->hasBeenOpened) {
 #else
     if (nvm3_initDefault() != ECODE_NVM3_OK) {
