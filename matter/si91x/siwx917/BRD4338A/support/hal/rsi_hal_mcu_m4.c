@@ -20,8 +20,9 @@
 #include "silabs_utils.h"
 #include "sl_si91x_button_pin_config.h"
 #include "sli_siwx917_soc.h"
+#include "rsi_debug.h"
 
-#define SOC_PLL_REF_FREQUENCY 32000000 /* PLL input REFERENCE clock 32MHZ */
+#define SOC_PLL_REF_FREQUENCY 40000000//32000000 /* PLL input REFERENCE clock 32MHZ */
 
 // Note: Change this macro to required PLL frequency in hertz
 #define PS4_SOC_FREQ 180000000 /* PLL out clock 180MHz */
@@ -69,6 +70,9 @@ int soc_pll_config(void) {
 
   RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
 
+  SysTick_Config(SystemCoreClock / 1000);
+  DEBUGINIT();
+
 #ifdef SWITCH_QSPI_TO_SOC_PLL
   /* program intf pll to 160Mhz */
   SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
@@ -81,7 +85,6 @@ int soc_pll_config(void) {
 
   RSI_CLK_QspiClkConfig(M4CLK, QSPI_INTFPLLCLK, 0, 0, 1);
 #endif /* SWITCH_QSPI_TO_SOC_PLL */
-
   return 0;
 }
 
