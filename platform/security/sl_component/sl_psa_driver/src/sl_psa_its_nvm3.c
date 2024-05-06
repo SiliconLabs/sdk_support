@@ -512,19 +512,24 @@ static inline void cache_session_key(uint8_t *session_key,
 }
 
 /**
- * \brief Derive a session key for ITS file encryption from the initialized root key and provided IV.
+ * \brief Derive a session key for ITS file encryption from the initialized root
+ * key and provided IV.
  *
- * \param[in] iv                Pointer to array containing the initialization vector to be used in the key derivation.
- * \param[in] iv_size           Size of the IV buffer in bytes. Must be 12 bytes (AES-GCM IV size).
- * \param[out] session_key      Pointer to array where derived session key shall be stored.
- * \param[out] session_key_size Size of the derived session key output array. Must be at least 32 bytes (AES-256 key size).
+ * \param[in] iv                Pointer to array containing the initialization
+ * vector to be used in the key derivation. \param[in] iv_size           Size of
+ * the IV buffer in bytes. Must be 12 bytes (AES-GCM IV size). \param[out]
+ * session_key      Pointer to array where derived session key shall be stored.
+ * \param[out] session_key_size Size of the derived session key output array.
+ * Must be at least 32 bytes (AES-256 key size).
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because iv or session_key is NULL, or their sizes are incorrect.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_BAD_STATE              The root key has
+ * not been initialized. \retval      PSA_ERROR_INVALID_ARGUMENT       The
+ * operation failed because iv or session_key is NULL, or their sizes are
+ * incorrect. \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed
+ * because an internal cryptographic operation failed.
  */
 static psa_status_t derive_session_key(uint8_t *iv, size_t iv_size,
                                        uint8_t *session_key,
@@ -592,21 +597,26 @@ static psa_status_t derive_session_key(uint8_t *iv, size_t iv_size,
 }
 
 /**
- * \brief Encrypt and authenticate ITS data with AES-128-GCM, storing the result in an encrypted blob.
+ * \brief Encrypt and authenticate ITS data with AES-128-GCM, storing the result
+ * in an encrypted blob.
  *
- * \param[in] metadata        ITS metadata to be used as authenticated additional data.
- * \param[in] plaintext       Pointer to array containing data to be encrypted.
- * \param[in] plaintext_size  Size of provided plaintext data array.
- * \param[out] blob           Pointer to array where the resulting encrypted blob shall be placed.
- * \param[in] blob_size       Size of the output array. Must be at least as big as plaintext_size + SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD
- * \param[out] blob_length    Resulting size of the output blob.
+ * \param[in] metadata        ITS metadata to be used as authenticated
+ * additional data. \param[in] plaintext       Pointer to array containing data
+ * to be encrypted. \param[in] plaintext_size  Size of provided plaintext data
+ * array. \param[out] blob           Pointer to array where the resulting
+ * encrypted blob shall be placed. \param[in] blob_size       Size of the output
+ * array. Must be at least as big as plaintext_size +
+ * SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD \param[out] blob_length    Resulting
+ * size of the output blob.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_BAD_STATE              The root key has
+ * not been initialized. \retval      PSA_ERROR_INVALID_ARGUMENT       The
+ * operation failed because one or more arguments are NULL or of invalid size.
+ * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an
+ * internal cryptographic operation failed.
  */
 static psa_status_t encrypt_its_file(sli_its_file_meta_v2_t *metadata,
                                      uint8_t *plaintext, size_t plaintext_size,
@@ -678,20 +688,25 @@ static psa_status_t encrypt_its_file(sli_its_file_meta_v2_t *metadata,
 /**
  * \brief Decrypt and authenticate encrypted ITS data.
  *
- * \param[in] metadata          ITS metadata to be used as authenticated additional data. Must be identical to the metadata used during encryption.
+ * \param[in] metadata          ITS metadata to be used as authenticated
+ * additional data. Must be identical to the metadata used during encryption.
  * \param[in] blob              Encrypted blob containing data to be decrypted.
  * \param[in] blob_size         Size of the encrypted blob in bytes.
- * \param[out] plaintext        Pointer to array where the decrypted plaintext shall be placed.
- * \param[in] plaintext_size    Size of the plaintext array. Must be equal to sizeof(blob->data) - AES_MAC_SIZE.
- * \param[out] plaintext_length Resulting length of the decrypted plaintext.
+ * \param[out] plaintext        Pointer to array where the decrypted plaintext
+ * shall be placed. \param[in] plaintext_size    Size of the plaintext array.
+ * Must be equal to sizeof(blob->data) - AES_MAC_SIZE. \param[out]
+ * plaintext_length Resulting length of the decrypted plaintext.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_INVALID_SIGANTURE      The operation failed because authentication of the decrypted data failed.
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_INVALID_SIGANTURE      The operation
+ * failed because authentication of the decrypted data failed. \retval
+ * PSA_ERROR_BAD_STATE              The root key has not been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because
+ * one or more arguments are NULL or of invalid size. \retval
+ * PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal
+ * cryptographic operation failed.
  */
 static psa_status_t decrypt_its_file(sli_its_file_meta_v2_t *metadata,
                                      sli_its_encrypted_blob_t *blob,
@@ -754,23 +769,29 @@ static psa_status_t decrypt_its_file(sli_its_file_meta_v2_t *metadata,
 }
 
 /**
- * \brief Authenticate encrypted ITS data and return the UID of the ITS file that was authenticated.
+ * \brief Authenticate encrypted ITS data and return the UID of the ITS file
+ * that was authenticated.
  *
- * \details NOTE: This function will run decrypt_its_file() internally. The difference from the decrypt_its_file()
- *          function is that authenticate_its_file() reads the NVM3 data, decrypts it in order to authenticate the
- *          stored data, and then discards the plaintext. This is needed since PSA Crypto doesn't support the
- *          GMAC primitive directly, which means we have to run a full GCM decrypt for authentication.
+ * \details NOTE: This function will run decrypt_its_file() internally. The
+ * difference from the decrypt_its_file() function is that
+ * authenticate_its_file() reads the NVM3 data, decrypts it in order to
+ * authenticate the stored data, and then discards the plaintext. This is needed
+ * since PSA Crypto doesn't support the GMAC primitive directly, which means we
+ * have to run a full GCM decrypt for authentication.
  *
- * \param[in] nvm3_object_id      The NVM3 id corresponding to the stored ITS file.
- * \param[out] authenticated_uid  UID for the authenticated ITS file.
+ * \param[in] nvm3_object_id      The NVM3 id corresponding to the stored ITS
+ * file. \param[out] authenticated_uid  UID for the authenticated ITS file.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_INVALID_SIGANTURE      The operation failed because authentication of the decrypted data failed.
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_INVALID_SIGANTURE      The operation
+ * failed because authentication of the decrypted data failed. \retval
+ * PSA_ERROR_BAD_STATE              The root key has not been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because
+ * one or more arguments are NULL or of invalid size. \retval
+ * PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal
+ * cryptographic operation failed.
  */
 static psa_status_t
 authenticate_its_file(nvm3_ObjectKey_t nvm3_object_id,
@@ -853,14 +874,19 @@ cleanup:
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_NOT_PERMITTED          The operation failed because the provided `uid` value was already created with PSA_STORAGE_FLAG_WRITE_ONCE
- * \retval      PSA_ERROR_NOT_SUPPORTED          The operation failed because one or more of the flags provided in `create_flags` is not supported or is not valid
- * \retval      PSA_ERROR_INSUFFICIENT_STORAGE   The operation failed because there was insufficient space on the storage medium
- * \retval      PSA_ERROR_STORAGE_FAILURE        The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one of the provided pointers(`p_data`)
- *                                               is invalid, for example is `NULL` or references memory the caller cannot access
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_NOT_PERMITTED          The operation
+ * failed because the provided `uid` value was already created with
+ * PSA_STORAGE_FLAG_WRITE_ONCE \retval      PSA_ERROR_NOT_SUPPORTED          The
+ * operation failed because one or more of the flags provided in `create_flags`
+ * is not supported or is not valid \retval      PSA_ERROR_INSUFFICIENT_STORAGE
+ * The operation failed because there was insufficient space on the storage
+ * medium \retval      PSA_ERROR_STORAGE_FAILURE        The operation failed
+ * because the physical storage has failed (Fatal error) \retval
+ * PSA_ERROR_INVALID_ARGUMENT       The operation failed because one of the
+ * provided pointers(`p_data`) is invalid, for example is `NULL` or references
+ * memory the caller cannot access \retval      PSA_ERROR_HARDWARE_FAILURE The
+ * operation failed because an internal cryptographic operation failed.
  */
 psa_status_t psa_its_set(psa_storage_uid_t uid, uint32_t data_length,
                          const void *p_data,
@@ -1013,20 +1039,25 @@ exit:
  *
  * \param[in] uid               The uid value
  * \param[in] data_offset       The starting offset of the data requested
- * \param[in] data_length       the amount of data requested (and the minimum allocated size of the `p_data` buffer)
- * \param[out] p_data           The buffer where the data will be placed upon successful completion
- * \param[out] p_data_length    The amount of data returned in the p_data buffer
+ * \param[in] data_length       the amount of data requested (and the minimum
+ * allocated size of the `p_data` buffer) \param[out] p_data           The
+ * buffer where the data will be placed upon successful completion \param[out]
+ * p_data_length    The amount of data returned in the p_data buffer
  *
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided `uid` value was not found in the storage
- * \retval      PSA_ERROR_BUFFER_TOO_SMALL   The operation failed because the data associated with provided uid is larger than `data_size`
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The operation failed because one of the provided pointers(`p_data`, `p_data_length`)
- *                                           is invalid. For example is `NULL` or references memory the caller cannot access.
- *                                           In addition, this can also happen if an invalid offset was provided.
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided `uid` value was not found in the storage \retval
+ * PSA_ERROR_BUFFER_TOO_SMALL   The operation failed because the data associated
+ * with provided uid is larger than `data_size` \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error) \retval      PSA_ERROR_INVALID_ARGUMENT The
+ * operation failed because one of the provided pointers(`p_data`,
+ * `p_data_length`) is invalid. For example is `NULL` or references memory the
+ * caller cannot access. In addition, this can also happen if an invalid offset
+ * was provided.
  */
 psa_status_t psa_its_get(psa_storage_uid_t uid, uint32_t data_offset,
                          uint32_t data_length, void *p_data,
@@ -1191,16 +1222,20 @@ exit:
  * \brief Retrieve the metadata about the provided uid
  *
  * \param[in] uid           The uid value
- * \param[out] p_info       A pointer to the `psa_storage_info_t` struct that will be populated with the metadata
+ * \param[out] p_info       A pointer to the `psa_storage_info_t` struct that
+ * will be populated with the metadata
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided uid value was not found in the storage
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The operation failed because one of the provided pointers(`p_info`)
- *                                           is invalid, for example is `NULL` or references memory the caller cannot access
- * \retval      PSA_ERROR_INVALID_SIGANTURE  The operation failed because authentication of the stored metadata failed.
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided uid value was not found in the storage \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error) \retval      PSA_ERROR_INVALID_ARGUMENT The
+ * operation failed because one of the provided pointers(`p_info`) is invalid,
+ * for example is `NULL` or references memory the caller cannot access \retval
+ * PSA_ERROR_INVALID_SIGANTURE  The operation failed because authentication of
+ * the stored metadata failed.
  */
 psa_status_t psa_its_get_info(psa_storage_uid_t uid,
                               struct psa_storage_info_t *p_info) {
@@ -1269,10 +1304,13 @@ exit:
  *
  * \return  A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided key value was not found in the storage
- * \retval      PSA_ERROR_NOT_PERMITTED      The operation failed because the provided key value was created with PSA_STORAGE_FLAG_WRITE_ONCE
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided key value was not found in the storage \retval
+ * PSA_ERROR_NOT_PERMITTED      The operation failed because the provided key
+ * value was created with PSA_STORAGE_FLAG_WRITE_ONCE \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error)
  */
 psa_status_t psa_its_remove(psa_storage_uid_t uid) {
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
@@ -1516,16 +1554,19 @@ psa_status_t sli_psa_its_encrypted(void) {
 
 #if defined(SLI_PSA_ITS_ENCRYPTED) && !defined(SEMAILBOX_PRESENT)
 /**
- * \brief Set the root key to be used when deriving session keys for ITS encryption.
+ * \brief Set the root key to be used when deriving session keys for ITS
+ * encryption.
  *
  * \param[in] root_key        Buffer containing the root key.
- * \param[in] root_key_size   Size of the root key in bytes. Must be 32 (256 bits).
+ * \param[in] root_key_size   Size of the root key in bytes. Must be 32 (256
+ * bits).
  *
  * \return  A status indicating the success/failure of the operation
  *
  * \retval      PSA_SUCCESS                  The key was successfully set.
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The root key was NULL or had an invalid size.
- * \retval      PSA_ERROR_ALREADY_EXISTS     The root key has already been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT   The root key was NULL or had an
+ * invalid size. \retval      PSA_ERROR_ALREADY_EXISTS     The root key has
+ * already been initialized.
  */
 psa_status_t sli_psa_its_set_root_key(uint8_t *root_key, size_t root_key_size) {
   // Check that arguments are valid
@@ -2189,17 +2230,18 @@ exit:
  * \brief Search through NVM3 for correct uid
  *
  * \param[in] uid               UID under what we want to store the data
- * \param[in] find_empty_slot   Indicates whether we want to find existing data or empty space for storing new.
- * \param[out] its_file_meta    Meta information of ITS file
- * \param[out] its_file_offset  Offset of ITS file
- * \param[out] its_file_size    Size of ITS file
- * \param[out] output_nvm3_id   NVM3 ID corresponding to UID.
+ * \param[in] find_empty_slot   Indicates whether we want to find existing data
+ * or empty space for storing new. \param[out] its_file_meta    Meta information
+ * of ITS file \param[out] its_file_offset  Offset of ITS file \param[out]
+ * its_file_size    Size of ITS file \param[out] output_nvm3_id   NVM3 ID
+ * corresponding to UID.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST         The data with this UID are not stored in NVM3
- * \retval      PSA_ERROR_NOT_PERMITTED          The requested operation is not permitted
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST         The data with this
+ * UID are not stored in NVM3 \retval      PSA_ERROR_NOT_PERMITTED          The
+ * requested operation is not permitted
  */
 static psa_status_t find_nvm3_id(psa_storage_uid_t uid, bool find_empty_slot,
                                  sli_its_file_meta_v2_t *its_file_meta,
@@ -2342,19 +2384,24 @@ static inline void cache_session_key(uint8_t *session_key,
 }
 
 /**
- * \brief Derive a session key for ITS file encryption from the initialized root key and provided IV.
+ * \brief Derive a session key for ITS file encryption from the initialized root
+ * key and provided IV.
  *
- * \param[in] iv                Pointer to array containing the initialization vector to be used in the key derivation.
- * \param[in] iv_size           Size of the IV buffer in bytes. Must be 12 bytes (AES-GCM IV size).
- * \param[out] session_key      Pointer to array where derived session key shall be stored.
- * \param[out] session_key_size Size of the derived session key output array. Must be at least 32 bytes (AES-256 key size).
+ * \param[in] iv                Pointer to array containing the initialization
+ * vector to be used in the key derivation. \param[in] iv_size           Size of
+ * the IV buffer in bytes. Must be 12 bytes (AES-GCM IV size). \param[out]
+ * session_key      Pointer to array where derived session key shall be stored.
+ * \param[out] session_key_size Size of the derived session key output array.
+ * Must be at least 32 bytes (AES-256 key size).
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because iv or session_key is NULL, or their sizes are incorrect.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_BAD_STATE              The root key has
+ * not been initialized. \retval      PSA_ERROR_INVALID_ARGUMENT       The
+ * operation failed because iv or session_key is NULL, or their sizes are
+ * incorrect. \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed
+ * because an internal cryptographic operation failed.
  */
 static psa_status_t derive_session_key(uint8_t *iv, size_t iv_size,
                                        uint8_t *session_key,
@@ -2422,21 +2469,26 @@ static psa_status_t derive_session_key(uint8_t *iv, size_t iv_size,
 }
 
 /**
- * \brief Encrypt and authenticate ITS data with AES-128-GCM, storing the result in an encrypted blob.
+ * \brief Encrypt and authenticate ITS data with AES-128-GCM, storing the result
+ * in an encrypted blob.
  *
- * \param[in] metadata        ITS metadata to be used as authenticated additional data.
- * \param[in] plaintext       Pointer to array containing data to be encrypted.
- * \param[in] plaintext_size  Size of provided plaintext data array.
- * \param[out] blob           Pointer to array where the resulting encrypted blob shall be placed.
- * \param[in] blob_size       Size of the output array. Must be at least as big as plaintext_size + SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD
- * \param[out] blob_length    Resulting size of the output blob.
+ * \param[in] metadata        ITS metadata to be used as authenticated
+ * additional data. \param[in] plaintext       Pointer to array containing data
+ * to be encrypted. \param[in] plaintext_size  Size of provided plaintext data
+ * array. \param[out] blob           Pointer to array where the resulting
+ * encrypted blob shall be placed. \param[in] blob_size       Size of the output
+ * array. Must be at least as big as plaintext_size +
+ * SLI_ITS_ENCRYPTED_BLOB_SIZE_OVERHEAD \param[out] blob_length    Resulting
+ * size of the output blob.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_BAD_STATE              The root key has
+ * not been initialized. \retval      PSA_ERROR_INVALID_ARGUMENT       The
+ * operation failed because one or more arguments are NULL or of invalid size.
+ * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an
+ * internal cryptographic operation failed.
  */
 psa_status_t sli_encrypt_its_file(sli_its_file_meta_v2_t *metadata,
                                   uint8_t *plaintext, size_t plaintext_size,
@@ -2509,20 +2561,25 @@ psa_status_t sli_encrypt_its_file(sli_its_file_meta_v2_t *metadata,
 /**
  * \brief Decrypt and authenticate encrypted ITS data.
  *
- * \param[in] metadata          ITS metadata to be used as authenticated additional data. Must be identical to the metadata used during encryption.
+ * \param[in] metadata          ITS metadata to be used as authenticated
+ * additional data. Must be identical to the metadata used during encryption.
  * \param[in] blob              Encrypted blob containing data to be decrypted.
  * \param[in] blob_size         Size of the encrypted blob in bytes.
- * \param[out] plaintext        Pointer to array where the decrypted plaintext shall be placed.
- * \param[in] plaintext_size    Size of the plaintext array. Must be equal to sizeof(blob->data) - AES_GCM_MAC_SIZE.
- * \param[out] plaintext_length Resulting length of the decrypted plaintext.
+ * \param[out] plaintext        Pointer to array where the decrypted plaintext
+ * shall be placed. \param[in] plaintext_size    Size of the plaintext array.
+ * Must be equal to sizeof(blob->data) - AES_GCM_MAC_SIZE. \param[out]
+ * plaintext_length Resulting length of the decrypted plaintext.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_INVALID_SIGANTURE      The operation failed because authentication of the decrypted data failed.
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_INVALID_SIGANTURE      The operation
+ * failed because authentication of the decrypted data failed. \retval
+ * PSA_ERROR_BAD_STATE              The root key has not been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because
+ * one or more arguments are NULL or of invalid size. \retval
+ * PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal
+ * cryptographic operation failed.
  */
 static psa_status_t sli_decrypt_its_file(sli_its_file_meta_v2_t *metadata,
                                          sli_its_encrypted_blob_t *blob,
@@ -2585,23 +2642,29 @@ static psa_status_t sli_decrypt_its_file(sli_its_file_meta_v2_t *metadata,
 }
 
 /**
- * \brief Authenticate encrypted ITS data and return the UID of the ITS file that was authenticated.
+ * \brief Authenticate encrypted ITS data and return the UID of the ITS file
+ * that was authenticated.
  *
- * \details NOTE: This function will run sli_decrypt_its_file() internally. The difference from the sli_decrypt_its_file()
- *          function is that authenticate_its_file() reads the NVM3 data, decrypts it in order to authenticate the
- *          stored data, and then discards the plaintext. This is needed since PSA Crypto doesn't support the
- *          GMAC primitive directly, which means we have to run a full GCM decrypt for authentication.
+ * \details NOTE: This function will run sli_decrypt_its_file() internally. The
+ * difference from the sli_decrypt_its_file() function is that
+ * authenticate_its_file() reads the NVM3 data, decrypts it in order to
+ * authenticate the stored data, and then discards the plaintext. This is needed
+ * since PSA Crypto doesn't support the GMAC primitive directly, which means we
+ * have to run a full GCM decrypt for authentication.
  *
- * \param[in] nvm3_object_id      The NVM3 id corresponding to the stored ITS file.
- * \param[out] authenticated_uid  UID for the authenticated ITS file.
+ * \param[in] nvm3_object_id      The NVM3 id corresponding to the stored ITS
+ * file. \param[out] authenticated_uid  UID for the authenticated ITS file.
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_INVALID_SIGANTURE      The operation failed because authentication of the decrypted data failed.
- * \retval      PSA_ERROR_BAD_STATE              The root key has not been initialized.
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one or more arguments are NULL or of invalid size.
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_INVALID_SIGANTURE      The operation
+ * failed because authentication of the decrypted data failed. \retval
+ * PSA_ERROR_BAD_STATE              The root key has not been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because
+ * one or more arguments are NULL or of invalid size. \retval
+ * PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal
+ * cryptographic operation failed.
  */
 static psa_status_t
 authenticate_its_file(nvm3_ObjectKey_t nvm3_object_id,
@@ -2684,15 +2747,21 @@ cleanup:
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                      The operation completed successfully
- * \retval      PSA_ERROR_NOT_PERMITTED          The operation failed because the provided `uid` value was already created with PSA_STORAGE_FLAG_WRITE_ONCE
- * \retval      PSA_ERROR_NOT_SUPPORTED          The operation failed because one or more of the flags provided in `create_flags` is not supported or is not valid
- * \retval      PSA_ERROR_INSUFFICIENT_STORAGE   The operation failed because there was insufficient space on the storage medium
- * \retval      PSA_ERROR_STORAGE_FAILURE        The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT       The operation failed because one of the provided pointers(`p_data`)
- *                                               is invalid, for example is `NULL` or references memory the caller cannot access
- * \retval      PSA_ERROR_HARDWARE_FAILURE       The operation failed because an internal cryptographic operation failed.
- * \retval      PSA_ERROR_INVALID_SIGNATURE      The operation failed because the provided `uid` doesnt match the autenticated uid from the storage
+ * \retval      PSA_SUCCESS                      The operation completed
+ * successfully \retval      PSA_ERROR_NOT_PERMITTED          The operation
+ * failed because the provided `uid` value was already created with
+ * PSA_STORAGE_FLAG_WRITE_ONCE \retval      PSA_ERROR_NOT_SUPPORTED          The
+ * operation failed because one or more of the flags provided in `create_flags`
+ * is not supported or is not valid \retval      PSA_ERROR_INSUFFICIENT_STORAGE
+ * The operation failed because there was insufficient space on the storage
+ * medium \retval      PSA_ERROR_STORAGE_FAILURE        The operation failed
+ * because the physical storage has failed (Fatal error) \retval
+ * PSA_ERROR_INVALID_ARGUMENT       The operation failed because one of the
+ * provided pointers(`p_data`) is invalid, for example is `NULL` or references
+ * memory the caller cannot access \retval      PSA_ERROR_HARDWARE_FAILURE The
+ * operation failed because an internal cryptographic operation failed. \retval
+ * PSA_ERROR_INVALID_SIGNATURE      The operation failed because the provided
+ * `uid` doesnt match the autenticated uid from the storage
  */
 psa_status_t psa_its_set(psa_storage_uid_t uid, uint32_t data_length,
                          const void *p_data,
@@ -2808,20 +2877,25 @@ exit:
  *
  * \param[in] uid               The uid value
  * \param[in] data_offset       The starting offset of the data requested
- * \param[in] data_length       the amount of data requested (and the minimum allocated size of the `p_data` buffer)
- * \param[out] p_data           The buffer where the data will be placed upon successful completion
- * \param[out] p_data_length    The amount of data returned in the p_data buffer
+ * \param[in] data_length       the amount of data requested (and the minimum
+ * allocated size of the `p_data` buffer) \param[out] p_data           The
+ * buffer where the data will be placed upon successful completion \param[out]
+ * p_data_length    The amount of data returned in the p_data buffer
  *
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided `uid` value was not found in the storage
- * \retval      PSA_ERROR_BUFFER_TOO_SMALL   The operation failed because the data associated with provided uid is larger than `data_size`
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The operation failed because one of the provided pointers(`p_data`, `p_data_length`)
- *                                           is invalid. For example is `NULL` or references memory the caller cannot access.
- *                                           In addition, this can also happen if an invalid offset was provided.
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided `uid` value was not found in the storage \retval
+ * PSA_ERROR_BUFFER_TOO_SMALL   The operation failed because the data associated
+ * with provided uid is larger than `data_size` \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error) \retval      PSA_ERROR_INVALID_ARGUMENT The
+ * operation failed because one of the provided pointers(`p_data`,
+ * `p_data_length`) is invalid. For example is `NULL` or references memory the
+ * caller cannot access. In addition, this can also happen if an invalid offset
+ * was provided.
  */
 psa_status_t psa_its_get(psa_storage_uid_t uid, uint32_t data_offset,
                          uint32_t data_length, void *p_data,
@@ -2972,16 +3046,20 @@ exit:
  * \brief Retrieve the metadata about the provided uid
  *
  * \param[in] uid           The uid value
- * \param[out] p_info       A pointer to the `psa_storage_info_t` struct that will be populated with the metadata
+ * \param[out] p_info       A pointer to the `psa_storage_info_t` struct that
+ * will be populated with the metadata
  *
  * \return      A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided uid value was not found in the storage
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The operation failed because one of the provided pointers(`p_info`)
- *                                           is invalid, for example is `NULL` or references memory the caller cannot access
- * \retval      PSA_ERROR_INVALID_SIGANTURE  The operation failed because authentication of the stored metadata failed.
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided uid value was not found in the storage \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error) \retval      PSA_ERROR_INVALID_ARGUMENT The
+ * operation failed because one of the provided pointers(`p_info`) is invalid,
+ * for example is `NULL` or references memory the caller cannot access \retval
+ * PSA_ERROR_INVALID_SIGANTURE  The operation failed because authentication of
+ * the stored metadata failed.
  */
 psa_status_t psa_its_get_info(psa_storage_uid_t uid,
                               struct psa_storage_info_t *p_info) {
@@ -3021,10 +3099,13 @@ psa_status_t psa_its_get_info(psa_storage_uid_t uid,
  *
  * \return  A status indicating the success/failure of the operation
  *
- * \retval      PSA_SUCCESS                  The operation completed successfully
- * \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed because the provided key value was not found in the storage
- * \retval      PSA_ERROR_NOT_PERMITTED      The operation failed because the provided key value was created with PSA_STORAGE_FLAG_WRITE_ONCE
- * \retval      PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical storage has failed (Fatal error)
+ * \retval      PSA_SUCCESS                  The operation completed
+ * successfully \retval      PSA_ERROR_DOES_NOT_EXIST     The operation failed
+ * because the provided key value was not found in the storage \retval
+ * PSA_ERROR_NOT_PERMITTED      The operation failed because the provided key
+ * value was created with PSA_STORAGE_FLAG_WRITE_ONCE \retval
+ * PSA_ERROR_STORAGE_FAILURE    The operation failed because the physical
+ * storage has failed (Fatal error)
  */
 psa_status_t psa_its_remove(psa_storage_uid_t uid) {
   psa_status_t psa_status = PSA_ERROR_CORRUPTION_DETECTED;
@@ -3146,16 +3227,19 @@ psa_status_t sli_psa_its_encrypted(void) {
 
 #if defined(SLI_PSA_ITS_ENCRYPTED) && !defined(SEMAILBOX_PRESENT)
 /**
- * \brief Set the root key to be used when deriving session keys for ITS encryption.
+ * \brief Set the root key to be used when deriving session keys for ITS
+ * encryption.
  *
  * \param[in] root_key        Buffer containing the root key.
- * \param[in] root_key_size   Size of the root key in bytes. Must be 32 (256 bits).
+ * \param[in] root_key_size   Size of the root key in bytes. Must be 32 (256
+ * bits).
  *
  * \return  A status indicating the success/failure of the operation
  *
  * \retval      PSA_SUCCESS                  The key was successfully set.
- * \retval      PSA_ERROR_INVALID_ARGUMENT   The root key was NULL or had an invalid size.
- * \retval      PSA_ERROR_ALREADY_EXISTS     The root key has already been initialized.
+ * \retval      PSA_ERROR_INVALID_ARGUMENT   The root key was NULL or had an
+ * invalid size. \retval      PSA_ERROR_ALREADY_EXISTS     The root key has
+ * already been initialized.
  */
 psa_status_t sli_psa_its_set_root_key(uint8_t *root_key, size_t root_key_size) {
   // Check that arguments are valid

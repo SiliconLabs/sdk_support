@@ -160,7 +160,8 @@ THREADING_TakeMutexBlocking(mbedtls_threading_mutex_t *mutex) {
  *
  * \param mutex    Pointer to the mutex being tested
  *
- * \return         RTOS_ERR_NONE on success (= mutex successfully owned), error code otherwise.
+ * \return         RTOS_ERR_NONE on success (= mutex successfully owned), error
+ * code otherwise.
  */
 static inline int
 THREADING_TakeMutexNonBlocking(mbedtls_threading_mutex_t *mutex) {
@@ -213,7 +214,8 @@ void mbedtls_threading_set_alt(
     int (*mutex_unlock)(mbedtls_threading_mutex_t *));
 
 /**
- * \brief          Helper function for setting up the mbed TLS threading subsystem
+ * \brief          Helper function for setting up the mbed TLS threading
+ * subsystem
  */
 static inline void THREADING_setup(void) {
   mbedtls_threading_set_alt(&THREADING_InitMutex, &THREADING_FreeMutex,
