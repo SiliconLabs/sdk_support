@@ -37,8 +37,8 @@
 
 /*******************************************************************************
  * \addtogroup sl_crypto_cmac Accelerated AES-CMAC Cipher
- * \brief Accelerated AES-CMAC cipher for the mbed TLS API using the CRYPTOACC or
- *        SE peripheral. This implementation builds on the PSA Crypto drivers
+ * \brief Accelerated AES-CMAC cipher for the mbed TLS API using the CRYPTOACC
+ *or SE peripheral. This implementation builds on the PSA Crypto drivers
  *        (\ref sl_psa_drivers).
  *
  * \{

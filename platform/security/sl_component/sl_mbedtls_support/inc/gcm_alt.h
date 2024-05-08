@@ -1,6 +1,7 @@
 /*******************************************************************************
  * @file
- * @brief Accelerated mbed TLS Galois/Counter Mode (GCM) for AES-128-bit block ciphers
+ * @brief Accelerated mbed TLS Galois/Counter Mode (GCM) for AES-128-bit block
+ *ciphers
  *******************************************************************************
  * # License
  * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
@@ -37,8 +38,8 @@
 
 /*******************************************************************************
  * \addtogroup sl_crypto_gcm Accelerated GCM AES-128 Cipher
- * \brief Accelerated AES-GCM-128 cipher for the mbed TLS API using the CRYPTOACC
- *        or SE peripheral
+ * \brief Accelerated AES-GCM-128 cipher for the mbed TLS API using the
+ *CRYPTOACC or SE peripheral
  *
  * \{
  * This module implements the GCM AES-128 cipher, as defined in
@@ -59,8 +60,8 @@
 #elif defined(SEMAILBOX_PRESENT)
 #include "em_se.h"
 #elif defined(CRYPTOACC_PRESENT)
-#include "sx_aes.h"
 #include "sl_enum.h"
+#include "sx_aes.h"
 #endif
 
 #ifdef __cplusplus
@@ -69,8 +70,8 @@ extern "C" {
 
 #if defined(CRYPTOACC_PRESENT)
 SL_ENUM(sli_gcm_mode_t){
-  SLI_GCM_ENC = 1,
-  SLI_GCM_DEC = 2,
+    SLI_GCM_ENC = 1,
+    SLI_GCM_DEC = 2,
 };
 #endif
 

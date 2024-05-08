@@ -37,8 +37,8 @@
 
 /*******************************************************************************
  * \addtogroup sl_crypto_ccm Accelerated AES-CCM AEAD Cipher
- * \brief Accelerated AES-CCM AEAD cipher for the mbed TLS API using the CRYPTOACC
- *         or SE peripheral
+ * \brief Accelerated AES-CCM AEAD cipher for the mbed TLS API using the
+ *CRYPTOACC or SE peripheral
  *
  * \{
  ******************************************************************************/

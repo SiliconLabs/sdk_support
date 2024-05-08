@@ -59,9 +59,9 @@
 #define SL_HASH_OPERATION_CTX_TYPE sli_cryptoacc_transparent_hash_operation_t
 #endif
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {

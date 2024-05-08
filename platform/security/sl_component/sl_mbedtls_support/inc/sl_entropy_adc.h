@@ -38,8 +38,8 @@
 
 #if defined(ADC_PRESENT) && defined(_ADC_SINGLECTRLX_VREFSEL_VENTROPY)
 
-#include "em_cmu.h"
 #include "em_adc.h"
+#include "em_cmu.h"
 #include "mbedtls/entropy.h"
 
 /*******************************************************************************
@@ -120,7 +120,8 @@ void mbedtls_entropy_adc_init(mbedtls_entropy_adc_context *ctx);
  * @return 0 for success or MBEDTLS_ERR_ENTROPY_SOURCE_FAILED if
  *         adc_inst is invalid.
  ******************************************************************************/
-int mbedtls_entropy_adc_set_instance(mbedtls_entropy_adc_context *ctx, unsigned int adc_inst);
+int mbedtls_entropy_adc_set_instance(mbedtls_entropy_adc_context *ctx,
+                                     unsigned int adc_inst);
 
 /*******************************************************************************
  * @brief
@@ -174,7 +175,8 @@ void mbedtls_entropy_adc_free(mbedtls_entropy_adc_context *ctx);
  *
  * @return Always 0 for success.
  ******************************************************************************/
-int mbedtls_entropy_adc_poll(mbedtls_entropy_adc_context *ctx, unsigned char *output, size_t len, size_t *olen);
+int mbedtls_entropy_adc_poll(mbedtls_entropy_adc_context *ctx,
+                             unsigned char *output, size_t len, size_t *olen);
 
 #ifdef __cplusplus
 }

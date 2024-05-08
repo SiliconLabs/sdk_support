@@ -54,7 +54,8 @@ extern "C" {
  *
  * \note Available builtin key IDs vary for different family of devices.
  *       For devices vith VSE see \ref sl_psa_drivers_cryptoacc_builtin_keys ,
- *       and for devices with Secure Engine see \ref sl_psa_drivers_se_builtin_keys .
+ *       and for devices with Secure Engine see \ref
+ *sl_psa_drivers_se_builtin_keys .
  * \{
  ******************************************************************************/
 /** \} (end addtogroup psa_builtin_keys) */
@@ -94,9 +95,9 @@ extern "C" {
  *   The location of the key. Can be SL_PSA_KEY_LOCATION_WRAPPED,
  *   SL_PSA_KEY_LOCATION_BUILTIN, or PSA_KEY_LOCATION_LOCAL_STORAGE.
  ******************************************************************************/
-void sl_psa_set_key_lifetime_with_location_preference(psa_key_attributes_t *attributes,
-                                                      psa_key_persistence_t persistence,
-                                                      psa_key_location_t preferred_location);
+void sl_psa_set_key_lifetime_with_location_preference(
+    psa_key_attributes_t *attributes, psa_key_persistence_t persistence,
+    psa_key_location_t preferred_location);
 
 /*******************************************************************************
  * @brief
