@@ -21,8 +21,9 @@
 #include "sl_si91x_button_pin_config.h"
 #include "sli_siwx917_soc.h"
 #include "rsi_debug.h"
+#include "rsi_rom_egpio.h"
 
-#define SOC_PLL_REF_FREQUENCY 40000000//32000000 /* PLL input REFERENCE clock 32MHZ */
+#define SOC_PLL_REF_FREQUENCY 40000000// /* PLL input REFERENCE clock 32MHZ */
 
 // Note: Change this macro to required PLL frequency in hertz
 #define PS4_SOC_FREQ 180000000 /* PLL out clock 180MHz */
@@ -48,26 +49,13 @@ void sl_button_on_change(uint8_t btn, uint8_t btnAction);
 int soc_pll_config(void) {
   int32_t status = RSI_OK;
 
-  RSI_CLK_SocPllLockConfig(1, 1, 7);
-
-  RSI_CLK_SocPllRefClkConfig(2);
-
   RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
-
-  /*Enable fre-fetch and register if SOC-PLL frequency is more than or equal to
-   * 120M*/
-#if (PS4_SOC_FREQ >= 120000000)
-  ICACHE2_ADDR_TRANSLATE_1_REG = BIT(21);
-  MISC_CFG_SRAM_REDUNDANCY_CTRL = BIT(4);
-  MISC_CONFIG_MISC_CTRL1 |= BIT(4);
-#if !(defined WISE_AOC_4)
-  MISC_QUASI_SYNC_MODE |= BIT(6);
-  MISC_QUASI_SYNC_MODE |= (BIT(6) | BIT(7));
-#endif /* !WISE_AOC_4 */
-#endif /* (PS4_SOC_FREQ > 120000000) */
-
+    // Configures the required registers for 180 Mhz clock in PS4
+  RSI_PS_PS4SetRegisters();
+    // Configure the PLL frequency
+    // Configure the SOC PLL to 180MHz
   RSI_CLK_SetSocPllFreq(M4CLK, PS4_SOC_FREQ, SOC_PLL_REF_FREQUENCY);
-
+    // Switch M4 clock to PLL clock for speed operations
   RSI_CLK_M4SocClkConfig(M4CLK, M4_SOCPLLCLK, 0);
 
   SysTick_Config(SystemCoreClock / 1000);
