@@ -37,8 +37,8 @@
 
 /*******************************************************************************
  * \addtogroup sl_crypto_aes Accelerated AES Block Cipher
- * \brief Accelerated AES block cipher for the mbed TLS API using the AES, CRYPTO,
- *        CRYPTOACC or SE peripheral
+ * \brief Accelerated AES block cipher for the mbed TLS API using the AES,
+ *CRYPTO, CRYPTOACC or SE peripheral
  *
  * \{
  ******************************************************************************/

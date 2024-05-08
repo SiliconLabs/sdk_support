@@ -60,8 +60,7 @@ extern "C" {
  *
  * \return         0 if successful, negative on error
  */
-__STATIC_INLINE int se_management_acquire(void)
-{
+__STATIC_INLINE int se_management_acquire(void) {
   // Acquire SE manager lock
   return sli_se_lock_acquire() == SL_STATUS_OK ? 0 : -1;
 }
@@ -71,8 +70,7 @@ __STATIC_INLINE int se_management_acquire(void)
  *
  * \return         0 if successful, negative on error
  */
-__STATIC_INLINE int se_management_release(void)
-{
+__STATIC_INLINE int se_management_release(void) {
   // Release SE manager lock
   return sli_se_lock_release() == SL_STATUS_OK ? 0 : -1;
 }

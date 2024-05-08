@@ -35,26 +35,28 @@
 
 #include "psa/crypto.h"
 
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // -----------------------------------------------------------------------------
 // Defines and Macros
 
 // Persistent key ID ranges.
 #define SLI_PSA_KEY_ID_RANGE_THREAD_START (0x00020000)
-#define SLI_PSA_KEY_ID_RANGE_THREAD_END   (0x0002FFFF)
+#define SLI_PSA_KEY_ID_RANGE_THREAD_END (0x0002FFFF)
 #define SLI_PSA_KEY_ID_RANGE_ZIGBEE_START (0x00030000)
-#define SLI_PSA_KEY_ID_RANGE_ZIGBEE_END   (0x0003FFFF)
+#define SLI_PSA_KEY_ID_RANGE_ZIGBEE_END (0x0003FFFF)
 
 // Convert a type name into an enum entry name, since enum entries and type
 // names share the same C namespace.
-#define SLI_PSA_CONTEXT_ENUM_NAME(NAME)     NAME##_e
+#define SLI_PSA_CONTEXT_ENUM_NAME(NAME) NAME##_e
 #define SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME) NAME##_e
 
 // Convenience macros for getting the size of a context structure type
-#define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME)     (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
-#define SLI_MBEDTLS_CONTEXT_GET_RUNTIME_SIZE(NAME) (sli_mbedtls_context_get_size(SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME)))
+#define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME)                                 \
+  (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
+#define SLI_MBEDTLS_CONTEXT_GET_RUNTIME_SIZE(NAME)                             \
+  (sli_mbedtls_context_get_size(SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME)))
 
 // -----------------------------------------------------------------------------
 // Type Definitions
