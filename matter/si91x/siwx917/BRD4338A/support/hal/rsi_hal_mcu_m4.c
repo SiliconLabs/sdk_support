@@ -15,13 +15,13 @@
  *    limitations under the License.
  */
 
+#include "rsi_debug.h"
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
+#include "rsi_rom_egpio.h"
 #include "silabs_utils.h"
 #include "sl_si91x_button_pin_config.h"
 #include "sli_siwx917_soc.h"
-#include "rsi_debug.h"
-#include "rsi_rom_egpio.h"
 
 #define SOC_PLL_REF_FREQUENCY 40000000 // /* PLL input REFERENCE clock 40MHZ */
 
@@ -33,21 +33,20 @@
 
 /* QSPI clock config params */
 #define INTF_PLL_500_CTRL_VALUE 0xD900
-#define INTF_PLL_CLK            80000000 /* PLL out clock 80 MHz */
+#define INTF_PLL_CLK 80000000 /* PLL out clock 80 MHz */
 
-#define PMU_GOOD_TIME  31 /*Duration in us*/
+#define PMU_GOOD_TIME 31  /*Duration in us*/
 #define XTAL_GOOD_TIME 31 /*Duration in us*/
 
 /*Pre-fetch and regestring */
-#define ICACHE2_ADDR_TRANSLATE_1_REG  *(volatile uint32_t *)(0x20280000 + 0x24)
+#define ICACHE2_ADDR_TRANSLATE_1_REG *(volatile uint32_t *)(0x20280000 + 0x24)
 #define MISC_CFG_SRAM_REDUNDANCY_CTRL *(volatile uint32_t *)(0x46008000 + 0x18)
-#define MISC_CONFIG_MISC_CTRL1        *(volatile uint32_t *)(0x46008000 + 0x44)
-#define MISC_QUASI_SYNC_MODE          *(volatile uint32_t *)(0x46008000 + 0x84)
+#define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
+#define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
 
 void sl_button_on_change(uint8_t btn, uint8_t btnAction);
 
-int soc_pll_config(void)
-{
+int soc_pll_config(void) {
   int32_t status = RSI_OK;
 
   RSI_CLK_M4SocClkConfig(M4CLK, M4_ULPREFCLK, 0);
@@ -65,7 +64,7 @@ int soc_pll_config(void)
 #ifdef SWITCH_QSPI_TO_SOC_PLL
   /* program intf pll to 160Mhz */
   SPI_MEM_MAP_PLL(INTF_PLL_500_CTRL_REG9) = INTF_PLL_500_CTRL_VALUE;
-  status                                  = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
+  status = RSI_CLK_SetIntfPllFreq(M4CLK, INTF_PLL_CLK, SOC_PLL_REF_FREQUENCY);
   if (status != RSI_OK) {
     SILABS_LOG("Failed to Config Interface PLL Clock, status:%d", status);
   } else {
@@ -77,8 +76,8 @@ int soc_pll_config(void)
   return 0;
 }
 
-void sl_si91x_button_isr(uint8_t pin, uint8_t state)
-{
-  (pin == SL_BUTTON_BTN0_PIN) ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, !state)
-                              : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, !state);
+void sl_si91x_button_isr(uint8_t pin, uint8_t state) {
+  (pin == SL_BUTTON_BTN0_PIN)
+      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, !state)
+      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, !state);
 }
