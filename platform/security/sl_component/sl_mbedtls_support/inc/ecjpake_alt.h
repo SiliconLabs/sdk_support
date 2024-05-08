@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Accelerated mbed TLS Elliptic Curve J-PAKE
  *******************************************************************************
@@ -30,12 +30,12 @@
 #ifndef ECJPAKE_ALT_H
 #define ECJPAKE_ALT_H
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto
  * \{
  ******************************************************************************/
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto_jpake Accelerated Elliptic Curve J-PAKE
  * \brief Accelerated Elliptic Curve J-PAKE for the mbed TLS API using the SE
  *        peripheral
@@ -61,19 +61,19 @@ extern "C" {
  * description as a pair C: client name, S: server name
  */
 typedef struct {
-  uint32_t curve_flags;                 /**< Curve flags to use             */
-  mbedtls_ecjpake_role role;            /**< Are we client or server?       */
-  int point_format;                     /**< Format for point export        */
+  uint32_t curve_flags;      /**< Curve flags to use             */
+  mbedtls_ecjpake_role role; /**< Are we client or server?       */
+  int point_format;          /**< Format for point export        */
 
-  char pwd[33];                         /**< J-PAKE password                */
-  size_t pwd_len;                       /**< J-PAKE password length         */
+  char pwd[33];   /**< J-PAKE password                */
+  size_t pwd_len; /**< J-PAKE password length         */
 
-  uint8_t r[32];                        /**< Random scalar for exchange     */
-  uint8_t Xm1[64];                      /**< Our point 1 (round 1)          */
-  uint8_t Xm2[64];                      /**< Our point 2 (round 1)          */
-  uint8_t Xp1[64];                      /**< Their point 1 (round 1)        */
-  uint8_t Xp2[64];                      /**< Their point 2 (round 1)        */
-  uint8_t Xp[64];                       /**< Their point (round 2)          */
+  uint8_t r[32];   /**< Random scalar for exchange     */
+  uint8_t Xm1[64]; /**< Our point 1 (round 1)          */
+  uint8_t Xm2[64]; /**< Our point 2 (round 1)          */
+  uint8_t Xp1[64]; /**< Their point 1 (round 1)        */
+  uint8_t Xp2[64]; /**< Their point 2 (round 1)        */
+  uint8_t Xp[64];  /**< Their point (round 2)          */
 } mbedtls_ecjpake_context;
 
 #ifdef __cplusplus

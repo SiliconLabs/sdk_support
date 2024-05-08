@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Accelerated mbed TLS AES block cipher
  *******************************************************************************
@@ -30,12 +30,12 @@
 #ifndef AES_ALT_H
 #define AES_ALT_H
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto
  * \{
  ******************************************************************************/
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto_aes Accelerated AES Block Cipher
  * \brief Accelerated AES block cipher for the mbed TLS API using the AES, CRYPTO,
  *        CRYPTOACC or SE peripheral
@@ -52,19 +52,18 @@ extern "C" {
  * \brief          AES context structure
  */
 typedef struct {
-  unsigned int                    keybits;     /*!<  size of key */
-  unsigned char                   key[32];     /*!<  AES key 128, 192 or 256 bits */
-}
-mbedtls_aes_context;
+  unsigned int keybits;  /*!<  size of key */
+  unsigned char key[32]; /*!<  AES key 128, 192 or 256 bits */
+} mbedtls_aes_context;
 
 #if defined(MBEDTLS_CIPHER_MODE_XTS)
 /**
  * \brief The AES XTS context-type definition.
  */
-typedef struct mbedtls_aes_xts_context{
-  mbedtls_aes_context crypt;   /*!< The AES context to use for AES block
+typedef struct mbedtls_aes_xts_context {
+  mbedtls_aes_context crypt; /*!< The AES context to use for AES block
                                         encryption or decryption. */
-  mbedtls_aes_context tweak;   /*!< The AES context used for tweak
+  mbedtls_aes_context tweak; /*!< The AES context used for tweak
                                         computation. */
 } mbedtls_aes_xts_context;
 #endif /* MBEDTLS_CIPHER_MODE_XTS */

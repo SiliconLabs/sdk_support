@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Accelerated mbed TLS Galois/Counter Mode (GCM) for AES-128-bit block ciphers
  *******************************************************************************
@@ -30,12 +30,12 @@
 #ifndef GCM_ALT_H
 #define GCM_ALT_H
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto
  * \{
  ******************************************************************************/
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto_gcm Accelerated GCM AES-128 Cipher
  * \brief Accelerated AES-GCM-128 cipher for the mbed TLS API using the CRYPTOACC
  *        or SE peripheral
@@ -68,7 +68,7 @@ extern "C" {
 #endif
 
 #if defined(CRYPTOACC_PRESENT)
-SL_ENUM(sli_gcm_mode_t) {
+SL_ENUM(sli_gcm_mode_t){
   SLI_GCM_ENC = 1,
   SLI_GCM_DEC = 2,
 };
@@ -78,36 +78,35 @@ SL_ENUM(sli_gcm_mode_t) {
  * \brief          The GCM context structure.
  */
 typedef struct {
-  unsigned int         keybits;       /*!< Size of key */
-  uint64_t             len;           /*!< Total length of encrypted data. */
-  uint64_t             add_len;       /*!< Total length of additional data. */
+  unsigned int keybits; /*!< Size of key */
+  uint64_t len;         /*!< Total length of encrypted data. */
+  uint64_t add_len;     /*!< Total length of additional data. */
 
 #if defined(CRYPTO_PRESENT)
 
-  CRYPTO_DData_TypeDef key;              /*!< AES key, 128 or 256 bits */
-  int                  mode;             /*!< Encryption or decryption */
-  CRYPTO_TypeDef*      device;           /*!< CRYPTO device to use */
-  CRYPTO_Data_TypeDef  ghash_state;      /*!< GHASH state */
-  CRYPTO_Data_TypeDef  gctr_state;       /*!< GCTR counter value */
-  CRYPTO_Data_TypeDef  ghash_key;        /*!< GHASH key (is a constant value
+  CRYPTO_DData_TypeDef key;        /*!< AES key, 128 or 256 bits */
+  int mode;                        /*!< Encryption or decryption */
+  CRYPTO_TypeDef *device;          /*!< CRYPTO device to use */
+  CRYPTO_Data_TypeDef ghash_state; /*!< GHASH state */
+  CRYPTO_Data_TypeDef gctr_state;  /*!< GCTR counter value */
+  CRYPTO_Data_TypeDef ghash_key;   /*!< GHASH key (is a constant value
                                               which is faster to restore than
                                               to reconstruct each time). */
 #elif defined(SEMAILBOX_PRESENT)
-  unsigned char        key[32];          /*!< AES key 128, 192 or 256 bits */
-  int                  mode;             /*!< Encryption or decryption */
-  size_t               iv_len;           /*!< IV length */
-  bool                 last_op;          /*!< Last streaming block identified */
-  uint8_t              tagbuf[16];       /*!< Buffer for storing tag */
-  uint8_t              se_ctx_enc[32];   /*!< SE GCM encryption state */
-  uint8_t              se_ctx_dec[32];   /*!< SE GCM decryption state */
+  unsigned char key[32];  /*!< AES key 128, 192 or 256 bits */
+  int mode;               /*!< Encryption or decryption */
+  size_t iv_len;          /*!< IV length */
+  bool last_op;           /*!< Last streaming block identified */
+  uint8_t tagbuf[16];     /*!< Buffer for storing tag */
+  uint8_t se_ctx_enc[32]; /*!< SE GCM encryption state */
+  uint8_t se_ctx_dec[32]; /*!< SE GCM decryption state */
 
 #elif defined(CRYPTOACC_PRESENT)
-  unsigned char        key[32];          /*!< AES key 128, 192 or 256 bits */
-  sli_gcm_mode_t       dir;              /*!< Encryption or decryption */
-  uint8_t              sx_ctx[AES_CTX_xCM_SIZE];   /*!< CRYPTOACC GCM state */
+  unsigned char key[32];            /*!< AES key 128, 192 or 256 bits */
+  sli_gcm_mode_t dir;               /*!< Encryption or decryption */
+  uint8_t sx_ctx[AES_CTX_xCM_SIZE]; /*!< CRYPTOACC GCM state */
 #endif
-}
-mbedtls_gcm_context;
+} mbedtls_gcm_context;
 
 #ifdef __cplusplus
 }

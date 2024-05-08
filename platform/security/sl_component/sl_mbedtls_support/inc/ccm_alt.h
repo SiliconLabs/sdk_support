@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Accelerated mbed TLS AES-CCM AEAD cipher
  *******************************************************************************
@@ -30,12 +30,12 @@
 #ifndef CCM_ALT_H
 #define CCM_ALT_H
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto
  * \{
  ******************************************************************************/
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_crypto_ccm Accelerated AES-CCM AEAD Cipher
  * \brief Accelerated AES-CCM AEAD cipher for the mbed TLS API using the CRYPTOACC
  *         or SE peripheral
@@ -53,10 +53,9 @@ extern "C" {
  *           to the APIs called.
  */
 typedef struct {
-  unsigned char key[32];      /*!< The key in use. */
+  unsigned char key[32]; /*!< The key in use. */
   unsigned int keybits;
-}
-mbedtls_ccm_context;
+} mbedtls_ccm_context;
 
 #ifdef __cplusplus
 }

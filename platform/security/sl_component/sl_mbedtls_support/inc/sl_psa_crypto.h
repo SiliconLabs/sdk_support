@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Silicon Labs PSA Crypto utility functions.
  *******************************************************************************
@@ -44,7 +44,7 @@
 extern "C" {
 #endif
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup psa_builtin_keys
  *
  * \brief Built-in key mechanism provides access to the keys stored in hardware.
@@ -59,7 +59,7 @@ extern "C" {
  ******************************************************************************/
 /** \} (end addtogroup psa_builtin_keys) */
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup key_derivation
  *
  * If single-shot key derivation is used (sl_psa_key_derivation_single_shot),
@@ -71,12 +71,12 @@ extern "C" {
  ******************************************************************************/
 /** \} (end addtogroup key_derivation) */
 
-/***************************************************************************//**
+/*******************************************************************************
  * \addtogroup sl_psa_drivers
  * \{
  ******************************************************************************/
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   Set the location attribute of a key in PSA Crypto according to a given
  *   persistence level, and a preferred location. If the preferred location is
@@ -94,12 +94,11 @@ extern "C" {
  *   The location of the key. Can be SL_PSA_KEY_LOCATION_WRAPPED,
  *   SL_PSA_KEY_LOCATION_BUILTIN, or PSA_KEY_LOCATION_LOCAL_STORAGE.
  ******************************************************************************/
-void sl_psa_set_key_lifetime_with_location_preference(
-  psa_key_attributes_t *attributes,
-  psa_key_persistence_t persistence,
-  psa_key_location_t preferred_location);
+void sl_psa_set_key_lifetime_with_location_preference(psa_key_attributes_t *attributes,
+                                                      psa_key_persistence_t persistence,
+                                                      psa_key_location_t preferred_location);
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   Get the 'most secure' location attribute of a key usable in this
  *   implementation of PSA Crypto.

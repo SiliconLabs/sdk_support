@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief Silicon Labs internal PSA Crypto utility functions.
  *******************************************************************************
@@ -49,16 +49,12 @@
 
 // Convert a type name into an enum entry name, since enum entries and type
 // names share the same C namespace.
-#define SLI_PSA_CONTEXT_ENUM_NAME(NAME) \
-  NAME ## _e
-#define SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME) \
-  NAME ## _e
+#define SLI_PSA_CONTEXT_ENUM_NAME(NAME)     NAME##_e
+#define SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME) NAME##_e
 
 // Convenience macros for getting the size of a context structure type
-#define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME) \
-  (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
-#define SLI_MBEDTLS_CONTEXT_GET_RUNTIME_SIZE(NAME) \
-  (sli_mbedtls_context_get_size(SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME)))
+#define SLI_PSA_CONTEXT_GET_RUNTIME_SIZE(NAME)     (sli_psa_context_get_size(SLI_PSA_CONTEXT_ENUM_NAME(NAME)))
+#define SLI_MBEDTLS_CONTEXT_GET_RUNTIME_SIZE(NAME) (sli_mbedtls_context_get_size(SLI_MBEDTLS_CONTEXT_ENUM_NAME(NAME)))
 
 // -----------------------------------------------------------------------------
 // Type Definitions
@@ -99,7 +95,7 @@ typedef enum {
 extern "C" {
 #endif
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   Get the size of a named PSA context structure. This is valuable for code
  *   shipping as precompiled libraries and needing to link with a source version
@@ -116,7 +112,7 @@ extern "C" {
  ******************************************************************************/
 size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type);
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   Get the size of a named Mbed TLS context structure. This is valuable for
  *   code shipping as precompiled libraries and needing to link with a source
@@ -133,7 +129,7 @@ size_t sli_psa_context_get_size(sli_psa_context_name_t ctx_type);
  ******************************************************************************/
 size_t sli_mbedtls_context_get_size(sli_mbedtls_context_name_t ctx_type);
 
-/***************************************************************************//**
+/*******************************************************************************
  * @brief
  *   Check if a key is copyable even though the key attributes do not have the
  *   PSA_KEY_USAGE_COPY flag set.
