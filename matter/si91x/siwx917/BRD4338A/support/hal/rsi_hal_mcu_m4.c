@@ -18,7 +18,6 @@
 #include "rsi_debug.h"
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
-#include "rsi_rom_egpio.h"
 #include "silabs_utils.h"
 #include "sl_si91x_button_pin_config.h"
 #include "sli_siwx917_soc.h"
