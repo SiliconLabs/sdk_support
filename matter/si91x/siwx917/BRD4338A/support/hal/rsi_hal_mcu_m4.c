@@ -22,7 +22,8 @@
 #include "sl_si91x_button_pin_config.h"
 #include "sli_siwx917_soc.h"
 
-#define SOC_PLL_REF_FREQUENCY 40000000 // /* PLL input REFERENCE clock 40MHZ */
+//As XTALclock  is used by TA and M4 can not access to the XTAL clock so m4 is moving to RC 32MHZ. 
+#define SOC_PLL_REF_FREQUENCY 32000000 // /* PLL input REFERENCE clock 32MHZ */
 
 // Note: Change this macro to required PLL frequency in hertz
 #define PS4_SOC_FREQ 180000000 /* PLL out clock 180MHz */
