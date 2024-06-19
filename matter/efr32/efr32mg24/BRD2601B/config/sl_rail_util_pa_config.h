@@ -72,8 +72,8 @@
 #define SL_RAIL_UTIL_PA_CURVE_TYPES         "pa_curve_types_efr32.h"
 
 // <q SL_RAIL_UTIL_PA_CALIBRATION_ENABLE> Enable PA Calibration
-// <i> Default: 0
-#define SL_RAIL_UTIL_PA_CALIBRATION_ENABLE  0
+// <i> Default: 1
+#define SL_RAIL_UTIL_PA_CALIBRATION_ENABLE  1
 
 // </h>
 // <<< end of configuration section >>>

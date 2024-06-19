@@ -56,7 +56,7 @@
 // <i> If no v1 files are used, its support can be disabled for space
 // <i> optimization.
 // <i> Default: 0
-#define SL_PSA_ITS_SUPPORT_V1_DRIVER 1
+#define SL_PSA_ITS_SUPPORT_V1_DRIVER 0
 
 // <o SL_PSA_ITS_SUPPORT_V2_DRIVER> Enable V2 ITS Driver Support <0-1>
 // <i> Devices that have used GSDK 4.1.x and earlier, and used ITS have the keys
@@ -69,7 +69,7 @@
 // <i> driver before in GSDK 4.1.x and earlier, or the keys has been already
 // <i> migrated.
 // <i> Default: 0
-#define SL_PSA_ITS_SUPPORT_V2_DRIVER 1
+#define SL_PSA_ITS_SUPPORT_V2_DRIVER 0
 
 // <o SL_PSA_ITS_SUPPORT_V3_DRIVER> Enable support for V3 ITS Driver <0-1>
 // <i> Devices that have used GSDK 4.1.x and earlier, and used ITS have the keys
@@ -107,6 +107,42 @@
 // <i> Default: PSA_ALG_PBKDF2_AES_CMAC_PRF_128
 #define SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG  (PSA_ALG_PBKDF2_AES_CMAC_PRF_128)
 #endif // SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG
+
+// </h>
+
+// <h> Power optimization configuration
+
+// <e SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP> Store already-generated random bytes before putting the device to sleep
+// <i> Using the hardware TRNG (for example through psa_generate_random()) will
+// <i> consume a non-negligible amount of power. A start-up routine must pass
+// <i> and a relatively large minimum amount of random bytes will be generated.
+// <i> Use cases where the device is frequently entering EM2/EM3 and thereafter
+// <i> consumes a small amount of data from the TRNG may benefit from buffering
+// <i> the existing random bytes before putting the device to sleep. These
+// <i> buffered bytes are then consumed until exhaustion before the TRNG needs
+// <i> to be initialized and used again.
+// <i>
+// <i> NOTE: this configuration option is only applicable for devices with a
+// <i> Virtual Secure Engine (VSE), and requires the 'Power Manager' component
+// <i> to be included in the project.
+// <i>
+// <i> Default: 0
+#define SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP  (0)
+
+// <o SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP> Number of random words to buffer before putting the device to sleep <1-63>
+// <i> This option can be used to decrease the amount of random words that
+// <i> (if enabled) are buffered before the device enters EM2/EM3. Lowering this
+// <i> number will result in less static RAM usage, but also means that the TRNG
+// <i> potentially has to be initialized more times--leading to increased power
+// <i> consumption. By default this option in configured to buffer as much TRNG
+// <i> data as possible (limited by the depth of the TRNG FIFO).
+// <i>
+// <i> NOTE: this configuration option is only applicable when
+// <i> SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP is enabled.
+// <i>
+// <i> Default: 63
+#define SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP (63)
+// </e>
 
 // </h>
 

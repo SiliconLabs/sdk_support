@@ -29,7 +29,7 @@
  ******************************************************************************/
 
 #include "sl_i2cspm.h"
-#include "em_cmu.h"
+#include "sl_clock_manager.h"
 // Include instance config 
 #include "sl_i2cspm_sensor_config.h"
 
@@ -59,6 +59,6 @@ I2CSPM_Init_TypeDef init_sensor = {
 
 void sl_i2cspm_init_instances(void)
 {
-  CMU_ClockEnable(cmuClock_GPIO, true);
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
   I2CSPM_Init(&init_sensor);
 }
