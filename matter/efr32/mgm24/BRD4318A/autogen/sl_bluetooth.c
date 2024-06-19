@@ -1,23 +1,38 @@
-
+/***************************************************************************//**
+ * @file
+ * @brief Bluetooth initialization and event processing
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * SPDX-License-Identifier: Zlib
+ *
+ * The licensor of this software is Silicon Laboratories Inc.
+ *
+ * This software is provided 'as-is', without any express or implied warranty.
+ * In no event will the authors be held liable for any damages arising from the
+ * use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ *    claim that you wrote the original software. If you use this software in a
+ *    product, an acknowledgment in the product documentation would be
+ *    appreciated but is not required.
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ *    misrepresented as being the original software.
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ ******************************************************************************/
 
 #include <sl_common.h>
 #include "sl_bluetooth.h"
 #include "sl_assert.h"
 #include "sl_bt_stack_init.h"
 #include "sl_component_catalog.h"
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
-/**
- * Override @ref PendSV_Handler for the Link Layer task when Bluetooth runs
- * in baremetal mode. The override must not exist when Bluetooth runs in an RTOS
- * where the link layer task runs in a thread.
- */
-#include <em_device.h>
-void PendSV_Handler()
-{
-  sl_bt_priority_handle();
-}
-#endif
-
 /**
  * Internal stack function to start the Bluetooth stack.
  *
@@ -27,11 +42,6 @@ extern sl_status_t sli_bt_system_start_bluetooth();
 
 void sl_bt_init(void)
 {
-#if !defined(SL_CATALOG_KERNEL_PRESENT)
-  NVIC_ClearPendingIRQ(PendSV_IRQn);
-  NVIC_EnableIRQ(PendSV_IRQn);
-#endif
-
   // Stack initialization could fail, e.g., due to out of memory.
   // The failure could not be returned to user as the system initialization
   // does not return an error code. Use the EFM_ASSERT to catch the failure,
