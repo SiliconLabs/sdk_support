@@ -16,8 +16,8 @@
 // $[I2C1]
 // [I2C1]$
 
-// $[I2C2]
-// [I2C2]$
+// $[ULP_I2C]
+// [ULP_I2C]$
 
 // $[SSI_MASTER]
 // [SSI_MASTER]$
@@ -25,8 +25,8 @@
 // $[SSI_SLAVE]
 // [SSI_SLAVE]$
 
-// $[SSI_ULP_MASTER]
-// [SSI_ULP_MASTER]$
+// $[ULP_SPI]
+// [ULP_SPI]$
 
 // $[GSPI_MASTER]
 // [GSPI_MASTER]$
@@ -34,8 +34,8 @@
 // $[I2S0]
 // [I2S0]$
 
-// $[I2S1]
-// [I2S1]$
+// $[ULP_I2S]
+// [ULP_I2S]$
 
 // $[SCT]
 // [SCT]$
@@ -45,6 +45,21 @@
 
 // $[PWM]
 // [PWM]$
+
+// $[ADC]
+// [ADC]$
+
+// $[COMP1]
+// [COMP1]$
+
+// $[COMP2]
+// [COMP2]$
+
+// $[DAC0]
+// [DAC0]$
+
+// $[DAC1]
+// [DAC1]$
 
 // $[CUSTOM_PIN_NAME]
 #ifndef _PORT

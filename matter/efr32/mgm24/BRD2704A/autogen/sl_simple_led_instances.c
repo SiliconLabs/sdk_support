@@ -37,7 +37,6 @@
 #endif
 
 #include "sl_simple_led_led0_config.h"
-#include "sl_simple_led_led1_config.h"
 
 sl_simple_led_context_t simple_led0_context = {
   .port = SL_SIMPLE_LED_LED0_PORT,
@@ -53,28 +52,12 @@ const sl_led_t sl_led_led0 = {
   .toggle = sl_simple_led_toggle,
   .get_state = sl_simple_led_get_state,
 };
-sl_simple_led_context_t simple_led1_context = {
-  .port = SL_SIMPLE_LED_LED1_PORT,
-  .pin = SL_SIMPLE_LED_LED1_PIN,
-  .polarity = SL_SIMPLE_LED_LED1_POLARITY,
-};
-
-const sl_led_t sl_led_led1 = {
-  .context = &simple_led1_context,
-  .init = sl_simple_led_init,
-  .turn_on = sl_simple_led_turn_on,
-  .turn_off = sl_simple_led_turn_off,
-  .toggle = sl_simple_led_toggle,
-  .get_state = sl_simple_led_get_state,
-};
 
 const sl_led_t *sl_simple_led_array[] = {
-  &sl_led_led0,
-  &sl_led_led1
+  &sl_led_led0
 };
 
 void sl_simple_led_init_instances(void)
 {
   sl_led_init(&sl_led_led0);
-  sl_led_init(&sl_led_led1);
 }
