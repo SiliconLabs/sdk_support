@@ -1,19 +1,19 @@
 /*******************************************************************************
-* @file  nvm3_default_config.h
-* @brief
-*******************************************************************************
-* # License
-* <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
-*******************************************************************************
-*
-* The licensor of this software is Silicon Laboratories Inc. Your use of this
-* software is governed by the terms of Silicon Labs Master Software License
-* Agreement (MSLA) available at
-* www.silabs.com/about-us/legal/master-software-license-agreement. This
-* software is distributed to you in Source Code format and is governed by the
-* sections of the MSLA applicable to Source Code.
-*
-******************************************************************************/
+ * @file  nvm3_default_config.h
+ * @brief
+ *******************************************************************************
+ * # License
+ * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ *******************************************************************************
+ *
+ * The licensor of this software is Silicon Laboratories Inc. Your use of this
+ * software is governed by the terms of Silicon Labs Master Software License
+ * Agreement (MSLA) available at
+ * www.silabs.com/about-us/legal/master-software-license-agreement. This
+ * software is distributed to you in Source Code format and is governed by the
+ * sections of the MSLA applicable to Source Code.
+ *
+ ******************************************************************************/
 
 #ifndef NVM3_DEFAULT_CONFIG_H
 #define NVM3_DEFAULT_CONFIG_H
@@ -40,18 +40,16 @@
 
 #ifndef NVM3_DEFAULT_REPACK_HEADROOM
 // <o NVM3_DEFAULT_REPACK_HEADROOM> NVM3 Default Instance User Repack Headroom
-// <i> Headroom determining how many bytes below the forced repack limit the user
-// <i> repack limit should be placed. The default is 0, which means the user and
-// <i> forced repack limits are equal.
-// <i> Default: 0
+// <i> Headroom determining how many bytes below the forced repack limit the
+// user <i> repack limit should be placed. The default is 0, which means the
+// user and <i> forced repack limits are equal. <i> Default: 0
 #define NVM3_DEFAULT_REPACK_HEADROOM 0
 #endif
 
 #ifndef NVM3_DEFAULT_NVM_SIZE
 // <o NVM3_DEFAULT_NVM_SIZE> NVM3 Default Instance Size
-// <i> Size of the NVM3 storage region in flash. This size should be aligned with
-// <i> the flash page size of the device.
-// <i> Default: 36864
+// <i> Size of the NVM3 storage region in flash. This size should be aligned
+// with <i> the flash page size of the device. <i> Default: 36864
 #define NVM3_DEFAULT_NVM_SIZE 36864
 #endif
 
