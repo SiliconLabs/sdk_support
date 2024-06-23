@@ -44,6 +44,3 @@ ulp_timer_config_t sl_timer_handle_timer0 = {
 		.timer_match_value =      SL_TIMER_MATCH_VALUE_DEFAULT,
 		.timer_direction =        SL_ULP_TIMER_TIMER0_DIRECTION,
 };
-
-
-

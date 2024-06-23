@@ -1,6 +1,6 @@
 /*******************************************************************************
 * @file  sl_si91x_stack_size_config.h
-* @brief 
+* @brief
 *******************************************************************************
 * # License
 * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
