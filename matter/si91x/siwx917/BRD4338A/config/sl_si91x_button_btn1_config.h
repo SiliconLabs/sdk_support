@@ -1,10 +1,10 @@
 /***************************************************************************/ /**
- * @file sl_si91x_button_config.h
- * @brief Button Driver Configuration
- *******************************************************************************
- * # License
- * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
- *******************************************************************************/
+                                                                               * @file sl_si91x_button_config.h
+                                                                               * @brief Button Driver Configuration
+                                                                               *******************************************************************************
+                                                                               * # License
+                                                                               * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+                                                                               *******************************************************************************/
 
 #ifndef SL_SI91X_BUTTON_BTN1_CONFIG_H
 #define SL_SI91X_BUTTON_BTN1_CONFIG_H
