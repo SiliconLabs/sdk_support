@@ -131,15 +131,9 @@
 #endif // SL_COMPONENT_CATALOG_PRESENT
 
 #ifdef SL_CATALOG_KERNEL_PRESENT
-void sli_bt_rtos_ll_callback();
-void sli_bt_rtos_stack_callback();
   #define SL_BT_CONFIG_FLAGS         (SL_BT_CONFIG_FLAG_RTOS | BT_EM2_LFCLK_REQ_FLAG)
-  #define SL_BT_CONFIG_LL_CALLBACK    sli_bt_rtos_ll_callback
-  #define SL_BT_CONFIG_STACK_CALLBACK sli_bt_rtos_stack_callback
 #else
   #define SL_BT_CONFIG_FLAGS          (BT_EM2_LFCLK_REQ_FLAG)
-  #define SL_BT_CONFIG_LL_CALLBACK    0
-  #define SL_BT_CONFIG_STACK_CALLBACK 0
 #endif // SL_CATALOG_KERNEL_PRESENT
 
 #include "sl_bt_stack_config.h"
@@ -148,8 +142,8 @@ void sli_bt_rtos_stack_callback();
   {                                                          \
     .config_flags = SL_BT_CONFIG_FLAGS,                      \
     .bluetooth.max_buffer_memory = SL_BT_CONFIG_BUFFER_SIZE, \
-    .scheduler_callback = SL_BT_CONFIG_LL_CALLBACK,          \
-    .stack_schedule_callback = SL_BT_CONFIG_STACK_CALLBACK,  \
+    .scheduler_callback = NULL,                              \
+    .stack_schedule_callback = NULL,                         \
     .gattdb = &gattdb,                                       \
     .max_timers = SL_BT_CONFIG_MAX_SOFTWARE_TIMERS,          \
     .rf.tx_gain = SL_BT_CONFIG_RF_PATH_GAIN_TX,              \

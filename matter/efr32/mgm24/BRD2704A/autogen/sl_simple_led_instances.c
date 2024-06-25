@@ -29,7 +29,13 @@
  ******************************************************************************/
 
 #include "sl_simple_led.h"
+
+#if defined(SL_CATALOG_GPIO_PRESENT)
+#include "sl_gpio.h"
+#else
 #include "em_gpio.h"
+#endif
+
 #include "sl_simple_led_led0_config.h"
 
 sl_simple_led_context_t simple_led0_context = {

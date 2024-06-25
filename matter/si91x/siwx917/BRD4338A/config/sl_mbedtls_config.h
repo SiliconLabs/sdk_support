@@ -107,7 +107,9 @@
 // the correct Mbed TLS / PSA Crypto options.
 #include "sli_mbedtls_config_transform_autogen.h"
 
-#ifndef SL_MBEDTLS_USE_TINYCRYPT
+#ifdef SL_MBEDTLS_USE_TINYCRYPT
+#include "mbedtls/check_config.h"
+#else
 // Included for backward compatibility reasons.
 #include "mbedtls/build_info.h"
 #endif // SL_MBEDTLS_USE_TINYCRYPT

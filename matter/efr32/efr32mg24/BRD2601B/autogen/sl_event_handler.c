@@ -1,16 +1,13 @@
 #include "sl_event_handler.h"
 
 #include "em_chip.h"
-#include "sl_device_init_nvic.h"
+#include "sl_interrupt_manager.h"
 #include "sl_board_init.h"
+#include "sl_clock_manager_init.h"
 #include "sl_device_init_dcdc.h"
-#include "sl_device_init_lfxo.h"
+#include "sl_clock_manager.h"
 #include "sl_hfxo_manager.h"
-#include "sl_device_init_hfxo.h"
-#include "sl_device_init_lfrco.h"
-#include "sl_device_init_dpll.h"
-#include "sl_device_init_clocks.h"
-#include "sl_device_init_emu.h"
+#include "SEGGER_RTT.h"
 #include "pa_conversions_efr32.h"
 #include "sl_rail_util_power_manager_init.h"
 #include "sl_rail_util_pti.h"
@@ -39,16 +36,13 @@
 void sl_platform_init(void)
 {
   CHIP_Init();
-  sl_device_init_nvic();
+  sl_interrupt_manager_init();
   sl_board_preinit();
+  sl_clock_manager_init();
   sl_device_init_dcdc();
-  sl_device_init_lfxo();
+  sl_clock_manager_runtime_init();
   sl_hfxo_manager_init_hardware();
-  sl_device_init_hfxo();
-  sl_device_init_lfrco();
-  sl_device_init_dpll();
-  sl_device_init_clocks();
-  sl_device_init_emu();
+  SEGGER_RTT_Init();
   sl_board_init();
   nvm3_initDefault();
   osKernelInitialize();
@@ -69,9 +63,7 @@ void sl_driver_init(void)
 #endif
   sl_simple_button_init_instances();
   sl_simple_led_init_instances();
-#if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
-#endif // CONFIG_ENABLE_UART
 }
 
 void sl_service_init(void)
