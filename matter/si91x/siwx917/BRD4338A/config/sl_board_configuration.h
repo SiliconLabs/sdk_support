@@ -1,6 +1,6 @@
 /*******************************************************************************
 * @file  sl_board_configuration.h
-* @brief 
+* @brief
 *******************************************************************************
 * # License
 * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
