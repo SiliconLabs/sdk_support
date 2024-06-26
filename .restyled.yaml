@@ -44,6 +44,7 @@ exclude:
     - ".github/**/*" # https://github.com/restyled-io/restyler/issues/73
     - ".github/*" # https://github.com/restyled-io/restyler/issues/73
     - "matter/efr32/**/*" #ignore Simplicity Studio generated files
+    - "matter/si91x/**/*" #ignore Simplicity Studio generated files
 
 
 changed_paths:
