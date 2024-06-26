@@ -1,32 +1,32 @@
 /***************************************************************************/ /**
- * @file sl_si91x_power_manager_config_3.h
- * @brief Power Manager Configuration NWP Basic and MCU Advance RAM Configuration
- *******************************************************************************
- * # License
- * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
- *******************************************************************************
- *
- * SPDX-License-Identifier: Zlib
- *
- * The licensor of this software is Silicon Laboratories Inc.
- *
- * This software is provided 'as-is', without any express or implied
- * warranty. In no event will the authors be held liable for any damages
- * arising from the use of this software.
- *
- * Permission is granted to anyone to use this software for any purpose,
- * including commercial applications, and to alter it and redistribute it
- * freely, subject to the following restrictions:
- *
- * 1. The origin of this software must not be misrepresented; you must not
- *    claim that you wrote the original software. If you use this software
- *    in a product, an acknowledgment in the product documentation would be
- *    appreciated but is not required.
- * 2. Altered source versions must be plainly marked as such, and must not be
- *    misrepresented as being the original software.
- * 3. This notice may not be removed or altered from any source distribution.
- *
- ******************************************************************************/
+                                                                               * @file sl_si91x_power_manager_config_3.h
+                                                                               * @brief Power Manager Configuration NWP Basic and MCU Advance RAM Configuration
+                                                                               *******************************************************************************
+                                                                               * # License
+                                                                               * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+                                                                               *******************************************************************************
+                                                                               *
+                                                                               * SPDX-License-Identifier: Zlib
+                                                                               *
+                                                                               * The licensor of this software is Silicon Laboratories Inc.
+                                                                               *
+                                                                               * This software is provided 'as-is', without any express or implied
+                                                                               * warranty. In no event will the authors be held liable for any damages
+                                                                               * arising from the use of this software.
+                                                                               *
+                                                                               * Permission is granted to anyone to use this software for any purpose,
+                                                                               * including commercial applications, and to alter it and redistribute it
+                                                                               * freely, subject to the following restrictions:
+                                                                               *
+                                                                               * 1. The origin of this software must not be misrepresented; you must not
+                                                                               *    claim that you wrote the original software. If you use this software
+                                                                               *    in a product, an acknowledgment in the product documentation would be
+                                                                               *    appreciated but is not required.
+                                                                               * 2. Altered source versions must be plainly marked as such, and must not be
+                                                                               *    misrepresented as being the original software.
+                                                                               * 3. This notice may not be removed or altered from any source distribution.
+                                                                               *
+                                                                               ******************************************************************************/
 
 #ifndef SL_SI91X_POWER_MANAGER_CONFIG_3_H
 #define SL_SI91X_POWER_MANAGER_CONFIG_3_H
@@ -138,15 +138,15 @@ extern "C" {
 // <e>Configure RAM Banks using Size
 #define SL_RAM_RETENTION_USING_SIZE 1
 
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_1  4
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_2  8
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_3  12
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_4  16
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_5  32
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_6  64
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_7  128
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_8  192
-#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_9  256
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_1 4
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_2 8
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_3 12
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_4 16
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_5 32
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_6 64
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_7 128
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_8 192
+#define SL_LP_RAM_RETENTION_USING_SIZE_BANK_9 256
 #define SL_LP_RAM_RETENTION_USING_SIZE_BANK_10 320
 // <o SL_LP_RAM_RETENTION_SIZE> Low Power Ram Retention Size (in KB)
 //   <SL_LP_RAM_RETENTION_USING_SIZE_BANK_1=> 4 KB
@@ -227,127 +227,127 @@ extern "C" {
 // <<< end of configuration section >>>
 
 sl_power_peripheral_t peripheral_config = {
-  .m4ss_peripheral = (0
+    .m4ss_peripheral = (0
 #if (SL_HP_M4_DEBUG_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_M4SS_PG_M4_DEBUG
+                        | SL_SI91X_POWER_MANAGER_M4SS_PG_M4_DEBUG
 #endif
 #if (SL_HP_RPDMA_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_M4SS_PG_RPDMA
+                        | SL_SI91X_POWER_MANAGER_M4SS_PG_RPDMA
 #endif
 #if (SL_HP_QSPI_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_M4SS_PG_QSPI
+                        | SL_SI91X_POWER_MANAGER_M4SS_PG_QSPI
 #endif
 #if (SL_HP_SDIO_SPI_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_M4SS_PG_SDIO_SPI
+                        | SL_SI91X_POWER_MANAGER_M4SS_PG_SDIO_SPI
 #endif
-                      ),
-  .ulpss_peripheral = (0
+                        ),
+    .ulpss_peripheral = (0
 #if (SL_ULP_AUX_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_AUX
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_AUX
 #endif
 #if (SL_ULP_CAP_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_CAP
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_CAP
 #endif
 #if (SL_ULP_FIM_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_FIM
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_FIM
 #endif
 #if (SL_ULP_I2C_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_I2C
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_I2C
 #endif
 #if (SL_ULP_I2S_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_I2S
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_I2S
 #endif
 #if (SL_ULP_IR_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_IR
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_IR
 #endif
 #if (SL_ULP_SSI_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_SSI
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_SSI
 #endif
 #if (SL_ULP_UART_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_UART
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_UART
 #endif
 #if (SL_ULP_UDMA_PERIPHERAL == 0)
-                       | SL_SI91X_POWER_MANAGER_ULPSS_PG_UDMA
+                         | SL_SI91X_POWER_MANAGER_ULPSS_PG_UDMA
 #endif
-                       ),
-  .npss_peripheral = (0
+                         ),
+    .npss_peripheral = (0
 #if (SL_UULP_MCU_STORE1_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE1
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE1
 #endif
 #if (SL_UULP_MCU_STORE2_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE2
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE2
 #endif
 #if (SL_UULP_MCU_STORE3_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE3
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUSTORE3
 #endif
 #if (SL_UULP_RTC_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCURTC
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCURTC
 #endif
 #if (SL_UULP_TIME_PERIOD_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_TIMEPERIOD
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_TIMEPERIOD
 #endif
 #if (SL_UULP_UPS_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUPS
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUPS
 #endif
 #if (SL_UULP_UTS_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUTS
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUTS
 #endif
 #if (SL_UULP_WDT_PERIPHERAL == 0)
-                      | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUWDT
+                        | SL_SI91X_POWER_MANAGER_NPSS_PG_MCUWDT
 #endif
-                      ),
+                        ),
 };
 
 sl_power_ram_retention_config_t ram_configuration = {
 #if (SL_RAM_RETENTION_USING_SIZE == 1)
-  .configure_ram_banks = false,
-  .m4ss_ram_size_kb    = SL_LP_RAM_RETENTION_SIZE,
-  .ulpss_ram_size_kb   = SL_ULP_RAM_RETENTION_SIZE,
+    .configure_ram_banks = false,
+    .m4ss_ram_size_kb = SL_LP_RAM_RETENTION_SIZE,
+    .ulpss_ram_size_kb = SL_ULP_RAM_RETENTION_SIZE,
 #else
-  .configure_ram_banks = true,
-  .m4ss_ram_banks      = (0
+    .configure_ram_banks = true,
+    .m4ss_ram_banks = (0
 #if (SL_LP_RAM_BANK1 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_1
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_1
 #endif
 #if (SL_LP_RAM_BANK2 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_2
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_2
 #endif
 #if (SL_LP_RAM_BANK3 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_3
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_3
 #endif
 #if (SL_LP_RAM_BANK3 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_3
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_3
 #endif
 #if (SL_LP_RAM_BANK4 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_4
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_4
 #endif
 #if (SL_LP_RAM_BANK5 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_5
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_5
 #endif
 #if (SL_LP_RAM_BANK6 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_6
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_6
 #endif
 #if (SL_LP_RAM_BANK7 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_7
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_7
 #endif
 #if (SL_LP_RAM_BANK8 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_8
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_8
 #endif
 #if (SL_LP_RAM_BANK9 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_9
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_9
 #endif
 #if (SL_LP_RAM_BANK10 == 0)
-                     | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_10
+                       | SL_SI91X_POWER_MANAGER_M4SS_RAM_BANK_10
 #endif
-                     ),
-  .ulpss_ram_banks     = (0
+                       ),
+    .ulpss_ram_banks = (0
 #if (SL_ULP_RAM_BANK2 == 0)
-                      | SL_SI91X_POWER_MANAGER_ULPSS_RAM_BANK_2
+                        | SL_SI91X_POWER_MANAGER_ULPSS_RAM_BANK_2
 #endif
 #if (SL_ULP_RAM_BANK3 == 0)
-                      | SL_SI91X_POWER_MANAGER_ULPSS_RAM_BANK_3
+                        | SL_SI91X_POWER_MANAGER_ULPSS_RAM_BANK_3
 #endif
-                      ),
+                        ),
 #endif
 };
 
