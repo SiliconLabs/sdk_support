@@ -1,4 +1,4 @@
-/***************************************************************************/ /**
+/***************************************************************************
                                                                                * @file sl_si91x_power_manager_handler.c.jinja
                                                                                * @brief Power Manager Service Handler
                                                                                *******************************************************************************
@@ -30,7 +30,7 @@
 
 #include "sl_si91x_power_manager.h"
 
-/***************************************************************************/ /**
+/***************************************************************************
                                                                                * Check if the MCU can sleep at that time. This function is called when the system
                                                                                * is about to go sleeping, with the interrupts disabled. It allows the software to
                                                                                * cancel going to sleep in case of a last-minute event occurred (window between the
@@ -44,7 +44,7 @@
                                                                                ******************************************************************************/
 __WEAK boolean_t app_is_ok_to_sleep(void) { return true; }
 
-/***************************************************************************/ /**
+/***************************************************************************
                                                                                * Check if the MCU can sleep after an interrupt. This function is called after an
                                                                                * interrupt occured and was processed. It allows the power manger to know if it must
                                                                                * go back to sleep or wakeup.
@@ -65,7 +65,7 @@ __WEAK boolean_t app_is_ok_to_sleep(void) { return true; }
 __WEAK sl_si91x_power_manager_on_isr_exit_t app_sleep_on_isr_exit(void) {
   return SL_SI91X_POWER_MANAGER_ISR_IGNORE;
 }
-/***************************************************************************/ /**
+/***************************************************************************
                                                                                * Mandatory callback that must validate if the MCU can sleep after having
                                                                                * processed an interrupt when the system was sleeping.
                                                                                ******************************************************************************/
