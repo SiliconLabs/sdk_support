@@ -78,7 +78,7 @@ boolean_t sl_si91x_power_manager_sleep_on_isr_exit(void)
   sl_si91x_power_manager_on_isr_exit_t answer;
   boolean_t sleep = false;
   boolean_t force_wakeup = false;
-   
+
 
   // Application hook
   answer = app_sleep_on_isr_exit();
@@ -87,7 +87,7 @@ boolean_t sl_si91x_power_manager_sleep_on_isr_exit(void)
   } else if (answer == SL_SI91X_POWER_MANAGER_ISR_SLEEP) {
     sleep = true;
   }
-  
+
   if (force_wakeup) {
     sleep = false;
   }
