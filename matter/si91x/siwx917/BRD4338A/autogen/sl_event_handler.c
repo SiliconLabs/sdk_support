@@ -5,6 +5,11 @@
 #include "sli_siwx917_soc.h"
 #include "rsi_board.h"
 #include "rsi_debug.h"
+#if SL_ICD_ENABLED
+#include "sl_si91x_power_manager.h"
+#include "rsi_wisemcu_hardware_setup.h"
+#include "sl_si91x_power_manager_init.h"
+#endif // SL_ICD_ENABLED
 #include "SEGGER_RTT.h"
 #include "sl_sleeptimer.h"
 #include "sl_si91x_button_instances.h"
@@ -40,9 +45,13 @@ void sl_driver_init(void)
 
 void sl_service_init(void) 
 {
-#ifdef DISPLAY_ENABLED
+#if SL_ICD_ENABLED
+  sl_si91x_power_manager_init();
+  sli_si91x_power_manager_configure_ram_and_peripheral();
+#endif // SL_ICD_ENABLED
+#if defined(DISPLAY_ENABLED) || defined(SL_ICD_ENABLED)
   sl_sleeptimer_init();
-#endif
+#endif // DISPLAY_ENABLED || SL_ICD_ENABLED
   sl_iostream_init_instances();
 }
 
