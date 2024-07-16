@@ -1,4 +1,4 @@
-/***************************************************************************/ /**
+/***************************************************************************//**
  * @file
  * @brief LED Driver Instances
  *******************************************************************************
@@ -42,7 +42,7 @@ extern const sl_led_t sl_led_led1;
 
 extern const sl_led_t *sl_simple_led_array[];
 
-#define SL_SIMPLE_LED_COUNT       2
+#define SL_SIMPLE_LED_COUNT 2
 #define SL_SIMPLE_LED_INSTANCE(n) (sl_simple_led_array[n])
 
 void sl_simple_led_init_instances(void);

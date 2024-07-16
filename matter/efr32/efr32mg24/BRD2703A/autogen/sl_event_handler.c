@@ -18,7 +18,6 @@
 #include "sl_sleeptimer.h"
 #include "sl_mpu.h"
 #include "gpiointerrupt.h"
-#include "sl_i2cspm_instances.h"
 #include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
@@ -60,7 +59,6 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
   GPIOINT_Init();
-  sl_i2cspm_init_instances();
   sl_simple_button_init_instances();
   sl_simple_led_init_instances();
 #if defined(CONFIG_ENABLE_UART)

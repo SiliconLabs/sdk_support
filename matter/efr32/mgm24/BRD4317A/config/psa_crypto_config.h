@@ -25,7 +25,7 @@
 // <i> gracefully in case an application opens more than its declared amount of
 // <i> keys, thereby precluding the stack from functioning.
 // <i> Default: 4
-#define SL_PSA_KEY_USER_SLOT_COUNT (4)
+#define SL_PSA_KEY_USER_SLOT_COUNT     (4)
 
 // <o SL_PSA_ITS_USER_MAX_FILES> PSA Maximum User Persistent Keys Count <0-1024>
 // <i> Maximum amount of keys (or other files) that can be stored persistently
@@ -48,7 +48,7 @@
 // <i> and if SL_PSA_ITS_USER_MAX_FILES is changed, ITS should be cleared and
 // <i> all files need to be stored again.
 // <i> Default: 128
-#define SL_PSA_ITS_USER_MAX_FILES (128)
+#define SL_PSA_ITS_USER_MAX_FILES           (128)
 
 // <o SL_PSA_ITS_SUPPORT_V1_DRIVER> Enable V1 Format Support For ITS Files <0-1>
 // <i> Devices that used PSA ITS together with gecko_sdk_3.1.x  or earlier
@@ -105,7 +105,7 @@
 // <i> It is recommended to only use the PUF key for deriving further key
 // <i> material.
 // <i> Default: PSA_ALG_PBKDF2_AES_CMAC_PRF_128
-#define SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG (PSA_ALG_PBKDF2_AES_CMAC_PRF_128)
+#define SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG  (PSA_ALG_PBKDF2_AES_CMAC_PRF_128)
 #endif // SL_CRYPTOACC_BUILTIN_KEY_PUF_ALG
 
 // </h>
@@ -127,7 +127,7 @@
 // <i> to be included in the project.
 // <i>
 // <i> Default: 0
-#define SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP (0)
+#define SL_VSE_BUFFER_TRNG_DATA_DURING_SLEEP  (0)
 
 // <o SL_VSE_MAX_TRNG_WORDS_BUFFERED_DURING_SLEEP> Number of random words to buffer before putting the device to sleep <1-63>
 // <i> This option can be used to decrease the amount of random words that
@@ -152,17 +152,17 @@
 // Sub-files
 
 #if defined(SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE)
-#include SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE
+  #include SLI_PSA_CONFIG_AUTOGEN_OVERRIDE_FILE
 #else
-#include "sli_psa_config_autogen.h"
+  #include "sli_psa_config_autogen.h"
 #endif
 
 #if defined(TFM_CONFIG_SL_SECURE_LIBRARY)
-#include "sli_psa_tfm_translation.h"
+  #include "sli_psa_tfm_translation.h"
 #endif
 
 #if SL_MBEDTLS_DRIVERS_ENABLED
-#include "sli_psa_acceleration.h"
+  #include "sli_psa_acceleration.h"
 #endif
 
 #include "sli_psa_builtin_config_autogen.h"
