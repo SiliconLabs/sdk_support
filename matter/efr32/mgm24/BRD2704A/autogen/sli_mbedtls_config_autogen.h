@@ -3,12 +3,10 @@
 #ifndef SLI_MBEDTLS_CONFIG_AUTOGEN_H
 #define SLI_MBEDTLS_CONFIG_AUTOGEN_H
 
-
 // Added definition check because of DIC specific configs
 #ifndef MBEDTLS_MPI_MAX_SIZE
 #define MBEDTLS_MPI_MAX_SIZE 32
 #endif
-
 
 #define MBEDTLS_AES_C
 #define MBEDTLS_ASN1_PARSE_C
@@ -30,7 +28,7 @@
 #define MBEDTLS_X509_USE_C
 #define MBEDTLS_X509_CREATE_C
 #define MBEDTLS_X509_CRT_PARSE_C
-// We don't need this feature
+// Do not need this feature
 // #define MBEDTLS_X509_CRT_WRITE_C
 #define MBEDTLS_X509_CRL_PARSE_C
 #define MBEDTLS_X509_CSR_PARSE_C
@@ -44,10 +42,5 @@
 #define MBEDTLS_MD_C
 #define MBEDTLS_PSA_CRYPTO_DRIVERS
 #define MBEDTLS_PSA_CRYPTO_STORAGE_C
-
-
-
-
-
 
 #endif // SLI_MBEDTLS_CONFIG_AUTOGEN_H
