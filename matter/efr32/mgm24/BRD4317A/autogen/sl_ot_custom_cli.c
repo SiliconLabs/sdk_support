@@ -57,5 +57,7 @@ const uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_command
 
 void sl_ot_custom_cli_init(void)
 {
+#if defined(CHIP_DEVICE_CONFIG_THREAD_ENABLE_CLI) && CHIP_DEVICE_CONFIG_THREAD_ENABLE_CLI
     IgnoreError(otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL));
+#endif // CHIP_DEVICE_CONFIG_THREAD_ENABLE_CLI
 }
