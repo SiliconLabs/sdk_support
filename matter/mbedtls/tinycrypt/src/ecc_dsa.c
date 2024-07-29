@@ -1,20 +1,15 @@
 /* ec_dsa.c - TinyCrypt implementation of EC-DSA */
 
-/*
- *  Copyright (c) 2019, Arm Limited (or its affiliates), All Rights Reserved.
- *  SPDX-License-Identifier: BSD-3-Clause
- */
-
 /* Copyright (c) 2014, Kenneth MacKay
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *  * Redistributions of source code must retain the above copyright notice,
- *	this list of conditions and the following disclaimer.
+ *    this list of conditions and the following disclaimer.
  *  * Redistributions in binary form must reproduce the above copyright notice,
- *	this list of conditions and the following disclaimer in the
- *documentation and/or other materials provided with the distribution.
+ *    this list of conditions and the following disclaimer in the documentation
+ *    and/or other materials provided with the distribution.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -34,16 +29,16 @@
  *  Redistribution and use in source and binary forms, with or without
  *  modification, are permitted provided that the following conditions are met:
  *
- *	- Redistributions of source code must retain the above copyright notice,
- *	 this list of conditions and the following disclaimer.
+ *    - Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
  *
- *	- Redistributions in binary form must reproduce the above copyright
- *	notice, this list of conditions and the following disclaimer in the
- *	documentation and/or other materials provided with the distribution.
+ *    - Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
  *
- *	- Neither the name of Intel Corporation nor the names of its
- *contributors may be used to endorse or promote products derived from this
- *software without specific prior written permission.
+ *    - Neither the name of Intel Corporation nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
  *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
  *  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -58,251 +53,238 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if !defined(MBEDTLS_CONFIG_FILE)
-#include "mbedtls/config.h"
-#else
-#include MBEDTLS_CONFIG_FILE
-#endif
+#include <tinycrypt/constants.h>
+#include <tinycrypt/ecc.h>
+#include <tinycrypt/ecc_dsa.h>
 
-#if defined(TINYCRYPT_PRIMITIVES)
-#include "mbedtls/platform_util.h"
-#include "tinycrypt/ecc.h"
-#include "tinycrypt/ecc_dsa.h"
 
 static void bits2int(uECC_word_t *native, const uint8_t *bits,
-                     unsigned bits_size) {
-  unsigned num_n_bytes = TC_BITS_TO_BYTES(NUM_ECC_BITS);
+		     unsigned bits_size, uECC_Curve curve)
+{
+	unsigned num_n_bytes = BITS_TO_BYTES(curve->num_n_bits);
+	unsigned num_n_words = BITS_TO_WORDS(curve->num_n_bits);
+	int shift;
+	uECC_word_t carry;
+	uECC_word_t *ptr;
 
-  if (bits_size > num_n_bytes) {
-    bits_size = num_n_bytes;
-  }
+	if (bits_size > num_n_bytes) {
+		bits_size = num_n_bytes;
+	}
 
-  uECC_vli_clear(native);
-  uECC_vli_bytesToNative(native, bits, bits_size);
+	uECC_vli_clear(native, num_n_words);
+	uECC_vli_bytesToNative(native, bits, bits_size);
+	if (bits_size * 8 <= (unsigned)curve->num_n_bits) {
+		return;
+	}
+	shift = bits_size * 8 - curve->num_n_bits;
+	carry = 0;
+	ptr = native + num_n_words;
+	while (ptr-- > native) {
+		uECC_word_t temp = *ptr;
+		*ptr = (temp >> shift) | carry;
+		carry = temp << (uECC_WORD_BITS - shift);
+	}
+
+	/* Reduce mod curve_n */
+	if (uECC_vli_cmp_unsafe(curve->n, native, num_n_words) != 1) {
+		uECC_vli_sub(native, native, curve->n, num_n_words);
+	}
 }
 
 int uECC_sign_with_k(const uint8_t *private_key, const uint8_t *message_hash,
-                     unsigned hash_size, uECC_word_t *k, uint8_t *signature) {
+		     unsigned hash_size, uECC_word_t *k, uint8_t *signature,
+		     uECC_Curve curve)
+{
 
-  uECC_word_t tmp[NUM_ECC_WORDS];
-  uECC_word_t s[NUM_ECC_WORDS];
-  uECC_word_t p[NUM_ECC_WORDS * 2];
-  wordcount_t num_n_words = TC_BITS_TO_WORDS(NUM_ECC_BITS);
-  int r = UECC_FAILURE;
+	uECC_word_t tmp[NUM_ECC_WORDS];
+	uECC_word_t s[NUM_ECC_WORDS];
+	uECC_word_t *k2[2] = {tmp, s};
+	uECC_word_t p[NUM_ECC_WORDS * 2];
+	uECC_word_t carry;
+	wordcount_t num_words = curve->num_words;
+	wordcount_t num_n_words = BITS_TO_WORDS(curve->num_n_bits);
+	bitcount_t num_n_bits = curve->num_n_bits;
 
-  /* Make sure 0 < k < curve_n */
-  if (uECC_vli_isZero(k) || uECC_vli_cmp(curve_n, k) != 1) {
-    return UECC_FAILURE;
-  }
+	/* Make sure 0 < k < curve_n */
+  	if (uECC_vli_isZero(k, num_words) ||
+	    uECC_vli_cmp(curve->n, k, num_n_words) != 1) {
+		return 0;
+	}
 
-  r = EccPoint_mult_safer(p, curve_G, k);
-  if (r != UECC_SUCCESS) {
-    return r;
-  }
+	carry = regularize_k(k, tmp, s, curve);
+	EccPoint_mult(p, curve->G, k2[!carry], 0, num_n_bits + 1, curve);
+	if (uECC_vli_isZero(p, num_words)) {
+		return 0;
+	}
 
-  /* If an RNG function was specified, get a random number
-  to prevent side channel analysis of k. */
-  if (!uECC_get_rng()) {
-    uECC_vli_clear(tmp);
-    tmp[0] = 1;
-  } else if (uECC_generate_random_int(tmp, curve_n, num_n_words) !=
-             UECC_SUCCESS) {
-    return UECC_FAILURE;
-  }
+	/* If an RNG function was specified, get a random number
+	to prevent side channel analysis of k. */
+	if (!uECC_get_rng()) {
+		uECC_vli_clear(tmp, num_n_words);
+		tmp[0] = 1;
+	}
+	else if (!uECC_generate_random_int(tmp, curve->n, num_n_words)) {
+		return 0;
+	}
 
-  /* Prevent side channel analysis of uECC_vli_modInv() to determine
-  bits of k / the private key by premultiplying by a random number */
-  uECC_vli_modMult(k, k, tmp, curve_n); /* k' = rand * k */
-  uECC_vli_modInv(k, k, curve_n);       /* k = 1 / k' */
-  uECC_vli_modMult(k, k, tmp, curve_n); /* k = 1 / k */
+	/* Prevent side channel analysis of uECC_vli_modInv() to determine
+	bits of k / the private key by premultiplying by a random number */
+	uECC_vli_modMult(k, k, tmp, curve->n, num_n_words); /* k' = rand * k */
+	uECC_vli_modInv(k, k, curve->n, num_n_words);       /* k = 1 / k' */
+	uECC_vli_modMult(k, k, tmp, curve->n, num_n_words); /* k = 1 / k */
 
-  uECC_vli_nativeToBytes(signature, NUM_ECC_BYTES, p); /* store r */
+	uECC_vli_nativeToBytes(signature, curve->num_bytes, p); /* store r */
 
-  /* tmp = d: */
-  uECC_vli_bytesToNative(tmp, private_key, TC_BITS_TO_BYTES(NUM_ECC_BITS));
+	/* tmp = d: */
+	uECC_vli_bytesToNative(tmp, private_key, BITS_TO_BYTES(curve->num_n_bits));
 
-  s[num_n_words - 1] = 0;
-  uECC_vli_set(s, p);
-  uECC_vli_modMult(s, tmp, s, curve_n); /* s = r*d */
+	s[num_n_words - 1] = 0;
+	uECC_vli_set(s, p, num_words);
+	uECC_vli_modMult(s, tmp, s, curve->n, num_n_words); /* s = r*d */
 
-  bits2int(tmp, message_hash, hash_size);
-  uECC_vli_modAdd(s, tmp, s, curve_n); /* s = e + r*d */
-  uECC_vli_modMult(s, s, k, curve_n);  /* s = (e + r*d) / k */
-  if (uECC_vli_numBits(s) > (bitcount_t)NUM_ECC_BYTES * 8) {
-    return UECC_FAILURE;
-  }
+	bits2int(tmp, message_hash, hash_size, curve);
+	uECC_vli_modAdd(s, tmp, s, curve->n, num_n_words); /* s = e + r*d */
+	uECC_vli_modMult(s, s, k, curve->n, num_n_words);  /* s = (e + r*d) / k */
+	if (uECC_vli_numBits(s, num_n_words) > (bitcount_t)curve->num_bytes * 8) {
+		return 0;
+	}
 
-  uECC_vli_nativeToBytes(signature + NUM_ECC_BYTES, NUM_ECC_BYTES, s);
-  return r;
+	uECC_vli_nativeToBytes(signature + curve->num_bytes, curve->num_bytes, s);
+	return 1;
 }
 
 int uECC_sign(const uint8_t *private_key, const uint8_t *message_hash,
-              unsigned hash_size, uint8_t *signature) {
-  int r;
-  uECC_word_t _random[2 * NUM_ECC_WORDS];
-  uECC_word_t k[NUM_ECC_WORDS];
-  uECC_word_t tries;
-  volatile const uint8_t *private_key_dup = private_key;
-  volatile const uint8_t *message_hash_dup = message_hash;
-  volatile unsigned hash_size_dup = hash_size;
-  volatile uint8_t *signature_dup = signature;
+	      unsigned hash_size, uint8_t *signature, uECC_Curve curve)
+{
+	      uECC_word_t _random[2*NUM_ECC_WORDS];
+	      uECC_word_t k[NUM_ECC_WORDS];
+	      uECC_word_t tries;
 
-  for (tries = 0; tries < uECC_RNG_MAX_TRIES; ++tries) {
-    /* Generating _random uniformly at random: */
-    uECC_RNG_Function rng_function = uECC_get_rng();
-    if (!rng_function ||
-        rng_function((uint8_t *)_random, 2 * NUM_ECC_WORDS * uECC_WORD_SIZE) !=
-            2 * NUM_ECC_WORDS * uECC_WORD_SIZE) {
-      return UECC_FAILURE;
-    }
+	for (tries = 0; tries < uECC_RNG_MAX_TRIES; ++tries) {
+		/* Generating _random uniformly at random: */
+		uECC_RNG_Function rng_function = uECC_get_rng();
+		if (!rng_function ||
+		    !rng_function((uint8_t *)_random, 2*NUM_ECC_WORDS*uECC_WORD_SIZE)) {
+			return 0;
+		}
 
-    // computing k as modular reduction of _random (see FIPS 186.4 B.5.1):
-    uECC_vli_mmod(k, _random, curve_n);
+		// computing k as modular reduction of _random (see FIPS 186.4 B.5.1):
+		uECC_vli_mmod(k, _random, curve->n, BITS_TO_WORDS(curve->num_n_bits));
 
-    r = uECC_sign_with_k(private_key, message_hash, hash_size, k, signature);
-    /* don't keep trying if a fault was detected */
-    if (r == UECC_FAULT_DETECTED) {
-      mbedtls_platform_memset(signature, 0, 2 * NUM_ECC_BYTES);
-      return r;
-    }
-    if (r == UECC_SUCCESS) {
-      if (private_key_dup != private_key || message_hash_dup != message_hash ||
-          hash_size_dup != hash_size || signature_dup != signature) {
-        mbedtls_platform_memset(signature, 0, 2 * NUM_ECC_BYTES);
-        return UECC_FAULT_DETECTED;
-      }
-      return UECC_SUCCESS;
-    }
-    /* else keep trying */
-  }
-  return UECC_FAILURE;
+		if (uECC_sign_with_k(private_key, message_hash, hash_size, k, signature, 
+		    curve)) {
+			return 1;
+		}
+	}
+	return 0;
 }
 
-static bitcount_t smax(bitcount_t a, bitcount_t b) { return (a > b ? a : b); }
+static bitcount_t smax(bitcount_t a, bitcount_t b)
+{
+	return (a > b ? a : b);
+}
 
 int uECC_verify(const uint8_t *public_key, const uint8_t *message_hash,
-                unsigned hash_size, const uint8_t *signature) {
+		unsigned hash_size, const uint8_t *signature,
+	        uECC_Curve curve)
+{
 
-  uECC_word_t u1[NUM_ECC_WORDS], u2[NUM_ECC_WORDS];
-  uECC_word_t z[NUM_ECC_WORDS];
-  uECC_word_t sum[NUM_ECC_WORDS * 2];
-  uECC_word_t rx[NUM_ECC_WORDS];
-  uECC_word_t ry[NUM_ECC_WORDS];
-  uECC_word_t tx[NUM_ECC_WORDS];
-  uECC_word_t ty[NUM_ECC_WORDS];
-  uECC_word_t tz[NUM_ECC_WORDS];
-  const uECC_word_t *points[4];
-  const uECC_word_t *point;
-  bitcount_t num_bits;
-  bitcount_t i;
-  bitcount_t flow_control;
-  volatile uECC_word_t diff;
+	uECC_word_t u1[NUM_ECC_WORDS], u2[NUM_ECC_WORDS];
+	uECC_word_t z[NUM_ECC_WORDS];
+	uECC_word_t sum[NUM_ECC_WORDS * 2];
+	uECC_word_t rx[NUM_ECC_WORDS];
+	uECC_word_t ry[NUM_ECC_WORDS];
+	uECC_word_t tx[NUM_ECC_WORDS];
+	uECC_word_t ty[NUM_ECC_WORDS];
+	uECC_word_t tz[NUM_ECC_WORDS];
+	const uECC_word_t *points[4];
+	const uECC_word_t *point;
+	bitcount_t num_bits;
+	bitcount_t i;
 
-  uECC_word_t _public[NUM_ECC_WORDS * 2];
-  uECC_word_t r[NUM_ECC_WORDS], s[NUM_ECC_WORDS];
-  wordcount_t num_words = NUM_ECC_WORDS;
-  wordcount_t num_n_words = TC_BITS_TO_WORDS(NUM_ECC_BITS);
+	uECC_word_t _public[NUM_ECC_WORDS * 2];
+	uECC_word_t r[NUM_ECC_WORDS], s[NUM_ECC_WORDS];
+	wordcount_t num_words = curve->num_words;
+	wordcount_t num_n_words = BITS_TO_WORDS(curve->num_n_bits);
 
-  rx[num_n_words - 1] = 0;
-  r[num_n_words - 1] = 0;
-  s[num_n_words - 1] = 0;
-  flow_control = 1;
+	rx[num_n_words - 1] = 0;
+	r[num_n_words - 1] = 0;
+	s[num_n_words - 1] = 0;
 
-  uECC_vli_bytesToNative(_public, public_key, NUM_ECC_BYTES);
-  uECC_vli_bytesToNative(_public + num_words, public_key + NUM_ECC_BYTES,
-                         NUM_ECC_BYTES);
-  uECC_vli_bytesToNative(r, signature, NUM_ECC_BYTES);
-  uECC_vli_bytesToNative(s, signature + NUM_ECC_BYTES, NUM_ECC_BYTES);
+	uECC_vli_bytesToNative(_public, public_key, curve->num_bytes);
+	uECC_vli_bytesToNative(_public + num_words, public_key + curve->num_bytes,
+			       curve->num_bytes);
+	uECC_vli_bytesToNative(r, signature, curve->num_bytes);
+	uECC_vli_bytesToNative(s, signature + curve->num_bytes, curve->num_bytes);
 
-  /* r, s must not be 0. */
-  if (uECC_vli_isZero(r) || uECC_vli_isZero(s)) {
-    return UECC_FAILURE;
-  }
+	/* r, s must not be 0. */
+	if (uECC_vli_isZero(r, num_words) || uECC_vli_isZero(s, num_words)) {
+		return 0;
+	}
 
-  /* r, s must be < n. */
-  if (uECC_vli_cmp_unsafe(curve_n, r) != 1 ||
-      uECC_vli_cmp_unsafe(curve_n, s) != 1) {
-    return UECC_FAILURE;
-  }
+	/* r, s must be < n. */
+	if (uECC_vli_cmp_unsafe(curve->n, r, num_n_words) != 1 ||
+	    uECC_vli_cmp_unsafe(curve->n, s, num_n_words) != 1) {
+		return 0;
+	}
 
-  flow_control++;
+	/* Calculate u1 and u2. */
+	uECC_vli_modInv(z, s, curve->n, num_n_words); /* z = 1/s */
+	u1[num_n_words - 1] = 0;
+	bits2int(u1, message_hash, hash_size, curve);
+	uECC_vli_modMult(u1, u1, z, curve->n, num_n_words); /* u1 = e/s */
+	uECC_vli_modMult(u2, r, z, curve->n, num_n_words); /* u2 = r/s */
 
-  /* Calculate u1 and u2. */
-  uECC_vli_modInv(z, s, curve_n); /* z = 1/s */
-  u1[num_n_words - 1] = 0;
-  bits2int(u1, message_hash, hash_size);
-  uECC_vli_modMult(u1, u1, z, curve_n); /* u1 = e/s */
-  uECC_vli_modMult(u2, r, z, curve_n);  /* u2 = r/s */
+	/* Calculate sum = G + Q. */
+	uECC_vli_set(sum, _public, num_words);
+	uECC_vli_set(sum + num_words, _public + num_words, num_words);
+	uECC_vli_set(tx, curve->G, num_words);
+	uECC_vli_set(ty, curve->G + num_words, num_words);
+	uECC_vli_modSub(z, sum, tx, curve->p, num_words); /* z = x2 - x1 */
+	XYcZ_add(tx, ty, sum, sum + num_words, curve);
+	uECC_vli_modInv(z, z, curve->p, num_words); /* z = 1/z */
+	apply_z(sum, sum + num_words, z, curve);
 
-  /* Calculate sum = G + Q. */
-  uECC_vli_set(sum, _public);
-  uECC_vli_set(sum + num_words, _public + num_words);
-  uECC_vli_set(tx, curve_G);
-  uECC_vli_set(ty, curve_G + num_words);
-  uECC_vli_modSub(z, sum, tx, curve_p); /* z = x2 - x1 */
-  XYcZ_add(tx, ty, sum, sum + num_words);
-  uECC_vli_modInv(z, z, curve_p); /* z = 1/z */
-  apply_z(sum, sum + num_words, z);
+	/* Use Shamir's trick to calculate u1*G + u2*Q */
+	points[0] = 0;
+	points[1] = curve->G;
+	points[2] = _public;
+	points[3] = sum;
+	num_bits = smax(uECC_vli_numBits(u1, num_n_words),
+	uECC_vli_numBits(u2, num_n_words));
 
-  flow_control++;
+	point = points[(!!uECC_vli_testBit(u1, num_bits - 1)) |
+                       ((!!uECC_vli_testBit(u2, num_bits - 1)) << 1)];
+	uECC_vli_set(rx, point, num_words);
+	uECC_vli_set(ry, point + num_words, num_words);
+	uECC_vli_clear(z, num_words);
+	z[0] = 1;
 
-  /* Use Shamir's trick to calculate u1*G + u2*Q */
-  points[0] = 0;
-  points[1] = curve_G;
-  points[2] = _public;
-  points[3] = sum;
-  num_bits = smax(uECC_vli_numBits(u1), uECC_vli_numBits(u2));
+	for (i = num_bits - 2; i >= 0; --i) {
+		uECC_word_t index;
+		curve->double_jacobian(rx, ry, z, curve);
 
-  point = points[(!!uECC_vli_testBit(u1, num_bits - 1)) |
-                 ((!!uECC_vli_testBit(u2, num_bits - 1)) << 1)];
-  uECC_vli_set(rx, point);
-  uECC_vli_set(ry, point + num_words);
-  uECC_vli_clear(z);
-  z[0] = 1;
-  flow_control++;
+		index = (!!uECC_vli_testBit(u1, i)) | ((!!uECC_vli_testBit(u2, i)) << 1);
+		point = points[index];
+		if (point) {
+			uECC_vli_set(tx, point, num_words);
+			uECC_vli_set(ty, point + num_words, num_words);
+			apply_z(tx, ty, z, curve);
+			uECC_vli_modSub(tz, rx, tx, curve->p, num_words); /* Z = x2 - x1 */
+			XYcZ_add(tx, ty, rx, ry, curve);
+			uECC_vli_modMult_fast(z, z, tz, curve);
+		}
+  	}
 
-  for (i = num_bits - 2; i >= 0; --i) {
-    uECC_word_t index;
-    double_jacobian_default(rx, ry, z);
+	uECC_vli_modInv(z, z, curve->p, num_words); /* Z = 1/Z */
+	apply_z(rx, ry, z, curve);
 
-    index = (!!uECC_vli_testBit(u1, i)) | ((!!uECC_vli_testBit(u2, i)) << 1);
-    point = points[index];
-    if (point) {
-      uECC_vli_set(tx, point);
-      uECC_vli_set(ty, point + num_words);
-      apply_z(tx, ty, z);
-      uECC_vli_modSub(tz, rx, tx, curve_p); /* Z = x2 - x1 */
-      XYcZ_add(tx, ty, rx, ry);
-      uECC_vli_modMult_fast(z, z, tz);
-    }
-    flow_control++;
-  }
+	/* v = x1 (mod n) */
+	if (uECC_vli_cmp_unsafe(curve->n, rx, num_n_words) != 1) {
+		uECC_vli_sub(rx, rx, curve->n, num_n_words);
+	}
 
-  uECC_vli_modInv(z, z, curve_p); /* Z = 1/Z */
-  apply_z(rx, ry, z);
-  flow_control++;
-
-  /* v = x1 (mod n) */
-  if (uECC_vli_cmp_unsafe(curve_n, rx) != 1) {
-    uECC_vli_sub(rx, rx, curve_n);
-  }
-
-  /* Accept only if v == r. */
-  diff = uECC_vli_equal(rx, r);
-  if (diff == 0) {
-    flow_control++;
-    mbedtls_platform_random_delay();
-
-    /* Re-check the condition and test if the control flow is as expected.
-     * 1 (base value) + num_bits - 1 (from the loop) + 5 incrementations.
-     */
-    if (diff == 0 && flow_control == (num_bits + 5)) {
-      return UECC_SUCCESS;
-    } else {
-      return UECC_FAULT_DETECTED;
-    }
-  }
-
-  return UECC_FAILURE;
+	/* Accept only if v == r. */
+	return (int)(uECC_vli_equal(rx, r, num_words) == 0);
 }
-#endif /* TINYCRYPT_PRIMITIVES */
+
