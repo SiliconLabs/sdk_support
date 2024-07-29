@@ -1,11 +1,6 @@
 /* ecc_dh.h - TinyCrypt interface to EC-DSA implementation */
 
 /*
- *  Copyright (c) 2019, Arm Limited (or its affiliates), All Rights Reserved.
- *  SPDX-License-Identifier: BSD-3-Clause
- */
-
-/*
  * Copyright (c) 2014, Kenneth MacKay
  * All rights reserved.
  *
@@ -83,7 +78,7 @@
 #ifndef __TC_ECC_DSA_H__
 #define __TC_ECC_DSA_H__
 
-#include "tinycrypt/ecc.h"
+#include <tinycrypt/ecc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,14 +86,14 @@ extern "C" {
 
 /**
  * @brief Generate an ECDSA signature for a given hash value.
- * @return UECC_SUCCESS or UECC_FAILURE or UECC_FAULT_DETECTED
+ * @return returns TC_CRYPTO_SUCCESS (1) if the signature generated successfully
+ *         returns TC_CRYPTO_FAIL (0) if an error occurred.
  *
  * @param p_private_key IN -- Your private key.
  * @param p_message_hash IN -- The hash of the message to sign.
  * @param p_hash_size IN -- The size of p_message_hash in bytes.
  * @param p_signature OUT -- Will be filled in with the signature value. Must be
- * at least 2 * curve size long (for secp256r1, signature must be 64 bytes
- * long).
+ * at least 2 * curve size long (for secp256r1, signature must be 64 bytes long).
  *
  * @warning A cryptographically-secure PRNG function must be set (using
  * uECC_set_rng()) before calling uECC_sign().
@@ -108,7 +103,7 @@ extern "C" {
  * attack.
  */
 int uECC_sign(const uint8_t *p_private_key, const uint8_t *p_message_hash,
-              unsigned p_hash_size, uint8_t *p_signature);
+	      unsigned p_hash_size, uint8_t *p_signature, uECC_Curve curve);
 
 #ifdef ENABLE_TESTS
 /*
@@ -116,14 +111,14 @@ int uECC_sign(const uint8_t *p_private_key, const uint8_t *p_message_hash,
  * Refer to uECC_sign() function for real applications.
  */
 int uECC_sign_with_k(const uint8_t *private_key, const uint8_t *message_hash,
-                     unsigned int hash_size, uECC_word_t *k,
-                     uint8_t *signature);
+		     unsigned int hash_size, uECC_word_t *k, uint8_t *signature,
+		     uECC_Curve curve);
 #endif
 
 /**
  * @brief Verify an ECDSA signature.
- * @return returns UECC_SUCCESS if the signature is valid
- * 	   returns UECC_FAILURE if the signature is invalid.
+ * @return returns TC_SUCCESS (1) if the signature is valid
+ * 	   returns TC_FAIL (0) if the signature is invalid.
  *
  * @param p_public_key IN -- The signer's public key.
  * @param p_message_hash IN -- The hash of the signed data.
@@ -135,7 +130,7 @@ int uECC_sign_with_k(const uint8_t *private_key, const uint8_t *message_hash,
  * the signature values (hash_size and signature).
  */
 int uECC_verify(const uint8_t *p_public_key, const uint8_t *p_message_hash,
-                unsigned int p_hash_size, const uint8_t *p_signature);
+		unsigned int p_hash_size, const uint8_t *p_signature, uECC_Curve curve);
 
 #ifdef __cplusplus
 }
