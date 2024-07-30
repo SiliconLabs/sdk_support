@@ -52,19 +52,20 @@ static void rekey(uint8_t *key, const uint8_t *new_key, unsigned int key_size)
 int tc_hmac_set_key(TCHmacState_t ctx, const uint8_t *key,
 		    unsigned int key_size)
 {
-	/* Input sanity check */
+
+	/* input sanity check: */
 	if (ctx == (TCHmacState_t) 0 ||
 	    key == (const uint8_t *) 0 ||
 	    key_size == 0) {
 		return TC_CRYPTO_FAIL;
 	}
 
-	const uint8_t dummy_key[TC_SHA256_BLOCK_SIZE];
+	const uint8_t dummy_key[key_size];
 	struct tc_hmac_state_struct dummy_state;
 
 	if (key_size <= TC_SHA256_BLOCK_SIZE) {
 		/*
-		 * The next three calls are dummy calls just to avoid
+		 * The next three lines consist of dummy calls just to avoid
 		 * certain timing attacks. Without these dummy calls,
 		 * adversaries would be able to learn whether the key_size is
 		 * greater than TC_SHA256_BLOCK_SIZE by measuring the time
