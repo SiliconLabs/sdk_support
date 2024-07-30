@@ -1,5 +1,8 @@
 /* ecc_dh.h - TinyCrypt interface to EC-DH implementation */
-
+/*
+ *  Copyright (c) 2019, Arm Limited (or its affiliates), All Rights Reserved.
+ *  SPDX-License-Identifier: BSD-3-Clause
+ */
 /*
  * Copyright (c) 2014, Kenneth MacKay
  * All rights reserved.
@@ -26,7 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 /* Copyright (C) 2017 by Intel Corporation, All Rights Reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -55,7 +57,6 @@
  *  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  *  POSSIBILITY OF SUCH DAMAGE.
  */
-
 /**
  * @file
  * @brief -- Interface to EC-DH implementation.
@@ -65,20 +66,15 @@
  *
  *  Security: The curve NIST p-256 provides approximately 128 bits of security.
  */
-
 #ifndef __TC_ECC_DH_H__
 #define __TC_ECC_DH_H__
-
 #include <tinycrypt/ecc.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 /**
  * @brief Create a public/private key pair.
- * @return returns TC_CRYPTO_SUCCESS (1) if the key pair was generated successfully
- *         returns TC_CRYPTO_FAIL (0) if error while generating key pair
+ * @return UECC_SUCCESS or UECC_FAILURE or UECC_FAULT_DETECTED
  *
  * @param p_public_key OUT -- Will be filled in with the public key. Must be at
  * least 2 * the curve size (in bytes) long. For curve secp256r1, p_public_key
@@ -91,25 +87,20 @@ extern "C" {
  * @warning A cryptographically-secure PRNG function must be set (using
  * uECC_set_rng()) before calling uECC_make_key().
  */
-int uECC_make_key(uint8_t *p_public_key, uint8_t *p_private_key, uECC_Curve curve);
-
+int uECC_make_key(uint8_t *p_public_key, uint8_t *p_private_key);
 #ifdef ENABLE_TESTS
-
 /**
  * @brief Create a public/private key pair given a specific d.
  *
  * @note THIS FUNCTION SHOULD BE CALLED ONLY FOR TEST PURPOSES. Refer to
  * uECC_make_key() function for real applications.
  */
-int uECC_make_key_with_d(uint8_t *p_public_key, uint8_t *p_private_key,
-    			 unsigned int *d, uECC_Curve curve);
+int uECC_make_key_with_d(uint8_t *p_public_key, uint8_t *p_private_key, unsigned int *d);
 #endif
-
 /**
  * @brief Compute a shared secret given your secret key and someone else's
  * public key.
- * @return returns TC_CRYPTO_SUCCESS (1) if the shared secret was computed successfully
- *         returns TC_CRYPTO_FAIL (0) otherwise
+ * @return UECC_SUCCESS or UECC_FAILURE or UECC_FAULT_DETECTED
  *
  * @param p_secret OUT -- Will be filled in with the shared secret value. Must be
  * the same size as the curve size (for curve secp256r1, secret must be 32 bytes
@@ -121,11 +112,8 @@ int uECC_make_key_with_d(uint8_t *p_public_key, uint8_t *p_private_key,
  * input of a recommended Key Derivation Function (see NIST SP 800-108) in
  * order to produce a cryptographically secure symmetric key.
  */
-int uECC_shared_secret(const uint8_t *p_public_key, const uint8_t *p_private_key,
-		       uint8_t *p_secret, uECC_Curve curve);
-
+int uECC_shared_secret(const uint8_t *p_public_key, const uint8_t *p_private_key, uint8_t *p_secret);
 #ifdef __cplusplus
 }
 #endif
-
 #endif /* __TC_ECC_DH_H__ */
