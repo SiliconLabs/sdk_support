@@ -6,6 +6,7 @@
 // sl_mbedtls_config header. File keeps the previous logic by only including
 // check_config without needing to modfy the generated files.
 
+// SLC-FIX until we can use the generated si sdk components
 #if defined(MBEDTLS_USER_CONFIG_FILE)
 #include MBEDTLS_USER_CONFIG_FILE
 #endif
