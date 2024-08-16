@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Custom CLI support for OpenThread
+ * @brief I2C simple poll-based master mode driver instance initialilization
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,37 +28,37 @@
  *
  ******************************************************************************/
 
-#include <openthread/cli.h>
-#include <common/code_utils.hpp>
-#include <string.h>
-#include "sl_ot_custom_cli.h"
+#include "sl_i2cspm.h"
+#include "sl_clock_manager.h"
+// Include instance config 
+#include "sl_i2cspm_sensor_config.h"
 
-/*******************************************************************************
- * Example syntax (.slcc or .slcp) for populating this file:
- *
- *   template_contribution:
- *     - name: sl_ot_cli_command    # Register a command
- *       value:
- *         name: status             # Name of command
- *         handler: status_command  # Function to be called. Must be defined
- *
- ******************************************************************************/
-extern otError bleCommand(void *aContext, uint8_t aArgsLength, char *aArgs[]);
+sl_i2cspm_t *sl_i2cspm_sensor = SL_I2CSPM_SENSOR_PERIPHERAL;
 
-otCliCommand sl_ot_custom_commands[] = {
-#ifdef SL_OPENTHREAD_BLE_CLI_ENABLE
-    {"ble", bleCommand},
+#if SL_I2CSPM_SENSOR_SPEED_MODE == 0
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRStandard
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_STANDARD_MAX
+#elif SL_I2CSPM_SENSOR_SPEED_MODE == 1
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRAsymetric
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_FAST_MAX
+#elif SL_I2CSPM_SENSOR_SPEED_MODE == 2
+#define SL_I2CSPM_SENSOR_HLR i2cClockHLRFast
+#define SL_I2CSPM_SENSOR_MAX_FREQ I2C_FREQ_FASTPLUS_MAX
 #endif
 
+I2CSPM_Init_TypeDef init_sensor = { 
+  .port = SL_I2CSPM_SENSOR_PERIPHERAL,
+  .sclPort = SL_I2CSPM_SENSOR_SCL_PORT,
+  .sclPin = SL_I2CSPM_SENSOR_SCL_PIN,
+  .sdaPort = SL_I2CSPM_SENSOR_SDA_PORT,
+  .sdaPin = SL_I2CSPM_SENSOR_SDA_PIN,
+  .i2cRefFreq = 0,
+  .i2cMaxFreq = SL_I2CSPM_SENSOR_MAX_FREQ,
+  .i2cClhr = SL_I2CSPM_SENSOR_HLR
 };
 
-// This is needed because `sizeof` is calculated at compile time and can't be calculated outside of this source file.
-const uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);
-
-void sl_ot_custom_cli_init(void)
+void sl_i2cspm_init_instances(void)
 {
-    if (sl_ot_custom_commands_count > 0) 
-    {
-        IgnoreError(otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL));
-    }
+  sl_clock_manager_enable_bus_clock(SL_BUS_CLOCK_GPIO);
+  I2CSPM_Init(&init_sensor);
 }

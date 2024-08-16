@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Custom CLI support for OpenThread
+ * @brief I2C simple poll-based master mode driver instances
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2020 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -27,38 +27,26 @@
  * 3. This notice may not be removed or altered from any source distribution.
  *
  ******************************************************************************/
+ 
+#ifndef SL_I2CSPM_INSTANCES_H
+#define SL_I2CSPM_INSTANCES_H
 
-#include <openthread/cli.h>
-#include <common/code_utils.hpp>
-#include <string.h>
-#include "sl_ot_custom_cli.h"
-
-/*******************************************************************************
- * Example syntax (.slcc or .slcp) for populating this file:
- *
- *   template_contribution:
- *     - name: sl_ot_cli_command    # Register a command
- *       value:
- *         name: status             # Name of command
- *         handler: status_command  # Function to be called. Must be defined
- *
- ******************************************************************************/
-extern otError bleCommand(void *aContext, uint8_t aArgsLength, char *aArgs[]);
-
-otCliCommand sl_ot_custom_commands[] = {
-#ifdef SL_OPENTHREAD_BLE_CLI_ENABLE
-    {"ble", bleCommand},
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-};
+#include "sl_i2cspm.h"
 
-// This is needed because `sizeof` is calculated at compile time and can't be calculated outside of this source file.
-const uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);
 
-void sl_ot_custom_cli_init(void)
-{
-    if (sl_ot_custom_commands_count > 0) 
-    {
-        IgnoreError(otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL));
-    }
+#define SL_I2CSPM_SENSOR_PRESENT
+
+
+extern sl_i2cspm_t *sl_i2cspm_sensor;
+
+void sl_i2cspm_init_instances(void);
+
+#ifdef __cplusplus
 }
+#endif
+
+#endif // SL_I2CSPM_INSTANCES_H

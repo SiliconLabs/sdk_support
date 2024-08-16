@@ -1,9 +1,9 @@
 /***************************************************************************//**
  * @file
- * @brief Custom CLI support for OpenThread
+ * @brief I2CSPM Config
  *******************************************************************************
  * # License
- * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,37 +28,44 @@
  *
  ******************************************************************************/
 
-#include <openthread/cli.h>
-#include <common/code_utils.hpp>
-#include <string.h>
-#include "sl_ot_custom_cli.h"
+#ifndef SL_I2CSPM_SENSOR_CONFIG_H
+#define SL_I2CSPM_SENSOR_CONFIG_H
 
-/*******************************************************************************
- * Example syntax (.slcc or .slcp) for populating this file:
- *
- *   template_contribution:
- *     - name: sl_ot_cli_command    # Register a command
- *       value:
- *         name: status             # Name of command
- *         handler: status_command  # Function to be called. Must be defined
- *
- ******************************************************************************/
-extern otError bleCommand(void *aContext, uint8_t aArgsLength, char *aArgs[]);
+// <<< Use Configuration Wizard in Context Menu
 
-otCliCommand sl_ot_custom_commands[] = {
-#ifdef SL_OPENTHREAD_BLE_CLI_ENABLE
-    {"ble", bleCommand},
-#endif
+// <h>I2CSPM settings
 
-};
+// <o SL_I2CSPM_SENSOR_REFERENCE_CLOCK> Reference clock frequency
+// <i> Frequency in Hz of the reference clock.
+// <i> Select 0 to use the frequency of the currently selected clock.
+// <i> Default: 0
+#define SL_I2CSPM_SENSOR_REFERENCE_CLOCK 0
 
-// This is needed because `sizeof` is calculated at compile time and can't be calculated outside of this source file.
-const uint8_t sl_ot_custom_commands_count = OT_ARRAY_LENGTH(sl_ot_custom_commands);
+// <o SL_I2CSPM_SENSOR_SPEED_MODE> Speed mode
+// <0=> Standard mode (100kbit/s)
+// <1=> Fast mode (400kbit/s)
+// <2=> Fast mode plus (1Mbit/s)
+// <i> Default: 0
+#define SL_I2CSPM_SENSOR_SPEED_MODE      0
+// </h> end I2CSPM config
 
-void sl_ot_custom_cli_init(void)
-{
-    if (sl_ot_custom_commands_count > 0) 
-    {
-        IgnoreError(otCliSetUserCommands(sl_ot_custom_commands, sl_ot_custom_commands_count, NULL));
-    }
-}
+// <<< end of configuration section >>>
+
+// <<< sl:start pin_tool >>>
+// <i2c signal=SCL,SDA> SL_I2CSPM_SENSOR
+// $[I2C_SL_I2CSPM_SENSOR]
+#define SL_I2CSPM_SENSOR_PERIPHERAL              I2C0
+#define SL_I2CSPM_SENSOR_PERIPHERAL_NO           0
+
+// I2C0 SCL on PB02
+#define SL_I2CSPM_SENSOR_SCL_PORT                gpioPortB
+#define SL_I2CSPM_SENSOR_SCL_PIN                 2
+
+// I2C0 SDA on PB03
+#define SL_I2CSPM_SENSOR_SDA_PORT                gpioPortB
+#define SL_I2CSPM_SENSOR_SDA_PIN                 3
+
+// [I2C_SL_I2CSPM_SENSOR]$
+// <<< sl:end pin_tool >>>
+
+#endif // SL_I2CSPM_SENSOR_CONFIG_H
