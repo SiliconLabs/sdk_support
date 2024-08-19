@@ -155,7 +155,8 @@ def _configure_sdk(si_sdk_path):
     Configures slc sdk permissions to enable generation
     """
     subprocess.run(["slc", "configuration", "--sdk", si_sdk_path], check=True)
-    subprocess.run(["slc", "signature", "trust", "--sdk", si_sdk_path], check=True)
+    subprocess.run(["slc", "signature", "trust",
+                   "--sdk", si_sdk_path], check=True)
 
 
 def _generate_slc(args):
@@ -222,10 +223,12 @@ def _generate_board(board: Board, si_sdk_path: str, slcp_path: str, output_path:
     si_sdk_path = Path(si_sdk_path)
     slcp_path = Path(slcp_path)
     output_path = Path(output_path)
-    output_path = os.path.join(output_path, board.family.value, board.board.value)
+    output_path = os.path.join(
+        output_path, board.family.value, board.board.value)
 
     # run slc generate command
-    subprocess.run(["slc", "generate", slcp_path, "-d", output_path, "--with", board.slc_arguments], check=True)
+    subprocess.run(["slc", "generate", slcp_path, "-d",
+                   output_path, "--with", board.slc_arguments], check=True)
 
     # delete files generated files
     if delete_files:
