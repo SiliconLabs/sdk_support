@@ -82,6 +82,7 @@
         .channel.channel = SL_WIFI_AUTO_CHANNEL, \
         .channel.band = SL_WIFI_AUTO_BAND, \
         .channel.bandwidth = SL_WIFI_AUTO_BANDWIDTH, \
+        .channel_bitmap.channel_bitmap_2_4 = SL_WIFI_DEFAULT_CHANNEL_BITMAP, \
         .bssid = {{0}}, \
         .bss_type = SL_WIFI_BSS_TYPE_INFRASTRUCTURE, \
         .security = DEFAULT_WIFI_CLIENT_SECURITY_TYPE, \
@@ -118,7 +119,7 @@
         .maximum_clients = 3, \
         .beacon_stop = 0, \
         .tdi_flags =SL_WIFI_TDI_NONE, \
-        .is_11n_enabled = 0, \
+        .is_11n_enabled = 1, \
     }, \
     .ip = { \
       .mode      = SL_IP_MANAGEMENT_STATIC_IP, \

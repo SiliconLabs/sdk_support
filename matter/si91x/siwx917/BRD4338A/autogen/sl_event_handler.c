@@ -19,7 +19,7 @@
 #include "cmsis_os2.h"
 #include "sl_iostream_init_instances.h"
 
-void sl_platform_init(void) 
+void sl_platform_init(void)
 {
   SystemCoreClockUpdate();
   sl_si91x_device_init_nvic();
@@ -43,7 +43,7 @@ void sl_driver_init(void)
   led_init_instances();
 }
 
-void sl_service_init(void) 
+void sl_service_init(void)
 {
 #if SL_ICD_ENABLED
   sl_si91x_power_manager_init();
