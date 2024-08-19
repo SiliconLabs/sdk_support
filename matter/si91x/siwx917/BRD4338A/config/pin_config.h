@@ -46,8 +46,74 @@
 // $[PWM]
 // [PWM]$
 
-// $[ADC]
-// [ADC]$
+// $[PWM_CH0]
+// [PWM_CH0]$
+
+// $[PWM_CH1]
+// [PWM_CH1]$
+
+// $[PWM_CH2]
+// [PWM_CH2]$
+
+// $[PWM_CH3]
+// [PWM_CH3]$
+
+// $[ADC_CH1]
+// [ADC_CH1]$
+
+// $[ADC_CH2]
+// [ADC_CH2]$
+
+// $[ADC_CH3]
+// [ADC_CH3]$
+
+// $[ADC_CH4]
+// [ADC_CH4]$
+
+// $[ADC_CH5]
+// [ADC_CH5]$
+
+// $[ADC_CH6]
+// [ADC_CH6]$
+
+// $[ADC_CH7]
+// [ADC_CH7]$
+
+// $[ADC_CH8]
+// [ADC_CH8]$
+
+// $[ADC_CH9]
+// [ADC_CH9]$
+
+// $[ADC_CH10]
+// [ADC_CH10]$
+
+// $[ADC_CH11]
+// [ADC_CH11]$
+
+// $[ADC_CH12]
+// [ADC_CH12]$
+
+// $[ADC_CH13]
+// [ADC_CH13]$
+
+// $[ADC_CH14]
+// [ADC_CH14]$
+
+// $[ADC_CH15]
+// [ADC_CH15]$
+
+// $[ADC_CH16]
+// [ADC_CH16]$
+
+// $[ADC_CH17]
+// [ADC_CH17]$
+
+// $[ADC_CH18]
+// [ADC_CH18]$
+
+// $[ADC_CH19]
+// [ADC_CH19]$
 
 // $[COMP1]
 // [COMP1]$

@@ -17,7 +17,7 @@
  *
  * 3. This notice may not be removed or altered from any source distribution.
  *
- * $Date:        1. December 2016
+ * $Date:        1. June 2024
  * $Revision:    V2.4.4
  *
  * Project:      RTE Device Configuration for Si91x 2.0 B0 BRD4338A
@@ -47,7 +47,7 @@
 #define RTE_BUTTON1_PIN    (11U)
 #define RTE_BUTTON1_PAD    6
 
-#define RTE_LED0_PORT   0
+#define RTE_LED0_PORT   4
 #define RTE_LED0_NUMBER 0
 #define RTE_LED0_PIN    (2U)
 
@@ -63,7 +63,7 @@
 
 #define RTE_USART0 1
 
-#define RTE_USART0_CLK_SRC      USART_INTFPLLCLK
+#define RTE_USART0_CLK_SRC      USART_ULPREFCLK
 #define RTE_USART0_CLK_DIV_FACT 1
 #define RTE_USART0_FRAC_DIV_SEL USART_FRACTIONAL_DIVIDER
 
@@ -225,7 +225,7 @@
 #define RTE_USART0_RX_PORT 0
 #define RTE_USART0_RX_PIN  65
 #define RTE_USART0_RX_MUX  2
-#define RTE_USART0_RX_PAD  24
+#define RTE_USART0_RX_PAD  23
 #elif (RTE_USART0_RX_PORT_ID == 4)
 #define RTE_USART0_RX_PORT 0
 #define RTE_USART0_RX_PIN  70
@@ -255,7 +255,7 @@
 #if (USART0_RX_LOC == 12)
 #define RTE_USART0_RX_PIN (USART0_RX_PIN + GPIO_MAX_PIN)
 #define RTE_USART0_RX_MUX 2
-#define RTE_USART0_RX_PAD 24
+#define RTE_USART0_RX_PAD 23
 #endif
 #if (USART0_RX_LOC == 13)
 #define RTE_USART0_RX_PIN (USART0_RX_PIN + GPIO_MAX_PIN)
@@ -578,7 +578,7 @@
 // <i> Configuration settings for Driver_UART1 in component ::CMSIS Driver:USART
 #define RTE_UART1 1
 
-#define RTE_UART1_CLK_SRC      USART_INTFPLLCLK
+#define RTE_UART1_CLK_SRC      USART_ULPREFCLK
 #define RTE_UART1_CLK_DIV_FACT 1
 #define RTE_UART1_FRAC_DIV_SEL USART_FRACTIONAL_DIVIDER
 
@@ -4887,3 +4887,13 @@
 // UULP GPIO as enable pin for sensors
 #define SENSOR_ENABLE_GPIO_MAPPED_TO_UULP
 #define SENSOR_ENABLE_GPIO_PIN RTE_UULP_GPIO_1_PIN
+
+// Memlcd GPIOs
+#define RTE_MEMLCD_CS_PIN  10 // Memlcd SPI CS pin
+#define RTE_MEMLCD_CS_PORT 0  // Memlcd SPI CS port
+
+#define RTE_MEMLCD_EXTCOMIN_PIN  3 // Memlcd external communication pin
+#define RTE_MEMLCD_EXTCOMIN_PORT 0 // Memlcd external communication port
+
+#define RTE_MEMLCD_ENABLE_DISPLAY_PIN  0 // Memlcd display enable pin
+#define RTE_MEMLCD_ENABLE_DISPLAY_PORT 0 // Memlcd display enable port
