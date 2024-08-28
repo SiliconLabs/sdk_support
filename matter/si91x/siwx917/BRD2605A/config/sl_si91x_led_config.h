@@ -11,7 +11,7 @@
 
 #include "RTE_Device_917.h"
 
-#define SL_SI91x_LED_COUNT 2
+#define SL_SI91x_LED_COUNT 1
 
 #ifndef SI917_DEVKIT
 
