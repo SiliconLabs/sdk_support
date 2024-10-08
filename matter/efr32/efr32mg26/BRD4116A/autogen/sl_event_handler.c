@@ -20,9 +20,9 @@
 #include "sl_sleeptimer.h"
 #include "sl_mpu.h"
 #include "gpiointerrupt.h"
-#if defined(USE_TEMP_SENSOR)
+#if defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
 #include "sl_i2cspm_instances.h"
-#endif
+#endif // defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
 #include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
 #include "nvm3_default.h"
