@@ -31,7 +31,15 @@
 #ifndef SL_SI91x_LED_INSTANCES_H
 #define SL_SI91x_LED_INSTANCES_H
 
-#include "sl_si91x_led.h"
+#include <stdint.h>
+#include "sl_si91x_led_init_led0_config.h"
+#include "sl_si91x_led_init_led1_config.h"
+
+typedef struct {
+  uint8_t pin;        ///< Pin number of the LED.
+  uint8_t port;       ///< Port number of the LED.
+  uint8_t led_number; ///< LED number for identification.
+} sl_led_t;
 
 extern const sl_led_t led_led0;
 extern const sl_led_t led_led1;
