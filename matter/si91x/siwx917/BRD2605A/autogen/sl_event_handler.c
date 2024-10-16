@@ -13,7 +13,7 @@
 #include "SEGGER_RTT.h"
 #include "sl_sleeptimer.h"
 #include "sl_si91x_button_instances.h"
-#include "sl_si91x_led_instances.h"
+#include "sl_si91x_rgb_led_instances.h"
 #include "sl_ulp_timer_instances.h"
 #include "sl_iostream_rtt.h"
 #include "cmsis_os2.h"
@@ -26,6 +26,7 @@ void sl_platform_init(void)
   sli_si91x_platform_init();
   RSI_Board_Init();
   DEBUGINIT();
+  SEGGER_RTT_Init();
 #if SL_ICD_ENABLED
   sl_si91x_hardware_setup();
 #endif // SL_ICD_ENABLED
@@ -40,7 +41,7 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
   button_init_instances();
-  led_init_instances();
+  rgb_led_init_instances();
 }
 
 void sl_service_init(void)
@@ -49,9 +50,7 @@ void sl_service_init(void)
   sl_si91x_power_manager_init();
   sli_si91x_power_manager_configure_ram_and_peripheral();
 #endif // SL_ICD_ENABLED
-#if defined(DISPLAY_ENABLED) || defined(SL_ICD_ENABLED)
   sl_sleeptimer_init();
-#endif // DISPLAY_ENABLED || SL_ICD_ENABLED
   sl_iostream_init_instances();
 }
 
