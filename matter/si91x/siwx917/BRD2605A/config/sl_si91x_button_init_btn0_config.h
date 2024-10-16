@@ -1,15 +1,13 @@
 /***************************************************************************/ /**
- * @file sl_si91x_button_config.h
+ * @file sl_si91x_button_init_btn0_config.h
  * @brief Button Driver Configuration
  *******************************************************************************
  * # License
  * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************/
 
-#ifndef SL_SI91X_BUTTON_BTN0_CONFIG_H
-#define SL_SI91X_BUTTON_BTN0_CONFIG_H
-
-#include "sl_si91x_button.h"
+#ifndef SL_SI91X_BUTTON_INIT_BTN0_CONFIG_H
+#define SL_SI91X_BUTTON_INIT_BTN0_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
 
@@ -25,4 +23,20 @@
 
 // <<< end of configuration section >>>
 
-#endif // SL_SI91X_BUTTON_BTN0_CONFIG_H
+// <<< sl:start pin_tool >>>
+// <gpio> SL_SI91X_BUTTON_0
+// $[GPIO_SL_SI91X_BUTTON_0]
+#ifndef SL_SI91X_BUTTON_0_PORT
+#define SL_SI91X_BUTTON_0_PORT UULP_VBAT
+#endif
+#ifndef SL_SI91X_BUTTON_0_PIN
+#define SL_SI91X_BUTTON_0_PIN 2
+#endif
+// [GPIO_SL_SI91X_BUTTON_0]$
+// <<< sl:end pin_tool >>>
+
+#define SL_BUTTON_BTN0_PIN    SL_SI91X_BUTTON_0_PIN
+#define SL_BUTTON_BTN0_PORT   RTE_BUTTON0_PORT
+#define SL_BUTTON_BTN0_NUMBER RTE_BUTTON0_NUMBER
+
+#endif // SL_SI91X_BUTTON_INIT_BTN0_CONFIG_H

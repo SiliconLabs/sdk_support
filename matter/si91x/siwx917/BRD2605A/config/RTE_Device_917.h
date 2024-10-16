@@ -38,8 +38,6 @@
 
 #define BUTTON_0_GPIO_PIN 2
 
-#define SI917_DEVKIT
-
 #define RTE_BUTTON0_PORT   0
 #define RTE_BUTTON0_NUMBER 0
 #define RTE_BUTTON0_PIN    (2U)
@@ -49,23 +47,26 @@
 #define RTE_BUTTON1_PIN    (1U)
 #define RTE_BUTTON1_PAD    13
 
-// RED LED
-#define RTE_LEDR_PORT   3
-#define RTE_LEDR_NUMBER 0
-#define RTE_LEDR_PIN    2
-#define RTE_LEDR_PAD    14
+// RGB LED Instance 0
+#define RTE_LED0_NUMBER 0
 
-// GREEN LED
-#define RTE_LEDG_PORT   3
-#define RTE_LEDG_NUMBER 1
-#define RTE_LEDG_PIN    3
-#define RTE_LEDG_PAD    15
+// Red LED
+#define RTE_LED0_LEDR_PORT   3
+#define RTE_LED0_LEDR_NUMBER RTE_LED0_NUMBER
+#define RTE_LED0_LEDR_PIN    2
+#define RTE_LED0_LEDR_PAD    14
 
-//BLUE LED
-#define RTE_LEDB_PORT   0
-#define RTE_LEDB_NUMBER 2
-#define RTE_LEDB_PIN    15
-#define RTE_LEDB_PAD    8
+// Green LED
+#define RTE_LED0_LEDG_PORT   3
+#define RTE_LED0_LEDG_NUMBER RTE_LED0_NUMBER
+#define RTE_LED0_LEDG_PIN    3
+#define RTE_LED0_LEDG_PAD    15
+
+// Blue LED
+#define RTE_LED0_LEDB_PORT   0
+#define RTE_LED0_LEDB_NUMBER RTE_LED0_NUMBER
+#define RTE_LED0_LEDB_PIN    15
+#define RTE_LED0_LEDB_PAD    8
 
 // <e> USART0  [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::CMSIS Driver:USART
@@ -120,7 +121,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_CLK_PORT USART0_CLK_PORT
+#define RTE_USART0_CLK_PORT 0
 #if (USART0_CLK_LOC == 0)
 #define RTE_USART0_CLK_PIN USART0_CLK_PIN
 #define RTE_USART0_CLK_MUX 2
@@ -178,7 +179,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_TX_PORT USART0_TX_PORT
+#define RTE_USART0_TX_PORT 0
 #if (USART0_TX_LOC == 4)
 #define RTE_USART0_TX_PIN USART0_TX_PIN
 #define RTE_USART0_TX_MUX 2
@@ -246,7 +247,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_RX_PORT USART0_RX_PORT
+#define RTE_USART0_RX_PORT 0
 #if (USART0_RX_LOC == 9)
 #define RTE_USART0_RX_PIN USART0_RX_PIN
 #define RTE_USART0_RX_MUX 2
@@ -305,7 +306,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_CTS_PORT USART0_CTS_PORT
+#define RTE_USART0_CTS_PORT 0
 #if (USART0_CTS_LOC == 14)
 #define RTE_USART0_CTS_PIN USART0_CTS_PIN
 #define RTE_USART0_CTS_MUX 2
@@ -354,7 +355,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_RTS_PORT USART0_RTS_PORT
+#define RTE_USART0_RTS_PORT 0
 #if (USART0_RTS_LOC == 18)
 #define RTE_USART0_RTS_PIN USART0_RTS_PIN
 #define RTE_USART0_RTS_MUX 2
@@ -406,7 +407,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_IR_TX_PORT USART0_IRTX_PORT
+#define RTE_USART0_IR_TX_PORT 0
 #if (USART0_IRTX_LOC == 22)
 #define RTE_USART0_IR_TX_PIN USART0_IRTX_PIN
 #define RTE_USART0_IR_TX_MUX 13
@@ -458,7 +459,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_IR_RX_PORT USART0_IRRX_PORT
+#define RTE_USART0_IR_RX_PORT 0
 #if (USART0_IRRX_LOC == 26)
 #define RTE_USART0_IR_RX_PIN USART0_IRRX_PIN
 #define RTE_USART0_IR_RX_MUX 13
@@ -502,7 +503,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_RI_PORT USART0_RI_PORT
+#define RTE_USART0_RI_PORT 0
 #if (USART0_RI_LOC == 30)
 #define RTE_USART0_RI_PIN USART0_RI_PIN
 #define RTE_USART0_RI_MUX 2
@@ -541,7 +542,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_USART0_DSR_PORT USART0_DSR_PORT
+#define RTE_USART0_DSR_PORT 0
 #define RTE_USART0_DSR_PIN  USART0_DSR_PIN
 #if (USART0_DSR_LOC == 33)
 #define RTE_USART0_DSR_MUX 2
@@ -560,7 +561,7 @@
 #define RTE_USART0_DCD_PORT 0
 #define RTE_USART0_DCD_PIN  12
 #else
-#define RTE_USART0_DCD_PORT USART0_DCD_PORT
+#define RTE_USART0_DCD_PORT 0
 #define RTE_USART0_DCD_PIN  USART0_DCD_PIN
 #if (USART0_DCD_LOC == 35)
 #define RTE_USART0_DCD_MUX 2
@@ -577,7 +578,7 @@
 #define RTE_USART0_DTR_PORT 0
 #define RTE_USART0_DTR_PIN  7
 #else
-#define RTE_USART0_DTR_PORT USART0_DTR_PORT
+#define RTE_USART0_DTR_PORT 0
 #define RTE_USART0_DTR_PIN  USART0_DTR_PIN
 #endif
 #define RTE_USART0_DTR_MUX 2
@@ -649,7 +650,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_UART1_TX_PORT UART1_TX_PORT
+#define RTE_UART1_TX_PORT 0
 #if (UART1_TX_LOC == 0)
 #define RTE_UART1_TX_PIN UART1_TX_PIN
 #define RTE_UART1_TX_MUX 6
@@ -713,7 +714,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_UART1_RX_PORT UART1_RX_PORT
+#define RTE_UART1_RX_PORT 0
 #if (UART1_RX_LOC == 5)
 #define RTE_UART1_RX_PIN UART1_RX_PIN
 #define RTE_UART1_RX_MUX 6
@@ -777,7 +778,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_UART1_CTS_PORT UART1_CTS_PORT
+#define RTE_UART1_CTS_PORT 0
 #if (UART1_CTS_LOC == 10)
 #define RTE_UART1_CTS_PIN UART1_CTS_PIN
 #define RTE_UART1_CTS_MUX 6
@@ -850,7 +851,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_UART1_RTS_PORT UART1_RTS_PORT
+#define RTE_UART1_RTS_PORT 0
 #if (UART1_RTS_LOC == 16)
 #define RTE_UART1_RTS_PIN UART1_RTS_PIN
 #define RTE_UART1_RTS_MUX 6
@@ -925,7 +926,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_ULP_UART_TX_PORT ULP_UART_TX_PORT
+#define RTE_ULP_UART_TX_PORT 0
 #define RTE_ULP_UART_TX_PIN  ULP_UART_TX_PIN
 #define RTE_ULP_UART_TX_MUX  3
 //Pintool data
@@ -952,7 +953,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_ULP_UART_RX_PORT ULP_UART_RX_PORT
+#define RTE_ULP_UART_RX_PORT 0
 #define RTE_ULP_UART_RX_PIN  ULP_UART_RX_PIN
 #define RTE_ULP_UART_RX_MUX  3
 //Pintool data
@@ -975,7 +976,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_ULP_UART_CTS_PORT ULP_UART_CTS_PORT
+#define RTE_ULP_UART_CTS_PORT 0
 #define RTE_ULP_UART_CTS_PIN  ULP_UART_CTS_PIN
 #define RTE_ULP_UART_CTS_MUX  3
 //Pintool data
@@ -992,7 +993,7 @@
 #error "Invalid ULPSS UART RTE_ULP_UART_RTS_PIN Pin Configuration!"
 #endif
 #else
-#define RTE_ULP_UART_RTS_PORT ULP_UART_RTS_PORT
+#define RTE_ULP_UART_RTS_PORT 0
 #define RTE_ULP_UART_RTS_PIN  ULP_UART_RTS_PIN
 #endif
 #define RTE_ULP_UART_RTS_MUX 8
@@ -1035,7 +1036,7 @@
 #else
 //Pintool data
 #define RTE_SSI_MASTER_MISO      1
-#define RTE_SSI_MASTER_MISO_PORT SSI_MASTER_MISO_DATA1_PORT
+#define RTE_SSI_MASTER_MISO_PORT 0
 #define RTE_SSI_MASTER_MISO_PIN  SSI_MASTER_MISO_DATA1_PIN
 #define RTE_SSI_MASTER_MISO_MODE EGPIO_PIN_MUX_MODE3
 #if (SSI_MASTER_DATA1_LOC == 3)
@@ -1078,7 +1079,7 @@
 #else
 //Pintool data
 #define RTE_SSI_MASTER_MOSI      1
-#define RTE_SSI_MASTER_MOSI_PORT SSI_MASTER_MOSI_DATA0_PORT
+#define RTE_SSI_MASTER_MOSI_PORT 0
 #define RTE_SSI_MASTER_MOSI_PIN  SSI_MASTER_MOSI_DATA0_PIN
 #define RTE_SSI_MASTER_MOSI_MODE EGPIO_PIN_MUX_MODE3
 #if (SSI_MASTER_DATA0_LOC == 0)
@@ -1121,7 +1122,7 @@
 #else
 //Pintool data
 #define RTE_SSI_MASTER_SCK      1
-#define RTE_SSI_MASTER_SCK_PORT SSI_MASTER_SCK__PORT
+#define RTE_SSI_MASTER_SCK_PORT 0
 #define RTE_SSI_MASTER_SCK_PIN  SSI_MASTER_SCK__PIN
 #define RTE_SSI_MASTER_SCK_MODE EGPIO_PIN_MUX_MODE3
 #if (SSI_MASTER_SCK_LOC == 6)
@@ -1169,7 +1170,7 @@
 #else
 //Pintool data
 #define RTE_SSI_MASTER_CS0      M4_SSI_CS0
-#define RTE_SSI_MASTER_CS0_PORT SSI_MASTER_CS0__PORT
+#define RTE_SSI_MASTER_CS0_PORT 0
 #define RTE_SSI_MASTER_CS0_PIN  SSI_MASTER_CS0__PIN
 #define RTE_SSI_MASTER_CS0_MODE EGPIO_PIN_MUX_MODE3
 #if (SSI_MASTER_CS0_LOC == 9)
@@ -1194,7 +1195,7 @@
 #error "Invalid SSI_MASTER_CS1 Pin Configuration!"
 #endif
 #else
-#define RTE_SSI_MASTER_CS1_PORT SSI_MASTER_CS1__PORT
+#define RTE_SSI_MASTER_CS1_PORT 0
 #define RTE_SSI_MASTER_CS1_PIN  SSI_MASTER_CS1__PIN
 #endif
 #define RTE_SSI_MASTER_CS1        M4_SSI_CS1
@@ -1222,7 +1223,7 @@
 #else
 //Pintool data
 #define RTE_SSI_MASTER_CS2      M4_SSI_CS2
-#define RTE_SSI_MASTER_CS2_PORT SSI_MASTER_CS2__PORT
+#define RTE_SSI_MASTER_CS2_PORT 0
 #define RTE_SSI_MASTER_CS2_PIN  SSI_MASTER_CS2__PIN
 #define RTE_SSI_MASTER_CS2_MODE EGPIO_PIN_MUX_MODE3
 #if (SSI_MASTER_CS2_LOC == 13)
@@ -1244,7 +1245,7 @@
 #error "Invalid SSI_MASTER_CS3 Pin Configuration!"
 #endif
 #else
-#define RTE_SSI_MASTER_CS3_PORT SSI_MASTER_CS3__PORT
+#define RTE_SSI_MASTER_CS3_PORT 0
 #define RTE_SSI_MASTER_CS3_PIN  SSI_MASTER_CS3__PIN
 #endif
 #define RTE_SSI_MASTER_CS3        M4_SSI_CS3
@@ -1306,7 +1307,7 @@
 #else
 //Pintool data
 #define RTE_SSI_SLAVE_MISO      1
-#define RTE_SSI_SLAVE_MISO_PORT SSI_SLAVE_MISO__PORT
+#define RTE_SSI_SLAVE_MISO_PORT 0
 #define RTE_SSI_SLAVE_MISO_PIN  SSI_SLAVE_MISO__PIN
 #define RTE_SSI_SLAVE_MISO_MODE EGPIO_PIN_MUX_MODE8
 #if (SSI_SLAVE_MISO_LOC == 5)
@@ -1364,7 +1365,7 @@
 #else
 //Pintool data
 #define RTE_SSI_SLAVE_MOSI      1
-#define RTE_SSI_SLAVE_MOSI_PORT SSI_SLAVE_MOSI__PORT
+#define RTE_SSI_SLAVE_MOSI_PORT 0
 #define RTE_SSI_SLAVE_MOSI_PIN  SSI_SLAVE_MOSI__PIN
 #define RTE_SSI_SLAVE_MOSI_MODE EGPIO_PIN_MUX_MODE8
 #if (SSI_SLAVE_MOSI_LOC == 1)
@@ -1418,7 +1419,7 @@
 #else
 //Pintool data
 #define RTE_SSI_SLAVE_SCK      1
-#define RTE_SSI_SLAVE_SCK_PORT SSI_SLAVE_SCK__PORT
+#define RTE_SSI_SLAVE_SCK_PORT 0
 #define RTE_SSI_SLAVE_SCK_PIN  SSI_SLAVE_SCK__PIN
 #define RTE_SSI_SLAVE_SCK_MODE EGPIO_PIN_MUX_MODE8
 #if (SSI_SLAVE_SCK_LOC == 9)
@@ -1472,7 +1473,7 @@
 #else
 //Pintool data
 #define RTE_SSI_SLAVE_CS      1
-#define RTE_SSI_SLAVE_CS_PORT SSI_SLAVE_CS0__PORT
+#define RTE_SSI_SLAVE_CS_PORT 0
 #define RTE_SSI_SLAVE_CS_PIN  SSI_SLAVE_CS0__PIN
 #define RTE_SSI_SLAVE_CS_MODE EGPIO_PIN_MUX_MODE8
 #if (SSI_SLAVE_CS0_LOC == 13)
@@ -1516,7 +1517,7 @@
 #define ULP_SSI_CS2 0
 
 // <o> SSI_ULP_MASTER_MISO Pin <0=>Not Used <1=>ULP_GPIO_2 <2=>ULP_GPIO_9
-#ifndef ULP_SPI_MISO_LOC
+#if !defined(ULP_SPI_MISO_LOC) && !defined(ULP_SSI_MISO_LOC)
 #define RTE_SSI_ULP_MASTER_MISO_PORT_ID 0
 #if (RTE_SSI_ULP_MASTER_MISO_PORT_ID == 0)
 #define RTE_SSI_ULP_MASTER_MISO      1
@@ -1534,14 +1535,14 @@
 #else
 //Pintool data
 #define RTE_SSI_ULP_MASTER_MISO      1
-#define RTE_SSI_ULP_MASTER_MISO_PORT ULP_SPI_MISO__PORT
-#define RTE_SSI_ULP_MASTER_MISO_PIN  ULP_SPI_MISO__PIN
+#define RTE_SSI_ULP_MASTER_MISO_PORT 0
+#define RTE_SSI_ULP_MASTER_MISO_PIN  ULP_SSI_MISO__PIN
 #define RTE_SSI_ULP_MASTER_MISO_MODE 1
 //Pintool data
 #endif
 
 // <o> SSI_ULP_MASTER_MOSI Pin <0=>Not Used <1=>ULP_GPIO_1 <2=>ULP_GPIO_11
-#ifndef ULP_SPI_MOSI_LOC
+#if !defined(ULP_SPI_MOSI_LOC) && !defined(ULP_SSI_MOSI_LOC)
 #define RTE_SSI_ULP_MASTER_MOSI_PORT_ID 0
 #if (RTE_SSI_ULP_MASTER_MOSI_PORT_ID == 0)
 #define RTE_SSI_ULP_MASTER_MOSI      1
@@ -1559,14 +1560,14 @@
 #else
 //Pintool data
 #define RTE_SSI_ULP_MASTER_MOSI      1
-#define RTE_SSI_ULP_MASTER_MOSI_PORT ULP_SPI_MOSI__PORT
-#define RTE_SSI_ULP_MASTER_MOSI_PIN  ULP_SPI_MOSI__PIN
+#define RTE_SSI_ULP_MASTER_MOSI_PORT 0
+#define RTE_SSI_ULP_MASTER_MOSI_PIN  ULP_SSI_MOSI__PIN
 #define RTE_SSI_ULP_MASTER_MOSI_MODE 1
 //Pintool data
 #endif
 
 // <o> SSI_ULP_MASTER_SCK Pin <0=>Not Used <1=>ULP_GPIO_0 <2=>ULP_GPIO_8
-#ifndef ULP_SPI_SCK_LOC
+#if !defined(ULP_SPI_SCK_LOC) && !defined(ULP_SSI_SCK_LOC)
 #ifdef SLI_SI91X_MCU_CONFIG_RADIO_BOARD_BASE_VER
 #define RTE_SSI_ULP_MASTER_SCK_PORT_ID 2
 #else
@@ -1590,14 +1591,14 @@
 #else
 //Pintool data
 #define RTE_SSI_ULP_MASTER_SCK      1
-#define RTE_SSI_ULP_MASTER_SCK_PORT ULP_SPI_SCK__PORT
-#define RTE_SSI_ULP_MASTER_SCK_PIN  ULP_SPI_SCK__PIN
+#define RTE_SSI_ULP_MASTER_SCK_PORT 0
+#define RTE_SSI_ULP_MASTER_SCK_PIN  ULP_SSI_SCK__PIN
 #define RTE_SSI_ULP_MASTER_SCK_MODE 1
 //Pintool data
 #endif
 
 // CS0
-#ifndef ULP_SPI_CS0_LOC
+#if !defined(ULP_SPI_CS0_LOC) && !defined(ULP_SSI_CS0_LOC)
 #define RTE_SSI_ULP_MASTER_CS0_PORT_ID 1
 #if (RTE_SSI_ULP_MASTER_CS0_PORT_ID == 0)
 #define RTE_SSI_ULP_MASTER_CS0      ULP_SSI_CS0
@@ -1615,30 +1616,30 @@
 #else
 //Pintool data
 #define RTE_SSI_ULP_MASTER_CS0      ULP_SSI_CS0
-#define RTE_SSI_ULP_MASTER_CS0_PORT ULP_SPI_CS0__PORT
-#define RTE_SSI_ULP_MASTER_CS0_PIN  ULP_SPI_CS0__PIN
+#define RTE_SSI_ULP_MASTER_CS0_PORT 0
+#define RTE_SSI_ULP_MASTER_CS0_PIN  ULP_SSI_CS0__PIN
 #define RTE_SSI_ULP_MASTER_CS0_MODE 1
 //Pintool data
 #endif
 
 // CS1
-#ifndef ULP_SPI_CS1_LOC
+#if !defined(ULP_SPI_CS1_LOC) || !defined(ULP_SSI_CS1_LOC)
 #define RTE_SSI_ULP_MASTER_CS1_PORT 0
 #define RTE_SSI_ULP_MASTER_CS1_PIN  4
 #else
-#define RTE_SSI_ULP_MASTER_CS1_PORT ULP_SPI_CS1__PORT
-#define RTE_SSI_ULP_MASTER_CS1_PIN  ULP_SPI_CS1__PIN
+#define RTE_SSI_ULP_MASTER_CS1_PORT 0
+#define RTE_SSI_ULP_MASTER_CS1_PIN  ULP_SSI_CS1__PIN
 #endif
 #define RTE_SSI_ULP_MASTER_CS1      ULP_SSI_CS1
 #define RTE_SSI_ULP_MASTER_CS1_MODE 1
 
 // CS2
-#ifndef ULP_SPI_CS2_LOC
+#if !defined(ULP_SPI_CS2_LOC) && !defined(ULP_SSI_CS2_LOC)
 #define RTE_SSI_ULP_MASTER_CS2_PORT 0
 #define RTE_SSI_ULP_MASTER_CS2_PIN  6
 #else
-#define RTE_SSI_ULP_MASTER_CS2_PORT ULP_SPI_CS2__PORT
-#define RTE_SSI_ULP_MASTER_CS2_PIN  ULP_SPI_CS2__PIN
+#define RTE_SSI_ULP_MASTER_CS2_PORT 0
+#define RTE_SSI_ULP_MASTER_CS2_PIN  ULP_SSI_CS2__PIN
 #endif
 #define RTE_SSI_ULP_MASTER_CS2      ULP_SSI_CS2
 #define RTE_SSI_ULP_MASTER_CS2_MODE 1
@@ -1729,7 +1730,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_SCLK_PORT I2S0_SCLK_PORT
+#define RTE_I2S0_SCLK_PORT 0
 #define RTE_I2S0_SCLK_PIN  I2S0_SCLK_PIN
 #define RTE_I2S0_SCLK_MUX  7
 #if (I2S0_SCLK_LOC == 0)
@@ -1777,7 +1778,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_WSCLK_PORT I2S0_WSCLK_PORT
+#define RTE_I2S0_WSCLK_PORT 0
 #define RTE_I2S0_WSCLK_PIN  I2S0_WSCLK_PIN
 #define RTE_I2S0_WSCLK_MUX  7
 #if (I2S0_WSCLK_LOC == 4)
@@ -1825,7 +1826,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_DOUT0_PORT I2S0_DOUT0_PORT
+#define RTE_I2S0_DOUT0_PORT 0
 #define RTE_I2S0_DOUT0_PIN  I2S0_DOUT0_PIN
 #define RTE_I2S0_DOUT0_MUX  7
 #if (I2S0_DOUT0_LOC == 8)
@@ -1873,7 +1874,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_DIN0_PORT I2S0_DIN0_PORT
+#define RTE_I2S0_DIN0_PORT 0
 #define RTE_I2S0_DIN0_PIN  I2S0_DIN0_PIN
 #define RTE_I2S0_DIN0_MUX  7
 #if (I2S0_DIN0_LOC == 12)
@@ -1925,7 +1926,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_DOUT1_PORT I2S0_DOUT1_PORT
+#define RTE_I2S0_DOUT1_PORT 0
 #define RTE_I2S0_DOUT1_PIN  I2S0_DOUT1_PIN
 #define RTE_I2S0_DOUT1_MUX  7
 #if (I2S0_DOUT1_LOC == 16)
@@ -1973,7 +1974,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S0_DIN1_PORT I2S0_DIN1_PORT
+#define RTE_I2S0_DIN1_PORT 0
 #define RTE_I2S0_DIN1_PIN  I2S0_DIN1_PIN
 #define RTE_I2S0_DIN1_MUX  7
 #if (I2S0_DIN1_LOC == 20)
@@ -2069,7 +2070,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S1_SCLK_PORT ULP_I2S_SCLK_PORT
+#define RTE_I2S1_SCLK_PORT 0
 #define RTE_I2S1_SCLK_PIN  ULP_I2S_SCLK_PIN
 #define RTE_I2S1_SCLK_MUX  2
 //Pintool data
@@ -2091,7 +2092,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S1_WSCLK_PORT ULP_I2S_WSCLK_PORT
+#define RTE_I2S1_WSCLK_PORT 0
 #define RTE_I2S1_WSCLK_PIN  ULP_I2S_WSCLK_PIN
 #define RTE_I2S1_WSCLK_MUX  2
 //Pintool data
@@ -2113,7 +2114,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S1_DOUT0_PORT ULP_I2S_DOUT0_PORT
+#define RTE_I2S1_DOUT0_PORT 0
 #define RTE_I2S1_DOUT0_PIN  ULP_I2S_DOUT0_PIN
 #define RTE_I2S1_DOUT0_MUX  2
 //Pintool data
@@ -2139,7 +2140,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2S1_DIN0_PORT ULP_I2S_DIN0_PORT
+#define RTE_I2S1_DIN0_PORT 0
 #define RTE_I2S1_DIN0_PIN  ULP_I2S_DIN0_PIN
 #define RTE_I2S1_DIN0_MUX  2
 //Pintool data
@@ -2233,7 +2234,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C0_SCL_PORT I2C0_SCL_PORT
+#define RTE_I2C0_SCL_PORT 0
 #if (I2C0_SCL_LOC == 0)
 #define RTE_I2C0_SCL_PIN     I2C0_SCL_PIN
 #define RTE_I2C0_SCL_MUX     4
@@ -2286,7 +2287,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C0_SDA_PORT I2C0_SDA_PORT
+#define RTE_I2C0_SDA_PORT 0
 #if (I2C0_SDA_LOC == 3)
 #define RTE_I2C0_SDA_PIN     I2C0_SDA_PIN
 #define RTE_I2C0_SDA_MUX     4
@@ -2368,7 +2369,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C1_SCL_PORT I2C1_SCL_PORT
+#define RTE_I2C1_SCL_PORT 0
 #if (I2C1_SCL_LOC == 0)
 #define RTE_I2C1_SCL_PIN I2C1_SCL_PIN
 #define RTE_I2C1_SCL_MUX 5
@@ -2459,7 +2460,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C1_SDA_PORT I2C1_SDA_PORT
+#define RTE_I2C1_SDA_PORT 0
 #if (I2C1_SDA_LOC == 6)
 #define RTE_I2C1_SDA_PIN I2C1_SDA_PIN
 #define RTE_I2C1_SDA_MUX 5
@@ -2537,7 +2538,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C2_SCL_PORT ULP_I2C_SCL_PORT
+#define RTE_I2C2_SCL_PORT 0
 #define RTE_I2C2_SCL_PIN  ULP_I2C_SCL_PIN
 #define RTE_I2C2_SCL_MUX  4
 #if (ULP_I2C_SCL_LOC == 0)
@@ -2575,8 +2576,8 @@
 #endif
 #else
 //Pintool data
-#define RTE_I2C2_SDA_PORT I2C2_SDA_PORT
-#define RTE_I2C2_SDA_PIN  I2C2_SDA_PIN
+#define RTE_I2C2_SDA_PORT 0
+#define RTE_I2C2_SDA_PIN  ULP_I2C_SDA_PIN
 #define RTE_I2C2_SDA_MUX  4
 #if (ULP_I2C_SDA_LOC == 4)
 #define RTE_I2C2_SDA_REN 0
@@ -2637,7 +2638,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_GSPI_MASTER_CLK_PORT GSPI_MASTER_SCK__PORT
+#define RTE_GSPI_MASTER_CLK_PORT 0
 #define RTE_GSPI_MASTER_CLK_PIN  GSPI_MASTER_SCK__PIN
 #define RTE_GSPI_MASTER_CLK_MUX  4
 #if (GSPI_MASTER_SCK_LOC == 0)
@@ -2692,7 +2693,7 @@
 #else
 //Pintool data
 #define RTE_GSPI_MASTER_CS0      1
-#define RTE_GSPI_MASTER_CS0_PORT GSPI_MASTER_CS0__PORT
+#define RTE_GSPI_MASTER_CS0_PORT 0
 #define RTE_GSPI_MASTER_CS0_PIN  GSPI_MASTER_CS0__PIN
 #define RTE_GSPI_MASTER_CS0_MUX  4
 #if (GSPI_MASTER_CS0_LOC == 4)
@@ -2746,7 +2747,7 @@
 #else
 //Pintool data
 #define RTE_GSPI_MASTER_CS1      1
-#define RTE_GSPI_MASTER_CS1_PORT GSPI_MASTER_CS1__PORT
+#define RTE_GSPI_MASTER_CS1_PORT 0
 #define RTE_GSPI_MASTER_CS1_PIN  GSPI_MASTER_CS1__PIN
 #define RTE_GSPI_MASTER_CS1_MUX  4
 #if (GSPI_MASTER_CS1_LOC == 8)
@@ -2800,7 +2801,7 @@
 #else
 //Pintool data
 #define RTE_GSPI_MASTER_CS2      1
-#define RTE_GSPI_MASTER_CS2_PORT GSPI_MASTER_CS2__PORT
+#define RTE_GSPI_MASTER_CS2_PORT 0
 #define RTE_GSPI_MASTER_CS2_PIN  GSPI_MASTER_CS2__PIN
 #define RTE_GSPI_MASTER_CS2_MUX  4
 #if (GSPI_MASTER_CS2_LOC == 12)
@@ -2853,7 +2854,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_GSPI_MASTER_MOSI_PORT GSPI_MASTER_MOSI__PORT
+#define RTE_GSPI_MASTER_MOSI_PORT 0
 #define RTE_GSPI_MASTER_MOSI_PIN  GSPI_MASTER_MOSI__PIN
 #if (GSPI_MASTER_MOSI_LOC == 16)
 #define RTE_GSPI_MASTER_MOSI_MUX 4
@@ -2908,7 +2909,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_GSPI_MASTER_MISO_PORT GSPI_MASTER_MISO__PORT
+#define RTE_GSPI_MASTER_MISO_PORT 0
 #define RTE_GSPI_MASTER_MISO_PIN  GSPI_MASTER_MISO__PIN
 #define RTE_GSPI_MASTER_MISO_MUX  4
 #if (GSPI_MASTER_MISO_LOC == 21)
@@ -2973,7 +2974,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_IN_0_PORT SCT_IN0_PORT
+#define RTE_SCT_IN_0_PORT 0
 #if (SCT_IN0_LOC == 0)
 #define RTE_SCT_IN_0_PIN SCT_IN0_PIN
 #define RTE_SCT_IN_0_MUX 9
@@ -3009,7 +3010,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_IN_1_PORT SCT_IN1_PORT
+#define RTE_SCT_IN_1_PORT 0
 #if (SCT_IN1_LOC == 3)
 #define RTE_SCT_IN_1_PIN SCT_IN1_PIN
 #define RTE_SCT_IN_1_MUX 9
@@ -3056,7 +3057,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_IN_2_PORT SCT_IN2_PORT
+#define RTE_SCT_IN_2_PORT 0
 #if (SCT_IN2_LOC == 6)
 #define RTE_SCT_IN_2_PIN SCT_IN2_PIN
 #define RTE_SCT_IN_2_MUX 9
@@ -3098,7 +3099,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_IN_3_PORT SCT_IN3_PORT
+#define RTE_SCT_IN_3_PORT 0
 #if (SCT_IN3_LOC == 8)
 #define RTE_SCT_IN_3_PIN SCT_IN3_PIN
 #define RTE_SCT_IN_3_MUX 9
@@ -3125,7 +3126,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_OUT_0_PORT SCT_OUT0_PORT
+#define RTE_SCT_OUT_0_PORT 0
 #if (SCT_OUT0_LOC == 10)
 #define RTE_SCT_OUT_0_PIN SCT_OUT0_PIN
 #define RTE_SCT_OUT_0_MUX 9
@@ -3151,7 +3152,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_SCT_OUT_1_PORT SCT_OUT1_PORT
+#define RTE_SCT_OUT_1_PORT 0
 #if (SCT_OUT1_LOC == 12)
 #define RTE_SCT_OUT_1_PIN SCT_OUT1_PIN
 #define RTE_SCT_OUT_1_MUX 9
@@ -3165,42 +3166,42 @@
 #endif
 
 //Pintool data
-#define RTE_SCT_OUT_2_PORT SCT_OUT2_PORT
+#define RTE_SCT_OUT_2_PORT 0
 #define RTE_SCT_OUT_2_PIN  SCT_OUT2_PIN
 #define RTE_SCT_OUT_2_MUX  7
 #define RTE_SCT_OUT_2_PAD  28
 //Pintool data
 
 //Pintool data
-#define RTE_SCT_OUT_3_PORT SCT_OUT3_PORT
+#define RTE_SCT_OUT_3_PORT 0
 #define RTE_SCT_OUT_3_PIN  SCT_OUT3_PIN
 #define RTE_SCT_OUT_3_MUX  7
 #define RTE_SCT_OUT_3_PAD  29
 //Pintool data
 
 //Pintool data
-#define RTE_SCT_OUT_4_PORT SCT_OUT4_PORT
+#define RTE_SCT_OUT_4_PORT 0
 #define RTE_SCT_OUT_4_PIN  SCT_OUT4_PIN
 #define RTE_SCT_OUT_4_MUX  7
 #define RTE_SCT_OUT_4_PAD  30
 //Pintool data
 
 //Pintool data
-#define RTE_SCT_OUT_5_PORT SCT_OUT5_PORT
+#define RTE_SCT_OUT_5_PORT 0
 #define RTE_SCT_OUT_5_PIN  SCT_OUT5_PIN
 #define RTE_SCT_OUT_5_MUX  7
 #define RTE_SCT_OUT_5_PAD  31
 //Pintool data
 
 //Pintool data
-#define RTE_SCT_OUT_6_PORT SCT_OUT6_PORT
+#define RTE_SCT_OUT_6_PORT 0
 #define RTE_SCT_OUT_6_PIN  SCT_OUT6_PIN
 #define RTE_SCT_OUT_6_MUX  7
 #define RTE_SCT_OUT_6_PAD  32
 //Pintool data
 
 //Pintool data
-#define RTE_SCT_OUT_7_PORT SCT_OUT7_PORT
+#define RTE_SCT_OUT_7_PORT 0
 #define RTE_SCT_OUT_7_PIN  SCT_OUT7_PIN
 #define RTE_SCT_OUT_7_MUX  7
 #define RTE_SCT_OUT_7_PAD  33
@@ -3544,7 +3545,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_1H_PORT PWM_1H_PORT
+#define RTE_PWM_1H_PORT 0
 #if (PWM_1H_LOC == 0)
 #define RTE_PWM_1H_PIN PWM_1H_PIN
 #define RTE_PWM_1H_MUX 10
@@ -3576,7 +3577,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_1L_PORT PWM_1L_PORT
+#define RTE_PWM_1L_PORT 0
 #if (PWM_1L_LOC == 2)
 #define RTE_PWM_1L_PIN PWM_1L_PIN
 #define RTE_PWM_1L_MUX 10
@@ -3611,7 +3612,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_2H_PORT PWM_2H_PORT
+#define RTE_PWM_2H_PORT 0
 #if (PWM_2H_LOC == 4)
 #define RTE_PWM_2H_PIN PWM_2H_PIN
 #define RTE_PWM_2H_MUX 10
@@ -3647,7 +3648,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_2L_PORT PWM_2L_PORT
+#define RTE_PWM_2L_PORT 0
 #if (PWM_2L_LOC == 6)
 #define RTE_PWM_2L_PIN PWM_2L_PIN
 #define RTE_PWM_2L_MUX 10
@@ -3679,7 +3680,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_3H_PORT PWM_3H_PORT
+#define RTE_PWM_3H_PORT 0
 #if (PWM_3H_LOC == 9)
 #define RTE_PWM_3H_PIN PWM_3H_PIN
 #define RTE_PWM_3H_MUX 10
@@ -3706,7 +3707,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_3L_PORT PWM_3L_PORT
+#define RTE_PWM_3L_PORT 0
 #if (PWM_3L_LOC == 11)
 #define RTE_PWM_3L_PIN PWM_3L_PIN
 #define RTE_PWM_3L_MUX 10
@@ -3742,7 +3743,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_4H_PORT PWM_4H_PORT
+#define RTE_PWM_4H_PORT 0
 #define RTE_PWM_4H_PIN  (PWM_4H_PIN + GPIO_MAX_PIN)
 #define RTE_PWM_4H_MUX  8
 #define RTE_PWM_4H_PAD  29
@@ -3772,7 +3773,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_4L_PORT PWM_4L_PORT
+#define RTE_PWM_4L_PORT 0
 #if (PWM_4L_LOC == 14)
 #define RTE_PWM_4L_PIN PWM_4L_PIN
 #define RTE_PWM_4L_MUX 10
@@ -3805,7 +3806,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_FAULTA_PORT PWM_FAULTA_PORT
+#define RTE_PWM_FAULTA_PORT 0
 #if (PWM_FAULTA_LOC == 16)
 #define RTE_PWM_FAULTA_PIN PWM_FAULTA_PIN
 #define RTE_PWM_FAULTA_MUX 10
@@ -3843,7 +3844,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_FAULTB_PORT PWM_FAULTB_PORT
+#define RTE_PWM_FAULTB_PORT 0
 #if (PWM_FAULTB_LOC == 19)
 #define RTE_PWM_FAULTB_PIN PWM_FAULTB_PIN
 #define RTE_PWM_FAULTB_MUX 10
@@ -3868,7 +3869,7 @@
 #define RTE_PWM_SLP_EVENT_TRIG_PIN  72
 #else
 //Pintool data
-#define RTE_PWM_SLP_EVENT_TRIG_PORT PWM_SLEEP_EVT_TRIG_PORT
+#define RTE_PWM_SLP_EVENT_TRIG_PORT 0
 #define RTE_PWM_SLP_EVENT_TRIG_PIN  (PWM_SLEEP_EVT_TRIG_PIN + GPIO_MAX_PIN)
 //Pintool data
 #endif
@@ -3904,7 +3905,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_TMR_EXT_TRIG_1_PORT PWM_TMR_EXT_TRIG_1_PORT
+#define RTE_PWM_TMR_EXT_TRIG_1_PORT 0
 #if (PWM_EXTTRIG1_LOC == 22)
 #define RTE_PWM_TMR_EXT_TRIG_1_PIN PWM_TMR_EXT_TRIG_1_PIN
 #define RTE_PWM_TMR_EXT_TRIG_1_MUX 10
@@ -3952,7 +3953,7 @@
 #endif
 #else
 //Pintool data
-#define RTE_PWM_TMR_EXT_TRIG_2_PORT PWM_TMR_EXT_TRIG_2_PORT
+#define RTE_PWM_TMR_EXT_TRIG_2_PORT 0
 #if (PWM_EXTTRIG2_LOC == 26)
 #define RTE_PWM_TMR_EXT_TRIG_2_PIN PWM_TMR_EXT_TRIG_2_PIN
 #define RTE_PWM_TMR_EXT_TRIG_2_MUX 10
@@ -3978,7 +3979,7 @@
 
 //PWM_TMR_EXT_TRIG_3
 //Pintool data
-#define RTE_PWM_TMR_EXT_TRIG_3_PORT PWM_TMR_EXT_TRIG_3_PORT
+#define RTE_PWM_TMR_EXT_TRIG_3_PORT 0
 #if (PWM_EXTTRIG3_LOC == 30)
 #define RTE_PWM_TMR_EXT_TRIG_3_PIN PWM_TMR_EXT_TRIG_3_PIN
 #define RTE_PWM_TMR_EXT_TRIG_3_MUX 10
@@ -3998,7 +3999,7 @@
 
 //PWM_TMR_EXT_TRIG_4
 //Pintool data
-#define RTE_PWM_TMR_EXT_TRIG_4_PORT PWM_TMR_EXT_TRIG_4_PORT
+#define RTE_PWM_TMR_EXT_TRIG_4_PORT 0
 #if (PWM_EXTTRIG4_LOC == 33)
 #define RTE_PWM_TMR_EXT_TRIG_4_PIN PWM_TMR_EXT_TRIG_4_PIN
 #define RTE_PWM_TMR_EXT_TRIG_4_MUX 10
@@ -4164,270 +4165,13 @@
 #endif
 
 #endif
-
-//ADC START
-
-#ifndef ADC_P0_LOC
-#define RTE_ADC_P0_PORT 0
-#define RTE_ADC_P0_PIN  0
-#else
-#define RTE_ADC_P0_PORT ADC_P0_PORT
-#define RTE_ADC_P0_PIN  ADC_P0_PIN
-#endif
-#define RTE_ADC_P0_MUX 1
-
-#ifndef ADC_N0_LOC
-#define RTE_ADC_N0_PORT 0
-#define RTE_ADC_N0_PIN  1
-#else
-#define RTE_ADC_N0_PORT ADC_N0_PORT
-#define RTE_ADC_N0_PIN  ADC_N0_PIN
-#endif
-#define RTE_ADC_N0_MUX 1
-
-#ifndef ADC_P1_LOC
-#define RTE_ADC_P1_PORT 0
-#define RTE_ADC_P1_PIN  2
-#else
-#define RTE_ADC_P1_PORT ADC_P1_PORT
-#define RTE_ADC_P1_PIN  ADC_P1_PIN
-#endif
-#define RTE_ADC_P1_MUX 1
-
-#ifndef ADC_N1_LOC
-#define RTE_ADC_N1_PORT 0
-#define RTE_ADC_N1_PIN  3
-#else
-#define RTE_ADC_N1_PORT ADC_N1_PORT
-#define RTE_ADC_N1_PIN  ADC_N1_PIN
-#endif
-#define RTE_ADC_N1_MUX 1
-
-#ifndef ADC_P2_LOC
-#define RTE_ADC_P2_PORT 0
-#define RTE_ADC_P2_PIN  4
-#else
-#define RTE_ADC_P2_PORT ADC_P2_PORT
-#define RTE_ADC_P2_PIN  ADC_P2_PIN
-#endif
-#define RTE_ADC_P2_MUX 1
-
-#ifndef ADC_N2_LOC
-#define RTE_ADC_N2_PORT 0
-#define RTE_ADC_N2_PIN  5
-#else
-#define RTE_ADC_N2_PORT ADC_N2_PORT
-#define RTE_ADC_N2_PIN  ADC_N2_PIN
-#endif
-#define RTE_ADC_N2_MUX 1
-
-#ifndef ADC_P3_LOC
-#define RTE_ADC_P3_PORT 0
-#define RTE_ADC_P3_PIN  6
-#else
-#define RTE_ADC_P3_PORT ADC_P3_PORT
-#define RTE_ADC_P3_PIN  ADC_P3_PIN
-#endif
-#define RTE_ADC_P3_MUX 1
-
-#ifndef ADC_N3_LOC
-#define RTE_ADC_N3_PORT 0
-#define RTE_ADC_N3_PIN  11
-#else
-#define RTE_ADC_N3_PORT ADC_N3_PORT
-#define RTE_ADC_N3_PIN  ADC_N3_PIN
-#endif
-#define RTE_ADC_N3_MUX 1
-
-#ifndef ADC_P4_LOC
-#define RTE_ADC_P4_PORT 0
-#define RTE_ADC_P4_PIN  8
-#else
-#define RTE_ADC_P4_PORT ADC_P4_PORT
-#define RTE_ADC_P4_PIN  ADC_P4_PIN
-#endif
-#define RTE_ADC_P4_MUX 1
-
-#ifndef ADC_N4_LOC
-#define RTE_ADC_N4_PORT 0
-#define RTE_ADC_N4_PIN  9
-#else
-#define RTE_ADC_N4_PORT ADC_N4_PORT
-#define RTE_ADC_N4_PIN  ADC_N4_PIN
-#endif
-#define RTE_ADC_N4_MUX 1
-
-#ifndef ADC_P5_LOC
-#define RTE_ADC_P5_PORT 0
-#define RTE_ADC_P5_PIN  10
-#else
-#define RTE_ADC_P5_PORT ADC_P5_PORT
-#define RTE_ADC_P5_PIN  ADC_P5_PIN
-#endif
-#define RTE_ADC_P5_MUX 1
-
-#ifndef ADC_N5_LOC
-#define RTE_ADC_N5_PORT 0
-#define RTE_ADC_N5_PIN  7
-#else
-#define RTE_ADC_N5_PORT ADC_N5_PORT
-#define RTE_ADC_N5_PIN  ADC_N5_PIN
-#endif
-#define RTE_ADC_N5_MUX 1
-
-#ifndef ADC_P6_LOC
-#define RTE_ADC_P6_PORT 0
-#define RTE_ADC_P6_PIN  25
-#else
-#define RTE_ADC_P6_PORT ADC_P6_PORT
-#define RTE_ADC_P6_PIN  ADC_P6_PIN
-#endif
-#define RTE_ADC_P6_MUX 1
-#define RTE_ADC_P6_PAD 0
-
-#ifndef ADC_N6_LOC
-#define RTE_ADC_N6_PORT 0
-#define RTE_ADC_N6_PIN  26
-#else
-#define RTE_ADC_N6_PORT ADC_N6_PORT
-#define RTE_ADC_N6_PIN  ADC_N6_PIN
-#endif
-#define RTE_ADC_N6_MUX 1
-#define RTE_ADC_N6_PAD 0
-
-#ifndef ADC_P7_LOC
-#define RTE_ADC_P7_PORT 0
-#define RTE_ADC_P7_PIN  27
-#else
-#define RTE_ADC_P7_PORT ADC_P7_PORT
-#define RTE_ADC_P7_PIN  ADC_P7_PIN
-#endif
-#define RTE_ADC_P7_MUX 1
-#define RTE_ADC_P7_PAD 0
-
-#ifndef ADC_N7_LOC
-#define RTE_ADC_N7_PORT 0
-#define RTE_ADC_N7_PIN  28
-#else
-#define RTE_ADC_N7_PORT ADC_N7_PORT
-#define RTE_ADC_N7_PIN  ADC_N7_PIN
-#endif
-#define RTE_ADC_N7_MUX 1
-#define RTE_ADC_N7_PAD 0
-
-#ifndef ADC_P8_LOC
-#define RTE_ADC_P8_PORT 0
-#define RTE_ADC_P8_PIN  29
-#else
-#define RTE_ADC_P8_PORT ADC_P8_PORT
-#define RTE_ADC_P8_PIN  ADC_P8_PIN
-#endif
-#define RTE_ADC_P8_MUX 1
-#define RTE_ADC_P8_PAD 0
-
-#ifndef ADC_N8_LOC
-#define RTE_ADC_N8_PORT 0
-#define RTE_ADC_N8_PIN  30
-#else
-#define RTE_ADC_N8_PORT ADC_N8_PORT
-#define RTE_ADC_N8_PIN  ADC_N8_PIN
-#endif
-#define RTE_ADC_N8_MUX 1
-#define RTE_ADC_N8_PAD 0
-
-#ifndef ADC_P10_LOC
-#define RTE_ADC_P10_PORT 0
-#define RTE_ADC_P10_PIN  1
-#else
-#define RTE_ADC_P10_PORT ADC_P10_PORT
-#define RTE_ADC_P10_PIN  ADC_P10_PIN
-#endif
-#define RTE_ADC_P10_MUX 1
-
-#ifndef ADC_P11_LOC
-#define RTE_ADC_P11_PORT 0
-#define RTE_ADC_P11_PIN  3
-#else
-#define RTE_ADC_P11_PORT ADC_P11_PORT
-#define RTE_ADC_P11_PIN  ADC_P11_PIN
-#endif
-#define RTE_ADC_P11_MUX 1
-
-#ifndef ADC_P12_LOC
-#define RTE_ADC_P12_PORT 0
-#define RTE_ADC_P12_PIN  5
-#else
-#define RTE_ADC_P12_PORT ADC_P12_PORT
-#define RTE_ADC_P12_PIN  ADC_P12_PIN
-#endif
-#define RTE_ADC_P12_MUX 1
-
-#ifndef ADC_P13_LOC
-#define RTE_ADC_P13_PORT 0
-#define RTE_ADC_P13_PIN  11
-#else
-#define RTE_ADC_P13_PORT ADC_P13_PORT
-#define RTE_ADC_P13_PIN  ADC_P13_PIN
-#endif
-#define RTE_ADC_P13_MUX 1
-
-#ifndef ADC_P14_LOC
-#define RTE_ADC_P14_PORT 0
-#define RTE_ADC_P14_PIN  9
-#else
-#define RTE_ADC_P14_PORT ADC_P14_PORT
-#define RTE_ADC_P14_PIN  ADC_P14_PIN
-#endif
-#define RTE_ADC_P14_MUX 1
-
-#ifndef ADC_P15_LOC
-#define RTE_ADC_P15_PORT 0
-#define RTE_ADC_P15_PIN  7
-#else
-#define RTE_ADC_P15_PORT ADC_P15_PORT
-#define RTE_ADC_P15_PIN  ADC_P15_PIN
-#endif
-#define RTE_ADC_P15_MUX 1
-
-#ifndef ADC_P16_LOC
-#define RTE_ADC_P16_PORT 0
-#define RTE_ADC_P16_PIN  26
-#else
-#define RTE_ADC_P16_PORT ADC_P16_PORT
-#define RTE_ADC_P16_PIN  ADC_P16_PIN
-#endif
-#define RTE_ADC_P16_MUX 1
-#define RTE_ADC_P16_PAD 0
-
-#ifndef ADC_P17_LOC
-#define RTE_ADC_P17_PORT 0
-#define RTE_ADC_P17_PIN  28
-#else
-#define RTE_ADC_P17_PORT ADC_P17_PORT
-#define RTE_ADC_P17_PIN  ADC_P17_PIN
-#endif
-#define RTE_ADC_P17_MUX 1
-#define RTE_ADC_P17_PAD 0
-
-#ifndef ADC_P18_LOC
-#define RTE_ADC_P18_PORT 0
-#define RTE_ADC_P18_PIN  30
-#else
-#define RTE_ADC_P18_PORT ADC_P18_PORT
-#define RTE_ADC_P18_PIN  ADC_P18_PIN
-#endif
-#define RTE_ADC_P18_MUX 1
-#define RTE_ADC_P18_PAD 0
-
-//ADC END
-
 //COMPARATOR START
 
 #ifndef COMP1_P0_LOC
 #define RTE_COMP1_P0_PORT 0
 #define RTE_COMP1_P0_PIN  0
 #else
-#define RTE_COMP1_P0_PORT COMP1_P0_PORT
+#define RTE_COMP1_P0_PORT 0
 #define RTE_COMP1_P0_PIN  COMP1_P0_PIN
 #endif
 #define RTE_COMP1_P0_MUX 0
@@ -4436,7 +4180,7 @@
 #define RTE_COMP1_N0_PORT 0
 #define RTE_COMP1_N0_PIN  1
 #else
-#define RTE_COMP1_N0_PORT COMP1_N0_PORT
+#define RTE_COMP1_N0_PORT 0
 #define RTE_COMP1_N0_PIN  COMP1_N0_PIN
 #endif
 #define RTE_COMP1_N0_MUX 0
@@ -4445,7 +4189,7 @@
 #define RTE_COMP1_P1_PORT 0
 #define RTE_COMP1_P1_PIN  5
 #else
-#define RTE_COMP1_P1_PORT COMP1_P1_PORT
+#define RTE_COMP1_P1_PORT 0
 #define RTE_COMP1_P1_PIN  COMP1_P1_PIN
 #endif
 #define RTE_COMP1_P1_MUX 0
@@ -4454,7 +4198,7 @@
 #define RTE_COMP1_N1_PORT 0
 #define RTE_COMP1_N1_PIN  4
 #else
-#define RTE_COMP1_N1_PORT COMP1_N1_PORT
+#define RTE_COMP1_N1_PORT 0
 #define RTE_COMP1_N1_PIN  COMP1_N1_PIN
 #endif
 #define RTE_COMP1_N1_MUX 0
@@ -4463,7 +4207,7 @@
 #define RTE_COMP2_P0_PORT 0
 #define RTE_COMP2_P0_PIN  2
 #else
-#define RTE_COMP2_P0_PORT COMP2_P0_PORT
+#define RTE_COMP2_P0_PORT 0
 #define RTE_COMP2_P0_PIN  COMP2_P0_PIN
 #endif
 #define RTE_COMP2_P0_MUX 0
@@ -4472,7 +4216,7 @@
 #define RTE_COMP2_N0_PORT 0
 #define RTE_COMP2_N0_PIN  3
 #else
-#define RTE_COMP2_N0_PORT COMP2_N0_PORT
+#define RTE_COMP2_N0_PORT 0
 #define RTE_COMP2_N0_PIN  COMP2_N0_PIN
 #endif
 #define RTE_COMP2_N0_MUX 0
@@ -4481,7 +4225,7 @@
 #define RTE_COMP2_P1_PORT 0
 #define RTE_COMP2_P1_PIN  27
 #else
-#define RTE_COMP2_P1_PORT COMP2_P1_PORT
+#define RTE_COMP2_P1_PORT 0
 #define RTE_COMP2_P1_PIN  COMP2_P1_PIN
 #endif
 #define RTE_COMP2_P1_MUX 0
@@ -4491,7 +4235,7 @@
 #define RTE_COMP2_N1_PORT 0
 #define RTE_COMP2_N1_PIN  28
 #else
-#define RTE_COMP2_N1_PORT COMP2_N1_PORT
+#define RTE_COMP2_N1_PORT 0
 #define RTE_COMP2_N1_PIN  COMP2_N1_PIN
 #endif
 #define RTE_COMP2_N1_MUX 0

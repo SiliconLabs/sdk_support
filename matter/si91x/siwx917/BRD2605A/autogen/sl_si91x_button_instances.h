@@ -32,6 +32,9 @@
 #define SL_SI91X_BUTTON_INSTANCES_H
 
 #include "sl_si91x_button.h"
+#include "sl_si91x_button_init_btn0_config.h"
+#include "sl_si91x_button_init_btn1_config.h"
+
 
 extern const sl_button_t button_btn0;
 extern const sl_button_t button_btn1;

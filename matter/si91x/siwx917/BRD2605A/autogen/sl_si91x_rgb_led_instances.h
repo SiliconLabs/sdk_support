@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
- * @file
- * @brief SL USART Config.
+ * @file sl_si91x_rgb_led_instances.h.jinja
+ * @brief RGB LED Instances
  *******************************************************************************
  * # License
  * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,25 +28,19 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SI91X_DMA_CONFIG_H
-#define SL_SI91X_DMA_CONFIG_H
+#ifndef SL_SI91x_RGB_LED_INSTANCES_H
+#define SL_SI91x_RGB_LED_INSTANCES_H
 
-// <<< Use Configuration Wizard in Context Menu >>>
-#ifdef __cplusplus
-extern "C" {
+#include "sl_si91x_rgb_led.h"
+
+#ifdef SI917_RGB_DRIVER_OLD
+extern const sl_led_t led_red;
+extern const sl_led_t led_green;
+extern const sl_led_t led_blue;
+#else
+  extern const sl_rgb_led_t led_led0;
 #endif
 
-// <o SL_DMA0_CHANNEL_COUNT> DMA instance 0 channel count <1-32>
-// <i> Default: 32
-#define SL_DMA0_CHANNEL_COUNT 32
+void rgb_led_init_instances(void);
 
-// <o SL_ULP_DMA_CHANNEL_COUNT> ULP DMA instance channel count <1-12>
-// <i> Default: 12
-#define SL_ULP_DMA_CHANNEL_COUNT 12
-
-// <<< end of configuration section >>>
-
-#ifdef __cplusplus
-}
-#endif
-#endif //SL_SI91X_DMA_CONFIG_H
+#endif // SL_SI91x_RGB_LED_INSTANCES_H
