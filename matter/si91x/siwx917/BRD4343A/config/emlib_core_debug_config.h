@@ -1,9 +1,9 @@
-/***************************************************************************/ /**
- * @file sl_si91x_ulp_uart_common_config.h
- * @brief SL SI91X ULP UART Common Config.
+/***************************************************************************//**
+ * @file
+ * @brief emlib_core Configuration
  *******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,16 +28,18 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SI91X_ULP_UART_COMMON_CONFIG_H
-#define SL_SI91X_ULP_UART_COMMON_CONFIG_H
+#ifndef EM_CORE_DEBUG_CONFIG_H
+#define EM_CORE_DEBUG_CONFIG_H
 
 // <<< Use Configuration Wizard in Context Menu >>>
-// <h>DMA Configuration
 
-// <q SL_ULPUART_DMA_CONFIG_ENABLE> ULP UART DMA
-// <i> Default: 1
-#define SL_ULPUART_DMA_CONFIG_ENABLE 0
+// <h> Core Configuration
+
+// <q SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING> Enables measuring of interrupt disable time for debugging purposes.
+// <i> Default: 0
+#define SL_EMLIB_CORE_ENABLE_INTERRUPT_DISABLED_TIMING    0
 
 // </h>
+
 // <<< end of configuration section >>>
-#endif // SL_SI91X_ULP_UART_COMMON_CONFIG_H
+#endif // EM_CORE_CONFIG_H

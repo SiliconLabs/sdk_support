@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
- * @file sl_si91x_ulp_uart_common_config.h
- * @brief SL SI91X ULP UART Common Config.
+ * @file sl_si91x_led_instances.c.jinja
+ * @brief Button Driver Instances
  *******************************************************************************
  * # License
  * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,16 +28,22 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SI91X_ULP_UART_COMMON_CONFIG_H
-#define SL_SI91X_ULP_UART_COMMON_CONFIG_H
+#include "sl_si91x_led.h"
+#include "sl_si91x_led_config.h"
+#include "sl_si91x_led_instances.h"
+sl_led_t const led_led0 = {
+  .port = SL_LED_LED0_PORT,
+  .pin = SL_LED_LED0_PIN,
+  .led_number = SL_LED_LED0_NUMBER,
+};
+sl_led_t const led_led1 = {
+  .port = SL_LED_LED1_PORT,
+  .pin = SL_LED_LED1_PIN,
+  .led_number = SL_LED_LED1_NUMBER,
+};
 
-// <<< Use Configuration Wizard in Context Menu >>>
-// <h>DMA Configuration
-
-// <q SL_ULPUART_DMA_CONFIG_ENABLE> ULP UART DMA
-// <i> Default: 1
-#define SL_ULPUART_DMA_CONFIG_ENABLE 0
-
-// </h>
-// <<< end of configuration section >>>
-#endif // SL_SI91X_ULP_UART_COMMON_CONFIG_H
+void led_init_instances(void)
+{
+  sl_si91x_led_init(&led_led0);
+  sl_si91x_led_init(&led_led1);
+}
