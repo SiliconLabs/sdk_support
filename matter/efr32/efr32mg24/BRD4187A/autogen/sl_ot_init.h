@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief This generated header includes declaration of all functions required
  * during initialization that must be defined by the OpenThread application.
