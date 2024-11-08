@@ -62,11 +62,11 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 #if defined(SL_MBEDTLS_USE_TINYCRYPT)
+#include <string.h>
+#include <tinycrypt/tinycrypt_util.h>
 #include <tinycrypt/ecc.h>
 #include <tinycrypt/ecc_dh.h>
-#include <tinycrypt/tinycript_util.h>
-#include <string.h>
-#include "mbedtls/platform_util.h"
+#include <mbedtls/platform_util.h>
 int uECC_make_key_with_d(uint8_t *public_key, uint8_t *private_key, unsigned int *d)
 {
   int ret = UECC_FAULT_DETECTED;
@@ -139,12 +139,12 @@ int uECC_shared_secret(const uint8_t *public_key, const uint8_t *private_key, ui
   uECC_word_t _private[NUM_ECC_WORDS];
   wordcount_t num_words = NUM_ECC_WORDS;
   wordcount_t num_bytes = NUM_ECC_BYTES;
-  int r                 = UECC_FAULT_DETECTED;
+  // int r                 = UECC_FAULT_DETECTED;
   /* Converting buffers to correct bit order: */
   uECC_vli_bytesToNative(_private, private_key, BITS_TO_BYTES(NUM_ECC_BITS));
   uECC_vli_bytesToNative(_public, public_key, num_bytes);
   uECC_vli_bytesToNative(_public + num_words, public_key + num_bytes, num_bytes);
-  r = EccPoint_mult_safer(_public, _public, _private);
+  int r = EccPoint_mult_safer(_public, _public, _private);
   uECC_vli_nativeToBytes(secret, num_bytes, _public);
   /* erasing temporary buffer used to store secret: */
   mbedtls_platform_zeroize(_private, sizeof(_private));

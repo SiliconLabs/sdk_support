@@ -60,11 +60,11 @@
 #include MBEDTLS_CONFIG_FILE
 #endif
 #if defined(SL_MBEDTLS_USE_TINYCRYPT)
-#include <tinycrypt/ecc.h>
-#include "mbedtls/platform_util.h"
-#include "mbedtls/sha256.h"
 #include <string.h>
-#include "mbedtls/platform_util.h"
+#include <tinycrypt/ecc.h>
+#include <tinycrypt/tinycrypt_util.h>
+#include <mbedtls/sha256.h>
+#include <mbedtls/platform_util.h>
 #if defined MBEDTLS_OPTIMIZE_TINYCRYPT_ASM
 #ifndef asm
 #define asm __asm
@@ -228,43 +228,37 @@ void uECC_vli_clear(uECC_word_t *vli)
 }
 #endif
 #if defined MBEDTLS_OPTIMIZE_TINYCRYPT_ASM && defined __CC_ARM
-__asm uECC_word_t uECC_vli_isZero(const uECC_word_t *vli){
+__asm uECC_word_t uECC_vli_isZero(const uECC_word_t *vli)
+{
 #if NUM_ECC_WORDS != 8
 #error adjust ARM assembly to handle NUM_ECC_WORDS != 8
 #endif
 #if defined __thumb__ && __TARGET_ARCH_THUMB < 4
-  LDMIA r0 !,  { r1, r2, r3 } ORRS r1, r2 ORRS r1, r3 LDMIA r0 !, { r2, r3 } ORRS r1, r2 ORRS r1,
-  r3 LDMIA r0, { r0, r2, r3 } ORRS r1, r0 ORRS r1, r2 ORRS r1,    r3 RSBS r1,         r1,
+  LDMIA r0 !, { r1, r2, r3 } ORRS r1, r2 ORRS r1, r3 LDMIA r0 !, { r2, r3 } ORRS r1, r2 ORRS r1, r3 LDMIA r0,
+    { r0, r2, r3 } ORRS r1, r0 ORRS r1, r2 ORRS r1, r3 RSBS r1, r1,
 # 0 // C set if zero
-  MOVS r0,
+    MOVS r0,
 # 0 ADCS r0,
-  r0 BX lr
+    r0 BX lr
 #else
-  LDMIA r0 !,
-  { r1, r2, r3, ip } ORRS r1,
-  r2 ORRS r1,
-  r3 ORRS r1,
-  ip LDMIA r0,
-  { r0, r2, r3, ip } ORRS r1,
-  r0 ORRS r1,
-  r2 ORRS r1,
-  r3 ORRS r1,
-  ip
+  LDMIA r0 !, { r1, r2, r3, ip } ORRS r1, r2 ORRS r1, r3 ORRS r1, ip LDMIA r0, { r0, r2, r3, ip } ORRS r1, r0 ORRS r1,
+    r2 ORRS r1, r3 ORRS r1,
+    ip
 #ifdef __ARM_FEATURE_CLZ
-    CLZ r0,
-  r1 // 32 if zero
-    LSRS r0,
-  r0,
+      CLZ r0,
+    r1 // 32 if zero
+      LSRS r0,
+    r0,
 # 5
 #else
-    RSBS r1,
-  r1,
+      RSBS r1,
+    r1,
 # 0 // C set if zero
-  MOVS r0,
+    MOVS r0,
 # 0 ADCS r0,
-  r0
+    r0
 #endif
-  BX lr
+    BX lr
 #endif
 }
 #elif defined MBEDTLS_OPTIMIZE_TINYCRYPT_ASM && defined __GNUC__ && defined __arm__
@@ -547,7 +541,7 @@ static __asm uECC_word_t uECC_vli_add(uECC_word_t *result, const uECC_word_t *le
 # 0 // does not affect C flag
     ADCS r0,
     r0 // r0 := 0 + 0 + C = carry
-    POP
+      POP
   {
     r4 - r8, pc
   }
