@@ -19,12 +19,13 @@
  */
 
 // This files is not part of the tinycript librairy. It is used to define function tinycript requires that are not present in the Simplicity SDK mbedtls fork
+#include <string.h>
 
-#include "mbedtls/platform_util.h"
+#include <mbedtls/platform_util.h>
 #include <tinycrypt/tinycrypt_util.h>
 
 #if defined(MBEDTLS_PLATFORM_FAULT_CALLBACKS)
-#include "platform_fault.h"
+#include <platform_fault.h>
 #else
 static void mbedtls_platform_fault()
 {
