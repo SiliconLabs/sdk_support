@@ -344,7 +344,9 @@ sl_status_t sl_net_wifi_client_init(sl_net_interface_t interface,
     return status;
   }
   wifi_client_context = context;
+#ifdef SLI_SI91X_MCU_INTERFACE
   tcpip_init(NULL, NULL);
+#endif // SLI_SI91X_MCU_INTERFACE
   sta_netif_config();
   return SL_STATUS_OK;
 }
