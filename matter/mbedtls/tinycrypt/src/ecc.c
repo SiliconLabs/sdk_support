@@ -64,17 +64,23 @@
 #endif
 
 #if defined(SL_MBEDTLS_USE_TINYCRYPT)
-#include <tinycrypt/ecc.h>
+#include <string.h>
+
+#include "tinycrypt/ecc.h"
+#include "tinycrypt/tinycrypt_util.h"
+
 #include "mbedtls/platform_util.h"
 #include "mbedtls/sha256.h"
-#include <string.h>
-#include "mbedtls/platform_util.h"
 
 #if defined MBEDTLS_OPTIMIZE_TINYCRYPT_ASM
 #ifndef asm
 #define asm __asm
 #endif
 #endif /* MBEDTLS_OPTIMIZE_TINYCRYPT_ASM */
+
+#if (MBEDTLS_VERSION_NUMBER >= 0x03000000)
+#include "mbedtls/compat-2.x.h"
+#endif
 
 /* Parameters for curve NIST P-256 aka secp256r1 */
 const uECC_word_t curve_p[NUM_ECC_WORDS] = {

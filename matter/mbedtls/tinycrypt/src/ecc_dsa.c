@@ -67,6 +67,8 @@
 #if defined(SL_MBEDTLS_USE_TINYCRYPT)
 #include <tinycrypt/ecc.h>
 #include <tinycrypt/ecc_dsa.h>
+#include <tinycrypt/tinycrypt_util.h>
+
 #include "mbedtls/platform_util.h"
 
 static void bits2int(uECC_word_t *native, const uint8_t *bits,
