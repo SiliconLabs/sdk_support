@@ -176,6 +176,7 @@ int uECC_shared_secret(const uint8_t *public_key, const uint8_t *private_key,
 	uECC_word_t _private[NUM_ECC_WORDS];
 	wordcount_t num_words = NUM_ECC_WORDS;
 	wordcount_t num_bytes = NUM_ECC_BYTES;
+	int r = UECC_FAULT_DETECTED;
 
 	/* Converting buffers to correct bit order: */
 	uECC_vli_bytesToNative(_private,
@@ -188,12 +189,14 @@ int uECC_shared_secret(const uint8_t *public_key, const uint8_t *private_key,
 				   public_key + num_bytes,
 				   num_bytes);
 
-	int r = EccPoint_mult_safer(_public, _public, _private);
+	r = EccPoint_mult_safer(_public, _public, _private);
 	uECC_vli_nativeToBytes(secret, num_bytes, _public);
-
+	
+	if(r != UECC_SUCCESS) {
 	/* erasing temporary buffer used to store secret: */
 	mbedtls_platform_zeroize(_private, sizeof(_private));
+	}
 
-	return UECC_FAULT_DETECTED;
+	return r;
 }
 #endif /* SL_MBEDTLS_USE_TINYCRYPT */
