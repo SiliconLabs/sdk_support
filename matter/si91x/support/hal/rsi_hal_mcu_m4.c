@@ -19,6 +19,8 @@
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
 #include "silabs_utils.h"
+#include "sl_component_catalog.h"
+
 #ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
 #include "sl_si91x_button_pin_config.h"
 #endif  //SL_CATALOG_SIMPLE_BUTTON_PRESENT
