@@ -1,9 +1,9 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
- * @brief LED Driver Instances
+ * @brief OpenThread radio configuration file.
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,19 +28,18 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SIMPLE_LED_INSTANCES_H
-#define SL_SIMPLE_LED_INSTANCES_H
+#ifndef _SL_OPENTHREAD_RADIO_CONFIG_H
+#define _SL_OPENTHREAD_RADIO_CONFIG_H
+//-------- <<< Use Configuration Wizard in Context Menu >>> -----------------
+//
+// <h> Default EFR32 Radio Configuration
 
-#include "sl_simple_led.h"
-
-extern const sl_led_t sl_led_led0;
-extern const sl_led_t sl_led_led1;
-
-extern const sl_led_t *sl_simple_led_array[];
-
-#define SL_SIMPLE_LED_COUNT 2
-#define SL_SIMPLE_LED_INSTANCE(n) (sl_simple_led_array[n])
-
-void sl_simple_led_init_instances(void);
-
-#endif // SL_SIMPLE_LED_INIT_H
+// <o SL_OPENTHREAD_RECEIVE_SENSITIVITY> Recieve Sensitivity [dBm]
+#define SL_OPENTHREAD_RECEIVE_SENSITIVITY -100   // dBm
+// <o SL_OPENTHREAD_RSSI_AVERAGING_TIME> RSSI Average Time [us]
+#define SL_OPENTHREAD_RSSI_AVERAGING_TIME 16     // us
+// <o SL_OPENTHREAD_RSSI_AVERAGING_TIMEOUT> RSSI Average Timeout [us]
+#define SL_OPENTHREAD_RSSI_AVERAGING_TIMEOUT 300 // us
+// </h>
+// <<< end of configuration section >>>
+#endif // _SL_OPENTHREAD_RADIO_CONFIG_H

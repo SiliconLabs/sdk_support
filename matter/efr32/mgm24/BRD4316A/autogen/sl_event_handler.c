@@ -59,8 +59,7 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-  GPIOINT_Init();
-#if defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
+  sl_debug_swo_init();
   sl_i2cspm_init_instances();
 #endif // defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
   sl_simple_button_init_instances();
