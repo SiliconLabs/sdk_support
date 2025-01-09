@@ -1,6 +1,6 @@
 /***************************************************************************/ /**
- * @file sl_si91x_power_manager_wakeup_source_config.h
- * @brief Power Manager Wakeup Source Configuration
+ * @file
+ * @brief SL USART Config.
  *******************************************************************************
  * # License
  * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
@@ -28,69 +28,25 @@
  *
  ******************************************************************************/
 
-#ifndef SL_SI91X_POWER_MANAGER_WAKEUP_SOURCE_CONFIG_H
-#define SL_SI91X_POWER_MANAGER_WAKEUP_SOURCE_CONFIG_H
+#ifndef SL_SI91X_DMA_CONFIG_H
+#define SL_SI91X_DMA_CONFIG_H
 
+// <<< Use Configuration Wizard in Context Menu >>>
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// <<< Use Configuration Wizard in Context Menu >>>
+// <o SL_DMA0_CHANNEL_COUNT> DMA instance 0 channel count <1-32>
+// <i> Default: 32
+#define SL_DMA0_CHANNEL_COUNT 32
 
-// <e>Calendar Wakeup
-#define SL_ENABLE_CALENDAR_WAKEUP_SOURCE 0
-
-// <q ENABLE_SECOND> Enable Second Wakeup Source
-// <i> Default: 0
-#define ENABLE_SECOND 0
-
-// <q ENABLE_ALARM> Enable Alarm Wakeup Source
-// <i> Default: 1
-#define ENABLE_ALARM 0
-
-// <o ALARM_TIME_MSEC> Alarm Time (in milliseconds)
-// <i> Default: 5000
-#define ALARM_TIME_MSEC 5000
-
-// </e>
-
-// <e>GPIO Wakeup
-#define SL_ENABLE_GPIO_WAKEUP_SOURCE 0
-
-// <q ENABLE_NPSS_GPIO_0> Enable NPSS GPIO 0
-// <i> Default: 0
-#define ENABLE_NPSS_GPIO_0 0
-
-// <q ENABLE_NPSS_GPIO_1> Enable NPSS GPIO 1
-// <i> Default: 0
-#define ENABLE_NPSS_GPIO_1 0
-
-// <q ENABLE_NPSS_GPIO_2> Enable NPSS GPIO 2
-// <i> Default: 0
-#define ENABLE_NPSS_GPIO_2 0
-
-// <q ENABLE_NPSS_GPIO_3> Enable NPSS GPIO 3
-// <i> Default: 0
-#define ENABLE_NPSS_GPIO_3 0
-// </e>
-
-// <e>Deep Sleep Timer Wakeup
-#define SL_ENABLE_DST_WAKEUP_SOURCE 0
-
-// <o DST_WAKEUP_TIME> Sleep Time (in microseconds) <10000-4294967295>
-// <i> Default: 10000
-#define DST_WAKEUP_TIME 10000
-
-// </e>
-
-// <e> Wireless Wakeup
-#define SL_ENABLE_WIRELESS_WAKEUP_SOURCE 1
-// </e>
+// <o SL_ULP_DMA_CHANNEL_COUNT> ULP DMA instance channel count <1-12>
+// <i> Default: 12
+#define SL_ULP_DMA_CHANNEL_COUNT 12
 
 // <<< end of configuration section >>>
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // SL_SI91X_POWER_MANAGER_WAKEUP_SOURCE_CONFIG_H
+#endif //SL_SI91X_DMA_CONFIG_H

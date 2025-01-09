@@ -1,9 +1,9 @@
-/***************************************************************************/ /**
- * @file sl_si91x_led_instances.c.jinja
- * @brief Button Driver Instances
+/***************************************************************************//**
+ * @file
+ * @brief GLIB Config.
  *******************************************************************************
  * # License
- * <b>Copyright 2023 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2022 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -28,22 +28,30 @@
  *
  ******************************************************************************/
 
-#include "sl_si91x_led_config.h"
-#include "sl_si91x_led_instances.h"
-#include "sl_si91x_led.h"
-sl_led_t const led_led0 = {
-  .port = SL_LED_LED0_PORT,
-  .pin = SL_LED_LED0_PIN,
-  .led_number = SL_LED_LED0_NUMBER,
-};
-sl_led_t const led_led1 = {
-  .port = SL_LED_LED1_PORT,
-  .pin = SL_LED_LED1_PIN,
-  .led_number = SL_LED_LED1_NUMBER,
-};
+#ifndef SL_GLIB_CONFIG_H
+#define SL_GLIB_CONFIG_H
 
-void led_init_instances(void)
-{
-  sl_si91x_led_init(&led_led0);
-  sl_si91x_led_init(&led_led1);
-}
+// <<< Use Configuration Wizard in Context Menu >>>
+
+// <h> Fonts configuration
+
+// <q SL_GLIB_FONTNORMAL_8X8> Default font, 8x8
+// <i> Include/exclude the font.
+// <i> Default: 1
+#define SL_GLIB_FONTNORMAL_8X8 1
+
+// <q SL_GLIB_FONTNARROW_6X8> Narrow font, 6x8
+// <i> Include/exclude the font.
+// <i> Default: 1
+#define SL_GLIB_FONTNARROW_6X8 1
+
+// <q SL_GLIB_FONTNUMBER_16X20> Number only font, 16x20
+// <i> Include/exclude the font.
+// <i> Default: 1
+#define SL_GLIB_FONTNUMBER_16X20 1
+
+// </h>
+
+// <<< end of configuration section >>>
+
+#endif // SL_GLIB_CONFIG_H

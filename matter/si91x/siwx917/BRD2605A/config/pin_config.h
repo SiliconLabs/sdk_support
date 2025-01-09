@@ -136,6 +136,9 @@
 // $[GPIO]
 // [GPIO]$
 
+// $[QEI]
+// [QEI]$
+
 // $[CUSTOM_PIN_NAME]
 #ifndef _PORT
 #define _PORT 0

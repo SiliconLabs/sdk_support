@@ -31,12 +31,7 @@
 
 sl_status_t sl_si91x_power_manager_wakeup_init(void)
 {
-  sl_status_t status = SL_STATUS_OK;
-
-  status = sli_si91x_power_manager_gpio_init();
-  if (status != SL_STATUS_OK) {
-    return status;
-  }
+  sl_status_t status=SL_STATUS_OK;
   
   return status;
 }
