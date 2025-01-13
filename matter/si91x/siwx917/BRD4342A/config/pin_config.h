@@ -25,8 +25,8 @@
 // $[SSI_SLAVE]
 // [SSI_SLAVE]$
 
-// $[ULP_SPI]
-// [ULP_SPI]$
+// $[ULP_SSI]
+// [ULP_SSI]$
 
 // $[GSPI_MASTER]
 // [GSPI_MASTER]$
@@ -126,6 +126,18 @@
 
 // $[DAC1]
 // [DAC1]$
+
+// $[SYSRTC]
+// [SYSRTC]$
+
+// $[UULP_VBAT_GPIO]
+// [UULP_VBAT_GPIO]$
+
+// $[GPIO]
+// [GPIO]$
+
+// $[QEI]
+// [QEI]$
 
 // $[CUSTOM_PIN_NAME]
 #ifndef _PORT

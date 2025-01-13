@@ -38,25 +38,25 @@
 #define SL_MEMLCD_SPI_PERIPHERAL_NO              0
 
 // USART0 TX on PC00
-#define SL_MEMLCD_SPI_TX_PORT                    gpioPortC
+#define SL_MEMLCD_SPI_TX_PORT                    SL_GPIO_PORT_C
 #define SL_MEMLCD_SPI_TX_PIN                     0
 
 // USART0 CLK on PC02
-#define SL_MEMLCD_SPI_CLK_PORT                   gpioPortC
+#define SL_MEMLCD_SPI_CLK_PORT                   SL_GPIO_PORT_C
 #define SL_MEMLCD_SPI_CLK_PIN                    2
 
 // [USART_SL_MEMLCD_SPI]$
 
 // <gpio> SL_MEMLCD_SPI_CS
 // $[GPIO_SL_MEMLCD_SPI_CS]
-#define SL_MEMLCD_SPI_CS_PORT                    gpioPortC
+#define SL_MEMLCD_SPI_CS_PORT                    SL_GPIO_PORT_C
 #define SL_MEMLCD_SPI_CS_PIN                     6
 
 // [GPIO_SL_MEMLCD_SPI_CS]$
 
 // <gpio optional=true> SL_MEMLCD_EXTCOMIN
 // $[GPIO_SL_MEMLCD_EXTCOMIN]
-#define SL_MEMLCD_EXTCOMIN_PORT                  gpioPortA
+#define SL_MEMLCD_EXTCOMIN_PORT                  SL_GPIO_PORT_A
 #define SL_MEMLCD_EXTCOMIN_PIN                   0
 
 // [GPIO_SL_MEMLCD_EXTCOMIN]$

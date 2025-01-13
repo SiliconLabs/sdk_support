@@ -28,17 +28,39 @@
  *
  ******************************************************************************/
 
-// <<< Use Configuration Wizard in Context Menu >>>
-
-#ifndef SL_CLOCK_MANAGER_OSCILLATOR_CONFIG_H
+ #ifndef SL_CLOCK_MANAGER_OSCILLATOR_CONFIG_H
 #define SL_CLOCK_MANAGER_OSCILLATOR_CONFIG_H
+
+#if defined(SL_COMPONENT_CATALOG_PRESENT)
+#include "sl_component_catalog.h"
+
+#endif
+
+// Internal Defines: DO NOT MODIFY
+#define SL_CLOCK_MANAGER_HFXO_EN_ENABLE     1
+#define SL_CLOCK_MANAGER_HFXO_EN_DISABLE    0
+
+#if defined(SL_CATALOG_RAIL_LIB_PRESENT)
+#define SL_CLOCK_MANAGER_HFXO_EN_AUTO       SL_CLOCK_MANAGER_HFXO_EN_ENABLE
+#else
+#define SL_CLOCK_MANAGER_HFXO_EN_AUTO       SL_CLOCK_MANAGER_HFXO_EN_DISABLE
+#endif
+
+// <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Oscillators Settings
 
-// <e SL_CLOCK_MANAGER_HFXO_EN> HFXO Settings (if High Frequency crystal is used)
+// <h> HFXO Settings (if High Frequency crystal is used)
+
+// <o SL_CLOCK_MANAGER_HFXO_EN> Enable
 // <i> Enable to configure HFXO
+// <i> AUTO enables HFXO if a radio is used
+// <SL_CLOCK_MANAGER_HFXO_EN_AUTO=> AUTO
+// <SL_CLOCK_MANAGER_HFXO_EN_ENABLE=> ENABLE
+// <SL_CLOCK_MANAGER_HFXO_EN_DISABLE=> DISABLE
+// <d> SL_CLOCK_MANAGER_HFXO_EN_AUTO
 #ifndef SL_CLOCK_MANAGER_HFXO_EN
-#define SL_CLOCK_MANAGER_HFXO_EN    1
+#define SL_CLOCK_MANAGER_HFXO_EN    SL_CLOCK_MANAGER_HFXO_EN_ENABLE
 #endif
 
 // <o SL_CLOCK_MANAGER_HFXO_MODE> Mode
@@ -51,7 +73,7 @@
 #define SL_CLOCK_MANAGER_HFXO_MODE    HFXO_CFG_MODE_XTAL
 #endif
 
-// <o SL_CLOCK_MANAGER_HFXO_FREQ> Frequency <38000000-40000000>
+// <o SL_CLOCK_MANAGER_HFXO_FREQ> Frequency in Hz <38000000-40000000>
 // <d> 39000000
 #ifndef SL_CLOCK_MANAGER_HFXO_FREQ
 #define SL_CLOCK_MANAGER_HFXO_FREQ    39000000
@@ -60,10 +82,10 @@
 // <o SL_CLOCK_MANAGER_HFXO_CTUNE> CTUNE <0-255>
 // <d> 140
 #ifndef SL_CLOCK_MANAGER_HFXO_CTUNE
-#define SL_CLOCK_MANAGER_HFXO_CTUNE    95
+#define SL_CLOCK_MANAGER_HFXO_CTUNE    87
 #endif
 
-// <o SL_CLOCK_MANAGER_HFXO_PRECISION> Precision <0-65535>
+// <o SL_CLOCK_MANAGER_HFXO_PRECISION> Precision in PPM <0-65535>
 // <d> 50
 #ifndef SL_CLOCK_MANAGER_HFXO_PRECISION
 #define SL_CLOCK_MANAGER_HFXO_PRECISION    50
@@ -140,7 +162,7 @@
 #define SL_CLOCK_MANAGER_HFXO_CRYSTAL_SHARING_GPIO_PIN    10
 #endif
 // </e>
-// </e>
+// </h>
 
 // <e> LFXO Settings (if Low Frequency crystal is used)
 // <i> Enable to configure LFXO
@@ -161,7 +183,7 @@
 // <o SL_CLOCK_MANAGER_LFXO_CTUNE> CTUNE <0-127>
 // <d> 63
 #ifndef SL_CLOCK_MANAGER_LFXO_CTUNE
-#define SL_CLOCK_MANAGER_LFXO_CTUNE    44
+#define SL_CLOCK_MANAGER_LFXO_CTUNE    36
 #endif
 
 // <o SL_CLOCK_MANAGER_LFXO_PRECISION> LFXO precision in PPM <0-65535>
@@ -214,7 +236,7 @@
 #define SL_CLOCK_MANAGER_HFRCO_DPLL_EN    1
 #endif
 
-// <o SL_CLOCK_MANAGER_DPLL_FREQ> Target Frequency <1000000-80000000>
+// <o SL_CLOCK_MANAGER_DPLL_FREQ> Target Frequency in Hz <1000000-80000000>
 // <i> DPLL target frequency
 // <d> 78000000
 #ifndef SL_CLOCK_MANAGER_DPLL_FREQ
@@ -240,6 +262,7 @@
 // <CMU_DPLLREFCLKCTRL_CLKSEL_DISABLED=> DISABLED
 // <CMU_DPLLREFCLKCTRL_CLKSEL_HFXO=> HFXO
 // <CMU_DPLLREFCLKCTRL_CLKSEL_LFXO=> LFXO
+// <CMU_DPLLREFCLKCTRL_CLKSEL_CLKIN0=> CLKIN0
 // <d> CMU_DPLLREFCLKCTRL_CLKSEL_HFXO
 #ifndef SL_CLOCK_MANAGER_DPLL_REFCLK
 #define SL_CLOCK_MANAGER_DPLL_REFCLK    CMU_DPLLREFCLKCTRL_CLKSEL_HFXO
@@ -314,8 +337,26 @@
 #endif
 // </h>
 
+// <h> CLKIN0 Settings
+// <o SL_CLOCK_MANAGER_CLKIN0_FREQ> Frequency in Hz <1000000-38000000>
+// <d> 38000000
+#ifndef SL_CLOCK_MANAGER_CLKIN0_FREQ
+#define SL_CLOCK_MANAGER_CLKIN0_FREQ    38000000
+#endif
 // </h>
 
-#endif /* SL_CLOCK_MANAGER_OSCILLATOR_CONFIG_H */
+// </h>
 
 // <<< end of configuration section >>>
+
+// <<< sl:start pin_tool >>>
+
+// <cmu signal=CLKIN0> SL_CLOCK_MANAGER_CLKIN0
+// $[CMU_SL_CLOCK_MANAGER_CLKIN0]
+
+
+// [CMU_SL_CLOCK_MANAGER_CLKIN0]$
+
+// <<< sl:end pin_tool >>>
+
+#endif /* SL_CLOCK_MANAGER_OSCILLATOR_CONFIG_H */

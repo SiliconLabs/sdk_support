@@ -48,7 +48,7 @@
 // <o SL_RAIL_UTIL_PA_VOLTAGE_MV> Milli-volts on PA supply pin (PA_VDD)
 // <0-65535:1>
 // <i> Default: 3300
-#define SL_RAIL_UTIL_PA_VOLTAGE_MV          3300
+#define SL_RAIL_UTIL_PA_VOLTAGE_MV          1800
 
 // <o SL_RAIL_UTIL_PA_SELECTION_2P4GHZ> 2.4 GHz PA Selection
 // <RAIL_TX_POWER_MODE_2P4GIG_HIGHEST=> Highest Possible
@@ -72,8 +72,8 @@
 #define SL_RAIL_UTIL_PA_CURVE_TYPES         "pa_curve_types_efr32.h"
 
 // <q SL_RAIL_UTIL_PA_CALIBRATION_ENABLE> Enable PA Calibration
-// <i> Default: 0
-#define SL_RAIL_UTIL_PA_CALIBRATION_ENABLE  0
+// <i> Default: 1
+#define SL_RAIL_UTIL_PA_CALIBRATION_ENABLE  1
 
 // </h>
 // <<< end of configuration section >>>

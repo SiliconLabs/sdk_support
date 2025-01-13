@@ -36,7 +36,7 @@
 // <q SL_DEVICE_INIT_DCDC_ENABLE> Enable DC/DC Converter
 // <i>
 // <i> Default: 1
-#define SL_DEVICE_INIT_DCDC_ENABLE         0
+#define SL_DEVICE_INIT_DCDC_ENABLE         1
 
 // <q SL_DEVICE_INIT_DCDC_BYPASS> Set DC/DC Converter in Bypass Mode
 // <i>

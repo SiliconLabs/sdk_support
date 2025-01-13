@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief OpenThread RTOS configuration file.
  *******************************************************************************
@@ -47,42 +47,42 @@
 
 // </h>
 // <h>  Priority Configuration for OpenThread RTOS Stack Task
-// <o SL_OPENTHREAD_RTOS_CLI_TASK_PRIORITY> OpenThread CLI task prority
+// <o SL_OPENTHREAD_RTOS_SERIAL_TASK_PRIORITY> OpenThread serial task prority
 // <i> Default: 16 (CMSIS-RTOS2 osPriorityBelowNormal)
-// <i> Defines OpenThread CLI task priority. This must be a valid priority value
+// <i> Defines OpenThread serial task priority. This must be a valid priority value
 // <i> from CMSIS-RTOS2 osPriority_t definition.
-#define SL_OPENTHREAD_RTOS_CLI_TASK_PRIORITY (16)
+#define SL_OPENTHREAD_RTOS_SERIAL_TASK_PRIORITY (16)
 
 // <o SL_OPENTHREAD_STACK_TASK_MEM_SIZE> OpenThread stack task stack size in bytes <1000-20000>
 // <i> Default: 4608
 // <i> Defines the stack size of the OpenThread RTOS stack task. The value is in bytes and
 // <i> and will be word aligned when it is applied at the task creation.
-#define SL_OPENTHREAD_STACK_TASK_MEM_SIZE 4608
+#define SL_OPENTHREAD_STACK_TASK_MEM_SIZE (4608)
 
 // <o SL_OPENTHREAD_APP_TASK_MEM_SIZE> OpenThread app task stack size in bytes <1000-20000>
-// <i> Default: 4096
+// <i> Default: 4608
 // <i> Defines the stack size of the OpenThread RTOS app task. The value is in bytes and
 // <i> and will be word aligned when it is applied at the task creation.
-#define SL_OPENTHREAD_APP_TASK_MEM_SIZE 4608
+#define SL_OPENTHREAD_APP_TASK_MEM_SIZE (4608)
 
-// <o SL_OPENTHREAD_CLI_TASK_MEM_SIZE> OpenThread CLI task stack size in bytes <1000-20000>
-// <i> Default: 2048
-// <i> Defines the stack size of the OpenThread RTOS CLI task. The value is in bytes and
+// <o SL_OPENTHREAD_SERIAL_TASK_MEM_SIZE> OpenThread serial task stack size in bytes <1000-20000>
+// <i> Default: 3072
+// <i> Defines the stack size of the OpenThread RTOS serial task. The value is in bytes and
 // <i> and will be word aligned when it is applied at the task creation.
-#define SL_OPENTHREAD_CLI_TASK_MEM_SIZE 2048
+#define SL_OPENTHREAD_SERIAL_TASK_MEM_SIZE (3072)
 // </h>
 // <h>  Priority Configuration for OpenThread RTOS Stack Task
-// <o SL_OPENTHREAD_RTOS_CLI_TASK_PRIORITY> OpenThread CLI task prority
+// <o SL_OPENTHREAD_RTOS_SERIAL_TASK_PRIORITY> OpenThread serial task prority
 // <i> Default: 16 (CMSIS-RTOS2 osPriorityBelowNormal)
-// <i> Defines OpenThread CLI task priority. This must be a valid priority value
+// <i> Defines OpenThread serial task priority. This must be a valid priority value
 // <i> from CMSIS-RTOS2 osPriority_t definition.
-#define SL_OPENTHREAD_RTOS_CLI_TASK_PRIORITY (16)
+#define SL_OPENTHREAD_RTOS_SERIAL_TASK_PRIORITY (16)
 
-// <o SL_OPENTHREAD_OS_CLI_TASK_SIZE> OpenThread CLI task stack size in bytes <1000-20000>
+// <o SL_OPENTHREAD_OS_SERIAL_TASK_SIZE> OpenThread serial task stack size in bytes <1000-20000>
 // <i> Default: 2048
-// <i> Defines the stack size of the OpenThread RTOS CLI task. The value is in bytes and
+// <i> Defines the stack size of the OpenThread RTOS serial task. The value is in bytes and
 // <i> and will be word aligned when it is applied at the task creation.
-#define SL_OPENTHREAD_OS_CLI_TASK_SIZE 2048
+#define SL_OPENTHREAD_OS_SERIAL_TASK_SIZE 2048
 
 // </h>
 // <h> App Task
@@ -91,10 +91,10 @@
 #define SL_OPENTHREAD_ENABLE_APP_TASK  0
 
 // </h>
-// <h> CLI Task
-// <i> Enable CLI task
+// <h> Serial task
+// <i> Enable Serial task
 // <i> Default: On
-#define SL_OPENTHREAD_ENABLE_CLI_TASK 0
+#define SL_OPENTHREAD_ENABLE_SERIAL_TASK (0)
 
 // </h>
 // <<< end of configuration section >>>

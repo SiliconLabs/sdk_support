@@ -19,13 +19,12 @@
 #include "platform-efr32.h"
 #include "sl_sleeptimer.h"
 #include "sl_mpu.h"
-#include "gpiointerrupt.h"
+#include "sl_gpio.h"
 #if defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
 #include "sl_i2cspm_instances.h"
 #endif // defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
 #include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
-#include "nvm3_default.h"
 #include "sl_ot_rtos_adaptation.h"
 #include "sl_simple_button_instances.h"
 #include "sl_simple_led_instances.h"
@@ -36,10 +35,13 @@
 #include "sl_spidrv_instances.h"
 #endif
 #include "psa/crypto.h"
+#include "sl_se_manager.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
+#include "sl_iostream_handles.h"
+#include "nvm3_default.h"
 #include "sl_power_manager.h"
 #if !RSI_BLE_ENABLE
 #include "sl_rail_util_power_manager_init.h"
@@ -56,8 +58,8 @@ void sl_platform_init(void)
   sl_hfxo_manager_init_hardware();
   SEGGER_RTT_Init();
   sl_board_init();
-  nvm3_initDefault();
   osKernelInitialize();
+  nvm3_initDefault();
   sl_power_manager_init();
 }
 
@@ -71,8 +73,8 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-  GPIOINT_Init();
-#ifdef SL_WIFI
+  sl_gpio_init();
+  #ifdef SL_WIFI
   sl_spidrv_init_instances();
 #endif
 #if defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
@@ -93,6 +95,8 @@ void sl_service_init(void)
   sl_mpu_disable_execute_from_ram();
   sl_mbedtls_init();
   psa_crypto_init();
+  sl_se_init();
+  sli_protocol_crypto_init();
   sli_aes_seed_mask();
   sl_iostream_init_instances();
 }

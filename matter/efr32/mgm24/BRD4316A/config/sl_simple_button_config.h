@@ -31,7 +31,7 @@
 #ifndef SL_SIMPLE_BUTTON_CONFIG_H
 #define SL_SIMPLE_BUTTON_CONFIG_H
 
-#include "em_gpio.h"
+#include "sl_gpio.h"
 // <<< Use Configuration Wizard in Context Menu >>>
 
 // <h> Simple Button Driver Configuration
@@ -43,16 +43,15 @@
 #define SL_SIMPLE_BUTTON_DEBOUNCE_BITS    5U
 
 // <o SL_SIMPLE_BUTTON_GPIO_MODE>
-// <gpioModeInput=> GPIO Input
-// <gpioModeInputPull=> GPIO Input Pull
-// <gpioModeInputPullFilter=> GPIO Input Pull Filter
+// <SL_GPIO_MODE_INPUT=> GPIO Input
+// <SL_GPIO_MODE_INPUT_PULL=> GPIO Input Pull
+// <SL_GPIO_MODE_INPUT_PULL_FILTER=> GPIO Input Pull Filter
 // <i> Default: gpioModeInput
-#define SL_SIMPLE_BUTTON_GPIO_MODE        gpioModeInput
+#define SL_SIMPLE_BUTTON_GPIO_MODE        SL_GPIO_MODE_INPUT
 
 // <q SL_SIMPLE_BUTTON_GPIO_DOUT>
-// <i> SL_SIMPLE_BUTTON_GPIO_MODE == gpioModeInput, Filter if DOUT is set
-// <i> SL_SIMPLE_BUTTON_GPIO_MODE == gpioModeInputPull, DOUT determines pull direction
-// <i> SL_SIMPLE_BUTTON_GPIO_MODE == gpioModeInputPullFilter, DOUT determines pull direction
+// <i> SL_SIMPLE_BUTTON_GPIO_MODE == SL_GPIO_MODE_INPUT, Filter if DOUT is set
+// <i> SL_SIMPLE_BUTTON_GPIO_MODE == SL_GPIO_MODE_INPUT_PULL, DOUT determines pull direction
 #define SL_SIMPLE_BUTTON_GPIO_DOUT        0U
 
 // <q SL_SIMPLE_BUTTON_POLARITY>

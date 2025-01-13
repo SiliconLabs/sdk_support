@@ -9,7 +9,7 @@
 #ifndef SL_SI91X_BUTTON_PIN_CONFIG_H
 #define SL_SI91X_BUTTON_PIN_CONFIG_H
 
-#include "RTE_Device_917.h"
+#include "em_device.h"
 #include "sl_si91x_button_instances.h"
 
 #define SL_SI91x_BUTTON_COUNT (2)

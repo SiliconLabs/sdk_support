@@ -84,7 +84,7 @@ extern "C" {
 // </e>
 
 // <e> Wireless Wakeup
-#define SL_ENABLE_WIRELESS_WAKEUP_SOURCE 0
+#define SL_ENABLE_WIRELESS_WAKEUP_SOURCE 1
 // </e>
 
 // <<< end of configuration section >>>

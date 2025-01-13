@@ -8,30 +8,30 @@
 #include "sl_clock_manager.h"
 #include "sl_hfxo_manager.h"
 #include "SEGGER_RTT.h"
-#include "sl_fem_util.h"
 #include "pa_conversions_efr32.h"
 #include "sl_rail_util_power_manager_init.h"
 #include "sl_rail_util_pti.h"
 #include "sl_rail_util_rssi.h"
+#include "sl_fem_util.h"
 #include "sl_board_control.h"
 #include "sl_bt_rtos_adaptation.h"
 #include "platform-efr32.h"
 #include "sl_sleeptimer.h"
 #include "sl_mpu.h"
-#include "gpiointerrupt.h"
+#include "sl_gpio.h"
 #include "sl_iostream_rtt.h"
 #include "sl_mbedtls.h"
-#include "nvm3_default.h"
 #include "sl_ot_rtos_adaptation.h"
 #include "sl_simple_button_instances.h"
-#if defined(CONFIG_ENABLE_UART)
 #include "sl_uartdrv_instances.h"
-#endif // CONFIG_ENABLE_UART
 #include "psa/crypto.h"
+#include "sl_se_manager.h"
 #include "sli_protocol_crypto.h"
 #include "cmsis_os2.h"
 #include "sl_iostream_init_instances.h"
 #include "sl_bluetooth.h"
+#include "sl_iostream_handles.h"
+#include "nvm3_default.h"
 #include "sl_power_manager.h"
 
 void sl_platform_init(void)
@@ -45,8 +45,8 @@ void sl_platform_init(void)
   sl_hfxo_manager_init_hardware();
   SEGGER_RTT_Init();
   sl_board_init();
-  nvm3_initDefault();
   osKernelInitialize();
+  nvm3_initDefault();
   sl_power_manager_init();
 }
 
@@ -58,11 +58,11 @@ void sl_kernel_start(void)
 
 void sl_driver_init(void)
 {
-  GPIOINT_Init();
+  sl_gpio_init();
   sl_simple_button_init_instances();
 #if defined(CONFIG_ENABLE_UART)
   sl_uartdrv_init_instances();
-#endif
+  #endif
 }
 
 void sl_service_init(void)
@@ -73,17 +73,19 @@ void sl_service_init(void)
   sl_mpu_disable_execute_from_ram();
   sl_mbedtls_init();
   psa_crypto_init();
+  sl_se_init();
+  sli_protocol_crypto_init();
   sli_aes_seed_mask();
   sl_iostream_init_instances();
 }
 
 void sl_stack_init(void)
 {
-  sl_fem_util_init();
   sl_rail_util_pa_init();
   sl_rail_util_power_manager_init();
   sl_rail_util_pti_init();
   sl_rail_util_rssi_init();
+  sl_fem_util_init();
   sl_bt_rtos_init();
   sl_ot_sys_init();
 }
