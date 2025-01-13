@@ -1,4 +1,4 @@
-/***************************************************************************//**
+/*******************************************************************************
  * @file
  * @brief OpenThread stack configuration file.
  *******************************************************************************
@@ -40,9 +40,9 @@
 //      <OT_THREAD_VERSION_1_2=> Thread 1.2
 //      <OT_THREAD_VERSION_1_3=> Thread 1.3
 //      <OT_THREAD_VERSION_1_4=> Thread 1.4
-// <i>  Current Default: OT_THREAD_VERSION_1_3
+// <i>  Current Default: OT_THREAD_VERSION_1_4
 #ifndef OPENTHREAD_CONFIG_THREAD_VERSION
-#define OPENTHREAD_CONFIG_THREAD_VERSION OT_THREAD_VERSION_1_3
+#define OPENTHREAD_CONFIG_THREAD_VERSION OT_THREAD_VERSION_1_4
 #endif
 // </h>
 
@@ -111,7 +111,7 @@
 #ifndef OPENTHREAD_CONFIG_SRP_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_SRP_SERVER_ENABLE         0
 #endif
-// <q>  TCPlp (Low power TCP over OpenThread)
+// <q>  TCP API
 #ifndef OPENTHREAD_CONFIG_TCP_ENABLE
 #define OPENTHREAD_CONFIG_TCP_ENABLE                0
 #endif
@@ -183,11 +183,6 @@
 // <e>  DHCP6 Server
 #ifndef OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE
 #define OPENTHREAD_CONFIG_DHCP6_SERVER_ENABLE       0
-#endif
-// </e>
-// <e>  Diagnostic
-#ifndef OPENTHREAD_CONFIG_DIAG_ENABLE
-#define OPENTHREAD_CONFIG_DIAG_ENABLE               0
 #endif
 // </e>
 // <e>  ECDSA (Elliptic Curve Digital Signature Algorithm) (Required for Matter support)

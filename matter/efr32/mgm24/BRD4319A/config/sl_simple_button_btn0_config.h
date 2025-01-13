@@ -3,7 +3,7 @@
  * @brief Simple Button Driver User Config
  *******************************************************************************
  * # License
- * <b>Copyright 2019 Silicon Laboratories Inc. www.silabs.com</b>
+ * <b>Copyright 2024 Silicon Laboratories Inc. www.silabs.com</b>
  *******************************************************************************
  *
  * SPDX-License-Identifier: Zlib
@@ -31,7 +31,7 @@
 #ifndef SL_SIMPLE_BUTTON_BTN0_CONFIG_H
 #define SL_SIMPLE_BUTTON_BTN0_CONFIG_H
 
-#include "em_gpio.h"
+#include "sl_gpio.h"
 #include "sl_simple_button.h"
 
 // <<< Use Configuration Wizard in Context Menu >>>
@@ -48,7 +48,7 @@
 
 // <gpio> SL_SIMPLE_BUTTON_BTN0
 // $[GPIO_SL_SIMPLE_BUTTON_BTN0]
-#define SL_SIMPLE_BUTTON_BTN0_PORT               gpioPortA
+#define SL_SIMPLE_BUTTON_BTN0_PORT               SL_GPIO_PORT_A
 #define SL_SIMPLE_BUTTON_BTN0_PIN                4
 
 // [GPIO_SL_SIMPLE_BUTTON_BTN0]$

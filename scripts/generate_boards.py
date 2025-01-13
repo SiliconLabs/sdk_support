@@ -249,6 +249,7 @@ def _delete_files(output_path: Path):
     # Files to delete after each generation
     files_to_delete = ["autogen/.crc_config.crc",
                        "autogen/linkerfile.ld",
+                       "config/prioconf/priority_config.prioconf",
                        "config/FreeRTOSConfig.h",
                        "config/SEGGER_RTT_Conf.h",
                        "config/sl_openthread_ble_cli_config.h",
