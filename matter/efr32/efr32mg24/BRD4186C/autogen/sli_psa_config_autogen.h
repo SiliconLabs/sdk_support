@@ -24,7 +24,8 @@
 #define PSA_WANT_ALG_TLS12_PSK_TO_MS 1
 #define MBEDTLS_PSA_CRYPTO_EXTERNAL_RNG
 
-#define MBEDTLS_PSA_KEY_SLOT_COUNT (2 + 15 + 1 + SL_PSA_KEY_USER_SLOT_COUNT)
+// Higher matter psa key slot count (30) than the usual (22) for the wf200 ncp.
+#define MBEDTLS_PSA_KEY_SLOT_COUNT (30 + 15 + 1 + SL_PSA_KEY_USER_SLOT_COUNT + 1)
 #ifndef SL_PSA_ITS_MAX_FILES
 #define SL_PSA_ITS_MAX_FILES (1 + SL_PSA_ITS_USER_MAX_FILES)
 #endif

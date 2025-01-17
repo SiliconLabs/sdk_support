@@ -68,6 +68,26 @@
 // <i> higher data throughput over connections, advertising or scanning long advertisement data.
 #define SL_BT_CONFIG_BUFFER_SIZE    (3150)
 
+// <e SL_BT_CONFIG_SET_CUSTOM_ADDRESS_FROM_NVM3> Enable using a custom Bluetooth address stored in NVM3
+// <i> Enable or disable using a custom Bluetooth address stored the Bluetooth space of NVM3. When enabled,
+// <i> the Bluetooth stack sets the address as the Bluetooth identity address of the device if a valid address
+// <i> is found in NVM3.
+// <i> Default: 1
+#define SL_BT_CONFIG_SET_CUSTOM_ADDRESS_FROM_NVM3  (1)
+// </e>
+
+// <e SL_BT_CONFIG_SET_CTUNE_FROM_NVM3> Enable setting the HFXO CTUNE with a value stored in the Bluetooth space of NVM3.
+// <i> Enable or disable setting the HFXO CTUNE with a value stored in the Bluetooth space of NVM3. When enabled, the
+// <i> Bluetooth stack sets the HFXO CTUNE at Bluetooth starting phase if a CTUNE value is found in NVM3. This
+// <i> operation will override the CTUNE that is set to with the value stored in the MFG_CTUNE token or the
+// <i> configuration value in the Clock Manager.
+// <i> Setting the HFXO CTUNE with this method is deprecated. Currently the functionality is provided for keeping
+// <i> backwards compatibility with legacy SDKs, and the support will be discontinued in future SDK releases.
+// <i> The recommended method is to store CTUNE value in the MFG_CTUNE token.
+// <i> Default: 0
+#define SL_BT_CONFIG_SET_CTUNE_FROM_NVM3  (0)
+// </e>
+
 // </h> End Bluetooth Stack Configuration
 
 // <h> TX Power Levels

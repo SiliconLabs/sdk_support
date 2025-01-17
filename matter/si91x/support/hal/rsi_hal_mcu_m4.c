@@ -19,7 +19,11 @@
 #include "rsi_pll.h"
 #include "rsi_rom_clks.h"
 #include "silabs_utils.h"
+#include "sl_component_catalog.h"
+
+#ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
 #include "sl_si91x_button_pin_config.h"
+#endif  //SL_CATALOG_SIMPLE_BUTTON_PRESENT
 #include "sli_siwx917_soc.h"
 
 #define SOC_PLL_REF_FREQUENCY 40000000 // /* PLL input REFERENCE clock 40MHZ */
@@ -43,7 +47,9 @@
 #define MISC_CONFIG_MISC_CTRL1 *(volatile uint32_t *)(0x46008000 + 0x44)
 #define MISC_QUASI_SYNC_MODE *(volatile uint32_t *)(0x46008000 + 0x84)
 
+#ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
 void sl_button_on_change(uint8_t btn, uint8_t btnAction);
+#endif  //SL_CATALOG_SIMPLE_BUTTON_PRESENT
 
 int soc_pll_config(void) {
   int32_t status = RSI_OK;
@@ -75,8 +81,10 @@ int soc_pll_config(void) {
   return 0;
 }
 
+#ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
 void sl_si91x_button_isr(uint8_t pin, int8_t state) {
   (pin == SL_BUTTON_BTN0_PIN)
       ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, !state)
       : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, !state);
 }
+#endif  //SL_CATALOG_SIMPLE_BUTTON_PRESENT

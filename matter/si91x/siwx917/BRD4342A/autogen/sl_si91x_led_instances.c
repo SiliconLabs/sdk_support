@@ -28,9 +28,9 @@
  *
  ******************************************************************************/
 
-#include "sl_si91x_led.h"
 #include "sl_si91x_led_config.h"
 #include "sl_si91x_led_instances.h"
+#include "sl_si91x_led.h"
 sl_led_t const led_led0 = {
   .port = SL_LED_LED0_PORT,
   .pin = SL_LED_LED0_PIN,

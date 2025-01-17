@@ -9,7 +9,7 @@
 #ifndef SL_SI91X_LED_CONFIG_H
 #define SL_SI91X_LED_CONFIG_H
 
-#include "RTE_Device_917.h"
+#include "em_device.h"
 #include "sl_si91x_led_instances.h"
 
 #define SL_SI91x_LED_COUNT 2

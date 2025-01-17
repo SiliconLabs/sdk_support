@@ -30,7 +30,6 @@
 
 #include "sl_si91x_button_pin_config.h"
 #include "sl_si91x_button_instances.h"
-
 sl_button_t const button_btn0 = {
   .port = SL_BUTTON_BTN0_PORT,
   .pin = SL_BUTTON_BTN0_PIN,
