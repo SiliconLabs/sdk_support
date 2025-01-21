@@ -3,8 +3,7 @@
 #include "sl_assert.h"
 
 // EUSART is used in MG24 + RS9116 combination
-#ifdef RS911X_WIFI
-#if !(defined(EXP_BOARD) && EXP_BOARD)
+#if defined(RS911X_WIFI) && !defined(EXP_BOARD)
 #include "sl_spidrv_eusart_exp_config.h"
 
 SPIDRV_HandleData_t sl_spidrv_eusart_exp_handle_data;
@@ -41,10 +40,9 @@ void sl_spidrv_init_instances(void)
 #endif
   SPIDRV_Init(sl_spidrv_eusart_exp_handle, &sl_spidrv_eusart_init_exp);
 }
-#endif
-#endif
+#endif //defined(RS911X_WIFI) && !defined(EXP_BOARD)
 
-#if (WF200_WIFI | EXP_BOARD) // USART is used in MG24 + WF200 and MG24 + 917 NCP combination
+#if defined(WF200_WIFI) || defined(EXP_BOARD) // USART is used in MG24 + WF200 and MG24 + 917 NCP combination
 #include "sl_spidrv_exp_config.h"
 
 SPIDRV_HandleData_t sl_spidrv_exp_handle_data;
@@ -90,4 +88,4 @@ void sl_spidrv_init_instances(void)
   SPIDRV_Init(sl_spidrv_exp_handle, &sl_spidrv_init_exp);
 }
 
-#endif
+#endif //defined(WF200_WIFI) || defined(EXP_BOARD)
