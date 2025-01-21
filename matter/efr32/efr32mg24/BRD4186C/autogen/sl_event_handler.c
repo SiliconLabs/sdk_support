@@ -71,10 +71,8 @@ void sl_kernel_start(void)
 void sl_driver_init(void)
 {
   sl_gpio_init();
-#ifndef SLI_SI917
 #ifdef SL_WIFI
   sl_spidrv_init_instances();
-#endif
 #endif
 #if defined(SL_MATTER_USE_SI70XX_SENSOR) && SL_MATTER_USE_SI70XX_SENSOR
   sl_i2cspm_init_instances();

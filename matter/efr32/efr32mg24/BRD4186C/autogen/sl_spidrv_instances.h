@@ -6,13 +6,14 @@ extern "C" {
 #endif
 
 #include "spidrv.h"
-#ifdef RS911X_WIFI
-extern SPIDRV_Handle_t sl_spidrv_eusart_exp_handle;
-#endif
 
-#ifdef WF200_WIFI
+#if defined(RS911X_WIFI) && !defined(EXP_BOARD)
+extern SPIDRV_Handle_t sl_spidrv_eusart_exp_handle;
+#endif //defined(RS911X_WIFI) && !defined(EXP_BOARD)
+
+#if defined(WF200_WIFI) || defined(EXP_BOARD)
 extern SPIDRV_Handle_t sl_spidrv_exp_handle;
-#endif
+#endif //defined(WF200_WIFI) || defined(EXP_BOARD)
 
 void sl_spidrv_init_instances(void);
 
