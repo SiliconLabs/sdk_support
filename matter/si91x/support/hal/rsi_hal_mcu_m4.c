@@ -84,7 +84,7 @@ int soc_pll_config(void) {
 #ifdef SL_CATALOG_SIMPLE_BUTTON_PRESENT
 void sl_si91x_button_isr(uint8_t pin, int8_t state) {
   (pin == SL_BUTTON_BTN0_PIN)
-      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, !state)
-      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, !state);
+      ? sl_button_on_change(SL_BUTTON_BTN0_NUMBER, state)
+      : sl_button_on_change(SL_BUTTON_BTN1_NUMBER, state);
 }
 #endif  //SL_CATALOG_SIMPLE_BUTTON_PRESENT
