@@ -23,11 +23,14 @@ class Boards(str, Enum):
     BRD4116A = "BRD4116A"
     BRD4117A = "BRD4117A"
     BRD4118A = "BRD4118A"
+    BRD2709A = "BRD2709A"
     BRD2704A = "BRD2704A"
     BRD4316A = "BRD4316A"
     BRD4317A = "BRD4317A"
     BRD4318A = "BRD4318A"
     BRD4319A = "BRD4319A"
+    BRD4350A = "BRD4350A"
+    BRD4351A = "BRD4351A"
     ALL = "ALL"
 
     @classmethod
@@ -44,6 +47,7 @@ class Family(str, Enum):
     MG26 = "efr32mg26"
     MG24 = "efr32mg24"
     MGM24 = "mgm24"
+    MGM26 = "mgm26"
 
 
 class BoardDict(dict):
@@ -96,12 +100,18 @@ _boards[Boards.BRD4319A] = Board(board=Boards.BRD4319A, family=Family.MGM24,
                                  slc_arguments="simple_button:btn0:btn1,uartdrv_eusart:vcom,brd4319a")
 _boards[Boards.BRD4116A] = Board(board=Boards.BRD4116A, family=Family.MG26,
                                  slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,mx25_flash_shutdown_usart,memlcd_usart,dmd_memlcd,i2cspm:sensor,brd4116a")
+_boards[Boards.BRD2709A] = Board(board=Boards.BRD2709A, family=Family.MG26,
+                                 slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,brd2709a")
 _boards[Boards.BRD4117A] = Board(board=Boards.BRD4117A, family=Family.MG26,
                                  slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,mx25_flash_shutdown_usart,memlcd_usart,dmd_memlcd,i2cspm:sensor,brd4117a")
 _boards[Boards.BRD4118A] = Board(board=Boards.BRD4118A, family=Family.MG26,
                                  slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,mx25_flash_shutdown_usart,memlcd_usart,dmd_memlcd,i2cspm:sensor,brd4118a")
 _boards[Boards.BRD2608A] = Board(board=Boards.BRD2608A, family=Family.MG26,
                                  slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,mx25_flash_shutdown_usart,i2cspm:sensor,brd2608a")
+_boards[Boards.BRD4350A] = Board(board=Boards.BRD4350A, family=Family.MGM26,
+                                 slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,i2cspm:sensor,brd4350a")
+_boards[Boards.BRD4351A] = Board(board=Boards.BRD4351A, family=Family.MGM26,
+                                 slc_arguments="simple_led:led0:led1,simple_button:btn0:btn1,uartdrv_eusart:vcom,i2cspm:sensor,brd4350a")
 
 
 def _parse_args():
